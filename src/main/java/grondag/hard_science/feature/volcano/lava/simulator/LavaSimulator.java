@@ -3,6 +3,7 @@ package grondag.hard_science.feature.volcano.lava.simulator;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
+import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.AgedBlockPos;
@@ -20,11 +21,12 @@ import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCollector;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.concurrency.CountedJob.CountedJobTask;
 import grondag.hard_science.library.world.PackedBlockPos;
-import grondag.hard_science.simulator.NodeRoots;
-import grondag.hard_science.simulator.SimulationNode;
+import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.terrain.TerrainBlock;
 import grondag.hard_science.superblock.terrain.TerrainState;
@@ -38,7 +40,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
-public class LavaSimulator extends SimulationNode
+public class LavaSimulator implements IPersistenceNode, ISimulationTickable
 {
     public final Executor LAVA_THREAD_POOL;
     
@@ -75,8 +77,8 @@ public class LavaSimulator extends SimulationNode
     /** Basalt blocks that are awaiting cooling */
     private final SimpleConcurrentList<AgedBlockPos> basaltBlocks = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, "Basalt Blocks", perfCollectorOnTick);
     private int lastEligibleBasaltCoolingTick;
+    private boolean isDirty;
     
-    private final static String BASALT_BLOCKS_NBT_TAG = "basaltblock"; 
     private static final int BASALT_BLOCKS_NBT_WIDTH = 3;
     
     private final CountedJobTask<AgedBlockPos> basaltCoolingTask =  new CountedJobTask<AgedBlockPos>() 
@@ -194,7 +196,7 @@ public class LavaSimulator extends SimulationNode
         }
     };
     
-    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, "lavaPlacementEvents", placementHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, ModNBTTag.LAVA_PLACEMENT_EVENTS, placementHandler, this.perfCollectorOffTick);
     
     private final BlockEventHandler lavaAddEventHandler = new BlockEventHandler()
     {
@@ -216,7 +218,7 @@ public class LavaSimulator extends SimulationNode
         }
     };
     
-    private final BlockEventList lavaAddEvents = new BlockEventList(10, "lavaAddEvents", lavaAddEventHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaAddEvents = new BlockEventList(10, ModNBTTag.LAVA_ADD_EVENTS, lavaAddEventHandler, this.perfCollectorOffTick);
     
             
     /** incremented each step, multiple times per tick */
@@ -224,7 +226,6 @@ public class LavaSimulator extends SimulationNode
     
     public LavaSimulator(World world)
     {
-        super(NodeRoots.LAVA_SIMULATOR.ordinal());
         this.worldBuffer = new WorldStateBuffer(world, Configurator.VOLCANO.enablePerformanceLogging, perfCollectorOnTick);
         this.terrainHelper = new LavaTerrainHelper(worldBuffer);
         this.particleManager = new LavaBlobManager();
@@ -304,7 +305,7 @@ public class LavaSimulator extends SimulationNode
         if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
             this.lavaBlockPlacementEvents.addEvent(pos, -TerrainBlock.getFlowHeightFromState(state));
-            this.setSaveDirty(true);
+            this.setDirty();
         }
     }
     
@@ -331,7 +332,7 @@ public class LavaSimulator extends SimulationNode
             // synchronize world buffer with world
             this.worldBuffer.clearBlockState(pos);
             
-            this.setSaveDirty(true);
+            this.setDirty();
         }
     }
     
@@ -350,7 +351,7 @@ public class LavaSimulator extends SimulationNode
     public void trackCoolingBlock(BlockPos pos)
     {
         this.basaltBlocks.add(new AgedBlockPos(pos, Simulator.INSTANCE.getTick()));
-        this.setSaveDirty(true);
+        this.setDirty();
     }
     
     /**
@@ -427,7 +428,7 @@ public class LavaSimulator extends SimulationNode
     }
     
     @Override
-    public void writeToNBT(NBTTagCompound nbt)
+    public void serializeNBT(NBTTagCompound nbt)
     {
         this.saveLavaNBT(nbt);
         this.worldBuffer.writeToNBT(nbt);
@@ -446,11 +447,11 @@ public class LavaSimulator extends SimulationNode
                 saveData[i++] = (int) ((apos.packedBlockPos >> 32) & 0xFFFFFFFF);
                 saveData[i++] = apos.getTick();
             }       
-            nbt.setIntArray(BASALT_BLOCKS_NBT_TAG, saveData);
+            nbt.setIntArray(ModNBTTag.BASALT_BLOCKS, saveData);
         }
     }
     
-    public void readFromNBT(NBTTagCompound nbt)
+    public void deserializeNBT(NBTTagCompound nbt)
     {
 
         basaltBlocks.clear();
@@ -463,7 +464,7 @@ public class LavaSimulator extends SimulationNode
         
         
         // LOAD BASALT BLOCKS
-        int[] saveData = nbt.getIntArray(BASALT_BLOCKS_NBT_TAG);
+        int[] saveData = nbt.getIntArray(ModNBTTag.BASALT_BLOCKS);
 
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
@@ -576,7 +577,7 @@ public class LavaSimulator extends SimulationNode
         // After this could be post-tick
         this.worldBuffer.isMCWorldAccessAppropriate = false;
         
-        this.setSaveDirty(true);
+        this.setDirty();
 
         perfOnTick.endRun();
         perfOnTick.addCount(1);
@@ -655,7 +656,7 @@ public class LavaSimulator extends SimulationNode
         
         this.connections.removeDeletedItems();
         
-        this.setSaveDirty(true);
+        this.setDirty();
         
         if(Configurator.VOLCANO.enablePerformanceLogging)
         {
@@ -710,7 +711,7 @@ public class LavaSimulator extends SimulationNode
     
     public void doStats()
     {
-        long now = System.currentTimeMillis();
+        long now = CommonProxy.currentTimeMillis();
 
         if(now >= this.nextStatTime)
         {
@@ -823,5 +824,26 @@ public class LavaSimulator extends SimulationNode
             this.coolLava(PackedBlockPos.pack(x, y, z));
         }
         cell.coolAndShrink();
+    }
+
+
+    @Override
+    public boolean isSaveDirty()
+    {
+        return this.isDirty;
+    }
+
+
+    @Override
+    public String tagName()
+    {
+        return ModNBTTag.LAVA_SIMULATOR;
+    }
+
+
+    @Override
+    public void setSaveDirty(boolean isDirty)
+    {
+        this.isDirty = true;
     }
 }

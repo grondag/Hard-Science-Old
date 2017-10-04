@@ -182,12 +182,12 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return StairMeshFactory.getShapeMeshFactory(); }
     },
     
-    RESERVED_002(NONE, false)
+    MACHINE(SPECIES, false)
     {
         @Override
-        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
         @Override
-        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+        public ShapeMeshGenerator meshFactory() { return MachineMeshFactory.getShapeMeshFactory(); }
     },
     
     RESERVED_003(NONE, false)

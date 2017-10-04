@@ -2,7 +2,6 @@ package grondag.hard_science.superblock.model.painter;
 
 import java.util.List;
 
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.render.Vertex;
@@ -10,8 +9,8 @@ import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.PaintLayer;
+import grondag.hard_science.superblock.model.state.RenderPass;
 import grondag.hard_science.superblock.model.state.Surface;
-import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
@@ -22,14 +21,30 @@ public abstract class QuadPainter
 {
     /** color map for this surface */
     protected final ColorMap myColorMap;
-    /** color map for lamp surface - used to render lamp gradients */
+    protected final RenderPass renderPass;
+    
+    /** 
+     * Color map for lamp surface - used to render lamp gradients
+     * Only populated for BASE/CUT surfaces
+     */
     protected final ColorMap lampColorMap;
-    protected final BlockRenderLayer renderLayer;
-    protected final LightingMode lightingMode;
+
+    /**
+    * Render layer for lamp surface - used to render lamp gradients
+    * Only populated for BASE/CUT surfaces
+    */
+    protected final RenderPass lampRenderPass;
+    
+    /**
+     * True if paint layer is supposed to be rendered at full brightness.
+     */
+    protected final boolean isFullBrightnessIntended;
+    
     protected final TexturePallette texture;
     public final Surface surface;
     public final PaintLayer paintLayer;
-    protected final Translucency translucency;
+    /** Do bitwise OR with color value to get correct alpha for rendering */
+    protected final int translucencyArgb;
     
     /**
      * Provided quad is already a clone, and should be
@@ -45,12 +60,24 @@ public abstract class QuadPainter
         this.surface = surface;
         this.paintLayer = paintLayer;
         this.myColorMap = modelState.getColorMap(paintLayer);
-        this.lampColorMap = modelState.getColorMap(PaintLayer.LAMP);
-        this.renderLayer = modelState.getRenderLayer(paintLayer);
-        this.lightingMode = modelState.getLightingMode(paintLayer);
+        
+        this.renderPass = modelState.getRenderPass(paintLayer);
+        this.isFullBrightnessIntended = modelState.isFullBrightness(paintLayer);
+
+        if(paintLayer == PaintLayer.BASE || paintLayer == PaintLayer.CUT)
+        {
+            this.lampColorMap = modelState.getColorMap(PaintLayer.LAMP);
+            this.lampRenderPass = modelState.getRenderPass(PaintLayer.LAMP);
+        }
+        else
+        {
+            this.lampColorMap = null;
+            this.lampRenderPass = null;
+        }
+        
         TexturePallette tex = modelState.getTexture(paintLayer);
         this.texture = tex == Textures.NONE ? modelState.getTexture(PaintLayer.BASE) : tex;
-        this.translucency = modelState.getTranslucency();
+        this.translucencyArgb = modelState.isTranslucent(paintLayer) ? modelState.getTranslucency().alphaARGB : 0xFF000000;
     }
     
     /** for null painter only */
@@ -58,61 +85,102 @@ public abstract class QuadPainter
     {
         this.myColorMap = null;
         this.lampColorMap = null;
-        this.renderLayer = null;
-        this.lightingMode = null;
+        this.lampRenderPass = null;
+        this.renderPass = null;
+        this.isFullBrightnessIntended = false;
         this.surface = null;
         this.paintLayer = null;
         this.texture = null;
-        this.translucency = null;
+        this.translucencyArgb = 0;
     }
 
-    public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
+    /**
+     * If isItem = true will bump out quads from block center to provide
+     * better depth rendering of layers in tiem rendering.
+     */
+    public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList, boolean isItem)
     {
-        if(inputQuad.surfaceInstance.surface() == this.surface)
+        if(inputQuad.surfaceInstance.surface() != this.surface) return;
+        
+        switch(this.paintLayer)
         {
-            RawQuad result = inputQuad.clone();
-            recolorQuad(result);
-            result.lightingMode = this.lightingMode;
-            result.renderLayer = this.renderLayer;
+        case BASE:
+            if(inputQuad.surfaceInstance.disableBase) return;
+            break;
             
-            // TODO: Vary color slightly with species, as user-selected option
-  
-            // Bump texture slightly above surface to avoid z-fighting
-            // Disabled for now because does not seem to work and doesn't seem to be needed.
-            // Could also try to make sure quads are properly ordered by dispatcher
-            // but that seems unlikely to be reliable.
-//            if(this.paintLayer == PaintLayer.OVERLAY)
-//            {
-//                Vec3d bump = result.getFaceNormal().scale(0.0005);
-//                for(int i = result.getVertexCount() - 1; i >= 0; i--)
-//                {
-//                    Vertex v = result.getVertex(i);
-//                    result.setVertex(i, (Vertex) v.add(bump));
-//                }
-//            }
+        case MIDDLE:
+            if(inputQuad.surfaceInstance.disableMiddle) return;
+            break;
             
-            result = this.paintQuad(result);
-            if(result != null) outputList.add(result);
+        case OUTER:
+            if(inputQuad.surfaceInstance.disableOuter) return;
+            break;
+            
+        case CUT:
+        case LAMP:
+        default:
+            break;
+        
+        }
+    
+        RawQuad result = inputQuad.clone();
+        result.renderPass = this.renderPass;
+        result.isFullBrightness = this.isFullBrightnessIntended;
+
+        recolorQuad(result);
+     
+        // TODO: Vary color slightly with species, as user-selected option
+        
+        result = this.paintQuad(result);
+        
+        if(result != null) 
+        {
+            if(result.lockUV)
+            {
+                // if lockUV is on, derive UV coords by projection
+                // of vertex coordinates on the plane of the quad's face
+                result.assignLockedUVCoordinates();;
+            }
+   
+            if(isItem)
+            {
+                switch(this.paintLayer)
+                {
+                case MIDDLE:
+                    result.scaleFromBlockCenter(1.01);
+                    break;
+                    
+                case OUTER:
+                    result.scaleFromBlockCenter(1.02);
+                    break;
+                    
+                default:
+                    break;
+                }
+            }
+            outputList.add(result);
         }
     }
     
     
     private void recolorQuad(RawQuad result)
     {
-        int color = this.myColorMap.getColor(this.lightingMode == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP : EnumColorMap.BASE);
-        if(this.renderLayer == BlockRenderLayer.TRANSLUCENT && this.texture.renderLayer == BlockRenderLayer.SOLID)
+        int color = this.myColorMap.getColor(this.isFullBrightnessIntended ? EnumColorMap.LAMP : EnumColorMap.BASE);
+        
+        if(this.renderPass.blockRenderLayer == BlockRenderLayer.TRANSLUCENT)
         {
-            color = this.translucency.alphaARGB | (color & 0x00FFFFFF);
+            color = this.translucencyArgb | (color & 0x00FFFFFF);
         }
         
-        if(this.lightingMode == LightingMode.FULLBRIGHT)
+        if(this.isFullBrightnessIntended)
         {
             // If the surface has a lamp gradient or is otherwise pre-shaded 
             // we don't want to see a gradient when rendering at full brightness
             // so make all vertices white before we recolor.
             result.replaceColor(color);
         }
-        else if(this.surface.isLampGradient)
+        
+        else if(result.surfaceInstance.isLampGradient && this.lampColorMap != null)
         {
             // if surface has a lamp gradient and rendered with shading, need
             // to replace the colors to form the gradient.
@@ -127,15 +195,18 @@ public abstract class QuadPainter
                     result.setVertex(i, v.withColor(vColor));
                 }
             }
+            
+            // if needed, change render pass of gradient surface to flat so that it doesn't get darkened by AO
+            if(!this.lampRenderPass.isShaded && this.renderPass.isShaded)
+            {
+                result.renderPass = this.renderPass.flipShading();
+            }
         }
         else
         {
             // normal shaded surface - tint existing colors, usually WHITE to start with
             result.multiplyColor(color);
         }
-        
-        
-        
     }
 
     public static QuadPainter makeNullQuadPainter(ModelState modelState, Surface surface, PaintLayer paintLayer)
@@ -154,7 +225,7 @@ public abstract class QuadPainter
         };
         
         @Override
-        public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
+        public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList, boolean isItem)
         {
             // NOOP
         }

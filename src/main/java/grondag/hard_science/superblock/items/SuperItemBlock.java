@@ -2,19 +2,21 @@ package grondag.hard_science.superblock.items;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.ModGuiHandler;
+import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.IPlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
-import grondag.hard_science.superblock.varia.SuperBlockNBTHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -52,6 +54,11 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     public SuperItemBlock(SuperBlock block) {
         super(block);
         setHasSubtypes(true);
+        if(this.block == ModBlocks.virtual_block)
+        {
+            this.setMaxDamage(0);
+            this.setMaxStackSize(1);
+        }
     }
     
     @Override
@@ -68,30 +75,19 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 //    }
 
     /** static version */
-    public static ModelState getModelStateFromStack(ItemStack stack)
+    public static ModelState getStackModelState(ItemStack stack)
     {
         if(stack.getItem() instanceof SuperItemBlock)
         {
-            return ((SuperItemBlock)stack.getItem()).getModelState(stack);
+            ModelState stackState = ModelState.deserializeFromNBTIfPresent(stack.getTagCompound());
+            //WAILA or other mods might create a stack with no NBT
+            if(stackState != null) return stackState;
+            return ((SuperBlock)((SuperItemBlock)stack.getItem()).block).getDefaultModelState();
         }
         return null;
     }
     
-    /** instance version */
-    @Override
-    public ModelState getModelState(ItemStack stack)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        //WAILA or other mods might create a stack with no NBT
-        if(tag != null)
-        {
-            ModelState modelState = SuperBlockNBTHelper.readModelState(tag);
-            if(modelState != null) return modelState;
-        }
-        return ((SuperBlock)block).getDefaultModelState();
-    }
-    
-    public static void setModelState(ItemStack stack, ModelState modelState)
+    public static void setStackModelState(ItemStack stack, ModelState modelState)
     {
         if(stack.getItem() instanceof SuperItemBlock)
         {
@@ -101,11 +97,25 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             {
                 tag = new NBTTagCompound();
             }
-            SuperBlockNBTHelper.writeModelState(tag, modelState);
+            modelState.serializeNBT(tag);
             stack.setTagCompound(tag);
         }
     }
- 
+
+    /**
+     * <i>Grondag: don't want to overflow size limits or burden 
+     * network by sending details of embedded storage that will 
+     * never be used on the client anyway.</i><br><br>
+     * 
+     * {@inheritDoc}
+     */
+    @Nullable
+    @Override
+    public final NBTTagCompound getNBTShareTag(ItemStack stack)
+    {
+        return SuperTileEntity.withoutServerTag(super.getNBTShareTag(stack));
+    }
+    
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {
@@ -114,9 +124,12 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             BlockPos blockpos = Minecraft.getMinecraft().objectMouseOver.getBlockPos();
             //if trying to place a block but too close, is annoying to get GUI
             //so only display if clicking on air
-            if (blockpos != null && world.getBlockState(blockpos).getMaterial() == Material.AIR && ((SuperBlock)this.block).hasAppearanceGui())
+            if (blockpos != null 
+                    && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
+                    && world.getBlockState(blockpos).getMaterial() == Material.AIR 
+                    && ((SuperBlock)this.block).hasAppearanceGui())
             {
-                player.openGui(HardScience.INSTANCE, ModGuiHandler.GUI_SUPERMODEL_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+                player.openGui(HardScience.INSTANCE, ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
             }
         }
@@ -132,7 +145,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 
         if (stackIn.isEmpty()) return EnumActionResult.FAIL;
         
-        ModelState modelState = getModelStateFromStack(stackIn);
+        ModelState modelState = getStackModelState(stackIn);
         
         if(modelState == null) return EnumActionResult.FAIL;
         
@@ -142,13 +155,13 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 
         if(placements.isEmpty()) return EnumActionResult.FAIL;
         
-        SoundType soundtype = SuperItemBlock.getStackSubstance(stackIn).soundType;
+        SoundType soundtype = getPlacementSound(stackIn);
         boolean didPlace = false;
         
         for(Pair<BlockPos, ItemStack> p : placements)
         {
             ItemStack placedStack = p.getRight();
-            ModelState placedModelState = SuperItemBlock.getModelStateFromStack(placedStack);
+            ModelState placedModelState = SuperItemBlock.getStackModelState(placedStack);
             BlockPos placedPos = p.getLeft();
             AxisAlignedBB axisalignedbb = placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
 
@@ -159,7 +172,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                 {
                     didPlace = true;
                     worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                    if(!playerIn.isCreative())
+                    if(!(playerIn.isCreative() || isVirtual(stackIn)))
                     {
                         stackIn.shrink(1);
                         if(stackIn.isEmpty()) break;
@@ -190,22 +203,6 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             
         if(!wasUpdated) 
             return false;
-
-        if(newState.getBlock() instanceof SuperBlockPlus)
-        {
-            SuperTileEntity blockTE = (SuperTileEntity)world.getTileEntity(pos);
-            if (blockTE != null) 
-            {
-                if(blockTE instanceof SuperModelTileEntity)
-                {
-                    SuperModelTileEntity superTE = (SuperModelTileEntity)blockTE;
-                    superTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
-                    superTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
-                }
-
-                blockTE.setModelState(getModelStateFromStack(stack));
-            }
-        }
         
         this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;
@@ -223,7 +220,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        SuperBlockNBTHelper.writeLightValue(tag, lightValue);
+        SuperModelTileEntity.SERIALIZER_LIGHT_VALUE.serializeNBT((byte)lightValue, tag);
         stack.setTagCompound(tag);
     }
     
@@ -232,7 +229,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         NBTTagCompound tag = stack.getTagCompound();
         return tag == null 
                 ? 0
-                : SuperBlockNBTHelper.readLightValue(tag);
+                : SuperModelTileEntity.SERIALIZER_LIGHT_VALUE.deserializeNBT(tag);
     }
 
     public static void setStackSubstance(ItemStack stack, BlockSubstance substance)
@@ -241,7 +238,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        SuperBlockNBTHelper.writeSubstance(tag, substance);
+        SuperModelTileEntity.SERIALIZER_SUBSTANCE.serializeNBT(substance, tag);
         stack.setTagCompound(tag);
     }
     
@@ -250,6 +247,18 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         NBTTagCompound tag = stack.getTagCompound();
         return tag == null 
                 ? BlockSubstance.FLEXSTONE
-                : SuperBlockNBTHelper.readSubstance(tag);
+                : SuperModelTileEntity.SERIALIZER_SUBSTANCE.deserializeNBT(tag);
     }
+    
+    private static SoundType getPlacementSound(ItemStack stack)
+    {
+        return getStackSubstance(stack).soundType;
+//        return isVirtual(stack) ? VirtualBlock.VIRTUAL_BLOCK_SOUND : getStackSubstance(stack).soundType;
+    }
+    
+    public static boolean isVirtual(ItemStack stack)
+    {
+        return stack.getItem() == ModItems.virtual_block;
+    }
+    
 }

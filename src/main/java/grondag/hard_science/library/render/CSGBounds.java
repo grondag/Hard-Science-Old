@@ -13,7 +13,7 @@ public class CSGBounds extends AxisAlignedBB
 
     public CSGBounds(Vec3d min, Vec3d max)
     {
-        super(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
+        super(min.x, min.y, min.z, max.x, max.y, max.z);
     }
     
     /**

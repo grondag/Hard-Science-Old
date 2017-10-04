@@ -33,6 +33,7 @@ public class QuadContainer
     private final List<BakedQuad> north;
     private final List<BakedQuad> south;
     private final List<BakedQuad> general;
+    
     private int[] occlusionHash;
 
     public static QuadContainer fromRawQuads(List<RawQuad> rawQuads)

@@ -15,6 +15,7 @@ import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
+import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelRotation;
@@ -41,6 +42,11 @@ public abstract class ShapeMeshGenerator
      */
     public final long defaultShapeStateBits;
     
+    /**
+     * True if it is possible for this generator to output a lamp surface.
+     */
+    protected final boolean hasAnyLampSurface;
+    
     protected ShapeMeshGenerator(StateFormat stateFormat, int stateFlags, Surface... surfaces)
     {
         this(stateFormat, stateFlags, 0L, surfaces);
@@ -53,6 +59,17 @@ public abstract class ShapeMeshGenerator
         this.surfaces = new ImmutableList.Builder<Surface>()
                 .add(surfaces).build();
         this.defaultShapeStateBits = defaultShapeStateBits;
+        
+        boolean hasLamp = false;
+        for(Surface s : surfaces)
+        {
+            if(s.surfaceType == SurfaceType.LAMP)
+            {
+                hasLamp = true;
+                break;
+            }
+        }
+        this.hasAnyLampSurface = hasLamp;
     }
     
     @Nonnull
@@ -99,6 +116,16 @@ public abstract class ShapeMeshGenerator
     public boolean isAdditive() { return false; }
     
     /**
+     * True if shape mesh generator will output lamp surface quads
+     * with the given model state. Default implementation
+     * simply looks for presence of any lamp surface.
+     */
+    public boolean hasLampSurface(ModelState modelState)
+    {
+        return this.hasAnyLampSurface;
+    }
+    
+    /**
      * Override to true for blocks like stairs and wedges.
      * CubicPlacementHandler will know they need to be placed 
      * in a corner instead of a face.
@@ -120,18 +147,18 @@ public abstract class ShapeMeshGenerator
     {
         if(modelState.hasAxis())
         {
-            if(modelState.hasModelRotation())
+            if(modelState.hasAxisRotation())
             {
-                return getMatrixForAxisAndRotation(modelState.getAxis(), modelState.isAxisInverted(), modelState.getModelRotation());
+                return getMatrixForAxisAndRotation(modelState.getAxis(), modelState.isAxisInverted(), modelState.getAxisRotation());
             }
             else
             {
                 return getMatrixForAxis(modelState.getAxis(), modelState.isAxisInverted());
             }
         }
-        else if(modelState.hasModelRotation())
+        else if(modelState.hasAxisRotation())
         {
-            return getMatrixForRotation(modelState.getModelRotation());
+            return getMatrixForRotation(modelState.getAxisRotation());
         }
         else
         {

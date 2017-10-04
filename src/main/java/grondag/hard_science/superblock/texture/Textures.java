@@ -10,21 +10,14 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.Substances.Substance;
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePalletteInfo;
-import net.minecraft.util.BlockRenderLayer;
 
 public class Textures
 {
     /** Collection of all mod textures */
     public static final TexturePalletteRegistry REGISTRY = new TexturePalletteRegistry();
-    
-    static final LightingMode[] LIGHTING_BOTH = {LightingMode.FULLBRIGHT, LightingMode.SHADED};
-    static final LightingMode[] LIGHTING_FULLBRIGHT_ONLY = {LightingMode.FULLBRIGHT};
-    static final LightingMode[] LIGHTING_SHADED_ONLY = {LightingMode.SHADED};
-    
     
     public static final int MAX_TEXTURES = 4096;
     
@@ -39,7 +32,7 @@ public class Textures
      */
     public static final TexturePallette NONE = REGISTRY.addTexturePallette("noise_moderate", 
             new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
-            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.ALWAYS_HIDDEN));
+            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.ALWAYS_HIDDEN));
     
     //======================================================================
     //  TEST/DEBUG TEXTURES - NOT LOADED UNLESS NEEDED
@@ -47,13 +40,13 @@ public class Textures
     
     // but still load placeholders so we don't mess up texture slot IDs
     
-    public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex_single" : "noise_moderate",
+    public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex_single" : "noise_moderate_0_0",
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
     
     public static final TexturePallette BIGTEX_TEST1  = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
             new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.TINY).withLayout(TextureLayout.SPLIT_X_8)
-            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
     
     public static final TexturePallette BIGTEX_TEST2 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
             new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.SMALL));
@@ -64,32 +57,32 @@ public class Textures
     public static final TexturePallette BIGTEX_TEST5 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
             new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.GIANT));
 
-    public static final TexturePallette TEST = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
     public static final TexturePallette TEST_ZOOM = REGISTRY.addZoomedPallete(TEST);
     
-    public static final TexturePallette TEST_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_90)));
     public static final TexturePallette TEST_90_ZOOM = REGISTRY.addZoomedPallete(TEST_90);
     
-    public static final TexturePallette TEST_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_180)));
     public static final TexturePallette TEST_180_ZOOM = REGISTRY.addZoomedPallete(TEST_180);
     
-    public static final TexturePallette TEST_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_270)));
     public static final TexturePallette TEST_270_ZOOM = REGISTRY.addZoomedPallete(TEST_270);
     
-    public static final TexturePallette TEST_4X4 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4X4 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
     
-    public static final TexturePallette TEST_4x4_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4x4_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_90)));
-    public static final TexturePallette TEST_4x4_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4x4_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_180)));
-    public static final TexturePallette TEST_4x4_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4x4_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_270)));
     
     //======================================================================
@@ -97,7 +90,7 @@ public class Textures
     //======================================================================
     public static final TexturePallette BLOCK_COBBLE = REGISTRY.addTexturePallette("cobble", 
             new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
-            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.STATIC_TILES));
+            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.STATIC_TILES));
     public static final TexturePallette BLOCK_COBBLE_ZOOM = REGISTRY.addZoomedPallete(BLOCK_COBBLE);
    
     public static final TexturePallette BLOCK_NOISE_STRONG = REGISTRY.addTexturePallette("noise_strong", new TexturePalletteInfo(BLOCK_COBBLE));
@@ -115,12 +108,52 @@ public class Textures
     
     public static final TexturePallette BORDER_SMOOTH_BLEND = REGISTRY.addTexturePallette("border_smooth_blended", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_BORDERS));
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS));
 
     public static final TexturePallette MASONRY_SIMPLE = REGISTRY.addTexturePallette("masonry_simple", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.MASONRY_5)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.CUTOUT_MIPPED).withGroup(TextureGroup.STATIC_BORDERS));
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS));
 
+    public static final TexturePallette BORDER_SINGLE_PINSTRIPE = addBorderSingle("border_single_pinstripe");
+    public static final TexturePallette BORDER_INSET_PINSTRIPE = addBorderSingle("border_inset_pinstripe");
+    public static final TexturePallette BORDER_GRITTY_INSET_PINSTRIPE = addBorderRandom("border_gritty_inset_pinstripe", false);
+    public static final TexturePallette BORDER_SINGLE_LINE = addBorderSingle("border_single_line");
+    public static final TexturePallette BORDER_SINGLE_BOLD_LINE = addBorderSingle("border_single_bold_line");
+    public static final TexturePallette BORDER_SINGLE_FAT_LINE = addBorderSingle("border_single_fat_line");
+    public static final TexturePallette BORDER_GRITTY_FAT_LINE = addBorderRandom("border_gritty_fat_line", false);
+    public static final TexturePallette BORDER_DOUBLE_MIXED_LINES = addBorderSingle("border_double_mixed_lines");
+    public static final TexturePallette BORDER_DOUBLE_PINSTRIPES = addBorderSingle("border_double_pinstripes");
+    public static final TexturePallette BORDER_INSET_DOUBLE_PINSTRIPES = addBorderSingle("border_inset_double_pinstripes");
+    public static final TexturePallette BORDER_TRIPLE_MIXED_LINES = addBorderSingle("border_triple_mixed_lines");
+    public static final TexturePallette BORDER_DOUBLE_DOUBLE = addBorderSingle("border_double_double");
+    public static final TexturePallette BORDER_WHITEWALL = addBorderSingle("border_whitewall");
+    public static final TexturePallette BORDER_GRITTY_WHITEWALL = addBorderRandom("border_gritty_whitewall", false);
+    
+    public static final TexturePallette BORDER_PINSTRIPE_DASH = addBorderSingle("border_pinstripe_dash");
+    public static final TexturePallette BORDER_INSET_DOTS_1 = addBorderSingle("border_inset_dots_1");
+    public static final TexturePallette BORDER_INSET_DOTS_2 = addBorderSingle("border_inset_dots_2");
+    public static final TexturePallette BORDER_INSET_PIN_DOTS = addBorderSingle("border_inset_pin_dots");
+    public static final TexturePallette BORDER_CHANNEL_DOTS = addBorderSingle("border_channel_dots");
+    public static final TexturePallette BORDER_CHANNEL_PIN_DOTS = addBorderSingle("border_channel_pin_dots");
+    
+    public static final TexturePallette BORDER_CHANNEL_CHECKERBOARD = addBorderSingle("border_channel_checkerboard");
+    public static final TexturePallette BORDER_CHECKERBOARD = addBorderSingle("border_checkerboard");
+    public static final TexturePallette BORDER_GRITTY_CHECKERBOARD = addBorderRandom("border_gritty_checkerboard", false);
+    
+    public static final TexturePallette BORDER_GROOVY_STRIPES = addBorderSingle("border_groovy_stripes");
+    public static final TexturePallette BORDER_GRITTY_GROOVES = addBorderRandom("border_gritty_grooves", false);
+    public static final TexturePallette BORDER_GROOVY_PINSTRIPES = addBorderSingle("border_groovy_pinstripes");
+    public static final TexturePallette BORDER_GRITTY_PINSTRIPE_GROOVES = addBorderRandom("border_gritty_pinstripe_grooves", false);
+    
+    public static final TexturePallette BORDER_ZIGZAG = addBorderSingle("border_zigzag");
+    public static final TexturePallette BORDER_INVERSE_ZIGZAG = addBorderSingle("border_inverse_zigzag");
+    public static final TexturePallette BORDER_CAUTION = addBorderSingle("border_caution");
+    public static final TexturePallette BORDER_FILMSTRIP = addBorderSingle("border_filmstrip");
+    public static final TexturePallette BORDER_CHANNEL_LINES = addBorderSingle("border_channel_lines");
+    public static final TexturePallette BORDER_SIGNAL = addBorderSingle("border_signal");
+    public static final TexturePallette BORDER_GRITTY_SIGNAL = addBorderRandom("border_gritty_signal", false);
+    public static final TexturePallette BORDER_LOGIC = addBorderRandomTile("border_logic");
+    public static final TexturePallette BORDER_INVERSE_TILE_1 = addBorderRandomTile("border_inverse_logic_1");
     
     //======================================================================
     //  BIGTEX
@@ -128,7 +161,7 @@ public class Textures
     
     public static final TexturePallette BIGTEX_WEATHERED_STONE = REGISTRY.addTexturePallette("weathered_smooth_stone", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.STATIC_TILES));
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.STATIC_TILES));
     public static final TexturePallette BIGTEX_WEATHERED_STONE_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_WEATHERED_STONE);
     public static final TexturePallette BIGTEX_WEATHERED_STONE_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_WEATHERED_STONE_ZOOM);
     
@@ -178,7 +211,7 @@ public class Textures
     
     public static final TexturePallette BIGTEX_BASALT_CUT = REGISTRY.addTexturePallette("basalt_cut", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.STATIC_TILES));
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.STATIC_TILES));
     public static final TexturePallette BIGTEX_BASALT_CUT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_CUT);
     public static final TexturePallette BIGTEX_BASALT_CUT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_CUT_ZOOM);
     
@@ -187,18 +220,18 @@ public class Textures
     public static final TexturePallette BIGTEX_BASALT_COOL_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_COOL_ZOOM);
     
     public static final TexturePallette BIGTEX_LAVA = REGISTRY.addTexturePallette(Configurator.VOLCANO.enableVolcano ? "lava" : "clouds",  
-            new TexturePalletteInfo(BIGTEX_BASALT_CUT).withLayout(TextureLayout.BIGTEX_ANIMATED).withGroup(TextureGroup.HIDDEN_TILES));
+            new TexturePalletteInfo(BIGTEX_BASALT_CUT).withLayout(TextureLayout.BIGTEX_ANIMATED).withGroups(TextureGroup.HIDDEN_TILES));
     
     public static final TexturePallette BIGTEX_BASALT_COOLING = REGISTRY.addTexturePallette("basalt_cooling", 
              new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_DETAILS));
+             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_DETAILS));
     public static final TexturePallette BIGTEX_BASALT_WARM = REGISTRY.addTexturePallette("basalt_warm",  new TexturePalletteInfo(BIGTEX_BASALT_COOLING));
     public static final TexturePallette BIGTEX_BASALT_HOT = REGISTRY.addTexturePallette("basalt_hot", new TexturePalletteInfo(BIGTEX_BASALT_COOLING));
     public static final TexturePallette BIGTEX_BASALT_VERY_HOT = REGISTRY.addTexturePallette("basalt_very_hot", new TexturePalletteInfo(BIGTEX_BASALT_COOLING));
     
     public static final TexturePallette BIGTEX_BASALT_HINT = REGISTRY.addTexturePallette("basalt_hint", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_DETAILS));
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_DETAILS));
     public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT);
     public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT_ZOOM);
     
@@ -208,80 +241,53 @@ public class Textures
 
     public static final TexturePallette BIGTEX_FLUID_GLOW = REGISTRY.addTexturePallette("fluid_glow", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS));
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.DYNAMIC_DETAILS));
     public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW);
     public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW_ZOOM);
 
     public static final TexturePallette BIGTEX_FLUID_VORTEX = REGISTRY.addTexturePallette("fluid_vortex", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS)
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
+            .withGroups(TextureGroup.DYNAMIC_DETAILS, TextureGroup.DYNAMIC_TILES)
             .withTicksPerFrame(2));
     public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX);
     public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_ZOOM);
 
-    public static final TexturePallette BIGTEX_FLUID_VORTEX_S = REGISTRY.addTexturePallette("fluid_vortex", 
-            new TexturePalletteInfo(BIGTEX_FLUID_VORTEX).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
-    public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S);
-    public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S_ZOOM);
-    
     public static final TexturePallette BIGTEX_CLOUDS = REGISTRY.addTexturePallette("clouds", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS));
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
+            .withGroups(TextureGroup.DYNAMIC_DETAILS, TextureGroup.DYNAMIC_TILES));
     public static final TexturePallette BIGTEX_CLOUDS_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS);
     public static final TexturePallette BIGTEX_CLOUDS_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_ZOOM);
     
-    public static final TexturePallette BIGTEX_CLOUDS_S = REGISTRY.addTexturePallette("clouds", 
-            new TexturePalletteInfo(BIGTEX_CLOUDS).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
-    public static final TexturePallette BIGTEX_CLOUDS_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_S);
-    public static final TexturePallette BIGTEX_CLOUDS_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_S_ZOOM);
-    
     public static final TexturePallette BIGTEX_STARFIELD = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX_ANIMATED)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS));
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
+            .withGroups(TextureGroup.DYNAMIC_DETAILS, TextureGroup.DYNAMIC_TILES));
     public static final TexturePallette BIGTEX_STARFIELD_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD);
     public static final TexturePallette BIGTEX_STARFIELD_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_ZOOM);
-    
-    public static final TexturePallette BIGTEX_STARFIELD_S = REGISTRY.addTexturePallette("starfield",
-            new TexturePalletteInfo(BIGTEX_STARFIELD).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
-    public static final TexturePallette BIGTEX_STARFIELD_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_S);
-    public static final TexturePallette BIGTEX_STARFIELD_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_S_ZOOM);
     
     public static final TexturePallette BIGTEX_STARFIELD_90 = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD).withRotation(FIXED.with(ROTATE_90)));
     public static final TexturePallette BIGTEX_STARFIELD_90_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90);
     public static final TexturePallette BIGTEX_STARFIELD_90_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_90_S = REGISTRY.addTexturePallette("starfield", 
-            new TexturePalletteInfo(BIGTEX_STARFIELD_90).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
-    public static final TexturePallette BIGTEX_STARFIELD_90_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90_S);
-    public static final TexturePallette BIGTEX_STARFIELD_90_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90_S_ZOOM);
-    
     public static final TexturePallette BIGTEX_STARFIELD_180 = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD).withRotation(FIXED.with(ROTATE_180)));
     public static final TexturePallette BIGTEX_STARFIELD_180_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180);
     public static final TexturePallette BIGTEX_STARFIELD_180_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_180_S = REGISTRY.addTexturePallette("starfield", 
-            new TexturePalletteInfo(BIGTEX_STARFIELD_180).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
-    public static final TexturePallette BIGTEX_STARFIELD_180_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180_S);
-    public static final TexturePallette BIGTEX_STARFIELD_180_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180_S_ZOOM);
-    
-    public static final TexturePallette BIGTEX_STARFIELD_270 = REGISTRY.addTexturePallette("starfield", 
+      public static final TexturePallette BIGTEX_STARFIELD_270 = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD).withRotation(FIXED.with(ROTATE_270)));
     public static final TexturePallette BIGTEX_STARFIELD_270_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270);
     public static final TexturePallette BIGTEX_STARFIELD_270_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270_ZOOM);
-    
-    public static final TexturePallette BIGTEX_STARFIELD_270_S = REGISTRY.addTexturePallette("starfield", 
-            new TexturePalletteInfo(BIGTEX_STARFIELD_270).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
-    public static final TexturePallette BIGTEX_STARFIELD_270_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270_S);
-    public static final TexturePallette BIGTEX_STARFIELD_270_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270_S_ZOOM);
     
     //======================================================================
     //  DECALS
     //======================================================================
     public static final TexturePallette DECAL_SMALL_DOT = REGISTRY.addTexturePallette("small_dot", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_DETAILS));
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_DETAILS));
     
     public static final TexturePallette DECAL_MEDIUM_DOT = REGISTRY.addTexturePallette("medium_dot", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_LARGE_DOT = REGISTRY.addTexturePallette("big_dot", new TexturePalletteInfo(DECAL_SMALL_DOT));
@@ -296,7 +302,7 @@ public class Textures
     public static final TexturePallette DECAL_THIN_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("thin_diagonal_ridges", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_THIN_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("thin_diagonal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_THIN_DIAGONAL_BARS = REGISTRY.addTexturePallette("thin_diagonal_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
-    public static final TexturePallette DECAL_SKINNY_DIAGNAL_CROSS_BARS = REGISTRY.addTexturePallette("skinny_diagnal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SKINNY_DIAGNAL_CROSS_BARS = REGISTRY.addTexturePallette("skinny_diagonal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_SKINNY_DIAGONAL_BARS = REGISTRY.addTexturePallette("skinny_diagonal_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("diagonal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_DIAGONAL_BARS = REGISTRY.addTexturePallette("diagonal_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
@@ -336,7 +342,120 @@ public class Textures
     public static final TexturePallette DECAL_FAT_BARS_RANDOM = REGISTRY.addTexturePallette("fat_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THICK_BARS_RANDOM = REGISTRY.addTexturePallette("thick_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THIN_BARS_RANDOM = REGISTRY.addTexturePallette("thin_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    
+    // Integrate after here at next compatibility break
+    
+    public static final TexturePallette BORDER_INVERSE_TILE_2 = addBorderRandomTile("border_inverse_logic_2");
+    
+    
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("skinny_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_CROSS_RIDGES = REGISTRY.addTexturePallette("thick_diagonal_cross_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("thick_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_CROSS_RIDGES = REGISTRY.addTexturePallette("thin_diagonal_cross_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("thin_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("thin_diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_BARS = REGISTRY.addTexturePallette("thin_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGNAL_CROSS_BARS = REGISTRY.addTexturePallette("skinny_diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_BARS = REGISTRY.addTexturePallette("skinny_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_BARS = REGISTRY.addTexturePallette("diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("fat_diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_CROSS_RIDGES = REGISTRY.addTexturePallette("diagonal_cross_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
 
+    
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("skinny_diagonal_ridges", 
+            new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("thick_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("thin_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("thin_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("skinny_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("skinny_diagonal_ridges", 
+            new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(RANDOM.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("thick_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("thin_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("thin_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("skinny_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    
+    public static final TexturePallette DECAL_BIG_TRIANGLE = REGISTRY.addTexturePallette("big_triangle", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_BIG_DIAMOND = REGISTRY.addTexturePallette("big_diamond", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_BIG_PENTAGON = REGISTRY.addTexturePallette("big_pentagon", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_BIG_HEXAGON = REGISTRY.addTexturePallette("big_hexagon", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_16 = REGISTRY.addTexturePallette("star_16", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_12 = REGISTRY.addTexturePallette("star_12", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_8 = REGISTRY.addTexturePallette("star_8", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_5 = REGISTRY.addTexturePallette("star_5", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_4 = REGISTRY.addTexturePallette("star_4", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_TWO_DOTS = REGISTRY.addTexturePallette("two_dots", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_TWO_DOTS_RANDOM = REGISTRY.addTexturePallette("two_dots", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(RANDOM.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_DUST = REGISTRY.addTexturePallette("dust", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_MIX = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_MIX_90 = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette DECAL_MIX_180 = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette DECAL_MIX_270 = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
+    public static final TexturePallette DECAL_DRIP = REGISTRY.addTexturePallette("drip", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_FUNNEL = REGISTRY.addTexturePallette("funnel", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_ARROW = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_ARROW_90 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette DECAL_ARROW_180 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette DECAL_ARROW_270 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
+    
+    public static final TexturePallette MATERIAL_GRADIENT = REGISTRY.addTexturePallette("material_gradient", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
+
+    public static final TexturePallette DECAL_BUILDER = REGISTRY.addTexturePallette("symbol_builder", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_CHEST = REGISTRY.addTexturePallette("symbol_chest", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    
+    public static final TexturePallette MACHINE_POWER_ON = REGISTRY.addTexturePallette("on", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_POWER_OFF = REGISTRY.addTexturePallette("off", new TexturePalletteInfo(MATERIAL_GRADIENT));
+ 
+    public static final TexturePallette MACHINE_GAUGE_INNER = REGISTRY.addTexturePallette("gauge_inner_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_GAUGE_MAIN = REGISTRY.addTexturePallette("gauge_main_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_GAGUE_MARKS = REGISTRY.addTexturePallette("gauge_background_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_GAUGE_FULL_MARKS = REGISTRY.addTexturePallette("gauge_marks_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+
+    public static final TexturePallette MACHINE_POWER_BACKGROUND = REGISTRY.addTexturePallette("power_background_128", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_POWER_FOREGROUND = REGISTRY.addTexturePallette("power_foreground_128", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette DECAL_NO = REGISTRY.addTexturePallette("no_128", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_MATERIAL_SHORTAGE = REGISTRY.addTexturePallette("material_shortage", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_ELECTRICITY = REGISTRY.addTexturePallette("electricity_64", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_CMY = REGISTRY.addTexturePallette("cmy", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_FLAME = REGISTRY.addTexturePallette("flame_64", new TexturePalletteInfo(DECAL_SMALL_DOT));
+
+    
+    private static TexturePallette addBorderSingle(String textureName)
+    {
+        return REGISTRY.addTexturePallette(textureName, 
+                new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
+                .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS));
+    }
+    
+    private static TexturePallette addBorderRandom(String textureName, boolean renderNoBorderAsTile)
+    {
+        return REGISTRY.addTexturePallette(textureName, 
+                new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
+                .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS)
+                .withRenderNoBorderAsTile(renderNoBorderAsTile));
+    }
+    
+    private static TexturePallette addBorderRandomTile(String textureName)
+    {
+        return REGISTRY.addTexturePallette(textureName, 
+                new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
+                .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
+                .withGroups(TextureGroup.STATIC_BORDERS, TextureGroup.STATIC_TILES)
+                .withRenderNoBorderAsTile(true));
+    }
+    
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
     {
         int searchFlags = 0;
@@ -367,7 +486,7 @@ public class Textures
         ImmutableList.Builder<TexturePallette> builder = ImmutableList.builder();
         for(TexturePallette t : REGISTRY)
         {
-            if((t.textureGroup.bitFlag & searchFlags) != 0)
+            if((t.textureGroupFlags & searchFlags) != 0)
             {
                 builder.add(t);
             }

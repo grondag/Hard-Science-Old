@@ -8,15 +8,18 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.world.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.WorldHelper;
+import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockTests;
-import jline.internal.Log;
+import grondag.hard_science.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -41,16 +44,16 @@ public class CubicPlacementHandler implements IPlacementHandler
         SuperItemBlock item = (SuperItemBlock)stack.getItem();
         PlacementMode placementMode = item.getMode(stack);
         
-        SuperBlock stackBlock = (SuperBlock) item.block;
+        SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
-        ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
+        ModelState stackModelState = SuperItemBlock.getStackModelState(stack);
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
-        BlockPos posPlaced = onBlock.isReplaceable(worldIn, posOn) ? posOn : posOn.offset(facing);
+        BlockPos posPlaced = (onBlock != ModBlocks.virtual_block && onBlock.isReplaceable(worldIn, posOn)) ? posOn : posOn.offset(facing);
         
         // abort if target space is occupied
-        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced))
+        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced, stackBlock != ModBlocks.virtual_block))
         {
             return Collections.emptyList();
         }
@@ -141,9 +144,9 @@ public class CubicPlacementHandler implements IPlacementHandler
                         {
                             stackModelState.setAxis(corner.orthogonalAxis);
                         
-                            if(stackModelState.hasModelRotation())
+                            if(stackModelState.hasAxisRotation())
                             {
-                                stackModelState.setModelRotation(corner.modelRotation);
+                                stackModelState.setAxisRotation(corner.modelRotation);
                                 isRotationDone = true;
                             }
                         }
@@ -160,15 +163,19 @@ public class CubicPlacementHandler implements IPlacementHandler
             }
         }
         
-        if(!isRotationDone && stackModelState.hasModelRotation())
+        if(!isRotationDone && stackModelState.hasAxisRotation())
         {
             if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
             {
-                stackModelState.setModelRotation(closestModelState.getModelRotation());
+                stackModelState.setAxisRotation(closestModelState.getAxisRotation());
+            }
+            else if(placementMode == PlacementMode.FACE)
+            {
+                stackModelState.setAxisRotation(Rotation.fromHorizontalFacing(playerIn.getHorizontalFacing().getOpposite()));
             }
             else
             {
-                stackModelState.setModelRotation(item.getRotation(stack));
+                stackModelState.setAxisRotation(item.getRotation(stack));
             }
         }
         
@@ -178,7 +185,7 @@ public class CubicPlacementHandler implements IPlacementHandler
             stackModelState.setSpecies(species);
             result.setItemDamage(stackModelState.getMetaData());
         }
-        SuperItemBlock.setModelState(result, stackModelState);
+        SuperItemBlock.setStackModelState(result, stackModelState);
  
         return ImmutableList.of(Pair.of(posPlaced, result));
     }
@@ -188,7 +195,7 @@ public class CubicPlacementHandler implements IPlacementHandler
     {
         // If player is sneaking, force no match to adjacent species.
         // If not sneaking, try to match block on which placed, or failing that, any adjacent block it can match.
-        if(player.isSneaking())
+        if(ModPlayerCaps.isPlacementModifierOn(player))
         {
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;

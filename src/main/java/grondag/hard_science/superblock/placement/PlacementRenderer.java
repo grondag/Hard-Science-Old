@@ -28,7 +28,8 @@ public class PlacementRenderer
         // abort if turned off
         if(Configurator.RENDER.previewSetting == PreviewMode.NONE) return;
 
-        ModelState modelState = item.getModelState(stack);
+        ModelState modelState = SuperItemBlock.getStackModelState(stack);
+        
         if(modelState == null) return;
         
         Minecraft mc = Minecraft.getMinecraft();
@@ -46,9 +47,9 @@ public class PlacementRenderer
         
         Vec3d hitVec = target.hitVec;
         
-        float xHit = (float)(hitVec.xCoord - (double)pos.getX());
-        float yHit = (float)(hitVec.yCoord - (double)pos.getY());
-        float zHit = (float)(hitVec.zCoord - (double)pos.getZ());
+        float xHit = (float)(hitVec.x - (double)pos.getX());
+        float yHit = (float)(hitVec.y - (double)pos.getY());
+        float zHit = (float)(hitVec.z - (double)pos.getZ());
         
         List<Pair<BlockPos, ItemStack>> placements = modelState.getShape().getPlacementHandler()
                 .getPlacementResults(player, player.world, target.getBlockPos(), player.getActiveHand(), target.sideHit, xHit, 
@@ -59,7 +60,7 @@ public class PlacementRenderer
         
         for(Pair<BlockPos, ItemStack> placement : placements)
         {
-            ModelState placementModelState = SuperItemBlock.getModelStateFromStack(placement.getRight());
+            ModelState placementModelState = SuperItemBlock.getStackModelState(placement.getRight());
             
             if(placementModelState != null)
             {

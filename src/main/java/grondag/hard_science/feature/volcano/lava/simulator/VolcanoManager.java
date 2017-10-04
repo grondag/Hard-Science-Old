@@ -9,12 +9,14 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.VolcanoTileEntity.VolcanoStage;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.UniversalPos;
-import grondag.hard_science.simulator.NodeRoots;
-import grondag.hard_science.simulator.SimulationNode;
-import grondag.hard_science.simulator.SimulationNodeRunnable;
+import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -22,24 +24,16 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
-public class VolcanoManager extends SimulationNodeRunnable
+public class VolcanoManager implements ISimulationTickable, IPersistenceNode
 {
-    private int nextNodeID = 0;
-    
     private HashMap<UniversalPos, VolcanoNode> nodes = new HashMap<UniversalPos, VolcanoNode>();
     
     private VolcanoNode activeNode = null; 
+    private boolean isDirty = true;
     
     private LinkedList<Ticket> tickets = new LinkedList<Ticket>();
     private  boolean isChunkloadingDirty = true;
     
-    public VolcanoManager()
-    {
-        super(NodeRoots.VOLCANO_MANAGER.ordinal());
-    }
-
-    private NBTTagCompound nbtVolcanoManager = new NBTTagCompound();
-        
     /** not thread-safe - to be called on world sever thread */
     @Override
     public void doOnTick()
@@ -61,7 +55,7 @@ public class VolcanoManager extends SimulationNodeRunnable
            
             int centerX = node.getX() >> 4;
             int centerZ = node.getZ() >> 4;
-            World worldObj = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(node.getDimension());
+            World worldObj = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(node.getDimension());
             
             Ticket chunkTicket = null;
             int chunksUsedThisTicket = 0;
@@ -73,7 +67,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                     if(chunkTicket == null || (chunksUsedThisTicket == chunkTicket.getChunkListDepth()))
                     {
                         chunkTicket = ForgeChunkManager.requestTicket(HardScience.INSTANCE, worldObj, ForgeChunkManager.Type.NORMAL);
-                        chunkTicket.getModData().setInteger("TYPE", this.getID());
+//                        chunkTicket.getModData().setInteger("TYPE", this.getID());
                         tickets.add(chunkTicket);
                         chunksUsedThisTicket = 0;
                     }
@@ -150,7 +144,7 @@ public class VolcanoManager extends SimulationNodeRunnable
     
     public VolcanoNode createNode(BlockPos pos, int dimensionID)
     {
-        VolcanoNode result = new VolcanoNode(this.nextNodeID++, new UniversalPos(pos, dimensionID));
+        VolcanoNode result = new VolcanoNode(new UniversalPos(pos, dimensionID));
         this.nodes.put(new UniversalPos(pos, dimensionID), result);
         this.setSaveDirty(true);
         return result;
@@ -161,69 +155,51 @@ public class VolcanoManager extends SimulationNodeRunnable
      * Should only ever be called from server thread during server start up.
      */
     @Override
-    public void readFromNBT(NBTTagCompound nbt)
+    public void deserializeNBT(NBTTagCompound nbt)
     {
-        nbtVolcanoManager = nbt.getCompoundTag(NodeRoots.VOLCANO_MANAGER.getTagKey());
-        NBTTagCompound nbtSubNodes;
-        this.nextNodeID = 0;
         this.activeNode = null;
         nodes = new HashMap<UniversalPos, VolcanoNode>();
         
-        if(nbtVolcanoManager == null)
+        if(nbt != null)
         {
-            nbtVolcanoManager = new NBTTagCompound();
-            nbtSubNodes = new NBTTagCompound();
-            nbtVolcanoManager.setTag(NodeRoots.SUBNODES_TAG, nbtSubNodes);
-        }
-        else
-        {
-            nbtSubNodes = nbtVolcanoManager.getCompoundTag(NodeRoots.SUBNODES_TAG);
-            // should never happen but just in case...
-            if( nbtSubNodes == null)
+            NBTTagList nbtSubNodes = nbt.getTagList(ModNBTTag.VOLCANO_NODES, 10);
+            if( nbtSubNodes != null && !nbtSubNodes.hasNoTags())
             {
-                nbtSubNodes = new NBTTagCompound();
-                nbtVolcanoManager.setTag(NodeRoots.SUBNODES_TAG, nbtSubNodes);
+                for (int i = 0; i < nbtSubNodes.tagCount(); ++i)
+                {
+                    VolcanoNode node = new VolcanoNode(null);
+                    node.deserializeNBT(nbtSubNodes.getCompoundTagAt(i));
+                    nodes.put(node.getUniversalPos(), node);
+                    if(node.isActive) this.activeNode = node;
+                }   
             }
-
-            for(String key : nbtSubNodes.getKeySet())
-            {
-                // note that totalWeights is updated by individual nodes during readFromNBT
-                VolcanoNode node = new VolcanoNode(getNodeIdFromTagKey(key), null);
-                node.readFromNBT(nbtSubNodes.getCompoundTag(key));
-                nodes.put(node.getUniversalPos(), node);
-                this.nextNodeID = (Math.max(this.nextNodeID, node.getID() + 1));
-            }   
         }
-
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt)
+    public void serializeNBT(NBTTagCompound nbt)
     {
+        // always save *something* to prevent "not found" warning when there are no volcanos
+        nbt.setBoolean(ModNBTTag.VOLCANO_MANAGER_IS_CREATED, true);
+        
         // Do first because any changes made after this point aren't guaranteed to be saved
         this.setSaveDirty(false);
 
-        // nothing to do if no nodes
-        if(this.nodes.isEmpty()) return;
+        NBTTagList nbtSubNodes = new NBTTagList();
         
-        NBTTagCompound nbtSubNodes = nbtVolcanoManager.getCompoundTag(NodeRoots.SUBNODES_TAG);
-        if(nbtSubNodes == null) nbtSubNodes = new NBTTagCompound();
-        
-        for (VolcanoNode node : this.nodes.values())
+        if(!this.nodes.isEmpty())
         {
-            if(node.isSaveDirty())
+            for (VolcanoNode node : this.nodes.values())
             {
                 NBTTagCompound nodeTag = new NBTTagCompound();
-                node.writeToNBT(nodeTag);
-                nbtSubNodes.setTag(node.getTagKey(), nodeTag);
+                node.serializeNBT(nodeTag);
+                nbtSubNodes.appendTag(nodeTag);
             }
         }
-        nbtVolcanoManager.setTag(NodeRoots.SUBNODES_TAG, nbtSubNodes);
-
-        nbt.setTag(NodeRoots.VOLCANO_MANAGER.getTagKey(), nbtVolcanoManager);
+        nbt.setTag(ModNBTTag.VOLCANO_NODES, nbtSubNodes);
     }
 
-    public class VolcanoNode extends SimulationNode
+    public class VolcanoNode implements IReadWriteNBT, IDirtKeeper
     {
         /** 
          * Occasionally updated by TE based on how
@@ -232,26 +208,18 @@ public class VolcanoManager extends SimulationNodeRunnable
          * will only be updated by server tick thread.
          */
         private int weight = 0;
-        private static final String TAG_WEIGHT = "w";
-        
         private VolcanoStage stage;
-        private static final String TAG_STAGE = "s";
         
         private int height = 0;
-        private static final String TAG_HEIGHT = "h";
-        
-        private static final String TAG_X = "x";
-        private static final String TAG_Y = "y";
-        private static final String TAG_Z= "z";
-        private static final String TAG_DIMENSION = "d";
         
         private volatile boolean isActive = false;
-        private static final String TAG_ACTIVE = "a";
         
         /** stores total world time of last TE update */
         private volatile long keepAlive;
         
         private UniversalPos uPos;
+        
+        private boolean isDirty;
         
         /** 
          * Last time (sim ticks) this volcano became active.
@@ -259,20 +227,26 @@ public class VolcanoManager extends SimulationNodeRunnable
          * If the volcano is active, can be used to calculate how long it has been so.
          */
         private volatile int lastActivationTick;
-        private static final String TAG_LAST_ACTIVATION_TICK = "t";
         
-        public VolcanoNode(int nodeID, UniversalPos uPos)
+        public VolcanoNode(UniversalPos uPos)
         {
-            super(nodeID);
             this.uPos = uPos;
         }
         
-        /** want to set Parent dirty also, if dirty*/
         @Override
         public void setSaveDirty(boolean isDirty)
         {
-            super.setSaveDirty(isDirty);
-            if(isDirty) VolcanoManager.this.setSaveDirty(isDirty);
+            if(isDirty != this.isDirty)
+            {
+                this.isDirty = isDirty;
+                if(isDirty) VolcanoManager.this.setSaveDirty(true);
+            }
+        }
+        
+        @Override
+        public boolean isSaveDirty()
+        {
+            return this.isDirty;
         }
         
         /** 
@@ -280,22 +254,25 @@ public class VolcanoManager extends SimulationNodeRunnable
          */
         public void updateWorldState(int newWeight, int newHeight, VolcanoStage newStage)
         {
+            boolean isDirty = false;
             if(newWeight != weight)
             {
                 this.weight = newWeight;
-                this.setSaveDirty(true);
+                isDirty = true;
             }
             if(newHeight != height)
             {
                 this.height = newHeight;
-                this.setSaveDirty(true);
+                isDirty = true;
             }
             if(newStage != stage)
             {
                 this.stage = newStage;
-                this.setSaveDirty(true);
+                isDirty = true;
             }
             this.keepAlive = Simulator.INSTANCE.getWorld().getTotalWorldTime();
+            
+            if(isDirty) this.setDirty();
 //            HardScience.log.info("keepAlive=" + this.keepAlive);
         }
         
@@ -312,35 +289,35 @@ public class VolcanoManager extends SimulationNodeRunnable
         }
         
         @Override
-        public void readFromNBT(NBTTagCompound nbt)
+        public void deserializeNBT(NBTTagCompound nbt)
         {
-            this.weight = nbt.getInteger(TAG_WEIGHT);                  
-            this.height = nbt.getInteger(TAG_HEIGHT);
-            this.stage = VolcanoStage.values()[nbt.getInteger(TAG_STAGE)];
-            int x = nbt.getInteger(TAG_X);
-            int y = nbt.getInteger(TAG_Y);
-            int z = nbt.getInteger(TAG_Z);
-            int dimensionID = nbt.getInteger(TAG_DIMENSION);
+            this.weight = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_WEIGHT);                  
+            this.height = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_HEIGHT);
+            this.stage = VolcanoStage.values()[nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_STAGE)];
+            int x = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_X);
+            int y = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_Y);
+            int z = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_Z);
+            int dimensionID = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_DIMENSION);
             this.setLocation(new BlockPos(x, y, z), dimensionID);
-            this.isActive = nbt.getBoolean(TAG_ACTIVE);
-            this.lastActivationTick = nbt.getInteger(TAG_LAST_ACTIVATION_TICK);
+            this.isActive = nbt.getBoolean(ModNBTTag.VOLCANO_NODE_TAG_ACTIVE);
+            this.lastActivationTick = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_LAST_ACTIVATION_TICK);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt)
+        public void serializeNBT(NBTTagCompound nbt)
         {
             synchronized(this)
             {
                 this.setSaveDirty(false);
-                nbt.setInteger(TAG_WEIGHT, this.weight);
-                nbt.setInteger(TAG_HEIGHT, this.height);
-                nbt.setInteger(TAG_STAGE, this.stage.ordinal());
-                nbt.setInteger(TAG_X, this.getX());
-                nbt.setInteger(TAG_Y, this.getY());
-                nbt.setInteger(TAG_Z, this.getZ());
-                nbt.setInteger(TAG_DIMENSION, this.getDimension());
-                nbt.setBoolean(TAG_ACTIVE, this.isActive);
-                nbt.setInteger(TAG_LAST_ACTIVATION_TICK, this.lastActivationTick);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_WEIGHT, this.weight);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_HEIGHT, this.height);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_STAGE, this.stage.ordinal());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_X, this.getX());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_Y, this.getY());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_Z, this.getZ());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_DIMENSION, this.getDimension());
+                nbt.setBoolean(ModNBTTag.VOLCANO_NODE_TAG_ACTIVE, this.isActive);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_LAST_ACTIVATION_TICK, this.lastActivationTick);
             }
         }
 
@@ -417,5 +394,24 @@ public class VolcanoManager extends SimulationNodeRunnable
         public boolean isActive() { return this.isActive; }
         public int getLastActivationTick() { return this.lastActivationTick; }
 
+    }
+
+    @Override
+    public boolean isSaveDirty()
+    {
+        return this.isDirty;
+    }
+
+    @Override
+    public void setSaveDirty(boolean isDirty)
+    {
+        this.isDirty = isDirty;
+        
+    }
+
+    @Override
+    public String tagName()
+    {
+        return ModNBTTag.VOLCANO_MANAGER;
     }
 }

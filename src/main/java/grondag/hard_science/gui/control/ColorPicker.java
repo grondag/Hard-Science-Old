@@ -1,6 +1,8 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
+import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -8,12 +10,11 @@ import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ColorPicker extends GuiControl
+public class ColorPicker extends GuiControl<ColorPicker>
 {
     private Hue selectedHue = Hue.AZURE;
     private Chroma selectedChroma = null;
@@ -35,6 +36,9 @@ public class ColorPicker extends GuiControl
     public Hue getHue() { return selectedHue; }
     public void setHue(Hue h) { selectedHue = h; }
     public int getColorMapID() { return colorMapID; }
+    
+    public boolean showLampColors = false;
+    
     public void setColorMapID( int colorMapID ) 
     { 
         this.colorMapID = colorMapID;
@@ -48,7 +52,7 @@ public class ColorPicker extends GuiControl
     }
 
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         for(int h = 0; h < Hue.values().length; h++)
         {
@@ -75,6 +79,9 @@ public class ColorPicker extends GuiControl
         double top = this.gridTop;
         double right;
         double bottom;
+        
+        EnumColorMap map = this.showLampColors ? EnumColorMap.LAMP : EnumColorMap.BASE;
+       
         for(Luminance l : Luminance.values())
         {
             bottom = top + this.gridIncrementY;
@@ -85,7 +92,7 @@ public class ColorPicker extends GuiControl
                 ColorMap colormap = BlockColorMapProvider.INSTANCE.getColorMap(selectedHue, c, l);
                 if(colormap != null)
                 {
-                    GuiUtil.drawRect(left, top, right, bottom, colormap.getColor(EnumColorMap.BASE));
+                    GuiUtil.drawRect(left, top, right, bottom, colormap.getColor(map));
                 }
                 left = right;
             }
@@ -97,8 +104,8 @@ public class ColorPicker extends GuiControl
         double sLeft = this.gridLeft + selectedColormap.chroma.ordinal() * this.gridIncrementX;
         double sTop = this.gridTop + selectedColormap.luminance.ordinal() * this.gridIncrementY;
 
-        GuiUtil.drawRect(sLeft - 1, sTop - 1, sLeft + this.gridIncrementX + 1, sTop + this.gridIncrementY + 1, 0xFFFFFFFF);
-        GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrementX + 0.5, sTop + this.gridIncrementY + 0.5, selectedColormap.getColor(EnumColorMap.BASE));
+        GuiUtil.drawRect(sLeft - 1, sTop - 1, sLeft + this.gridIncrementX + 1, sTop + this.gridIncrementY + 1, this.showLampColors ? Color.BLACK : Color.WHITE);
+        GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrementX + 0.5, sTop + this.gridIncrementY + 0.5, selectedColormap.getColor(map));
     }
 
     private void changeHueIfDifferent(Hue newHue)
@@ -126,7 +133,7 @@ public class ColorPicker extends GuiControl
     }
     
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         double distance = Math.sqrt((Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)));
 
@@ -164,9 +171,9 @@ public class ColorPicker extends GuiControl
     }
     
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        this.handleMouseClick(mc, mouseX, mouseY);
+        this.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
     }
     
     @Override
@@ -201,7 +208,7 @@ public class ColorPicker extends GuiControl
     private static double outerRadius(double height) { return height / 2.0; }
     private static double innerRadius(double height) { return outerRadius(height) * 0.85; }
 //    private static double gridIncrement(double height) { return innerRadius(height) * 2 / Luminance.values().length; }
-//    private static double width(double height) { return height + gridIncrement(height) * (Chroma.values().length + 1); }
+//    private static double pixelWidth(double height) { return height + gridIncrement(height) * (Chroma.values().length + 1); }
     
     private static double height(double width)
     {
@@ -219,9 +226,15 @@ public class ColorPicker extends GuiControl
     }
     
     @Override 
-    public GuiControl setWidth(double width)
+    public ColorPicker setWidth(double width)
     {
-        // width is always derived from height, so have to work backwards to correct height value
+        // pixelWidth is always derived from height, so have to work backwards to correct height value
         return this.setHeight(height(width));
+    }
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

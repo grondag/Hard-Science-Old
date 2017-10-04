@@ -5,6 +5,7 @@ import java.util.List;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.terrain.TerrainBlock;
 import grondag.hard_science.superblock.terrain.TerrainState;
@@ -38,8 +39,6 @@ public class EntityLavaBlob extends Entity
 
     public final int id;
 
-    private static final String TAG_AMOUNT = "amt";
-
     private float renderScale;
     
     private int cachedAmount;
@@ -68,12 +67,12 @@ public class EntityLavaBlob extends Entity
     {
         this(world, amount);
 //        if(!world.isRemote) HardScience.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
-        this.setPosition(position.xCoord, position.yCoord, position.zCoord);
+        this.setPosition(position.x, position.y, position.z);
 
 
-        this.motionX = velocity.xCoord;
-        this.motionY = velocity.yCoord;
-        this.motionZ = velocity.zCoord;
+        this.motionX = velocity.x;
+        this.motionY = velocity.y;
+        this.motionZ = velocity.z;
 
     }
 
@@ -110,7 +109,7 @@ public class EntityLavaBlob extends Entity
          */
         this.renderScale = (float) (2 * Math.pow(unitAmout * 3 / (Math.PI * 4), 1F/3F));
 
-        //        HardScience.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
+        //        HardScience.log.info("Particle @" + this.getPosition().toString() + " has edgeLength_mm=" + edgeLength_mm + "  and scale=" + renderScale);
     }
 
     @Override
@@ -267,7 +266,7 @@ public class EntityLavaBlob extends Entity
         if(!this.world.isRemote )
         {
 //            HardScience.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
-            Simulator.INSTANCE.getLavaSimulator().addLava(this.getPosition(), this.getFluidAmount());
+            Simulator.INSTANCE.lavaSimulator().addLava(this.getPosition(), this.getFluidAmount());
         }
         //            this.world.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
         this.setDead();
@@ -297,9 +296,9 @@ public class EntityLavaBlob extends Entity
     @Override
     public void move(MoverType type, double x, double y, double z)
     {
-        this.world.theProfiler.startSection("move");
+        this.world.profiler.startSection("move");
 
-        AxisAlignedBB targetBox = this.getEntityBoundingBox().addCoord(x, y, z);
+        AxisAlignedBB targetBox = this.getEntityBoundingBox().offset(x, y, z);
 
         this.destroyCollidingDisplaceableBlocks(targetBox);
 
@@ -335,8 +334,8 @@ public class EntityLavaBlob extends Entity
 
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
 
-        this.world.theProfiler.endSection();
-        this.world.theProfiler.startSection("rest");
+        this.world.profiler.endSection();
+        this.world.profiler.startSection("rest");
         this.resetPositionToBB();
         this.isCollidedHorizontally = startingX != x || startingZ != z;
         this.isCollidedVertically = startingY != y;
@@ -401,7 +400,7 @@ public class EntityLavaBlob extends Entity
         }
 
 
-        this.world.theProfiler.endSection();
+        this.world.profiler.endSection();
 
     }
 
@@ -445,7 +444,7 @@ public class EntityLavaBlob extends Entity
             Vec3d posCurrent = new Vec3d(this.posX, this.posY, this.posZ);
             Vec3d posNext = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
     
-            List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expandXyz(1.0D));
+            List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().offset(this.motionX, this.motionY, this.motionZ).grow(1.0D));
     
             if(!list.isEmpty())
             {
@@ -458,7 +457,7 @@ public class EntityLavaBlob extends Entity
                     if (victim.canBeCollidedWith())
                     {
                         
-                        AxisAlignedBB axisalignedbb = victim.getEntityBoundingBox().expandXyz(0.30000001192092896D);
+                        AxisAlignedBB axisalignedbb = victim.getEntityBoundingBox().grow(0.30000001192092896D);
                         RayTraceResult intercept = axisalignedbb.calculateIntercept(posCurrent, posNext);
         
                         if (intercept != null)
@@ -470,7 +469,7 @@ public class EntityLavaBlob extends Entity
                             Vec3d centerDistance = posEntity.subtract(posCurrent);
                             double pushMagnitude = myVelocity.dotProduct(centerDistance) / centerDistance.lengthSquared();
                             Vec3d pushVector = centerDistance.scale(pushMagnitude);
-                            victim.addVelocity(pushVector.xCoord, pushVector.yCoord, pushVector.zCoord);
+                            victim.addVelocity(pushVector.x, pushVector.y, pushVector.z);
                             victim.attackEntityFrom(DamageSource.FALLING_BLOCK, this.getFluidAmount() / TerrainState.BLOCK_LEVELS_INT);
                             victim.setFire(5);
                         }
@@ -483,7 +482,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.cachedAmount = compound.getInteger(TAG_AMOUNT);
+        this.cachedAmount = compound.getInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT);
         this.dataManager.set(FLUID_AMOUNT, cachedAmount);
         this.updateAmountDependentData();
     }
@@ -491,7 +490,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        compound.setInteger(TAG_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
+        compound.setInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
     }
 
     @Override

@@ -15,7 +15,11 @@ public enum TextureLayout
     
     /**
      * Separate files with naming convention same as SPLIT_X_8 except only the first 13 textures
-     * out of every 16. Files won't exist or will be blank for 13-15.
+     * out of every 16 are used for borders.  Texture 14 contains the face that should be
+     * rendered if the border is rendered in the solid render layer.  It is IMPORTANT that texture
+     * 14 have a solid alpha channel - otherwise mipmap generation will be borked.  The solid face
+     * won't be used at all if rendering in a non-solid layer. 
+     * Files won't exist or will be blank for 14 and 15.
      */       
     BORDER_13 (STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_SPECIES),
     

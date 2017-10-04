@@ -42,7 +42,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
      
         if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("BigTex cubic quad painter received quad without lockUV semantics.  Not expected");
 
-        Vec3i surfaceVec = CubicQuadPainterBigTex.getSurfaceVector(this.pos, quad.face, this.texture.textureScale);
+        Vec3i surfaceVec = CubicQuadPainterBigTex.getSurfaceVector(this.pos, quad.getNominalFace(), this.texture.textureScale);
         
                 
         
@@ -52,8 +52,8 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             
             // abs is necessary so that hash input components combine together properly
             // Small random numbers already have most bits set.
-            int depthAndSpeciesHash = quad.surfaceInstance.ignoreDepthForRandomization && quad.surfaceInstance.textureSalt == 0
-                    ? 0 
+            int depthAndSpeciesHash = quad.surfaceInstance.ignoreDepthForRandomization
+                    ? quad.surfaceInstance.textureSalt 
                     : MathHelper.hash(Math.abs(surfaceVec.getZ()) | (this.species << 8) | (quad.surfaceInstance.textureSalt << 12));
             
             // rotation 

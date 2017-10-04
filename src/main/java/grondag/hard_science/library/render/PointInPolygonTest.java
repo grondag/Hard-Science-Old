@@ -141,16 +141,16 @@ public class PointInPolygonTest
         private static DiscardAxis get(Vec3d normal)
         {
             DiscardAxis result = X;
-            double maxAbsoluteComponent = Math.abs(normal.xCoord);
+            double maxAbsoluteComponent = Math.abs(normal.x);
 
-            double absY = Math.abs(normal.yCoord);
+            double absY = Math.abs(normal.y);
             if(absY > maxAbsoluteComponent)
             {
                 result = Y;
                 maxAbsoluteComponent = absY;
             }
 
-            if(Math.abs(normal.zCoord) > maxAbsoluteComponent)
+            if(Math.abs(normal.z) > maxAbsoluteComponent)
             {
                 result = Z;
             }
@@ -166,13 +166,13 @@ public class PointInPolygonTest
             switch(this)
             {
             case X:
-                return new Point2d(pointIn.yCoord, pointIn.zCoord);
+                return new Point2d(pointIn.y, pointIn.z);
 
             case Y:
-                return new Point2d(pointIn.xCoord, pointIn.zCoord);
+                return new Point2d(pointIn.x, pointIn.z);
 
             case Z:
-                return new Point2d(pointIn.xCoord, pointIn.yCoord);
+                return new Point2d(pointIn.x, pointIn.y);
 
             default:
                 // nonsense

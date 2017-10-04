@@ -12,6 +12,7 @@ import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
 import grondag.hard_science.library.concurrency.CountedJob.CountedJobTask;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.Simulator;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
@@ -419,7 +420,7 @@ public class LavaCells
         if(Configurator.VOLCANO.enablePerformanceLogging)
             Log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
-        nbt.setIntArray(LavaCell.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
+        nbt.setIntArray(ModNBTTag.LAVA_CELLS, Arrays.copyOfRange(saveData, 0, i));
     }
     
     public void readNBT(LavaSimulator sim, NBTTagCompound nbt)
@@ -427,7 +428,7 @@ public class LavaCells
         this.cellChunks.clear();
         
         // LOAD LAVA CELLS
-        int[] saveData = nbt.getIntArray(LavaCell.LAVA_CELL_NBT_TAG);
+        int[] saveData = nbt.getIntArray(ModNBTTag.LAVA_CELLS);
         
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)

@@ -1,7 +1,6 @@
 package grondag.hard_science.library.render;
 
-import java.nio.IntBuffer;
-
+import java.nio.ByteBuffer;
 import org.lwjgl.opengl.EXTBgra;
 import org.lwjgl.opengl.EXTTextureCompressionS3TC;
 import org.lwjgl.opengl.GL11;
@@ -42,13 +41,13 @@ public class TextureHelper
      * Element 0 is used for operations that are not LOD-specific.
      * Whole array is used for compressed texture upload/download.
      */
-    private static final IntBuffer[] DATA_BUFFER = new IntBuffer[MAX_LOD_LEVELS];
+    private static final ByteBuffer[] DATA_BUFFER = new ByteBuffer[MAX_LOD_LEVELS];
     
     static
     {
         for(int i = 0; i < MAX_LOD_LEVELS; i++)
         {
-            DATA_BUFFER[i] = GLAllocation.createDirectIntBuffer(BUFFER_SIZE >> (i * 2));
+            DATA_BUFFER[i] = GLAllocation.createDirectByteBuffer((BUFFER_SIZE >> (i * 2)) * 4);
         }      
     }
     
@@ -58,14 +57,14 @@ public class TextureHelper
      * except that it accepts array of preloaded DMA buffers
      * which can be built via {@link #getBufferedTexture(int[][])}.
      */
-    public static void uploadTextureMipmap(IntBuffer[] imageData, final int width, final int height, final int originX, final int originY, final boolean blur, final boolean clamp)
+    public static void uploadTextureMipmap(ByteBuffer[] imageData, final int width, final int height, final int originX, final int originY, final boolean blur, final boolean clamp)
     {
         for (int i = 0; i < imageData.length; ++i)
         {
             setTextureBlurMipmap(blur, (width >> i) > 1);
             setTextureClamped(clamp);
             if ((width >> i <= 0) || (height >> i <= 0)) break;
-            GlStateManager.glTexSubImage2D(GL11.GL_TEXTURE_2D, i, originX >> i, originY >> i, width >> i, height >> i, EXTBgra.GL_BGRA_EXT, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, imageData[i]);
+            GlStateManager.glTexSubImage2D(GL11.GL_TEXTURE_2D, i, originX >> i, originY >> i, width >> i, height >> i, EXTBgra.GL_BGRA_EXT, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, imageData[i].asIntBuffer());
         }
     }
     
@@ -113,14 +112,14 @@ public class TextureHelper
             if (imageWidth >> lod <= 0) break;
             setTextureBlurMipmap(false, imageWidth >> lod > 1);
             setTextureClamped(false);
-            GlStateManager.glTexSubImage2D(GL11.GL_TEXTURE_2D, lod, originX >> lod, originY >> lod, imageWidth >> lod, imageWidth >> lod, EXTBgra.GL_BGRA_EXT, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, DATA_BUFFER[lod]);
+            GlStateManager.glTexSubImage2D(GL11.GL_TEXTURE_2D, lod, originX >> lod, originY >> lod, imageWidth >> lod, imageWidth >> lod, EXTBgra.GL_BGRA_EXT, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, DATA_BUFFER[lod].asIntBuffer());
         }
     }
     
     /**
      * Similar to vanilla version in TextureUtil
      */
-    private static void setTextureBlurMipmap(final boolean enableBlur, final boolean isMoreThanOnePixel)
+    public static void setTextureBlurMipmap(final boolean enableBlur, final boolean isMoreThanOnePixel)
     {
         if (enableBlur)
         {
@@ -137,7 +136,7 @@ public class TextureHelper
     /**
      * Similar to vanilla version in TextureUtil
      */
-    private static void setTextureClamped(boolean isClamped)
+    public static void setTextureClamped(boolean isClamped)
     {
         if (isClamped)
         {
@@ -154,7 +153,7 @@ public class TextureHelper
     /**
      * Similar to vanilla version in TextureUtil
      */
-    private static void copyToBufferPos(int[] sourceData, IntBuffer target, int startPos, int length)
+    public static void copyToBufferPos(int[] sourceData, ByteBuffer target, int startPos, int length)
     {
         int[] aint = sourceData;
 
@@ -164,20 +163,26 @@ public class TextureHelper
         }
 
         target.clear();
-        target.put(aint, startPos, length);
-        target.position(0).limit(length);
+        target.asIntBuffer().put(aint, startPos, length);
+        target.asIntBuffer().position(0).limit(length);
     }
 
-    public static IntBuffer[] getBufferedTexture(int[][] imageData)
+    public static ByteBuffer[] getBufferedTexture(int[][] imageData)
     {
-        IntBuffer[] result = new IntBuffer[imageData.length];
+        ByteBuffer[] result = new ByteBuffer[imageData.length];
         
         for(int i = 0; i < imageData.length; i++)
         {
-            result[i] = GLAllocation.createDirectIntBuffer(imageData[i].length);
-            copyToBufferPos(imageData[i], result[i], 0, imageData[i].length);
+            result[i] = getBufferedTexture(imageData[i]);
         }
         
+        return result;
+    }
+    
+    public static ByteBuffer getBufferedTexture(int[] imageData)
+    {
+        ByteBuffer result = GLAllocation.createDirectByteBuffer(imageData.length * 4);
+        copyToBufferPos(imageData, result, 0, imageData.length);
         return result;
     }
 }

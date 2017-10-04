@@ -1,17 +1,16 @@
 package grondag.hard_science.gui.control;
 
-import static grondag.hard_science.gui.GuiUtil.HorizontalAlignment.*;
-import static grondag.hard_science.gui.GuiUtil.VerticalAlignment.*;
+import static grondag.hard_science.library.varia.HorizontalAlignment.*;
+import static grondag.hard_science.library.varia.VerticalAlignment.*;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class VisiblitySelector extends GuiControl
+public class VisiblitySelector extends GuiControl<VisiblitySelector>
 {
     private final VisibilityPanel target;
     
@@ -23,9 +22,8 @@ public class VisiblitySelector extends GuiControl
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        FontRenderer fontrenderer = mc.fontRendererObj;
         double y = this.top;
         
         int hoverIndex = this.getButtonIndex(mouseX, mouseY);
@@ -39,7 +37,7 @@ public class VisiblitySelector extends GuiControl
             GuiUtil.drawRect(this.left + 2 , y + 2, this.right - 2, y + this.buttonHeight - 2, buttonColor);
 
             int textColor = i == hoverIndex ? TEXT_COLOR_FOCUS : i == this.target.getVisiblityIndex() ? TEXT_COLOR_ACTIVE : TEXT_COLOR_INACTIVE;
-            GuiUtil.drawAlignedStringNoShadow(fontrenderer, label, (float)this.left, (float)y, (float)this.width, (float)this.buttonHeight, textColor, CENTER, MIDDLE);
+            GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), label, (float)this.left, (float)y, (float)this.width, (float)this.buttonHeight, textColor, CENTER, MIDDLE);
             
             y += this.buttonHeight;
         }
@@ -67,18 +65,19 @@ public class VisiblitySelector extends GuiControl
     }
 
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         int clickIndex = this.getButtonIndex(mouseX, mouseY);
         
         if(clickIndex != NO_SELECTION && clickIndex != this.target.getVisiblityIndex())
         {
             this.target.setVisiblityIndex(clickIndex);
+            GuiUtil.playPressedSound(mc);
         }
     }
 
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // ignore
     }
@@ -87,6 +86,13 @@ public class VisiblitySelector extends GuiControl
     protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
         // ignore
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

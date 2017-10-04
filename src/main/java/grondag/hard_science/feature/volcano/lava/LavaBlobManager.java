@@ -12,13 +12,13 @@ import com.google.common.collect.ComparisonChain;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.Simulator;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class LavaBlobManager
 {
-    private final static String NBT_SAVE_DATA_TAG = "particleManager";
     private final static int NBT_SAVE_DATA_WIDTH = 4;
     
     private final static int MIN_WAIT_TICKS = 4;
@@ -120,7 +120,7 @@ public class LavaBlobManager
     {
         this.map.clear();
     
-        int[] saveData = nbt.getIntArray(NBT_SAVE_DATA_TAG);
+        int[] saveData = nbt.getIntArray(ModNBTTag.LAVA_PARTICLE_MANAGER);
 
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
@@ -161,7 +161,7 @@ public class LavaBlobManager
             saveData[i++] = p.fluidUnits;
         }       
 
-        nbt.setIntArray(NBT_SAVE_DATA_TAG, saveData);
+        nbt.setIntArray(ModNBTTag.LAVA_PARTICLE_MANAGER, saveData);
 
     }
 }

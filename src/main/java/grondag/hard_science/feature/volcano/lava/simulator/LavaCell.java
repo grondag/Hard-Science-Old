@@ -350,7 +350,6 @@ public class LavaCell extends AbstractLavaCell
         }
     }
 
-    static final String LAVA_CELL_NBT_TAG = "lavacells";
     static final int LAVA_CELL_NBT_WIDTH = 7;
 
     /** 

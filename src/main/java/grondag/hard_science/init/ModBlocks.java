@@ -5,7 +5,8 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.feature.volcano.VolcanoBlock;
 import grondag.hard_science.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
-import grondag.hard_science.library.render.LightingMode;
+import grondag.hard_science.machines.BasicBuilderBlock;
+import grondag.hard_science.machines.SmartChestBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -13,19 +14,20 @@ import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.terrain.TerrainBlockRegistry;
 import grondag.hard_science.superblock.terrain.TerrainCubicBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
 import grondag.hard_science.superblock.terrain.TerrainStaticBlock;
-import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
@@ -33,6 +35,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 @ObjectHolder(HardScience.MODID)
 public class ModBlocks
 {
+    public static final Block volcano_block = null;
     public static final Block basalt_cobble = null;
     public static final Block basalt_cool_dynamic_height = null;
     public static final Block basalt_cool_dynamic_filler = null;
@@ -51,15 +54,23 @@ public class ModBlocks
     public static final Block lava_dynamic_height = null;
     public static final Block lava_dynamic_filler = null;
     
+    public static final Block virtual_block = null;
+    public static final Block smart_chest = null;
+    public static final Block basic_builder = null;
+    
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
+        ModelState workingModel;
+        
+        workingModel = new ModelState();
+        
         if(Configurator.VOLCANO.enableVolcano)
         {
             event.getRegistry().register(new VolcanoBlock());
             
-            ModelState workingModel = new ModelState();
+            workingModel = new ModelState();
             workingModel.setShape(ModelShape.CUBE);
             workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
@@ -110,10 +121,10 @@ public class ModBlocks
             workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.RED, Chroma.WHITE, Luminance.BRILLIANT));
-            workingModel.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
+            workingModel.setFullBrightness(PaintLayer.BASE, true);
             workingModel.setTexture(PaintLayer.MIDDLE, Textures.BIGTEX_BASALT_HINT);
             workingModel.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VERMILLION, Chroma.ULTRA_ACCENT, Luminance.MEDIUM_DARK));
-            workingModel.setLightingMode(PaintLayer.MIDDLE, LightingMode.SHADED);
+            workingModel.setFullBrightness(PaintLayer.MIDDLE, false);
             
             Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", BlockSubstance.VOLCANIC_LAVA, workingModel, false);
             
@@ -153,16 +164,23 @@ public class ModBlocks
             event.getRegistry().register(dynamicVeryHotBasaltHeight);
             event.getRegistry().register(dynamicVeryHotBasaltFiller);
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicVeryHotBasaltHeight, dynamicVeryHotBasaltFiller);
+            
         }
+        
+        // VIRTUAL BLOCKS
+        event.getRegistry().register(new VirtualBlock("virtual_block"));
+        
+        event.getRegistry().register(new SmartChestBlock("smart_chest"));
+        event.getRegistry().register(new BasicBuilderBlock("basic_builder"));
     }
     
-    private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller)
+    private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
     {
         ModelState model = new ModelState();
         model.setShape(isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
         model.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
         model.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.TORCH, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
-        model.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
+        model.setFullBrightness(PaintLayer.BASE, true);
         model.setTexture(PaintLayer.MIDDLE, tex);
         model.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         model.setMiddleLayerEnabled(true);
@@ -170,11 +188,11 @@ public class ModBlocks
         return new CoolingBasaltBlock(name, BlockSubstance.BASALT, model, isFiller).setAllowSilkHarvest(false);
     }
     
-    public static void preInit(FMLPreInitializationEvent event) 
+    public static void init(FMLInitializationEvent event) 
     {   
         if(Configurator.VOLCANO.enableVolcano)
         {
-            // these have to be in pre-init so that object holders are populated
+            // these have to be in init so that object holders are populated
             ((SuperBlock)ModBlocks.basalt_cut).setDropItem(ModItems.basalt_cobble);
     
             ((SuperBlock)ModBlocks.basalt_cool_dynamic_height).setDropItem(ModItems.basalt_rubble);

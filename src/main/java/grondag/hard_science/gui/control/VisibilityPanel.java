@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class VisibilityPanel extends Panel
 {
 
-    private final ArrayList<ArrayList<GuiControl>> groups = new ArrayList<ArrayList<GuiControl>>();
+    private final ArrayList<ArrayList<GuiControl<?>>> groups = new ArrayList<ArrayList<GuiControl<?>>>();
 
     private final ArrayList<String> labels = new ArrayList<String>();
 
@@ -41,18 +41,18 @@ public class VisibilityPanel extends Panel
     public int createVisiblityGroup(String label)
     {
         this.labels.add(label);
-        this.groups.add(new ArrayList<GuiControl>());
+        this.groups.add(new ArrayList<GuiControl<?>>());
         return this.labels.size() - 1;
     }
     
-    public VisibilityPanel addAll(int visibilityIndex, GuiControl... controls)
+    public VisibilityPanel addAll(int visibilityIndex, GuiControl<?>... controls)
     {
         this.groups.get(visibilityIndex).addAll(Arrays.asList(controls));
         this.isDirty = true;
         return this;
     }
 
-    public VisibilityPanel add(int visibilityIndex, GuiControl control)
+    public VisibilityPanel add(int visibilityIndex, GuiControl<?> control)
     {
         this.groups.get(visibilityIndex).add(control);
         this.isDirty = true;

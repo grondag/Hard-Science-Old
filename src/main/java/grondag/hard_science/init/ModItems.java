@@ -5,36 +5,40 @@ import java.util.Map;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.feature.volcano.lava.LavaBlobItem;
+import grondag.hard_science.machines.base.MachineBlock;
+import grondag.hard_science.machines.support.MachineItemBlock;
+import grondag.hard_science.materials.Matter;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.terrain.TerrainWand;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber
 @ObjectHolder(HardScience.MODID)
 public class ModItems
 {
     public static final Item basalt_rubble = null;
-
+    
     // item blocks
     public static final Item basalt_cobble = null;
     public static final Item basalt_cut = null;
     
+    public static final Item virtual_block = null;
+    public static final Item smart_chest = null;
+    
+    // tools
+//    public static final Item obj_test_model = null;
+      
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) 
     {
@@ -51,6 +55,13 @@ public class ModItems
         }
         
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
+        
+        for(Matter matter : Matter.values())
+        {
+            matter.register(itemReg);
+        }       
+        
+//        itemReg.register(new Item().setRegistryName("obj_test_model").setUnlocalizedName("obj_test_model").setCreativeTab(HardScience.tabMod));
     }
 
     private static void registerItemBlocks(IForgeRegistry<Item> itemReg)
@@ -61,49 +72,28 @@ public class ModItems
         {
             if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
             {
+                ItemBlock itemBlock;
                 Block block = entry.getValue();
-                if(block instanceof SuperBlock)
+                if(block instanceof MachineBlock)
                 {
-                    SuperBlock superBlock = (SuperBlock)block;
-                    SuperItemBlock itemBlock = new SuperItemBlock(superBlock);
-                    itemBlock.setRegistryName(superBlock.getRegistryName());
-                    itemReg.register(itemBlock);
+                    itemBlock = new MachineItemBlock((MachineBlock)block);
+                }
+                else if(block instanceof SuperBlock)
+                {
+                    itemBlock = new SuperItemBlock((SuperBlock)block);
                 }
                 else
                 {
-                    ItemBlock itemBlock = new ItemBlock(block);
-                    itemBlock.setRegistryName(block.getRegistryName());
-                    itemReg.register(itemBlock);
+                    itemBlock = new ItemBlock(block);
                 }
+                itemBlock.setRegistryName(block.getRegistryName());
+                itemReg.register(itemBlock);
             }
         }
     }
     
-    public static void preInit(FMLPreInitializationEvent event) 
-    {
-        if(event.getSide() == Side.CLIENT)
-        {
-            IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
-            
-            for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
-            {
-                if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
-                {
-                    Item item = entry.getValue();
-                    if(item instanceof SuperItemBlock)
-                    {
-                        for (ItemStack stack : ((SuperBlock)(((ItemBlock)item).getBlock())).getSubItems())
-                        {
-                            ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory");
-                            ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), itemModelResourceLocation);
-                        }
-                    }
-                    else
-                    {
-                        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
-                    }
-                }
-            }
-        }
-    }
+//    public static void preInit(FMLPreInitializationEvent event) 
+//    {
+//  
+//    }
 }

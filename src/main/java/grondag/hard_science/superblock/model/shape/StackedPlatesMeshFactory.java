@@ -8,7 +8,6 @@ import javax.vecmath.Matrix4d;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Rotation;
@@ -53,7 +52,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         RawQuad template = new RawQuad();
         template.color = 0xFFFFFFFF;
         template.rotation = Rotation.ROTATE_NONE;
-        template.lightingMode = LightingMode.SHADED;
+        template.isFullBrightness = false;
         template.lockUV = true;
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();

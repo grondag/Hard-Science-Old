@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.Layout;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class Panel extends GuiControl
+public class Panel extends GuiControl<Panel>
 {
     /** if false is horizontal */
     public final boolean isVertical;
@@ -19,7 +19,13 @@ public class Panel extends GuiControl
     private int outerMarginWidth = 0;
     private int innerMarginWidth = 0;
     
-    protected ArrayList<GuiControl> children = new ArrayList<GuiControl>();
+    /**
+     * If true, don't adjust layout of any child controls.
+     * Useful for containers that have to conform to a specific pixel layout. 
+     */
+    private boolean isLayoutDisabled = false;
+    
+    protected ArrayList<GuiControl<?>> children = new ArrayList<GuiControl<?>>();
     
     public Panel(boolean isVertical)
     {
@@ -27,43 +33,43 @@ public class Panel extends GuiControl
         this.isVertical = isVertical;
     }
     
-    public Panel addAll(GuiControl... controls)
+    public Panel addAll(GuiControl<?>... controls)
     {
         this.children.addAll(Arrays.asList(controls));
         this.isDirty = true;
         return this;
     }
 
-    public Panel add(GuiControl control)
+    public Panel add(GuiControl<?> control)
     {
         this.children.add(control);
         this.isDirty = true;
         return this;
     }
     
-    public GuiControl get(int i)
+    public GuiControl<?> get(int i)
     {
         return this.children.get(i);
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.getBackgroundColor() != 0)
         {
             GuiUtil.drawRect(this.left, this.top, this.right, this.bottom, this.getBackgroundColor());
         }
         
-        for(GuiControl control : this.children)
+        for(GuiControl<?> control : this.children)
         {
-            control.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
+            control.drawControl(renderContext, mouseX, mouseY, partialTicks);
         }
     }
 
     @Override
     protected void handleCoordinateUpdate()
     {
-        if(this.children == null || this.children.isEmpty()) return;
+        if(this.isLayoutDisabled || this.children == null || this.children.isEmpty()) return;
         
         int totalWeight = 0;
         int totalFixed = 0;
@@ -72,7 +78,7 @@ public class Panel extends GuiControl
         double fixedSpace = (this.isVertical ? this.width : this.height) - this.outerMarginWidth * 2;
         
         // on first pass, gather the size/weights for the expanding dimension
-        for(GuiControl control : this.children)
+        for(GuiControl<?> control : this.children)
         {
             if(this.isVertical)
             {
@@ -120,7 +126,7 @@ public class Panel extends GuiControl
         double fixedSize = (this.isVertical ? this.width : this.height) - this.outerMarginWidth * 2;
         
         // on second pass rescale
-        for(GuiControl control : this.children)
+        for(GuiControl<?> control : this.children)
         {
 //            double variableSize;
             
@@ -189,69 +195,39 @@ public class Panel extends GuiControl
     }
 
     @Override
-    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        for(GuiControl child : this.children)
+        for(GuiControl<?> child : this.children)
         {
-            child.mouseClick(mc, mouseX, mouseY);
+            child.mouseClick(mc, mouseX, mouseY, clickedMouseButton);
         }
     }
 
     @Override
-    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        for(GuiControl child : this.children)
+        for(GuiControl<?> child : this.children)
         {
-            child.mouseDrag(mc, mouseX, mouseY);
+            child.mouseDrag(mc, mouseX, mouseY, clickedMouseButton);
         }
     }
     
     @Override
     protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
-        for(GuiControl child : this.children)
+        for(GuiControl<?> child : this.children)
         {
             child.mouseScroll(mouseX, mouseY, scrollDelta);
         }       
     }
-    
-//    @Override
-//    public double minWidth()
-//    {
-//        return Math.max(this.childMinWidth, this.panelMinWidth);
-//    }
-//
-//    @Override
-//    public double minHeight()
-//    {
-//        return Math.max(this.childMinHeight, this.panelMinHeight);
-//    }
-//
-//    @Override
-//    public boolean shouldWidthExpand()
-//    {
-//        return this.shouldWidthExpand;
-//    }
-
-//    @Override
-//    public boolean shouldHeightExpand()
-//    {
-//        return this.shouldHeightExpand;
-//    }
-//    
-//    @Override
-//    public boolean shouldScaleToParent()
-//    {
-//        return true;
-//    }
    
-    /** the width of the background from the edge of child controls */
+    /** the pixelWidth of the background from the edge of child controls */
     public int getOuterMarginWidth()
     {
         return outerMarginWidth;
     }
 
-    /** sets the width of the background from the edge of child controls */
+    /** sets the pixelWidth of the background from the edge of child controls */
     public Panel setOuterMarginWidth(int outerMarginWidth)
     {
         this.outerMarginWidth = outerMarginWidth;
@@ -273,4 +249,25 @@ public class Panel extends GuiControl
         return this;
     }
 
+    /**
+     * Set true to disable automatic layout of child controls.
+     * Used for containers that require a fixed layout.
+     * Means you must write code to set position and size of all children.
+     */
+    public boolean isLayoutDisabled()
+    {
+        return isLayoutDisabled;
+    }
+
+    public void setLayoutDisabled(boolean isLayoutDisabled)
+    {
+        this.isLayoutDisabled = isLayoutDisabled;
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

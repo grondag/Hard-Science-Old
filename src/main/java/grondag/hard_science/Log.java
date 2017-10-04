@@ -25,20 +25,35 @@ public class Log
     {
         getLog().warn(message);
     }
+    
+    public static void warn(String message, Object...args)
+    {
+        getLog().warn(String.format(message, args));
+    }
 
     public static void info(String message)
     {
         getLog().info(message);
     }
 
-    public static void error(String message)
+    public static void info(String message, Object...args)
     {
-        getLog().error(message);
+        getLog().info(String.format(message, args));
     }
-
+    
     public static void debug(String message)
     {
         getLog().debug(message);
+    }
+    
+    public static void debug(String message, Object...args)
+    {
+        getLog().debug(String.format(message, args));
+    }
+
+    public static void error(String message)
+    {
+        getLog().error(message);
     }
 
     public static void error(String message, Throwable t)

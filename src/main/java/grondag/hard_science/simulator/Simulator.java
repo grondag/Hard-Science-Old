@@ -1,5 +1,6 @@
 package grondag.hard_science.simulator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,12 +12,15 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager;
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.persistence.IPersistenceNode;
+import grondag.hard_science.simulator.persistence.PersistenceManager;
+import grondag.hard_science.simulator.wip.DomainManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 
@@ -42,13 +46,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
  * will observe that the machines are running very quickly.
  * 
  */
-public class Simulator extends SimulationNode implements ForgeChunkManager.OrderedLoadingCallback
+public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLoadingCallback
 {
-
-	protected Simulator()
-    {
-        super(NodeRoots.SIMULATION.ordinal());
-    }
 
     public static final Simulator INSTANCE = new Simulator();
 	
@@ -56,13 +55,19 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     
     private LavaSimulator lavaSimulator;
     
+    private DomainManager domainManager;
+    
 	public static ExecutorService executor;
 	private static ExecutorService controlThread;
+	
+	private List<ISimulationTickable> tickables = new ArrayList<ISimulationTickable>();
 	
 	private Future<?> lastTickFuture = null;
     
     /** used for world time */
     private World world;
+    
+    private boolean isDirty;
     
     private volatile boolean isRunning = false;
     public boolean isRunning() { return isRunning; }
@@ -79,13 +84,11 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
      * If equal to currentSimTick, means simulation is caught up with world ticks.
      */
     private volatile int lastSimTick = 0;
-    private static final String TAG_LAST_SIM_TICK = "lstk";
 
     /** worldTickOffset + lastWorldTick = max value of current simulation tick.
 	 * Updated on server post tick, *after* all world tick events should be submitted.
 	 */
 	private volatile long worldTickOffset = 0; 
-    private static final String TAG_WORLD_TICK_OFFSET= "wtos";
 
     static
     {
@@ -101,37 +104,51 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         Log.info("starting sim");
 	    synchronized(this)
 	    {
+	        this.tickables.clear();
+	        
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
-	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
+	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
 	     
 	        
             if(PersistenceManager.loadNode(world, this))
             {
+                this.domainManager = new DomainManager(false);
+                if(!PersistenceManager.loadNode(world, this.domainManager))
+                {
+                    Log.warn("Domain manager data not found - recreating.  Some world state may be lost.");
+                    this.domainManager = new DomainManager(true);
+                    PersistenceManager.registerNode(world, this.domainManager);                   
+                }
+             
+                
                 if(Configurator.VOLCANO.enableVolcano)
                 {
                     this.volcanoManager = new VolcanoManager();
                     this.lavaSimulator = new LavaSimulator(this.world);
                     if(!PersistenceManager.loadNode(world, this.volcanoManager))
                     {
-                        Log.info("Volcano manager data not found - recreating.  Some world state may be lost.");
+                        Log.warn("Volcano manager data not found - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.volcanoManager);
                     }
                     
                     if(!PersistenceManager.loadNode(world, this.lavaSimulator))
                     {
-                        Log.info("Lava simulator data not found - recreating.  Some world state may be lost.");
+                        Log.warn("Lava simulator data not found - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.lavaSimulator);
                     }
                 }
             }
             else
     	    {
-                Log.info("creating sim");
+                Log.info("Creating new simulation.");
                 // Not found, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
     	        this.lastSimTick = 0;
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
+    	        
+    	        this.domainManager = new DomainManager(true);
+    	        PersistenceManager.registerNode(world, this.domainManager);
     	        
     	        if(Configurator.VOLCANO.enableVolcano)
                 {
@@ -142,6 +159,11 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                 }
     	    }
 
+            if(Configurator.VOLCANO.enableVolcano)
+            {
+                this.tickables.add(this.volcanoManager);
+                this.tickables.add(this.lavaSimulator);
+            }
     		this.isRunning = true;
             Log.info("starting first simulation frame");
 	    }
@@ -177,9 +199,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	
     public void onServerTick(ServerTickEvent event) 
     {
-        
-        // thought it might offer more determinism if we run after block/entity ticks
-        if(event.phase == TickEvent.Phase.END && this.isRunning)
+        if(this.isRunning)
         {
             if(lastTickFuture == null || lastTickFuture.isDone())
             {
@@ -209,10 +229,12 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                     }
                 }
                 
-                if(this.volcanoManager != null)
-                {                  
-                    this.volcanoManager.doOnTick();
-                    this.lavaSimulator.doOnTick();
+                if(!Simulator.this.tickables.isEmpty())
+                {
+                    for(ISimulationTickable tickable : Simulator.this.tickables)
+                    {
+                        tickable.doOnTick();
+                    }
                 }
                 
                 lastTickFuture = controlThread.submit(this.offTickFrame);
@@ -220,65 +242,47 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         }
     }
 
-    
-//    /**
-//     * Call to claim a new ID for all created nodes.
-//     * Node #0 is reserved for the simulation object itself.
-//     * Claiming a node ID does not cause it to be ticked or persisted.
-//     */
-//    private int getNewNodeID()
-//    {
-//        this.setSaveDirty(true);
-//        return this.nextNodeID.getAndIncrement();
-//    }
- 
-	// Node interface implementation
-	
-
     @Override
-    public void readFromNBT(NBTTagCompound nbt)
+    public void deserializeNBT(NBTTagCompound nbt)
     {
         Log.info("Simulator read from NBT");
-        this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
-        this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
+        this.lastSimTick = nbt.getInteger(ModNBTTag.SIMULATION_LAST_TICK);
+        this.worldTickOffset = nbt.getLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET);
     }
-
+  
     @Override
-    public boolean isSaveDirty()
-    {
-        return super.isSaveDirty();
-    }
-
-    @Override
-    public void writeToNBT(NBTTagCompound nbt)
+    public void serializeNBT(NBTTagCompound nbt)
     {
         Log.info("saving simulation state");
-        nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
-        nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
+        nbt.setInteger(ModNBTTag.SIMULATION_LAST_TICK, lastSimTick);
+        nbt.setLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET, worldTickOffset);
     }
     
     public World getWorld() { return this.world; }
     public int getTick() { return this.lastSimTick; }
     
-    public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
-    public LavaSimulator getLavaSimulator() { return this.lavaSimulator; }
-
+    public VolcanoManager volcanoManager() { return this.volcanoManager; }
+    public LavaSimulator lavaSimulator() { return this.lavaSimulator; }
+    public DomainManager domainManager() { return this.domainManager; }
+    
     // Frame execution logic
     Runnable offTickFrame = new Runnable()
     {
         @Override
         public void run()
         {
-            if(Simulator.this.volcanoManager != null)
+            if(!Simulator.this.tickables.isEmpty())
             {
-                try
+                for(ISimulationTickable tickable : Simulator.this.tickables)
                 {
-                    Simulator.this.volcanoManager.doOffTick();
-                    Simulator.this.lavaSimulator.doOffTick();
-                }
-                catch(Exception e)
-                {
-                    Log.error("Exception during simulator off-tick processing", e);
+                    try
+                    {
+                        tickable.doOffTick();
+                    }
+                    catch(Exception e)
+                    {
+                        Log.error("Exception during simulator off-tick processing", e);
+                    }
                 }
             }
         }    
@@ -301,6 +305,25 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         // or when activation changes. Dispose of all tickets.
         List<ForgeChunkManager.Ticket> validTickets = Lists.newArrayList();
         return validTickets;
+    }
+
+    @Override
+    public boolean isSaveDirty()
+    {
+        return this.isDirty;
+    }
+
+    @Override
+    public void setSaveDirty(boolean isDirty)
+    {
+        this.isDirty = true;
+        
+    }
+
+    @Override
+    public String tagName()
+    {
+        return ModNBTTag.SIMULATOR;
     }
 
  

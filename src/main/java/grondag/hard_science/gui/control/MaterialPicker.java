@@ -1,11 +1,11 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
-import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
+import grondag.hard_science.gui.IGuiRenderContext;
+import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -16,7 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class MaterialPicker extends GuiControl
+public class MaterialPicker extends GuiControl<MaterialPicker>
 {
     /** dimensions are material and toughness */
     private static BlockSubstance[][]substances = new BlockSubstance[3][3];
@@ -115,17 +115,17 @@ public class MaterialPicker extends GuiControl
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         double halfWidth = this.width / 2;
         double halfHeight = this.height / 2;
         double xMiddle = this.left + halfWidth;
         double yMiddle = this.top + halfHeight;
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, textMaterial, (float) this.left, (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), textMaterial, (float) this.left, (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, textToughness, (float) (xMiddle + spacing), (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), textToughness, (float) (xMiddle + spacing), (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
         int mouseIndex = this.getMouseIndex(mouseX, mouseY);
@@ -148,28 +148,28 @@ public class MaterialPicker extends GuiControl
         }
 
         
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        renderContext.minecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         
         double x = this.left + 1;
         double y = yMiddle + 1;
         double size = this.boxSize - 2;
         
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Item.getItemFromBlock(Blocks.STONE)), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Item.getItemFromBlock(Blocks.STONE)), x , y, size);
         x += (this.boxSize + this.spacing);
         
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Item.getItemFromBlock(Blocks.GLASS)), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Item.getItemFromBlock(Blocks.GLASS)), x , y, size);
         x += (this.boxSize + this.spacing);
 
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Item.getItemFromBlock(Blocks.LOG)), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Item.getItemFromBlock(Blocks.LOG)), x , y, size);
         x += (this.boxSize + this.spacing + this.spacing);
 
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Items.STONE_PICKAXE), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Items.STONE_PICKAXE), x , y, size);
         x += (this.boxSize + this.spacing);
         
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Items.IRON_PICKAXE), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Items.IRON_PICKAXE), x , y, size);
         x += (this.boxSize + this.spacing);
 
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Items.DIAMOND_PICKAXE), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Items.DIAMOND_PICKAXE), x , y, size);
     }
 
     @Override
@@ -181,7 +181,7 @@ public class MaterialPicker extends GuiControl
     }
 
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         int mouseIndex = this.getMouseIndex(mouseX, mouseY);
         if(mouseIndex == NO_SELECTION) return;
@@ -197,15 +197,22 @@ public class MaterialPicker extends GuiControl
     }
 
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        this.handleMouseClick(mc, mouseX, mouseY);
+        this.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
     }
 
     @Override
     protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
         // ignore
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

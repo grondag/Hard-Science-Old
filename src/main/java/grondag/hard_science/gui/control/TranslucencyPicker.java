@@ -1,18 +1,18 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
-import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
+import grondag.hard_science.gui.IGuiRenderContext;
+import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.superblock.model.state.Translucency;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TranslucencyPicker extends GuiControl
+public class TranslucencyPicker extends GuiControl<TranslucencyPicker>
 {
     private Translucency translucency = null;
     
@@ -36,9 +36,9 @@ public class TranslucencyPicker extends GuiControl
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, LABEL, (float)this.left, (float)this.top, 
+        GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), LABEL, (float)this.left, (float)this.top, 
                 (float)(this.width - this.firstBoxLeft), (float)this.height, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
         
         double x = this.firstBoxLeft;
@@ -49,7 +49,7 @@ public class TranslucencyPicker extends GuiControl
         {
             GuiUtil.drawRect(x + 2, this.top + 2, x + this.height - 2, this.bottom - 2, 0xFFFFFFFF);
             String label = Integer.toString((int)Math.round((100 * (1 - t.alpha)))) + "%";
-            GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, label, x, this.top, this.height, this.height, 0xFF000000, 
+            GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), label, x, this.top, this.height, this.height, 0xFF000000, 
                     HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
             int color = t.alphaARGB | 0x00FF0000;
             GuiUtil.drawRect(x + 2, this.top + 2, x + this.height - 2, this.bottom - 2, color);
@@ -75,20 +75,21 @@ public class TranslucencyPicker extends GuiControl
     }
 
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         int mouseIndex = this.getMouseIndex(mouseX, mouseY);
         if(mouseIndex != NO_SELECTION)
         {
             this.setTranslucency(Translucency.values()[mouseIndex]);
+            GuiUtil.playPressedSound(mc);
         }
         
     }
 
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        this.handleMouseClick(mc, mouseX, mouseY);
+        this.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
     }
 
     @Override
@@ -105,6 +106,13 @@ public class TranslucencyPicker extends GuiControl
     public void setTranslucency(Translucency translucency)
     {
         this.translucency = translucency;
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

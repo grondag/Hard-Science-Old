@@ -16,6 +16,7 @@ import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
+import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -31,8 +32,8 @@ import net.minecraft.world.World;
 
 public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
-    private static final Surface SURFACE_TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.TILED);
-    private static final Surface SURFACE_SIDE = new Surface(SurfaceType.CUT, SurfaceTopology.TILED);
+    private static final SurfaceInstance SURFACE_TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance.withAllowBorders(false).withIgnoreDepthForRandomization(true);
+    private static final SurfaceInstance SURFACE_SIDE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance.withAllowBorders(false);
     
     private static ShapeMeshGenerator instance;
  
@@ -71,7 +72,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     {
         super(  StateFormat.FLOW, 
                 ModelState.STATE_FLAG_NEEDS_POS, 
-                SURFACE_TOP, SURFACE_SIDE);
+                SURFACE_TOP.surface(), SURFACE_SIDE.surface());
     }
 
     @Override
@@ -93,7 +94,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
      */
     private Vec3d shadowEnhance(Vec3d vec)
     {
-        return new Vec3d(vec.xCoord * 4, vec.yCoord, vec.zCoord * 2);
+        return new Vec3d(vec.x * 4, vec.y, vec.z * 2);
     }
 
     @Override
@@ -104,7 +105,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 
         template.color = Color.WHITE;
         template.lockUV = true;
-        template.surfaceInstance = SURFACE_TOP.unitInstance;
+        template.surfaceInstance = SURFACE_TOP;
         // default - need to change for sides and bottom
         template.setFace(EnumFacing.UP);
 
@@ -143,8 +144,8 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         for(HorizontalCorner corner : HorizontalCorner.values())
         {
 
-            fvMidCorner[corner.ordinal()].depth = 1.0 - flowState.getMidCornerVertexHeight(corner) + flowState.getYOffset();
-            fvFarCorner[corner.ordinal()].depth = 1.0 - flowState.getFarCornerVertexHeight(corner) + flowState.getYOffset();
+            fvMidCorner[corner.ordinal()] = fvMidCorner[corner.ordinal()].withDepth(1.0 - flowState.getMidCornerVertexHeight(corner) + flowState.getYOffset());
+            fvFarCorner[corner.ordinal()] = fvFarCorner[corner.ordinal()].withDepth(1.0 - flowState.getFarCornerVertexHeight(corner) + flowState.getYOffset());
 
             quadInputsCorner.add(new ArrayList<RawQuad>(8));            
         }
@@ -165,8 +166,8 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 
         for(HorizontalFace side : HorizontalFace.values())
         {
-            fvMidSide[side.ordinal()].depth = 1.0 - flowState.getMidSideVertexHeight(side) + flowState.getYOffset();
-            fvFarSide[side.ordinal()].depth = 1.0 - flowState.getFarSideVertexHeight(side) + flowState.getYOffset();
+            fvMidSide[side.ordinal()] = fvMidSide[side.ordinal()].withDepth(1.0 - flowState.getMidSideVertexHeight(side) + flowState.getYOffset());
+            fvFarSide[side.ordinal()] = fvFarSide[side.ordinal()].withDepth(1.0 - flowState.getFarSideVertexHeight(side) + flowState.getYOffset());
 
             quadInputsSide.add(new ArrayList<RawQuad>(8));   
 
@@ -320,7 +321,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 
                 // side
                 RawQuad qSide = new RawQuad(template);
-                qSide.surfaceInstance = SURFACE_SIDE.unitInstance;
+                qSide.surfaceInstance = SURFACE_SIDE;
                 qSide.setFace(side.face);
                 setupUVForSide(qSide, side.face);
 
@@ -354,7 +355,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 
                 //Sides
                 RawQuad qSide = new RawQuad(template);
-                qSide.surfaceInstance = SURFACE_SIDE.unitInstance;
+                qSide.surfaceInstance = SURFACE_SIDE;
                 qSide.setFace(side.face);
                 setupUVForSide(qSide, side.face);
 
@@ -367,7 +368,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
                 rawQuads.add(qSide);
 
                 qSide = new RawQuad(qSide);
-                qSide.surfaceInstance = SURFACE_SIDE.unitInstance;
+                qSide.surfaceInstance = SURFACE_SIDE;
                 qSide.setFace(side.face);
                 qSide.setupFaceQuad(
                         new FaceVertex(0.5, bottom, 0),
@@ -384,7 +385,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         //flip X-orthogonalAxis texture on bottom face
 //        qBottom.minU = 14 - qBottom.minU;
 //        qBottom.maxU = qBottom.minU + 2;
-        qBottom.surfaceInstance = SURFACE_SIDE.unitInstance;
+        qBottom.surfaceInstance = SURFACE_SIDE;
         qBottom.setFace(EnumFacing.DOWN);        
         qBottom.setupFaceQuad(0, 0, 1, 1, bottom, EnumFacing.NORTH);
         rawQuads.add(qBottom);
@@ -392,28 +393,23 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 
 
         CSGShape cubeQuads = new CSGShape();
-        cubeQuads.add(template.clone().setSurfaceInstance(SURFACE_SIDE.unitInstance).setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+        cubeQuads.add(template.clone().setSurfaceInstance(SURFACE_SIDE).setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
         RawQuad faceQuad = template.clone();
         
         //flip X-orthogonalAxis texture on bottom face
 //        faceQuad.minU = 14 - faceQuad.minU;
 //        faceQuad.maxU = faceQuad.minU + 2;
         
-        cubeQuads.add(faceQuad.clone().setSurfaceInstance(SURFACE_SIDE.unitInstance).setupFaceQuad(EnumFacing.DOWN, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+        cubeQuads.add(faceQuad.clone().setSurfaceInstance(SURFACE_SIDE).setupFaceQuad(EnumFacing.DOWN, 0, 0, 1, 1, 0, EnumFacing.NORTH));
 
         
-        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.NORTH).setSurfaceInstance(SURFACE_SIDE.unitInstance).setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
-        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.SOUTH).setSurfaceInstance(SURFACE_SIDE.unitInstance).setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));
-        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.EAST).setSurfaceInstance(SURFACE_SIDE.unitInstance).setupFaceQuad(EnumFacing.EAST, 0, 0, 1, 1, 0, EnumFacing.UP));
-        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.WEST).setSurfaceInstance(SURFACE_SIDE.unitInstance).setupFaceQuad(EnumFacing.WEST, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.NORTH).setSurfaceInstance(SURFACE_SIDE).setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.SOUTH).setSurfaceInstance(SURFACE_SIDE).setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.EAST).setSurfaceInstance(SURFACE_SIDE).setupFaceQuad(EnumFacing.EAST, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.WEST).setSurfaceInstance(SURFACE_SIDE).setupFaceQuad(EnumFacing.WEST, 0, 0, 1, 1, 0, EnumFacing.UP));
 
         rawQuads = rawQuads.intersect(cubeQuads);
 
-        // don't count quads as face quads unless actually on the face
-        // will be useful for face culling
-        rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getNominalFace()) ? quad.getNominalFace() : null));        
-
-        
         // scale all quads UVs according to position to match what surface painter expects
         // Any quads with a null face are assumed to be part of the top face
         
@@ -422,7 +418,12 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         for(RawQuad quad : rawQuads)
         {
             EnumFacing face = quad.getNominalFace();
-            if(face == null) face = EnumFacing.UP;
+            if(face == null) 
+            {
+                if(Log.DEBUG_MODE) 
+                    Log.warn("Terrain Mesh Generator is outputting quad with null nominal face.");
+                face = EnumFacing.UP;
+            }
             
             switch(face)
             {
@@ -510,7 +511,9 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public boolean isCube(ModelState modelState)
     {
-        return modelState.getTerrainState().isFullCube();
+        return false; 
+        // doing it this way caused lighting problems: massive dark areas
+//        return modelState.getTerrainState().isFullCube();
     }
 
     @Override

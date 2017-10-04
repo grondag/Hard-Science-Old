@@ -1,27 +1,27 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
-import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
+import grondag.hard_science.gui.IGuiRenderContext;
+import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.varia.VerticalAlignment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class Toggle extends GuiControl
+public class Toggle extends GuiControl<Toggle>
 {
 
-    private boolean isOn = false;
-    private String label  = "unlabedl toggle";
+    protected boolean isOn = false;
+    protected String label  = "unlabedl toggle";
     
-    private int targetAreaTop;
-    private int targetAreaBottom;
-    private int labelWidth;
-    private int labelHeight;
+    protected int targetAreaTop;
+    protected int targetAreaBottom;
+    protected int labelWidth;
+    protected int labelHeight;
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         float boxRight = (float) (this.left + this.labelHeight);
         
@@ -32,34 +32,38 @@ public class Toggle extends GuiControl
             GuiUtil.drawRect(this.left + 2, this.targetAreaTop + 2, boxRight - 2, this.targetAreaBottom - 2, BUTTON_COLOR_ACTIVE);
         }
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, this.label, boxRight + CONTROL_INTERNAL_MARGIN, this.targetAreaTop, 
+        GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), this.label, boxRight + CONTROL_INTERNAL_MARGIN, this.targetAreaTop, 
                 this.labelWidth, this.labelHeight, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
     }
 
     @Override
     protected void handleCoordinateUpdate()
     {
-        int fontHeight = Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT;
+        int fontHeight = Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT;
         this.targetAreaTop = (int) Math.max(this.top, this.top + (this.height - fontHeight) / 2);
         this.targetAreaBottom = (int) Math.min(this.bottom, this.targetAreaTop + fontHeight);
         this.labelHeight = fontHeight;
-        this.labelWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(this.label);
+        this.labelWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(this.label);
     }
 
-    private boolean isMouseOver(int mouseX, int mouseY)
+    protected boolean isMouseOver(int mouseX, int mouseY)
     {
         return !(mouseX < this.left || mouseX > this.left + this.labelHeight + CONTROL_INTERNAL_MARGIN + this.labelWidth
                 || mouseY < this.targetAreaTop || mouseY > this.targetAreaBottom);
     }
     
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        if(this.isMouseOver(mouseX, mouseY)) this.isOn = !this.isOn;
+        if(this.isMouseOver(mouseX, mouseY))
+        {
+            this.isOn = !this.isOn;
+            GuiUtil.playPressedSound(mc);
+        }
     }
 
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // ignore
         
@@ -92,6 +96,13 @@ public class Toggle extends GuiControl
         this.label = label;
         this.isDirty = true;
         return this;
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

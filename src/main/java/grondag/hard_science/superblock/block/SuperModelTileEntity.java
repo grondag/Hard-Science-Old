@@ -1,51 +1,70 @@
 package grondag.hard_science.superblock.block;
 
+import grondag.hard_science.library.serialization.ByteSerializer;
+import grondag.hard_science.library.serialization.EnumSerializer;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.superblock.varia.BlockSubstance;
-import grondag.hard_science.superblock.varia.SuperBlockNBTHelper;
-import grondag.hard_science.superblock.varia.SuperBlockNBTHelper.SuperModelNBTReadHandler;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class SuperModelTileEntity extends SuperTileEntity implements SuperModelNBTReadHandler
+public class SuperModelTileEntity extends SuperTileEntity
 {
+    ////////////////////////////////////////////////////////////////////////
+    //  STATIC MEMBERS
+    ////////////////////////////////////////////////////////////////////////
+    public static final EnumSerializer<SuperModelTileEntity, BlockSubstance> SERIALIZER_SUBSTANCE 
+            = new EnumSerializer<SuperModelTileEntity, BlockSubstance>(ModNBTTag.SUPER_MODEL_SUBSTANCE, BlockSubstance.class)
+    {
+        @Override
+        public BlockSubstance getValue(SuperModelTileEntity target)
+        {
+            return target.getSubstance();
+        }
+
+        @Override
+        public void setValue(SuperModelTileEntity target, BlockSubstance value)
+        {
+            target.setSubstance(value);
+        } 
+    };
+    
+    public static final ByteSerializer<SuperModelTileEntity> SERIALIZER_LIGHT_VALUE = new ByteSerializer<SuperModelTileEntity>( "HSLV")
+    {
+        @Override
+        public byte getValue(SuperModelTileEntity target)
+        {
+            return (byte) target.getLightValue();
+        }
+
+        @Override
+        public void setValue(SuperModelTileEntity target, byte value)
+        {
+            target.setLightValue(value);;
+        } 
+    };
+    
+    ////////////////////////////////////////////////////////////////////////
+    //  INSTANCE MEMBERS
+    ////////////////////////////////////////////////////////////////////////
+    
     /** non-zero if block emits light */
     private byte lightValue = 0;
 
     private BlockSubstance substance = BlockSubstance.FLEXSTONE;
     
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+    public void writeModNBT(NBTTagCompound compound)
     {
-        return SuperBlockNBTHelper.writeToNBT(super.writeToNBT(compound), this.lightValue, this.substance);
+        super.writeModNBT(compound);
+        SERIALIZER_SUBSTANCE.serializeNBT(this, compound);
+        SERIALIZER_LIGHT_VALUE.serializeNBT(this, compound);
     }
 
     @Override
-    public void handleNBTRead(byte lightValue, BlockSubstance substance)
+    public void readModNBT(NBTTagCompound compound)
     {
-        this.lightValue = lightValue;
-        this.substance = substance;
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag)
-    {
-        // The description packet often arrives after render state is first cached on client
-        // so we need to refresh render state once we have the server-side info.
-        int oldLight = this.lightValue;
-        
-        super.handleUpdateTag(tag);
-        
-        if(oldLight != this.lightValue)
-        {
-            this.world.checkLight(this.pos);
-        }
-    }
-    
-    @Override
-    public void readFromNBT(NBTTagCompound compound)
-    {
-        super.readFromNBT(compound);
-        SuperBlockNBTHelper.superModelReadFromNBT(compound, this);
-        isLoaded = true;
+        super.readModNBT(compound);
+        SERIALIZER_SUBSTANCE.deserializeNBT(this, compound);
+        SERIALIZER_LIGHT_VALUE.deserializeNBT(this, compound);
     }
 
     public byte getLightValue()
@@ -58,7 +77,7 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
         if(this.lightValue != lightValue)
         {
             this.lightValue = lightValue;
-            if(this.world.isRemote)
+            if(this.world != null && this.world.isRemote)
                 this.world.checkLight(this.pos);
             else
                 this.markDirty();
@@ -76,7 +95,7 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
         if(this.substance != substance)
         {
             this.substance = substance;
-            if(!this.world.isRemote) this.markDirty();
+            if(!(this.world == null || this.world.isRemote)) this.markDirty();
         }
     }
 }

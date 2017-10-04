@@ -25,20 +25,10 @@ public class QuadBakery
         
         //Dimensions are vertex 0-4 and u/v 0-1.
         float[][] uvData = new float[4][2];
-        if(raw.lockUV)
+        for(int v = 0; v < 4; v++)
         {
-            // if lockUV is on, derive UV coords by projection
-            // of vertex coordinates on the plane of the quad's face
-            getLockedUVCoordinates(raw, uvData);
-        }
-        else
-        {
-            // honor UV coordinates given in the quad
-            for(int v = 0; v < 4; v++)
-            {
-                uvData[v][0] = (float) raw.getVertex(v).u;
-                uvData[v][1] = (float) raw.getVertex(v).v;
-            }
+            uvData[v][0] = (float) raw.getVertex(v).u;
+            uvData[v][1] = (float) raw.getVertex(v).v;
         }
         
         // apply texture rotation
@@ -53,14 +43,14 @@ public class QuadBakery
 
         if(raw.shouldContractUVs)
         {
-            contractUVs(raw, textureSprite, uvData);
+            contractUVs(textureSprite, uvData);
         }
 
         int[] vertexData = new int[28];
 
-        // see LightingMode for more info on how this enables full brightness for block models.
-//        VertexFormat format = raw.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
-        VertexFormat format = raw.lightingMode.getVertexFormat();
+        VertexFormat format = raw.isFullBrightness || raw.surfaceInstance.isLampGradient
+                ? net.minecraft.client.renderer.vertex.DefaultVertexFormats.BLOCK
+                : net.minecraft.client.renderer.vertex.DefaultVertexFormats.ITEM;
 
         float[] faceNormal = raw.getFaceNormalArray();          
 
@@ -91,7 +81,7 @@ public class QuadBakery
 
                 case COLOR:
                     float shade;
-                    if(raw.lightingMode == LightingMode.SHADED && Configurator.RENDER.enableCustomShading && !raw.surfaceInstance.isLampGradient())
+                    if(!raw.isFullBrightness && Configurator.RENDER.enableCustomShading && !raw.surfaceInstance.isLampGradient())
                     {
                         Vec3d surfaceNormal = raw.getVertex(v).hasNormal() ? raw.getVertex(v).getNormal() : raw.getFaceNormal();
                         shade = Configurator.RENDER.minAmbientLight + 
@@ -140,12 +130,12 @@ public class QuadBakery
             }
         }
 
-        boolean applyDiffuseLighting = raw.lightingMode == LightingMode.SHADED
+        boolean applyDiffuseLighting = !raw.isFullBrightness
                 && !raw.surfaceInstance.isLampGradient()  
                 && !Configurator.RENDER.enableCustomShading;
         
-        return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, raw.color, raw.face, textureSprite, 
-                applyDiffuseLighting, format));
+        return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, raw.face, textureSprite, applyDiffuseLighting, 
+                format));
     }
     
     private static void applyTextureRotation(RawQuad raw, float[][] uvData)
@@ -190,71 +180,18 @@ public class QuadBakery
     }
 
     /**
-     * Assigns UV coordinates to each vertex by projecting vertex
-     * onto plane of the quad's face. If the quad is not rotated,
-     * then semantics of vertex coordinates matches those of setupFaceQuad.
-     * For example, on NSEW faces, "up" (+y) corresponds to the top of the texture.
-     * 
-     * Assigned values are in the range 0-16, as is conventional for MC.
+     * UV shrinkage amount to prevent visible seams
      */
-    private static void getLockedUVCoordinates(RawQuad raw, float[][] uvData)
-    {
-        for(int i = 0; i < 4; i++)
-        {
-            Vertex v = raw.getVertex(i);
-            
-            switch(raw.getNominalFace())
-            {
-            case EAST:
-                uvData[i][0] = (float) ((1.0 - v.zCoord) * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
-                break;
-                
-            case WEST:
-                uvData[i][0] = (float) (v.zCoord * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
-                break;
-                
-            case NORTH:
-                uvData[i][0] = (float) ((1.0 - v.xCoord) * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
-                break;
-                
-            case SOUTH:
-                uvData[i][0] = (float) (v.xCoord * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
-                break;
-                
-            case DOWN:
-                uvData[i][0] = (float) (v.xCoord * 16);
-                uvData[i][1] = (float) ((1.0 - v.zCoord) * 16);
-                break;
-                
-            case UP:
-            default:
-                // our default semantic for UP is different than MC
-                // "top" is north instead of south
-                uvData[i][0] = (float) (v.xCoord * 16);
-                uvData[i][1] = (float) (v.zCoord * 16);
-                break;
-            
-            }
-        }
-        
-    }
-
-    /**
+    public static final float UV_EPS = 1f / 0x100;
+    
+     /**
      * Prevents visible seams along quad boundaries due to slight overlap
      * with neighboring textures or empty texture buffer.
      * Borrowed from Forge as implemented by Fry in UnpackedBakedQuad.build().
      * Array dimensions are vertex 0-3, u/v 0-1
      */
-    private static void contractUVs(RawQuad raw, TextureAtlasSprite textureSprite, float[][] uvData)
+    public static void contractUVs(TextureAtlasSprite textureSprite, float[][] uvData)
     {
-        if(!raw.shouldContractUVs) return;
-
-        final float eps = 1f / 0x100;
-
         float tX = textureSprite.getOriginX() / textureSprite.getMinU();
         float tY = textureSprite.getOriginY() / textureSprite.getMinV();
         float tS = tX > tY ? tX : tY;
@@ -275,7 +212,7 @@ public class QuadBakery
             for (int i = 0; i < 2; i++)
             {
                 float uo = uvData[v][i];
-                float un = uo * (1 - eps) + center[i] * eps;
+                float un = uo * (1 - UV_EPS) + center[i] * UV_EPS;
                 float ud = uo - un;
                 float aud = ud;
                 if(aud < 0) aud = -aud;

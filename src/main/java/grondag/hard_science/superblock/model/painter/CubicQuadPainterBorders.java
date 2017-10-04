@@ -29,8 +29,15 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
     private final static int TEXTURE_JOIN_ALL_TR_BL = 10;
     private final static int TEXTURE_JOIN_ALL_TR_BL_BR = 11;
     private final static int TEXTURE_JOIN_ALL_ALL_CORNERS = 12;
+    // this last one will be a blank texture unless this is a completed texture vs just a border
+    private final static int TEXTURE_JOIN_ALL_NO_CORNERS = 13;
     
-    public final static int TEXTURE_COUNT = 13;
+    /**
+     * Used only when a border is rendered in the solid layer.  Declared at module level so that we can check for it.
+     */
+    private final static FaceQuadInputs NO_BORDER = new FaceQuadInputs(TEXTURE_JOIN_ALL_NO_CORNERS, Rotation.ROTATE_NONE, false, false);
+    
+    public final static int TEXTURE_COUNT = 14;
     public final static int TEXTURE_BLOCK_SIZE = 16;
     
     protected final CornerJoinBlockState bjs;
@@ -56,6 +63,10 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
         if(inputs == null)
             return null;
         
+        // don't render the "no border" texture unless this is a tile of some kind
+        if(inputs == NO_BORDER && !this.texture.renderNoBorderAsTile)
+            return null;
+        
         quad.rotation = inputs.rotation;
 //        cubeInputs.rotateBottom = false;
         quad.minU = inputs.flipU ? 16 : 0;
@@ -70,8 +81,10 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
     
     static
     {
-        for(EnumFacing face: EnumFacing.values()){
-            FACE_INPUTS[face.ordinal()][CornerJoinFaceState.ALL_NO_CORNERS.ordinal()] = null; // NO BORDER
+        for(EnumFacing face: EnumFacing.values())
+        {
+            //First one will only be used if we are rendering in solid layer.
+            FACE_INPUTS[face.ordinal()][CornerJoinFaceState.ALL_NO_CORNERS.ordinal()] = NO_BORDER;
             FACE_INPUTS[face.ordinal()][CornerJoinFaceState.NO_FACE.ordinal()] = null; // NULL FACE
             FACE_INPUTS[face.ordinal()][CornerJoinFaceState.NONE.ordinal()] = new FaceQuadInputs( TEXTURE_JOIN_NONE, Rotation.ROTATE_NONE, false, false);
             
@@ -131,6 +144,19 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
             FACE_INPUTS[face.ordinal()][CornerJoinFaceState.ALL_TL_TR_BR.ordinal()] = new FaceQuadInputs( TEXTURE_JOIN_ALL_TR_BL_BR, Rotation.ROTATE_270, false, false);
             
             FACE_INPUTS[face.ordinal()][CornerJoinFaceState.ALL_TL_TR_BL_BR.ordinal()] = new FaceQuadInputs( TEXTURE_JOIN_ALL_ALL_CORNERS, Rotation.ROTATE_NONE, false, false);
+            
+            // rotate bottom face 180 so that it works - bottom face orientation is different from others
+            if(face == EnumFacing.DOWN)
+            {
+                for(int i = 0; i <  FACE_INPUTS[EnumFacing.DOWN.ordinal()].length; i++ )
+                {
+                    FaceQuadInputs fqi = FACE_INPUTS[EnumFacing.DOWN.ordinal()][i];
+                    if(fqi != null && fqi != NO_BORDER)
+                    {
+                        FACE_INPUTS[EnumFacing.DOWN.ordinal()][i] = new FaceQuadInputs(fqi.textureOffset, fqi.rotation.clockwise().clockwise(), fqi.flipU, fqi.flipV);
+                    }
+                }
+            }
         }
     }
 }

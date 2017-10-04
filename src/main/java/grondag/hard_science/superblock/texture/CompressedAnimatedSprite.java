@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.texture;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorCompletionService;
@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.imageio.ImageReader;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -35,7 +36,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class CompressedAnimatedSprite extends TextureAtlasSprite
+public class CompressedAnimatedSprite extends EnhancedSprite
 {
     /** DO NOT ACCESS DIRECTLY.  Use {@link #getLoaderPool()} */
     private static volatile ThreadPoolExecutor loaderThreadPool;
@@ -95,7 +96,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
      * Used when texture compression is disabled.
      * Dimensions are frame, mipmap level 
      */
-    private IntBuffer[][] rawImageData;
+    private ByteBuffer[][] rawImageData;
     
     /** handles to compressed textures if texture compression is enabled */
     private int glCompressedTextureID[];
@@ -125,7 +126,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
     }
 
     @Override
-    public boolean load(IResourceManager manager, ResourceLocation location)
+    public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
     {
         perfLoadRead.startRun();
         
@@ -209,7 +210,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
             }
             else
             {
-                this.rawImageData = new IntBuffer[frameIndex][];            
+                this.rawImageData = new ByteBuffer[frameIndex][];            
             }
             
             int completedFrameCount = 0;

@@ -15,12 +15,12 @@ public class SuperStaticBlock extends SuperBlockPlus
     
     public SuperStaticBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
     {
-        super(blockName, substance.material, defaultModelState);
+        super(blockName, substance.material, defaultModelState, null);
         
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();
         modelState.setStatic(true);
-        this.defaultModelStateBits = modelState.getBitsIntArray();
+        this.defaultModelStateBits = modelState.serializeToInts();
         this.isGeometryFullCube = defaultModelState.isCube();
         this.worldLightOpacity = WorldLightOpacity.getClosest(substance, defaultModelState);
         

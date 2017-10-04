@@ -16,7 +16,7 @@ public class Vertex extends Vec3d
     
     public Vertex(Vec3d point, double u, double v, int color, Vec3d normal)
     {
-        this(point.xCoord, point.yCoord, point.zCoord, u, v, color, normal);
+        this(point.x, point.y, point.z, u, v, color, normal);
     }
     
     public Vertex(double x, double y, double z, double u, double v, int color)
@@ -36,19 +36,19 @@ public class Vertex extends Vec3d
     /** returns copy of this vertex with given normal */
     public Vertex withNormal(Vec3d normalIn)
     {
-        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, normalIn);
+        return new Vertex(this.x, this.y, this.z, this.u, this.v, this.color, normalIn);
     }
 
     /** returns copy of this vertex with given color */
     public Vertex withColor(int colorIn)
     {
-        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, colorIn, this.normal);
+        return new Vertex(this.x, this.y, this.z, this.u, this.v, colorIn, this.normal);
     }
 
     /** returns copy of this vertex with given UV */
     public Vertex withUV(double uNew, double vNew)
     {
-        return new Vertex(this.xCoord, this.yCoord, this.zCoord, uNew, vNew, this.color, this.normal);
+        return new Vertex(this.x, this.y, this.z, uNew, vNew, this.color, this.normal);
     }
     
     /** returns copy of this vertex with given XYZ coords */
@@ -89,7 +89,7 @@ public class Vertex extends Vec3d
         newColor |= (int) ((this.color & 0xFF0000) + ((otherVertex.color & 0xFF0000) - (this.color & 0xFF0000)) * otherWeight);
         newColor |= (int) ((this.color & 0xFF000000) + ((otherVertex.color & 0xFF000000) - (this.color & 0xFF000000)) * otherWeight);
 
-        return new Vertex(newPos.xCoord, newPos.yCoord, newPos.zCoord, newU, newV, newColor, newNorm);
+        return new Vertex(newPos.x, newPos.y, newPos.z, newU, newV, newColor, newNorm);
     }
 
     /**
@@ -112,22 +112,22 @@ public class Vertex extends Vec3d
         switch(face)
         {
         case UP:
-            return this.yCoord - 1;
+            return this.y - 1;
 
         case DOWN:
-            return - this.yCoord;
+            return - this.y;
             
         case EAST:
-            return this.xCoord - 1;
+            return this.x - 1;
 
         case WEST:
-            return -this.xCoord;
+            return -this.x;
 
         case NORTH:
-            return -this.zCoord;
+            return -this.z;
             
         case SOUTH:
-            return this.zCoord - 1;
+            return this.z - 1;
 
         default:
             // make compiler shut up about unhandled case
@@ -135,20 +135,20 @@ public class Vertex extends Vec3d
         }
     }
     
-    public boolean isOnFacePlane(EnumFacing face)
+    public boolean isOnFacePlane(EnumFacing face, double tolerance)
     {
-        return Math.abs(this.distanceToFacePlane(face)) < QuadHelper.EPSILON;
+        return Math.abs(this.distanceToFacePlane(face)) < tolerance;
     }
     
     public Vertex clone()
     {
-        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, this.normal);
+        return new Vertex(this.x, this.y, this.z, this.u, this.v, this.color, this.normal);
     }
 
     public Vertex transform(Matrix4f matrix, boolean rescaleToUnitCube)
     {
 
-        Vector4f tmp = new Vector4f((float) xCoord, (float) yCoord, (float) zCoord, 1f);
+        Vector4f tmp = new Vector4f((float) x, (float) y, (float) z, 1f);
 
         matrix.transform(tmp);
         if (rescaleToUnitCube && Math.abs(tmp.w - 1f) > 1e-5)
@@ -158,7 +158,7 @@ public class Vertex extends Vec3d
 
         if(this.hasNormal())
         {
-            Vector4f tmpNormal = new Vector4f((float)this.normal.xCoord, (float)this.normal.yCoord, (float)this.normal.zCoord, 1f);
+            Vector4f tmpNormal = new Vector4f((float)this.normal.x, (float)this.normal.y, (float)this.normal.z, 1f);
             matrix.transform(tmp);
             Vec3d newNormal = new Vec3d(tmpNormal.x, tmpNormal.y, tmpNormal.z);
             newNormal.normalize();
@@ -173,7 +173,7 @@ public class Vertex extends Vec3d
     
     public Vertex add(Vec3d vec)
     {
-        return this.addVector(vec.xCoord, vec.yCoord, vec.zCoord);
+        return this.addVector(vec.x, vec.y, vec.z);
     }
 
     /**
@@ -182,15 +182,15 @@ public class Vertex extends Vec3d
      */
     public Vertex addVector(double x, double y, double z)
     {
-        return new Vertex(this.xCoord + x, this.yCoord + y, this.zCoord + z, u, v, color);
+        return new Vertex(this.x + x, this.y + y, this.z + z, u, v, color);
     }
 
     public float[] xyzToFloatArray()
     {
         float[] retVal = new float[3];
-        retVal[0] = (float)this.xCoord;
-        retVal[1] = (float)this.yCoord;
-        retVal[2] = (float)this.zCoord;
+        retVal[0] = (float)this.x;
+        retVal[1] = (float)this.y;
+        retVal[2] = (float)this.z;
         return retVal;
     }
 
@@ -200,9 +200,9 @@ public class Vertex extends Vec3d
         if(this.hasNormal())
         {
             retVal = new float[3];
-            retVal[0] = (float) this.normal.xCoord;
-            retVal[1] = (float) this.normal.yCoord;
-            retVal[2] = (float) this.normal.zCoord;
+            retVal[0] = (float) this.normal.x;
+            retVal[1] = (float) this.normal.y;
+            retVal[2] = (float) this.normal.z;
         }
         return retVal;
     }
@@ -212,9 +212,9 @@ public class Vertex extends Vec3d
      */
     public boolean isCsgEqual(Vertex vertexIn)
     {
-        return Math.abs(vertexIn.xCoord - this.xCoord) < QuadHelper.EPSILON
-            && Math.abs(vertexIn.yCoord - this.yCoord) < QuadHelper.EPSILON
-            && Math.abs(vertexIn.zCoord - this.zCoord) < QuadHelper.EPSILON;
+        return Math.abs(vertexIn.x - this.x) < QuadHelper.EPSILON
+            && Math.abs(vertexIn.y - this.y) < QuadHelper.EPSILON
+            && Math.abs(vertexIn.z - this.z) < QuadHelper.EPSILON;
 
     }
 

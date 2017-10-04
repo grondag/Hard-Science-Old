@@ -1,8 +1,8 @@
 package grondag.hard_science.gui.control;
 
-import static grondag.hard_science.gui.GuiUtil.HorizontalAlignment.*;
-import static grondag.hard_science.gui.GuiUtil.VerticalAlignment.*;
 import static grondag.hard_science.gui.control.GuiControl.*;
+import static grondag.hard_science.library.varia.HorizontalAlignment.*;
+import static grondag.hard_science.library.varia.VerticalAlignment.*;
 
 import grondag.hard_science.gui.GuiUtil;
 import net.minecraft.client.Minecraft;
@@ -26,24 +26,24 @@ public class Button extends GuiButton
 
     public void resize(int x, int y, int width, int height)
     {
-        this.xPosition = x;
-        this.yPosition = y;
+        this.x = x;
+        this.y = y;
         this.width = width;
         this.height = height;
     }
     
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY)
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         if (this.visible)
         {
-            this.hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
             int i = this.getHoverState(this.hovered);
             int color = i == 0 ? this.disabledColor : i == 2 ? this.hoverColor : this.buttonColor;
 
-            GuiUtil.drawRect(this.xPosition, this.yPosition, this.xPosition + this.width - 1, this.yPosition + this.height - 1, color);
-            FontRenderer fontrenderer = mc.fontRendererObj;
-            GuiUtil.drawAlignedStringNoShadow(fontrenderer, this.displayString, this.xPosition, this.yPosition, this.width, this.height, this.textColor, CENTER, MIDDLE);
+            GuiUtil.drawRect(this.x, this.y, this.x + this.width - 1, this.y + this.height - 1, color);
+            FontRenderer fontrenderer = mc.fontRenderer;
+            GuiUtil.drawAlignedStringNoShadow(fontrenderer, this.displayString, this.x, this.y, this.width, this.height, this.textColor, CENTER, MIDDLE);
         }
     }
 }

@@ -6,7 +6,6 @@ import javax.vecmath.Matrix4d;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -39,7 +38,7 @@ public class StairMeshFactory extends AbstractWedgeMeshFactory
         RawQuad template = new RawQuad();
         template.color = 0xFFFFFFFF;
         template.rotation = Rotation.ROTATE_NONE;
-        template.lightingMode = LightingMode.SHADED;
+        template.isFullBrightness = false;
         template.lockUV = true;
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
@@ -48,55 +47,85 @@ public class StairMeshFactory extends AbstractWedgeMeshFactory
         quad.surfaceInstance = BACK_AND_BOTTOM_INSTANCE;
         quad.setFace(EnumFacing.NORTH);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0, EnumFacing.UP);
-        builder.add(quad.transform(matrix));
+        quad = quad.transform(matrix);
+        builder.add(quad);
       
         quad = template.clone();
         quad.surfaceInstance = BACK_AND_BOTTOM_INSTANCE;
         quad.setFace(EnumFacing.EAST);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.UP);
-        builder.add(quad.transform(matrix));
+        quad = quad.transform(matrix);
+        builder.add(quad);
+        
+        // Splitting sides into three quadrants vs one long strip plus one long quadrant
+        // is necessary to avoid AO lighting artifacts.  AO is done by vertex, and having
+        // a T-junction tends to mess about with the results.
         
         quad = template.clone();
         quad.surfaceInstance = SIDE_INSTANCE;
-        quad.setupFaceQuad(EnumFacing.UP, 0.0, 0.5, 1.0, 1.0, 0.0, EnumFacing.NORTH);
-        builder.add(quad.transform(matrix));
+        quad.setupFaceQuad(EnumFacing.UP, 0.0, 0.5, 0.5, 1.0, 0.0, EnumFacing.NORTH);
+        quad = quad.transform(matrix);
+        builder.add(quad);
+        
+        quad = template.clone();
+        quad.surfaceInstance = SIDE_INSTANCE;
+        quad.setupFaceQuad(EnumFacing.UP, 0.5, 0.5, 1.0, 1.0, 0.0, EnumFacing.NORTH);
+        quad = quad.transform(matrix);
+        builder.add(quad);
         
         quad = template.clone();
         quad.surfaceInstance = SIDE_INSTANCE;
         quad.setupFaceQuad(EnumFacing.UP, 0.5, 0.0, 1.0, 0.5, 0.0, EnumFacing.NORTH);
-        builder.add(quad.transform(matrix));
+        quad = quad.transform(matrix);
+        builder.add(quad);
+        
+        // Splitting sides into three quadrants vs one long strip plus one long quadrant
+        // is necessary to avoid AO lighting artifacts.  AO is done by vertex, and having
+        // a T-junction tends to mess about with the results.
         
         quad = template.clone();
         quad.surfaceInstance = SIDE_INSTANCE;
-        quad.setupFaceQuad(EnumFacing.DOWN, 0.0, 0.5, 1.0, 1.0, 0.0, EnumFacing.NORTH);
-        builder.add(quad.transform(matrix));
+        quad.setupFaceQuad(EnumFacing.DOWN, 0.0, 0.5, 0.5, 1.0, 0.0, EnumFacing.NORTH);
+        quad = quad.transform(matrix);
+        builder.add(quad);
+        
+        quad = template.clone();
+        quad.surfaceInstance = SIDE_INSTANCE;
+        quad.setupFaceQuad(EnumFacing.DOWN, 0.5, 0.5, 1.0, 1.0, 0.0, EnumFacing.NORTH);
+        quad = quad.transform(matrix);
+        builder.add(quad);
         
         quad = template.clone();
         quad.surfaceInstance = SIDE_INSTANCE;
         quad.setupFaceQuad(EnumFacing.DOWN, 0.0, 0.0, 0.5, 0.5, 0.0, EnumFacing.NORTH);
-        builder.add(quad.transform(matrix));
-
+        quad = quad.transform(matrix);
+        builder.add(quad);
+        
+        
         
         quad = template.clone();
         quad.surfaceInstance = SIDE_INSTANCE;
         quad.setupFaceQuad(EnumFacing.SOUTH, 0.5, 0.0, 1.0, 1.0, 0.0, EnumFacing.UP);
-        builder.add(quad.transform(matrix));
-        
-        quad = template.clone();
-        quad.surfaceInstance = SIDE_INSTANCE;
-        quad.setupFaceQuad(EnumFacing.WEST, 0.0, 0.0, 0.5, 1.0, 0.0, EnumFacing.UP);
-        builder.add(quad.transform(matrix));
-        
+        quad = quad.transform(matrix);
+        builder.add(quad);
         
         quad = template.clone();
         quad.surfaceInstance = TOP_INSTANCE;
         quad.setupFaceQuad(EnumFacing.SOUTH, 0.0, 0.0, 0.5, 1.0, 0.5, EnumFacing.UP);
-        builder.add(quad.transform(matrix));
+        quad = quad.transform(matrix);
+        builder.add(quad);
+        
+        quad = template.clone();
+        quad.surfaceInstance = SIDE_INSTANCE;
+        quad.setupFaceQuad(EnumFacing.WEST, 0.0, 0.0, 0.5, 1.0, 0.0, EnumFacing.UP);
+        quad = quad.transform(matrix);
+        builder.add(quad);
         
         quad = template.clone();
         quad.surfaceInstance = TOP_INSTANCE;
         quad.setupFaceQuad(EnumFacing.WEST, 0.5, 0.0, 1.0, 1.0, 0.5, EnumFacing.UP);
-        builder.add(quad.transform(matrix));
+        quad = quad.transform(matrix);
+        builder.add(quad);
         
         return builder.build();
     }

@@ -8,17 +8,22 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
-
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Configurator;
+import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.Log;
 import grondag.hard_science.external.IWailaProvider;
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
+import grondag.hard_science.network.ModMessages;
+import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
+import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateProperty;
 import grondag.hard_science.superblock.model.state.PaintLayer;
@@ -38,9 +43,12 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -106,17 +114,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
     /** change in constructor to have different appearance */
     protected int[] defaultModelStateBits;
-
-    /** will be set based on default model state first time is needed */
-    protected int renderLayerEnabledFlags = -1;
-    
-    /** 
-     * Used by dispatcher to known if shading should be enabled for the given render layer.
-     * Will be set based on default model state first time is needed unless
-     * changed to value other than -1 in constructor.
-     */
-    /** will be set based on default model state first time is needed */
-    protected int renderLayerShadedFlags = -1;
     
     /** change in constructor to have fewer variants */
     protected int metaCount = 16;
@@ -124,7 +121,14 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     /** see {@link #isAssociatedBlock(Block)} */
     protected Block associatedBlock;
     
-    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState)
+    public final BlockRenderMode blockRenderMode;
+    
+    /**
+     * Sub-items for the block. Initialized in {@link #createSubItems()}
+     */
+    private List<ItemStack> subItems;
+    
+    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState, BlockRenderMode blockRenderMode)
     {
         super(defaultMaterial);
         setCreativeTab(HardScience.tabMod);
@@ -141,33 +145,31 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         
         this.lightOpacity = 0;
 
-        this.defaultModelStateBits = defaultModelState.getBitsIntArray();
-    }
+        this.defaultModelStateBits = defaultModelState.serializeToInts();
+        
+        this.blockRenderMode = blockRenderMode == null
+                ? defaultModelState.getRenderPassSet().blockRenderMode
+                : blockRenderMode;
+    }   
 
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
-    {
+    {       
         ModelState modelState = this.getModelState(worldIn, pos, true);
         ICollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
 
-        if (collisionHandler == null)
-        {
-            super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185477_7_);
-        }
-        else
-        {
-            AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
+        AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
 
-            List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(modelState);
+        List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(modelState);
 
-            for (AxisAlignedBB aabb : bounds) {
-                if (localMask.intersectsWith(aabb)) 
-                {
-                    collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
-                }
-            }        
-        }
+        for (AxisAlignedBB aabb : bounds) {
+            if (localMask.intersects(aabb)) 
+            {
+                collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
+            }
+        }        
+        
     }
 
     @Override
@@ -283,12 +285,12 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced)
     {
-        super.addInformation(stack, playerIn, tooltip, advanced);
+        super.addInformation(stack, world, tooltip, advanced);
         tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
         
-        ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
+        ModelState modelState = SuperItemBlock.getStackModelState(stack);
         
         if(modelState != null)
         {
@@ -329,8 +331,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Optional.Method(modid = "theoneprobe")
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
-        
         ModelState modelState = this.getModelStateAssumeStateIsStale(blockState, world, data.getPos(), true);
         
         if(modelState != null)
@@ -352,21 +352,48 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             {
                 probeInfo.text(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
             }
-            if(modelState.hasAxis())
+            
+            if(Configurator.BLOCKS.probeInfoLevel != ProbeInfoLevel.BASIC)
             {
-                probeInfo.text(I18n.translateToLocal("label.axis") + ": " + modelState.getAxis());
-                if(modelState.hasAxisOrientation())
+                if(modelState.hasAxis())
                 {
-                    probeInfo.text(I18n.translateToLocal("label.axis_inverted") + ": " + modelState.isAxisInverted());
+                    probeInfo.text(I18n.translateToLocal("label.axis") + ": " + modelState.getAxis());
+                    if(modelState.hasAxisOrientation())
+                    {
+                        probeInfo.text(I18n.translateToLocal("label.axis_inverted") + ": " + modelState.isAxisInverted());
+                    }
                 }
+                if(modelState.hasAxisRotation())
+                {
+                    probeInfo.text(I18n.translateToLocal("label.model_rotation") + ": " + modelState.getAxisRotation());
+                }
+                probeInfo.text(I18n.translateToLocal("label.position") + ": " + modelState.getPosX() + ", " + modelState.getPosY() + ", " + modelState.getPosZ());
             }
-            if(modelState.hasModelRotation())
-            {
-                probeInfo.text(I18n.translateToLocal("label.model_rotation") + ": " + modelState.getModelRotation());
-            }
-            probeInfo.text(I18n.translateToLocal("label.position") + ": " + modelState.getPosX() + ", " + modelState.getPosY() + ", " + modelState.getPosZ());
         }
         probeInfo.text(I18n.translateToLocal("label.material") + ": " + this.getSubstance(blockState, world, data.getPos()).localizedName());
+        
+        if(Configurator.BLOCKS.probeInfoLevel == ProbeInfoLevel.DEBUG)
+        {
+            probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
+
+            
+            probeInfo.text(I18n.translateToLocal("label.full_block") + ": " + this.fullBlock);
+            probeInfo.text("isOpaqueCube(): " + this.isOpaqueCube(blockState));
+            probeInfo.text("isFullCube(): " + this.isFullCube(blockState));
+            probeInfo.text("getUseNB: " + this.getUseNeighborBrightness(blockState));
+            probeInfo.text("getLightOpacity: " + this.getLightOpacity(blockState));
+            probeInfo.text("getAmbientOcclusionLightValue: " + this.getAmbientOcclusionLightValue(blockState));
+            probeInfo.text("getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos()));
+            
+            IBlockState upState = world.getBlockState(data.getPos().up());
+            probeInfo.text("UP isFullBlock: " + upState.isFullBlock());
+            probeInfo.text("UP isOpaqueCube(): " + upState.isOpaqueCube());
+            probeInfo.text("UP isFullCube(): " + upState.isFullCube());
+            probeInfo.text("UP getUseNB: " + upState.useNeighborBrightness());
+            probeInfo.text("UP getLightOpacity: " + upState.getLightOpacity());
+            probeInfo.text("UP getAmbientOcclusionLightValue: " + upState.getAmbientOcclusionLightValue());
+            probeInfo.text("UP getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos().up()));
+        }
     }
 
     /**
@@ -453,42 +480,23 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     /**
      * This is queried before getActualState, which means it cannot be determined from world.
      * 
-     * We only have a couple ways to get around this that don't involve ASM or switching to a TESR.
-     * 
-     * 1) We can persist it in the block instance somehow and set block states that have the
-     * right value for the model they represent.  This could force some block state changes in 
-     * the world however if model state changes - but those changes are not likely.
-     * Main drawback of this approach is that it consumes a lot of block ids.
-     * 
-     * 2) We can report that we render in all layers but return no quads.  However, this means RenderChunk
+     * We could report that we render in all layers but return no quads.  However, this means RenderChunk
      * does quite a bit of work asking us for stuff that isn't there. 
      * 
-     * Default implementation derives it from default model state first time it is needed.
+     * Instead we persist it in the block instance and set block states that point to the
+     * appropriate block instance for the model they represent.  This could force some block state changes in 
+     * the world however if model state changes - but those changes are not likely.
+     * Main drawback of this approach is that it consumes more block ids.
+     * 
+     * If any rendering is done by TESR, then don't render in any layer because too hard to
+     * get render depth perfectly aligned that way.  TESR will also render normal block layers.
      */
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
-        int layerFlags = this.renderLayerEnabledFlags;
-        if(layerFlags == -1)
-        {
-            layerFlags = this.getDefaultModelState().getCanRenderInLayerFlags();
-            this.renderLayerEnabledFlags = layerFlags;
-        }
-        return ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, layerFlags);
+        return this.blockRenderMode != BlockRenderMode.TESR && this.blockRenderMode.renderLayout.containsBlockRenderLayer(layer);
     }
-    
-    /** used by dispatcher to control AO shading by render layer */
-    public int renderLayerShadedFlags()
-    {
-        int layerFlags = this.renderLayerShadedFlags;
-        if(layerFlags == -1)
-        {
-            layerFlags = this.getDefaultModelState().getRenderLayerShadedFlags();
-            this.renderLayerShadedFlags = layerFlags;
-        }
-        return layerFlags;
-    }
-
+   
     @Override
     public boolean canSilkHarvest()
     {
@@ -504,38 +512,28 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
-        if (this.getModelStateAssumeStateIsStale(blockState, worldIn, pos, true).getShape().meshFactory().collisionHandler() == null)
-        {
-            // same as vanilla logic here, but avoiding call to rayTrace so can detected unsupported calls to it
-            Vec3d vec3d = start.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
-            Vec3d vec3d1 = end.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
-            RayTraceResult raytraceresult = this.getBoundingBox(blockState, worldIn, pos).calculateIntercept(vec3d, vec3d1);
-            return raytraceresult == null ? null : new RayTraceResult(raytraceresult.hitVec.addVector((double)pos.getX(), (double)pos.getY(), (double)pos.getZ()), raytraceresult.sideHit, pos);
-        }
-        else
-        {
-            ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
+        ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
+        
+        this.addCollisionBoxToList(blockState, worldIn, pos, 
+                new AxisAlignedBB(start.x, start.y, start.z, end.x, end.y, end.z),
+                bounds, null, false);
 
-            this.addCollisionBoxToList(blockState, worldIn, pos, 
-                    new AxisAlignedBB(start.xCoord, start.yCoord, start.zCoord, end.xCoord, end.yCoord, end.zCoord),
-                    bounds, null, false);
+        RayTraceResult retval = null;
+        double shortestDistance = 1;
 
-            RayTraceResult retval = null;
-            double distance = 1;
-
-            for (AxisAlignedBB aabb : bounds) {
-                RayTraceResult candidate = aabb.calculateIntercept(start, end);
-                if (candidate != null) {
-                    double checkDist = candidate.hitVec.squareDistanceTo(start);
-                    if (retval == null || checkDist < distance) {
-                        retval = candidate;
-                        distance = checkDist;
-                    }
+        for (AxisAlignedBB aabb : bounds) {
+            RayTraceResult candidate = aabb.calculateIntercept(start, end);
+            if (candidate != null) {
+                double candidateDistance = candidate.hitVec.squareDistanceTo(start);
+                if (retval == null || candidateDistance < shortestDistance) 
+                {
+                    retval = candidate;
+                    shortestDistance = candidateDistance;
                 }
             }
-
-            return retval == null ? null : new RayTraceResult(retval.hitVec.addVector(pos.getX(), pos.getY(), pos.getZ()), retval.sideHit, pos);
         }
+
+        return retval == null ? null : new RayTraceResult(retval.hitVec, retval.sideHit, pos);
     }
 
     @Override
@@ -554,8 +552,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
         ModelState modelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
-        return modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID
-                && modelState.sideShape(face).occludesOpposite;
+        return !modelState.hasTranslucentGeometry() && modelState.sideShape(face).occludesOpposite;
     }
     
     @Override
@@ -659,22 +656,20 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
     {
-        List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
-
         if(this.dropItem == null)
         {
             ItemStack stack = getStackFromBlock(state, world, pos);
             if(stack != null)
             {
-                ret.add(stack);
+                return Collections.singletonList(stack);
             }
         }
         else
         {
             int count = quantityDropped(world, pos, state);
-            ret.add(new ItemStack(this.dropItem, count, 0));
+            return Collections.singletonList(new ItemStack(this.dropItem, count, 0));
         }
-        return ret;
+        return Collections.emptyList();
     }
 
      /**
@@ -685,7 +680,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         return ((IExtendedBlockState)state)
                 .withProperty(MODEL_STATE, getModelStateAssumeStateIsCurrent(state, world, pos, true));
-//                .withProperty(SHADE_FLAGS, (int)this.getModelState(state, world, pos, false).getRenderLayerShadedFlags());;
     }
 
     /**
@@ -835,7 +829,42 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         //which is then cached, leading to strange render problems for blocks just placed up updated.
         IBlockState goodState = world.getBlockState(pos);
 
-        return getStackFromBlock(goodState, world, pos);
+        ItemStack picked = getStackFromBlock(goodState, world, pos);
+        
+        // logic for TE blocks has to be in parent so that virtual blocks can take advantage of it
+        if(this.hasTileEntity(state))
+        {
+            TileEntity myTE = world.getTileEntity(pos);
+            if(myTE != null && myTE instanceof SuperModelTileEntity)
+            {
+                
+                SuperItemBlock.setStackLightValue(picked, ((SuperModelTileEntity)myTE).getLightValue());
+                SuperItemBlock.setStackSubstance(picked, ((SuperModelTileEntity)myTE).getSubstance());
+            }
+        }
+   
+        // for virtual blocks only, take appearance of picked virtual block
+        if(!player.capabilities.isCreativeMode && world.isRemote 
+                && Minecraft.getMinecraft().gameSettings.keyBindPickBlock.isKeyDown()) 
+        {
+            if(!picked.isEmpty())
+            {
+                ItemStack heldStack = player.getHeldItemMainhand();
+                
+                if(heldStack.getItem() == ModItems.virtual_block)
+                {
+                    SuperItemBlock.setStackModelState(heldStack, SuperItemBlock.getStackModelState(picked));
+                    SuperItemBlock.setStackLightValue(heldStack, SuperItemBlock.getStackLightValue(picked));
+                    SuperItemBlock.setStackSubstance(heldStack, SuperItemBlock.getStackSubstance(picked));
+                    ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(heldStack));
+                }
+            }
+            return ItemStack.EMPTY;
+        }
+        else
+        {
+            return picked;
+        }
     }
    
     /**
@@ -868,17 +897,33 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
-        list.addAll(getSubItems());
+        items.addAll(getSubItems());
     }
 
-    public List<ItemStack> getSubItems()
+    public final List<ItemStack> getSubItems()
     {
-        return this.getSubItemsBasic();
+        if(this.subItems == null)
+        {
+            this.subItems = this.createSubItems();
+        }
+        return this.subItems;
     }
     
-    protected List<ItemStack> getSubItemsBasic()
+    /**
+     * Override and alter the items in the list or replace with a different
+     * list to control sub items for this block. Only called once per block instance.
+     */
+    protected List<ItemStack> createSubItems()
+    {
+        return this.defaultSubItems();
+    }
+    
+    /**
+     * Default implementation for {@link #createSubItems()}
+     */
+    protected final List<ItemStack> defaultSubItems()
     {
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
         for(int i = 0; i < this.metaCount; i++)
@@ -890,7 +935,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 // model state will squawk is usage is NONE
                 modelState.setMetaData(i);
             }
-            SuperItemBlock.setModelState(stack, modelState);
+            SuperItemBlock.setStackModelState(stack, modelState);
             itemBuilder.add(stack);
         }
         return itemBuilder.build();
@@ -1004,19 +1049,13 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         return this.isGeometryFullCube(state) && this.worldLightOpacity(state) == WorldLightOpacity.SOLID;
     }
-
-    /**
-     * {@inheritDoc} <br><br>
-     * 
-     * Has nothing to do with block geometry but instead is based on material.
-     * Is used by fluid rendering to know if fluid should appear to flow into this block.
-     */
-    @Override
-    public boolean isBlockSolid(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+  
+    public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing face)
     {
-        return this.getSubstance(worldIn, pos).material.isSolid();
+        return this.getModelState(world, pos, true).sideShape(face) == SideShape.SOLID
+         ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }
-
+    
     @Override
     public boolean isBurning(IBlockAccess world, BlockPos pos)
     {
@@ -1091,6 +1130,11 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public abstract boolean isGeometryFullCube(IBlockState state);
     
     public abstract boolean isHypermatter();
+    
+    /**
+     * Only true for virtual blocks.  Prevents "instanceof" checking.
+     */
+    public boolean isVirtual() { return false; }
    
     /**
      * {@inheritDoc} <br><br>
@@ -1193,8 +1237,12 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis)
     {
-        IBlockState blockState = world.getBlockState(pos);
-        return this.getModelStateAssumeStateIsCurrent(blockState, world, pos, true).rotateBlock(blockState, world, pos, axis, this);
+        return false;
+        // Rotation currently not supported.  
+        // Code below does not work because need to refresh modelstate and send to client
+        
+//        IBlockState blockState = world.getBlockState(pos);
+//        return this.getModelStateAssumeStateIsCurrent(blockState, world, pos, true).rotateBlock(blockState, world, pos, axis, this);
     }
 
     public SuperBlock setAllowSilkHarvest(boolean allow)
@@ -1216,6 +1264,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
+
         if(this.getSubstance(blockState, blockAccess, pos).isTranslucent)
         {
             BlockPos otherPos = pos.offset(side);
@@ -1224,7 +1273,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             if(block instanceof SuperBlock)
             {
                 SuperBlock sBlock = (SuperBlock)block;
-                if(((SuperBlock) block).getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
+                // only match with blocks with same "virtuality" as this one
+                if(this.isVirtual() == sBlock.isVirtual() && sBlock.getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
                 {
                     ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);

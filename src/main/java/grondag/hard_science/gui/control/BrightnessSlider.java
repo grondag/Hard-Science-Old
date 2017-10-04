@@ -1,8 +1,8 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
-import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
+import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.varia.VerticalAlignment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
@@ -40,7 +40,7 @@ public class BrightnessSlider extends Slider
         
         int textColor = this.selectedTabIndex > 6 ? 0xFF000000 : 0xFFFFFFFF;
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, Integer.toString(this.selectedTabIndex), 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, Integer.toString(this.selectedTabIndex), 
                 this.labelRight, this.top, this.choiceWidth, this.height, 
                 textColor, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
     }

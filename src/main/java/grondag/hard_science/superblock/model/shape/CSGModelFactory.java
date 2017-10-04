@@ -50,8 +50,8 @@ package grondag.hard_science.superblock.model.shape;
 //    {
 //        RawQuad template = new RawQuad();
 //        template.lockUV = true;
-//        ColorMap colorMap = state.getValue(colorComponent);
-//        template.color = colorMap.getColor(EnumColorMap.BASE);
+//        ColorMap borderColor = state.getValue(colorComponent);
+//        template.color = borderColor.getColor(EnumColorMap.BASE);
 //        template.rotation = state.getValue(rotationComponent);
 //        template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
 //                texState.buildTextureName(state.getValue(textureComponent)));
@@ -80,11 +80,11 @@ package grondag.hard_science.superblock.model.shape;
 //
 //        
 ////        CSGShape quadsA = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0.4, 0.4, 1.0, 0.6, 0.6), template));
-////        template.color = colorMap.getColorMap(EnumColorMap.BORDER);
+////        template.color = borderColor.getColorMap(EnumColorMap.BORDER);
 ////        CSGShape quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.2, 0, 0.4, 0.6, 1.0, 0.8), template));
 //
 ////        CSGShape quadsA = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.0, 0.0, 0.0, 1, 1, 1), template));
-////        template.color = colorMap.getColorMap(EnumColorMap.BORDER);
+////        template.color = borderColor.getColorMap(EnumColorMap.BORDER);
 ////        CSGShape quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, .1, .45, .05, 0.9, .55), template));
 //
 ////        CSGShape result = quadsA.intersect(quadsB);
@@ -97,11 +97,11 @@ package grondag.hard_science.superblock.model.shape;
 ////        quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0, 0.3, 1, 1, .7), template));
 ////        result = result.difference(quadsB);
 //        
-////        template.color = colorMap.getColorMap(EnumColorMap.HIGHLIGHT);
+////        template.color = borderColor.getColorMap(EnumColorMap.HIGHLIGHT);
 ////        quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.2, 0.2, 0, 0.8, 0.8, 1), template));
 ////        result = result.difference(quadsB);
 ////
-////        template.color = colorMap.getColorMap(EnumColorMap.HIGHLIGHT);
+////        template.color = borderColor.getColorMap(EnumColorMap.HIGHLIGHT);
 ////        quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0, .4, 1, .4, .65), template));
 ////        result = result.difference(quadsB);
 //        
@@ -140,9 +140,9 @@ package grondag.hard_science.superblock.model.shape;
 //    }
 //    
 //    @Override
-//    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
+//    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderIntent)
 //    {
-//        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+//        if(renderIntent != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
 //        
 //        return QuadContainer.fromRawQuads(this.makeRawQuads(texState, state));
 //    }

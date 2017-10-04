@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableList;
 
 import net.minecraft.util.BlockRenderLayer;
 
+
+
 /**
  * Super lightweight version of EnumMap for Block layers to QuadContainer. Only stores values for keys that are used.
  */
@@ -29,8 +31,12 @@ public class SparseLayerMapBuilder
     
     public SparseLayerMap makeNewMap()
     {
-        if(size == 1)
+        if(this.size == 1)
             return new SparseLayerSingletonMap();
+        
+        else if(this.size == 2 && this.layerList.get(0) == BlockRenderLayer.SOLID && this.layerList.get(1) == BlockRenderLayer.TRANSLUCENT)
+            return new SparseLayerSolidTransMap();
+        
         else 
             return new SparseLayerArrayMap();
     }
@@ -91,6 +97,55 @@ public class SparseLayerMapBuilder
         public QuadContainer[] getAll()
         {
             return new QuadContainer[] { this.value };
+        }
+    }
+    
+    /**
+     * Optimized for most common (currently only) non-singleton case/
+     */
+    private class SparseLayerSolidTransMap extends SparseLayerMap
+    {
+        private QuadContainer solid;
+        private QuadContainer translucent;
+        
+        private SparseLayerSolidTransMap()
+        {
+            // Keep private
+        }
+        
+        public QuadContainer get(BlockRenderLayer layer)
+        {
+            switch(layer)
+            {
+            case SOLID:
+                return this.solid;
+                
+            case TRANSLUCENT:
+                return this.translucent;
+                
+            default:
+                return null;
+            }
+        }
+        
+        public void set(BlockRenderLayer layer, QuadContainer value)
+        {
+            switch(layer)
+            {
+            case SOLID:
+                this.solid = value;
+                
+            case TRANSLUCENT:
+                this.translucent = value;
+                
+            default:
+                //NOOP
+            }
+        }
+        
+        public QuadContainer[] getAll()
+        {
+            return new QuadContainer[] { this.solid, this.translucent };
         }
     }
 }

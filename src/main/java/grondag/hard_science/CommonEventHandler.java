@@ -6,20 +6,26 @@ import com.google.gson.Gson;
 
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 @SuppressWarnings({ "deprecation"})
@@ -84,7 +90,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+            LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -95,7 +101,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+            LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -105,7 +111,7 @@ public class CommonEventHandler
     {
         if(event.getWorld().isRemote) return;
         
-        LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+        LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
         if(sim != null)
         {
             for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
@@ -121,7 +127,65 @@ public class CommonEventHandler
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent event) 
     {
-        Simulator.INSTANCE.onServerTick(event);
+        if(event.phase == Phase.START) 
+        {
+            CommonProxy.updateCurrentTime();
+        }
+        else
+        {
+            // thought it might be more determinism if simulator runs after block/entity ticks
+            Simulator.INSTANCE.onServerTick(event);
+        }
+    }
+    
+    private static String lastTroubleMaker = null;
+    private static BlockPos lastAttemptLocation = null;
+    private static long lastAttemptTimeMillis = -1;
+    private static int attemptsAtTrouble = 0;
+    @SubscribeEvent
+    public static void onAskingForIt(ServerChatEvent event)
+    {
+        if(!Configurator.VOLCANO.enableVolcano) return;
+        
+        EntityPlayerMP player = event.getPlayer();
+        
+        if(player.getHeldItemMainhand().getItem() == Items.LAVA_BUCKET && event.getMessage().toLowerCase().contains("volcanos are awesome"))
+        {
+            long time = CommonProxy.currentTimeMillis();
+
+            if(event.getUsername() == lastTroubleMaker
+                    && player.getPosition().equals(lastAttemptLocation)
+                    && time - lastAttemptTimeMillis < 30000)
+            {
+                //FIXME" check for volcano nearby
+                
+                attemptsAtTrouble++;
+                
+                //FIXME: localize
+                if(attemptsAtTrouble == 1)
+                {
+                    player.sendMessage(new TextComponentString(String.format("This is a really bad idea, %s", player.getDisplayNameString())));
+                }
+                else if(attemptsAtTrouble == 2)
+                {
+                    player.sendMessage(new TextComponentString(String.format("I hope there isn't anything nearby you want to keep.", player.getDisplayNameString())));
+                }
+                else if(attemptsAtTrouble == 3)
+                {
+                    player.sendMessage(new TextComponentString(String.format("Now would be a good time to run away.", player.getDisplayNameString())));
+                    player.world.setBlockState(new BlockPos(lastAttemptLocation.getX(), 0, lastAttemptLocation.getZ()), ModBlocks.volcano_block.getDefaultState());
+                }
+            }
+            else
+            {
+                attemptsAtTrouble = 0;
+            }
+            lastTroubleMaker = event.getUsername();
+            lastAttemptLocation = player.getPosition();
+            lastAttemptTimeMillis = time;
+            
+            Log.warn("player is asking for it at " + event.getPlayer().posX + " " + event.getPlayer().posZ);
+        }
     }
     
 //	@SubscribeEvent

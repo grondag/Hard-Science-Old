@@ -21,6 +21,7 @@ import grondag.hard_science.feature.volcano.lava.simulator.LavaCells;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager.VolcanoNode;
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -140,17 +141,17 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
                 this.groundLevel = Useful.getAvgHeight(this.world, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
                 
-            this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.pos, this.world.provider.getDimension());
+            this.node = Simulator.INSTANCE.volcanoManager().findNode(this.pos, this.world.provider.getDimension());
             
             if(node == null)
             {
                 Log.info("Setting up new Volcano Node @" + this.pos.toString());
-                this.node = Simulator.INSTANCE.getVolcanoManager().createNode(this.pos,this.world.provider.getDimension());
+                this.node = Simulator.INSTANCE.volcanoManager().createNode(this.pos,this.world.provider.getDimension());
                 this.stage = VolcanoStage.DORMANT;
             }
             else
             {
-                Log.info("Recovered Volcano Node @" + this.pos.toString());
+                Log.info("Found Volcano Node @" + this.pos.toString());
                 this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
             }
 
@@ -221,7 +222,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         }
         
         // if have too many blocks, switch to cooling mode
-        if(Simulator.INSTANCE.getLavaSimulator().loadFactor() > 1)
+        if(Simulator.INSTANCE.lavaSimulator().loadFactor() > 1)
         {
             this.clearingLevel = CLEARING_LEVEL_RESTART;
             return VolcanoStage.COOLING;
@@ -263,7 +264,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
      */
     private VolcanoStage doCooling()
     {
-        if(Simulator.INSTANCE.getLavaSimulator().loadFactor() > Configurator.VOLCANO.cooldownTargetLoadFactor)
+        if(Simulator.INSTANCE.lavaSimulator().loadFactor() > Configurator.VOLCANO.cooldownTargetLoadFactor)
         {
             this.lavaCooldownTicks = 0;
             return VolcanoStage.COOLING;
@@ -281,7 +282,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     private VolcanoStage doFlowing()
     {
         
-        if(Simulator.INSTANCE.getLavaSimulator().loadFactor() > 1)
+        if(Simulator.INSTANCE.lavaSimulator().loadFactor() > 1)
         {
             this.wasBoreFlowEnabled = false;
             setBoreFlowEnabled(false);
@@ -302,7 +303,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
 
     private void setBoreFlowEnabled(boolean enabled)
     {
-        LavaCells cells = Simulator.INSTANCE.getLavaSimulator().cells;
+        LavaCells cells = Simulator.INSTANCE.lavaSimulator().cells;
         for(int i = 0; i < BORE_OFFSETS.size(); i++)
         {
             Vec3i offset = BORE_OFFSETS.get(i);
@@ -331,7 +332,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         
         if(block == ModBlocks.lava_dynamic_height)
         {
-            LavaCell cell = Simulator.INSTANCE.getLavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+            LavaCell cell = Simulator.INSTANCE.lavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
             if(cell != null) cell.setCoolingDisabled(true);
             return;
         }
@@ -345,11 +346,11 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
                 buildMound();
             }
         }
-        LavaCell cell = Simulator.INSTANCE.getLavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+        LavaCell cell = Simulator.INSTANCE.lavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
         if(cell == null) 
         {
             // force cell creation
-            Simulator.INSTANCE.getLavaSimulator().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
+            Simulator.INSTANCE.lavaSimulator().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
         }
         else
         {
@@ -468,29 +469,27 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     {
         super.readFromNBT(tagCompound);
 
-        this.stage = VolcanoStage.values()[tagCompound.getInteger("stage")];
-        this.level = tagCompound.getInteger("level");
-        this.buildLevel = tagCompound.getInteger("buildLevel");
-        this.groundLevel = tagCompound.getInteger("groundLevel");
-        this.ticksActive = tagCompound.getInteger("ticksActive");
-        this.clearingLevel = tagCompound.getInteger("clearingLevel");
-        this.lavaCounter = tagCompound.getInteger("lavaCounter");
-        this.lavaCooldownTicks = tagCompound.getInteger("cooldownTicks");
+        this.stage = VolcanoStage.values()[tagCompound.getInteger(ModNBTTag.VOLCANO_STAGE)];
+        this.level = tagCompound.getInteger(ModNBTTag.VOLCANO_LEVEL);
+        this.buildLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_BUILD_LEVEL);
+        this.groundLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_GROUND_LEVEL);
+        this.ticksActive = tagCompound.getInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE);
+        this.clearingLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL);
+        this.lavaCounter = tagCompound.getInteger(ModNBTTag.VOLCANO_LAVA_COUNTER);
+        this.lavaCooldownTicks = tagCompound.getInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tagCompound) 
     {        
-        tagCompound.setInteger("stage", this.stage.ordinal());
-        tagCompound.setInteger("level", this.level);
-        tagCompound.setInteger("buildLevel", this.buildLevel);
-        tagCompound.setInteger("groundLevel", this.groundLevel);
-        tagCompound.setInteger("ticksActive", this.ticksActive);
-        tagCompound.setInteger("clearingLevel", this.clearingLevel);
-        tagCompound.setInteger("lavaCounter", this.lavaCounter);
-        tagCompound.setInteger("cooldownTicks", lavaCooldownTicks);
-
-        if(this.node != null) tagCompound.setInteger("nodeId", this.node.getID());
+        tagCompound.setInteger(ModNBTTag.VOLCANO_STAGE, this.stage.ordinal());
+        tagCompound.setInteger(ModNBTTag.VOLCANO_LEVEL, this.level);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_BUILD_LEVEL, this.buildLevel);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_GROUND_LEVEL, this.groundLevel);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE, this.ticksActive);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL, this.clearingLevel);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_LAVA_COUNTER, this.lavaCounter);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS, lavaCooldownTicks);
         return super.writeToNBT(tagCompound);
     }
 

@@ -12,11 +12,11 @@ import javax.vecmath.Vector4d;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.world.Rotation;
+import grondag.hard_science.superblock.model.state.RenderPass;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -24,13 +24,13 @@ import net.minecraft.util.math.Vec3i;
 
 public class RawQuad
 {
-    private static final SurfaceInstance NO_SURFACE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance;
+    public static final SurfaceInstance NO_SURFACE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance;
     
     private Vertex[] vertices;
     private Vec3d faceNormal = null;
     private final int vertexCount;
 
-    public EnumFacing face;
+    protected EnumFacing face;
     public String textureName;
     
     /** 
@@ -45,18 +45,21 @@ public class RawQuad
     public Rotation rotation = Rotation.ROTATE_NONE;
     
     public int color = Color.WHITE;
-    public LightingMode lightingMode = LightingMode.SHADED;
+    
+    public boolean isFullBrightness = false;
     
     /** 
-     * If true then UV coordinates will be ignored and instead set
+     * If true then quad painters will ignore UV coordinates and instead set
      * based on projection of vertices onto the given nominal face.
+     * Note that FaceVertex does this by default even if lockUV is not specified.
+     * To get unlockedUV coordiates, specificy a face using FaceVertex.UV or FaceVertex.UVColored.
      */
     public boolean lockUV = false;
     
 
     public boolean shouldContractUVs = true;
     
-    public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
+    public RenderPass renderPass = RenderPass.SOLID_SHADED;
     public SurfaceInstance surfaceInstance = NO_SURFACE;
 
     public float minU = 0;
@@ -74,6 +77,7 @@ public class RawQuad
     protected long[] lineID;
 
 //    private static final Vec3d LIGHTING_NORMAL = new Vec3d(0, 1, 0.35).normalize();
+
 
     public RawQuad()
     {
@@ -126,7 +130,7 @@ public class RawQuad
         this.textureName = fromObject.textureName;
         this.rotation = fromObject.rotation;
         this.color = fromObject.color;
-        this.lightingMode = fromObject.lightingMode;
+        this.isFullBrightness = fromObject.isFullBrightness;
         this.lockUV = fromObject.lockUV;
         this.ancestorQuadID = fromObject.ancestorQuadID;
         this.isInverted = fromObject.isInverted;
@@ -136,7 +140,7 @@ public class RawQuad
         this.maxU = fromObject.maxU;
         this.minV = fromObject.minV;
         this.maxV = fromObject.maxV;
-        this.renderLayer = fromObject.renderLayer;
+        this.renderPass = fromObject.renderPass;
         this.surfaceInstance = fromObject.surfaceInstance;
     }
 
@@ -300,21 +304,22 @@ public class RawQuad
     /** 
      * Sets up a quad with human-friendly semantics. <br><br>
      * 
-     * topFace establishes a reference for "up" in these semantics.
+     * topFace establishes a reference for "up" in these semantics. If null, will use default.
      * Depth represents how far recessed into the surface of the face the quad should be. <br><br>
      * 
      * Vertices should be given counter-clockwise.
      * Ordering of vertices is maintained for future references.
      * (First vertex passed in will be vertex 0, for example.) <br><br>
      * 
-     * UV coordinates always based on where rotated vertices project onto the nominal 
-     * face for this quad. (Do not use this unless lockUV is on.)
+     * UV coordinates will be based on where rotated vertices project onto the nominal 
+     * face for this quad (effectively lockedUV) unless face vertexes have UV coordinates.
      */
     public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
     {
-        if(!this.lockUV) Log.warn("RawQuad faceQuad used when lockUV is false. Quad semantics may be invalid.");
         
         EnumFacing defaultTop = QuadHelper.defaultTopOf(this.getNominalFace());
+        if(topFace == null) topFace = defaultTop;
+        
         FaceVertex rv0;
         FaceVertex rv1;
         FaceVertex rv2;
@@ -322,79 +327,76 @@ public class RawQuad
 
         if(topFace == defaultTop)
         {
-            rv0 = vertexIn0.clone();
-            rv1 = vertexIn1.clone();
-            rv2 = vertexIn2.clone();
-            rv3 = vertexIn3.clone();
+            rv0 = vertexIn0;
+            rv1 = vertexIn1;
+            rv2 = vertexIn2;
+            rv3 = vertexIn3;
         }
         else if(topFace == QuadHelper.rightOf(this.getNominalFace(), defaultTop))
         {
-            rv0 = new FaceVertex.Colored(vertexIn0.y, 1.0 - vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
-            rv1 = new FaceVertex.Colored(vertexIn1.y, 1.0 - vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
-            rv2 = new FaceVertex.Colored(vertexIn2.y, 1.0 - vertexIn2.x, vertexIn2.depth, vertexIn2.getColor(this.color));
-            rv3 = new FaceVertex.Colored(vertexIn3.y, 1.0 - vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
+            rv0 = vertexIn0.withXY(vertexIn0.y, 1.0 - vertexIn0.x);
+            rv1 = vertexIn1.withXY(vertexIn1.y, 1.0 - vertexIn1.x);
+            rv2 = vertexIn2.withXY(vertexIn2.y, 1.0 - vertexIn2.x);
+            rv3 = vertexIn3.withXY(vertexIn3.y, 1.0 - vertexIn3.x);
         }
         else if(topFace == QuadHelper.bottomOf(this.getNominalFace(), defaultTop))
         {
-            rv0 = new FaceVertex.Colored(1.0 - vertexIn0.x, 1.0 - vertexIn0.y, vertexIn0.depth, vertexIn0.getColor(this.color));
-            rv1 = new FaceVertex.Colored(1.0 - vertexIn1.x, 1.0 - vertexIn1.y, vertexIn1.depth, vertexIn1.getColor(this.color));
-            rv2 = new FaceVertex.Colored(1.0 - vertexIn2.x, 1.0 - vertexIn2.y, vertexIn2.depth, vertexIn2.getColor(this.color));
-            rv3 = new FaceVertex.Colored(1.0 - vertexIn3.x, 1.0 - vertexIn3.y, vertexIn3.depth, vertexIn3.getColor(this.color));
+            rv0 = vertexIn0.withXY(1.0 - vertexIn0.x, 1.0 - vertexIn0.y);
+            rv1 = vertexIn1.withXY(1.0 - vertexIn1.x, 1.0 - vertexIn1.y);
+            rv2 = vertexIn2.withXY(1.0 - vertexIn2.x, 1.0 - vertexIn2.y);
+            rv3 = vertexIn3.withXY(1.0 - vertexIn3.x, 1.0 - vertexIn3.y);
         }
         else // left of
         {
-            rv0 = new FaceVertex.Colored(1.0 - vertexIn0.y, vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
-            rv1 = new FaceVertex.Colored(1.0 - vertexIn1.y, vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
-            rv2 = new FaceVertex.Colored(1.0 - vertexIn2.y, vertexIn2.x, vertexIn2.depth, vertexIn2.getColor(this.color));
-            rv3 = new FaceVertex.Colored(1.0 - vertexIn3.y, vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
+            rv0 = vertexIn0.withXY(1.0 - vertexIn0.y, vertexIn0.x);
+            rv1 = vertexIn1.withXY(1.0 - vertexIn1.y, vertexIn1.x);
+            rv2 = vertexIn2.withXY(1.0 - vertexIn2.y, vertexIn2.x);
+            rv3 = vertexIn3.withXY(1.0 - vertexIn3.y, vertexIn3.x);
         }
 
-        // NOTE: the UVs that are populated here will be replaced at quad bake.
-        // They are leftover from a prior approach.
-        // Left in because we need to put in some value anyway and they do no harm.
         
         switch(this.getNominalFace())
         {
         case UP:
-            setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case DOWN:     
-            setVertex(0, new Vertex(rv0.x, rv0.depth, rv0.y, (1.0-rv0.x) * 16.0, rv0.y * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, rv1.depth, rv1.y, (1.0-rv1.x) * 16.0, rv1.y * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, rv2.depth, rv2.y, (1.0-rv2.x) * 16.0, rv2.y * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, rv3.depth, rv3.y, (1.0-rv3.x) * 16.0, rv3.y * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, rv0.depth, rv0.y, 16.0-rv0.u() * 16.0, 16.0-rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.x, rv1.depth, rv1.y, 16.0-rv1.u() * 16.0, 16.0-rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.x, rv2.depth, rv2.y, 16.0-rv2.u() * 16.0, 16.0-rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.x, rv3.depth, rv3.y, 16.0-rv3.u() * 16.0, 16.0-rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case EAST:
-            setVertex(0, new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case WEST:
-            setVertex(0, new Vertex(rv0.depth, rv0.y, rv0.x, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.depth, rv1.y, rv1.x, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.depth, rv2.y, rv2.x, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.depth, rv3.y, rv3.x, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.depth, rv0.y, rv0.x, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.depth, rv1.y, rv1.x, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.depth, rv2.y, rv2.x, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.depth, rv3.y, rv3.x, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case NORTH:
-            setVertex(0, new Vertex(1-rv0.x, rv0.y, rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(1-rv1.x, rv1.y, rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(1-rv2.x, rv2.y, rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(1-rv3.x, rv3.y, rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(1-rv0.x, rv0.y, rv0.depth, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(1-rv1.x, rv1.y, rv1.depth, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(1-rv2.x, rv2.y, rv2.depth, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(1-rv3.x, rv3.y, rv3.depth, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case SOUTH:
-            setVertex(0, new Vertex(rv0.x, rv0.y, 1-rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, rv1.y, 1-rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, rv2.y, 1-rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, rv3.y, 1-rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, rv0.y, 1-rv0.depth, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.x, rv1.y, 1-rv1.depth, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.x, rv2.y, 1-rv2.depth, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.x, rv3.y, 1-rv3.depth, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
         }
 
@@ -652,13 +654,13 @@ public class RawQuad
         return true;
     }
 
-    public boolean isOnFace(EnumFacing face)
+    public boolean isOnFace(EnumFacing face, double tolerance)
     {
         if(face == null) return false;
         boolean retVal = true;
         for(int i = 0; i < this.vertexCount; i++)
         {
-            retVal = retVal && getVertex(i).isOnFacePlane(face);
+            retVal = retVal && getVertex(i).isOnFacePlane(face, tolerance);
         }
         return retVal;
     }
@@ -755,17 +757,71 @@ public class RawQuad
 
     public AxisAlignedBB getAABB()
     {
-        double minX = Math.min(Math.min(getVertex(0).xCoord, getVertex(1).xCoord), Math.min(getVertex(2).xCoord, getVertex(3).xCoord));
-        double minY = Math.min(Math.min(getVertex(0).yCoord, getVertex(1).yCoord), Math.min(getVertex(2).yCoord, getVertex(3).yCoord));
-        double minZ = Math.min(Math.min(getVertex(0).zCoord, getVertex(1).zCoord), Math.min(getVertex(2).zCoord, getVertex(3).zCoord));
+        double minX = Math.min(Math.min(getVertex(0).x, getVertex(1).x), Math.min(getVertex(2).x, getVertex(3).x));
+        double minY = Math.min(Math.min(getVertex(0).y, getVertex(1).y), Math.min(getVertex(2).y, getVertex(3).y));
+        double minZ = Math.min(Math.min(getVertex(0).z, getVertex(1).z), Math.min(getVertex(2).z, getVertex(3).z));
 
-        double maxX = Math.max(Math.max(getVertex(0).xCoord, getVertex(1).xCoord), Math.max(getVertex(2).xCoord, getVertex(3).xCoord));
-        double maxY = Math.max(Math.max(getVertex(0).yCoord, getVertex(1).yCoord), Math.max(getVertex(2).yCoord, getVertex(3).yCoord));
-        double maxZ = Math.max(Math.max(getVertex(0).zCoord, getVertex(1).zCoord), Math.max(getVertex(2).zCoord, getVertex(3).zCoord));
+        double maxX = Math.max(Math.max(getVertex(0).x, getVertex(1).x), Math.max(getVertex(2).x, getVertex(3).x));
+        double maxY = Math.max(Math.max(getVertex(0).y, getVertex(1).y), Math.max(getVertex(2).y, getVertex(3).y));
+        double maxZ = Math.max(Math.max(getVertex(0).z, getVertex(1).z), Math.max(getVertex(2).z, getVertex(3).z));
 
         return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+    /**
+     * Assigns UV coordinates to each vertex by projecting vertex
+     * onto plane of the quad's face. If the quad is not rotated,
+     * then semantics of vertex coordinates matches those of setupFaceQuad.
+     * For example, on NSEW faces, "up" (+y) corresponds to the top of the texture.
+     * 
+     * Assigned values are in the range 0-16, as is conventional for MC.
+     */
+    public void assignLockedUVCoordinates()
+    {
+        EnumFacing face = getNominalFace();
+        if(face == null)
+        {
+            if(Log.DEBUG_MODE)
+                Log.warn("RawQuad.assignLockedUVCoordinates encountered null nominal face.  Should not occur.  Using normal face instead.");
+            face = getNormalFace();
+        }
+
+        for(int i = 0; i < this.getVertexCount(); i++)
+        {
+            Vertex v = getVertex(i);
+            
+            switch(face)
+            {
+            case EAST:
+                this.setVertex(i, v.withUV((1.0 - v.z) * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case WEST:
+                this.setVertex(i, v.withUV(v.z * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case NORTH:
+                this.setVertex(i, v.withUV((1.0 - v.x) * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case SOUTH:
+                this.setVertex(i, v.withUV(v.x * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case DOWN:
+                this.setVertex(i, v.withUV(v.x * 16, (1.0 - v.z) * 16));
+                break;
+                
+            case UP:
+                // our default semantic for UP is different than MC
+                // "top" is north instead of south
+                this.setVertex(i, v.withUV(v.x * 16, v.z * 16));
+                break;
+            
+            }
+        }
+        
+    }
      /**
       * Multiplies uvMin/Max by the given factors.
       */
@@ -775,6 +831,21 @@ public class RawQuad
         this.maxU *= uScale;
         this.minV *= vScale;
         this.maxV *= vScale;
+    }
+    
+    /** 
+     * Simple scale transformation of all vertex coordinates 
+     * using block center (0.5, 0.5, 0.5) as origin.
+     */
+    public void scaleFromBlockCenter(double scale)
+    {
+        double c = 0.5 * (1-scale);
+        
+        for(int i = 0; i < this.getVertexCount(); i++)
+        {
+            Vertex v = getVertex(i);
+            this.setVertex(i, v.withXYZ(v.x * scale + c, v.y * scale + c, v.z * scale + c));
+        }
     }
 
     public Vec3d getFaceNormal()
@@ -797,9 +868,9 @@ public class RawQuad
 
         float[] retval = new float[3];
 
-        retval[0] = (float)(normal.xCoord);
-        retval[1] = (float)(normal.yCoord);
-        retval[2] = (float)(normal.zCoord);
+        retval[0] = (float)(normal.x);
+        retval[1] = (float)(normal.y);
+        retval[2] = (float)(normal.z);
         return retval;
     }
 
@@ -859,15 +930,16 @@ public class RawQuad
     /** 
      * Face to use for occlusion testing.
      * Null if not fully on one of the faces.
+     * Fudges a bit because painted quads can be slightly offset from the plane.
      */
     public EnumFacing getActualFace()
     {
         // semantic face will be right most of the time
-        if(this.isOnFace(this.face)) return face;
+        if(this.isOnFace(this.face, QuadHelper.EPSILON)) return face;
 
         for(EnumFacing f : EnumFacing.values())
         {
-            if(f != face && this.isOnFace(f)) return f;
+            if(f != face && this.isOnFace(f, QuadHelper.EPSILON)) return f;
         }
         return null;
     }
@@ -903,7 +975,7 @@ public class RawQuad
         for(int i = 0; i < result.vertexCount; i++)
         {
             Vertex vertex = result.getVertex(i);
-            Vector4d temp = new Vector4d(vertex.xCoord, vertex.yCoord, vertex.zCoord, 1.0);
+            Vector4d temp = new Vector4d(vertex.x, vertex.y, vertex.z, 1.0);
             matrix.transform(temp);
             if(Math.abs(temp.w - 1.0) > 1e-5) temp.scale(1.0 / temp.w);
             result.setVertex(i, vertex.withXYZ(temp.x, temp.y, temp.z));

@@ -3,8 +3,11 @@ package grondag.hard_science.superblock.varia;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.cache.ObjectSimpleCacheLoader;
 import grondag.hard_science.library.cache.ObjectSimpleLoadingCache;
@@ -22,8 +25,10 @@ import grondag.hard_science.superblock.model.painter.QuadPainter;
 import grondag.hard_science.superblock.model.painter.QuadPainterFactory;
 import grondag.hard_science.superblock.model.shape.ShapeMeshGenerator;
 import grondag.hard_science.superblock.model.state.PaintLayer;
+import grondag.hard_science.superblock.model.state.RenderLayout;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
@@ -33,12 +38,16 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -46,7 +55,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class SuperDispatcher
 {
-    private final String resourceName;
+    public static final String RESOURCE_BASE_NAME = "super_dispatcher";
     private final SparseLayerMapBuilder[] layerMapBuilders;
     
     public final DispatchDelegate[] delegates;
@@ -62,7 +71,7 @@ public class SuperDispatcher
 		@Override
 		public SparseLayerMap load(ModelState key) {
 			
-		    Collection<RawQuad> paintedQuads = getFormattedQuads(key);
+		    Collection<RawQuad> paintedQuads = getFormattedQuads(key, false);
 		    
 		    @SuppressWarnings("unchecked")
             ArrayList<RawQuad>[] containers = new ArrayList[BlockRenderLayer.values().length];
@@ -73,14 +82,16 @@ public class SuperDispatcher
 		    
 			for(RawQuad quad : paintedQuads)
 			{
-			    containers[quad.renderLayer.ordinal()].add(quad);
+			    containers[quad.renderPass.blockRenderLayer.ordinal()].add(quad);
 			}
 
-			SparseLayerMap result = layerMapBuilders[key.getCanRenderInLayerFlags()].makeNewMap();
+			RenderLayout renderLayout = key.getRenderPassSet().renderLayout;
+			
+			SparseLayerMap result = layerMapBuilders[renderLayout.blockLayerFlags].makeNewMap();
 
 			for(BlockRenderLayer layer : BlockRenderLayer.values())
 			{
-			    if(key.canRenderInLayer(layer))
+			    if(renderLayout.containsBlockRenderLayer(layer))
 			    {
 //			        if(Output.DEBUG_MODE && containers[layer.ordinal()].isEmpty())
 //			            Output.warn("SuperDispatcher BlockCacheLoader: Empty quads on enabled render layer.");
@@ -97,11 +108,25 @@ public class SuperDispatcher
 		public SimpleItemBlockModel load(ModelState key) 
 		{
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-	    	for(RawQuad quad : getFormattedQuads(key))
+	    	for(RawQuad quad : getFormattedQuads(key, true))
 	    	{
+	    	    switch(quad.surfaceInstance.surfaceType())
+	    	    {
+                case CUT:
+                    break;
+                case LAMP:
+                    break;
+                case MAIN:
+                    break;
+                default:
+                    break;
+	    	    
+	    	    
+	    	    }
+	    	    
 	    	    builder.add(QuadBakery.createBakedQuad(quad));
 	    	}
-			return new SimpleItemBlockModel(builder.build(), key.getRenderLayerShadedFlags() != 0);
+			return new SimpleItemBlockModel(builder.build(), true);
 		}       
     }
     
@@ -133,20 +158,23 @@ public class SuperDispatcher
         }       
     }
     
-    public SuperDispatcher(String resourceName)
+    public SuperDispatcher()
     {
-        this.resourceName = resourceName;
+        this.layerMapBuilders = new SparseLayerMapBuilder[RenderLayout.BENUMSET_BLOCK_RENDER_LAYER.combinationCount()];
 
-        this.layerMapBuilders = new SparseLayerMapBuilder[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
-        this.delegates  = new DispatchDelegate[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
-
-        for(int i = 0; i < ModelState.BENUMSET_RENDER_LAYER.combinationCount(); i++)
+        for(int i = 0; i < RenderLayout.BENUMSET_BLOCK_RENDER_LAYER.combinationCount(); i++)
         {
-            this.layerMapBuilders[i] = new SparseLayerMapBuilder(ModelState.BENUMSET_RENDER_LAYER.getValuesForSetFlags(i));
-            this.delegates[i] = new DispatchDelegate(i);
+            this.layerMapBuilders[i] = new SparseLayerMapBuilder(RenderLayout.BENUMSET_BLOCK_RENDER_LAYER.getValuesForSetFlags(i));
+        }
+        
+        this.delegates = new DispatchDelegate[BlockRenderMode.values().length];
+        for(BlockRenderMode mode : BlockRenderMode.values())
+        {
+            DispatchDelegate newDelegate = new DispatchDelegate(mode);
+            this.delegates[mode.ordinal()] = newDelegate;
         }
     }
-        
+    
     public void clear()
     {
             modelCache.clear();
@@ -155,7 +183,7 @@ public class SuperDispatcher
 
     public int getOcclusionKey(ModelState modelState, EnumFacing face)
     {
-        if(modelState.canRenderInLayer(BlockRenderLayer.SOLID)) return 0;
+        if(!modelState.getRenderPassSet().renderLayout.containsBlockRenderLayer(BlockRenderLayer.SOLID)) return 0;
 
         SparseLayerMap map = modelCache.get(modelState);
         if(map == null)
@@ -163,7 +191,7 @@ public class SuperDispatcher
             Log.warn("Missing layer map for occlusion key.");
             return 0;
         }
-        
+
         QuadContainer container = map.get(BlockRenderLayer.SOLID);
         if(container == null) 
         {
@@ -173,7 +201,7 @@ public class SuperDispatcher
         return container.getOcclusionHash(face);
     }
     
-    private Collection<RawQuad> getFormattedQuads(ModelState modelState)
+    private Collection<RawQuad> getFormattedQuads(ModelState modelState, boolean isItem)
     {
         ArrayList<RawQuad> result = new ArrayList<RawQuad>();
          
@@ -218,7 +246,7 @@ public class SuperDispatcher
             Surface qSurface = shapeQuad.surfaceInstance.surface();
             for(QuadPainter p : painters)
             {
-                if(qSurface == p.surface) p.addPaintedQuadToList(shapeQuad, result);
+                if(qSurface == p.surface) p.addPaintedQuadToList(shapeQuad, result, isItem);
             }
         }
         return result;
@@ -226,28 +254,49 @@ public class SuperDispatcher
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
     {
-        ModelState key = SuperItemBlock.getModelStateFromStack(stack);
+        ModelState key = SuperItemBlock.getStackModelState(stack);
         return itemCache.get(key);
     }
   
-    
     public DispatchDelegate getDelegate(SuperBlock block)
     {
-        return this.delegates[block.renderLayerShadedFlags()];
+        return this.delegates[block.blockRenderMode.ordinal()];
     }
-        
-    public class DispatchDelegate implements IBakedModel
+    
+    /**
+     * Ugly but only used during load. Retrieves delegates for our custom model loader.
+     */
+    public DispatchDelegate getDelegate(String resourceString)
     {
-        private final int renderLayerShadedFlags;
-        
-        public String getModelResourceString()
+        int start = resourceString.lastIndexOf(SuperDispatcher.RESOURCE_BASE_NAME) + SuperDispatcher.RESOURCE_BASE_NAME.length();
+        int index;
+        if(resourceString.contains("item"))
         {
-            return SuperDispatcher.this.resourceName  + this.renderLayerShadedFlags;
+            int end = resourceString.lastIndexOf(".");
+            index = Integer.parseInt(resourceString.substring(start, end));
+        }
+        else
+        {
+            index = Integer.parseInt(resourceString.substring(start));
+        }
+        return this.delegates[index];
+    }
+    
+    public class DispatchDelegate implements IBakedModel, IModel
+    {
+        private final BlockRenderMode blockRenderMode;
+        private final String modelResourceString;
+        
+        private DispatchDelegate(BlockRenderMode blockRenderMode)
+        {
+            this.blockRenderMode = blockRenderMode;
+            this.modelResourceString = HardScience.MODID + ":" + SuperDispatcher.RESOURCE_BASE_NAME  + blockRenderMode.ordinal();
         }
 
-        private DispatchDelegate(int renderLayerShadedFlags)
+        /** only used for block layer version */
+        public String getModelResourceString()
         {
-            this.renderLayerShadedFlags = renderLayerShadedFlags;
+            return this.modelResourceString;
         }
         
         @Override
@@ -266,7 +315,7 @@ public class SuperDispatcher
             
             BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
             
-            // If no renderLayer set then probably getting request from block breaking
+            // If no renderIntent set then probably getting request from block breaking
             if(layer == null)
             {
                 QuadContainer qc = damageCache.get(modelState.geometricState());
@@ -289,8 +338,21 @@ public class SuperDispatcher
         @Override
         public boolean isAmbientOcclusion()
         {
+         
             BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
-            return layer == null ? true : ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, this.renderLayerShadedFlags);
+            if(layer == null) return true;
+            
+            switch(layer)
+            {
+            case SOLID:
+                return !this.blockRenderMode.isSolidLayerFlatLighting;
+                
+            case TRANSLUCENT:
+                return !this.blockRenderMode.isTranlucentLayerFlatLighting;
+                
+            default:
+                return true;
+            }
         }
     
         @Override
@@ -315,6 +377,12 @@ public class SuperDispatcher
         public ItemCameraTransforms getItemCameraTransforms()
         {
             return ItemCameraTransforms.DEFAULT;
+        }
+
+        @Override
+        public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
+        {
+            return this;
         }
     }
 }

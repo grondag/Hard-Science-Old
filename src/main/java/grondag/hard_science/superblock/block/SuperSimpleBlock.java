@@ -20,7 +20,7 @@ public class SuperSimpleBlock extends SuperBlock
     
     public SuperSimpleBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
     {
-        super(blockName, substance.material, defaultModelState);
+        super(blockName, substance.material, defaultModelState, null);
         this.substance = substance;
         this.blockHardness = substance.hardness;
         this.blockResistance = substance.resistance;
@@ -28,6 +28,7 @@ public class SuperSimpleBlock extends SuperBlock
         
         this.isGeometryFullCube = defaultModelState.isCube();
         this.worldLightOpacity = WorldLightOpacity.getClosest(substance, defaultModelState);
+        this.metaCount = 1;
     }
 
     @Override

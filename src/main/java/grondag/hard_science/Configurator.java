@@ -8,17 +8,21 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.*;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 
 @LangKey("hard_science.config.general")
 @Config(modid = HardScience.MODID, type = Type.INSTANCE)
 public class Configurator
 {
     
+    @Comment("Enable for tracing machine packets and processing. Highly verbose. Intended for dev environment and troubleshooeting.")
+    public static boolean logMachineNetwork = true;
+    
     public static void recalcDerived()
     {
         Render.recalcDerived();
         Volcano.recalcDerived();
+        Machines.recalcDerived();
     }
     
     ////////////////////////////////////////////////////        
@@ -49,6 +53,8 @@ public class Configurator
         public Substance hyperwood = new Substance(10, "axe", 3, 200, 1.3);
         
         public Substance basalt = new Substance(2, "pickaxe", 1, 10, 1.0);
+        
+        public Substance hdpe = new Substance(2, "axe", 1, 10, 1.0);
 
         public Substance volcanicLava = new Substance(-1, "shovel", 3, 2000, 0.75);
         
@@ -155,6 +161,9 @@ public class Configurator
         
         @Comment("Rendering for blocks about to be placed.")
         public PreviewMode previewSetting = PreviewMode.OUTLINE;
+
+        @Comment("Debug Feature: output generated font images that are uploaded to texture map.")
+        public boolean outputFontTexturesForDebugging = true;
         
         public static float normalLightFactor;
         
@@ -184,6 +193,29 @@ public class Configurator
     {
         @Comment("Allow user selection of hidden textures in SuperModel Block GUI. Generally only useful for testing.")
         public boolean showHiddenTextures = false;
+        
+        @Comment("Controls how much detail should be shown if The One Probe is enabled.")
+        public ProbeInfoLevel probeInfoLevel = ProbeInfoLevel.BASIC;
+        
+        public static enum ProbeInfoLevel
+        {
+            BASIC,
+            EXTRA,
+            DEBUG
+        }
+        
+        @Comment("Keypress modifier that is used to force difference species or other alternate behavior on block placement.")
+        public PlacementModifier placementModifier = PlacementModifier.SHIFT;
+        
+        public static enum PlacementModifier
+        {
+            SHIFT,
+            CONTROL,
+            ALT
+        }
+        
+        @Comment("If true, virtual blocks will always be rendered, even if not holding an item that enables it.")
+        public boolean alwaysRenderVirtualBlocks = false;
     }
     
     ////////////////////////////////////////////////////        
@@ -412,4 +444,60 @@ public class Configurator
         @Comment("If true, hyper-dimensional blocks have a chance to lose durability due to damage from entities or explosions.")
         public boolean canBeDamaged;
      }
+    
+    ////////////////////////////////////////////////////        
+    // MACHINES
+    ////////////////////////////////////////////////////
+    @LangKey("hard_science.config.machines")
+    @Comment("Settings for machines.")
+    public static Machines MACHINES = new Machines();
+    
+    public static class Machines
+    {
+        @Comment({"Machines display four-character random names. ",
+            "What could possibly go wrong?"})
+        public boolean filterOffensiveMachineNames = true;
+        
+        @Comment({"Radius for basic builder to find & build virtual blocks - in chunks.",
+            "0 means can only build in chunk where machine is located."})
+        @RequiresMcRestart
+        @RangeInt(min = 0, max = 8)
+        public int basicBuilderChunkRadius = 4;
+        
+        @Comment({"Number of milliseconds server waits between sending machine updates to clients.",
+                  "Lower values will provide more responsive machine status feedback at the cost of more network traffic",
+                  "Some specialized machines may not honor this value consistently."})
+        @RangeInt(min = 0, max = 5000)
+        public int machineUpdateIntervalMilliseconds = 200;
+        
+        @Comment({"Number of milliseconds between keepalive packets sent from client to server to notifiy ",
+                  "server that machine is being rendered and needs status information for external display.",
+                  "Values must match on both client and server for machine updates to work reliably!",
+                  "Not recommended to change this unless you are trying to address a specific problem."})
+        @RangeInt(min = 1000, max = 30000)
+        public int machineKeepaliveIntervalMilliseconds = 5000;
+        
+        @Comment({"Number of milliseconds grace period gives before timing out listeners when no keepalive packet is received.",
+                  "Lower values will sligntly reduce network traffice but are not recommended if any clients have high latency" })
+        @RangeInt(min = 100, max = 2000)
+        public int machineLatencyAllowanceMilliseconds = 1000;
+
+        @Comment({"Track and display exponential average change in machine material & power buffers.",
+                  "Disabling may slightly improve client performance. Has no effect on server."})
+        @RequiresMcRestart
+        public boolean enableDeltaTracking = true;
+
+        @Comment({"You have to be this close to machines for external displays to render.",
+                  "Visibility starts at this distance and then becomes full at 4 blocks less.",
+                  "Lower values may improve performance in worlds with many machines."})
+        @RangeInt(min = 5, max = 16)
+        public int machineMaxRenderDistance = 8;
+        
+        public static int machineKeepAlivePlusLatency;
+        
+        private static void recalcDerived()
+        {
+            machineKeepAlivePlusLatency = MACHINES.machineKeepaliveIntervalMilliseconds + MACHINES.machineLatencyAllowanceMilliseconds;
+        }
+    }
 }

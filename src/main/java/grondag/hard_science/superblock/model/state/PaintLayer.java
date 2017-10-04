@@ -43,7 +43,8 @@ public enum PaintLayer
     
     /**
      * Textures the CUT surface. 
-     * Same texture and color as base layer but without any overlay or detail applied.
+     * Same color and lighting mode as base layer but may have a separate texture.
+     * Use static index (ordinal) for texture and dyamic index for color, lighting.
      * Must always be present.
      */
     CUT(0, SurfaceType.CUT);

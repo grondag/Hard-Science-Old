@@ -36,7 +36,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();
         modelState.setShape(this.isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
-        this.defaultModelStateBits = modelState.getBitsIntArray();
+        this.defaultModelStateBits = modelState.serializeToInts();
     }
     
     /** 
@@ -79,19 +79,19 @@ public class TerrainStaticBlock extends SuperStaticBlock
     }
 
     @Override
-    public List<ItemStack> getSubItems()
+    protected List<ItemStack> createSubItems()
     {
-        List<ItemStack> items = super.getSubItems();
+        List<ItemStack> items = super.createSubItems();
         
         for(ItemStack stack : items)
         {
             int meta = stack.getMetadata();
-            ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
+            ModelState modelState = SuperItemBlock.getStackModelState(stack);
             int level = this.isFiller ? TerrainState.BLOCK_LEVELS_INT - 1 : TerrainState.BLOCK_LEVELS_INT - meta;
             int [] quadrants = new int[] {level, level, level, level};
             TerrainState flowState = new TerrainState(level, quadrants, quadrants, 0);
             modelState.setTerrainState(flowState);
-            SuperItemBlock.setModelState(stack, modelState);
+            SuperItemBlock.setStackModelState(stack, modelState);
         }
         return items;
     }
@@ -103,7 +103,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
         ModelState modelState = this.getModelStateAssumeStateIsStale(state, world, pos, true);
         for(AxisAlignedBB box : modelState.getShape().meshFactory().collisionHandler().getCollisionBoxes(modelState))
         {
-            volume += Useful.AABBVolume(box);
+            volume += Useful.volumeAABB(box);
         }
 
         return (int) Math.min(9, volume * 9);

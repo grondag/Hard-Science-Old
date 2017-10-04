@@ -2,13 +2,14 @@ package grondag.hard_science.gui.control;
 
 import java.util.List;
 
+import grondag.hard_science.CommonProxy;
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.superblock.color.ColorMap;
-import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.texture.TextureRotationType;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.fml.relauncher.Side;
@@ -17,7 +18,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class TexturePicker extends TabBar<TexturePallette>
 {
-    public ColorMap colorMap;
+    public int borderColor = 0xFFFFFFFF;
+    public int baseColor = 0;
+    public boolean renderAlpha = true;
     
     public TexturePicker(List<TexturePallette> items, double left, double top)
     {
@@ -26,15 +29,35 @@ public class TexturePicker extends TabBar<TexturePallette>
     }
 
     @Override
-    protected void drawItem(TexturePallette item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
+    protected void drawItem(TexturePallette item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
-        int color = this.colorMap == null ? 0xFFFFFFFF : this.colorMap.getColor(EnumColorMap.BASE);
-      
+
+        int size = this.actualItemPixels();
+        
+        // if texture is translucent provide a background
+        if(this.renderAlpha) GuiUtil.drawRect(left, top, left + size, top + size, this.baseColor);
+
         Rotation rotation = item.rotation.rotationType() == TextureRotationType.RANDOM 
-                ? Rotation.values()[(int) ((System.currentTimeMillis() >> 11) & 3)]
+                ? Rotation.values()[(int) ((CommonProxy.currentTimeMillis() >> 11) & 3)]
                 : item.rotation.rotation;
                 
         TextureAtlasSprite tex = mc.getTextureMapBlocks().getAtlasSprite(item.getSampleTextureName());
-        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, (int)this.actualItemSize(), (int)this.actualItemSize(), color, item.textureScale, rotation);
+        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, size, size, this.borderColor, item.textureScale, rotation, renderAlpha);
+    }
+
+    @Override
+    protected void setupItemRendering()
+    {
+        GlStateManager.disableDepth();
+        GlStateManager.disableLighting();
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);        
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

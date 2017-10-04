@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -45,8 +47,8 @@ public class AdditivePlacementHandler implements IPlacementHandler
         if(((PlacementItem)stack.getItem()).getMode(stack) == PlacementMode.STATIC) 
             return CubicPlacementHandler.INSTANCE.getPlacementResults(playerIn, worldIn, posOn, hand, facing, hitX, hitY, hitZ, stack);
 
-        final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).block;
-        final ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
+        final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).getBlock();
+        final ModelState stackModelState = SuperItemBlock.getStackModelState(stack);
 
         final IBlockState onBlockState = worldIn.getBlockState(posOn);
 
@@ -70,7 +72,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
                     
                     // confirm have space to add - the ItemStack handler will allow us to get 
                     // here if the adjacent position contains another additive block
-                    if(onModelState.getMetaData() < 0xF || WorldHelper.isBlockReplaceable(worldIn, posOn.offset(facing)))
+                    if(onModelState.getMetaData() < 0xF || WorldHelper.isBlockReplaceable(worldIn, posOn.offset(facing), stackBlock != ModBlocks.virtual_block))
                     {
                         return addToBlockAtPosition(worldIn, stack, stackModelState, onModelState, posOn);
                     }
@@ -115,7 +117,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
             ItemStack newStack = stack.copy();
             newStack.setItemDamage(targetMeta);
             modelState.setMetaData(targetMeta);
-            SuperItemBlock.setModelState(newStack, modelState);
+            SuperItemBlock.setStackModelState(newStack, modelState);
             result.add(Pair.of(posOn, newStack));
         }
 
@@ -141,12 +143,12 @@ public class AdditivePlacementHandler implements IPlacementHandler
                 }
             }
 
-            if(WorldHelper.isBlockReplaceable(worldIn, posOn.offset(addFace)))
+            if(WorldHelper.isBlockReplaceable(worldIn, posOn.offset(addFace), stack.getItem() != ModItems.virtual_block))
             {
                 ItemStack newStack = stack.copy();
                 newStack.setItemDamage(targetMeta);
                 modelState.setMetaData(targetMeta);
-                SuperItemBlock.setModelState(newStack, modelState);
+                SuperItemBlock.setStackModelState(newStack, modelState);
                 result.add(Pair.of(posOn.offset(addFace), newStack));
             }
         }

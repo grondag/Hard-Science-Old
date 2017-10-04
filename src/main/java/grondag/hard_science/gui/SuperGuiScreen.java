@@ -25,24 +25,27 @@ import grondag.hard_science.gui.control.VisibilityPanel;
 import grondag.hard_science.gui.control.VisiblitySelector;
 import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.library.render.LightingMode;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.PacketReplaceHeldItem;
+import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
+import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
@@ -50,7 +53,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class SuperGuiScreen extends GuiScreen
+public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 {
 
     private static final int BUTTON_ID_CANCEL = 0;
@@ -96,6 +99,8 @@ public class SuperGuiScreen extends GuiScreen
     private int group_shape;
     private int group_material;
     private VisibilityPanel rightPanel;
+    
+    private GuiControl<?> hoverControl;
 
     @Override
     public boolean doesGuiPauseGame()
@@ -184,38 +189,41 @@ public class SuperGuiScreen extends GuiScreen
             updateItemPreviewSub(layer);
         }
 
-
-        BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-        if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
+        if(baseTranslucentToggle.isOn() != modelState.isTranslucent(PaintLayer.BASE))
         {
-            modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
+            modelState.setTranslucent(PaintLayer.BASE, baseTranslucentToggle.isOn());
             hasUpdates = true;
         }
 
-        renderLayer = lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-        if(renderLayer != modelState.getRenderLayer(PaintLayer.LAMP))
+        if(lampTranslucentToggle.isOn() != modelState.isTranslucent(PaintLayer.LAMP))
         {
-            modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
+            modelState.setTranslucent(PaintLayer.LAMP, lampTranslucentToggle.isOn());
             hasUpdates = true;
         }
-
-        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).block;
-        SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
-
-        if(currentBlock != newBlock && newBlock != null)
+       
+        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).getBlock();
+        
+        // virtual block always remains same block
+        if(currentBlock != ModBlocks.virtual_block)
         {
-            ItemStack newStack = new ItemStack(newBlock);
-            newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
-            newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
-            itemPreview.previewItem = newStack;
-            hasUpdates = true;
-
+            SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
+    
+            if(currentBlock != newBlock && newBlock != null)
+            {
+                ItemStack newStack = new ItemStack(newBlock);
+                newStack.setCount(itemPreview.previewItem.getCount());
+                newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
+                newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
+                itemPreview.previewItem = newStack;
+                hasUpdates = true;
+    
+            }
         }
         
         if(hasUpdates)
         {
             this.itemPreview.previewItem.setItemDamage(this.modelState.getMetaData());
-            SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
+            SuperItemBlock.setStackModelState(itemPreview.previewItem, modelState);
         }
     }
 
@@ -223,8 +231,7 @@ public class SuperGuiScreen extends GuiScreen
     {
         if(modelState.getColorMap(layer).ordinal != colorPicker[layer.dynamicIndex].getColorMapID())
         {
-            modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
-            textureTabBar[layer.dynamicIndex].colorMap = BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID());
+            updateColors(layer);
             hasUpdates = true;
         }
 
@@ -247,18 +254,40 @@ public class SuperGuiScreen extends GuiScreen
             }
         }
 
-        if(!((modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && fullBrightToggle[layer.dynamicIndex].isOn()))
+        if(((modelState.isFullBrightness(layer)) != fullBrightToggle[layer.dynamicIndex].isOn()))
         {
-            modelState.setLightingMode(layer, fullBrightToggle[layer.dynamicIndex].isOn() ? LightingMode.FULLBRIGHT : LightingMode.SHADED);
+            modelState.setFullBrightness(layer, fullBrightToggle[layer.dynamicIndex].isOn());
+            updateColors(layer);
+            this.colorPicker[layer.dynamicIndex].showLampColors = modelState.isFullBrightness(layer);
             hasUpdates = true;
         }
     }
 
+    private void updateColors(PaintLayer layer)
+    {
+        modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
+        textureTabBar[layer.dynamicIndex].borderColor = BlockColorMapProvider.INSTANCE
+                .getColorMap(colorPicker[layer.dynamicIndex].getColorMapID())
+                .getColor(modelState.isFullBrightness(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
+        
+        if(layer == PaintLayer.BASE)
+        {
+            // refresh base color on overlay layers if it has changed
+            int baseColor = modelState.isFullBrightness(PaintLayer.BASE)
+                    ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
+                    : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
+
+            textureTabBar[PaintLayer.MIDDLE.dynamicIndex].baseColor = baseColor;
+            textureTabBar[PaintLayer.OUTER.dynamicIndex].baseColor = baseColor;
+            textureTabBar[PaintLayer.LAMP.dynamicIndex].baseColor = baseColor;
+        }
+    }
+    
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        mainPanel.mouseClick(mc, mouseX, mouseY);
+        mainPanel.mouseClick(mc, mouseX, mouseY, clickedMouseButton);
         //        colorPicker.mouseClick(this.mc, mouseX, mouseY);
         //        this.textureTabBar.mouseClick(this.mc, mouseX, mouseY);
         updateItemPreviewState();
@@ -268,7 +297,7 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        mainPanel.mouseDrag(mc, mouseX, mouseY);
+        mainPanel.mouseDrag(mc, mouseX, mouseY, clickedMouseButton);
         //        colorPicker.mouseDrag(this.mc, mouseX, mouseY);
         //        this.textureTabBar.mouseDrag(this.mc, mouseX, mouseY);
         updateItemPreviewState();
@@ -305,15 +334,13 @@ public class SuperGuiScreen extends GuiScreen
     {
         super.initGui();
 
-
-        ySize = MathHelper.clamp(height * 4 / 5, fontRendererObj.FONT_HEIGHT * 28, height);
+        ySize = MathHelper.clamp(height * 4 / 5, fontRenderer.FONT_HEIGHT * 28, height);
         yStart = (height - ySize) / 2;
         xSize = (int) (ySize * GuiUtil.GOLDEN_RATIO);
         xStart = (width - xSize) / 2;
 
-        FontRenderer fr = mc.fontRendererObj;
-        buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
-        buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+        buttonWidth = Math.max(fontRenderer.getStringWidth(STR_ACCEPT), fontRenderer.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+        buttonHeight = fontRenderer.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
 
         int buttonTop = yStart + ySize - buttonHeight - CONTROL_EXTERNAL_MARGIN;
         int buttonLeft = xStart + xSize - CONTROL_EXTERNAL_MARGIN * 2 - buttonWidth * 2;
@@ -333,7 +360,7 @@ public class SuperGuiScreen extends GuiScreen
                 return;
             }
             //            this.meta = this.itemPreview.previewItem.getMetadata();
-            modelState = SuperItemBlock.getModelStateFromStack(itemPreview.previewItem);
+            modelState = SuperItemBlock.getStackModelState(itemPreview.previewItem);
         }
 
         // abort on strangeness
@@ -360,6 +387,8 @@ public class SuperGuiScreen extends GuiScreen
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
             {
                 TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<TexturePallette>(), xStart + CONTROL_EXTERNAL_MARGIN, yStart + 100).setVerticalWeight(5);
+                // only render textures with alpha for layers that will render that way in world
+                t.renderAlpha = PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.MIDDLE || PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.OUTER;
                 textureTabBar[i] = t;
 
                 colorPicker[i] = (ColorPicker) new ColorPicker().setHorizontalWeight(5);
@@ -378,9 +407,9 @@ public class SuperGuiScreen extends GuiScreen
                     .setBackgroundColor(GuiControl.CONTROL_BACKGROUND);
 
             group_base = rightPanel.createVisiblityGroup(PaintLayer.BASE.localizedName());
-            GuiControl tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.BASE.ordinal()], baseTranslucentToggle)
+            Panel tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.BASE.ordinal()], baseTranslucentToggle)
                     .setHorizontalWeight(2);
-            GuiControl tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
+            Panel tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_base, tempH, textureTabBar[PaintLayer.BASE.ordinal()]);
             rightPanel.setVisiblityIndex(group_base);
 
@@ -454,8 +483,8 @@ public class SuperGuiScreen extends GuiScreen
         brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(itemPreview.previewItem));
         outerToggle.setOn(modelState.isOuterLayerEnabled());
         middleToggle.setOn(modelState.isMiddleLayerEnabled());
-        baseTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
-        lampTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
+        baseTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.BASE));
+        lampTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.LAMP));
 
         baseTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
         lampTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
@@ -474,42 +503,30 @@ public class SuperGuiScreen extends GuiScreen
             TexturePallette tex = modelState.getTexture(layer);
             t.setSelected(tex == Textures.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
-            t.colorMap = modelState.getColorMap(layer);
+            t.borderColor = modelState.isFullBrightness(layer)
+                    ? modelState.getColorMap(layer).getColor(EnumColorMap.LAMP)
+                    : modelState.getColorMap(layer).getColor(EnumColorMap.BASE);
+            t.baseColor = modelState.isFullBrightness(PaintLayer.BASE)
+                    ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
+                    : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
 
             ColorPicker c = colorPicker[layer.dynamicIndex];
             c.setColorMapID(modelState.getColorMap(layer).ordinal);
-
-            fullBrightToggle[layer.dynamicIndex].setOn(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT);
+            
+            c.showLampColors = modelState.isFullBrightness(layer);
+            fullBrightToggle[layer.dynamicIndex].setOn(modelState.isFullBrightness(layer));
         }
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-
+        this.hoverControl = null;
+        super.drawDefaultBackground();
         drawGradientRect(xStart, yStart, xStart + xSize, yStart + ySize, -1072689136, -804253680);
-
-        mainPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
-
+        mainPanel.drawControl(this, mouseX, mouseY, partialTicks);
         super.drawScreen(mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    public void drawBackground(int tint)
-    {
-        //        GlStateManager.disableLighting();
-        //        GlStateManager.disableFog();
-        //        Tessellator tessellator = Tessellator.getInstance();
-        //        VertexBuffer vertexbuffer = tessellator.getBuffer();
-        //        this.mc.getTextureManager().bindTexture(OPTIONS_BACKGROUND);
-        //        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        ////        float f = 32.0F;
-        //        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-        //        vertexbuffer.pos(0.0D, (double)this.height, 0.0D).tex(0.0D, (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
-        //        vertexbuffer.pos((double)this.width, (double)this.height, 0.0D).tex((double)((float)this.width / 32.0F), (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
-        //        vertexbuffer.pos((double)this.width, 0.0D, 0.0D).tex((double)((float)this.width / 32.0F), (double)tint).color(64, 64, 64, 255).endVertex();
-        //        vertexbuffer.pos(0.0D, 0.0D, 0.0D).tex(0.0D, (double)tint).color(64, 64, 64, 255).endVertex();
-        //        tessellator.draw();
+        if(this.hoverControl != null) hoverControl.drawToolTip(this, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -525,5 +542,68 @@ public class SuperGuiScreen extends GuiScreen
             updateItemPreviewState();
         }
 
+    }
+    
+    @Override
+    public Minecraft minecraft()
+    {
+        return this.mc;
+    }
+
+    @Override
+    public RenderItem renderItem()
+    {
+        return this.itemRender;
+    }
+
+    @Override
+    public GuiScreen screen()
+    {
+        return this;
+    }
+
+    @Override
+    public FontRenderer fontRenderer()
+    {
+        return this.fontRenderer;
+    }
+    
+    @Override
+    public void drawToolTip(ItemStack hoverStack, int mouseX, int mouseY)
+    {
+        this.renderToolTip(hoverStack, mouseX, mouseY);
+    }
+
+    @Override
+    public void setHoverControl(GuiControl<?> control)
+    {
+        this.hoverControl = control;
+    }
+
+    @Override
+    public int mainPanelLeft()
+    {
+        // Not used for this one
+        return 0;
+    }
+
+    @Override
+    public int mainPanelTop()
+    {
+        // Not used for this one
+        return 0;
+    }
+
+    @Override
+    public int mainPanelSize()
+    {
+        // Not used for this one
+        return 0;
+    }
+
+    @Override
+    public void addControls(Panel mainPanel, MachineTileEntity tileEntity)
+    {
+        // Not used for this one
     }
 }

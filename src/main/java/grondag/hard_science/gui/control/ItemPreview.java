@@ -1,14 +1,14 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ItemPreview extends GuiControl
+public class ItemPreview extends GuiControl<ItemPreview>
 {
     public ItemStack previewItem;
     
@@ -17,11 +17,11 @@ public class ItemPreview extends GuiControl
     private double contentSize;
   
     @Override
-    public void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    public void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.previewItem != null)
         {
-            GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, this.previewItem, this.contentLeft, this.contentTop, this.contentSize);
+            GuiUtil.renderItemAndEffectIntoGui(renderContext, this.previewItem, this.contentLeft, this.contentTop, this.contentSize);
         }
     }
 
@@ -34,13 +34,13 @@ public class ItemPreview extends GuiControl
     }
 
     @Override
-    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // nothing special
     }
     
     @Override
-    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // nothing special
     }
@@ -49,6 +49,13 @@ public class ItemPreview extends GuiControl
     protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
         // ignore
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
     
 }
