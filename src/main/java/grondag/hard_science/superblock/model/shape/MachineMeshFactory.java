@@ -1,25 +1,23 @@
 package grondag.hard_science.superblock.model.shape;
 
-import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-
-import grondag.hard_science.library.render.CubeInputs;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.world.Rotation;
+import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
+import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
+import grondag.hard_science.superblock.model.shape.machine.SolarCellMeshFactory;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
-import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -27,123 +25,107 @@ import net.minecraft.world.World;
  * Square machines use lamp surface as the control face
  * and main surface as the casing sides.
  */
-public class MachineMeshFactory extends ShapeMeshGenerator
+public class MachineMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
-    private static ShapeMeshGenerator instance;
+    public static enum MachineShape
+    {
+        BASIC_BOX,
+        SOLAR_CELL
+    }
     
+    private static final ShapeMeshGenerator[] HANDLERS;
+    
+    public static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    public static final Surface SURFACE_LAMP = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
+    
+    public static final SurfaceInstance INSTANCE_MAIN = SURFACE_MAIN.unitInstance;
+    public static final SurfaceInstance INSTANCE_LAMP = SURFACE_LAMP.unitInstance.withAllowBorders(false);
+    
+    private static ShapeMeshGenerator instance;
 
+    static
+    {
+        instance = new MachineMeshFactory();
+        
+        HANDLERS = new ShapeMeshGenerator[MachineShape.values().length];
+        
+        HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory();;
+        HANDLERS[MachineShape.SOLAR_CELL.ordinal()] = new SolarCellMeshFactory();
+    }
+    
     public static ShapeMeshGenerator getShapeMeshFactory()
     {
-        if(instance == null) instance = new MachineMeshFactory();
         return instance; 
     };
-    
-    /** never changes so may as well save it */
-    private final List<RawQuad> quads0;
-    private final List<RawQuad> quads90;
-    private final List<RawQuad> quads180;
-    private final List<RawQuad> quads270;
-    
-    private static final Surface mainSurface = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-//    private static final Surface symbolSurface = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-    private static final Surface lampSurface = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
-    
-    private static final SurfaceInstance mainInstance = mainSurface.unitInstance;
-    private static final SurfaceInstance lampInstance = lampSurface.unitInstance.withAllowBorders(false);
-    
     
     protected MachineMeshFactory()
     {
         super(StateFormat.BLOCK, ModelState.STATE_FLAG_HAS_AXIS_ROTATION, 
-                mainSurface, lampSurface); 
-        
-        this.quads0 = getCubeQuads(Rotation.ROTATE_NONE);
-        this.quads90 = getCubeQuads(Rotation.ROTATE_90);
-        this.quads180 = getCubeQuads(Rotation.ROTATE_180);
-        this.quads270 = getCubeQuads(Rotation.ROTATE_270);
+                SURFACE_MAIN, SURFACE_LAMP); 
     }
 
+    public static MachineShape getMachineShape(ModelState modelState)
+    {
+        return Useful.safeEnumFromOrdinal((int)modelState.getStaticShapeBits(), MachineShape.BASIC_BOX);
+    }
+
+    public static void setMachineShape(MachineShape shape, ModelState modelState)
+    {
+        modelState.setStaticShapeBits(shape.ordinal());
+    }
+    
     @Override
     public List<RawQuad> getShapeQuads(ModelState modelState)
     {
-        switch(modelState.getAxisRotation())
-        {
-        case ROTATE_NONE:
-            return this.quads0;
-        case ROTATE_90:
-            return this.quads90;
-        case ROTATE_180:
-            return this.quads180;
-        case ROTATE_270:
-            return this.quads270;
-        default:
-            return Collections.emptyList();
-        }
+        return HANDLERS[getMachineShape(modelState).ordinal()].getShapeQuads(modelState);
     }
     
-    private List<RawQuad> getCubeQuads(Rotation rotation)
-    {
-        CubeInputs result = new CubeInputs();
-        result.color = 0xFFFFFFFF;
-        result.textureRotation = Rotation.ROTATE_NONE;
-        result.isFullBrightness = false;
-        result.u0 = 0;
-        result.v0 = 0;
-        result.u1 = 16;
-        result.v1 = 16;
-        result.isOverlay = false;
-        
-        RawQuad template = new RawQuad();
-        template.color = 0xFFFFFFFF;
-        template.rotation = Rotation.ROTATE_NONE;
-        template.isFullBrightness = false;
-        template.minU = 0;
-        template.minV = 0;
-        template.maxU = 16;
-        template.maxV = 16;
-        
-        ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
-       
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            result.surfaceInstance = face == rotation.horizontalFace  ? lampInstance : mainInstance;
-            builder.add(result.makeRawFace(face));
-        }
-        return builder.build();
-    }
-
-
+ 
     @Override
     public boolean isCube(ModelState modelState)
     {
-        return true;
+        return HANDLERS[getMachineShape(modelState).ordinal()].isCube(modelState);
     }
 
     @Override
     public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState)
     {
-        return false;
-        
-        // does not work, see comments in SuperBlock parent method
-//        modelState.setAxisRotation(modelState.getAxisRotation().clockwise());
-//        return true;
+        return HANDLERS[getMachineShape(modelState).ordinal()].rotateBlock(blockState, world, pos, axis, block, modelState);
     }
 
     @Override
     public int geometricSkyOcclusion(ModelState modelState)
     {
-        return 255;
+        return HANDLERS[getMachineShape(modelState).ordinal()].geometricSkyOcclusion(modelState);
     }
 
     @Override
     public ICollisionHandler collisionHandler()
     {
-        return CubeCollisionHandler.INSTANCE;
+        return this;
     }
 
     @Override
     public SideShape sideShape(ModelState modelState, EnumFacing side)
     {
-        return SideShape.SOLID;
+        return HANDLERS[getMachineShape(modelState).ordinal()].sideShape(modelState, side);
+    }
+
+    @Override
+    public List<AxisAlignedBB> getCollisionBoxes(ModelState modelState)
+    {
+        return HANDLERS[getMachineShape(modelState).ordinal()].collisionHandler().getCollisionBoxes(modelState);
+    }
+
+    @Override
+    public AxisAlignedBB getCollisionBoundingBox(ModelState modelState)
+    {
+        return HANDLERS[getMachineShape(modelState).ordinal()].collisionHandler().getCollisionBoundingBox(modelState);
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox(ModelState modelState)
+    {
+        return HANDLERS[getMachineShape(modelState).ordinal()].collisionHandler().getRenderBoundingBox(modelState);
     }
 }

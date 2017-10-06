@@ -163,7 +163,10 @@ public class Configurator
         public PreviewMode previewSetting = PreviewMode.OUTLINE;
 
         @Comment("Debug Feature: output generated font images that are uploaded to texture map.")
-        public boolean outputFontTexturesForDebugging = true;
+        public boolean outputFontTexturesForDebugging = false;
+
+        @Comment("Debug Feature: output generated color atlas in config folder to show possible hues.")
+        public boolean debugOutputColorAtlas = false;
         
         public static float normalLightFactor;
         

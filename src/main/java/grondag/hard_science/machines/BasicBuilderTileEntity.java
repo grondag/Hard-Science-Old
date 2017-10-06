@@ -43,7 +43,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
@@ -53,7 +52,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 
-public class BasicBuilderTileEntity extends MachineContainerTileEntity implements ITickable
+public class BasicBuilderTileEntity extends MachineContainerTileEntity
 {
 
     ////////////////////////////////////////////////////////////////////////

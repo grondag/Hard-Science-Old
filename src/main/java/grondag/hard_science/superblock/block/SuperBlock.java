@@ -803,8 +803,18 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
-        // for mundane (non-TE) blocks don't need to worry about state being persisted, logic is same for old and current states
-        return refreshFromWorldIfNeeded ? this.getDefaultModelState().refreshFromWorld(state, world, pos) : this.getDefaultModelState();
+        
+        ModelState result = this.getDefaultModelState();
+        if(refreshFromWorldIfNeeded)
+        {
+            result.refreshFromWorld(state, world, pos);
+        }
+        else
+        {
+            // do a "lite" refresh that won't cause a stack overflow
+           result.setMetaData(state.getValue(META));
+        }
+        return result;
     }
     
     /** 
@@ -812,6 +822,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     public ModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
+        // for mundane (non-TE) blocks don't need to worry about state being persisted, logic is same for old and current states
         return getModelStateAssumeStateIsStale(state, world, pos, refreshFromWorldIfNeeded);
     }
  
@@ -932,7 +943,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             ModelState modelState = this.getDefaultModelState();
             if(modelState.metaUsage() != MetaUsage.NONE || i > 0)
             {
-                // model state will squawk is usage is NONE
                 modelState.setMetaData(i);
             }
             SuperItemBlock.setStackModelState(stack, modelState);

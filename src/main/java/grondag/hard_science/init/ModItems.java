@@ -35,7 +35,8 @@ public class ModItems
     
     public static final Item virtual_block = null;
     public static final Item smart_chest = null;
-    
+    public static final Item solar_cell = null;
+            
     // tools
 //    public static final Item obj_test_model = null;
       

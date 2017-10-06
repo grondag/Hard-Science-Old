@@ -370,10 +370,7 @@ public class ModelStateFactory
 
             populateStateFlagsIfNeeded();
 
-            if(this.metaUsage() != MetaUsage.NONE)
-            {
-                this.setMetaData(state.getValue(SuperBlock.META));
-            }
+            this.setMetaData(state.getValue(SuperBlock.META));
 
             switch(this.getShape().meshFactory().stateFormat)
             {
@@ -1007,7 +1004,7 @@ public class ModelStateFactory
 
             case NONE:
             default:
-                if(Log.DEBUG_MODE) Log.warn("ModelState.setMetaData called for inappropriate shape");
+                //NOOP
             }            
         }
 

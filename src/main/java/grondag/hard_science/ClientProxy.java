@@ -26,8 +26,8 @@ public class ClientProxy extends CommonProxy
 		super.preInit(event);
 		ModModels.preInit(event);
 		
-		if(Log.DEBUG_MODE)
-		{
+		if(Configurator.RENDER.debugOutputColorAtlas)
+	    {
 		    BlockColorMapProvider.writeColorAtlas(event.getModConfigurationDirectory());
 		}
 	}
