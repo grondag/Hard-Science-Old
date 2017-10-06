@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.varia;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.Substances.Substance;
+import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -41,8 +42,10 @@ public enum BlockSubstance
 	//can't use lava as material here - confuses the lava fluid renderer
     VOLCANIC_LAVA(Configurator.SUBSTANCES.volcanicLava, Material.ROCK, SoundType.STONE, 0),
     
+    MACHINE(Configurator.SUBSTANCES.durastone,  MachineBlock.MACHINE_MATERIAL, SoundType.METAL, 
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT).ordinal),
+    
     // Reserved to pad enum serializer so don't break world saves if later add more substances.
-    RESERVED01(Configurator.SUBSTANCES.flexstone,  null, null, 0),
     RESERVED02(Configurator.SUBSTANCES.flexstone,  null, null, 0),
     RESERVED03(Configurator.SUBSTANCES.flexstone,  null, null, 0),
     RESERVED04(Configurator.SUBSTANCES.flexstone,  null, null, 0),

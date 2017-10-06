@@ -12,7 +12,7 @@ public enum Luminance
     MEDIUM_LIGHT(45),
     MEDIUM_DARK(36),
     DARK(27),
-    EXTRA_DARK(18);
+    EXTRA_DARK(13);
 
     public final double value;
 

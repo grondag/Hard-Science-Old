@@ -42,7 +42,8 @@ public class CommonProxy
 	public void preInit(FMLPreInitializationEvent event) 
 	{
 		Log.setLog(event.getModLog());
-		
+		Configurator.recalcDerived();
+	      
         ModMessages.registerNetworkMessages();
 
 		ModTileEntities.preInit(event);
@@ -58,7 +59,6 @@ public class CommonProxy
 
 	public void init(FMLInitializationEvent event) 
 	{
-	    Configurator.recalcDerived();
 		ModRecipes.init(event);
         ModBlocks.init(event);
         

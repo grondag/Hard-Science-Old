@@ -464,8 +464,12 @@ public class RasterFont extends TextureAtlasSprite
      */
     public void drawLine(double xLeft, double yTop, String text, double lineHeight, double zDepth, int red, int green, int blue, int alpha)
     {
+        // moved this to machine rendering setup
         GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-        TextureHelper.setTextureBlurMipmap(true, true);
+        
+        // moved this to machine rendering setup
+//        TextureHelper.setTextureBlurMipmap(true, true);
+        
 //        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);

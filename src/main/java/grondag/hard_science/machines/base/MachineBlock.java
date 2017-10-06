@@ -207,6 +207,7 @@ public abstract class MachineBlock extends SuperBlockPlus
       
 
     }
+    
     @Override
     public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
     {
@@ -276,7 +277,7 @@ public abstract class MachineBlock extends SuperBlockPlus
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return BlockSubstance.DURASTONE;
+        return BlockSubstance.MACHINE;
     }
 
     @Override

@@ -1142,6 +1142,8 @@ public class MachineControlRenderer
     
     public static void setupMachineRendering()
     {
+        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+        TextureHelper.setTextureBlurMipmap(true, true);
         GlStateManager.disableLighting();
         GlStateManager.enableBlend();
         GlStateManager.disableColorMaterial();
@@ -1180,6 +1182,7 @@ public class MachineControlRenderer
      */
     public static void restoreWorldRendering()
     {
+        TextureHelper.setTextureBlurMipmap(false, true);
         GlStateManager.enableLighting();
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);

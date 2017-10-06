@@ -7,6 +7,7 @@ import grondag.hard_science.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.machines.BasicBuilderBlock;
 import grondag.hard_science.machines.SmartChestBlock;
+import grondag.hard_science.machines.SolarCellBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -57,6 +58,8 @@ public class ModBlocks
     public static final Block virtual_block = null;
     public static final Block smart_chest = null;
     public static final Block basic_builder = null;
+    public static final Block solar_cell = null;
+//    public static final Block solar_aggregator = null;
     
     
     @SubscribeEvent
@@ -172,6 +175,7 @@ public class ModBlocks
         
         event.getRegistry().register(new SmartChestBlock("smart_chest"));
         event.getRegistry().register(new BasicBuilderBlock("basic_builder"));
+        event.getRegistry().register(new SolarCellBlock("solar_cell"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 

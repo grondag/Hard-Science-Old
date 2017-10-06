@@ -431,6 +431,14 @@ public class Textures
     public static final TexturePallette DECAL_CMY = REGISTRY.addTexturePallette("cmy", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_FLAME = REGISTRY.addTexturePallette("flame_64", new TexturePalletteInfo(DECAL_SMALL_DOT));
 
+    public static final TexturePallette TILE_DOTS = REGISTRY.addTexturePallette("dots", 
+            new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
+            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT).withGroups(TextureGroup.STATIC_TILES, TextureGroup.STATIC_DETAILS));
+
+    public static final TexturePallette TILE_DOTS_SUBTLE = REGISTRY.addTexturePallette("dots_subtle", new TexturePalletteInfo(TILE_DOTS));
+    public static final TexturePallette TILE_DOTS_INVERSE = REGISTRY.addTexturePallette("dots_inverse", new TexturePalletteInfo(TILE_DOTS));
+    public static final TexturePallette TILE_DOTS_INVERSE_SUBTLE = REGISTRY.addTexturePallette("dots_inverse_subtle", new TexturePalletteInfo(TILE_DOTS));
+
     
     private static TexturePallette addBorderSingle(String textureName)
     {

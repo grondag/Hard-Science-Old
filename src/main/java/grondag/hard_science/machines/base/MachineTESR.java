@@ -19,7 +19,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public abstract class MachineTESR extends SuperBlockTESR
 {
-    
     @Override
     public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
@@ -54,8 +53,14 @@ public abstract class MachineTESR extends SuperBlockTESR
 
         MachineTileEntity mte = (MachineTileEntity)te;
         
+        // fade in controls as player approaches - over a 4-block distance
+        int displayAlpha = (int)(alpha * (MathHelper.clamp((1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255, 0, 255)));
+
+        if(displayAlpha <= 1) return;
+       
+        int white = (displayAlpha << 24) | 0xFFFFFF;
+
         // TE will send keepalive packets to server to get updated machine status for rendering
-        
         //FIXME - don't call if not displaying anything than can change
         mte.notifyServerPlayerWatching();
         
@@ -72,11 +77,6 @@ public abstract class MachineTESR extends SuperBlockTESR
         
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        
-        
-        // fade in controls as player approaches - over a 4-block distance
-        int displayAlpha = (int)(alpha * (MathHelper.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
-        int white = (displayAlpha << 24) | 0xFFFFFF;
   
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolSprite(), (displayAlpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
         MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, white);
@@ -99,9 +99,6 @@ public abstract class MachineTESR extends SuperBlockTESR
             MachineControlRenderer.renderFuelCell(tessellator, buffer, RenderBounds.BOUNDS_POWER_2, mps.fuelCell(), displayAlpha);
         }
         renderControlFace(tessellator, buffer, mte, displayAlpha);
-        
-        
-//        TextureHelper.setTextureClamped(true);
         
         MachineControlRenderer.restoreWorldRendering();
         GlStateManager.popMatrix();

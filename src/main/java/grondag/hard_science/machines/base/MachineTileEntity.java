@@ -37,6 +37,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -45,7 +46,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public abstract class MachineTileEntity extends SuperTileEntity implements IIdentified
+public abstract class MachineTileEntity extends SuperTileEntity implements IIdentified, ITickable
 {
     ////////////////////////////////////////////////////////////////////////
     //  STATIC MEMBERS
@@ -538,6 +539,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         this.markPlayerUpdateDirty(false);
     }
     
+    @Override
     public final void update()
     {
         if(world.isRemote) 
