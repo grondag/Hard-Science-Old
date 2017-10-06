@@ -34,12 +34,14 @@ public class CubeMeshFactory extends ShapeMeshGenerator
         return instance; 
     };
     
+    private static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    
     /** never changes so may as well save it */
     private final List<RawQuad> cachedQuads;
     
     protected CubeMeshFactory()
     {
-        super(StateFormat.BLOCK, STATE_FLAG_NONE, new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC));
+        super(StateFormat.BLOCK, STATE_FLAG_NONE, SURFACE_MAIN);
         this.cachedQuads = getCubeQuads();
     }
 
@@ -60,7 +62,7 @@ public class CubeMeshFactory extends ShapeMeshGenerator
         result.u1 = 16;
         result.v1 = 16;
         result.isOverlay = false;
-        result.surfaceInstance = this.surfaces.get(0).unitInstance;
+        result.surfaceInstance = SURFACE_MAIN.unitInstance;
         
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
        

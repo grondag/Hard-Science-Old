@@ -113,7 +113,7 @@ public class ModelStateFlagHelper
         
         ShapeMeshGenerator mesh = state.getShape().meshFactory();
         
-        int flags = ModelState.STATE_FLAG_IS_POPULATED | mesh.stateFlags;
+        int flags = ModelState.STATE_FLAG_IS_POPULATED | mesh.getStateFlags(state);
         
         TexturePallette texBase = state.getTexture(PaintLayer.BASE);
         flags |= texBase.stateFlags;

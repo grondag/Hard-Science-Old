@@ -8,6 +8,7 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
+import grondag.hard_science.superblock.model.shape.machine.SolarCableMeshFactory;
 import grondag.hard_science.superblock.model.shape.machine.SolarCellMeshFactory;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
@@ -30,7 +31,8 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     public static enum MachineShape
     {
         BASIC_BOX,
-        SOLAR_CELL
+        SOLAR_CELL,
+        SOLAR_CABLE
     }
     
     private static final ShapeMeshGenerator[] HANDLERS;
@@ -49,8 +51,9 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
         
         HANDLERS = new ShapeMeshGenerator[MachineShape.values().length];
         
-        HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory();;
+        HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory();
         HANDLERS[MachineShape.SOLAR_CELL.ordinal()] = new SolarCellMeshFactory();
+        HANDLERS[MachineShape.SOLAR_CABLE.ordinal()] = new SolarCableMeshFactory();
     }
     
     public static ShapeMeshGenerator getShapeMeshFactory()
@@ -60,7 +63,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     
     protected MachineMeshFactory()
     {
-        super(StateFormat.BLOCK, ModelState.STATE_FLAG_HAS_AXIS_ROTATION, 
+        super(StateFormat.BLOCK, ModelState.STATE_FLAG_NONE, 
                 SURFACE_MAIN, SURFACE_LAMP); 
     }
 
@@ -128,4 +131,17 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     {
         return HANDLERS[getMachineShape(modelState).ordinal()].collisionHandler().getRenderBoundingBox(modelState);
     }
+
+    @Override
+    public int getStateFlags(ModelState modelState)
+    {
+        return HANDLERS[getMachineShape(modelState).ordinal()].getStateFlags(modelState);
+    }
+    
+    @Override
+    public List<Surface> getSurfaces(ModelState modelState)
+    {
+        return HANDLERS[getMachineShape(modelState).ordinal()].getSurfaces(modelState);
+    }
+
 }

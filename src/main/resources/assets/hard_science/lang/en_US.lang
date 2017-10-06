@@ -43,6 +43,7 @@ tile.basic_builder.name=Integrated Builder
 tile.smart_chest.name=Smart Chest
 tile.solar_aggregator.name=Solar Aggregator
 tile.solar_cell.name=Solar Cell
+tile.solar_cable.name=Solar Cable
 machine.redstone_enabled=Redstone control is ENABLED.
 machine.redstone_disabled=Redstone control is DISABLED.
 machine.redstone_live=Machine IS receiving redstone signal.

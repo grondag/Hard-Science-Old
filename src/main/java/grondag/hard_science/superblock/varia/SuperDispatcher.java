@@ -208,7 +208,7 @@ public class SuperDispatcher
         ShapeMeshGenerator mesher = modelState.getShape().meshFactory();
                 
         ArrayList<QuadPainter> painters = new ArrayList<QuadPainter>();
-        for(Surface surface : mesher.surfaces)
+        for(Surface surface : mesher.getSurfaces(modelState))
         {
             switch(surface.surfaceType)
             {

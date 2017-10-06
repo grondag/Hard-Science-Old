@@ -11,8 +11,6 @@ import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
-import grondag.hard_science.superblock.model.shape.ShapeMeshGenerator;
-import grondag.hard_science.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -23,12 +21,12 @@ import net.minecraft.world.World;
  * Square machines use lamp surface as the control face
  * and main surface as the casing sides.
  */
-public class SolarCellMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
+public class SolarCellMeshFactory extends AbstractMachineMeshGenerator implements ICollisionHandler
 {
     
     public SolarCellMeshFactory()
     {
-        super(StateFormat.BLOCK, ModelState.STATE_FLAG_HAS_AXIS_ROTATION, 
+        super(ModelState.STATE_FLAG_NONE, 
                 MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
     }
     

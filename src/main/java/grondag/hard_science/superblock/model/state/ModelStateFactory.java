@@ -1094,11 +1094,11 @@ public class ModelStateFactory
                 if(this.hasAxis()) result.setAxis(this.getAxis());
                 if(this.hasAxisOrientation()) result.setAxisInverted(this.isAxisInverted());
                 if(this.hasAxisRotation()) result.setAxisRotation(this.getAxisRotation());
-                if((this.getShape().meshFactory().stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == STATE_FLAG_NEEDS_CORNER_JOIN)
+                if((this.getShape().meshFactory().getStateFlags(this) & STATE_FLAG_NEEDS_CORNER_JOIN) == STATE_FLAG_NEEDS_CORNER_JOIN)
                 {
                     result.setCornerJoin(this.getCornerJoin());
                 }
-                else if((this.getShape().meshFactory().stateFlags & STATE_FLAG_NEEDS_SIMPLE_JOIN) == STATE_FLAG_NEEDS_SIMPLE_JOIN)  
+                else if((this.getShape().meshFactory().getStateFlags(this) & STATE_FLAG_NEEDS_SIMPLE_JOIN) == STATE_FLAG_NEEDS_SIMPLE_JOIN)  
                 { 
                     result.setSimpleJoin(this.getSimpleJoin());
                 }

@@ -31,10 +31,10 @@ public abstract class ShapeMeshGenerator
     public final StateFormat stateFormat;
     
     /** bits flags used by ModelState to know which optional state elements are needed by this shape */
-    public int stateFlags;
+    private final int stateFlags;
     
     /** Surfaces that compose the model. */
-    public List<Surface> surfaces;
+    private final List<Surface> surfaces;
     
     /**
      * When shape is changed on ModelState, the per-shape bits will be
@@ -242,5 +242,15 @@ public abstract class ShapeMeshGenerator
         Matrix4f result = getMatrixForAxis(axis, isAxisInverted);
         result.mul(getMatrixForRotation(rotation));
         return result;
+    }
+
+    public int getStateFlags(ModelState modelState)
+    {
+        return stateFlags;
+    }
+
+    public List<Surface> getSurfaces(ModelState modelState)
+    {
+        return surfaces;
     }
 }
