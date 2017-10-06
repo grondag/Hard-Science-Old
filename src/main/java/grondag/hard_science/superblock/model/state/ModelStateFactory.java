@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
@@ -36,6 +37,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -370,8 +372,16 @@ public class ModelStateFactory
 
             populateStateFlagsIfNeeded();
 
-            this.setMetaData(state.getValue(SuperBlock.META));
-
+            if(state.getBlock() instanceof SuperBlock)
+            {
+                this.setMetaData(state.getValue(SuperBlock.META));
+            }
+            else
+            {
+                // prevent strangeness - shouldn't get called by non-superblock but modded MC is crazy biz
+                return this;
+            }
+            
             switch(this.getShape().meshFactory().stateFormat)
             {
             case BLOCK:
@@ -667,7 +677,7 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
 
-            if(Log.DEBUG_MODE && !this.hasSpecies())
+            if(Configurator.BLOCKS.debugModelState && !this.hasSpecies())
                 Log.warn("getSpecies on model state does not apply for shape");
 
             return this.hasSpecies() ? P3B_SPECIES.getValue(bits3) : 0;
@@ -677,7 +687,7 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
 
-            if(Log.DEBUG_MODE && !this.hasSpecies())
+            if(Configurator.BLOCKS.debugModelState && !this.hasSpecies())
                 Log.warn("setSpecies on model state does not apply for shape");
 
             if(this.hasSpecies())
@@ -689,19 +699,19 @@ public class ModelStateFactory
 
         public CornerJoinBlockState getCornerJoin()
         {
-            if(Log.DEBUG_MODE)
+            if(Configurator.BLOCKS.debugModelState)
             {
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                     Log.warn("getCornerJoin on model state does not apply for shape");
             }
 
-            return CornerJoinBlockStateSelector.getJoinState(P3B_BLOCK_JOIN.getValue(bits3));
+            return CornerJoinBlockStateSelector.getJoinState(MathHelper.clamp(P3B_BLOCK_JOIN.getValue(bits3), 0, CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT - 1));
         }
 
         public void setCornerJoin(CornerJoinBlockState join)
         {
-            if(Log.DEBUG_MODE)
+            if(Configurator.BLOCKS.debugModelState)
             {
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
@@ -714,7 +724,7 @@ public class ModelStateFactory
 
         public SimpleJoin getSimpleJoin()
         {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+            if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Log.warn("getSimpleJoin on model state does not apply for shape");
 
 
@@ -728,7 +738,7 @@ public class ModelStateFactory
 
         public void setSimpleJoin(SimpleJoin join)
         {
-            if(Log.DEBUG_MODE)
+            if(Configurator.BLOCKS.debugModelState)
             {
                 if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 {
@@ -750,7 +760,7 @@ public class ModelStateFactory
 
         public SimpleJoin getMasonryJoin()
         {
-            if(Log.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
+            if(Configurator.BLOCKS.debugModelState && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
                 Log.warn("getMasonryJoin on model state does not apply for shape");
 
             populateStateFlagsIfNeeded();
@@ -759,7 +769,7 @@ public class ModelStateFactory
 
         public void setMasonryJoin(SimpleJoin join)
         {
-            if(Log.DEBUG_MODE)
+            if(Configurator.BLOCKS.debugModelState)
             {
                 populateStateFlagsIfNeeded();
                 if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
@@ -784,7 +794,7 @@ public class ModelStateFactory
          */
         public Rotation getAxisRotation()
         {
-            if(Log.DEBUG_MODE)
+            if(Configurator.BLOCKS.debugModelState)
             {
                 populateStateFlagsIfNeeded();
                 if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == 0)
@@ -801,13 +811,13 @@ public class ModelStateFactory
             populateStateFlagsIfNeeded();
             if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
             {
-                if(Log.DEBUG_MODE) Log.warn("Ignored setAxisRotation on model state that does not apply for shape");
+                if(Configurator.BLOCKS.debugModelState) Log.warn("Ignored setAxisRotation on model state that does not apply for shape");
                 return;
             }
 
             if((stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == 0)
             {
-                if(Log.DEBUG_MODE) Log.warn("Ignored setAxisRotation on model state for which it does not apply");
+                if(Configurator.BLOCKS.debugModelState) Log.warn("Ignored setAxisRotation on model state for which it does not apply");
                 return;
             }
 
@@ -822,7 +832,7 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public long getMultiBlockBits()
         {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+            if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
                 Log.warn("getMultiBlockBits on model state does not apply for shape");
 
             return bits3;
@@ -831,7 +841,7 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public void setMultiBlockBits(long bits)
         {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+            if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
                 Log.warn("setMultiBlockBits on model state does not apply for shape");
 
             bits3 = bits;
@@ -844,7 +854,7 @@ public class ModelStateFactory
 
         public TerrainState getTerrainState()
         {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+            if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
                 Log.warn("getTerrainState on model state does not apply for shape");
 
             return new TerrainState(P3F_FLOW_JOIN.getValue(bits3));
@@ -852,7 +862,7 @@ public class ModelStateFactory
 
         public void setTerrainState(TerrainState flowState)
         {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+            if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
                 Log.warn("setTerrainState on model state does not apply for shape");
 
             bits3 = P3F_FLOW_JOIN.setValue(flowState.getStateKey(), bits3);
@@ -985,7 +995,7 @@ public class ModelStateFactory
 
             case NONE:
             default:
-                if(Log.DEBUG_MODE) Log.warn("ModelState.getMetaData called for inappropriate shape");
+                if(Configurator.BLOCKS.debugModelState) Log.warn("ModelState.getMetaData called for inappropriate shape");
                 return 0;
             }            
         }

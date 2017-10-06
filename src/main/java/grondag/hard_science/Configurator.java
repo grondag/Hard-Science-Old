@@ -219,6 +219,9 @@ public class Configurator
         
         @Comment("If true, virtual blocks will always be rendered, even if not holding an item that enables it.")
         public boolean alwaysRenderVirtualBlocks = false;
+
+        @Comment("Set true to enable tracing output for block model state.  Can spam the log quite a bit, so leave false unless having problems.")
+        public boolean debugModelState = true;
     }
     
     ////////////////////////////////////////////////////        
