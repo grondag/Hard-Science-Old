@@ -18,7 +18,7 @@ public abstract class MatterModel
         this.addRawQuads(quads);
         for(RawQuad raw : quads)
         {
-            builder.add(QuadBakery.createBakedQuad(raw));
+            builder.add(QuadBakery.createBakedQuad(raw, true));
         }
     }
     

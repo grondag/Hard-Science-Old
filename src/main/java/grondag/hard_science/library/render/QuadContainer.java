@@ -59,11 +59,11 @@ public class QuadContainer
             EnumFacing facing = r.getActualFace();
             if(facing == null)
             {
-                buckets[6].add(QuadBakery.createBakedQuad(r));
+                buckets[6].add(QuadBakery.createBakedQuad(r, false));
             }
             else
             {
-                buckets[facing.ordinal()].add(QuadBakery.createBakedQuad(r));
+                buckets[facing.ordinal()].add(QuadBakery.createBakedQuad(r, false));
             }
         }
 

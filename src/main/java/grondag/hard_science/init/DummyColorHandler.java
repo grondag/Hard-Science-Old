@@ -11,7 +11,7 @@ public class DummyColorHandler implements IItemColor
     public static final DummyColorHandler INSTANCE = new DummyColorHandler();
     
     @Override
-    public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+    public int colorMultiplier(ItemStack stack, int tintIndex) {
         return 0xFFFFFFFF;
     }
 }

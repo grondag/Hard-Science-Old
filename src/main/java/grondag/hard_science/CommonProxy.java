@@ -1,7 +1,5 @@
 package grondag.hard_science;
 
-
-import grondag.hard_science.external.WailaDataProvider;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModEntities;
 import grondag.hard_science.init.ModRecipes;
@@ -12,7 +10,6 @@ import grondag.hard_science.simulator.Simulator;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -49,11 +46,6 @@ public class CommonProxy
 		ModTileEntities.preInit(event);
 		ModEntities.preInit(event);
 		
-        if (Loader.isModLoaded("Waila"))
-        {
-            WailaDataProvider.register();
-        }
-        
         ForgeChunkManager.setForcedChunkLoadingCallback(HardScience.INSTANCE, Simulator.INSTANCE);
 	}
 

@@ -15,8 +15,11 @@ public class QuadBakery
 {
     /**
      * Creates a baked quad - does not mutate the given instance.
+     * Will use ITEM vertex format if forceItemFormat is true.
+     * Use this for item models.  Doing so will disable pre-baked lighting
+     * and cause the quad to include normals.
      */
-    public static BakedQuad createBakedQuad(RawQuad raw)
+    public static BakedQuad createBakedQuad(RawQuad raw, boolean forceItemFormat)
     {
         float spanU = raw.maxU - raw.minU;
         float spanV = raw.maxV - raw.minV;
@@ -48,7 +51,7 @@ public class QuadBakery
 
         int[] vertexData = new int[28];
 
-        VertexFormat format = raw.isFullBrightness || raw.surfaceInstance.isLampGradient
+        VertexFormat format = !forceItemFormat && (raw.isFullBrightness || raw.surfaceInstance.isLampGradient)
                 ? net.minecraft.client.renderer.vertex.DefaultVertexFormats.BLOCK
                 : net.minecraft.client.renderer.vertex.DefaultVertexFormats.ITEM;
 

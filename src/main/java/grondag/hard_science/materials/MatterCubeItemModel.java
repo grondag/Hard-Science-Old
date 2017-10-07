@@ -108,7 +108,7 @@ public class MatterCubeItemModel implements IBakedModel
         // add size symbol
         for(RawQuad raw : matterCube.cubeSize.rawQuads())
         {
-            builder.add(QuadBakery.createBakedQuad(raw));
+            builder.add(QuadBakery.createBakedQuad(raw, true));
         }
 
         this.quads = builder.build();

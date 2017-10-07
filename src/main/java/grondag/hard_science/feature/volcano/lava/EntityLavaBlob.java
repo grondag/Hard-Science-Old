@@ -337,22 +337,22 @@ public class EntityLavaBlob extends Entity
         this.world.profiler.endSection();
         this.world.profiler.startSection("rest");
         this.resetPositionToBB();
-        this.isCollidedHorizontally = startingX != x || startingZ != z;
-        this.isCollidedVertically = startingY != y;
+        this.collidedHorizontally = startingX != x || startingZ != z;
+        this.collidedVertically = startingY != y;
         //        this.onGround = this.isCollidedVertically && startingY < 0.0D;
         //having negative Y offset is not determinative because tops of blocks can
         //force us up even if we aren't really fully on top of them.
-        this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
+        this.collided = this.collidedHorizontally || this.collidedVertically;
         j4 = MathHelper.floor(this.posX);
         int l4 = MathHelper.floor(this.posY - 0.20000000298023224D);
         int i5 = MathHelper.floor(this.posZ);
         BlockPos blockpos = new BlockPos(j4, l4, i5);
         IBlockState iblockstate = this.world.getBlockState(blockpos);
-        this.onGround = this.isCollidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || TerrainBlock.isFlowFiller(iblockstate.getBlock());
+        this.onGround = this.collidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || TerrainBlock.isFlowFiller(iblockstate.getBlock());
 
         //this is very crude, but if we are vertically collided but not resting on top of the ground
         //re-center on our block pos so that we have a better chance to fall down
-        if(this.isCollidedVertically && !this.onGround)
+        if(this.collidedVertically && !this.onGround)
         {
             this.setEntityBoundingBox(this.getEntityBoundingBox().offset(this.posX - (blockpos.getX() +0.5), 0.0D, this.posZ - (blockpos.getZ() +0.5)));
             this.resetPositionToBB();

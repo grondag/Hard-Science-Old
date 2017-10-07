@@ -5,14 +5,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import grondag.hard_science.HardScience;
+
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.external.IWailaProvider;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
@@ -25,19 +26,17 @@ import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.MetaUsage;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateProperty;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
 import mcjty.theoneprobe.api.ProbeMode;
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -79,9 +78,9 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.fml.common.Optional;
 
 /**
  * Base class for HardScience building blocks.
@@ -89,9 +88,8 @@ import net.minecraftforge.fml.common.Optional;
 @SuppressWarnings("deprecation")
 
 @Optional.InterfaceList({
-    @Optional.Interface(iface = "mcjty.theoneprobe.api.IProbeInfoAccessor", modid = "theoneprobe"),
-    @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaProvider", modid = "waila")})
-public abstract class SuperBlock extends Block implements IWailaProvider, IProbeInfoAccessor
+    @Optional.Interface(iface = "mcjty.theoneprobe.api.IProbeInfoAccessor", modid = "theoneprobe")})
+public abstract class SuperBlock extends Block implements IProbeInfoAccessor
 {
 
     /**
@@ -972,14 +970,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return this.worldLightOpacity(state) == WorldLightOpacity.TRANSPARENT
                 || !this.isGeometryFullCube(state);
     }
-
-    @Override
-    @Optional.Method(modid = "waila")
-    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
-    {
-        return Collections.emptyList();
-    }
-
+ 
     //overridden to allow for world-sensitive drops
     @Override
     public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) 

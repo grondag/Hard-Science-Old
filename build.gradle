@@ -27,9 +27,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "1.12.1-14.22.0.2475"
+    version = "1.12.2-14.23.0.2503"
     runDir = "run"
-    mappings = "snapshot_20170810"
+    mappings = "snapshot_20171003"
     useDepAts = true
 }
 
@@ -100,14 +100,20 @@ dependencies {
     //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
-    deobfCompile "mezz.jei:jei_1.12.1:4.7.8.95"
-    deobfCompile "mcp.mobius.waila:Hwyla:1.8.18-B32_1.12:api"
+    deobfCompile "mezz.jei:jei_1.12.2:4.8.0.105"
     deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.18-10"
-    deobfCompile "cofh:RedstoneFlux:1.12-2.0.1.2:universal"
-    deobfCompile "MCMultiPart2:MCMultiPart:2.2.2"
-    deobfCompile "refinedstorage:refinedstorage:1.5.18-1363"
+
+	// not currently using these APIs
+	// here to support compatibility testing in dev environment
+	// or because thinking about using the APIs
+    deobfCompile "MCMultiPart2:MCMultiPart:2.3.2"
+    deobfCompile "mod.chiselsandbits:chiselsandbits:14.0.88" 
+    deobfCompile "refinedstorage:refinedstorage:1.5.19-1377"
+    
+
+    // deobfCompile "mcp.mobius.waila:Hwyla:1.8.18-B32_1.12:api"
+    // deobfCompile "cofh:RedstoneFlux:1.12-2.0.1.2:universal"
     // deobfCompile "com.github.mcjty:intwheel:1.1x-1.2.4"
-     
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
