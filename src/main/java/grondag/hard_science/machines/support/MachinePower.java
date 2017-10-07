@@ -34,7 +34,7 @@ public class MachinePower
      * Volume will be surface area of plate x this number.
      * This number is pure hand-waving because the technology doesn't exist yet.
      */
-    public static final int POLYETHYLENE_MAX_CONVERSION_RATE_μM = 27;
+    public static final int POLYETHYLENE_MAX_CONVERSION_RATE_MICROMETERS = 27;
    
 //    public static enum FuelCellSpec
 //    {
