@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.model.state;
 
 public enum Translucency
 {
-    CLEAR(0.2F),
+    CLEAR(0.1F),
     TINTED(0.4F),
     SHADED(0.6F),
     STAINED(0.8F);

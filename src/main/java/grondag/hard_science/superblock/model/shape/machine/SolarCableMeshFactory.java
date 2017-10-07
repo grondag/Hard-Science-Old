@@ -31,6 +31,10 @@ public class SolarCableMeshFactory extends AbstractMachineMeshGenerator implemen
 {
     private static final double CABLE_RADIUS = 1.0/16.0;
     private static final double CABLE_Y_CENTER = 0.25;
+    private static final double yLow = CABLE_Y_CENTER - CABLE_RADIUS;
+    private static final double yHigh = CABLE_Y_CENTER + CABLE_RADIUS;
+    private static final double xzMin = 0.5 - CABLE_RADIUS;
+    private static final double xzMax = 0.5 + CABLE_RADIUS;
     
     public SolarCableMeshFactory()
     {
@@ -57,24 +61,25 @@ public class SolarCableMeshFactory extends AbstractMachineMeshGenerator implemen
         
         SimpleJoin join = modelState.getSimpleJoin();
         
-        CSGShape shape = null;
+        CSGShape shape = makeAxis(join, EnumFacing.NORTH, template);
         
-        for(EnumFacing face : EnumFacing.VALUES)
+        CSGShape box = makeAxis(join, EnumFacing.EAST, template);
+        
+        if(box != null)
         {
-            if(join.isJoined(face))
-            {
-                CSGShape box = new CSGShape(makeBox(face, template));
-                
-                shape = shape == null ? box : shape.union(box);
-            }
+            shape = shape == null ? box : shape.union(box);
+        }
+        
+        box = makeAxis(join, EnumFacing.UP, template);
+        
+        if(box != null)
+        {
+            shape = shape == null ? box : shape.union(box);
         }
         
         if(shape == null)
         {
-            double yLow = CABLE_Y_CENTER - CABLE_RADIUS;
-            double yHigh = CABLE_Y_CENTER + CABLE_RADIUS;
-            double xzMin = 0.5 - CABLE_RADIUS;
-            double xzMax = 0.5 + CABLE_RADIUS;
+
             builder.addAll(QuadHelper.makeBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template));
         }
         else
@@ -87,32 +92,50 @@ public class SolarCableMeshFactory extends AbstractMachineMeshGenerator implemen
         return builder.build();
     }
    
-    private static List<RawQuad> makeBox(@Nonnull EnumFacing face, @Nonnull RawQuad template)
+    private static CSGShape makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull RawQuad template)
+    {
+        if(join.isJoined(face))
+        {
+            return new CSGShape(makeBox(face, template, join.isJoined(face.getOpposite())));
+        }
+        else if(join.isJoined(face.getOpposite()))
+        {
+            return new CSGShape(makeBox(face.getOpposite(), template, false));
+        }
+        else
+        {
+            return null;
+        }
+    }
+    private static List<RawQuad> makeBox(@Nonnull EnumFacing face, @Nonnull RawQuad template, boolean isBothEnds)
     {
         AxisAlignedBB aabb;
-        
-        double yLow = CABLE_Y_CENTER - CABLE_RADIUS;
-        double yHigh = CABLE_Y_CENTER + CABLE_RADIUS;
-        double xzMin = 0.5 - CABLE_RADIUS;
-        double xzMax = 0.5 + CABLE_RADIUS;
         
         switch(face.getAxis())
         {
         case X:
-            aabb = face.getAxisDirection() == AxisDirection.POSITIVE
-                ? new AxisAlignedBB(xzMin, yLow, xzMin, 1.0, yHigh, xzMax)
-                : new AxisAlignedBB(0.0, yLow, xzMin, xzMax, yHigh, xzMax);  
+            aabb = isBothEnds 
+                ? new AxisAlignedBB(0.0, yLow, xzMin, 1.0, yHigh, xzMax)
+                : face.getAxisDirection() == AxisDirection.POSITIVE
+                    ? new AxisAlignedBB(xzMin, yLow, xzMin, 1.0, yHigh, xzMax)
+                    : new AxisAlignedBB(0.0, yLow, xzMin, xzMax, yHigh, xzMax);  
             break;
+            
         case Y:
-            aabb = face.getAxisDirection() == AxisDirection.POSITIVE
-            ? new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, 1.0, xzMax)
-            : new AxisAlignedBB(xzMin, 0.0, xzMin, xzMax, yHigh, xzMax);  
+            aabb = isBothEnds 
+                ? new AxisAlignedBB(xzMin, 0.0, xzMin, xzMax, 1.0, xzMax)
+                : face.getAxisDirection() == AxisDirection.POSITIVE
+                    ? new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, 1.0, xzMax)
+                    : new AxisAlignedBB(xzMin, 0.0, xzMin, xzMax, yHigh, xzMax);  
             break;
+            
         case Z:
         default:
-            aabb = face.getAxisDirection() == AxisDirection.POSITIVE
-            ? new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, 1.0)
-            : new AxisAlignedBB(xzMin, yLow, 0.0, xzMax, yHigh, xzMax);  
+            aabb = isBothEnds 
+                ? new AxisAlignedBB(xzMin, yLow, 0.0, xzMax, yHigh, 1.0)
+                : face.getAxisDirection() == AxisDirection.POSITIVE
+                    ? new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, 1.0)
+                    : new AxisAlignedBB(xzMin, yLow, 0.0, xzMax, yHigh, xzMax);  
             break;
         
         }

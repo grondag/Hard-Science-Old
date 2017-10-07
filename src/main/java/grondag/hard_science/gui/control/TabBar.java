@@ -162,6 +162,27 @@ public abstract class TabBar<T> extends GuiControl<TabBar<T>>
         
     }
     
+    @Override
+    public final void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        if(this.items == null) return;
+        
+        this.handleListSizeUpdateIfNeeded();
+        
+        this.updateMouseLocation(mouseX, mouseY);
+        
+        if(this.currentMouseLocation == MouseLocation.ITEM)
+        {
+            T item = this.get(this.currentMouseIndex);
+            if(item != null)
+            {
+                this.drawToolTip(item, renderContext, mouseX, mouseY, partialTicks);
+            }
+        }
+    }
+    
+    protected abstract void drawToolTip(T item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks);
+    
     /**
      * 
      * @param index

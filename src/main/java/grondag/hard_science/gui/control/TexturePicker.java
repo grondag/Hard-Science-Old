@@ -55,9 +55,8 @@ public class TexturePicker extends TabBar<TexturePallette>
     }
 
     @Override
-    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    protected void drawToolTip(TexturePallette item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        // TODO Auto-generated method stub
-        
+        renderContext.drawToolTip(item.localizedName(), mouseX, mouseY);
     }
 }

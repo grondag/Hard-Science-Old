@@ -25,9 +25,6 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
 {
     protected final FontRenderer fontRenderer;
     
-    /** set during rendering for tooltip callback */
-    protected ItemStack hoverStack;
-    
     protected final IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>> clickHandler;
     
     public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer,  
@@ -47,7 +44,6 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        this.hoverStack = null;
         super.drawContent(renderContext, mouseX, mouseY, partialTicks);
     }
    
@@ -86,10 +82,7 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
         
         // itemRender doesn't clean this up, messes up highlight boxes
         this.drawQuantity(item.getQuantity(), x, y);
-        
-        if(isHighlighted) this.hoverStack = stack;
-        
-    }
+     }
     
     protected void drawQuantity(long qty, int left, int top)
     {
@@ -160,11 +153,10 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
         return res == null ? StorageType.ITEM.emptyResource.withQuantity(0) : res;
     }
 
-
     @Override
-    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    protected void drawToolTip(AbstractResourceWithQuantity<StorageTypeStack> item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        if(this.hoverStack != null) renderContext.drawToolTip(this.hoverStack, mouseX, mouseY);
+        renderContext.drawToolTip(((ItemResource)item.resource()).sampleItemStack(), mouseX, mouseY);
         
     }
 }

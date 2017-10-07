@@ -28,7 +28,7 @@ public class ShapePicker extends TabBar<ModelShape>
         {
             ModelState modelState = new ModelState();
             modelState.setShape(shape);
-            ItemStack stack = ModSuperModelBlocks.findAppropriateSuperModelBlock(BlockSubstance.FLEXSTONE, modelState).getSubItems().get(0);
+            ItemStack stack = ModSuperModelBlocks.findAppropriateSuperModelBlock(BlockSubstance.FLEXSTONE, modelState).getSubItems().get(0).copy();
             SuperItemBlock.setStackModelState(stack, modelState);
             ITEMS[shape.ordinal()] = stack;
         }
@@ -58,9 +58,8 @@ public class ShapePicker extends TabBar<ModelShape>
     }
 
     @Override
-    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    protected void drawToolTip(ModelShape item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        // TODO Auto-generated method stub
-        
+        renderContext.drawToolTip(item.localizedName(), mouseX, mouseY);
     }
 }
