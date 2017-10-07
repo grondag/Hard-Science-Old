@@ -166,7 +166,7 @@ public class RasterFont extends TextureAtlasSprite
      * Characters we support for in-world rendering. Limited to reduce texture map consumption.
      */
     private static final String CHARSET = "+-%.=?!/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final String SUBSCRIPTS = "";
+    private static final char[] SUBSCRIPTS = {0x2080, 0x2081, 0x2082, 0x2083, 0x2084, 0x2085, 0x2086, 0x2087, 0x2088, 0x2089};
     
     /**
      * Pixels around each glyph in texture map to prevent bleeding
@@ -257,7 +257,7 @@ public class RasterFont extends TextureAtlasSprite
                 }
     
                 int i = 256;
-                for (char ch : SUBSCRIPTS.toCharArray())
+                for (char ch : SUBSCRIPTS)
                 {
                     BufferedImage fontImage = getFontImage(ch, fontHeight, font, fontMetrics);
     
