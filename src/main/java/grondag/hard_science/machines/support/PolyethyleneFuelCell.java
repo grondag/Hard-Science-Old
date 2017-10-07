@@ -50,7 +50,7 @@ public class PolyethyleneFuelCell extends FuelCell
         this.plateQuantity = plateQuantity;
         this.cellType = hasThermalCapture ? PolyethyleneFuelCellType.ADVANCED : PolyethyleneFuelCellType.BASIC;
         
-        long maxFuelConsumptionNanoLitersPerSimulatedSecond = plateSize.faceSurfaceArea_μm2 * this.plateQuantity * MachinePower.POLYETHYLENE_MAX_CONVERSION_RATE_μM / VolumeUnits.CUBIC_MICROMETERS_PER_NANOLITER;
+        long maxFuelConsumptionNanoLitersPerSimulatedSecond = plateSize.faceSurfaceArea_micrometer2 * this.plateQuantity * MachinePower.POLYETHYLENE_MAX_CONVERSION_RATE_μM / VolumeUnits.CUBIC_MICROMETERS_PER_NANOLITER;
         
         long maxFuelConsumptionNanoLitersPerTick = (long) (maxFuelConsumptionNanoLitersPerSimulatedSecond * TimeUnits.SIMULATED_SECONDS_PER_TICK);
         

@@ -67,7 +67,7 @@ public enum CubeSize
     /*
      * Surface area of cube face in square micrometers
      */
-    public final long faceSurfaceArea_μm2;
+    public final long faceSurfaceArea_micrometer2;
     
     private CubeSize(int divisionLevel, float renderScale, String symbolTexture)
     {
@@ -77,7 +77,7 @@ public enum CubeSize
         this.nanoLiters = VolumeUnits.KILOLITER.nL / (1 << (divisionLevel * 3));
         this.edgeLength_mm = 1000f / (1 << divisionLevel);
         this.faceSurfaceArea_mm2 = this.edgeLength_mm * this.edgeLength_mm;
-        this.faceSurfaceArea_μm2 = (long) (this.faceSurfaceArea_mm2 * 1000000);
+        this.faceSurfaceArea_micrometer2 = (long) (this.faceSurfaceArea_mm2 * 1000000);
                 
         // want colors that are visually separated, not too oversaturated, not too bright
         this.symbolColor = Color.fromHCL(360f * divisionLevel / 7 , 60, 60, EnumHCLFailureMode.REDUCE_CHROMA).RGB_int | 0xFF000000;;
