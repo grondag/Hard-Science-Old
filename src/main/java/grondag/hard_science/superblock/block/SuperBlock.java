@@ -600,7 +600,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer()
     {
-        return BlockRenderLayer.TRANSLUCENT;
+        return BlockRenderLayer.SOLID;
     }
 
     /**
