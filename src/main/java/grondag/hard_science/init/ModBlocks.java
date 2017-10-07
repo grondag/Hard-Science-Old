@@ -70,15 +70,16 @@ public class ModBlocks
         
         workingModel = new ModelState();
         
+        workingModel = new ModelState();
+        workingModel.setShape(ModelShape.CUBE);
+        workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+        event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", BlockSubstance.BASALT, workingModel));
+
         if(Configurator.VOLCANO.enableVolcano)
         {
             event.getRegistry().register(new VolcanoBlock());
             
-            workingModel = new ModelState();
-            workingModel.setShape(ModelShape.CUBE);
-            workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
-            workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
-            event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", BlockSubstance.BASALT, workingModel));
             
             workingModel = new ModelState();
             workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
