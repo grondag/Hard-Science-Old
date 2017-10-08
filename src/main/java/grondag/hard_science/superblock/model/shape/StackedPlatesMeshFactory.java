@@ -19,6 +19,7 @@ import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.PlacementOrientationType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -111,6 +112,12 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         return modelState.getAxis() == EnumFacing.Axis.Y ? 255 : modelState.getMetaData();
     }
 
+    @Override
+    public PlacementOrientationType orientationType(ModelState modelState)
+    {
+        return PlacementOrientationType.FACE;
+    }
+    
     @Override
     public ICollisionHandler collisionHandler()
     {

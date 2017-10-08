@@ -207,16 +207,6 @@ public class Configurator
             DEBUG
         }
         
-        @Comment("Keypress modifier that is used to force difference species or other alternate behavior on block placement.")
-        public PlacementModifier placementModifier = PlacementModifier.SHIFT;
-        
-        public static enum PlacementModifier
-        {
-            SHIFT,
-            CONTROL,
-            ALT
-        }
-        
         @Comment("If true, virtual blocks will always be rendered, even if not holding an item that enables it.")
         public boolean alwaysRenderVirtualBlocks = false;
 

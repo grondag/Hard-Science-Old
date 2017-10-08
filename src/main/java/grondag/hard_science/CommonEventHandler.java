@@ -7,10 +7,17 @@ import com.google.gson.Gson;
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.player.ModPlayerCaps;
+import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.superblock.placement.PlacementItem;
+import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
@@ -20,6 +27,7 @@ import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -92,6 +100,37 @@ public class CommonEventHandler
         {
             LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event)
+    {
+        EntityPlayer player = event.getEntityPlayer();
+        
+        if(player == null) return;
+        
+        ItemStack stackIn = player.getHeldItemMainhand();
+        if (stackIn == null || stackIn.isEmpty() || !(stackIn.getItem() instanceof PlacementItem)) return;
+        
+        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
+        {
+            //FIXME: remove
+            Log.info("EXCAVATION LOGIC HAPPENS NOW");
+            event.setCanceled(true);
+        }
+        else if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
+        {
+            //FIXME: remove
+            Log.info("UNDO LOGIC HAPPENS NOW");
+            event.setCanceled(true);
+        }
+        else if(PlacementItem.isSelectRegionInProgress(stackIn))
+        {
+            //FIXME: remove
+            Log.info("Cancel region selection");
+            PlacementItem.selectRegionCancel(stackIn);
+            event.setCanceled(true);
         }
     }
     

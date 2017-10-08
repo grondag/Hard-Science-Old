@@ -15,6 +15,7 @@ import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
+import grondag.hard_science.superblock.placement.PlacementOrientationType;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import net.minecraft.block.Block;
@@ -65,6 +66,12 @@ public abstract class AbstractWedgeMeshFactory extends ShapeMeshGenerator implem
         return modelState.getAxis() == EnumFacing.Axis.Y ? 7 : 255;
     }
 
+    @Override
+    public PlacementOrientationType orientationType(ModelState modelState)
+    {
+        return PlacementOrientationType.EDGE;
+    } 
+    
     @Override
     public ICollisionHandler collisionHandler()
     {

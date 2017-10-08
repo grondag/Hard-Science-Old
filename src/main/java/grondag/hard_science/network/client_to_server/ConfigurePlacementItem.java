@@ -1,17 +1,19 @@
 package grondag.hard_science.network.client_to_server;
 
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementMode;
+import grondag.hard_science.superblock.placement.PlacementOrientationAxis;
+import grondag.hard_science.superblock.placement.PlacementOrientationCorner;
+import grondag.hard_science.superblock.placement.PlacementOrientationEdge;
+import grondag.hard_science.superblock.placement.PlacementOrientationFace;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.EnumHand;
 
 /**
  * This is a packet that can be used to update the NBT on the held item of a player.
@@ -23,12 +25,14 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private ModelState modelState;
     private BlockSubstance blockSubstance;
     private int lightValue;
-    //FIXME: these will be replaced when placement semantics change
-    private EnumFacing face;
     private PlacementMode mode;
-    private Rotation rotation;
+    private PlacementOrientationAxis axis;
+    private PlacementOrientationFace face;
+    private PlacementOrientationEdge edge;
+    private PlacementOrientationCorner corner;
+//    private BlockPos selectedRegionStart;
+//    private BlockPos selectedRegion;
     
-
     public ConfigurePlacementItem() 
     {
     }
@@ -36,13 +40,19 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     public ConfigurePlacementItem(ItemStack stack) 
     {
         this.meta = stack.getItemDamage();
+        
         this.modelState = PlacementItem.getStackModelState(stack);
         if(this.modelState == null) this.modelState = new ModelState();
+        
         this.blockSubstance = PlacementItem.getStackSubstance(stack);
         this.lightValue = PlacementItem.getStackLightValue(stack);
-        this.face = PlacementItem.getFace(stack);
         this.mode = PlacementItem.getMode(stack);
-        this.rotation = PlacementItem.getRotation(stack);
+        this.axis = PlacementItem.getOrientationAxis(stack);
+        this.face = PlacementItem.getOrientationFace(stack);
+        this.edge = PlacementItem.getOrientationEdge(stack);
+        this.corner = PlacementItem.getOrientationCorner(stack);
+//        this.selectedRegionStart = PlacementItem.isSelectRegionInProgress(stack) ? PlacementItem.selectedRegionStart(stack) : null;
+//        this.selectedRegion = PlacementItem.selectedRegion(stack);
     }
 
     @Override
@@ -53,9 +63,13 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.modelState.fromBytes(pBuff);
         this.blockSubstance = pBuff.readEnumValue(BlockSubstance.class);
         this.lightValue = pBuff.readByte();
-        this.face = pBuff.readEnumValue(EnumFacing.class);
-        this.mode = pBuff.readEnumValue(PlacementMode.class);
-        this.rotation = pBuff.readEnumValue(Rotation.class);
+        this.mode = PlacementMode.FILL_REGION.fromBytes(pBuff);
+        this.axis = PlacementOrientationAxis.DYNAMIC.fromBytes(pBuff);
+        this.face = PlacementOrientationFace.DYNAMIC.fromBytes(pBuff);
+        this.edge = PlacementOrientationEdge.DYNAMIC.fromBytes(pBuff);
+        this.corner = PlacementOrientationCorner.DYNAMIC.fromBytes(pBuff);
+//        this.selectedRegionStart = pBuff.readBoolean() ? pBuff.readBlockPos() : null;
+//        this.selectedRegion = pBuff.readBoolean() ? pBuff.readBlockPos() : null;
     }
 
     @Override
@@ -65,9 +79,31 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.modelState.toBytes(pBuff);
         pBuff.writeEnumValue(this.blockSubstance);
         pBuff.writeByte(this.lightValue);
-        pBuff.writeEnumValue(this.face);
-        pBuff.writeEnumValue(this.mode);
-        pBuff.writeEnumValue(this.rotation);
+        this.mode.toBytes(pBuff);
+        this.axis.toBytes(pBuff);
+        this.face.toBytes(pBuff);
+        this.edge.toBytes(pBuff);
+        this.corner.toBytes(pBuff);
+        
+//        if(this.selectedRegionStart == null)
+//        {
+//            pBuff.writeBoolean(false);
+//        }
+//        else
+//        {
+//            pBuff.writeBoolean(false);
+//            pBuff.writeBlockPos(this.selectedRegionStart);
+//        }
+//        
+//        if(this.selectedRegion == null)
+//        {
+//            pBuff.writeBoolean(false);
+//        }
+//        else
+//        {
+//            pBuff.writeBoolean(false);
+//            pBuff.writeBlockPos(this.selectedRegion);
+//        }
     }
    
     @Override
@@ -80,9 +116,25 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setStackModelState(heldStack, message.modelState);
             PlacementItem.setStackSubstance(heldStack, message.blockSubstance);
             PlacementItem.setStackLightValue(heldStack, message.lightValue);
-            PlacementItem.setFace(heldStack, message.face);
             PlacementItem.setMode(heldStack, message.mode);
-            PlacementItem.setRotation(heldStack, message.rotation);
+            PlacementItem.setOrientationAxis(heldStack, message.axis);
+            PlacementItem.setOrientationFace(heldStack, message.face);
+            PlacementItem.setOrientationEdge(heldStack, message.edge);
+            PlacementItem.setOrientationCorner(heldStack, message.corner);
+            
+//            if(this.selectedRegionStart == null)
+//            {
+//                if(PlacementItem.isSelectRegionInProgress(heldStack)) PlacementItem.selectRegionCancel(heldStack);
+//            }
+//            else
+//            {
+//                if(!PlacementItem.isSelectRegionInProgress(heldStack)) PlacementItem.selectRegionStart(heldStack, this.selectedRegionStart, false);
+//            }
+//            
+//            if(this.selectedRegion != null)
+//            {
+//                PlacementItem.selectedRegionUpdate(heldStack, this.selectedRegion);
+//            }
         }
     }
 }

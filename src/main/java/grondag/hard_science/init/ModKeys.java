@@ -10,20 +10,20 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 public class ModKeys
 {
     public static KeyBinding PLACEMENT_MODE;
-    public static KeyBinding PLACEMENT_FACE;
-    public static KeyBinding PLACEMENT_ROTATION;
+    public static KeyBinding PLACEMENT_HISTORY;
+    public static KeyBinding PLACEMENT_ORIENTATION;
     public static KeyBinding PLACEMENT_PREVIEW;
 
     public static void init(FMLInitializationEvent event)
     {
         PLACEMENT_MODE = new KeyBinding("key.placement_mode", KeyConflictContext.IN_GAME, Keyboard.KEY_B, "key.categories.hard_science");
-        PLACEMENT_FACE = new KeyBinding("key.placement_face", KeyConflictContext.IN_GAME, Keyboard.KEY_V, "key.categories.hard_science");
-        PLACEMENT_ROTATION = new KeyBinding("key.placement_rotation", KeyConflictContext.IN_GAME, Keyboard.KEY_R, "key.categories.hard_science");
+        PLACEMENT_HISTORY = new KeyBinding("key.placement_history", KeyConflictContext.IN_GAME, Keyboard.KEY_V, "key.categories.hard_science");
+        PLACEMENT_ORIENTATION = new KeyBinding("key.placement_orientation", KeyConflictContext.IN_GAME, Keyboard.KEY_R, "key.categories.hard_science");
         PLACEMENT_PREVIEW = new KeyBinding("key.placement_preview", KeyConflictContext.IN_GAME, Keyboard.KEY_P, "key.categories.hard_science");
 
         ClientRegistry.registerKeyBinding(PLACEMENT_MODE);
-        ClientRegistry.registerKeyBinding(PLACEMENT_FACE);
-        ClientRegistry.registerKeyBinding(PLACEMENT_ROTATION);
+        ClientRegistry.registerKeyBinding(PLACEMENT_HISTORY);
+        ClientRegistry.registerKeyBinding(PLACEMENT_ORIENTATION);
         ClientRegistry.registerKeyBinding(PLACEMENT_PREVIEW);
     }
 

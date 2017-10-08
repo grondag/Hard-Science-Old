@@ -2,6 +2,11 @@ package grondag.hard_science.superblock.varia;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.Substances.Substance;
+import grondag.hard_science.library.serialization.IMessagePlusImmutable;
+import grondag.hard_science.library.serialization.IReadWriteNBTImmutable;
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.ILocalized;
+import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
@@ -9,13 +14,15 @@ import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.translation.I18n;
 
 /**
  * Similar to Minecraft Material. Didn't want to tie to that implementation.
  * Determines Minecraft material and other physical properties.
  */
-public enum BlockSubstance
+public enum BlockSubstance implements IMessagePlusImmutable<BlockSubstance>, IReadWriteNBTImmutable<BlockSubstance>, ILocalized
 {
 	FLEXSTONE(Configurator.SUBSTANCES.flexstone, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
@@ -98,5 +105,29 @@ public enum BlockSubstance
     public String localizedName()
     {
         return I18n.translateToLocal("material." + this.name().toLowerCase());
+    }
+    
+    @Override
+    public BlockSubstance deserializeNBT(NBTTagCompound tag)
+    {
+        return Useful.safeEnumFromTag(tag, ModNBTTag.SUPER_MODEL_SUBSTANCE, this);
+    }
+
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        Useful.saveEnumToTag(tag, ModNBTTag.SUPER_MODEL_SUBSTANCE, this);
+    }
+
+    @Override
+    public BlockSubstance fromBytes(PacketBuffer pBuff)
+    {
+        return pBuff.readEnumValue(BlockSubstance.class);
+    }
+
+    @Override
+    public void toBytes(PacketBuffer pBuff)
+    {
+        pBuff.writeEnumValue(this);
     }
 }

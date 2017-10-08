@@ -67,33 +67,66 @@ machine.power_stored=Stored Energy %,d joules
 
 #KEYS
 key.categories.hard_science=Hard Science
-key.placement_mode=Placement Mode
-key.placement_face=Placement Axis/Orientation
-key.placement_rotation=Placement Rotation
-key.placement_preview=Placement Preview
+key.placement_mode=Toggle Block Placement Mode
+key.placement_orientation=Cycle Block Placement Orientation
+key.placement_history=Cycle Block Placement History
+key.placement_preview=Toggle Block Placement Preview Mode
 
 #PLACEMENT
 placement.message.preview_set=Placement preview mode set to %s
 placement.message.orientation_set=Placement orientation set to %s
-placement.message.mode=Placement mode set to %s
-placement.message.rotation=Placement rotation set to %s
+placement.message.mode=Placement mode/shape set to %s
+placement.message.region_single=Placement region is a single block
+placement.message.region_additive=Placement region is determined by existing blocks.
+placement.message.region_box=Placement region is %d x %d x %d blocks
 placement.preview.none=NONE
 placement.preview.outline=OUTLINE
 #placement.preview.ghost=GHOST
-placement.orientation.up=UP
-placement.orientation.down=DOWN
-placement.orientation.east=EAST
-placement.orientation.west=WEST
-placement.orientation.north=NORTH
-placement.orientation.south=SOUTH
-placement.mode.static=STATIC
-placement.mode.face=FACE
-placement.mode.match_closest=MATCH CLOSEST
-placement.rotation.rotate_none=NONE
-placement.rotation.rotate_90=CLOCKWISE
-placement.rotation.rotate_180=FLIP
-placement.rotation.rotate_270=COUNTER CLOCKWISE
+placement.mode.single_block=SINGLE BLOCK
+placement.mode.fill_region=FILL REGION
+placement.mode.add_to_existing=ADD TO EXISTING BLOCKS
 
+placement.orientation.none=NONE
+placement.orientation.axis.dynamic=DYNAMIC
+placement.orientation.axis.match_closest=MATCH CLOSEST
+placement.orientation.axis.x=EAST/WEST
+placement.orientation.axis.y=UP/DOWN
+placement.orientation.axis.z=NORTH/SOUTH
+
+placement.orientation.face.dynamicp=DYNAMIC
+placement.orientation.face.match_closest=MATCH CLOSEST
+placement.orientation.face.up=UP
+placement.orientation.face.down=DOWN
+placement.orientation.face.east=EAST
+placement.orientation.face.west=WEST
+placement.orientation.face.north=NORTH
+placement.orientation.face.south=SOUTH
+
+placement.orientation.edge.dynamicp=DYNAMIC
+placement.orientation.edge.match_closest=MATCH CLOSEST
+placement.orientation.edge.up_east=UP / EAST
+placement.orientation.edge.up_west=UP / WEST
+placement.orientation.edge.up_north=UP / NORTH
+placement.orientation.edge.up_south=UP / SOUTH
+placement.orientation.edge.north_east=NORTH / EAST
+placement.orientation.edge.north_west=NORTH / WEST
+placement.orientation.edge.south_east=SOUTH / EAST
+placement.orientation.edge.south_west=SOUTH / WEST
+placement.orientation.edge.down_east=DOWN / EAST
+placement.orientation.edge.down_west=DOWN / WEST
+placement.orientation.edge.down_north=DOWN / NORTH
+placement.orientation.edge.down_south=DOWN / SOUTH
+
+placement.orientation.corner.dynamicp=DYNAMIC
+placement.orientation.corner.match_closest=MATCH CLOSEST
+placement.orientation.edge.up_north_east=UP / NORTH / EAST
+placement.orientation.edge.up_north_west=UP / NORTH / WEST
+placement.orientation.edge.up_south_east=UP / SOUTH / EAST
+placement.orientation.edge.up_south_west=UP / SOUTH / WEST
+placement.orientation.edge.down_north_east=DOWN / NORTH / EAST
+placement.orientation.edge.down_north_west=DOWN / NORTH / WEST
+placement.orientation.edge.down_south_east=DOWN / SOUTH / EAST
+placement.orientation.edge.down_south_west=DOWN / SOUTH / WEST
 
 
 #ITEMS

@@ -501,6 +501,21 @@ public class Useful
     }
 
     /**
+     * Equivalent to offsetEnumValue(value, -1)
+     * Probably slightly faster.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<?>> T prevEnumValue(T value)
+    {
+        int ord = value.ordinal() - 1;
+        if(ord < 0)
+        {
+            ord = value.getClass().getEnumConstants().length - 1;
+        }
+        return (T) value.getClass().getEnumConstants()[ord];
+    }
+    
+    /**
      * Returns enum value that is offset values distance
      * from given value.  Wraps.
      */

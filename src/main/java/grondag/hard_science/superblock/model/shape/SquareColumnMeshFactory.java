@@ -23,6 +23,7 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
+import grondag.hard_science.superblock.placement.PlacementOrientationType;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -131,6 +132,12 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
         return 255;
     }
 
+    @Override
+    public PlacementOrientationType orientationType(ModelState modelState)
+    {
+        return PlacementOrientationType.AXIS;
+    } 
+    
     @Override
     public SideShape sideShape(ModelState modelState, EnumFacing side)
     {

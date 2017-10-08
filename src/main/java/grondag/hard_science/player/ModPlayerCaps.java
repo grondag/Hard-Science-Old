@@ -17,7 +17,6 @@ public class ModPlayerCaps implements ICapabilityProvider, IReadWriteNBT
     
     public static enum ModifierKey
     {
-        PLACEMENT_MODIFIER,
         CTRL_KEY,
         ALT_KEY;
         

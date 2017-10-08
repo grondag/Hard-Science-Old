@@ -60,7 +60,7 @@ public class CubicPlacementHandler implements IPlacementHandler
         }
 
         ModelState closestModelState = null;
-        if(placementMode == PlacementMode.MATCH_CLOSEST)
+        if(PlacementItem.isBlockOrientationMatchClosest(stack))
         {
             if(onBlock instanceof SuperBlock)
             {
@@ -105,19 +105,19 @@ public class CubicPlacementHandler implements IPlacementHandler
         
         if(stackModelState.hasAxis())
         {
-            if(placementMode == PlacementMode.STATIC)
+            if(PlacementItem.isBlockOrientationMatchClosest(stack))
             {
-                stackModelState.setAxis(PlacementItem.getFace(stack).getAxis());
+                stackModelState.setAxis(PlacementItem.getBlockPlacementAxis(stack));
                 if(stackModelState.hasAxisOrientation())
                 {
-                    stackModelState.setAxisInverted(PlacementItem.getFace(stack).getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE);
+                    stackModelState.setAxisInverted(PlacementItem.getBlockPlacementAxisIsInverted(stack));
                 }
             }
             else
             {
                 boolean isAxisDone = false;
                 
-                if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
+                if(PlacementItem.isBlockOrientationMatchClosest(stack) && closestModelState != null)
                 {
                     stackModelState.setAxis(closestModelState.getAxis());
                     if(stackModelState.hasAxisOrientation())
@@ -166,17 +166,18 @@ public class CubicPlacementHandler implements IPlacementHandler
         
         if(!isRotationDone && stackModelState.hasAxisRotation())
         {
-            if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
+            if(PlacementItem.isBlockOrientationMatchClosest(stack) && closestModelState != null)
             {
                 stackModelState.setAxisRotation(closestModelState.getAxisRotation());
             }
-            else if(placementMode == PlacementMode.FACE)
+            else if(PlacementItem.isBlockOrientationDynamic(stack))
             {
                 stackModelState.setAxisRotation(Rotation.fromHorizontalFacing(playerIn.getHorizontalFacing().getOpposite()));
             }
             else
             {
-                stackModelState.setAxisRotation(PlacementItem.getRotation(stack));
+                // FIXME: put this back somehow?
+//                stackModelState.setAxisRotation(PlacementItem.getRotation(stack));
             }
         }
         
@@ -196,7 +197,7 @@ public class CubicPlacementHandler implements IPlacementHandler
     {
         // If player is sneaking, force no match to adjacent species.
         // If not sneaking, try to match block on which placed, or failing that, any adjacent block it can match.
-        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
+        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
         {
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;
