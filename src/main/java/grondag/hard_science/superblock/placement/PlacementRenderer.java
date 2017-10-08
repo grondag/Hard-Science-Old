@@ -6,7 +6,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.Render.PreviewMode;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
@@ -28,7 +27,7 @@ public class PlacementRenderer
         // abort if turned off
         if(Configurator.RENDER.previewSetting == PreviewMode.NONE) return;
 
-        ModelState modelState = SuperItemBlock.getStackModelState(stack);
+        ModelState modelState = PlacementItem.getStackModelState(stack);
         
         if(modelState == null) return;
         
@@ -60,7 +59,7 @@ public class PlacementRenderer
         
         for(Pair<BlockPos, ItemStack> placement : placements)
         {
-            ModelState placementModelState = SuperItemBlock.getStackModelState(placement.getRight());
+            ModelState placementModelState = PlacementItem.getStackModelState(placement.getRight());
             
             if(placementModelState != null)
             {

@@ -6,9 +6,9 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -86,12 +86,12 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         for(ItemStack stack : items)
         {
             int meta = stack.getMetadata();
-            ModelState modelState = SuperItemBlock.getStackModelState(stack);
+            ModelState modelState = PlacementItem.getStackModelState(stack);
             int level = this.isFiller ? TerrainState.BLOCK_LEVELS_INT - 1 : TerrainState.BLOCK_LEVELS_INT - meta;
             int [] quadrants = new int[] {level, level, level, level};
             TerrainState flowState = new TerrainState(level, quadrants, quadrants, 0);
             modelState.setTerrainState(flowState);
-            SuperItemBlock.setStackModelState(stack, modelState);
+            PlacementItem.setStackModelState(stack, modelState);
         }
         return items;
     }

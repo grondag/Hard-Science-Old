@@ -93,4 +93,6 @@ public class ModNBTTag
     public static final String MACHINE_BATTERY_MAX_STORED_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String MACHINE_BATTERY_CHEMISTRY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String MACHINE_POWER_RECEIVER_MAX_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String SUPER_MODEL_LIGHT_VALUE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);;
 }

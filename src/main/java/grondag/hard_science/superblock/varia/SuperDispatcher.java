@@ -19,7 +19,6 @@ import grondag.hard_science.library.render.SimpleItemBlockModel;
 import grondag.hard_science.library.render.SparseLayerMapBuilder;
 import grondag.hard_science.library.render.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.items.SuperModelItemOverrideList;
 import grondag.hard_science.superblock.model.painter.QuadPainter;
 import grondag.hard_science.superblock.model.painter.QuadPainterFactory;
@@ -28,6 +27,7 @@ import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.RenderLayout;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
@@ -254,7 +254,7 @@ public class SuperDispatcher
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
     {
-        ModelState key = SuperItemBlock.getStackModelState(stack);
+        ModelState key = PlacementItem.getStackModelState(stack);
         return itemCache.get(key);
     }
   

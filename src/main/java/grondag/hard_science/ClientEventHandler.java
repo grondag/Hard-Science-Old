@@ -7,8 +7,8 @@ import grondag.hard_science.library.render.QuadCache;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
-import grondag.hard_science.network.client_to_server.PacketUpdatePlacementKey;
+import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
 import grondag.hard_science.superblock.block.SuperTileEntity;
@@ -66,8 +66,8 @@ public class ClientEventHandler
     }
     
     
-    /** used to detect key down/up for modifier key */
-    private static boolean isPlacementModifierPressed=false;
+    /** used to detect key down/up for modifier keys */
+    private static int modifierKeyFlags = 0;
     
     private static int clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
     
@@ -112,31 +112,33 @@ public class ClientEventHandler
             {
                 ClientProxy.setVirtualBlockRenderingEnabled(renderVirtual);
             }
-            
-            boolean newDown;
+       
+            int keyFlags;
             
             switch(Configurator.BLOCKS.placementModifier)
             {
             case ALT:
-                newDown = GuiScreen.isAltKeyDown();
+                keyFlags = GuiScreen.isAltKeyDown() ? ModPlayerCaps.ModifierKey.PLACEMENT_MODIFIER.flag : 0;
                 break;
                 
             case CONTROL:
-                newDown =  GuiScreen.isCtrlKeyDown();
+                keyFlags =  GuiScreen.isCtrlKeyDown() ? ModPlayerCaps.ModifierKey.PLACEMENT_MODIFIER.flag : 0;
                 break;
                 
             case SHIFT:
             default:
-                newDown = GuiScreen.isShiftKeyDown();
+                keyFlags = GuiScreen.isShiftKeyDown() ? ModPlayerCaps.ModifierKey.PLACEMENT_MODIFIER.flag : 0;
                 break;
             }
             
-            
-            if(newDown != isPlacementModifierPressed)
+            keyFlags |= (GuiScreen.isCtrlKeyDown() ? ModPlayerCaps.ModifierKey.CTRL_KEY.flag : 0) 
+                     | (GuiScreen.isAltKeyDown() ? ModPlayerCaps.ModifierKey.ALT_KEY.flag : 0);
+                    
+            if(keyFlags != modifierKeyFlags)
             {
-                isPlacementModifierPressed = newDown;
-                ModPlayerCaps.setPlacementModifierOn(Minecraft.getMinecraft().player, newDown);
-                ModMessages.INSTANCE.sendToServer(new PacketUpdatePlacementKey(newDown));
+                modifierKeyFlags = keyFlags;
+                ModPlayerCaps.setPlacementModifierFlags(Minecraft.getMinecraft().player, keyFlags);
+                ModMessages.INSTANCE.sendToServer(new PacketUpdateModifierKeys(keyFlags));
             }
             
             //FIXME: remove or cleanup
@@ -181,9 +183,9 @@ public class ClientEventHandler
             ItemStack stack = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND);
             if(stack.getItem() instanceof PlacementItem)
             {
-                ((PlacementItem)stack.getItem()).cycleFace(stack);
-                ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.orientation_set",  I18n.translateToLocal("placement.orientation." + ((PlacementItem)stack.getItem()).getFace(stack).toString().toLowerCase()));
+                PlacementItem.cycleFace(stack);
+                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                String message = I18n.translateToLocalFormatted("placement.message.orientation_set",  I18n.translateToLocal("placement.orientation." + PlacementItem.getFace(stack).toString().toLowerCase()));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
         } 
@@ -192,9 +194,9 @@ public class ClientEventHandler
             ItemStack stack = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND);
             if(stack.getItem() instanceof PlacementItem)
             {
-                ((PlacementItem)stack.getItem()).cycleMode(stack);
-                ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.mode",  I18n.translateToLocal("placement.mode." + ((PlacementItem)stack.getItem()).getMode(stack).toString().toLowerCase()));
+                PlacementItem.cycleMode(stack);
+                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                String message = I18n.translateToLocalFormatted("placement.message.mode",  I18n.translateToLocal("placement.mode." + PlacementItem.getMode(stack).toString().toLowerCase()));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
         }
@@ -211,9 +213,9 @@ public class ClientEventHandler
             ItemStack stack = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND);
             if(stack.getItem() instanceof PlacementItem)
             {
-                ((PlacementItem)stack.getItem()).cycleRotation(stack);
-                ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.rotation",  I18n.translateToLocal("placement.rotation." + ((PlacementItem)stack.getItem()).getRotation(stack).toString().toLowerCase()));
+                PlacementItem.cycleRotation(stack);
+                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                String message = I18n.translateToLocalFormatted("placement.message.rotation",  I18n.translateToLocal("placement.rotation." + PlacementItem.getRotation(stack).toString().toLowerCase()));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
         }

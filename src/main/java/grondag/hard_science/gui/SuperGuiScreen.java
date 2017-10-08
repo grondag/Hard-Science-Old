@@ -25,17 +25,15 @@ import grondag.hard_science.gui.control.VisibilityPanel;
 import grondag.hard_science.gui.control.VisiblitySelector;
 import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
-import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
-import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Translucency;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
@@ -44,7 +42,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
@@ -132,15 +129,15 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             hasUpdates = shapeGui.saveSettings(modelState) || hasUpdates;
         }
 
-        if(brightnessSlider.getBrightness() != SuperItemBlock.getStackLightValue(itemPreview.previewItem))
+        if(brightnessSlider.getBrightness() != PlacementItem.getStackLightValue(itemPreview.previewItem))
         {
-            SuperItemBlock.setStackLightValue(itemPreview.previewItem, brightnessSlider.getBrightness());
+            PlacementItem.setStackLightValue(itemPreview.previewItem, brightnessSlider.getBrightness());
             hasUpdates = true;
         }
 
-        if(materialPicker.getSubstance() != SuperItemBlock.getStackSubstance(itemPreview.previewItem))
+        if(materialPicker.getSubstance() != PlacementItem.getStackSubstance(itemPreview.previewItem))
         {
-            SuperItemBlock.setStackSubstance(itemPreview.previewItem, materialPicker.getSubstance());
+            PlacementItem.setStackSubstance(itemPreview.previewItem, materialPicker.getSubstance());
             baseTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
             lampTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
             translucencyPicker.setVisible(materialPicker.getSubstance().isTranslucent);
@@ -201,29 +198,10 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             hasUpdates = true;
         }
        
-        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).getBlock();
-        
-        // virtual block always remains same block
-        if(currentBlock != ModBlocks.virtual_block)
-        {
-            SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
-    
-            if(currentBlock != newBlock && newBlock != null)
-            {
-                ItemStack newStack = new ItemStack(newBlock);
-                newStack.setCount(itemPreview.previewItem.getCount());
-                newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
-                newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
-                itemPreview.previewItem = newStack;
-                hasUpdates = true;
-    
-            }
-        }
-        
         if(hasUpdates)
         {
             this.itemPreview.previewItem.setItemDamage(this.modelState.getMetaData());
-            SuperItemBlock.setStackModelState(itemPreview.previewItem, modelState);
+            PlacementItem.setStackModelState(itemPreview.previewItem, modelState);
         }
     }
 
@@ -316,7 +294,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
     {
         if(hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {
-            ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(itemPreview.previewItem));
+            ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(itemPreview.previewItem));
             hasUpdates = false;
         }
         mc.displayGuiScreen((GuiScreen)null);
@@ -360,7 +338,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
                 return;
             }
             //            this.meta = this.itemPreview.previewItem.getMetadata();
-            modelState = SuperItemBlock.getStackModelState(itemPreview.previewItem);
+            modelState = PlacementItem.getStackModelState(itemPreview.previewItem);
         }
 
         // abort on strangeness
@@ -478,9 +456,9 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
     private void loadControlValuesFromModelState()
     {
-        materialPicker.setSubstance(SuperItemBlock.getStackSubstance(itemPreview.previewItem));
+        materialPicker.setSubstance(PlacementItem.getStackSubstance(itemPreview.previewItem));
         shapePicker.setSelected(modelState.getShape());
-        brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(itemPreview.previewItem));
+        brightnessSlider.setBrightness(PlacementItem.getStackLightValue(itemPreview.previewItem));
         outerToggle.setOn(modelState.isOuterLayerEnabled());
         middleToggle.setOn(modelState.isMiddleLayerEnabled());
         baseTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.BASE));

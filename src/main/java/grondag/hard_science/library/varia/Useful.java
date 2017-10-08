@@ -15,6 +15,8 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.world.PackedBlockPos;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -308,6 +310,19 @@ public class Useful
     }
 
     /**
+     * Creates stack tag if it doesn't exist
+     */
+    public static NBTTagCompound getOrCreateTagCompound(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null){
+            tag = new NBTTagCompound();
+            stack.setTagCompound(tag);
+        }
+        return tag;
+    }
+    
+    /**
      * Returns volume of given AABB
      */
     public static double volumeAABB(AxisAlignedBB box)
@@ -454,6 +469,22 @@ public class Useful
         return (T) defaultValue.getClass().getEnumConstants()[ord];
     }
 
+    /**
+     * Returns first given default value if ordinal is out of range or not present.
+     */
+    public static <T extends Enum<?>> T safeEnumFromTag(NBTTagCompound tag, String tagName, T defaultValue)
+    {
+        return (tag == null) ? defaultValue : safeEnumFromOrdinal(tag.getInteger(tagName), defaultValue);
+    }
+    
+    /**
+     * Writes tag value for later reading by {@link #safeEnumFromTag(NBTTagCompound, String, Enum)}
+     */
+    public static void saveEnumToTag(NBTTagCompound tag, String tagName, Enum<?> enumValue)
+    {
+        tag.setInteger(tagName, enumValue == null ? 0 : enumValue.ordinal());
+    }
+    
     /**
      * Equivalent to offsetEnumValue(value, 1)
      * Probably slightly faster.

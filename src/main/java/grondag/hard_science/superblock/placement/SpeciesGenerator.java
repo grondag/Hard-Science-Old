@@ -5,7 +5,6 @@ import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.PlacementValidatorCubic;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.item.ItemStack;
@@ -59,7 +58,7 @@ public abstract class SpeciesGenerator {
         {
             int speciesInUseFlags = 0;
             
-            ModelState stackModelState = SuperItemBlock.getStackModelState(stack);
+            ModelState stackModelState = PlacementItem.getStackModelState(stack);
             NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos, false);
             NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(block, stackModelState, false));
             

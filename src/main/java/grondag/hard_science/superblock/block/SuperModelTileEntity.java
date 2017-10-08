@@ -1,8 +1,7 @@
 package grondag.hard_science.superblock.block;
 
-import grondag.hard_science.library.serialization.ByteSerializer;
-import grondag.hard_science.library.serialization.EnumSerializer;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -11,36 +10,7 @@ public class SuperModelTileEntity extends SuperTileEntity
     ////////////////////////////////////////////////////////////////////////
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
-    public static final EnumSerializer<SuperModelTileEntity, BlockSubstance> SERIALIZER_SUBSTANCE 
-            = new EnumSerializer<SuperModelTileEntity, BlockSubstance>(ModNBTTag.SUPER_MODEL_SUBSTANCE, BlockSubstance.class)
-    {
-        @Override
-        public BlockSubstance getValue(SuperModelTileEntity target)
-        {
-            return target.getSubstance();
-        }
 
-        @Override
-        public void setValue(SuperModelTileEntity target, BlockSubstance value)
-        {
-            target.setSubstance(value);
-        } 
-    };
-    
-    public static final ByteSerializer<SuperModelTileEntity> SERIALIZER_LIGHT_VALUE = new ByteSerializer<SuperModelTileEntity>( "HSLV")
-    {
-        @Override
-        public byte getValue(SuperModelTileEntity target)
-        {
-            return (byte) target.getLightValue();
-        }
-
-        @Override
-        public void setValue(SuperModelTileEntity target, byte value)
-        {
-            target.setLightValue(value);;
-        } 
-    };
     
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
@@ -55,16 +25,16 @@ public class SuperModelTileEntity extends SuperTileEntity
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
-        SERIALIZER_SUBSTANCE.serializeNBT(this, compound);
-        SERIALIZER_LIGHT_VALUE.serializeNBT(this, compound);
+        Useful.saveEnumToTag(compound, ModNBTTag.SUPER_MODEL_SUBSTANCE, substance);
+        compound.setByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE, (byte)this.lightValue);
     }
 
     @Override
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        SERIALIZER_SUBSTANCE.deserializeNBT(this, compound);
-        SERIALIZER_LIGHT_VALUE.deserializeNBT(this, compound);
+        this.substance = Useful.safeEnumFromTag(compound, ModNBTTag.SUPER_MODEL_SUBSTANCE,  BlockSubstance.FLEXSTONE);
+        this.lightValue = compound == null ? 0 : compound.getByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE);
     }
 
     public byte getLightValue()

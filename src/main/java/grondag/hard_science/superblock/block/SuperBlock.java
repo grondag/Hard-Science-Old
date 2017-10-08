@@ -18,12 +18,11 @@ import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
+import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -31,6 +30,7 @@ import grondag.hard_science.superblock.model.state.ModelStateProperty;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
@@ -288,7 +288,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         super.addInformation(stack, world, tooltip, advanced);
         tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
         
-        ModelState modelState = SuperItemBlock.getStackModelState(stack);
+        ModelState modelState = PlacementItem.getStackModelState(stack);
         
         if(modelState != null)
         {
@@ -310,7 +310,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
                 tooltip.add(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
             }
         }
-        tooltip.add(I18n.translateToLocal("label.material") + ": " + SuperItemBlock.getStackSubstance(stack).localizedName());
+        tooltip.add(I18n.translateToLocal("label.material") + ": " + PlacementItem.getStackSubstance(stack).localizedName());
     }
 
     @Override
@@ -847,8 +847,8 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
             if(myTE != null && myTE instanceof SuperModelTileEntity)
             {
                 
-                SuperItemBlock.setStackLightValue(picked, ((SuperModelTileEntity)myTE).getLightValue());
-                SuperItemBlock.setStackSubstance(picked, ((SuperModelTileEntity)myTE).getSubstance());
+                PlacementItem.setStackLightValue(picked, ((SuperModelTileEntity)myTE).getLightValue());
+                PlacementItem.setStackSubstance(picked, ((SuperModelTileEntity)myTE).getSubstance());
             }
         }
    
@@ -862,10 +862,10 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
                 
                 if(heldStack.getItem() == ModItems.virtual_block)
                 {
-                    SuperItemBlock.setStackModelState(heldStack, SuperItemBlock.getStackModelState(picked));
-                    SuperItemBlock.setStackLightValue(heldStack, SuperItemBlock.getStackLightValue(picked));
-                    SuperItemBlock.setStackSubstance(heldStack, SuperItemBlock.getStackSubstance(picked));
-                    ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(heldStack));
+                    PlacementItem.setStackModelState(heldStack, PlacementItem.getStackModelState(picked));
+                    PlacementItem.setStackLightValue(heldStack, PlacementItem.getStackLightValue(picked));
+                    PlacementItem.setStackSubstance(heldStack, PlacementItem.getStackSubstance(picked));
+                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(heldStack));
                 }
             }
             return ItemStack.EMPTY;
@@ -943,7 +943,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
             {
                 modelState.setMetaData(i);
             }
-            SuperItemBlock.setStackModelState(stack, modelState);
+            PlacementItem.setStackModelState(stack, modelState);
             itemBuilder.add(stack);
         }
         return itemBuilder.build();

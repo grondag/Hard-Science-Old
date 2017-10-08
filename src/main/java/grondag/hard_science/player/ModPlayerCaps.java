@@ -15,10 +15,24 @@ public class ModPlayerCaps implements ICapabilityProvider, IReadWriteNBT
     @CapabilityInject(ModPlayerCaps.class)
     public static Capability<ModPlayerCaps> CAP_INSTANCE = null;
     
+    public static enum ModifierKey
+    {
+        PLACEMENT_MODIFIER,
+        CTRL_KEY,
+        ALT_KEY;
+        
+        public final int flag;
+        
+        private ModifierKey()
+        {
+           this.flag = 1 << this.ordinal(); 
+        }
+    }
+
     /**
      *  True if player is holding down the placement modifier key.  Not persisted.
      */
-    private boolean isPlacementModifierOn;
+    private int modifierKeyFlags;
     
     @Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing)
@@ -46,37 +60,37 @@ public class ModPlayerCaps implements ICapabilityProvider, IReadWriteNBT
         
     }
 
-    public boolean isPlacementModifierOn()
+    public boolean isModifierKeyPressed(ModifierKey key)
     {
-        return isPlacementModifierOn;
+        return (this.modifierKeyFlags & key.flag) != 0;
     }
 
-    public void setPlacementModifierOn(boolean isPlacementModifierOn)
+    public void setPlacementModifierFlags(int keyFlags)
     {
-        this.isPlacementModifierOn = isPlacementModifierOn;
+        this.modifierKeyFlags = keyFlags;
     }
 
-    public static boolean isPlacementModifierOn(EntityPlayer player)
+    public static boolean isModifierKeyPressed(EntityPlayer player, ModifierKey key)
     {
         if(player != null)
         {
             ModPlayerCaps caps = player.getCapability(ModPlayerCaps.CAP_INSTANCE, null);
             if(caps != null)
             {
-                return caps.isPlacementModifierOn();
+                return caps.isModifierKeyPressed(key);
             }
         }
         return false;
     }
     
-    public static void setPlacementModifierOn(EntityPlayer player, boolean isOn)
+    public static void setPlacementModifierFlags(EntityPlayer player, int keyFlags)
     {
         if(player != null)
         {
             ModPlayerCaps caps = player.getCapability(ModPlayerCaps.CAP_INSTANCE, null);
             if(caps != null)
             {
-                caps.setPlacementModifierOn(isOn);
+                caps.setPlacementModifierFlags(keyFlags);
             }
         }
         

@@ -5,8 +5,8 @@ import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
-import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
-import grondag.hard_science.network.client_to_server.PacketUpdatePlacementKey;
+import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
@@ -27,8 +27,8 @@ public class ModMessages
     {
 
         // Packed handled on Server side, sent from Client
-        INSTANCE.registerMessage(PacketReplaceHeldItem.class, PacketReplaceHeldItem.class, packetID++, Side.SERVER);
-        INSTANCE.registerMessage(PacketUpdatePlacementKey.class, PacketUpdatePlacementKey.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(ConfigurePlacementItem.class, ConfigurePlacementItem.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketUpdateModifierKeys.class, PacketUpdateModifierKeys.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketDestroyVirtualBlock.class, PacketDestroyVirtualBlock.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketOpenContainerStorageInteraction.class, PacketOpenContainerStorageInteraction.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketMachineStatusAddListener.class, PacketMachineStatusAddListener.class, packetID++, Side.SERVER);

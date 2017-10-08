@@ -3,76 +3,120 @@ package grondag.hard_science.superblock.placement;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Rotation;
+import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 
 public interface PlacementItem
 {
-
-    
     /** Face corresponding with the orthogonalAxis and orientation for placement. Not the face on which it is placed. */
-    public default void setFace(ItemStack stack, EnumFacing face)
+    public static void setFace(ItemStack stack, EnumFacing face)
     {
-        NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null){
-            tag = new NBTTagCompound();
-        }
-        tag.setInteger(ModNBTTag.PLACEMENT_FACE, face.ordinal());
-        stack.setTagCompound(tag);
+        Useful.saveEnumToTag(Useful.getOrCreateTagCompound(stack), ModNBTTag.PLACEMENT_FACE, face);
     }
     
     /** Face corresponding with the orthogonalAxis and orientation for placement. Not the face on which it is placed. */
-    public default EnumFacing getFace(ItemStack stack)
+    public static EnumFacing getFace(ItemStack stack)
     {
-        NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? EnumFacing.UP : EnumFacing.values()[tag.getInteger(ModNBTTag.PLACEMENT_FACE)];
+        return Useful.safeEnumFromTag(stack.getTagCompound(), ModNBTTag.PLACEMENT_FACE, EnumFacing.UP);
     }
     
-    public default void cycleFace(ItemStack stack)
+    public static void cycleFace(ItemStack stack)
     {
-        this.setFace(stack, Useful.nextEnumValue(this.getFace(stack)));
+        setFace(stack, Useful.nextEnumValue(getFace(stack)));
     }
     
-    public default void setRotation(ItemStack stack, Rotation rotation)
+    public static void setRotation(ItemStack stack, Rotation rotation)
     {
-        NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null){
-            tag = new NBTTagCompound();
-        }
-        tag.setInteger(ModNBTTag.PLACEMENT_ROTATION, rotation.ordinal());
-        stack.setTagCompound(tag);
+        Useful.saveEnumToTag(Useful.getOrCreateTagCompound(stack), ModNBTTag.PLACEMENT_ROTATION, rotation);
     }
 
-    public default Rotation getRotation(ItemStack stack)
+    public static Rotation getRotation(ItemStack stack)
     {
-        NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? Rotation.ROTATE_NONE : Rotation.values()[tag.getInteger(ModNBTTag.PLACEMENT_ROTATION)];
+        return Useful.safeEnumFromTag(stack.getTagCompound(), ModNBTTag.PLACEMENT_ROTATION, Rotation.ROTATE_NONE);
     }
     
-    public default void cycleRotation(ItemStack stack)
+    public static void cycleRotation(ItemStack stack)
     {
-        this.setRotation(stack, Useful.nextEnumValue(this.getRotation(stack)));
+        setRotation(stack, Useful.nextEnumValue(getRotation(stack)));
     }
     
-    public default void setMode(ItemStack stack, PlacementMode mode)
+    public static void setMode(ItemStack stack, PlacementMode mode)
+    {
+        Useful.saveEnumToTag(Useful.getOrCreateTagCompound(stack), ModNBTTag.PLACEMENT_MODE, mode);
+    }
+    
+    public static PlacementMode getMode(ItemStack stack)
+    {
+        return Useful.safeEnumFromTag(stack.getTagCompound(), ModNBTTag.PLACEMENT_MODE,  PlacementMode.FACE);
+    }
+    
+    public static void cycleMode(ItemStack stack)
+    {
+        setMode(stack, Useful.nextEnumValue(getMode(stack)));
+    }
+    
+   
+    public static void setStackLightValue(ItemStack stack, int lightValue)
+    {
+        Useful.getOrCreateTagCompound(stack).setByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE, (byte)lightValue);
+    }
+    
+    public static byte getStackLightValue(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null){
-            tag = new NBTTagCompound();
+        return tag == null ? 0 : tag.getByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE);
+    }
+
+    public static void setStackSubstance(ItemStack stack, BlockSubstance substance)
+    {
+        Useful.saveEnumToTag(Useful.getOrCreateTagCompound(stack), ModNBTTag.SUPER_MODEL_SUBSTANCE, substance);
+    }
+    
+    public static BlockSubstance getStackSubstance(ItemStack stack)
+    {
+        return Useful.safeEnumFromTag(stack.getTagCompound(), ModNBTTag.SUPER_MODEL_SUBSTANCE,  BlockSubstance.FLEXSTONE);
+    }
+    
+    public static ModelState getStackModelState(ItemStack stack)
+    {
+        ModelState stackState = ModelState.deserializeFromNBTIfPresent(stack.getTagCompound());
+        
+        //WAILA or other mods might create a stack with no NBT
+        if(stackState != null) return stackState;
+        
+        if(stack.getItem() instanceof SuperItemBlock)
+        {
+            return ((SuperBlock)((SuperItemBlock)stack.getItem()).getBlock()).getDefaultModelState();
         }
-        tag.setInteger(ModNBTTag.PLACEMENT_MODE, mode.ordinal());
-        stack.setTagCompound(tag);
+        
+        return null;
     }
     
-    public default PlacementMode getMode(ItemStack stack)
+    public static void setStackModelState(ItemStack stack, ModelState modelState)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? PlacementMode.STATIC : PlacementMode.values()[tag.getInteger(ModNBTTag.PLACEMENT_MODE)];       
+        if(modelState == null)
+        {
+            if(tag != null) tag.removeTag(ModNBTTag.MODEL_STATE);
+            return;
+        }
+        
+        if(tag == null)
+        {
+            tag = new NBTTagCompound();
+            stack.setTagCompound(tag);
+        }
+        
+        modelState.serializeNBT(tag);
     }
     
-    public default void cycleMode(ItemStack stack)
+    public static boolean isPlacementItem(ItemStack stack)
     {
-        this.setMode(stack, Useful.nextEnumValue(this.getMode(stack)));
+        return stack.getItem() instanceof PlacementItem;
     }
 }

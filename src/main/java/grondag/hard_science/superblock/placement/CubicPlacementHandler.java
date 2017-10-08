@@ -14,6 +14,7 @@ import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.player.ModPlayerCaps;
+import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -42,11 +43,11 @@ public class CubicPlacementHandler implements IPlacementHandler
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
 
         SuperItemBlock item = (SuperItemBlock)stack.getItem();
-        PlacementMode placementMode = item.getMode(stack);
+        PlacementMode placementMode = PlacementItem.getMode(stack);
         
         SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
-        ModelState stackModelState = SuperItemBlock.getStackModelState(stack);
+        ModelState stackModelState = PlacementItem.getStackModelState(stack);
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
@@ -106,10 +107,10 @@ public class CubicPlacementHandler implements IPlacementHandler
         {
             if(placementMode == PlacementMode.STATIC)
             {
-                stackModelState.setAxis(item.getFace(stack).getAxis());
+                stackModelState.setAxis(PlacementItem.getFace(stack).getAxis());
                 if(stackModelState.hasAxisOrientation())
                 {
-                    stackModelState.setAxisInverted(item.getFace(stack).getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE);
+                    stackModelState.setAxisInverted(PlacementItem.getFace(stack).getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE);
                 }
             }
             else
@@ -175,7 +176,7 @@ public class CubicPlacementHandler implements IPlacementHandler
             }
             else
             {
-                stackModelState.setAxisRotation(item.getRotation(stack));
+                stackModelState.setAxisRotation(PlacementItem.getRotation(stack));
             }
         }
         
@@ -185,7 +186,7 @@ public class CubicPlacementHandler implements IPlacementHandler
             stackModelState.setSpecies(species);
             result.setItemDamage(stackModelState.getMetaData());
         }
-        SuperItemBlock.setStackModelState(result, stackModelState);
+        PlacementItem.setStackModelState(result, stackModelState);
  
         return ImmutableList.of(Pair.of(posPlaced, result));
     }
@@ -195,7 +196,7 @@ public class CubicPlacementHandler implements IPlacementHandler
     {
         // If player is sneaking, force no match to adjacent species.
         // If not sneaking, try to match block on which placed, or failing that, any adjacent block it can match.
-        if(ModPlayerCaps.isPlacementModifierOn(player))
+        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
         {
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;

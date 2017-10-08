@@ -26,8 +26,8 @@ import grondag.hard_science.simulator.wip.AssignedNumber;
 import grondag.hard_science.simulator.wip.IIdentified;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.KeyedTuple;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -385,9 +385,9 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             
             SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(this.getControlState().getSubstance(), this.getControlState().getModelState());
             result = newBlock.getSubItems().get(0);
-            SuperItemBlock.setStackLightValue(result, this.getControlState().getLightValue());
-            SuperItemBlock.setStackSubstance(result, this.getControlState().getSubstance());
-            SuperItemBlock.setStackModelState(result, this.getControlState().getModelState());
+            PlacementItem.setStackLightValue(result, this.getControlState().getLightValue());
+            PlacementItem.setStackSubstance(result, this.getControlState().getSubstance());
+            PlacementItem.setStackModelState(result, this.getControlState().getModelState());
             this.statusStack = result;
         }
         return result;

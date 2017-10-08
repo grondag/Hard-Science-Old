@@ -29,8 +29,8 @@ import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.virtualblock.VirtualBlock;
@@ -415,9 +415,9 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
             
             ItemStack stack = newMeta < items.size() ? items.get(newMeta) : items.get(0);
             stack.setItemDamage(newMeta);
-            SuperItemBlock.setStackLightValue(stack, newLightValue);
-            SuperItemBlock.setStackSubstance(stack, newSubstance);
-            SuperItemBlock.setStackModelState(stack, newModelState);
+            PlacementItem.setStackLightValue(stack, newLightValue);
+            PlacementItem.setStackSubstance(stack, newSubstance);
+            PlacementItem.setStackModelState(stack, newModelState);
             
             for(EnumFacing face : EnumFacing.VALUES)
             {
