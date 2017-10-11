@@ -13,7 +13,7 @@ import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementRenderer;
+import grondag.hard_science.superblock.placement.PlacementItemRenderer;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
@@ -51,7 +51,7 @@ public class ClientEventHandler
         if (heldItem !=null && !heldItem.isEmpty() && (heldItem.getItem() instanceof PlacementItem)) 
         {
             PlacementItem placer = (PlacementItem) heldItem.getItem();
-            PlacementRenderer.renderOverlay(event, player, heldItem, placer);
+            PlacementItemRenderer.renderOverlay(event, player, heldItem, placer);
         }
     }
 
@@ -160,49 +160,107 @@ public class ClientEventHandler
     @SubscribeEvent
     public static void onKeyInput(InputEvent.KeyInputEvent event)
     {
-        ItemStack stack = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND);
-        if(stack.getItem() instanceof PlacementItem)
+        
+        ItemStack stack = PlacementItem.getHeldPlacementItem(Minecraft.getMinecraft().player);
+        
+        if(stack != null && ((PlacementItem)stack.getItem()).getSuperBlock().canUseControls(Minecraft.getMinecraft().player))
         {
-            if (ModKeys.PLACEMENT_HISTORY.isPressed())
+            if(ModKeys.PLACEMENT_ORIENTATION.isPressed())
             {
-                if(stack.getItem() instanceof PlacementItem)
+                if(GuiScreen.isCtrlKeyDown())
                 {
-                    if(PlacementItem.cycleHistory(stack, GuiScreen.isAltKeyDown()));
+                    // Ctrl + key: cycle floating selection enable/range
+                    PlacementItem.cycleSelectionTargetRange(stack, GuiScreen.isShiftKeyDown());
+                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                    
+                    String message = PlacementItem.isFloatingSelectionEnabled(stack)
+                            ? I18n.translateToLocalFormatted("placement.message.range_floating",  PlacementItem.getFloatingSelectionRange(stack))
+                            : I18n.translateToLocal("placement.message.range_normal");
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+                }
+                
+                else if(GuiScreen.isAltKeyDown())
+                {
+                    // Alt + key: cycle region orientation
+                    PlacementItem.cycleRegionOrientation(stack, GuiScreen.isShiftKeyDown());
+                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                    String message = I18n.translateToLocalFormatted("placement.message.orientation_region",  PlacementItem.getRegionOrientation(stack).localizedName());
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+                }
+                
+                else
+                {
+                    // unmodified: cycle block orientation
+                    PlacementItem.cycleBlockOrientation(stack, GuiScreen.isShiftKeyDown());
+                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                    String message = I18n.translateToLocalFormatted("placement.message.orientation_block",  PlacementItem.blockOrientationLocalizedName(stack));
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+                }
+            }
+            else if (ModKeys.PLACEMENT_HISTORY.isPressed())
+            {
+                if(GuiScreen.isCtrlKeyDown())
+                {
+                    // Ctrl + key: cycle region history
+                    if(PlacementItem.cycleHistory(stack, GuiScreen.isShiftKeyDown()))
                     {
+                        //TODO: implement
                         ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                        //TODO: user notification
+                        String message ="Please pretend region history just worked";
+                        Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+
                     }
+                }
+                else if(GuiScreen.isAltKeyDown())
+                {
+                    // Alt + key: cycle block history
+                    // TODO: implement
+                    String message ="Please pretend block history just worked";
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+
+                }
+                else 
+                {
+                    // Unmodified key: display GUI
+                    ((PlacementItem)stack.getItem()).displayGui(Minecraft.getMinecraft().player);
                 }
             } 
             else if (ModKeys.PLACEMENT_MODE.isPressed())
             {
-                if(stack.getItem() instanceof PlacementItem)
+                if(GuiScreen.isCtrlKeyDown())
                 {
-                    PlacementItem.cycleMode(stack, GuiScreen.isAltKeyDown());
+                    // Ctrl + key: cycle obstacle handling
+                   // TODO: implement
+                    String message ="Please pretend obstacle handling mode has changed";
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+                }
+                else if(GuiScreen.isAltKeyDown())
+                {
+                    // Alt + key: cycle placement mode
+                    PlacementItem.cycleMode(stack, GuiScreen.isShiftKeyDown());
                     ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
                     String message = I18n.translateToLocalFormatted("placement.message.mode",  PlacementItem.getMode(stack).localizedName());
                     Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 }
+                else 
+                {
+                 // Unmodified key: cycle species handling
+                    PlacementItem.cycleSpeciesMode(stack, GuiScreen.isShiftKeyDown());
+                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                    String message = I18n.translateToLocalFormatted("placement.message.species_mode",  PlacementItem.getSpeciesMode(stack).localizedName());
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+                    
+                }
             }
             else if(ModKeys.PLACEMENT_PREVIEW.isPressed())
             {
-                PreviewMode newMode = GuiScreen.isAltKeyDown() 
+                PreviewMode newMode = GuiScreen.isShiftKeyDown() 
                         ? Useful.prevEnumValue(Configurator.RENDER.previewSetting) 
                         : Useful.nextEnumValue(Configurator.RENDER.previewSetting);
                 Configurator.RENDER.previewSetting = newMode;
                 ConfigManager.sync(HardScience.MODID, Type.INSTANCE);
                 String message = I18n.translateToLocalFormatted("placement.message.preview_set",  I18n.translateToLocal("placement.preview." + newMode.toString().toLowerCase()));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
-            }
-            else if(ModKeys.PLACEMENT_ORIENTATION.isPressed())
-            {
-                if(stack.getItem() instanceof PlacementItem)
-                {
-                    PlacementItem.cycleOrientation(stack, GuiScreen.isAltKeyDown());
-                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                    String message = I18n.translateToLocalFormatted("placement.message.orientation_set",  PlacementItem.orientationLocalizedName(stack));
-                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
-                }
             }
         }
        

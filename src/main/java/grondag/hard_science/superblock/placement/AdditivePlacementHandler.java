@@ -88,8 +88,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
             final SuperBlock faceBlock = (SuperBlock) faceBlockState.getBlock();
             final ModelState faceModelState = faceBlock.getModelStateAssumeStateIsCurrent(faceBlockState, worldIn, facePos, true);
 
-            if((faceBlock != null 
-                    && faceBlock == stackBlock 
+            if((    faceBlock == stackBlock 
                     && faceModelState.getShape() == stackModelState.getShape())
                     && faceModelState.doesAppearanceMatch(stackModelState)) 
              {

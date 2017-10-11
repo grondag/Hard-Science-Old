@@ -10,7 +10,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.translation.I18n;
 
-public enum PlacementOrientationFace implements IMessagePlusImmutable<PlacementOrientationFace>, IReadWriteNBTImmutable<PlacementOrientationFace>, ILocalized
+public enum BlockOrientationFace implements IMessagePlusImmutable<BlockOrientationFace>, IReadWriteNBTImmutable<BlockOrientationFace>, ILocalized
 {
     DYNAMIC(null),
     MATCH_CLOSEST(null),
@@ -23,13 +23,13 @@ public enum PlacementOrientationFace implements IMessagePlusImmutable<PlacementO
     
     public final EnumFacing face;
     
-    private PlacementOrientationFace(EnumFacing face)
+    private BlockOrientationFace(EnumFacing face)
     {
         this.face = face;
     }
     
     @Override
-    public PlacementOrientationFace deserializeNBT(NBTTagCompound tag)
+    public BlockOrientationFace deserializeNBT(NBTTagCompound tag)
     {
         return Useful.safeEnumFromTag(tag, ModNBTTag.PLACEMENT_ORIENTATION_FACE, this);
     }
@@ -41,9 +41,9 @@ public enum PlacementOrientationFace implements IMessagePlusImmutable<PlacementO
     }
 
     @Override
-    public PlacementOrientationFace fromBytes(PacketBuffer pBuff)
+    public BlockOrientationFace fromBytes(PacketBuffer pBuff)
     {
-        return pBuff.readEnumValue(PlacementOrientationFace.class);
+        return pBuff.readEnumValue(BlockOrientationFace.class);
     }
 
     @Override

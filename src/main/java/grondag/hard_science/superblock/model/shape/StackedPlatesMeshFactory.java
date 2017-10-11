@@ -19,7 +19,7 @@ import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.PlacementOrientationType;
+import grondag.hard_science.superblock.placement.BlockOrientationType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -113,9 +113,9 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     }
 
     @Override
-    public PlacementOrientationType orientationType(ModelState modelState)
+    public BlockOrientationType orientationType(ModelState modelState)
     {
-        return PlacementOrientationType.FACE;
+        return BlockOrientationType.FACE;
     }
     
     @Override

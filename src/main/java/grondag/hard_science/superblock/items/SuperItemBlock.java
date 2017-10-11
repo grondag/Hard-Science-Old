@@ -6,22 +6,19 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.player.ModPlayerCaps;
-import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.IPlacementHandler;
+import grondag.hard_science.superblock.placement.PlacementEvent;
 import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.placement.PlacementResult;
 import grondag.hard_science.superblock.varia.BlockSubstance;
-import jline.internal.Log;
-import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -36,6 +33,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
@@ -55,7 +53,8 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         return true;
     }
 
-    public SuperItemBlock(SuperBlock block) {
+    public SuperItemBlock(SuperBlock block)
+    {
         super(block);
         setHasSubtypes(true);
         if(this.block == ModBlocks.virtual_block)
@@ -97,6 +96,32 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {
+        if(player == null) return new ActionResult<>(EnumActionResult.PASS, null);
+        
+        ItemStack stackIn = player.getHeldItem(hand);
+        
+        if (stackIn.isEmpty()) return new ActionResult<>(EnumActionResult.PASS, stackIn);
+        
+        PlacementResult result = IPlacementHandler.doRightClickBlock(player, null, null, null, stackIn);
+        
+        result.applyToStack(stackIn, player);
+        
+        if(result.hasPlacementList())
+        {
+            return new ActionResult<>(this.doPlacements(result, stackIn, world, player) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, player.getHeldItem(hand));
+        }
+        
+        if(result.event() != PlacementEvent.NO_OPERATION_CONTINUE) return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+        
+//        if(PlacementItem.operationInProgress(stackIn) == PlacementOperation.SELECTING && PlacementItem.isFloatingSelectionEnabled(stackIn))
+//        {
+//            BlockPos endPos = PlacementItem.getFloatingSelectionBlockPos(stackIn, player);
+//            if(endPos != null) PlacementItem.selectPlacementRegionFinish(stackIn, player, endPos, false);
+//            //FIXME: remove
+//            Log.info("Finished selection " + PlacementItem.selectedRegionLocalizedName(stackIn));
+//            return new ActionResult<>(EnumActionResult.SUCCESS, stackIn);
+//        }
+        
         if (world.isRemote) 
         {
             BlockPos blockpos = Minecraft.getMinecraft().objectMouseOver.getBlockPos();
@@ -105,9 +130,9 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             if (blockpos != null 
                     && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
                     && world.getBlockState(blockpos).getMaterial().isReplaceable()
-                    && ((SuperBlock)this.block).hasAppearanceGui())
+                    && ((SuperBlock)this.block).canUseControls(player))
             {
-                player.openGui(HardScience.INSTANCE, ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+                this.displayGui(player);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
             }
         }
@@ -122,22 +147,23 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         ItemStack stackIn = playerIn.getHeldItem(hand);
         if (stackIn.isEmpty()) return EnumActionResult.FAIL;
         
-        if(ModPlayerCaps.isModifierKeyPressed(playerIn, ModifierKey.CTRL_KEY))
+        PlacementResult result = IPlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn);
+        
+        result.applyToStack(stackIn, playerIn);
+        
+        if(result.hasPlacementList())
         {
-            PlacementItem.selectRegionStart(stackIn, pos, false);
-            //FIXME: remove
-            Log.info("Started new selection");
-            return EnumActionResult.FAIL;
-        }
-        else if(PlacementItem.isSelectRegionInProgress(stackIn))
-        {
-            //FIXME: remove
-            PlacementItem.selectRegionFinish(stackIn, pos, false);
-            Log.info("Finished selection " + PlacementItem.selectedRegionLocalizedName(stackIn));
-            return EnumActionResult.FAIL;
+            return this.doPlacements(result, stackIn, worldIn, playerIn) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
         }
         
-        if(!playerIn.capabilities.allowEdit) return EnumActionResult.FAIL;
+        return EnumActionResult.SUCCESS;
+    }
+    /**
+     * true if successful
+     */
+    private boolean doPlacements(PlacementResult result, ItemStack stackIn, World worldIn, EntityPlayer playerIn)
+    {
+        if(!playerIn.capabilities.allowEdit) return false;
         
         // supermodel blocks may need to use a different block instance depending on model/substance
         // handle this here by substituting a stack different than what player is holding, but don't
@@ -145,12 +171,12 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         SuperBlock targetBlock = (SuperBlock) this.block;
         
         ModelState modelState = PlacementItem.getStackModelState(stackIn);
-        if(modelState == null) return EnumActionResult.FAIL;
+        if(modelState == null) return false;
 
         if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
         {
             BlockSubstance substance = PlacementItem.getStackSubstance(stackIn);
-            if(substance == null) return EnumActionResult.FAIL;
+            if(substance == null) return false;
             targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
             
             if(targetBlock != this.block)
@@ -163,12 +189,9 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             }
         }
         
+        List<Pair<BlockPos, ItemStack>> placements = result.placements(); // placementHandler.getPlacementResults(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ, stackIn);
         
-        IPlacementHandler placementHandler = modelState.getShape().getPlacementHandler();
-        
-        List<Pair<BlockPos, ItemStack>> placements = placementHandler.getPlacementResults(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ, stackIn);
-
-        if(placements.isEmpty()) return EnumActionResult.FAIL;
+        if(placements.isEmpty()) return false;
         
         SoundType soundtype = getPlacementSound(stackIn);
         boolean didPlace = false;
@@ -183,11 +206,11 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
             if(worldIn.checkNoEntityCollision(axisalignedbb.offset(placedPos)))
             {
-                IBlockState placedState = targetBlock.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, placedStack.getMetadata(), playerIn, hand);
-                if (placeBlockAt(placedStack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, placedState))
+                IBlockState placedState = targetBlock.getStateFromMeta(placedStack.getMetadata());
+                if (placeBlockAt(placedStack, playerIn, worldIn, placedPos, null, 0, 0, 0, placedState))
                 {
                     didPlace = true;
-                    worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                    worldIn.playSound(playerIn, placedPos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
                     if(!(playerIn.isCreative() || isVirtual(stackIn)))
                     {
                         stackIn.shrink(1);
@@ -196,9 +219,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                 }
             }
         }
-
-        return didPlace ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
-     
+        return didPlace;
     }
    
      /**
@@ -239,5 +260,17 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     public static boolean isVirtual(ItemStack stack)
     {
         return stack.getItem() == ModItems.virtual_block;
+    }
+
+    @Override
+    public SuperBlock getSuperBlock()
+    {
+        return (SuperBlock) this.block;
+    }
+
+    @Override
+    public int guiOrdinal()
+    {
+        return ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal();
     }
 }

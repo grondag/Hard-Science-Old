@@ -43,11 +43,12 @@ public class CubicPlacementHandler implements IPlacementHandler
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
 
         SuperItemBlock item = (SuperItemBlock)stack.getItem();
-        PlacementMode placementMode = PlacementItem.getMode(stack);
+//        PlacementMode placementMode = PlacementItem.getMode(stack);
         
         SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
         ModelState stackModelState = PlacementItem.getStackModelState(stack);
+
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();

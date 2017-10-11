@@ -88,6 +88,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
         {
             this.clear();
         }
+        else
         {
             if(input.length == lastID.length)
             {

@@ -7,17 +7,17 @@ import com.google.gson.Gson;
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.player.ModPlayerCaps;
-import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.superblock.placement.IPlacementHandler;
+import grondag.hard_science.superblock.placement.PlacementEvent;
 import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.placement.PlacementResult;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
@@ -110,28 +110,16 @@ public class CommonEventHandler
         
         if(player == null) return;
         
-        ItemStack stackIn = player.getHeldItemMainhand();
+        ItemStack stackIn = event.getItemStack();
         if (stackIn == null || stackIn.isEmpty() || !(stackIn.getItem() instanceof PlacementItem)) return;
+
+        PlacementResult result = IPlacementHandler.doLeftClickBlock(player, event.getPos(), event.getFace(), event.getHitVec(), stackIn);
         
-        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
-        {
-            //FIXME: remove
-            Log.info("EXCAVATION LOGIC HAPPENS NOW");
-            event.setCanceled(true);
-        }
-        else if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
-        {
-            //FIXME: remove
-            Log.info("UNDO LOGIC HAPPENS NOW");
-            event.setCanceled(true);
-        }
-        else if(PlacementItem.isSelectRegionInProgress(stackIn))
-        {
-            //FIXME: remove
-            Log.info("Cancel region selection");
-            PlacementItem.selectRegionCancel(stackIn);
-            event.setCanceled(true);
-        }
+        result.applyToStack(stackIn, player);
+        
+        //TODO: do deletions
+        
+        if(result.event() != PlacementEvent.NO_OPERATION_CONTINUE) event.setCanceled(true);
     }
     
     @SubscribeEvent

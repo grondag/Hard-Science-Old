@@ -10,7 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.translation.I18n;
 
-public enum PlacementOrientationCorner implements IMessagePlusImmutable<PlacementOrientationCorner>, IReadWriteNBTImmutable<PlacementOrientationCorner>, ILocalized
+public enum BlockOrientationCorner implements IMessagePlusImmutable<BlockOrientationCorner>, IReadWriteNBTImmutable<BlockOrientationCorner>, ILocalized
 {
     DYNAMIC(null),
     MATCH_CLOSEST(null),
@@ -25,13 +25,13 @@ public enum PlacementOrientationCorner implements IMessagePlusImmutable<Placemen
     
     public final FarCorner corner;
     
-    private PlacementOrientationCorner(FarCorner corner)
+    private BlockOrientationCorner(FarCorner corner)
     {
         this.corner = corner;
     }
     
     @Override
-    public PlacementOrientationCorner deserializeNBT(NBTTagCompound tag)
+    public BlockOrientationCorner deserializeNBT(NBTTagCompound tag)
     {
         return Useful.safeEnumFromTag(tag, ModNBTTag.PLACEMENT_ORIENTATION_CORNER, this);
     }
@@ -43,9 +43,9 @@ public enum PlacementOrientationCorner implements IMessagePlusImmutable<Placemen
     }
 
     @Override
-    public PlacementOrientationCorner fromBytes(PacketBuffer pBuff)
+    public BlockOrientationCorner fromBytes(PacketBuffer pBuff)
     {
-        return pBuff.readEnumValue(PlacementOrientationCorner.class);
+        return pBuff.readEnumValue(BlockOrientationCorner.class);
     }
 
     @Override

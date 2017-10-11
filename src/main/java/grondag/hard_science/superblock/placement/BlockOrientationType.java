@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.placement;
 
-public enum PlacementOrientationType
+public enum BlockOrientationType
 {
     NONE,
     AXIS,

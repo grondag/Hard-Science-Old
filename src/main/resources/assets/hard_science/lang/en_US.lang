@@ -73,18 +73,36 @@ key.placement_history=Cycle Block Placement History
 key.placement_preview=Toggle Block Placement Preview Mode
 
 #PLACEMENT
+placement.message.range_normal=Block targeting set to normal Minecraft behavior.
+placement.message.range_floating=Block targeting set to %d blocks in direction player is looking.
+placement.message.orientation_block=Block orientation set to %s
+placement.message.orientation_region=Region orientation set to %s
+
 placement.message.preview_set=Placement preview mode set to %s
-placement.message.orientation_set=Placement orientation set to %s
 placement.message.mode=Placement mode/shape set to %s
 placement.message.region_single=Placement region is a single block
 placement.message.region_additive=Placement region is determined by existing blocks.
 placement.message.region_box=Placement region is %d x %d x %d blocks
+placement.message.species_mode=Changed join behavior: %s
+
 placement.preview.none=NONE
 placement.preview.outline=OUTLINE
 #placement.preview.ghost=GHOST
 placement.mode.single_block=SINGLE BLOCK
 placement.mode.fill_region=FILL REGION
 placement.mode.add_to_existing=ADD TO EXISTING BLOCKS
+
+placement.species_mode.match_clicked=Join with clicked face if possible, break otherwise (hold Alt key to break instead)
+placement.species_mode.counter_clicked=Break with clicked face, join otherwise (hold Alt key to join instead) 
+placement.species_mode.match_most=Join with nearby blocks if possible (hold Alt key to break instead)
+placement.species_mode.counter_most=Break with nearby blocks if possible (hold Alt key to join instead)
+
+placement.orientation.region.xyz=Width / Height / Depth (Default)
+placement.orientation.region.zyx=Width = Depth / Height / Depth = Width 
+placement.orientation.region.zxy=Width = Depth / Height = Width / Depth = Height
+placement.orientation.region.xzy=Width / Depth / Height = Depth = Height
+placement.orientation.region.yxz=Width = Height / Height = Width / Depth
+placement.orientation.region.yzx=Width = Height / Height = Depth / Depth = Width
 
 placement.orientation.none=NONE
 placement.orientation.axis.dynamic=DYNAMIC
@@ -93,7 +111,7 @@ placement.orientation.axis.x=EAST/WEST
 placement.orientation.axis.y=UP/DOWN
 placement.orientation.axis.z=NORTH/SOUTH
 
-placement.orientation.face.dynamicp=DYNAMIC
+placement.orientation.face.dynamic=DYNAMIC
 placement.orientation.face.match_closest=MATCH CLOSEST
 placement.orientation.face.up=UP
 placement.orientation.face.down=DOWN
@@ -102,7 +120,7 @@ placement.orientation.face.west=WEST
 placement.orientation.face.north=NORTH
 placement.orientation.face.south=SOUTH
 
-placement.orientation.edge.dynamicp=DYNAMIC
+placement.orientation.edge.dynamic=DYNAMIC
 placement.orientation.edge.match_closest=MATCH CLOSEST
 placement.orientation.edge.up_east=UP / EAST
 placement.orientation.edge.up_west=UP / WEST
@@ -117,7 +135,7 @@ placement.orientation.edge.down_west=DOWN / WEST
 placement.orientation.edge.down_north=DOWN / NORTH
 placement.orientation.edge.down_south=DOWN / SOUTH
 
-placement.orientation.corner.dynamicp=DYNAMIC
+placement.orientation.corner.dynamic=DYNAMIC
 placement.orientation.corner.match_closest=MATCH CLOSEST
 placement.orientation.edge.up_north_east=UP / NORTH / EAST
 placement.orientation.edge.up_north_west=UP / NORTH / WEST

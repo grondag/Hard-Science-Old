@@ -14,13 +14,16 @@ import net.minecraft.util.text.translation.I18n;
  */
 public enum PlacementMode implements IMessagePlusImmutable<PlacementMode>, IReadWriteNBTImmutable<PlacementMode>, ILocalized
 {
-    /** place selected block */
+    /** place selected block - normal MC  behavior*/
     SINGLE_BLOCK,
     
     /** fill selected AABB*/
     FILL_REGION,
     
-    /** like a typical MC builder's wand */
+    /** place surface blocks of AABB and excavate interior*/
+    HOLLOW_REGION,
+    
+    /** act like a typical MC builder's wand */
     ADD_TO_EXISTING;
     
     @Override

@@ -1006,13 +1006,15 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     }
 
     /**
-     * True if block has a configurable appearance.
+     * True if block has a GUI and keyboard controls and player can use them. 
+     * May be that the block simply doesn't have them, or player may not have rights.
+     * Some blocks have controls that only work in creative mode.
      */
-    public boolean hasAppearanceGui()
+    public boolean canUseControls(EntityPlayer player)
     {
         return false;
     }
-
+    
     /** 
      * This is an egregious hack to avoid performance hit of instanceof.
      * (Based on performance profile results.) <br> <br>

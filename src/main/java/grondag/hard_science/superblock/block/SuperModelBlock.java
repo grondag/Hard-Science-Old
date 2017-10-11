@@ -14,6 +14,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
@@ -190,9 +191,9 @@ public class SuperModelBlock extends SuperBlockPlus
     }
     
     @Override
-    public boolean hasAppearanceGui()
+    public boolean canUseControls(EntityPlayer player)
     {
-        return true;
+        return player.capabilities.isCreativeMode || this.isVirtual();
     }
     
      @Override

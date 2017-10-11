@@ -16,8 +16,8 @@ public class ModKeys
 
     public static void init(FMLInitializationEvent event)
     {
-        PLACEMENT_MODE = new KeyBinding("key.placement_mode", KeyConflictContext.IN_GAME, Keyboard.KEY_B, "key.categories.hard_science");
-        PLACEMENT_HISTORY = new KeyBinding("key.placement_history", KeyConflictContext.IN_GAME, Keyboard.KEY_V, "key.categories.hard_science");
+        PLACEMENT_MODE = new KeyBinding("key.placement_mode", KeyConflictContext.IN_GAME, Keyboard.KEY_V, "key.categories.hard_science");
+        PLACEMENT_HISTORY = new KeyBinding("key.placement_history", KeyConflictContext.IN_GAME, Keyboard.KEY_B, "key.categories.hard_science");
         PLACEMENT_ORIENTATION = new KeyBinding("key.placement_orientation", KeyConflictContext.IN_GAME, Keyboard.KEY_R, "key.categories.hard_science");
         PLACEMENT_PREVIEW = new KeyBinding("key.placement_preview", KeyConflictContext.IN_GAME, Keyboard.KEY_P, "key.categories.hard_science");
 

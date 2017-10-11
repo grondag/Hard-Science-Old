@@ -27,7 +27,7 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.placement.PlacementOrientationType;
+import grondag.hard_science.superblock.placement.BlockOrientationType;
 import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
@@ -321,7 +321,7 @@ public class ModelStateFactory
         {
             if(this == obj) return true;
 
-            if(obj instanceof ModelState && obj != null)
+            if(obj instanceof ModelState)
             {
                 ModelState other = (ModelState)obj;
                 return this.bits0 == other.bits0
@@ -337,7 +337,7 @@ public class ModelStateFactory
         {
             if(this == obj) return true;
 
-            if(obj instanceof ModelState && obj != null)
+            if(obj instanceof ModelState)
             {
                 ModelState other = (ModelState)obj;
                 return this.bits0 == other.bits0
@@ -491,7 +491,7 @@ public class ModelStateFactory
         /**
          * Used by placement logic to know if shape has any kind of orientation to it that can be selected during placement.
          */
-        public PlacementOrientationType orientationType()
+        public BlockOrientationType orientationType()
         { 
             return getShape().meshFactory().orientationType(this);
         } 

@@ -146,7 +146,7 @@ public class TerrainBlock
                 update = Blocks.AIR.getDefaultState();
                 worldObj.setBlockState(basePos, update);
             }
-            else if(baseState.getValue(SuperBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
+            else if(fillBlock != null && (baseState.getValue(SuperBlock.META) != targetMeta || baseBlock != fillBlock))
             {
                 update = fillBlock.getDefaultState().withProperty(SuperBlock.META, targetMeta);
                 worldObj.setBlockState(basePos, update);

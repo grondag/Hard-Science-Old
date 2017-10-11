@@ -1,49 +1,103 @@
 package grondag.hard_science.superblock.placement;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import grondag.hard_science.HardScience;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
 
 /**
  * Intended control layout for placement items
  *
  *   Click 
- *       normal - not selecting: break block
+ *    Done
+ *       normal - not selecting/deleting: break blocks in region
+ *       alt - not deleting: undo last placement
+ *       ctrl - not deleting: start delete mode
+ *       alt + ctrl: undo last deletion
  *       normal - selecting: cancel selection
- *       alt - undo last placement
- *       ctrl - excavate region
+ *       normal - deleting: set delete region size and delete all blocks in delete region
+ *       ctrl - deleting: set delete region shape without deleting blocks in current region
  *   
  *   Right Click
- *       normal - not selecting: place according to current slection
- *       normal - selecting, complete and place selection
- *       alt - place with different species
- *       ctrl - start new selection
+ *       delete mode - any: cancel delete
+ *       select mode - ctrl: complete selection without placing
+ *       select mode - none: selecting, complete and place selection
+ *       normal mode - none: place according to current mode/selection
+ *       normal mode - ctrl: start new selection
+ *       normal mode - alt: place with different species      
  *       
- *   R - cycle block orientation
- *       alt: reverse
- *       ctrl: cycle region orientation
- *       ctrl+alt: reverse cycle region orientation
+ *   R - normal: cycle block orientation
+ *       ctrl: cycle selection floating / range
+ *       alt: cycle region orientation
+ *       shift: reverse
+ *
+ *   B - normal: show block menu
+ *       ctrl: cycle region history
+ *       alt: cycle block history
+ *       shift: reverse 
  *       
- *   V - normal: cycle region/shape history
- *       alt: reverse 
+ *   V - ctrl: cycle obstacle handling SKIP / DISALLOW / SELECTION ASSIST
+ *       alt: cycle placement mode  SINGLE / FILL REGION / HOLLOW REGION / FOLLOW
+ *       normal: cycle species handling MATCH MOST / AVOID MOST / MATCH CLICKED / AVOID CLICKED
+ *       shift: reverse
  *       
- *   B - toggle placement mode  SINGLE/FILL REGION/FOLLOW
  */
 public interface PlacementItem
 {
-    public static void setOrientationAxis(ItemStack stack, PlacementOrientationAxis orientation)
+    /**
+     * Returns the SuperBlock instance of the item implementing this interface,
+     * if it is an ItemBlock.  Could be null if it isn't an item block.
+     * @return
+     */
+    public SuperBlock getSuperBlock();
+    
+    public int guiOrdinal();
+    
+    public default void displayGui(EntityPlayer player)
+    {
+        player.openGui(HardScience.INSTANCE, this.guiOrdinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+    }
+    
+    public static void setBlockOrientationAxis(ItemStack stack, BlockOrientationAxis orientation)
     {
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
+    /**
+     * Returns PlacementItem held by player in either hand, or null if player isn't holding one.
+     * If player is holding a PlacementItem in both hands, returns item in primary hand.
+     */
+    @Nullable
+    public static ItemStack getHeldPlacementItem(EntityPlayer player)
+    {
+        ItemStack stack = Minecraft.getMinecraft().player.getHeldItemMainhand();
+        
+        if(stack.getItem() instanceof PlacementItem) return stack;
+        
+        
+        stack = Minecraft.getMinecraft().player.getHeldItemOffhand();
+        
+        if(stack.getItem() instanceof PlacementItem) return stack;
+        
+        return null;
+    }
+    
     /**
      * Hides what type of shape we are using and just lets us know the axis.
      * Returns UP/DOWN if not applicable.
@@ -53,10 +107,10 @@ public interface PlacementItem
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
-            return getOrientationAxis(stack).axis;
+            return getBlockOrientationAxis(stack).axis;
             
         case FACE:
-            return getOrientationFace(stack).face.getAxis();
+            return getBlockOrientationFace(stack).face.getAxis();
 
         case NONE:
         case EDGE:
@@ -78,7 +132,7 @@ public interface PlacementItem
             return false;
             
         case FACE:
-            return getOrientationFace(stack).face.getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
+            return getBlockOrientationFace(stack).face.getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
 
         case NONE:
         case EDGE:
@@ -96,16 +150,16 @@ public interface PlacementItem
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
-            return getOrientationAxis(stack) == PlacementOrientationAxis.DYNAMIC;
+            return getBlockOrientationAxis(stack) == BlockOrientationAxis.DYNAMIC;
             
         case CORNER:
-            return getOrientationCorner(stack) == PlacementOrientationCorner.DYNAMIC;
+            return getBlockOrientationCorner(stack) == BlockOrientationCorner.DYNAMIC;
             
         case EDGE:
-            return getOrientationEdge(stack) == PlacementOrientationEdge.DYNAMIC;
+            return getBlockOrientationEdge(stack) == BlockOrientationEdge.DYNAMIC;
             
         case FACE:
-            return getOrientationFace(stack) == PlacementOrientationFace.DYNAMIC;
+            return getBlockOrientationFace(stack) == BlockOrientationFace.DYNAMIC;
 
         case NONE:
         default:
@@ -121,16 +175,16 @@ public interface PlacementItem
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
-            return getOrientationAxis(stack).isFixed();
+            return getBlockOrientationAxis(stack).isFixed();
             
         case CORNER:
-            return getOrientationCorner(stack).isFixed();
+            return getBlockOrientationCorner(stack).isFixed();
             
         case EDGE:
-            return getOrientationEdge(stack).isFixed();
+            return getBlockOrientationEdge(stack).isFixed();
             
         case FACE:
-            return getOrientationFace(stack).isFixed();
+            return getBlockOrientationFace(stack).isFixed();
 
         case NONE:
         default:
@@ -146,16 +200,16 @@ public interface PlacementItem
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
-            return getOrientationAxis(stack) == PlacementOrientationAxis.MATCH_CLOSEST;
+            return getBlockOrientationAxis(stack) == BlockOrientationAxis.MATCH_CLOSEST;
             
         case CORNER:
-            return getOrientationCorner(stack) == PlacementOrientationCorner.MATCH_CLOSEST;
+            return getBlockOrientationCorner(stack) == BlockOrientationCorner.MATCH_CLOSEST;
             
         case EDGE:
-            return getOrientationEdge(stack) == PlacementOrientationEdge.MATCH_CLOSEST;
+            return getBlockOrientationEdge(stack) == BlockOrientationEdge.MATCH_CLOSEST;
             
         case FACE:
-            return getOrientationFace(stack) == PlacementOrientationFace.MATCH_CLOSEST;
+            return getBlockOrientationFace(stack) == BlockOrientationFace.MATCH_CLOSEST;
 
         case NONE:
         default:
@@ -163,82 +217,82 @@ public interface PlacementItem
         }
     }
     
-    public static PlacementOrientationAxis getOrientationAxis(ItemStack stack)
+    public static BlockOrientationAxis getBlockOrientationAxis(ItemStack stack)
     {
-        return PlacementOrientationAxis.DYNAMIC.deserializeNBT(stack.getTagCompound());
+        return BlockOrientationAxis.DYNAMIC.deserializeNBT(stack.getTagCompound());
     }
     
-    public static void cycleOrientationAxis(ItemStack stack, boolean reverse)
+    public static void cycleBlockOrientationAxis(ItemStack stack, boolean reverse)
     {
-        setOrientationAxis(stack, reverse ? Useful.prevEnumValue(getOrientationAxis(stack)) : Useful.nextEnumValue(getOrientationAxis(stack)));
+        setBlockOrientationAxis(stack, reverse ? Useful.prevEnumValue(getBlockOrientationAxis(stack)) : Useful.nextEnumValue(getBlockOrientationAxis(stack)));
     }
     
-    public static void setOrientationFace(ItemStack stack, PlacementOrientationFace orientation)
+    public static void setBlockOrientationFace(ItemStack stack, BlockOrientationFace orientation)
     {
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
-    public static PlacementOrientationFace getOrientationFace(ItemStack stack)
+    public static BlockOrientationFace getBlockOrientationFace(ItemStack stack)
     {
-        return PlacementOrientationFace.DYNAMIC.deserializeNBT(stack.getTagCompound());
+        return BlockOrientationFace.DYNAMIC.deserializeNBT(stack.getTagCompound());
     }
     
-    public static void cycleOrientationFace(ItemStack stack, boolean reverse)
+    public static void cycleBlockOrientationFace(ItemStack stack, boolean reverse)
     {
-        setOrientationFace(stack, reverse ? Useful.prevEnumValue(getOrientationFace(stack)) : Useful.nextEnumValue(getOrientationFace(stack)));
+        setBlockOrientationFace(stack, reverse ? Useful.prevEnumValue(getBlockOrientationFace(stack)) : Useful.nextEnumValue(getBlockOrientationFace(stack)));
     }
     
-    public static void setOrientationEdge(ItemStack stack, PlacementOrientationEdge orientation)
+    public static void setBlockOrientationEdge(ItemStack stack, BlockOrientationEdge orientation)
     {
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
-    public static PlacementOrientationEdge getOrientationEdge(ItemStack stack)
+    public static BlockOrientationEdge getBlockOrientationEdge(ItemStack stack)
     {
-        return PlacementOrientationEdge.DYNAMIC.deserializeNBT(stack.getTagCompound());
+        return BlockOrientationEdge.DYNAMIC.deserializeNBT(stack.getTagCompound());
     }
     
-    public static void cycleOrientationEdge(ItemStack stack, boolean reverse)
+    public static void cycleBlockOrientationEdge(ItemStack stack, boolean reverse)
     {
-        setOrientationEdge(stack, reverse ? Useful.prevEnumValue(getOrientationEdge(stack)) : Useful.nextEnumValue(getOrientationEdge(stack)));
+        setBlockOrientationEdge(stack, reverse ? Useful.prevEnumValue(getBlockOrientationEdge(stack)) : Useful.nextEnumValue(getBlockOrientationEdge(stack)));
     }
     
-    public static void setOrientationCorner(ItemStack stack, PlacementOrientationCorner orientation)
+    public static void setBlockOrientationCorner(ItemStack stack, BlockOrientationCorner orientation)
     {
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
-    public static PlacementOrientationCorner getOrientationCorner(ItemStack stack)
+    public static BlockOrientationCorner getBlockOrientationCorner(ItemStack stack)
     {
-        return PlacementOrientationCorner.DYNAMIC.deserializeNBT(stack.getTagCompound());
+        return BlockOrientationCorner.DYNAMIC.deserializeNBT(stack.getTagCompound());
     }
     
-    public static void cycleOrientationCorner(ItemStack stack, boolean reverse)
+    public static void cycleBlockOrientationCorner(ItemStack stack, boolean reverse)
     {
-        setOrientationCorner(stack, reverse ? Useful.prevEnumValue(getOrientationCorner(stack)) : Useful.nextEnumValue(getOrientationCorner(stack)));
+        setBlockOrientationCorner(stack, reverse ? Useful.prevEnumValue(getBlockOrientationCorner(stack)) : Useful.nextEnumValue(getBlockOrientationCorner(stack)));
     }
     
     /**
      * Context-sensitive version - calls appropriate cycle method based on shape type
      */
-    public static void cycleOrientation(ItemStack stack, boolean reverse)
+    public static void cycleBlockOrientation(ItemStack stack, boolean reverse)
     {
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
-            cycleOrientationAxis(stack, reverse);
+            cycleBlockOrientationAxis(stack, reverse);
             break;
             
         case CORNER:
-            cycleOrientationCorner(stack, reverse);
+            cycleBlockOrientationCorner(stack, reverse);
             break;
             
         case EDGE:
-            cycleOrientationEdge(stack, reverse);
+            cycleBlockOrientationEdge(stack, reverse);
             break;
             
         case FACE:
-            cycleOrientationFace(stack, reverse);
+            cycleBlockOrientationFace(stack, reverse);
             break;
 
         case NONE:
@@ -250,26 +304,41 @@ public interface PlacementItem
     /**
      * Context-sensitive localized name of current orientation.
      */
-    public static String orientationLocalizedName(ItemStack stack)
+    public static String blockOrientationLocalizedName(ItemStack stack)
     {
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
-            return getOrientationAxis(stack).localizedName();
+            return getBlockOrientationAxis(stack).localizedName();
             
         case CORNER:
-            return getOrientationCorner(stack).localizedName();
+            return getBlockOrientationCorner(stack).localizedName();
             
         case EDGE:
-            return getOrientationEdge(stack).localizedName();
+            return getBlockOrientationEdge(stack).localizedName();
             
         case FACE:
-            return getOrientationFace(stack).localizedName();
+            return getBlockOrientationFace(stack).localizedName();
 
         case NONE:
         default:
             return I18n.translateToLocal("placement.orientation.none");
         }
+    }
+    
+    public static void setRegionOrientation(ItemStack stack, RegionOrientation orientation)
+    {
+        orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
+    }
+
+    public static RegionOrientation getRegionOrientation(ItemStack stack)
+    {
+        return RegionOrientation.XYZ.deserializeNBT(stack.getTagCompound());
+    }
+    
+    public static void cycleRegionOrientation(ItemStack stack, boolean reverse)
+    {
+        setRegionOrientation(stack, reverse ? Useful.prevEnumValue(getRegionOrientation(stack)) : Useful.nextEnumValue(getRegionOrientation(stack)));
     }
     
     public static void setMode(ItemStack stack, PlacementMode mode)
@@ -287,7 +356,21 @@ public interface PlacementItem
         setMode(stack, reverse ? Useful.prevEnumValue(getMode(stack)) : Useful.nextEnumValue(getMode(stack)));
     }
     
-   
+    public static void setSpeciesMode(ItemStack stack, SpeciesMode mode)
+    {
+        mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
+    }
+    
+    public static SpeciesMode getSpeciesMode(ItemStack stack)
+    {
+        return SpeciesMode.MATCH_CLICKED.deserializeNBT(stack.getTagCompound());
+    }
+    
+    public static void cycleSpeciesMode(ItemStack stack, boolean reverse)
+    {
+        setSpeciesMode(stack, reverse ? Useful.prevEnumValue(getSpeciesMode(stack)) : Useful.nextEnumValue(getSpeciesMode(stack)));
+    }
+    
     public static void setStackLightValue(ItemStack stack, int lightValue)
     {
         Useful.getOrCreateTagCompound(stack).setByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE, (byte)lightValue);
@@ -353,28 +436,41 @@ public interface PlacementItem
     public static boolean cycleHistory(ItemStack stack, boolean reverse)
     {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
     
-    public static void selectRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
+    public static void selectPlacementRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
     {
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        tag.setBoolean(ModNBTTag.PLACEMENT_REGION_IN_PROGRESS, true);
-        tag.setLong(ModNBTTag.PLACEMENT_REGION_START_POSITION, pos.toLong());
+        PlacementOperation.SELECTING.serializeNBT(tag);
+        PlacementMode.FILL_REGION.serializeNBT(tag);
+        tag.setLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION, pos.toLong());
     }
     
-    public static void selectRegionCancel(ItemStack stack)
+    public static void selectPlacementRegionCancel(ItemStack stack)
     {
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        tag.setBoolean(ModNBTTag.PLACEMENT_REGION_IN_PROGRESS, false);
-        tag.removeTag(ModNBTTag.PLACEMENT_REGION_START_POSITION);
+        PlacementOperation.NONE.serializeNBT(tag);
+        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
     }
     
-    public static void selectRegionFinish(ItemStack stack, BlockPos pos, boolean isCenter)
+    /**
+     * See {@link #placementRegionPosition(ItemStack)} for some explanation.
+     */
+    public static BlockPos getPlayerRelativeRegionFromEndPoints(BlockPos from, BlockPos to, EntityPlayer player)
+    {
+        BlockPos selectedPos = new BlockPos(1 + Math.abs(from.getX() - to.getX()), 1 + Math.abs(from.getY() - to.getY()), 1 + Math.abs(from.getZ() - to.getZ()));
+        return(player.getHorizontalFacing().getAxis() == EnumFacing.Axis.Z)
+                ? selectedPos
+                : new BlockPos(selectedPos.getZ(), selectedPos.getY(), selectedPos.getX());
+    }
+    
+    public static void selectPlacementRegionFinish(ItemStack stack, EntityPlayer player, BlockPos pos, boolean isCenter)
     {
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        BlockPos startPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_START_POSITION));
-        BlockPos selectedPos = new BlockPos(1 + Math.abs(pos.getX() - startPos.getX()), 1 + Math.abs(pos.getY() - startPos.getY()), 1 + Math.abs(pos.getZ() - startPos.getZ()));
+        BlockPos startPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION));
+        BlockPos selectedPos = getPlayerRelativeRegionFromEndPoints(pos, startPos, player);
+
         if(selectedPos.getX() == 1 && selectedPos.getY() == 1 && selectedPos.getZ() == 1 )
         {
             PlacementMode.SINGLE_BLOCK.serializeNBT(tag);
@@ -382,33 +478,89 @@ public interface PlacementItem
         else
         {
             PlacementMode.FILL_REGION.serializeNBT(tag);
-            tag.setLong(ModNBTTag.PLACEMENT_REGION_SELECTED_POSITION, selectedPos.toLong());
+            
+            
+            tag.setLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION, selectedPos.toLong());
         }
    
-        tag.setBoolean(ModNBTTag.PLACEMENT_REGION_IN_PROGRESS, false);
-        tag.removeTag(ModNBTTag.PLACEMENT_REGION_START_POSITION);
+        PlacementOperation.NONE.serializeNBT(tag);
+        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
     }
     
-    public static boolean isSelectRegionInProgress(ItemStack stack)
+    public static void selectDeletionRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
     {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null ? false : tag.getBoolean(ModNBTTag.PLACEMENT_REGION_IN_PROGRESS);
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        PlacementOperation.DELETING.serializeNBT(tag);
+        tag.setLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION, pos.toLong());
     }
     
-    public static BlockPos selectedRegion(ItemStack stack)
+    public static void selectDeletionRegionCancel(ItemStack stack)
     {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null ? new BlockPos(1, 1, 1) : BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_SELECTED_POSITION));
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        PlacementOperation.NONE.serializeNBT(tag);
+        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
     }
     
-    public static BlockPos selectedRegionStart(ItemStack stack)
+    public static void selectDeletionRegionFinish(ItemStack stack, EntityPlayer player, BlockPos pos, boolean isCenter)
+    {
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        BlockPos startPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION));
+        if(pos.equals(startPos))
+        {
+            tag.removeTag(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION);
+        }
+        else
+        {
+            BlockPos selectedPos = getPlayerRelativeRegionFromEndPoints(pos, startPos, player);
+            tag.setLong(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION, selectedPos.toLong());
+        }
+        PlacementOperation.NONE.serializeNBT(tag);
+        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
+    }
+    
+    public static PlacementOperation operationInProgress(ItemStack stack)
+    {
+        return PlacementOperation.NONE.deserializeNBT(stack.getTagCompound());
+    }
+ 
+    /**
+     * X is left/right relative to player and Z is depth in direction player is facing.
+     * Y is always vertical height.
+     * All are always positive numbers.
+     */
+    @Nonnull
+    public static BlockPos placementRegionPosition(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return tag == null 
-                ? null 
-                : tag.getBoolean(ModNBTTag.PLACEMENT_REGION_IN_PROGRESS) 
-                    ? BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_SELECTED_POSITION))
-                    : null;
+        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION)) return new BlockPos(1, 1, 1);
+        
+        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION));
+    }
+    
+    /**
+     * X is left/right relative to player and Z is depth in direction player is facing.
+     * Y is always vertical height.
+     * All are always positive numbers.
+     * Null if single block.
+     */
+    @Nullable
+    public static BlockPos deletionRegionPosition(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION)) return null;
+        
+        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION));
+    }
+    
+    @Nullable
+    public static BlockPos operationPosition(ItemStack stack)
+    {
+        if (operationInProgress(stack) == PlacementOperation.NONE) return null;
+                        
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION)) return null;
+        
+        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION));
     }
     
 //    /**
@@ -419,11 +571,11 @@ public interface PlacementItem
 //        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
 //        if(selectedPos == null)
 //        {
-//            tag.removeTag(ModNBTTag.PLACEMENT_REGION_SELECTED_POSITION);
+//            tag.removeTag(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION);
 //        }
 //        else
 //        {
-//            tag.setLong(ModNBTTag.PLACEMENT_REGION_SELECTED_POSITION, selectedPos.toLong());
+//            tag.setLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION, selectedPos.toLong());
 //        }
 //    }
     
@@ -432,7 +584,7 @@ public interface PlacementItem
         switch(getMode(stack))
         {
         case FILL_REGION:
-            BlockPos pos = selectedRegion(stack);
+            BlockPos pos = placementRegionPosition(stack);
             return I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
             
         case ADD_TO_EXISTING:
@@ -443,5 +595,54 @@ public interface PlacementItem
             return I18n.translateToLocal("placement.message.region_single");
         
         }
+    }
+    
+    /**
+     * 0 means non-floating
+     */
+    public static void setSelectionTargetRange(ItemStack stack, int range)
+    {
+        // subtract because external values jump from 0 to 2
+        if(range > 0) range--;
+        Useful.getOrCreateTagCompound(stack).setByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE, (byte)range);
+    }
+    
+    /**
+     * 0 means non-floating
+     */
+    public static int getFloatingSelectionRange(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        int range = tag == null ? 0 : MathHelper.clamp(tag.getByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE), 0, 4);
+        return range == 0 ? 0 : range + 1;
+    }
+    
+    public static void cycleSelectionTargetRange(ItemStack stack, boolean reverse)
+    {
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        int range = tag.getByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE) + (reverse ? -1 : 1);
+        if(range > 4) range = 0;
+        if(range < 0) range = 4;
+        tag.setByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE, (byte)range);
+    }
+    
+    public static boolean isFloatingSelectionEnabled(ItemStack stack)
+    {
+        return getFloatingSelectionRange(stack) != 0;
+    }
+    
+    /**
+     * Will return a meaningless result if floating selection is disabled.
+     */
+    public static BlockPos getFloatingSelectionBlockPos(ItemStack stack, EntityLivingBase entity)
+    {
+        int range = getFloatingSelectionRange(stack);
+        
+        Vec3d look = entity.getLookVec();
+        int blockX = MathHelper.floor(look.x * range + entity.posX);
+        int blockY = MathHelper.floor(look.y * range + entity.posY + entity.getEyeHeight());
+        int blockZ = MathHelper.floor(look.z * range + entity.posZ);
+
+        return new BlockPos(blockX, blockY, blockZ);
     }
 }

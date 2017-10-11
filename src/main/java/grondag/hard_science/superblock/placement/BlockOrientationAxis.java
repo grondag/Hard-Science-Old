@@ -10,7 +10,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.translation.I18n;
 
-public enum PlacementOrientationAxis implements IMessagePlusImmutable<PlacementOrientationAxis>, IReadWriteNBTImmutable<PlacementOrientationAxis>, ILocalized
+public enum BlockOrientationAxis implements IMessagePlusImmutable<BlockOrientationAxis>, IReadWriteNBTImmutable<BlockOrientationAxis>, ILocalized
 {
     DYNAMIC(null),
     MATCH_CLOSEST(null),
@@ -20,13 +20,13 @@ public enum PlacementOrientationAxis implements IMessagePlusImmutable<PlacementO
     
     public final EnumFacing.Axis axis;
     
-    private PlacementOrientationAxis(EnumFacing.Axis axis)
+    private BlockOrientationAxis(EnumFacing.Axis axis)
     {
         this.axis = axis;
     }
     
     @Override
-    public PlacementOrientationAxis deserializeNBT(NBTTagCompound tag)
+    public BlockOrientationAxis deserializeNBT(NBTTagCompound tag)
     {
         return Useful.safeEnumFromTag(tag, ModNBTTag.PLACEMENT_ORIENTATION_AXIS, this);
     }
@@ -38,9 +38,9 @@ public enum PlacementOrientationAxis implements IMessagePlusImmutable<PlacementO
     }
 
     @Override
-    public PlacementOrientationAxis fromBytes(PacketBuffer pBuff)
+    public BlockOrientationAxis fromBytes(PacketBuffer pBuff)
     {
-        return pBuff.readEnumValue(PlacementOrientationAxis.class);
+        return pBuff.readEnumValue(BlockOrientationAxis.class);
     }
 
     @Override

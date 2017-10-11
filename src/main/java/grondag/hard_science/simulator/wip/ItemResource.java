@@ -168,7 +168,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     {
         nbt.setInteger(ModNBTTag.ITEM_RESOURCE_ITEM, Item.getIdFromItem(this.item));
         nbt.setInteger(ModNBTTag.ITEM_RESOURCE_META, this.meta);
-        if(this != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG, this.tag);
+        nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG, this.tag);
         if(this.caps != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS, this.caps);
     }
 

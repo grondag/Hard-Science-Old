@@ -14,6 +14,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
@@ -187,7 +189,7 @@ public class TrueTypeFont
 
     }
 
-    private void createSet(char[] customCharsArray)
+    private void createSet(@Nullable char[] customCharsArray)
     {
         // If there are custom chars then I expand the font texture twice
         if (customCharsArray != null && customCharsArray.length > 0)
@@ -211,43 +213,46 @@ public class TrueTypeFont
             int positionX = 0;
             int positionY = 0;
 
-            int customCharsLength = (customCharsArray != null) ? customCharsArray.length : 0;
-
-            for (int i = 0; i < 256 + customCharsLength; i++)
+            if(customCharsArray != null)
             {
+                int customCharsLength = customCharsArray.length;
 
-                // get 0-255 characters and then custom characters
-                char ch = (i < 256) ? (char) i : customCharsArray[i - 256];
-
-                BufferedImage fontImage = getFontImage(ch);
-
-
-                if (positionX + fontImage.getWidth() >= textureWidth)
+                for (int i = 0; i < 256 + customCharsLength; i++)
                 {
-                    positionX = 0;
-                    positionY += this.fontHeight + GLYPH_MARGIN * 2;
+    
+                    // get 0-255 characters and then custom characters
+                    char ch = (i < 256) ? (char) i : customCharsArray[i - 256];
+    
+                    BufferedImage fontImage = getFontImage(ch);
+    
+    
+                    if (positionX + fontImage.getWidth() >= textureWidth)
+                    {
+                        positionX = 0;
+                        positionY += this.fontHeight + GLYPH_MARGIN * 2;
+                    }
+                    
+                    GlyphInfo glyph = new GlyphInfo(fontImage.getWidth() - GLYPH_MARGIN * 2, this.fontHeight, positionX + GLYPH_MARGIN, positionY + GLYPH_MARGIN);
+    
+    
+                    // Draw it here
+                    g.drawImage(fontImage, positionX, positionY, null);
+    
+                    positionX += fontImage.getWidth();
+    
+                    if (i < 256)
+                    { // standard characters
+                        glyphArray[i] = glyph;
+                    }
+                    else
+                    { // custom characters
+                        customGlyphs.put(ch, glyph);
+                    }
+    
+                    fontImage = null;
                 }
-                
-                GlyphInfo glyph = new GlyphInfo(fontImage.getWidth() - GLYPH_MARGIN * 2, this.fontHeight, positionX + GLYPH_MARGIN, positionY + GLYPH_MARGIN);
-
-
-                // Draw it here
-                g.drawImage(fontImage, positionX, positionY, null);
-
-                positionX += fontImage.getWidth();
-
-                if (i < 256)
-                { // standard characters
-                    glyphArray[i] = glyph;
-                }
-                else
-                { // custom characters
-                    customGlyphs.put(ch, glyph);
-                }
-
-                fontImage = null;
             }
-
+            
              fontTextureID = loadImage(glyphMap);
 
         }

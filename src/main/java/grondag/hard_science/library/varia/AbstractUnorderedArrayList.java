@@ -2,6 +2,8 @@ package grondag.hard_science.library.varia;
 
 import java.util.Arrays;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.Log;
 
 /**
@@ -59,6 +61,7 @@ public class AbstractUnorderedArrayList<T>
     }
     
     @SuppressWarnings("unchecked")
+    @Nullable
     public T get(int index)
     {
         return (T) this.items[index];

@@ -166,8 +166,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     {
         ItemStack heldStack = player.inventory.getItemStack();
         
-        boolean holdingStack = heldStack != null && !heldStack.isEmpty();
-        if(holdingStack)
+        if(heldStack != null && !heldStack.isEmpty())
         {
             ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(heldStack);
             int added = (int) storage.add(heldResource.resource(), single ? 1 : heldStack.getCount(), false);
@@ -199,9 +198,8 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         if(howMany == 0) return;
 
         ItemStack heldStack = player.inventory.getItemStack();
-        boolean holdingStack = heldStack != null && !heldStack.isEmpty();
         
-        if(holdingStack)
+        if(heldStack != null && !heldStack.isEmpty())
         {
             ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(heldStack);
             boolean heldStackMatchesTarget = targetResource.isResourceEqual(heldResource.resource());

@@ -124,7 +124,9 @@ public class CSGShape extends ArrayList<RawQuad>
             }
         }
 
-        return new CSGBounds(retVal.minX, retVal.minY, retVal.minZ, retVal.maxX, retVal.maxY, retVal.maxZ);
+        return retVal == null 
+                ? new CSGBounds(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                : new CSGBounds(retVal.minX, retVal.minY, retVal.minZ, retVal.maxX, retVal.maxY, retVal.maxZ);
     }
     
     /**

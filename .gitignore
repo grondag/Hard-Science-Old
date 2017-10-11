@@ -37,3 +37,4 @@ logs
 .html
 discarded textures
 *.nps
+/.apt_generated/

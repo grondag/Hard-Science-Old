@@ -16,7 +16,7 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceType;
-import grondag.hard_science.superblock.placement.PlacementOrientationType;
+import grondag.hard_science.superblock.placement.BlockOrientationType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelRotation;
@@ -76,7 +76,7 @@ public abstract class ShapeMeshGenerator
     /**
      * Override if shape has any kind of orientation to it that can be selected during placement.
      */
-    public PlacementOrientationType orientationType(ModelState modelState) { return PlacementOrientationType.NONE; } 
+    public BlockOrientationType orientationType(ModelState modelState) { return BlockOrientationType.NONE; } 
     
     
     @Nonnull

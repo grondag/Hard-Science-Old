@@ -37,8 +37,11 @@ public class BlockHighlighter
 		}
 	}
 	
-	private static final float[] COLOR_HIGHLIGHT = {0.6f, 0, 0, 0};
-	private static final float[] COLOR_PREVIEW = {1, 1, 1, 1};
+	public static final float[] COLOR_HIGHLIGHT = {0.6f, 0, 0, 0};
+	public static final float[] COLOR_PREVIEW = {1, 1, 1, 1};
+	public static final float[] COLOR_HIDDEN = {1, 1, 1, 0};
+	public static final float[] COLOR_PLACEMENT = {1, 0, 1, 1};
+	public static final float[] COLOR_DELETION = {1, 1, 0, 1};
 	
 	public static void drawBlockHighlight(ModelState modelState, BlockPos pos, EntityPlayer player, float partialTicks, boolean isPreview)
 	{
@@ -77,5 +80,39 @@ public class BlockHighlighter
         GlStateManager.enableAlpha();
 	}
 	
-	
+	/*
+	 * If hiddenColor is provided, occluded part of box will still be drawn - in that color.
+	 */
+	public static void drawAABB(AxisAlignedBB aabb, EntityPlayer player, float partialTicks, float[] colorARGB, float[] hiddenColorARGB)
+    {
+        double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
+        double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
+        double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
+        
+
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+       
+        aabb = aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D);
+
+        if(hiddenColorARGB != null) 
+        {
+            GlStateManager.glLineWidth(1.0F);
+            GlStateManager.disableDepth();
+            RenderGlobal.drawSelectionBoundingBox(aabb.offset(-d0, -d1, -d2), hiddenColorARGB[1], hiddenColorARGB[2], hiddenColorARGB[3], hiddenColorARGB[0]);
+            GlStateManager.enableDepth();
+        }
+        
+        GlStateManager.glLineWidth(2.0F);
+        RenderGlobal.drawSelectionBoundingBox(aabb.offset(-d0, -d1, -d2), colorARGB[1], colorARGB[2], colorARGB[3], colorARGB[0]);
+        
+        
+        GlStateManager.depthMask(true);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+    }
 }

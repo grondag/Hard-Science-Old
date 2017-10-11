@@ -46,9 +46,13 @@ public class ModNBTTag
     public final static String PLACEMENT_ORIENTATION_FACE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_ORIENTATION_EDGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_ORIENTATION_CORNER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_REGION_START_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_REGION_SELECTED_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_REGION_IN_PROGRESS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_REGION_OPERATION_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_REGION_PLACEMENT_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_REGION_EXCATION_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_REGION_FLOATING_RANGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_REGION_ORIENTATION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_SPECIES_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_OPERATION_IN_PROGRESS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String RESOURCE_QUANTITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SERVER_SIDE_ONLY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SIMULATION_LAST_TICK = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -99,5 +103,5 @@ public class ModNBTTag
     public static final String MACHINE_BATTERY_CHEMISTRY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String MACHINE_POWER_RECEIVER_MAX_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String SUPER_MODEL_LIGHT_VALUE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);;
+    public static final String SUPER_MODEL_LIGHT_VALUE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 }

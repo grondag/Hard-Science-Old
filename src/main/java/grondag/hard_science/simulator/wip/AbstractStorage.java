@@ -91,7 +91,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         for(int i = 0; i < slots.size(); i++)
         {
             rwq = this.slots.get(i);
-            if(rwq.resource().equals(resource))
+            if(rwq != null && rwq.resource().equals(resource))
             {
                 foundIndex = i;
                 break;
@@ -102,7 +102,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         
         long taken = Math.min(limit, current);
         
-        if(taken > 0 && !simulate)
+        if(taken > 0 && rwq != null && !simulate)
         {
             rwq.quantity -= taken;
             this.used -= taken;
