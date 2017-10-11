@@ -524,32 +524,38 @@ public interface PlacementItem
     }
  
     /**
-     * X is left/right relative to player and Z is depth in direction player is facing.
-     * Y is always vertical height.
-     * All are always positive numbers.
+     * X is left/right relative to player and Z is depth in direction player is facing.<br>
+     * Y is always vertical height.<br>
+     * All are always positive numbers.<br>
+     * Region rotation is or isn't applied according to parameter.<br>
      */
     @Nonnull
-    public static BlockPos placementRegionPosition(ItemStack stack)
+    public static BlockPos placementRegionPosition(ItemStack stack, boolean applyRegionRotation)
     {
         NBTTagCompound tag = stack.getTagCompound();
         if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION)) return new BlockPos(1, 1, 1);
         
-        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION));
+        BlockPos result = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION));
+        
+        return applyRegionRotation ? getRegionOrientation(stack).rotatedRegionPos(result) : result;
     }
     
     /**
-     * X is left/right relative to player and Z is depth in direction player is facing.
-     * Y is always vertical height.
-     * All are always positive numbers.
-     * Null if single block.
+     * X is left/right relative to player and Z is depth in direction player is facing.<br>
+     * Y is always vertical height.<br>
+     * All are always positive numbers.<br>
+     * Null if single block.<br>
+     * Region rotation is or isn't applied according to parameter.<br>
      */
     @Nullable
-    public static BlockPos deletionRegionPosition(ItemStack stack)
+    public static BlockPos deletionRegionPosition(ItemStack stack, boolean applyRegionRotation)
     {
         NBTTagCompound tag = stack.getTagCompound();
         if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION)) return null;
         
-        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION));
+        BlockPos result = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION));
+        
+        return applyRegionRotation ? getRegionOrientation(stack).rotatedRegionPos(result) : result;
     }
     
     @Nullable
@@ -584,7 +590,7 @@ public interface PlacementItem
         switch(getMode(stack))
         {
         case FILL_REGION:
-            BlockPos pos = placementRegionPosition(stack);
+            BlockPos pos = placementRegionPosition(stack, false);
             return I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
             
         case ADD_TO_EXISTING:

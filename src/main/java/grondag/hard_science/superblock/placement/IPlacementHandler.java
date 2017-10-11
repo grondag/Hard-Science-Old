@@ -31,6 +31,26 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+/**
+ * TODO: Placement WIP
+ * Species handling modes
+ * Obstacle handling mode
+ * Obstacle rendering
+ * Deletion Mode - creative
+ * Deletion Rendering
+ * Fixed block orientation
+ * Dynamic block orientation
+ * Match closest block orientation
+ * Follow mode
+ * Block History
+ * Region History
+ * Deletion Mode - survival
+ * Temporary deletion drone service
+ * Placement Undo
+ * Deletion Undo
+ */
+
+
 public interface IPlacementHandler
 {
     /**
@@ -218,7 +238,7 @@ public interface IPlacementHandler
                 else
                 {
                     // normal left click on block - check for a multi-block excavation region
-                    BlockPos deletionPos = PlacementItem.deletionRegionPosition(stack);
+                    BlockPos deletionPos = PlacementItem.deletionRegionPosition(stack, true);
     
                     if(deletionPos == null)
                     {
@@ -434,7 +454,7 @@ public interface IPlacementHandler
                 else
                 {
                     // normal right click on block - check for a multi-block placement region
-                    BlockPos placementPos = PlacementItem.getMode(stack) == PlacementMode.FILL_REGION ? PlacementItem.placementRegionPosition(stack) : null;
+                    BlockPos placementPos = PlacementItem.getMode(stack) == PlacementMode.FILL_REGION ? PlacementItem.placementRegionPosition(stack, true) : null;
                     BlockPos endPos = placementPos == null ? startPos : getPlayerRelativeOffset(startPos, placementPos, player, onFace);
                     
                     return new PlacementResult(
