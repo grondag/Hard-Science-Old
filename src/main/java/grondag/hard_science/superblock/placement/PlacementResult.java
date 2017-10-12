@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.placement;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 public class PlacementResult
 {
     private final List<Pair<BlockPos, ItemStack>> placements;
-    private final List<BlockPos> deletions;
+    private final Set<BlockPos> deletions;
     private final AxisAlignedBB placementAABB;
     private final AxisAlignedBB deletionAABB;
     private final BlockPos blockPos;
@@ -29,7 +30,7 @@ public class PlacementResult
             @Nullable AxisAlignedBB placementAABB, 
             @Nullable List<Pair<BlockPos, ItemStack>> placements, 
             @Nullable AxisAlignedBB deletionAABB, 
-            @Nullable List<BlockPos> deletions,
+            @Nullable Set<BlockPos> deletions,
             @Nullable BlockPos blockPos,
             @Nonnull  PlacementEvent event)
     {
@@ -59,6 +60,9 @@ public class PlacementResult
         return this.blockPos;
     }
     
+    /**
+     * Blocks that should be placed.
+     */
     @Nonnull
     public List<Pair<BlockPos, ItemStack>> placements()
     {
@@ -67,11 +71,15 @@ public class PlacementResult
                 : this.placements;
     }
     
+    /**
+     * For deletion actions, blocks to be deleted.
+     * For placement actions, blocks that were obstacles to placement.
+     */
     @Nonnull
-    public List<BlockPos> deletions()
+    public Set<BlockPos> deletions()
     {
         return this.deletions == null
-                ? Collections.emptyList()
+                ? Collections.emptySet()
                 : this.deletions;
     }
 

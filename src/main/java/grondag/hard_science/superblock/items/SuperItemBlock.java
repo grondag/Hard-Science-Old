@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModItems;

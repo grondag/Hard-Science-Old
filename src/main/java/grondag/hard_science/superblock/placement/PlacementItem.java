@@ -356,6 +356,21 @@ public interface PlacementItem
         setMode(stack, reverse ? Useful.prevEnumValue(getMode(stack)) : Useful.nextEnumValue(getMode(stack)));
     }
     
+    public static void setObstacleHandling(ItemStack stack, ObstacleHandling mode)
+    {
+        mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
+    }
+    
+    public static ObstacleHandling getObstacleHandling(ItemStack stack)
+    {
+        return ObstacleHandling.SKIP.deserializeNBT(stack.getTagCompound());
+    }
+    
+    public static void cycleObstacleHandling(ItemStack stack, boolean reverse)
+    {
+        setObstacleHandling(stack, reverse ? Useful.prevEnumValue(getObstacleHandling(stack)) : Useful.nextEnumValue(getObstacleHandling(stack)));
+    }
+    
     public static void setSpeciesMode(ItemStack stack, SpeciesMode mode)
     {
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));

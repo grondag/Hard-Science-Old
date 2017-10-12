@@ -2,12 +2,13 @@ package grondag.hard_science.superblock.placement;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.Configurator;
-import grondag.hard_science.Configurator.Render.PreviewMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.varia.BlockHighlighter;
+import net.minecraft.block.Block;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -21,138 +22,91 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class PlacementItemRenderer
 {
+    private static float[] COLOR_DELETED_RGBA = {1.0f, 0.3f, 0.3f, 1.0f};
+    private static float[] COLOR_PLACED_RGBA = {1.0f, 1.0f, 1.0f, 1.0f};
+    private static float[] COLOR_BLOCKED_RGBA = {1.0f, 1.0f, 0.3f, 1.0f};
+    
+    
     public static void renderOverlay(RenderWorldLastEvent event, EntityPlayerSP player, ItemStack stack, PlacementItem item)
     {
+        double d0 = player.lastTickPosX;
+        double d1 = player.lastTickPosY;
+        double d2 = player.lastTickPosZ;
+
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+
+        
         PlacementResult result = IPlacementHandler.predictPlacementResults(player, stack, item);
         
         // render region AABB - preference given to place over deletion
         if(result.hasPlacementAABB())
         {
-            BlockHighlighter.drawAABB(result.placementAABB(), player, 0, BlockHighlighter.COLOR_PLACEMENT, BlockHighlighter.COLOR_HIDDEN);
+            AxisAlignedBB regionAABB = result.placementAABB().offset(-d0, -d1, -d2);
+            
+            boolean isBlocked = !result.hasPlacementList() && result.hasDeletionList();
+            float[] color = isBlocked ? COLOR_BLOCKED_RGBA : COLOR_PLACED_RGBA;
+            // draw once without depth to show any blocked regions
+            GlStateManager.disableDepth();
+            GlStateManager.glLineWidth(1.0F);
+            RenderGlobal.drawSelectionBoundingBox(regionAABB, COLOR_BLOCKED_RGBA[0], COLOR_BLOCKED_RGBA[1], COLOR_BLOCKED_RGBA[2], COLOR_BLOCKED_RGBA[3]);
+            
+            // draw again with depth to show unblocked region
+            GlStateManager.enableDepth();
+            GlStateManager.glLineWidth(2.0F);
+            RenderGlobal.drawSelectionBoundingBox(regionAABB, color[0], color[1], color[2], color[3]);
+            
+            GlStateManager.disableDepth();
+            
+            if(isBlocked)
+            {
+                for(BlockPos pos : result.deletions())
+                {
+                    AxisAlignedBB blockAABB = Block.FULL_BLOCK_AABB.offset(pos.getX(), pos.getY(), pos.getZ());
+                    RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), COLOR_BLOCKED_RGBA[0], COLOR_BLOCKED_RGBA[1], COLOR_BLOCKED_RGBA[2], COLOR_BLOCKED_RGBA[3]);
+                }
+            }
+            else if(result.hasPlacementList())
+            {
+                for(Pair<BlockPos, ItemStack> placement : result.placements())
+                {
+                    ModelState placementModelState = PlacementItem.getStackModelState(placement.getRight());
+                    if(placementModelState != null)
+                    {
+                        // Draw collision boxes
+                        for (AxisAlignedBB blockAABB : placementModelState.collisionBoxes(placement.getLeft())) 
+                        {
+                            RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), COLOR_PLACED_RGBA[0], COLOR_PLACED_RGBA[1], COLOR_PLACED_RGBA[2], COLOR_PLACED_RGBA[3]);
+                        }
+                    }
+                }
+            }
         }
         else if(result.hasDeletiopnAABB())
         {
-            BlockHighlighter.drawAABB(result.deletionAABB(), player, 0, BlockHighlighter.COLOR_DELETION, BlockHighlighter.COLOR_HIDDEN);
-        }
-        
-        // render individual block outlines if enabled or if more than one to be placed
-        if(result.hasPlacementList() && Configurator.RENDER.previewSetting == PreviewMode.OUTLINE || result.placements().size() > 1)
-        {
-            for(Pair<BlockPos, ItemStack> placement : result.placements())
+            AxisAlignedBB regionAABB = result.deletionAABB().offset(-d0, -d1, -d2);
+            
+            // draw again with depth to show unblocked region
+            GlStateManager.disableDepth();
+            GlStateManager.glLineWidth(2.0F);
+            RenderGlobal.drawSelectionBoundingBox(regionAABB, COLOR_DELETED_RGBA[0], COLOR_DELETED_RGBA[1], COLOR_DELETED_RGBA[2], COLOR_DELETED_RGBA[3]);
+            
+            if(result.hasDeletionList())
             {
-                ModelState placementModelState = PlacementItem.getStackModelState(placement.getRight());
-                
-                if(placementModelState != null)
+                for(BlockPos pos : result.deletions())
                 {
-                    BlockHighlighter.drawBlockHighlight(placementModelState, placement.getLeft(), player, event.getPartialTicks(), true);
+                    AxisAlignedBB blockAABB = Block.FULL_BLOCK_AABB.offset(pos.getX(), pos.getY(), pos.getZ());
+                    RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), COLOR_DELETED_RGBA[0], COLOR_DELETED_RGBA[1], COLOR_DELETED_RGBA[2], COLOR_DELETED_RGBA[3]);
                 }
             }
         }
         
-        //TODO: draw deletion boxes?
-        
-//        Minecraft mc = Minecraft.getMinecraft();
-//        
-//        if(PlacementItem.operationInProgress(stack) == PlacementOperation.SELECTING)
-//        {
-//            BlockPos startPos = PlacementItem.operationPosition(stack);
-//            if(startPos == null) return;
-//            
-//            BlockPos endPos = null;
-//            if(PlacementItem.isFloatingSelectionEnabled(stack))
-//            {
-//                endPos = PlacementItem.getFloatingSelectionBlockPos(stack, player);
-//            }
-//            
-//            if(endPos == null)
-//            {
-//                if(ForgeHooks.rayTraceEyeHitVec(player, mc.playerController.getBlockReachDistance() + 1) == null) return;
-//                
-//                RayTraceResult target = mc.objectMouseOver;
-//                
-//                if(target.typeOfHit != RayTraceResult.Type.BLOCK) return;
-//                
-//                endPos = target.getBlockPos().offset(target.sideHit);
-//            }
-//            
-//            if(endPos == null) return;
-//            
-//            BlockHighlighter.drawAABB(startPos, endPos, player, 0, true);
-//            
-//            return;
-//        }
-//        else if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
-//        {
-//            BlockPos pos = null;
-//            
-//            // draw potential region start if ctrl key down
-//            if(PlacementItem.isFloatingSelectionEnabled(stack))
-//            {
-//                pos = PlacementItem.getFloatingSelectionBlockPos(stack, player);
-//            }
-//            
-//            if(pos == null)
-//            {
-//                if(ForgeHooks.rayTraceEyeHitVec(player, mc.playerController.getBlockReachDistance() + 1) == null) return;
-//                
-//                RayTraceResult target = mc.objectMouseOver;
-//                
-//                if(target.typeOfHit != RayTraceResult.Type.BLOCK) return;
-//                
-//                pos = target.getBlockPos().offset(target.sideHit);
-//            }
-//            
-//            if(pos != null) 
-//            {
-//                BlockHighlighter.drawAABB(pos, pos, player, 0, true);
-//                return;
-//            }
-//        }
-//        
-//        // if get to here, in placement mode - exit if turned off
-//        if(Configurator.RENDER.previewSetting == PreviewMode.NONE) return;
-//
-//        ModelState modelState = PlacementItem.getStackModelState(stack);
-//        
-//        if(modelState == null) return;
-//        
-//        // abort if out of range
-//        if(ForgeHooks.rayTraceEyeHitVec(player, mc.playerController.getBlockReachDistance() + 1) == null) return;
-//        
-//        RayTraceResult target = mc.objectMouseOver;
-//        
-//        if(target.typeOfHit != RayTraceResult.Type.BLOCK) return;
-//        
-//        BlockPos pos = target.getBlockPos();
-//        
-//        if(player.world.isAirBlock(pos)) return;
-//        
-//        Vec3d hitVec = target.hitVec;
-//        
-//        float xHit = (float)(hitVec.x - (double)pos.getX());
-//        float yHit = (float)(hitVec.y - (double)pos.getY());
-//        float zHit = (float)(hitVec.z - (double)pos.getZ());
-//        
-//        List<Pair<BlockPos, ItemStack>> placements = modelState.getShape().getPlacementHandler()
-//                .getPlacementResults(player, player.world, target.getBlockPos(), player.getActiveHand(), target.sideHit, xHit, 
-//                        yHit, zHit, stack);
-//                 
-//        if(placements.isEmpty()) return;
-//        
-//        
-//        for(Pair<BlockPos, ItemStack> placement : placements)
-//        {
-//            ModelState placementModelState = PlacementItem.getStackModelState(placement.getRight());
-//            
-//            if(placementModelState != null)
-//            {
-//                if(Configurator.RENDER.previewSetting == PreviewMode.OUTLINE)
-//                {
-//                    BlockHighlighter.drawBlockHighlight(placementModelState, placement.getLeft(), player, event.getPartialTicks(), true);
-//                }
-//            }
-//        }
-//
-//            
+        GlStateManager.enableDepth();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
     }
 }

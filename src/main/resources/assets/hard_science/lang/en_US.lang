@@ -84,6 +84,7 @@ placement.message.region_single=Placement region is a single block
 placement.message.region_additive=Placement region is determined by existing blocks.
 placement.message.region_box=Placement region is %d x %d x %d blocks
 placement.message.species_mode=Changed join behavior: %s
+placement.message.obstacle_mode=Changed obstacle handling: %s
 
 placement.preview.none=NONE
 placement.preview.outline=OUTLINE
@@ -146,6 +147,9 @@ placement.orientation.edge.down_north_west=DOWN / NORTH / WEST
 placement.orientation.edge.down_south_east=DOWN / SOUTH / EAST
 placement.orientation.edge.down_south_west=DOWN / SOUTH / WEST
 
+placement.obdstacle_mode.skip=Place blocks where possible, skip occupied spaces
+placement.obdstacle_mode.disallow=Don't place blocks if any space is occupied
+placement.obdstacle_mode.adjust=Assist with placement to avoid obstacles
 
 #ITEMS
 item.block_wand.name=Block Adjuster

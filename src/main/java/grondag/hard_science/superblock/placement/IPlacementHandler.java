@@ -1,7 +1,9 @@
 package grondag.hard_science.superblock.placement;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -9,13 +11,15 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.library.world.HorizontalFace;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import jline.internal.Log;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -34,8 +38,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * TODO: Placement WIP
  * Species handling modes
- * Obstacle handling mode
- * Obstacle rendering
  * Deletion Mode - creative
  * Deletion Rendering
  * Fixed block orientation
@@ -263,7 +265,7 @@ public interface IPlacementHandler
         }
     }
 
-    public static List<BlockPos> positionsInRegion(BlockPos fromPos, BlockPos toPos)
+    public static Set<BlockPos> positionsInRegion(BlockPos fromPos, BlockPos toPos)
     {
         int swap;
         int xFrom = fromPos.getX();
@@ -293,7 +295,7 @@ public interface IPlacementHandler
             zTo = swap;
         }        
 
-        ImmutableList.Builder<BlockPos> builder = ImmutableList.builder();
+        ImmutableSet.Builder<BlockPos> builder = ImmutableSet.builder();
         for(int x = xFrom; x <= xTo; x++)
         {
             for(int y = yFrom; y <= yTo; y++)
@@ -424,13 +426,7 @@ public interface IPlacementHandler
                 else
                 {
                     // right-click while selecting - set region and place blocks 
-                    return new PlacementResult(
-                            blockBoundaryAABB(endPos, startPos), 
-                            placeRegion(player, onPos, onFace, hitVec, stack, endPos, startPos), 
-                            null, 
-                            null, 
-                            startPos,
-                            PlacementEvent.PLACE_AND_SET_REGION);
+                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, endPos, true);
                 }
             }
             
@@ -456,117 +452,156 @@ public interface IPlacementHandler
                     // normal right click on block - check for a multi-block placement region
                     BlockPos placementPos = PlacementItem.getMode(stack) == PlacementMode.FILL_REGION ? PlacementItem.placementRegionPosition(stack, true) : null;
                     BlockPos endPos = placementPos == null ? startPos : getPlayerRelativeOffset(startPos, placementPos, player, onFace);
-                    
-                    return new PlacementResult(
-                            blockBoundaryAABB(startPos, endPos), 
-                            placeRegion(player, onPos, onFace, hitVec, stack, startPos, endPos), 
-                            null, 
-                            null, 
-                            onPos,
-                            PlacementEvent.PLACE);
+                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, endPos, false);
                 }
             }
         }
     }
+    
+    public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, BlockPos startPos, BlockPos endPos, boolean setRegion)
+    {
+        Set<BlockPos> region = positionsInRegion(startPos, endPos);
+        Set<BlockPos> exclusions = obstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
 
-//    public static List<Pair<BlockPos, ItemStack>> placeSingleWithHitBlock(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack)
-//    {
-//        //TODO: force different species if alt button is down
-//        
-//        ImmutableList.Builder<Pair<BlockPos, ItemStack>> builder = ImmutableList.builder();
-//        
-//        builder.add(Pair.of(onPos.offset(onFace), stack));
-//        
-//        return builder.build();
-//    }
+        List<Pair<BlockPos, ItemStack>> placements = Collections.emptyList();
+        
+        switch(PlacementItem.getObstacleHandling(stack))
+        {
+            case ADJUST:
+                // adjust selection region up to one block from user selection to avoid obstacles
+                // if not possible, no placement occurs
+                if(exclusions.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos))) 
+                {
+                    placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
+                }
+                else
+                {
+                    EnumFacing[] checkOrder = faceCheckOrder(player, onFace);
+                            
+                    for(EnumFacing face : checkOrder)
+                    {
+                        BlockPos posA = startPos.offset(face);
+                        BlockPos posB = endPos.offset(face);
+                        Set<BlockPos> newRegion = positionsInRegion(posA, posB);
+                        Set<BlockPos> newExclusions = obstaclesInRegion(player, onPos, onFace, hitVec, stack, newRegion);
+                        if(newExclusions.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(posA, posB)))
+                        {
+                            region = newRegion;
+                            exclusions = newExclusions;
+                            startPos = posA;
+                            endPos = posB;
+                            placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
+                            break;
+                        }
+                    }
+                }
+                break;
+                
+            case DISALLOW:
+                if(exclusions.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos))) 
+                    placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
+                break;
+
+            case SKIP:
+                placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
+                break;
+        }
+        
+        return new PlacementResult(
+                blockBoundaryAABB(startPos, endPos), 
+                placements, 
+                null, 
+                exclusions, 
+                startPos,
+                setRegion ? PlacementEvent.PLACE_AND_SET_REGION : PlacementEvent.PLACE);
+    }
+
+    /**
+     * Order of preference for selection adjustment based on player facing.
+     */
+    public static EnumFacing[] faceCheckOrder(EntityPlayer player, EnumFacing onFace)
+    {
+        if(onFace == null)
+        {
+            HorizontalFace playerFacing = HorizontalFace.find(player.getHorizontalFacing());
+            EnumFacing[] result = new EnumFacing[6];
+            result[0] = playerFacing.getLeft().face;
+            result[1] = playerFacing.getRight().face;
+            result[2] = playerFacing.face.getOpposite();
+            result[3] = playerFacing.face;
+            result[4] = EnumFacing.UP;
+            result[5] = EnumFacing.DOWN;
+            return result;
+        }
+       
+        
+        switch(onFace)
+        {
+            case DOWN:
+                final EnumFacing[] DOWN_RESULT = {EnumFacing.DOWN, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.UP, };
+                return DOWN_RESULT;
+                
+            case UP:
+                final EnumFacing[] UP_RESULT = {EnumFacing.UP, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.DOWN};
+                return UP_RESULT;
+
+            case EAST:
+                final EnumFacing[]  EAST_RESULT = {EnumFacing.EAST, EnumFacing.NORTH,  EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN};
+                return EAST_RESULT;
+
+            case NORTH:
+                final EnumFacing[] NORTH_RESULT = {EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.UP, EnumFacing.DOWN};
+                return NORTH_RESULT;
+
+            case SOUTH:
+                final EnumFacing[] SOUTH_RESULT = {EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.UP, EnumFacing.DOWN};
+                return SOUTH_RESULT;
+
+            case WEST:
+            default:
+                final EnumFacing[] WEST_RESULT = {EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.UP, EnumFacing.DOWN};
+                return WEST_RESULT;
+       
+        }
+    }
+    public static Set<BlockPos> obstaclesInRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, Collection<BlockPos> region)
+    {
+        World world = player.world;
+        
+       ImmutableSet.Builder<BlockPos> builder = ImmutableSet.builder();
+        
+        for(BlockPos pos : region)
+        {
+            if(!world.getBlockState(pos).getMaterial().isReplaceable())
+            {
+                builder.add(pos);
+            }
+        }
+        return builder.build();
+    }
     
     /**
-     * Routes to single placement logic if region is a single block
+     * Generates positions and item stacks that should be placed in the given region 
+     * according to current stack settings.
+     * The 
      */
-    public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, BlockPos fromPos, BlockPos toPos)
+    public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, 
+            Collection<BlockPos> region, Set<BlockPos> exclusions)
     {
-        //TODO: force different species if alt button is down
-        //TODO: check for follow mode / single block
-        //TODO: use onPos if available for context, if appropriate for given mode
-
-//        if(fromPos == toPos) return placeSingleWithHitBlock(player, toPos, onFace, hitVec, stack);
         
         ImmutableList.Builder<Pair<BlockPos, ItemStack>> builder = ImmutableList.builder();
         
-        for(BlockPos pos : positionsInRegion(fromPos, toPos))
+        for(BlockPos pos : region)
         {
-            builder.add(Pair.of(pos, stack));
+            if(!exclusions.contains(pos))
+            {
+                builder.add(Pair.of(pos, stack));
+            }
         }
         return builder.build();
-        
-//        ModelState modelState = PlacementItem.getStackModelState(stack);
-//
-//        if(modelState == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
-//
-//        float xHit = (float)(hitVec.x - (double)onPos.getX());
-//        float yHit = (float)(hitVec.y - (double)onPos.getY());
-//        float zHit = (float)(hitVec.z - (double)onPos.getZ());
-//
-//        List<Pair<BlockPos, ItemStack>> placements = modelState.getShape().getPlacementHandler()
-//                .getPlacementResults(player, player.world, onPos, player.getActiveHand(), onFace, xHit, 
-//                        yHit, zHit, stack);
+       
     }
     
-//    public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, ItemStack stack, BlockPos fromPos, BlockPos toPos)
-//    {
-//        //TODO: force different species if alt button is down
-//
-//        ImmutableList.Builder<Pair<BlockPos, ItemStack>> builder = ImmutableList.builder();
-//        
-//        for(BlockPos pos : positionsInRegion(fromPos, toPos))
-//        {
-//            builder.add(Pair.of(pos, stack));
-//        }
-//        return builder.build();
-//    }
-    
-//    public static List<Pair<BlockPos, ItemStack>> placeFollowWithHitBlock(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack)
-//    {
-//        //TODO: force different species if alt button is down
-//
-//        //TODO: implement
-//        return placeSingleWithHitBlock(player, onPos, onFace, hitVec, stack);
-//    }
-  
-    /**
-     * Call when item is right clicked but not on a block.
-     * Returns true if the click was handled and input processing should stop.
-     */
-    public default boolean handleRightClick(World world, EntityPlayer player, EnumHand hand)
-    {
-        //        ItemStack stack = player.getHeldItem(hand);
-        //              
-        //        if(stack == null || stack.getItem() != this) return new ActionResult<ItemStack>(EnumActionResult.PASS, stack);
-        //        
-        //        return new ActionResult<ItemStack>(EnumActionResult.PASS, stack);
-        return false;
-    }
-
-    /**
-     * Call when item is clicked on a block.
-     * Returns true if the click was handled and input processing should stop.
-     */
-    public default boolean handleRightClickBlock(EntityPlayer player, EnumHand hand, BlockPos pos, EnumFacing face, Vec3d hitVec)
-    {
-        //        ItemStack stack = player.getHeldItem(hand);
-        //        
-        //        if(stack == null || stack.getItem() != this) return EnumActionResult.PASS;;
-        //        
-        //        if(isFloatingSelectionEnabled(stack))
-        //        {
-        //            ActionResult<ItemStack> handleRightClick
-        //            player.setHeldItem(hand, stack);
-        //        }
-        //        return new ActionResult<ItemStack>(EnumActionResult.PASS, stack);
-        //        return EnumActionResult.PASS;
-        return false;
-    }
-
     /**
      * Returns list of stacks to be placed.
      * Responsible for confirming that all positions placed are air or replaceable.

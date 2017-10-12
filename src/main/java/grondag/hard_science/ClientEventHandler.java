@@ -230,8 +230,9 @@ public class ClientEventHandler
                 if(GuiScreen.isCtrlKeyDown())
                 {
                     // Ctrl + key: cycle obstacle handling
-                   // TODO: implement
-                    String message ="Please pretend obstacle handling mode has changed";
+                    PlacementItem.cycleObstacleHandling(stack, GuiScreen.isShiftKeyDown());
+                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                    String message = I18n.translateToLocalFormatted("placement.message.obstacle_mode",  PlacementItem.getObstacleHandling(stack).localizedName());
                     Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 }
                 else if(GuiScreen.isAltKeyDown())

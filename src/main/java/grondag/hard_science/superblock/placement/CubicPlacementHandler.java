@@ -36,6 +36,19 @@ public class CubicPlacementHandler implements IPlacementHandler
 {
     public static final CubicPlacementHandler INSTANCE = new CubicPlacementHandler();
 
+// For reference - handling of coordinates that were passed into this before new placement system
+//  ModelState modelState = PlacementItem.getStackModelState(stack);
+//
+//  if(modelState == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
+//
+//  float xHit = (float)(hitVec.x - (double)onPos.getX());
+//  float yHit = (float)(hitVec.y - (double)onPos.getY());
+//  float zHit = (float)(hitVec.z - (double)onPos.getZ());
+//
+//  List<Pair<BlockPos, ItemStack>> placements = modelState.getShape().getPlacementHandler()
+//          .getPlacementResults(player, player.world, onPos, player.getActiveHand(), onFace, xHit, 
+//                  yHit, zHit, stack);
+    
     @Override
     public List<Pair<BlockPos, ItemStack>> getPlacementResults(EntityPlayer playerIn, World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
             float hitY, float hitZ, ItemStack stack)

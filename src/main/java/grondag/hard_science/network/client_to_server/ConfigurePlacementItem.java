@@ -10,6 +10,7 @@ import grondag.hard_science.superblock.placement.BlockOrientationAxis;
 import grondag.hard_science.superblock.placement.BlockOrientationCorner;
 import grondag.hard_science.superblock.placement.BlockOrientationEdge;
 import grondag.hard_science.superblock.placement.BlockOrientationFace;
+import grondag.hard_science.superblock.placement.ObstacleHandling;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -33,6 +34,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private BlockOrientationCorner corner;
     private RegionOrientation regionOrientation;
     private int floatingSelectionRange;
+    private ObstacleHandling obstacleHandling;
     
     public ConfigurePlacementItem() 
     {
@@ -54,6 +56,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.corner = PlacementItem.getBlockOrientationCorner(stack);
         this.floatingSelectionRange = PlacementItem.getFloatingSelectionRange(stack);
         this.regionOrientation = PlacementItem.getRegionOrientation(stack);
+        this.obstacleHandling = PlacementItem.getObstacleHandling(stack);
     }
 
     @Override
@@ -71,6 +74,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.corner = BlockOrientationCorner.DYNAMIC.fromBytes(pBuff);
         this.floatingSelectionRange = pBuff.readByte();
         this.regionOrientation = RegionOrientation.XYZ.fromBytes(pBuff);
+        this.obstacleHandling = ObstacleHandling.SKIP.fromBytes(pBuff);
     }
 
     @Override
@@ -87,6 +91,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.corner.toBytes(pBuff);
         pBuff.writeByte(floatingSelectionRange);
         this.regionOrientation.toBytes(pBuff);
+        this.obstacleHandling.toBytes(pBuff);
     }
    
     @Override
@@ -106,6 +111,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setBlockOrientationCorner(heldStack, message.corner);
             PlacementItem.setSelectionTargetRange(heldStack, message.floatingSelectionRange);
             PlacementItem.setRegionOrientation(heldStack, message.regionOrientation);
+            PlacementItem.setObstacleHandling(heldStack, message.obstacleHandling);
         }
     }
 }
