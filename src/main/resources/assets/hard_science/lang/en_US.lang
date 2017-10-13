@@ -149,7 +149,8 @@ placement.orientation.edge.down_south_west=DOWN / SOUTH / WEST
 
 placement.obdstacle_mode.skip=Place blocks where possible, skip occupied spaces
 placement.obdstacle_mode.disallow=Don't place blocks if any space is occupied
-placement.obdstacle_mode.adjust=Assist with placement to avoid obstacles
+placement.obdstacle_mode.adjust_and_skip=Adjust placement to avoid obstacles and skip occupied spaces that can't be avoided
+placement.obdstacle_mode.adjust_and_disallow=Adjust placement to avoid obstacles and don't place if any space is occupied
 
 #ITEMS
 item.block_wand.name=Block Adjuster

@@ -11,10 +11,19 @@ import net.minecraft.util.text.translation.I18n;
 
 public enum ObstacleHandling implements IMessagePlusImmutable<ObstacleHandling>, IReadWriteNBTImmutable<ObstacleHandling>, ILocalized
 {
-    SKIP,
-    DISALLOW,
-    ADJUST;
+    ADJUST_AND_SKIP(true, true),
+    ADJUST_AND_DISALLOW(false, true),
+    SKIP(true, false),
+    DISALLOW(false, false);
     
+    public final boolean skip;
+    public final boolean adjust;
+    
+    private ObstacleHandling(boolean skip, boolean adjust)
+    {
+        this.skip = skip;
+        this.adjust = adjust;
+    }
     @Override
     public ObstacleHandling deserializeNBT(NBTTagCompound tag)
     {

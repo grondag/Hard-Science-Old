@@ -50,6 +50,11 @@ public class PlacementResult
         return this.event;
     }
     
+    public PlacementResult withEvent(PlacementEvent event)
+    {
+        return new PlacementResult(this.placementAABB, this.placements, this.deletionAABB, this.deletions, this.blockPos, event);
+    }
+    
     /**
      * If the event associated with this result requires a BlockPos for state changes,
      * the BlockPos that should be used. Null otherwise.

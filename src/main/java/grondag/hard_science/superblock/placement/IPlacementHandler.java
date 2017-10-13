@@ -251,7 +251,7 @@ public interface IPlacementHandler
                     {
                         // excavate
                         BlockPos startPos = onPos;
-                        BlockPos endPos = getPlayerRelativeOffset(startPos, deletionPos, player, onFace);
+                        BlockPos endPos = getPlayerRelativeOffset(startPos, deletionPos, player, onFace, OffsetPosition.FLIP_NONE);
                         return new PlacementResult(
                                 null, 
                                 null, 
@@ -312,9 +312,10 @@ public interface IPlacementHandler
     /**
      * Find the position offset for the placement/deletion position values in PlacementItem
      * relative to the player's current orientation and starting location.
-     * @param onFace if non-null, assumes startPos is against this face, and should extend in the opposite direction
+     * @param onFace if non-null, assumes startPos is against this face, and should extend in the opposite direction.
+     * OffsetPosition alters box placements and is used to find alternate regions that might avoid obstacles.
      */
-    public static BlockPos getPlayerRelativeOffset(BlockPos startPos, BlockPos offsetPos, EntityPlayer player, EnumFacing onFace)
+    public static BlockPos getPlayerRelativeOffset(BlockPos startPos, BlockPos offsetPos, EntityPlayer player, EnumFacing onFace, OffsetPosition offset)
     {
         Vec3d lookVec = player.getLookVec();
         int xFactor = lookVec.x > 0 ? 1 : -1;
@@ -336,11 +337,11 @@ public interface IPlacementHandler
 
         if(player.getHorizontalFacing().getAxis() == EnumFacing.Axis.X)
         {
-            return startPos.add((offsetPos.getX() - 1) * xFactor, offsetPos.getY() - 1, (offsetPos.getZ() - 1) * zFactor);
+            return startPos.add((offsetPos.getX() - 1) * xFactor * offset.depthFactor, (offsetPos.getY() - 1) * offset.heightFactor, (offsetPos.getZ() - 1) * zFactor * offset.widthFactor);
         }
         else
         {
-            return startPos.add((offsetPos.getZ() - 1) * xFactor, offsetPos.getY() - 1, (offsetPos.getX() - 1) * zFactor);
+            return startPos.add((offsetPos.getZ() - 1) * xFactor * offset.widthFactor, (offsetPos.getY() - 1) * offset.heightFactor, (offsetPos.getX() - 1) * zFactor * offset.depthFactor);
         }
     }
 
@@ -402,15 +403,10 @@ public interface IPlacementHandler
             
             case SELECTING:
             {
-                // need both positions for any of this to work
                 BlockPos endPos = PlacementItem.operationPosition(stack);
-                if(startPos == null || endPos == null) return new PlacementResult(
-                        null, 
-                        null, 
-                        null, 
-                        null, 
-                        null,
-                        PlacementEvent.CANCEL_PLACEMENT_REGION);
+                
+                // need both positions to do anything
+                if(startPos == null || endPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
                 
                 if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
                 {
@@ -426,7 +422,9 @@ public interface IPlacementHandler
                 else
                 {
                     // right-click while selecting - set region and place blocks 
-                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, endPos, true);
+                    // Note that we don't pass end pos - will be re-evaluated by placement logic
+                    // to allow for obstacle handling.
+                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, true);
                 }
             }
             
@@ -449,63 +447,86 @@ public interface IPlacementHandler
                 }
                 else
                 {
-                    // normal right click on block - check for a multi-block placement region
-                    BlockPos placementPos = PlacementItem.getMode(stack) == PlacementMode.FILL_REGION ? PlacementItem.placementRegionPosition(stack, true) : null;
-                    BlockPos endPos = placementPos == null ? startPos : getPlayerRelativeOffset(startPos, placementPos, player, onFace);
-                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, endPos, false);
+                    // normal right click on block 
+                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, false);
                 }
             }
         }
     }
     
-    public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, BlockPos startPos, BlockPos endPos, boolean setRegion)
+    public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, BlockPos startPos, boolean setRegion)
     {
+        boolean isSelecting = PlacementItem.operationInProgress(stack) == PlacementOperation.SELECTING;
+        
+        // check for a multi-block placement region
+        BlockPos placementPos = PlacementItem.getMode(stack) == PlacementMode.FILL_REGION ? PlacementItem.placementRegionPosition(stack, true) : null;
+        BlockPos endPos;
+        if(isSelecting)
+        {
+            endPos = PlacementItem.operationPosition(stack);
+        }
+        else
+        {
+            endPos = placementPos == null ? startPos : getPlayerRelativeOffset(startPos, placementPos, player, onFace, OffsetPosition.FLIP_NONE);
+        }
+        
         Set<BlockPos> region = positionsInRegion(startPos, endPos);
         Set<BlockPos> exclusions = obstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
-
-        List<Pair<BlockPos, ItemStack>> placements = Collections.emptyList();
         
-        switch(PlacementItem.getObstacleHandling(stack))
+        ObstacleHandling handling = PlacementItem.getObstacleHandling(stack);
+        
+        /** true if no obstacles */
+        boolean isClear = exclusions.isEmpty() 
+                && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos));
+        
+        // adjust selection to avoid exclusions if requested and necessary
+        // no point if is only a single position
+        // also can't do this if user is currently selecting a region
+        if(!isClear && !isSelecting && handling.adjust && placementPos != null && !startPos.equals(endPos))
         {
-            case ADJUST:
-                // adjust selection region up to one block from user selection to avoid obstacles
-                // if not possible, no placement occurs
-                if(exclusions.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos))) 
+            for(OffsetPosition offset : OffsetPosition.ALTERNATES)
+            {
+                // first try pivoting the selection box around the position being targeted
+                BlockPos endPos2 = getPlayerRelativeOffset(startPos, placementPos, player, onFace, offset);
+                Set<BlockPos> region2 = positionsInRegion(startPos, endPos2);
+                Set<BlockPos> exclusions2 = obstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
+    
+                if(exclusions2.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos2)))
                 {
-                    placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
+                    endPos = endPos2;
+                    region = region2;
+                    exclusions = exclusions2;
+                    isClear = true;
+                    break;
                 }
-                else
+            }
+            
+            if(!isClear)
+            {
+                // that didn't work, so try nudging the region a block in each direction
+                EnumFacing[] checkOrder = faceCheckOrder(player, onFace);
+                
+                for(EnumFacing face : checkOrder)
                 {
-                    EnumFacing[] checkOrder = faceCheckOrder(player, onFace);
-                            
-                    for(EnumFacing face : checkOrder)
+                    BlockPos startPos2 = startPos.offset(face);
+                    BlockPos endPos2 = endPos.offset(face);
+                    Set<BlockPos>region2 = positionsInRegion(startPos2, endPos2);
+                    Set<BlockPos> exclusions2 = obstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
+                    if(exclusions2.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos2, endPos2)))
                     {
-                        BlockPos posA = startPos.offset(face);
-                        BlockPos posB = endPos.offset(face);
-                        Set<BlockPos> newRegion = positionsInRegion(posA, posB);
-                        Set<BlockPos> newExclusions = obstaclesInRegion(player, onPos, onFace, hitVec, stack, newRegion);
-                        if(newExclusions.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(posA, posB)))
-                        {
-                            region = newRegion;
-                            exclusions = newExclusions;
-                            startPos = posA;
-                            endPos = posB;
-                            placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
-                            break;
-                        }
+                        endPos = endPos2;
+                        region = region2;
+                        exclusions = exclusions2;
+                        isClear = true;
+                        break;
                     }
                 }
-                break;
-                
-            case DISALLOW:
-                if(exclusions.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos))) 
-                    placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
-                break;
-
-            case SKIP:
-                placements = placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions);
-                break;
+            }
         }
+        
+        List<Pair<BlockPos, ItemStack>> placements = (handling.skip || isClear)
+                ? placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions)
+                : Collections.emptyList();
         
         return new PlacementResult(
                 blockBoundaryAABB(startPos, endPos), 
