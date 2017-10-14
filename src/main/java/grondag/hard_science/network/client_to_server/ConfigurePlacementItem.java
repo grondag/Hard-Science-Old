@@ -6,6 +6,7 @@ import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementMode;
 import grondag.hard_science.superblock.placement.RegionOrientation;
+import grondag.hard_science.superblock.placement.SpeciesMode;
 import grondag.hard_science.superblock.placement.BlockOrientationAxis;
 import grondag.hard_science.superblock.placement.BlockOrientationCorner;
 import grondag.hard_science.superblock.placement.BlockOrientationEdge;
@@ -35,6 +36,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private RegionOrientation regionOrientation;
     private int floatingSelectionRange;
     private ObstacleHandling obstacleHandling;
+    private SpeciesMode speciesMode;
     
     public ConfigurePlacementItem() 
     {
@@ -57,6 +59,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.floatingSelectionRange = PlacementItem.getFloatingSelectionRange(stack);
         this.regionOrientation = PlacementItem.getRegionOrientation(stack);
         this.obstacleHandling = PlacementItem.getObstacleHandling(stack);
+        this.speciesMode = PlacementItem.getSpeciesMode(stack);
     }
 
     @Override
@@ -75,6 +78,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.floatingSelectionRange = pBuff.readByte();
         this.regionOrientation = RegionOrientation.XYZ.fromBytes(pBuff);
         this.obstacleHandling = ObstacleHandling.SKIP.fromBytes(pBuff);
+        this.speciesMode = SpeciesMode.MATCH_CLICKED.fromBytes(pBuff);
     }
 
     @Override
@@ -92,6 +96,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         pBuff.writeByte(floatingSelectionRange);
         this.regionOrientation.toBytes(pBuff);
         this.obstacleHandling.toBytes(pBuff);
+        this.speciesMode.toBytes(pBuff);
     }
    
     @Override
@@ -112,6 +117,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setSelectionTargetRange(heldStack, message.floatingSelectionRange);
             PlacementItem.setRegionOrientation(heldStack, message.regionOrientation);
             PlacementItem.setObstacleHandling(heldStack, message.obstacleHandling);
+            PlacementItem.setSpeciesMode(heldStack, message.speciesMode);
         }
     }
 }

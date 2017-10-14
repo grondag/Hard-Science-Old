@@ -6,20 +6,16 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModItems;
-import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.IPlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementEvent;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -166,29 +162,30 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     {
         if(!playerIn.capabilities.allowEdit) return false;
         
-        // supermodel blocks may need to use a different block instance depending on model/substance
-        // handle this here by substituting a stack different than what player is holding, but don't
-        // change what is in player's hand.
-        SuperBlock targetBlock = (SuperBlock) this.block;
         
         ModelState modelState = PlacementItem.getStackModelState(stackIn);
         if(modelState == null) return false;
 
-        if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
-        {
-            BlockSubstance substance = PlacementItem.getStackSubstance(stackIn);
-            if(substance == null) return false;
-            targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
-            
-            if(targetBlock != this.block)
-            {
-                ItemStack tempStack = new ItemStack(targetBlock);
-                tempStack.setCount(stackIn.getCount());
-                tempStack.setItemDamage(stackIn.getItemDamage());
-                tempStack.setTagCompound(stackIn.getTagCompound());
-                stackIn = tempStack;
-            }
-        }
+        // supermodel blocks may need to use a different block instance depending on model/substance
+        // handle this here by substituting a stack different than what player is holding, but don't
+        // change what is in player's hand.
+//        SuperBlock targetBlock = (SuperBlock) this.block;
+//
+//        if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
+//        {
+//            BlockSubstance substance = PlacementItem.getStackSubstance(stackIn);
+//            if(substance == null) return false;
+//            targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
+//            
+//            if(targetBlock != this.block)
+//            {
+//                ItemStack tempStack = new ItemStack(targetBlock);
+//                tempStack.setCount(stackIn.getCount());
+//                tempStack.setItemDamage(stackIn.getItemDamage());
+//                tempStack.setTagCompound(stackIn.getTagCompound());
+//                stackIn = tempStack;
+//            }
+//        }
         
         List<Pair<BlockPos, ItemStack>> placements = result.placements(); // placementHandler.getPlacementResults(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ, stackIn);
         
@@ -207,7 +204,8 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
             if(worldIn.checkNoEntityCollision(axisalignedbb.offset(placedPos)))
             {
-                IBlockState placedState = targetBlock.getStateFromMeta(placedStack.getMetadata());
+                IBlockState placedState = PlacementItem.getPlacementBlockStateFromStack(placedStack);
+                        //targetBlock.getStateFromMeta(placedStack.getMetadata());
                 if (placeBlockAt(placedStack, playerIn, worldIn, placedPos, null, 0, 0, 0, placedState))
                 {
                     didPlace = true;

@@ -4,12 +4,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -331,9 +334,12 @@ public interface PlacementItem
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
+    /**
+     * Always returns XYZ during selection operations because display wouldn't match what user is doing otherwise.
+     */
     public static RegionOrientation getRegionOrientation(ItemStack stack)
     {
-        return RegionOrientation.XYZ.deserializeNBT(stack.getTagCompound());
+        return operationInProgress(stack) == PlacementOperation.NONE ? RegionOrientation.XYZ.deserializeNBT(stack.getTagCompound()) : RegionOrientation.XYZ;
     }
     
     public static void cycleRegionOrientation(ItemStack stack, boolean reverse)
@@ -407,6 +413,36 @@ public interface PlacementItem
         return BlockSubstance.FLEXSTONE.deserializeNBT(stack.getTagCompound());
     }
     
+    /**
+     * Gets the appropriate super block to place from a given item stack if it is
+     * a SuperItemBlock stack. Null otherwise.
+     * May be different than the stack block because SuperModel in-world blocks are dependent on substance and other properties stored in the stack.
+     */
+    public static IBlockState getPlacementBlockStateFromStack(ItemStack stack)
+    {
+
+        // supermodel blocks may need to use a different block instance depending on model/substance
+        // handle this here by substituting a stack different than what we received
+
+        if(stack.getItem() instanceof SuperItemBlock)
+        {
+            ModelState modelState = PlacementItem.getStackModelState(stack);
+            if(modelState == null) return null;
+
+            SuperBlock targetBlock = ((SuperBlock)((SuperItemBlock)stack.getItem()).getBlock());
+            
+            if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
+            {
+                BlockSubstance substance = PlacementItem.getStackSubstance(stack);
+                if(substance == null) return null;
+                targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
+            }
+            
+            return targetBlock.getStateFromMeta(stack.getMetadata());
+        }
+        return null;
+    }
+    
     public static ModelState getStackModelState(ItemStack stack)
     {
         ModelState stackState = ModelState.deserializeFromNBTIfPresent(stack.getTagCompound());
@@ -458,7 +494,13 @@ public interface PlacementItem
     {
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         PlacementOperation.SELECTING.serializeNBT(tag);
-        PlacementMode.FILL_REGION.serializeNBT(tag);
+        RegionOrientation.XYZ.serializeNBT(tag);
+        
+        PlacementMode currentMode = getMode(stack);
+        // assume user wants to fill a region  and
+        // change mode to region fill if not already set to FILL_REGION or HOLLOW_FILL
+        if(!currentMode.isFilledRegion) PlacementMode.FILL_REGION.serializeNBT(tag);
+        
         tag.setLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION, pos.toLong());
     }
     
@@ -485,16 +527,14 @@ public interface PlacementItem
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         BlockPos startPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION));
         BlockPos selectedPos = getPlayerRelativeRegionFromEndPoints(pos, startPos, player);
-
+        RegionOrientation.XYZ.serializeNBT(tag);
+        
         if(selectedPos.getX() == 1 && selectedPos.getY() == 1 && selectedPos.getZ() == 1 )
         {
             PlacementMode.SINGLE_BLOCK.serializeNBT(tag);
         }
         else
         {
-            PlacementMode.FILL_REGION.serializeNBT(tag);
-            
-            
             tag.setLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION, selectedPos.toLong());
         }
    

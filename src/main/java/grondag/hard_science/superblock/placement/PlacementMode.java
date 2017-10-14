@@ -15,16 +15,23 @@ import net.minecraft.util.text.translation.I18n;
 public enum PlacementMode implements IMessagePlusImmutable<PlacementMode>, IReadWriteNBTImmutable<PlacementMode>, ILocalized
 {
     /** place selected block - normal MC  behavior*/
-    SINGLE_BLOCK,
+    SINGLE_BLOCK(false),
     
     /** fill selected AABB*/
-    FILL_REGION,
+    FILL_REGION(true),
     
     /** place surface blocks of AABB and excavate interior*/
-    HOLLOW_REGION,
+    HOLLOW_REGION(true),
     
     /** act like a typical MC builder's wand */
-    ADD_TO_EXISTING;
+    ADD_TO_EXISTING(false);
+    
+    public final boolean isFilledRegion;
+    
+    private PlacementMode(boolean isFilledRegion)
+    {
+        this.isFilledRegion = isFilledRegion;
+    }
     
     @Override
     public PlacementMode deserializeNBT(NBTTagCompound tag)

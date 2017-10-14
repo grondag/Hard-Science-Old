@@ -1,9 +1,8 @@
 package grondag.hard_science.superblock.placement;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,16 +10,19 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.library.world.BlockRegion;
 import grondag.hard_science.library.world.HorizontalFace;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.varia.SuperBlockHelper;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,10 +38,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
- * TODO: Placement WIP
+ * TODO: 
  * Species handling modes
  * Deletion Mode - creative
  * Deletion Rendering
+ * Deletion Mode - Veinminer
  * Fixed block orientation
  * Dynamic block orientation
  * Match closest block orientation
@@ -175,7 +178,7 @@ public interface IPlacementHandler
                             null, 
                             null, 
                             blockBoundaryAABB(startPos, onPos), 
-                            positionsInRegion(startPos, onPos), 
+                            BlockRegion.positionsInRegion(startPos, onPos), 
                             onPos,
                             PlacementEvent.EXCAVATE_AND_SET_REGION);
                 }
@@ -256,57 +259,13 @@ public interface IPlacementHandler
                                 null, 
                                 null, 
                                 blockBoundaryAABB(startPos, endPos), 
-                                positionsInRegion(startPos, endPos), 
+                                BlockRegion.positionsInRegion(startPos, endPos), 
                                 onPos,
                                 PlacementEvent.EXCAVATE);
                     }
                 }
             }
         }
-    }
-
-    public static Set<BlockPos> positionsInRegion(BlockPos fromPos, BlockPos toPos)
-    {
-        int swap;
-        int xFrom = fromPos.getX();
-        int xTo = toPos.getX();
-        if(xFrom > xTo)
-        {
-            swap = xFrom;
-            xFrom = xTo;
-            xTo = swap;
-        }
-
-        int yFrom = fromPos.getY();
-        int yTo = toPos.getY();
-        if(yFrom > yTo)
-        {
-            swap = yFrom;
-            yFrom = yTo;
-            yTo = swap;
-        }
-
-        int zFrom = fromPos.getZ();
-        int zTo = toPos.getZ();
-        if(zFrom > zTo)
-        {
-            swap = zFrom;
-            zFrom = zTo;
-            zTo = swap;
-        }        
-
-        ImmutableSet.Builder<BlockPos> builder = ImmutableSet.builder();
-        for(int x = xFrom; x <= xTo; x++)
-        {
-            for(int y = yFrom; y <= yTo; y++)
-            {
-                for(int z = zFrom; z <= zTo; z++)
-                {
-                    builder.add(new BlockPos(x, y, z));
-                }
-            }
-        }
-        return builder.build();
     }
 
     /**
@@ -458,8 +417,11 @@ public interface IPlacementHandler
     {
         boolean isSelecting = PlacementItem.operationInProgress(stack) == PlacementOperation.SELECTING;
         
+        PlacementMode mode = PlacementItem.getMode(stack);
+        boolean isHollow = mode == PlacementMode.HOLLOW_REGION;
+        
         // check for a multi-block placement region
-        BlockPos placementPos = PlacementItem.getMode(stack) == PlacementMode.FILL_REGION ? PlacementItem.placementRegionPosition(stack, true) : null;
+        BlockPos placementPos = mode.isFilledRegion ? PlacementItem.placementRegionPosition(stack, true) : null;
         BlockPos endPos;
         if(isSelecting)
         {
@@ -470,13 +432,13 @@ public interface IPlacementHandler
             endPos = placementPos == null ? startPos : getPlayerRelativeOffset(startPos, placementPos, player, onFace, OffsetPosition.FLIP_NONE);
         }
         
-        Set<BlockPos> region = positionsInRegion(startPos, endPos);
-        Set<BlockPos> exclusions = obstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
+        BlockRegion region = new BlockRegion(startPos, endPos, isHollow);
+        excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
         
         ObstacleHandling handling = PlacementItem.getObstacleHandling(stack);
         
         /** true if no obstacles */
-        boolean isClear = exclusions.isEmpty() 
+        boolean isClear = region.exclusions().isEmpty() 
                 && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos));
         
         // adjust selection to avoid exclusions if requested and necessary
@@ -488,14 +450,13 @@ public interface IPlacementHandler
             {
                 // first try pivoting the selection box around the position being targeted
                 BlockPos endPos2 = getPlayerRelativeOffset(startPos, placementPos, player, onFace, offset);
-                Set<BlockPos> region2 = positionsInRegion(startPos, endPos2);
-                Set<BlockPos> exclusions2 = obstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
+                BlockRegion region2 = new BlockRegion(startPos, endPos2, isHollow);
+                excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
     
-                if(exclusions2.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos2)))
+                if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos2)))
                 {
                     endPos = endPos2;
                     region = region2;
-                    exclusions = exclusions2;
                     isClear = true;
                     break;
                 }
@@ -510,13 +471,12 @@ public interface IPlacementHandler
                 {
                     BlockPos startPos2 = startPos.offset(face);
                     BlockPos endPos2 = endPos.offset(face);
-                    Set<BlockPos>region2 = positionsInRegion(startPos2, endPos2);
-                    Set<BlockPos> exclusions2 = obstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
-                    if(exclusions2.isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos2, endPos2)))
+                    BlockRegion region2 = new BlockRegion(startPos2, endPos2, isHollow);
+                    excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
+                    if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos2, endPos2)))
                     {
                         endPos = endPos2;
                         region = region2;
-                        exclusions = exclusions2;
                         isClear = true;
                         break;
                     }
@@ -525,14 +485,14 @@ public interface IPlacementHandler
         }
         
         List<Pair<BlockPos, ItemStack>> placements = (handling.skip || isClear)
-                ? placeRegion(player, onPos, onFace, hitVec, stack, region, exclusions)
+                ? placeRegion(player, onPos, onFace, hitVec, stack, region)
                 : Collections.emptyList();
         
         return new PlacementResult(
                 blockBoundaryAABB(startPos, endPos), 
                 placements, 
                 null, 
-                exclusions, 
+                region.exclusions(), 
                 startPos,
                 setRegion ? PlacementEvent.PLACE_AND_SET_REGION : PlacementEvent.PLACE);
     }
@@ -585,20 +545,20 @@ public interface IPlacementHandler
        
         }
     }
-    public static Set<BlockPos> obstaclesInRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, Collection<BlockPos> region)
+    public static void excludeObstaclesInRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, BlockRegion region)
     {
         World world = player.world;
         
-       ImmutableSet.Builder<BlockPos> builder = ImmutableSet.builder();
+        HashSet<BlockPos> set = new HashSet<BlockPos>();
         
-        for(BlockPos pos : region)
+        for(BlockPos.MutableBlockPos pos : region.includedPositions())
         {
             if(!world.getBlockState(pos).getMaterial().isReplaceable())
             {
-                builder.add(pos);
+                set.add(pos.toImmutable());
             }
         }
-        return builder.build();
+        region.exclude(set);
     }
     
     /**
@@ -607,20 +567,124 @@ public interface IPlacementHandler
      * The 
      */
     public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, 
-            Collection<BlockPos> region, Set<BlockPos> exclusions)
+            BlockRegion region)
     {
+        
+        stack = stack.copy();
+        
+        int species = speciesForPlacement(player, onPos, onFace, hitVec, stack, region);
+        if(species >= 0) 
+        {
+            ModelState modelState = PlacementItem.getStackModelState(stack);
+            modelState.setSpecies(species);
+            PlacementItem.setStackModelState(stack, modelState);
+            if(modelState.metaUsage() == MetaUsage.SPECIES)
+            {
+                stack.setItemDamage(species);
+            }
+        }
         
         ImmutableList.Builder<Pair<BlockPos, ItemStack>> builder = ImmutableList.builder();
         
-        for(BlockPos pos : region)
+        for(BlockPos.MutableBlockPos pos : region.includedPositions())
         {
-            if(!exclusions.contains(pos))
-            {
-                builder.add(Pair.of(pos, stack));
-            }
+            builder.add(Pair.of(pos.toImmutable(), stack));
         }
         return builder.build();
-       
+    }
+    
+    /**
+     * Determines species that should be used for placing a region
+     * according to current stack settings.
+     */
+    public static int speciesForPlacement(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, BlockRegion region)
+    {
+        // ways this can happen:
+        // have a species we want to match because we clicked on a face
+        // break with everything - need to know adjacent species
+        // match with most - need to know adjacent species
+        
+        SpeciesMode mode = PlacementItem.getSpeciesMode(stack);
+        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY)) mode = mode.alternate();
+        
+        boolean shouldBreak = mode != SpeciesMode.MATCH_MOST;
+        
+        ModelState  withModelState = PlacementItem.getStackModelState(stack);
+        if(withModelState == null || !withModelState.hasSpecies()) return 0;
+        
+        World world = player.world;
+        if(world == null) return 0;
+        
+        IBlockState withBlockState = PlacementItem.getPlacementBlockStateFromStack(stack);
+        
+        if(mode == SpeciesMode.MATCH_CLICKED && onPos != null && onFace != null)
+        {
+            int clickedSpecies = SuperBlockHelper.getJoinableSpecies(world, onPos, withBlockState, withModelState);
+            if(clickedSpecies >= 0) return clickedSpecies;
+            // if doesn't find on clicked face will default to break, because shouldBreak will be true
+        }
+        
+        int[] adjacentCount = new int[16];
+        int[] interiorCount = new int[16];
+        
+        for(BlockPos.MutableBlockPos pos : region.includedPositions())
+        {
+            int interiorSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
+            if(interiorSpecies >= 0 && interiorSpecies <= 15) interiorCount[interiorSpecies]++;
+        }
+        
+        for(BlockPos.MutableBlockPos pos : region.adjacentPositions())
+        {
+            int adjacentSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
+            if(adjacentSpecies >= 0 && adjacentSpecies <= 15) adjacentCount[adjacentSpecies]++;
+        }
+        
+        if(shouldBreak)
+        {
+            // find a species that matches as few things as possible
+            int bestSpecies = 0;
+            int bestCount = adjacentCount[0] + interiorCount[0];
+            
+            for(int i = 1; i < 16; i++)
+            {
+                int tryCount = adjacentCount[i] + interiorCount[i];
+                if(tryCount < bestCount) 
+                {
+                    bestCount = tryCount;
+                    bestSpecies = i;
+                }
+            }
+            return bestSpecies;
+        }
+        else
+        {
+            // find the most common species and match with that
+            // give preference to species that are included in the region if any
+            int bestSpecies = 0;
+            int bestCount = interiorCount[0];
+            
+            for(int i = 1; i < 16; i++)
+            {
+                if(interiorCount[i] > bestCount)
+                {
+                    bestCount = interiorCount[i];
+                    bestSpecies = i;
+                }
+            }
+            
+            if(bestCount == 0)
+            {
+                for(int i = 1; i < 16; i++)
+                {
+                    if(adjacentCount[i] > bestCount)
+                    {
+                        bestCount = adjacentCount[i];
+                        bestSpecies = i;
+                    }
+                }
+            }
+            return bestSpecies;
+        }
     }
     
     /**

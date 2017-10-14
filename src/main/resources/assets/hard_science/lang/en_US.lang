@@ -91,12 +91,12 @@ placement.preview.outline=OUTLINE
 #placement.preview.ghost=GHOST
 placement.mode.single_block=SINGLE BLOCK
 placement.mode.fill_region=FILL REGION
+placement.mode.hollow_region=HOLLOW REGION
 placement.mode.add_to_existing=ADD TO EXISTING BLOCKS
 
-placement.species_mode.match_clicked=Join with clicked face if possible, break otherwise (hold Alt key to break instead)
-placement.species_mode.counter_clicked=Break with clicked face, join otherwise (hold Alt key to join instead) 
-placement.species_mode.match_most=Join with nearby blocks if possible (hold Alt key to break instead)
-placement.species_mode.counter_most=Break with nearby blocks if possible (hold Alt key to join instead)
+placement.species_mode.match_clicked=Join with clicked face if possible (hold Alt key to break instead)
+placement.species_mode.counter_most=Break with nearby blocks if possible (hold Alt key to join clicked face)
+placement.species_mode.match_most=Join with nearby blocks if possible - prefer clicked face (hold Alt key to break instead)
 
 placement.orientation.region.xyz=Width / Height / Depth (Default)
 placement.orientation.region.zyx=Width = Depth / Height / Depth = Width 
