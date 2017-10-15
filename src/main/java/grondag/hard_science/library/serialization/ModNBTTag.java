@@ -48,7 +48,6 @@ public class ModNBTTag
     public final static String PLACEMENT_ORIENTATION_CORNER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_REGION_OPERATION_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_REGION_PLACEMENT_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_REGION_EXCATION_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_REGION_FLOATING_RANGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_REGION_ORIENTATION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_SPECIES_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

@@ -14,8 +14,7 @@ import net.minecraft.network.PacketBuffer;
 public enum PlacementOperation implements IMessagePlusImmutable<PlacementOperation>, IReadWriteNBTImmutable<PlacementOperation>
 {
     NONE,
-    SELECTING,
-    DELETING;
+    SELECTING;
 
 
     @Override

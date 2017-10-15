@@ -29,16 +29,12 @@ import net.minecraft.util.text.translation.I18n;
  *
  *   Click 
  *    Done
- *       normal - not selecting/deleting: break blocks in region
- *       alt - not deleting: undo last placement
- *       ctrl - not deleting: start delete mode
- *       alt + ctrl: undo last deletion
+ *       normal - not selecting: break blocks in region
+ *       alt - undo last placement
+ *       ctrl - currently unused
  *       normal - selecting: cancel selection
- *       normal - deleting: set delete region size and delete all blocks in delete region
- *       ctrl - deleting: set delete region shape without deleting blocks in current region
  *   
  *   Right Click
- *       delete mode - any: cancel delete
  *       select mode - ctrl: complete selection without placing
  *       select mode - none: selecting, complete and place selection
  *       normal mode - none: place according to current mode/selection
@@ -542,37 +538,6 @@ public interface PlacementItem
         tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
     }
     
-    public static void selectDeletionRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
-    {
-        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        PlacementOperation.DELETING.serializeNBT(tag);
-        tag.setLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION, pos.toLong());
-    }
-    
-    public static void selectDeletionRegionCancel(ItemStack stack)
-    {
-        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        PlacementOperation.NONE.serializeNBT(tag);
-        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
-    }
-    
-    public static void selectDeletionRegionFinish(ItemStack stack, EntityPlayer player, BlockPos pos, boolean isCenter)
-    {
-        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        BlockPos startPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION));
-        if(pos.equals(startPos))
-        {
-            tag.removeTag(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION);
-        }
-        else
-        {
-            BlockPos selectedPos = getPlayerRelativeRegionFromEndPoints(pos, startPos, player);
-            tag.setLong(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION, selectedPos.toLong());
-        }
-        PlacementOperation.NONE.serializeNBT(tag);
-        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
-    }
-    
     public static PlacementOperation operationInProgress(ItemStack stack)
     {
         return PlacementOperation.NONE.deserializeNBT(stack.getTagCompound());
@@ -591,24 +556,6 @@ public interface PlacementItem
         if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION)) return new BlockPos(1, 1, 1);
         
         BlockPos result = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION));
-        
-        return applyRegionRotation ? getRegionOrientation(stack).rotatedRegionPos(result) : result;
-    }
-    
-    /**
-     * X is left/right relative to player and Z is depth in direction player is facing.<br>
-     * Y is always vertical height.<br>
-     * All are always positive numbers.<br>
-     * Null if single block.<br>
-     * Region rotation is or isn't applied according to parameter.<br>
-     */
-    @Nullable
-    public static BlockPos deletionRegionPosition(ItemStack stack, boolean applyRegionRotation)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION)) return null;
-        
-        BlockPos result = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_EXCATION_POSITION));
         
         return applyRegionRotation ? getRegionOrientation(stack).rotatedRegionPos(result) : result;
     }

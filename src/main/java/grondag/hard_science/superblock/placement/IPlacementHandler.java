@@ -39,20 +39,20 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * TODO: 
- * Species handling modes
  * Deletion Mode - creative
+ * Deletion Tracking
  * Deletion Rendering
+ * Deletion Mode - survival
+ * Temporary deletion drone service
  * Deletion Mode - Veinminer
+ * Undo
+ * Follow mode
  * Fixed block orientation
  * Dynamic block orientation
  * Match closest block orientation
- * Follow mode
  * Block History
  * Region History
- * Deletion Mode - survival
- * Temporary deletion drone service
- * Placement Undo
- * Deletion Undo
+ * mode indicator on Item icon
  */
 
 
@@ -115,18 +115,9 @@ public interface IPlacementHandler
                 }
             }
         }
-
-        if(PlacementItem.operationInProgress(stack) == PlacementOperation.DELETING)
-        {
-            // assume user will click the left mouse button
-            // but can only happen if in range
-            return onPos == null ? PlacementResult.EMPTY_RESULT_CONTINUE : doLeftClickBlock(player, onPos, onFace, hitVec, stack);
-        }
-        else
-        {
-            // assume user will click the right mouse button
-            return doRightClickBlock(player, onPos, onFace, hitVec, stack);
-        }
+       
+        // assume user will click the right mouse button
+        return doRightClickBlock(player, onPos, onFace, hitVec, stack);
     }
 
     /**
@@ -148,42 +139,6 @@ public interface IPlacementHandler
     {
         switch(PlacementItem.operationInProgress(stack))
         {
-            case DELETING:
-            {
-                // need operation start position for this to work
-                BlockPos startPos = PlacementItem.operationPosition(stack);
-                if(startPos == null) return new PlacementResult(
-                        null, 
-                        null, 
-                        null, 
-                        null, 
-                        null,
-                        PlacementEvent.CANCEL_EXCAVATION_REGION);
-    
-                if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
-                {
-                    // Ctrl left-click while deleting - set region without excavation
-                    return new PlacementResult(
-                            null, 
-                            null, 
-                            blockBoundaryAABB(startPos, onPos), 
-                            null, 
-                            onPos,
-                            PlacementEvent.SET_EXCAVATION_REGION);
-                }
-                else
-                {
-                    // left-click while deleting - set region and excavate it 
-                    return new PlacementResult(
-                            null, 
-                            null, 
-                            blockBoundaryAABB(startPos, onPos), 
-                            BlockRegion.positionsInRegion(startPos, onPos), 
-                            onPos,
-                            PlacementEvent.EXCAVATE_AND_SET_REGION);
-                }
-            }
-            
             case SELECTING:
             {
                 // any left click while selecting cancels the operation;
@@ -201,68 +156,22 @@ public interface IPlacementHandler
             {
                 if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
                 {
-                    if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
-                    {
-                        // Alt + Ctrl left click: undo block excavation
-                        //TODO
-                        Log.info("UNDO EXCAVATION LOGIC HAPPENS NOW");
-                        return new PlacementResult(
-                                null, 
-                                null, 
-                                null, 
-                                null, 
-                                onPos,
-                                PlacementEvent.UNDO_EXCAVATION);
-                    }
-                    else
-                    {
-                        // Alt+left click: undo block placement
-    
-                        //TODO
-                        Log.info("UNDO PLACEMENT LOGIC HAPPENS NOW");
-                        return new PlacementResult(
-                                null, 
-                                null, 
-                                null, 
-                                null, 
-                                onPos,
-                                PlacementEvent.UNDO_PLACEMENT);
-                    }
-                }
-                else if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
-                {
-                    // Ctrl + left click: start new excavation region
+                    // Alt+left click: undo block placement
+
+                    //TODO
+                    Log.info("UNDO PLACEMENT LOGIC HAPPENS NOW");
                     return new PlacementResult(
                             null, 
                             null, 
-                            blockBoundaryAABB(onPos, onPos),
+                            null, 
                             null, 
                             onPos,
-                            PlacementEvent.START_EXCAVATION_REGION);
+                            PlacementEvent.UNDO_PLACEMENT);
                 }
                 else
                 {
-                    // normal left click on block - check for a multi-block excavation region
-                    BlockPos deletionPos = PlacementItem.deletionRegionPosition(stack, true);
-    
-                    if(deletionPos == null)
-                    {
-                        // no excavation region, let normal MC behavior occur
-                        return PlacementResult.EMPTY_RESULT_CONTINUE;
-                    }
-                    else
-                    {
-                        // excavate
-                        BlockPos startPos = onPos;
-                        BlockPos endPos = getPlayerRelativeOffset(startPos, deletionPos, player, onFace, OffsetPosition.FLIP_NONE);
-                        return new PlacementResult(
-                                null, 
-                                null, 
-                                blockBoundaryAABB(startPos, endPos), 
-                                BlockRegion.positionsInRegion(startPos, endPos), 
-                                onPos,
-                                PlacementEvent.EXCAVATE);
-                    }
+                    // normal left click on block - let normal MC behavior occur
+                    return PlacementResult.EMPTY_RESULT_CONTINUE;
                 }
             }
         }
@@ -347,19 +256,6 @@ public interface IPlacementHandler
                 
         switch(PlacementItem.operationInProgress(stack))
         {
-            case DELETING:
-            {
-                
-                // any right click while selecting cancels the operation;
-                return new PlacementResult(
-                        null, 
-                        null, 
-                        null, 
-                        null, 
-                        null,
-                        PlacementEvent.CANCEL_EXCAVATION_REGION);
-            }
-            
             case SELECTING:
             {
                 BlockPos endPos = PlacementItem.operationPosition(stack);

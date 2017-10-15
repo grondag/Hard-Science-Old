@@ -124,42 +124,17 @@ public class PlacementResult
     {
         switch(this.event())
         {
-        case CANCEL_EXCAVATION_REGION:
-            PlacementItem.selectDeletionRegionCancel(stackIn);
-            break;
-            
-        case CANCEL_PLACEMENT_REGION:
-            PlacementItem.selectPlacementRegionCancel(stackIn);
-            break;
-            
         case PLACE_AND_SET_REGION:
         case SET_PLACEMENT_REGION:
             PlacementItem.selectPlacementRegionFinish(stackIn, player, blockPos, false);
             break;
 
-        case EXCAVATE_AND_SET_REGION:
-        case SET_EXCAVATION_REGION:
-            PlacementItem.selectDeletionRegionFinish(stackIn, player, blockPos, false);
-            break;
-            
         case PLACE:
             // TODO: record for undo?
             break;
 
-        case EXCAVATE:
-            // TODO: record for undo?
-            break;
-            
-        case START_EXCAVATION_REGION:
-            PlacementItem.selectDeletionRegionStart(stackIn, blockPos, false);
-            break;
-            
         case START_PLACEMENT_REGION:
             PlacementItem.selectPlacementRegionStart(stackIn, blockPos, false);
-            break;
-            
-        case UNDO_EXCAVATION:
-            //TODO
             break;
             
         case UNDO_PLACEMENT:

@@ -89,7 +89,8 @@ placement.message.obstacle_mode=Changed obstacle handling: %s
 placement.preview.none=NONE
 placement.preview.outline=OUTLINE
 #placement.preview.ghost=GHOST
-placement.mode.single_block=SINGLE BLOCK
+
+placement.mode.single_block=PLACE SINGLE BLOCK
 placement.mode.fill_region=FILL REGION
 placement.mode.hollow_region=HOLLOW REGION
 placement.mode.add_to_existing=ADD TO EXISTING BLOCKS
