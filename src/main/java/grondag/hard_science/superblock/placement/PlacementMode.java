@@ -9,40 +9,45 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.translation.I18n;
 
-/** 
- * Determines how placed blocks are oriented (orthogonalAxis, rotation)
+/**
+ * Determines operation to be performed on selected blocks
  */
 public enum PlacementMode implements IMessagePlusImmutable<PlacementMode>, IReadWriteNBTImmutable<PlacementMode>, ILocalized
 {
-    /** place selected block - normal MC  behavior*/
-    SINGLE_BLOCK(false),
+    ADJUST_AND_SKIP(true, true),
+    ADJUST_AND_DISALLOW(false, true),
+    SKIP(true, false),
+    DISALLOW(false, false);
+    /**
+     * FIXME: add
+     * REPLACE_EXISTING
+     * EXCAVATE
+     * IGNORE_EXISTING
+     */
     
-    /** fill selected AABB*/
-    FILL_REGION(true),
+    public final boolean skip;
     
-    /** place surface blocks of AABB and excavate interior*/
-    HOLLOW_REGION(true),
+    /**
+     * True if this type of placement should use selection region adjustment if that feature is enabled. 
+     * (Is controlled by RegionOrientation.)
+     */
+    public final boolean adjustIfEnabled;
     
-    /** act like a typical MC builder's wand */
-    ADD_TO_EXISTING(false);
-    
-    public final boolean isFilledRegion;
-    
-    private PlacementMode(boolean isFilledRegion)
+    private PlacementMode(boolean skip, boolean adjustIfEnabled)
     {
-        this.isFilledRegion = isFilledRegion;
+        this.skip = skip;
+        this.adjustIfEnabled = adjustIfEnabled;
     }
-    
     @Override
     public PlacementMode deserializeNBT(NBTTagCompound tag)
     {
-        return Useful.safeEnumFromTag(tag, ModNBTTag.PLACEMENT_MODE, this);
+        return Useful.safeEnumFromTag(tag, ModNBTTag.PLACEMENT_OBSTACLE_MODE, this);
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        Useful.saveEnumToTag(tag, ModNBTTag.PLACEMENT_MODE, this);
+        Useful.saveEnumToTag(tag, ModNBTTag.PLACEMENT_OBSTACLE_MODE, this);
     }
 
     @Override
@@ -61,6 +66,6 @@ public enum PlacementMode implements IMessagePlusImmutable<PlacementMode>, IRead
     @Override
     public String localizedName()
     {
-        return I18n.translateToLocal("placement.mode." + this.name().toLowerCase());
+        return I18n.translateToLocal("placement.obdstacle_mode." + this.name().toLowerCase());
     }
 }

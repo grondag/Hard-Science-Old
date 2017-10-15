@@ -237,15 +237,15 @@ public class ClientEventHandler
                 }
                 else if(GuiScreen.isAltKeyDown())
                 {
-                    // Alt + key: cycle placement mode
-                    PlacementItem.cycleMode(stack, GuiScreen.isShiftKeyDown());
+                    // Alt + key: cycle selection mode
+                    PlacementItem.cycleSelectionMode(stack, GuiScreen.isShiftKeyDown());
                     ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                    String message = I18n.translateToLocalFormatted("placement.message.mode",  PlacementItem.getMode(stack).localizedName());
+                    String message = I18n.translateToLocalFormatted("placement.message.selection_mode",  PlacementItem.getSelectionMode(stack).localizedName());
                     Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 }
                 else 
                 {
-                 // Unmodified key: cycle species handling
+                    // Unmodified key: cycle species handling
                     PlacementItem.cycleSpeciesMode(stack, GuiScreen.isShiftKeyDown());
                     ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
                     String message = I18n.translateToLocalFormatted("placement.message.species_mode",  PlacementItem.getSpeciesMode(stack).localizedName());

@@ -12,7 +12,7 @@ import grondag.hard_science.init.ModItems;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.IPlacementHandler;
+import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementEvent;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
@@ -99,7 +99,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
         if (stackIn.isEmpty()) return new ActionResult<>(EnumActionResult.PASS, stackIn);
         
-        PlacementResult result = IPlacementHandler.doRightClickBlock(player, null, null, null, stackIn);
+        PlacementResult result = PlacementHandler.doRightClickBlock(player, null, null, null, stackIn);
         
         result.applyToStack(stackIn, player);
         
@@ -144,7 +144,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         ItemStack stackIn = playerIn.getHeldItem(hand);
         if (stackIn.isEmpty()) return EnumActionResult.FAIL;
         
-        PlacementResult result = IPlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn);
+        PlacementResult result = PlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn);
         
         result.applyToStack(stackIn, playerIn);
         

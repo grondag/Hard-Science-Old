@@ -20,7 +20,7 @@ public class Panel extends GuiControl<Panel>
     private int innerMarginWidth = 0;
     
     /**
-     * If true, don't adjust layout of any child controls.
+     * If true, don't adjustIfEnabled layout of any child controls.
      * Useful for containers that have to conform to a specific pixel layout. 
      */
     private boolean isLayoutDisabled = false;

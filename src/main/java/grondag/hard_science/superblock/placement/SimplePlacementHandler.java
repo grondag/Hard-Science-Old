@@ -19,7 +19,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class SimplePlacementHandler implements IPlacementHandler
+public class SimplePlacementHandler extends PlacementHandler
 {
     public static final SimplePlacementHandler INSTANCE = new SimplePlacementHandler();
 

@@ -12,6 +12,7 @@ import net.minecraft.util.text.translation.I18n;
 
 public enum RegionOrientation implements IMessagePlusImmutable<RegionOrientation>, IReadWriteNBTImmutable<RegionOrientation>, ILocalized
 {
+    AUTOMATIC,
     XYZ,
     ZYX,
     ZXY,
@@ -55,6 +56,7 @@ public enum RegionOrientation implements IMessagePlusImmutable<RegionOrientation
         switch(this)
         {
         case XYZ:
+        case AUTOMATIC:
         default:
             return fromPos;
             

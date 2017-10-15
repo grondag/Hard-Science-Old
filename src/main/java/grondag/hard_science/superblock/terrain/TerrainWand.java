@@ -362,7 +362,7 @@ public class TerrainWand extends Item
 //            Block baseBlock = baseState.getBlock();
 //            SuperBlock fillBlock = null;
 //            
-//            //don't adjust static blocks
+//            //don't adjustIfEnabled static blocks
 //            if(baseBlock instanceof TerrainStaticBlock) continue;
 //            
 //            int targetMeta = SHOULD_BE_AIR;

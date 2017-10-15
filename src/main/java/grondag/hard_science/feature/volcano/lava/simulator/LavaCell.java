@@ -1910,7 +1910,7 @@ public class LavaCell extends AbstractLavaCell
 //         * -----
 //         * Lava already exists at same or higher level - no action
 //         * Lava already exists but at a lower level - increase level
-//         * Lava does not exist and is a fully open space close to surface - increase level, adjust visible height
+//         * Lava does not exist and is a fully open space close to surface - increase level, adjustIfEnabled visible height
 //         * Lava does not exist and is a fully open space above surface - create falling particles
 //         * 
 //         * Space is outside this cell - super strange - re-validate this chunk

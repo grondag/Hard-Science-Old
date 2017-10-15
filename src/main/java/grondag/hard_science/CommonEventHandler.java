@@ -8,7 +8,7 @@ import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.placement.IPlacementHandler;
+import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementEvent;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
@@ -113,7 +113,7 @@ public class CommonEventHandler
         ItemStack stackIn = event.getItemStack();
         if (stackIn == null || stackIn.isEmpty() || !(stackIn.getItem() instanceof PlacementItem)) return;
 
-        PlacementResult result = IPlacementHandler.doLeftClickBlock(player, event.getPos(), event.getFace(), event.getHitVec(), stackIn);
+        PlacementResult result = PlacementHandler.doLeftClickBlock(player, event.getPos(), event.getFace(), event.getHitVec(), stackIn);
         
         result.applyToStack(stackIn, player);
         

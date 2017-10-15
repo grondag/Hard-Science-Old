@@ -39,6 +39,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * TODO: 
+ * Cache predicted results
  * Deletion Mode - creative
  * Deletion Tracking
  * Deletion Rendering
@@ -56,7 +57,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 
 
-public interface IPlacementHandler
+public abstract class PlacementHandler
 {
     /**
      * Called client-side by overlay renderer to know
@@ -124,7 +125,7 @@ public interface IPlacementHandler
      * Call when item is left clicked on a block.
      * Returns true if the click was handled and input processing should stop.
      */
-    public default boolean handleLeftClickBlock(EntityPlayer player, BlockPos onPos, EnumFacing face, Vec3d hitVec)
+    public boolean handleLeftClickBlock(EntityPlayer player, BlockPos onPos, EnumFacing face, Vec3d hitVec)
     {
         return true;
     }
@@ -313,11 +314,11 @@ public interface IPlacementHandler
     {
         boolean isSelecting = PlacementItem.operationInProgress(stack) == PlacementOperation.SELECTING;
         
-        PlacementMode mode = PlacementItem.getMode(stack);
-        boolean isHollow = mode == PlacementMode.HOLLOW_REGION;
+        SelectionMode selectionMode = PlacementItem.getSelectionMode(stack);
+        boolean isHollow = selectionMode == SelectionMode.HOLLOW_REGION;
         
         // check for a multi-block placement region
-        BlockPos placementPos = mode.isFilledRegion ? PlacementItem.placementRegionPosition(stack, true) : null;
+        BlockPos placementPos = selectionMode.usesSelectionRegion ? PlacementItem.placementRegionPosition(stack, true) : null;
         BlockPos endPos;
         if(isSelecting)
         {
@@ -331,16 +332,23 @@ public interface IPlacementHandler
         BlockRegion region = new BlockRegion(startPos, endPos, isHollow);
         excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
         
-        ObstacleHandling handling = PlacementItem.getObstacleHandling(stack);
+        PlacementMode handling = PlacementItem.getObstacleHandling(stack);
+        boolean adjustmentEnabled = PlacementItem.getRegionOrientation(stack) == RegionOrientation.AUTOMATIC;
         
         /** true if no obstacles */
         boolean isClear = region.exclusions().isEmpty() 
                 && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos));
         
-        // adjust selection to avoid exclusions if requested and necessary
-        // no point if is only a single position
-        // also can't do this if user is currently selecting a region
-        if(!isClear && !isSelecting && handling.adjust && placementPos != null && !startPos.equals(endPos))
+        // Adjust selection to avoid exclusions if requested and necessary.
+        // No point if is only a single position or a selection mode that doesn't use the selection region.
+        // Also can't do this if user is currently selecting a region
+        if(     adjustmentEnabled 
+             && selectionMode.usesSelectionRegion 
+             && !isClear 
+             && !isSelecting 
+             && handling.adjustIfEnabled 
+             && placementPos != null 
+             && !startPos.equals(endPos))
         {
             for(OffsetPosition offset : OffsetPosition.ALTERNATES)
             {
@@ -601,13 +609,13 @@ public interface IPlacementHandler
      * 
      * List should be empty if nothing can be placed.
      */
-    default List<Pair<BlockPos, ItemStack>> getPlacementResults(EntityPlayer playerIn, World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
+    public List<Pair<BlockPos, ItemStack>> getPlacementResults(EntityPlayer playerIn, World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
             float hitY, float hitZ, ItemStack stack)
     {
         if(!PlacementItem.isPlacementItem(stack)) return Collections.emptyList();
 
         PlacementItem item = (PlacementItem)stack.getItem();
-        PlacementMode placementMode = PlacementItem.getMode(stack);
+        SelectionMode placementMode = PlacementItem.getSelectionMode(stack);
 
         boolean isFloating = PlacementItem.isFloatingSelectionEnabled(stack);
 
@@ -617,12 +625,12 @@ public interface IPlacementHandler
 
         switch(placementMode)
         {
-        case FILL_REGION:
+        case REGION:
             return isFloating 
                     ? floatingMultiBlockResults()
                             : multiBlockResults();
 
-        case ADD_TO_EXISTING:
+        case MATCH_CLICKED:
             additiveResults();
 
         case SINGLE_BLOCK:
@@ -636,7 +644,7 @@ public interface IPlacementHandler
     /**
      * Conventional block placement - placed on a given face, so that face can be used for context
      */
-    default List<Pair<BlockPos, ItemStack>> singleBlockResult(World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
+    public List<Pair<BlockPos, ItemStack>> singleBlockResult(World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
             float hitY, float hitZ, ItemStack stack)
     {
         return Collections.emptyList();
@@ -646,7 +654,7 @@ public interface IPlacementHandler
     /**
      * Single block placed at an arbitrary location, so there is no "placed on" face that can be used for context
      */
-    default List<Pair<BlockPos, ItemStack>> floatingSingleBlockResult()
+    public List<Pair<BlockPos, ItemStack>> floatingSingleBlockResult()
     {
         return Collections.emptyList();
     }
@@ -654,7 +662,7 @@ public interface IPlacementHandler
     /**
      * Multiple blocks but still placed on a given face, so that face can still be used for context
      */
-    default List<Pair<BlockPos, ItemStack>> multiBlockResults()
+    public List<Pair<BlockPos, ItemStack>> multiBlockResults()
     {
         return Collections.emptyList();
     }
@@ -662,7 +670,7 @@ public interface IPlacementHandler
     /**
      * Multiple blocks placed at an arbitrary location, so there is no "placed on" face that can be used for context
      */
-    default List<Pair<BlockPos, ItemStack>> floatingMultiBlockResults()
+    public List<Pair<BlockPos, ItemStack>> floatingMultiBlockResults()
     {
         return Collections.emptyList();
     }
@@ -670,7 +678,7 @@ public interface IPlacementHandler
     /**
      * "Builders wand" style of placement.
      */
-    default List<Pair<BlockPos, ItemStack>> additiveResults()
+    public List<Pair<BlockPos, ItemStack>> additiveResults()
     {
         return Collections.emptyList();
     }

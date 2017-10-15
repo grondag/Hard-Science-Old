@@ -151,7 +151,7 @@ public class TerrainBlock
                 update = fillBlock.getDefaultState().withProperty(SuperBlock.META, targetMeta);
                 worldObj.setBlockState(basePos, update);
             }
-            //confirm filler needed and adjust/remove if needed
+            //confirm filler needed and adjustIfEnabled/remove if needed
         }
         else if(targetMeta != SHOULD_BE_AIR && fillBlock != null)
         {

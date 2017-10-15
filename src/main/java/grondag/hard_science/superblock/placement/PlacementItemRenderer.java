@@ -39,7 +39,7 @@ public class PlacementItemRenderer
         GlStateManager.depthMask(false);
 
         
-        PlacementResult result = IPlacementHandler.predictPlacementResults(player, stack, item);
+        PlacementResult result = PlacementHandler.predictPlacementResults(player, stack, item);
         
         // render region AABB - preference given to place over deletion
         if(result.hasPlacementAABB())

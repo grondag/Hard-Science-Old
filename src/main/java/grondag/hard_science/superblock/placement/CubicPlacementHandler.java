@@ -32,7 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class CubicPlacementHandler implements IPlacementHandler
+public class CubicPlacementHandler extends PlacementHandler
 {
     public static final CubicPlacementHandler INSTANCE = new CubicPlacementHandler();
 
@@ -56,7 +56,7 @@ public class CubicPlacementHandler implements IPlacementHandler
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
 
         SuperItemBlock item = (SuperItemBlock)stack.getItem();
-//        PlacementMode placementMode = PlacementItem.getMode(stack);
+//        SelectionMode placementMode = PlacementItem.getMode(stack);
         
         SuperBlock stackBlock = (SuperBlock) item.getBlock();
         

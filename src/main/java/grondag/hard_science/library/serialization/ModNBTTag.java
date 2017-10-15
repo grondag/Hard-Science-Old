@@ -41,7 +41,7 @@ public class ModNBTTag
     public final static String MACHINE_STORED_ENERGY_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_TARGET_BLOCKPOS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MODEL_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String SELECTION_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_ORIENTATION_AXIS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_ORIENTATION_FACE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_ORIENTATION_EDGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

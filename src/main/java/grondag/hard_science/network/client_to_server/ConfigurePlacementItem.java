@@ -4,14 +4,14 @@ package grondag.hard_science.network.client_to_server;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementMode;
+import grondag.hard_science.superblock.placement.SelectionMode;
 import grondag.hard_science.superblock.placement.RegionOrientation;
 import grondag.hard_science.superblock.placement.SpeciesMode;
 import grondag.hard_science.superblock.placement.BlockOrientationAxis;
 import grondag.hard_science.superblock.placement.BlockOrientationCorner;
 import grondag.hard_science.superblock.placement.BlockOrientationEdge;
 import grondag.hard_science.superblock.placement.BlockOrientationFace;
-import grondag.hard_science.superblock.placement.ObstacleHandling;
+import grondag.hard_science.superblock.placement.PlacementMode;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -28,14 +28,14 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private ModelState modelState;
     private BlockSubstance blockSubstance;
     private int lightValue;
-    private PlacementMode mode;
+    private SelectionMode mode;
     private BlockOrientationAxis axis;
     private BlockOrientationFace face;
     private BlockOrientationEdge edge;
     private BlockOrientationCorner corner;
     private RegionOrientation regionOrientation;
     private int floatingSelectionRange;
-    private ObstacleHandling obstacleHandling;
+    private PlacementMode obstacleHandling;
     private SpeciesMode speciesMode;
     
     public ConfigurePlacementItem() 
@@ -51,7 +51,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         
         this.blockSubstance = PlacementItem.getStackSubstance(stack);
         this.lightValue = PlacementItem.getStackLightValue(stack);
-        this.mode = PlacementItem.getMode(stack);
+        this.mode = PlacementItem.getSelectionMode(stack);
         this.axis = PlacementItem.getBlockOrientationAxis(stack);
         this.face = PlacementItem.getBlockOrientationFace(stack);
         this.edge = PlacementItem.getBlockOrientationEdge(stack);
@@ -70,14 +70,14 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.modelState.fromBytes(pBuff);
         this.blockSubstance = pBuff.readEnumValue(BlockSubstance.class);
         this.lightValue = pBuff.readByte();
-        this.mode = PlacementMode.FILL_REGION.fromBytes(pBuff);
+        this.mode = SelectionMode.REGION.fromBytes(pBuff);
         this.axis = BlockOrientationAxis.DYNAMIC.fromBytes(pBuff);
         this.face = BlockOrientationFace.DYNAMIC.fromBytes(pBuff);
         this.edge = BlockOrientationEdge.DYNAMIC.fromBytes(pBuff);
         this.corner = BlockOrientationCorner.DYNAMIC.fromBytes(pBuff);
         this.floatingSelectionRange = pBuff.readByte();
         this.regionOrientation = RegionOrientation.XYZ.fromBytes(pBuff);
-        this.obstacleHandling = ObstacleHandling.SKIP.fromBytes(pBuff);
+        this.obstacleHandling = PlacementMode.SKIP.fromBytes(pBuff);
         this.speciesMode = SpeciesMode.MATCH_CLICKED.fromBytes(pBuff);
     }
 
@@ -109,7 +109,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setStackModelState(heldStack, message.modelState);
             PlacementItem.setStackSubstance(heldStack, message.blockSubstance);
             PlacementItem.setStackLightValue(heldStack, message.lightValue);
-            PlacementItem.setMode(heldStack, message.mode);
+            PlacementItem.setSelectionMode(heldStack, message.mode);
             PlacementItem.setBlockOrientationAxis(heldStack, message.axis);
             PlacementItem.setBlockOrientationFace(heldStack, message.face);
             PlacementItem.setBlockOrientationEdge(heldStack, message.edge);

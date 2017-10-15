@@ -79,7 +79,7 @@ placement.message.orientation_block=Block orientation set to %s
 placement.message.orientation_region=Region orientation set to %s
 
 placement.message.preview_set=Placement preview mode set to %s
-placement.message.mode=Placement mode/shape set to %s
+placement.message.selection_mode=Changed selection behavior: %s
 placement.message.region_single=Placement region is a single block
 placement.message.region_additive=Placement region is determined by existing blocks.
 placement.message.region_box=Placement region is %d x %d x %d blocks
@@ -90,16 +90,17 @@ placement.preview.none=NONE
 placement.preview.outline=OUTLINE
 #placement.preview.ghost=GHOST
 
-placement.mode.single_block=PLACE SINGLE BLOCK
-placement.mode.fill_region=FILL REGION
-placement.mode.hollow_region=HOLLOW REGION
-placement.mode.add_to_existing=ADD TO EXISTING BLOCKS
+placement.selection_mode.single_block=PLACE SINGLE BLOCK
+placement.selection_mode.region=FILL REGION
+placement.selection_mode.hollow_region=HOLLOW REGION
+placement.selection_mode.match_clicked=ADD TO EXISTING BLOCKS
 
 placement.species_mode.match_clicked=Join with clicked face if possible (hold Alt key to break instead)
 placement.species_mode.counter_most=Break with nearby blocks if possible (hold Alt key to join clicked face)
 placement.species_mode.match_most=Join with nearby blocks if possible - prefer clicked face (hold Alt key to break instead)
 
-placement.orientation.region.xyz=Width / Height / Depth (Default)
+placement.orientation.region.automatic=Adjust to avoid obstacles (Default)
+placement.orientation.region.xyz=Width / Height / Depth (Original)
 placement.orientation.region.zyx=Width = Depth / Height / Depth = Width 
 placement.orientation.region.zxy=Width = Depth / Height = Width / Depth = Height
 placement.orientation.region.xzy=Width / Depth / Height = Depth = Height

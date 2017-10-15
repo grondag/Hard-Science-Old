@@ -33,7 +33,7 @@ import net.minecraft.world.World;
  * found there, add to it as in #1.  Otherwise, if the space is empty
  * place a new additive block on the face clicked. 
  */
-public class AdditivePlacementHandler implements IPlacementHandler
+public class AdditivePlacementHandler extends PlacementHandler
 {
     public static final AdditivePlacementHandler INSTANCE = new AdditivePlacementHandler();
 

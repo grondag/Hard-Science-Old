@@ -51,8 +51,8 @@ import net.minecraft.util.text.translation.I18n;
  *       alt: cycle block history
  *       shift: reverse 
  *       
- *   V - ctrl: cycle obstacle handling SKIP / DISALLOW / SELECTION ASSIST
- *       alt: cycle placement mode  SINGLE / FILL REGION / HOLLOW REGION / FOLLOW
+ *   V - ctrl: cycle fill mode 
+ *       alt: cycle selection mode  SINGLE BLOCK / SELECTED REGION / HOLLOW REGION / MATCH CLICKED BLOCK
  *       normal: cycle species handling MATCH MOST / AVOID MOST / MATCH CLICKED / AVOID CLICKED
  *       shift: reverse
  *       
@@ -343,29 +343,29 @@ public interface PlacementItem
         setRegionOrientation(stack, reverse ? Useful.prevEnumValue(getRegionOrientation(stack)) : Useful.nextEnumValue(getRegionOrientation(stack)));
     }
     
-    public static void setMode(ItemStack stack, PlacementMode mode)
+    public static void setSelectionMode(ItemStack stack, SelectionMode mode)
     {
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
-    public static PlacementMode getMode(ItemStack stack)
+    public static SelectionMode getSelectionMode(ItemStack stack)
     {
-        return PlacementMode.FILL_REGION.deserializeNBT(stack.getTagCompound());
+        return SelectionMode.REGION.deserializeNBT(stack.getTagCompound());
     }
     
-    public static void cycleMode(ItemStack stack, boolean reverse)
+    public static void cycleSelectionMode(ItemStack stack, boolean reverse)
     {
-        setMode(stack, reverse ? Useful.prevEnumValue(getMode(stack)) : Useful.nextEnumValue(getMode(stack)));
+        setSelectionMode(stack, reverse ? Useful.prevEnumValue(getSelectionMode(stack)) : Useful.nextEnumValue(getSelectionMode(stack)));
     }
     
-    public static void setObstacleHandling(ItemStack stack, ObstacleHandling mode)
+    public static void setObstacleHandling(ItemStack stack, PlacementMode mode)
     {
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
-    public static ObstacleHandling getObstacleHandling(ItemStack stack)
+    public static PlacementMode getObstacleHandling(ItemStack stack)
     {
-        return ObstacleHandling.SKIP.deserializeNBT(stack.getTagCompound());
+        return PlacementMode.SKIP.deserializeNBT(stack.getTagCompound());
     }
     
     public static void cycleObstacleHandling(ItemStack stack, boolean reverse)
@@ -492,10 +492,10 @@ public interface PlacementItem
         PlacementOperation.SELECTING.serializeNBT(tag);
         RegionOrientation.XYZ.serializeNBT(tag);
         
-        PlacementMode currentMode = getMode(stack);
+        SelectionMode currentMode = getSelectionMode(stack);
         // assume user wants to fill a region  and
-        // change mode to region fill if not already set to FILL_REGION or HOLLOW_FILL
-        if(!currentMode.isFilledRegion) PlacementMode.FILL_REGION.serializeNBT(tag);
+        // change mode to region fill if not already set to REGION or HOLLOW_FILL
+        if(!currentMode.usesSelectionRegion) SelectionMode.REGION.serializeNBT(tag);
         
         tag.setLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION, pos.toLong());
     }
@@ -527,7 +527,7 @@ public interface PlacementItem
         
         if(selectedPos.getX() == 1 && selectedPos.getY() == 1 && selectedPos.getZ() == 1 )
         {
-            PlacementMode.SINGLE_BLOCK.serializeNBT(tag);
+            SelectionMode.SINGLE_BLOCK.serializeNBT(tag);
         }
         else
         {
@@ -589,13 +589,13 @@ public interface PlacementItem
     
     public static String selectedRegionLocalizedName(ItemStack stack)
     {
-        switch(getMode(stack))
+        switch(getSelectionMode(stack))
         {
-        case FILL_REGION:
+        case REGION:
             BlockPos pos = placementRegionPosition(stack, false);
             return I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
             
-        case ADD_TO_EXISTING:
+        case MATCH_CLICKED:
             return I18n.translateToLocal("placement.message.region_additive");
 
         case SINGLE_BLOCK:
