@@ -5,27 +5,27 @@ public enum PlacementEvent
     /**
      * Nothing happens, and click processing should continue.
      */
-    NO_OPERATION_CONTINUE,
+    NO_OPERATION_CONTINUE(false, false, false),
     /**
      * Nothing happens, and we eat the click event.
      */
-    NO_OPERATION_STOP,
+    NO_OPERATION_STOP(false, false, false),
     
     /**
      * Place blocks, eat the event.
      * Cancel any previous operations in progress. 
      */
-    PLACE,
+    PLACE(true, false, false),
 
     /**
      * Place blocks, also complete placement region selection operation, eat the event.
      */
-    PLACE_AND_SET_REGION,
+    PLACE_AND_SET_REGION(true, false, true),
     
     /*
      * Finish placement region selection operation in progress. Eat the event. 
      */
-    SET_PLACEMENT_REGION,
+    SET_PLACEMENT_REGION(false, false, true),
     
     /*
      * Start a new placement region selection operation.
@@ -33,31 +33,41 @@ public enum PlacementEvent
      * BlockPos is the first position that should be part of the region.
      * Eat the event. 
      */
-    START_PLACEMENT_REGION,
+    START_PLACEMENT_REGION(false, false, false),
     
     /*
      * Cancel placement region selection operation in progress.
      * Eat the event. 
      */
-    CANCEL_PLACEMENT_REGION,
+    CANCEL_PLACEMENT_REGION(false, false, false),
     
     /**
-     * Remove blocks, also complete excavation region selection operation, eat the event.
+     * Remove blocks, also complete region selection operation, eat the event.
      * Block position identifies the block that was clicked.
      */
-    EXCAVATE_AND_SET_REGION,
+    EXCAVATE_AND_SET_REGION(false, true, true),
     
     /*
-     * Finish excavation region selection operation in progress. Eat the event. 
+     * Remove blocks. Eat the event. 
      * Block position identifies the block that was clicked.
      */
-    SET_EXCAVATION_REGION,
+    EXCAVATE(false, true, false),
     
     /**
      * Undo block placement. Block position identifies the block that was clicked.
      * Cancel any previous operations in progress. 
      * Eat the event. 
      */
-    UNDO_PLACEMENT;
+    UNDO_PLACEMENT(false, false, false);
     
+    public final boolean isExcavation;
+    public final boolean isPlacement;
+    public final boolean isSetRegion;
+    
+    private PlacementEvent(Boolean isPlacement, boolean isExcavation, boolean isSetRegion)
+    {
+        this.isPlacement = isPlacement;
+        this.isExcavation = isExcavation;
+        this.isSetRegion = isSetRegion;
+    }
 }

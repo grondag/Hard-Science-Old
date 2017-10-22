@@ -16,6 +16,8 @@ import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemRenderer;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
+import grondag.hard_science.virtualblock.ExcavationRenderTracker;
+import grondag.hard_science.virtualblock.VirtualRenderTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiOptions;
@@ -45,7 +47,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ClientEventHandler
 {
     @SubscribeEvent()
-    public static void renderWorldLastEvent(RenderWorldLastEvent event) {
+    public static void renderWorldLastEvent(RenderWorldLastEvent event)
+    {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
         if (heldItem !=null && !heldItem.isEmpty() && (heldItem.getItem() instanceof PlacementItem)) 
@@ -53,6 +56,8 @@ public class ClientEventHandler
             PlacementItem placer = (PlacementItem) heldItem.getItem();
             PlacementItemRenderer.renderOverlay(event, player, heldItem, placer);
         }
+        
+        ExcavationRenderTracker.INSTANCE.render(event.getContext(), event.getPartialTicks());
     }
 
     /**
@@ -201,23 +206,15 @@ public class ClientEventHandler
             {
                 if(GuiScreen.isCtrlKeyDown())
                 {
-                    // Ctrl + key: cycle region history
-                    if(PlacementItem.cycleHistory(stack, GuiScreen.isShiftKeyDown()))
-                    {
-                        //TODO: implement
-                        ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                        String message ="Please pretend region history just worked";
-                        Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
-
-                    }
+                    // Ctrl + key: don't use - toggles MC narrator if set to B key
                 }
                 else if(GuiScreen.isAltKeyDown())
                 {
-                    // Alt + key: cycle block history
-                    // TODO: implement
-                    String message ="Please pretend block history just worked";
+                    // Alt + key: toggle excavation mode
+                    PlacementItem.toggleDeleteMode(stack);
+                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                    String message  = I18n.translateToLocal(PlacementItem.isDeleteModeEnabled(stack) ? "placement.message.delete_on" : "placement.message.delete_off");
                     Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
-
                 }
                 else 
                 {
@@ -229,26 +226,26 @@ public class ClientEventHandler
             {
                 if(GuiScreen.isCtrlKeyDown())
                 {
-                    // Ctrl + key: cycle obstacle handling
-                    PlacementItem.cycleObstacleHandling(stack, GuiScreen.isShiftKeyDown());
+                    // Ctrl + key: cycle filter mode
+                    PlacementItem.cycleFilterMode(stack, GuiScreen.isShiftKeyDown());
                     ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                    String message = I18n.translateToLocalFormatted("placement.message.obstacle_mode",  PlacementItem.getObstacleHandling(stack).localizedName());
+                    String message = I18n.translateToLocalFormatted("placement.message.filter_mode",  PlacementItem.getFilterMode(stack).localizedName());
                     Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 }
                 else if(GuiScreen.isAltKeyDown())
                 {
-                    // Alt + key: cycle selection mode
-                    PlacementItem.cycleSelectionMode(stack, GuiScreen.isShiftKeyDown());
+                    // Alt + key: cycle species handling
+                    PlacementItem.cycleSpeciesMode(stack, GuiScreen.isShiftKeyDown());
                     ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                    String message = I18n.translateToLocalFormatted("placement.message.selection_mode",  PlacementItem.getSelectionMode(stack).localizedName());
+                    String message = I18n.translateToLocalFormatted("placement.message.species_mode",  PlacementItem.getSpeciesMode(stack).localizedName());
                     Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 }
                 else 
                 {
-                    // Unmodified key: cycle species handling
-                    PlacementItem.cycleSpeciesMode(stack, GuiScreen.isShiftKeyDown());
+                    // Unmodified key: cycle selection mode
+                    PlacementItem.cycleSelectionMode(stack, GuiScreen.isShiftKeyDown());
                     ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                    String message = I18n.translateToLocalFormatted("placement.message.species_mode",  PlacementItem.getSpeciesMode(stack).localizedName());
+                    String message = I18n.translateToLocalFormatted("placement.message.selection_mode",  PlacementItem.getSelectionMode(stack).localizedName());
                     Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                     
                 }

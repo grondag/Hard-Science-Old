@@ -12,10 +12,14 @@ import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -31,7 +35,7 @@ import net.minecraft.util.text.translation.I18n;
  *    Done
  *       normal - not selecting: break blocks in region
  *       alt - undo last placement
- *       ctrl - currently unused
+ *       ctrl - select filter block
  *       normal - selecting: cancel selection
  *   
  *   Right Click
@@ -39,21 +43,21 @@ import net.minecraft.util.text.translation.I18n;
  *       select mode - none: selecting, complete and place selection
  *       normal mode - none: place according to current mode/selection
  *       normal mode - ctrl: start new selection
- *       normal mode - alt: place with different species      
+ *       normal mode - alt:  place with different species      
  *       
  *   R - normal: cycle block orientation
  *       ctrl: cycle selection floating / range
- *       alt: cycle region orientation
+ *       alt: cycle region orientation / assist / fixed
  *       shift: reverse
  *
  *   B - normal: show block menu
- *       ctrl: cycle region history
- *       alt: cycle block history
+ *       ctrl: don't use - activates MC narrator
+ *       alt: toggle delete mode
  *       shift: reverse 
  *       
- *   V - ctrl: cycle fill mode 
- *       alt: cycle selection mode  SINGLE BLOCK / SELECTED REGION / HOLLOW REGION / MATCH CLICKED BLOCK
- *       normal: cycle species handling MATCH MOST / AVOID MOST / MATCH CLICKED / AVOID CLICKED
+ *   V - ctrl: cycle filter mode 
+ *       alt: cycle species handling
+ *       normal: cycle selection mode
  *       shift: reverse
  *       
  */
@@ -350,7 +354,7 @@ public interface PlacementItem
     
     public static SelectionMode getSelectionMode(ItemStack stack)
     {
-        return SelectionMode.REGION.deserializeNBT(stack.getTagCompound());
+        return SelectionMode.FILL_REGION.deserializeNBT(stack.getTagCompound());
     }
     
     public static void cycleSelectionMode(ItemStack stack, boolean reverse)
@@ -358,19 +362,19 @@ public interface PlacementItem
         setSelectionMode(stack, reverse ? Useful.prevEnumValue(getSelectionMode(stack)) : Useful.nextEnumValue(getSelectionMode(stack)));
     }
     
-    public static void setObstacleHandling(ItemStack stack, PlacementMode mode)
+    public static void setFilterMode(ItemStack stack, FilterMode mode)
     {
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
-    public static PlacementMode getObstacleHandling(ItemStack stack)
+    public static FilterMode getFilterMode(ItemStack stack)
     {
-        return PlacementMode.SKIP.deserializeNBT(stack.getTagCompound());
+        return FilterMode.FILL_REPLACEABLE.deserializeNBT(stack.getTagCompound());
     }
     
-    public static void cycleObstacleHandling(ItemStack stack, boolean reverse)
+    public static void cycleFilterMode(ItemStack stack, boolean reverse)
     {
-        setObstacleHandling(stack, reverse ? Useful.prevEnumValue(getObstacleHandling(stack)) : Useful.nextEnumValue(getObstacleHandling(stack)));
+        setFilterMode(stack, reverse ? Useful.prevEnumValue(getFilterMode(stack)) : Useful.nextEnumValue(getFilterMode(stack)));
     }
     
     public static void setSpeciesMode(ItemStack stack, SpeciesMode mode)
@@ -419,8 +423,9 @@ public interface PlacementItem
 
         // supermodel blocks may need to use a different block instance depending on model/substance
         // handle this here by substituting a stack different than what we received
-
-        if(stack.getItem() instanceof SuperItemBlock)
+        Item item = stack.getItem();
+        
+        if(item instanceof SuperItemBlock)
         {
             ModelState modelState = PlacementItem.getStackModelState(stack);
             if(modelState == null) return null;
@@ -436,7 +441,16 @@ public interface PlacementItem
             
             return targetBlock.getStateFromMeta(stack.getMetadata());
         }
-        return null;
+        else if(item instanceof ItemBlock)
+        {
+            Block targetBlock = (Block)((ItemBlock)stack.getItem()).getBlock();
+            return targetBlock.getStateFromMeta(stack.getMetadata());
+        }
+        else
+        {
+            return Blocks.AIR.getDefaultState();
+        }
+            
     }
     
     public static ModelState getStackModelState(ItemStack stack)
@@ -477,13 +491,19 @@ public interface PlacementItem
         return stack.getItem() instanceof PlacementItem;
     }
 
-    /**
-     * Returns true if caused a change
-     */
-    public static boolean cycleHistory(ItemStack stack, boolean reverse)
+    public static void toggleDeleteMode(ItemStack stack)
     {
-        // TODO Auto-generated method stub
-        return true;
+        setDeleteModeEnabled(stack, !isDeleteModeEnabled(stack));
+    }
+    
+    public static boolean isDeleteModeEnabled(ItemStack stack)
+    {
+        return Useful.getOrCreateTagCompound(stack).getBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED);
+    }
+    
+    public static void setDeleteModeEnabled(ItemStack stack, boolean enabled)
+    {
+        Useful.getOrCreateTagCompound(stack).setBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED, enabled);
     }
     
     public static void selectPlacementRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
@@ -494,8 +514,8 @@ public interface PlacementItem
         
         SelectionMode currentMode = getSelectionMode(stack);
         // assume user wants to fill a region  and
-        // change mode to region fill if not already set to REGION or HOLLOW_FILL
-        if(!currentMode.usesSelectionRegion) SelectionMode.REGION.serializeNBT(tag);
+        // change mode to region fill if not already set to FILL_REGION or HOLLOW_FILL
+        if(!currentMode.usesSelectionRegion) SelectionMode.FILL_REGION.serializeNBT(tag);
         
         tag.setLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION, pos.toLong());
     }
@@ -527,7 +547,7 @@ public interface PlacementItem
         
         if(selectedPos.getX() == 1 && selectedPos.getY() == 1 && selectedPos.getZ() == 1 )
         {
-            SelectionMode.SINGLE_BLOCK.serializeNBT(tag);
+            SelectionMode.ON_CLICKED_FACE.serializeNBT(tag);
         }
         else
         {
@@ -591,14 +611,14 @@ public interface PlacementItem
     {
         switch(getSelectionMode(stack))
         {
-        case REGION:
+        case FILL_REGION:
             BlockPos pos = placementRegionPosition(stack, false);
             return I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
             
-        case MATCH_CLICKED:
+        case ON_CLICKED_SURFACE:
             return I18n.translateToLocal("placement.message.region_additive");
 
-        case SINGLE_BLOCK:
+        case ON_CLICKED_FACE:
         default:
             return I18n.translateToLocal("placement.message.region_single");
         

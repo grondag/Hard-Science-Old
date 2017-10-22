@@ -84,22 +84,28 @@ placement.message.region_single=Placement region is a single block
 placement.message.region_additive=Placement region is determined by existing blocks.
 placement.message.region_box=Placement region is %d x %d x %d blocks
 placement.message.species_mode=Changed join behavior: %s
-placement.message.obstacle_mode=Changed obstacle handling: %s
+placement.message.filter_mode=Changed filter mode: %s
+placement.message.delete_on=Excavation mode is enabled!
+placement.message.delete_off=Excavation mode is disabled.
+
 
 placement.preview.none=NONE
 placement.preview.outline=OUTLINE
 #placement.preview.ghost=GHOST
 
-placement.selection_mode.single_block=PLACE SINGLE BLOCK
-placement.selection_mode.region=FILL REGION
-placement.selection_mode.hollow_region=HOLLOW REGION
-placement.selection_mode.match_clicked=ADD TO EXISTING BLOCKS
+placement.selection_mode.on_clicked_face=Place single block on clicked face (normal Minecraft)
+placement.selection_mode.fill_region=Replace blocks in selected region that match filter
+placement.selection_mode.hollow_region=Replace blocks on outside of selected region that match filter
+placement.selection_mode.complete_region=Replace all blocks in selected region if all match filter
+placement.selection_mode.match_clicked_block=Replace clicked blocks and matching blocks connected to it (like an Exchanger)
+placement.selection_mode.on_clicked_surface=Place block on clicked face and connected faces that match it (like a Builder's wand)
 
 placement.species_mode.match_clicked=Join with clicked face if possible (hold Alt key to break instead)
 placement.species_mode.counter_most=Break with nearby blocks if possible (hold Alt key to join clicked face)
 placement.species_mode.match_most=Join with nearby blocks if possible - prefer clicked face (hold Alt key to break instead)
 
 placement.orientation.region.automatic=Adjust to avoid obstacles (Default)
+placement.orientation.region.fixed=Fixed location
 placement.orientation.region.xyz=Width / Height / Depth (Original)
 placement.orientation.region.zyx=Width = Depth / Height / Depth = Width 
 placement.orientation.region.zxy=Width = Depth / Height = Width / Depth = Height
@@ -149,10 +155,11 @@ placement.orientation.edge.down_north_west=DOWN / NORTH / WEST
 placement.orientation.edge.down_south_east=DOWN / SOUTH / EAST
 placement.orientation.edge.down_south_west=DOWN / SOUTH / WEST
 
-placement.obdstacle_mode.skip=Place blocks where possible, skip occupied spaces
-placement.obdstacle_mode.disallow=Don't place blocks if any space is occupied
-placement.obdstacle_mode.adjust_and_skip=Adjust placement to avoid obstacles and skip occupied spaces that can't be avoided
-placement.obdstacle_mode.adjust_and_disallow=Adjust placement to avoid obstacles and don't place if any space is occupied
+placement.filter_mode.fill_replaceable=Fill spaces containing air, water, plants and other replaceable blocks.
+placement.filter_mode.replace_solid=Replace solid blocks only (leave air, water, etc.)
+placement.filter_mode.replace_all=Replace all solid blocks and fill empty spaces
+placement.filter_mode.replace_only=Replace specific block...  (Ctrl-left click to choose)
+placement.filter_mode.replace_all_except=Replace all blocks except... (Ctrl-left clock to choose)
 
 #ITEMS
 item.block_wand.name=Block Adjuster

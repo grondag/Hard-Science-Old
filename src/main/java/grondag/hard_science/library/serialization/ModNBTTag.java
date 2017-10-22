@@ -104,5 +104,6 @@ public class ModNBTTag
 
     public static final String SUPER_MODEL_LIGHT_VALUE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     
-    public final static String PLACEMENT_OBSTACLE_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_FILTER_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String PLACEMENT_DELETE_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 }

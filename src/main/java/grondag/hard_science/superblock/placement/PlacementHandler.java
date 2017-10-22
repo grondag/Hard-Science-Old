@@ -26,6 +26,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -39,14 +40,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * TODO: 
- * Cache predicted results
- * Deletion Mode - creative
- * Deletion Tracking
- * Deletion Rendering
- * Deletion Mode - survival
- * Temporary deletion drone service
- * Deletion Mode - Veinminer
- * Undo
+ * Add render for excavations
+ * Temporary drone service machine
+ * Make virtual blocks truly virtual (no world state)
+ * Selection mode - veinmine
+ * Selection mode - builders wand
+ * Selection mode - complete region
+ * Block filter - add way to add specific blocks to filter
+ * Block filter - implement whitelist / blacklist modes
+ * Add fixed selection mode (in addition to floating, normal)
  * Follow mode
  * Fixed block orientation
  * Dynamic block orientation
@@ -54,11 +56,31 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Block History
  * Region History
  * mode indicator on Item icon
+ * Undo
+ * performance tuning
+ * Optimization: don't generate a placement if target is already equal to placed block / air if delete
+ * Cache predicted results - previous attempt wasn't workable, see predicePlacementResults
+ * Add move selection controls (AWSD Sneak/Jump with Ctrl, relative to look vector)
  */
 
 
 public abstract class PlacementHandler
 {
+   
+//    /**
+//     * This and similarly-named variables cache the last result of {@link #predictPlacementResults(EntityPlayerSP, ItemStack, PlacementItem)}.
+//     */
+//    @SideOnly(Side.CLIENT)
+//    private static PlacementResult lastPredictionResult = null;
+//    @SideOnly(Side.CLIENT)
+//    private static ItemStack lastPredicionStack = ItemStack.EMPTY;
+//    @SideOnly(Side.CLIENT)
+//    private static BlockPos lastPredictionPos = null;
+//    @SideOnly(Side.CLIENT)
+//    private static EnumFacing lastPredictionFace = null;
+//    @SideOnly(Side.CLIENT)
+//    private static Vec3d lastPredictionHitVec = null;
+    
     /**
      * Called client-side by overlay renderer to know
      * what should be rendered for player. If no operation is in progress,
@@ -103,9 +125,8 @@ public abstract class PlacementHandler
                 onPos = target.getBlockPos();
 
                 // if block out of range there will be no "placed on" position
-                //FIXME: what about water?
                 if(onPos.distanceSq(onPos) > Useful.squared(mc.playerController.getBlockReachDistance() + 1)
-                        || player.world.isAirBlock(onPos))
+                        || player.world.getBlockState(onPos).getMaterial().isReplaceable())
                 {
                     onPos = null;
                 }
@@ -116,7 +137,7 @@ public abstract class PlacementHandler
                 }
             }
         }
-       
+   
         // assume user will click the right mouse button
         return doRightClickBlock(player, onPos, onFace, hitVec, stack);
     }
@@ -148,7 +169,6 @@ public abstract class PlacementHandler
                         null, 
                         null, 
                         null, 
-                        null,
                         PlacementEvent.CANCEL_PLACEMENT_REGION);
             }
             
@@ -165,8 +185,7 @@ public abstract class PlacementHandler
                             null, 
                             null, 
                             null, 
-                            null, 
-                            onPos,
+                            onPos, 
                             PlacementEvent.UNDO_PLACEMENT);
                 }
                 else
@@ -231,10 +250,20 @@ public abstract class PlacementHandler
      */
     public static PlacementResult doRightClickBlock(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, ItemStack stack)
     {
+        final boolean isFloating = PlacementItem.isFloatingSelectionEnabled(stack);
+        
+        // should not pass on___ info if floating - would give different result from preview and not intended behavior when floating is active
+        if(isFloating)
+        {
+            onPos = null;
+            onFace = null;
+            hitVec = null;
+        }
+        
         /**
          * position user is activating, either by clicking against a block or with floating selection.
          */
-        BlockPos startPos = PlacementItem.isFloatingSelectionEnabled(stack)
+        BlockPos startPos = isFloating
                 ? PlacementItem.getFloatingSelectionBlockPos(stack, player) 
                 : onPos == null || onFace == null ? null : onPos.offset(onFace);
         
@@ -250,8 +279,7 @@ public abstract class PlacementHandler
                     blockBoundaryAABB(startPos, startPos),
                     ImmutableList.of(Pair.of(startPos, stack)), 
                     null, 
-                    null, 
-                    startPos,
+                    startPos, 
                     PlacementEvent.PLACE);
         }
                 
@@ -271,8 +299,7 @@ public abstract class PlacementHandler
                             blockBoundaryAABB(startPos, endPos), 
                             null, 
                             null, 
-                            null, 
-                            startPos,
+                            startPos, 
                             PlacementEvent.SET_PLACEMENT_REGION);
                 }
                 else
@@ -297,8 +324,7 @@ public abstract class PlacementHandler
                             blockBoundaryAABB(startPos, startPos),
                             null, 
                             null, 
-                            null, 
-                            startPos,
+                            startPos, 
                             PlacementEvent.START_PLACEMENT_REGION);
                 }
                 else
@@ -312,10 +338,12 @@ public abstract class PlacementHandler
     
     public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, BlockPos startPos, boolean setRegion)
     {
+        
         boolean isSelecting = PlacementItem.operationInProgress(stack) == PlacementOperation.SELECTING;
         
         SelectionMode selectionMode = PlacementItem.getSelectionMode(stack);
         boolean isHollow = selectionMode == SelectionMode.HOLLOW_REGION;
+        boolean isExcavating = PlacementItem.isDeleteModeEnabled(stack);
         
         // check for a multi-block placement region
         BlockPos placementPos = selectionMode.usesSelectionRegion ? PlacementItem.placementRegionPosition(stack, true) : null;
@@ -330,10 +358,9 @@ public abstract class PlacementHandler
         }
         
         BlockRegion region = new BlockRegion(startPos, endPos, isHollow);
-        excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
+        if(selectionMode.usesSelectionRegion) excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
         
-        PlacementMode handling = PlacementItem.getObstacleHandling(stack);
-        boolean adjustmentEnabled = PlacementItem.getRegionOrientation(stack) == RegionOrientation.AUTOMATIC;
+        boolean adjustmentEnabled = PlacementItem.getRegionOrientation(stack) == RegionOrientation.AUTOMATIC && !isExcavating;
         
         /** true if no obstacles */
         boolean isClear = region.exclusions().isEmpty() 
@@ -346,7 +373,6 @@ public abstract class PlacementHandler
              && selectionMode.usesSelectionRegion 
              && !isClear 
              && !isSelecting 
-             && handling.adjustIfEnabled 
              && placementPos != null 
              && !startPos.equals(endPos))
         {
@@ -388,17 +414,18 @@ public abstract class PlacementHandler
             }
         }
         
-        List<Pair<BlockPos, ItemStack>> placements = (handling.skip || isClear)
+        List<Pair<BlockPos, ItemStack>> placements = (selectionMode != SelectionMode.COMPLETE_REGION || isClear)
                 ? placeRegion(player, onPos, onFace, hitVec, stack, region)
                 : Collections.emptyList();
         
         return new PlacementResult(
                 blockBoundaryAABB(startPos, endPos), 
                 placements, 
-                null, 
                 region.exclusions(), 
-                startPos,
-                setRegion ? PlacementEvent.PLACE_AND_SET_REGION : PlacementEvent.PLACE);
+                startPos, 
+                setRegion 
+                    ? isExcavating ? PlacementEvent.EXCAVATE_AND_SET_REGION : PlacementEvent.PLACE_AND_SET_REGION
+                    : isExcavating ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE);
     }
 
     /**
@@ -451,15 +478,36 @@ public abstract class PlacementHandler
     }
     public static void excludeObstaclesInRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, BlockRegion region)
     {
+        FilterMode filterMode =  PlacementItem.getFilterMode(stack);
+        boolean isExcavating = PlacementItem.isDeleteModeEnabled(stack);
+        
+        // if excavating, adjust filter mode if needed so that it does something
+        if(isExcavating && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
+                
         World world = player.world;
         
         HashSet<BlockPos> set = new HashSet<BlockPos>();
         
-        for(BlockPos.MutableBlockPos pos : region.includedPositions())
+        if(isExcavating)
         {
-            if(!world.getBlockState(pos).getMaterial().isReplaceable())
+            for(BlockPos.MutableBlockPos pos : region.positions())
             {
-                set.add(pos.toImmutable());
+                IBlockState blockState = world.getBlockState(pos);
+                if(blockState.getBlock().isAir(blockState, world, pos) || !filterMode.shouldAffectBlock(blockState, world, pos, stack, player))
+                {
+                    set.add(pos.toImmutable());
+                }
+            }
+        }
+        else
+        {
+            for(BlockPos.MutableBlockPos pos : region.includedPositions())
+            {
+                IBlockState blockState = world.getBlockState(pos);
+                if(!filterMode.shouldAffectBlock(blockState, world, pos, stack, player))
+                {
+                    set.add(pos.toImmutable());
+                }
             }
         }
         region.exclude(set);
@@ -470,21 +518,33 @@ public abstract class PlacementHandler
      * according to current stack settings.
      * The 
      */
-    public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, 
+    public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stackIn, 
             BlockRegion region)
     {
         
-        stack = stack.copy();
+        ItemStack stack;
         
-        int species = speciesForPlacement(player, onPos, onFace, hitVec, stack, region);
-        if(species >= 0) 
+        if(PlacementItem.isDeleteModeEnabled(stackIn))
         {
+            stack = Items.AIR.getDefaultInstance();
+        }
+        else
+        {
+            stack = stackIn.copy();
+        
             ModelState modelState = PlacementItem.getStackModelState(stack);
-            modelState.setSpecies(species);
-            PlacementItem.setStackModelState(stack, modelState);
-            if(modelState.metaUsage() == MetaUsage.SPECIES)
+            if(modelState.hasSpecies())
             {
-                stack.setItemDamage(species);
+                int species = speciesForPlacement(player, onPos, onFace, hitVec, stack, region);
+                if(species >= 0) 
+                {
+                    modelState.setSpecies(species);
+                    PlacementItem.setStackModelState(stack, modelState);
+                    if(modelState.metaUsage() == MetaUsage.SPECIES)
+                    {
+                        stack.setItemDamage(species);
+                    }
+                }
             }
         }
         
@@ -625,15 +685,15 @@ public abstract class PlacementHandler
 
         switch(placementMode)
         {
-        case REGION:
+        case FILL_REGION:
             return isFloating 
                     ? floatingMultiBlockResults()
                             : multiBlockResults();
 
-        case MATCH_CLICKED:
+        case ON_CLICKED_SURFACE:
             additiveResults();
 
-        case SINGLE_BLOCK:
+        case ON_CLICKED_FACE:
         default:
             return isFloating 
                     ? floatingSingleBlockResult()

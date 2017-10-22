@@ -1,9 +1,9 @@
 package grondag.hard_science.virtualblock;
 
 import grondag.hard_science.library.world.PerChunkBlockPosQueue;
-import grondag.hard_science.library.world.PerWorldReference;
+import grondag.hard_science.library.world.WorldMap;
 
-public class VirtualBlockTracker extends PerWorldReference<PerChunkBlockPosQueue>
+public class VirtualBlockTracker extends WorldMap<PerChunkBlockPosQueue>
 {
     /**
      * 

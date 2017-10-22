@@ -121,6 +121,13 @@ public class BlockRegion
         return getAllOnBoxSurfaceMutable(this.xMin, this.yMin, this.zMin, this.xMax, this.yMax, this.zMax);
     }
     
+    /** Positions that belong the region, excluding interior positions if hollow, but not excluding any excluded positions. */
+    public Iterable<MutableBlockPos> positions()
+    {
+        return isHollow ? surfacePositions() : allPositions();
+    }
+    
+    
     /** All positions on the surface of the region. Will be same as {@link #allPositions()} if region is not at least 3x3x3 */
     public Iterable<MutableBlockPos> adjacentPositions()
     {
@@ -138,7 +145,7 @@ public class BlockRegion
             {
                 return new AbstractIterator<BlockPos.MutableBlockPos>()
                 {
-                    Iterator<BlockPos.MutableBlockPos> wrapped = isHollow ? surfacePositions().iterator() : allPositions().iterator();
+                    Iterator<BlockPos.MutableBlockPos> wrapped = positions().iterator();
                     
                     protected BlockPos.MutableBlockPos computeNext()
                     {

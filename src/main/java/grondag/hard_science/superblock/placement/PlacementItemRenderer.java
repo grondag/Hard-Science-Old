@@ -22,16 +22,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class PlacementItemRenderer
 {
-    private static float[] COLOR_DELETED_RGBA = {1.0f, 0.3f, 0.3f, 1.0f};
-    private static float[] COLOR_PLACED_RGBA = {1.0f, 1.0f, 1.0f, 1.0f};
-    private static float[] COLOR_BLOCKED_RGBA = {1.0f, 1.0f, 0.3f, 1.0f};
+    public static float[] COLOR_DELETED_RGBA = {1.0f, 0.3f, 0.3f, 1.0f};
+    public static float[] COLOR_PLACED_RGBA = {1.0f, 1.0f, 1.0f, 1.0f};
+    public static float[] COLOR_BLOCKED_RGBA = {1.0f, 1.0f, 0.3f, 1.0f};
     
     
     public static void renderOverlay(RenderWorldLastEvent event, EntityPlayerSP player, ItemStack stack, PlacementItem item)
     {
-        double d0 = player.lastTickPosX;
-        double d1 = player.lastTickPosY;
-        double d2 = player.lastTickPosZ;
+        double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
+        double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
+        double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
 
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -46,8 +46,8 @@ public class PlacementItemRenderer
         {
             AxisAlignedBB regionAABB = result.placementAABB().offset(-d0, -d1, -d2);
             
-            boolean isBlocked = !result.hasPlacementList() && result.hasDeletionList();
-            float[] color = isBlocked ? COLOR_BLOCKED_RGBA : COLOR_PLACED_RGBA;
+            boolean isBlocked = !result.hasPlacementList() && result.hasExclusionList();
+            float[] color = isBlocked ? COLOR_BLOCKED_RGBA : PlacementItem.isDeleteModeEnabled(stack) ? COLOR_DELETED_RGBA : COLOR_PLACED_RGBA;
             // draw once without depth to show any blocked regions
             GlStateManager.disableDepth();
             GlStateManager.glLineWidth(1.0F);
@@ -62,10 +62,10 @@ public class PlacementItemRenderer
             
             if(isBlocked)
             {
-                for(BlockPos pos : result.deletions())
+                for(BlockPos pos : result.exclusions())
                 {
                     AxisAlignedBB blockAABB = Block.FULL_BLOCK_AABB.offset(pos.getX(), pos.getY(), pos.getZ());
-                    RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), COLOR_BLOCKED_RGBA[0], COLOR_BLOCKED_RGBA[1], COLOR_BLOCKED_RGBA[2], COLOR_BLOCKED_RGBA[3]);
+                    RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), color[0], color[1], color[2], color[3]);
                 }
             }
             else if(result.hasPlacementList())
@@ -73,32 +73,21 @@ public class PlacementItemRenderer
                 for(Pair<BlockPos, ItemStack> placement : result.placements())
                 {
                     ModelState placementModelState = PlacementItem.getStackModelState(placement.getRight());
-                    if(placementModelState != null)
+                    if(placementModelState == null)
+                    {
+                        // No model state, draw generic box
+                        BlockPos pos = placement.getLeft();
+                        AxisAlignedBB blockAABB = Block.FULL_BLOCK_AABB.offset(pos.getX(), pos.getY(), pos.getZ());
+                        RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), color[0], color[1], color[2], color[3]);
+                    }
+                    else
                     {
                         // Draw collision boxes
                         for (AxisAlignedBB blockAABB : placementModelState.collisionBoxes(placement.getLeft())) 
                         {
-                            RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), COLOR_PLACED_RGBA[0], COLOR_PLACED_RGBA[1], COLOR_PLACED_RGBA[2], COLOR_PLACED_RGBA[3]);
+                            RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), color[0], color[1], color[2], color[3]);
                         }
                     }
-                }
-            }
-        }
-        else if(result.hasDeletiopnAABB())
-        {
-            AxisAlignedBB regionAABB = result.deletionAABB().offset(-d0, -d1, -d2);
-            
-            // draw again with depth to show unblocked region
-            GlStateManager.disableDepth();
-            GlStateManager.glLineWidth(2.0F);
-            RenderGlobal.drawSelectionBoundingBox(regionAABB, COLOR_DELETED_RGBA[0], COLOR_DELETED_RGBA[1], COLOR_DELETED_RGBA[2], COLOR_DELETED_RGBA[3]);
-            
-            if(result.hasDeletionList())
-            {
-                for(BlockPos pos : result.deletions())
-                {
-                    AxisAlignedBB blockAABB = Block.FULL_BLOCK_AABB.offset(pos.getX(), pos.getY(), pos.getZ());
-                    RenderGlobal.drawSelectionBoundingBox(blockAABB.offset(-d0, -d1, -d2), COLOR_DELETED_RGBA[0], COLOR_DELETED_RGBA[1], COLOR_DELETED_RGBA[2], COLOR_DELETED_RGBA[3]);
                 }
             }
         }

@@ -15,19 +15,26 @@ import net.minecraft.util.text.translation.I18n;
 public enum SelectionMode implements IMessagePlusImmutable<SelectionMode>, IReadWriteNBTImmutable<SelectionMode>, ILocalized
 {
     /** affect a single block - normal MC  behavior*/
-    SINGLE_BLOCK(false),
+    ON_CLICKED_FACE(false),
     
     /** use the placement item's selection region */
-    REGION(true),
+    FILL_REGION(true),
     
     /** use only the exterior blocks the placement item's selection region*/
     HOLLOW_REGION(true),
     
-    /** search for and affect blocks that match the clicked block */
-    MATCH_CLICKED(false);
+    /** use the placement item's selection region ONLY if all blocks in region match the filter criteria */
+    COMPLETE_REGION(true),
+    
+    /** flood fill search for blocks that match the clicked block - like an exchanger */
+    MATCH_CLICKED_BLOCK(false),
+    
+    /** flood fill of adjacent surfaces that match the clicked block - like a builder's wand */
+    ON_CLICKED_SURFACE(false);
     
     /**
      * If true, this mode uses the geometrically-defined volume defined by the placement item's current selection region.
+     * By extension, also determines if the current filter mode applies.
      * If false, affects a single block or employs some other logic for determining what blocks are affected.
      */
     public final boolean usesSelectionRegion;

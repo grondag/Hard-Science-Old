@@ -11,7 +11,7 @@ import grondag.hard_science.superblock.placement.BlockOrientationAxis;
 import grondag.hard_science.superblock.placement.BlockOrientationCorner;
 import grondag.hard_science.superblock.placement.BlockOrientationEdge;
 import grondag.hard_science.superblock.placement.BlockOrientationFace;
-import grondag.hard_science.superblock.placement.PlacementMode;
+import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -35,8 +35,9 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private BlockOrientationCorner corner;
     private RegionOrientation regionOrientation;
     private int floatingSelectionRange;
-    private PlacementMode obstacleHandling;
+    private FilterMode filterMode;
     private SpeciesMode speciesMode;
+    private boolean isDeleteModeEnabled;
     
     public ConfigurePlacementItem() 
     {
@@ -58,8 +59,9 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.corner = PlacementItem.getBlockOrientationCorner(stack);
         this.floatingSelectionRange = PlacementItem.getFloatingSelectionRange(stack);
         this.regionOrientation = PlacementItem.getRegionOrientation(stack);
-        this.obstacleHandling = PlacementItem.getObstacleHandling(stack);
+        this.filterMode = PlacementItem.getFilterMode(stack);
         this.speciesMode = PlacementItem.getSpeciesMode(stack);
+        this.isDeleteModeEnabled = PlacementItem.isDeleteModeEnabled(stack);
     }
 
     @Override
@@ -70,15 +72,16 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.modelState.fromBytes(pBuff);
         this.blockSubstance = pBuff.readEnumValue(BlockSubstance.class);
         this.lightValue = pBuff.readByte();
-        this.mode = SelectionMode.REGION.fromBytes(pBuff);
+        this.mode = SelectionMode.FILL_REGION.fromBytes(pBuff);
         this.axis = BlockOrientationAxis.DYNAMIC.fromBytes(pBuff);
         this.face = BlockOrientationFace.DYNAMIC.fromBytes(pBuff);
         this.edge = BlockOrientationEdge.DYNAMIC.fromBytes(pBuff);
         this.corner = BlockOrientationCorner.DYNAMIC.fromBytes(pBuff);
         this.floatingSelectionRange = pBuff.readByte();
         this.regionOrientation = RegionOrientation.XYZ.fromBytes(pBuff);
-        this.obstacleHandling = PlacementMode.SKIP.fromBytes(pBuff);
+        this.filterMode = FilterMode.FILL_REPLACEABLE.fromBytes(pBuff);
         this.speciesMode = SpeciesMode.MATCH_CLICKED.fromBytes(pBuff);
+        this.isDeleteModeEnabled = pBuff.readBoolean();
     }
 
     @Override
@@ -95,8 +98,9 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.corner.toBytes(pBuff);
         pBuff.writeByte(floatingSelectionRange);
         this.regionOrientation.toBytes(pBuff);
-        this.obstacleHandling.toBytes(pBuff);
+        this.filterMode.toBytes(pBuff);
         this.speciesMode.toBytes(pBuff);
+        pBuff.writeBoolean(this.isDeleteModeEnabled);
     }
    
     @Override
@@ -116,8 +120,9 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setBlockOrientationCorner(heldStack, message.corner);
             PlacementItem.setSelectionTargetRange(heldStack, message.floatingSelectionRange);
             PlacementItem.setRegionOrientation(heldStack, message.regionOrientation);
-            PlacementItem.setObstacleHandling(heldStack, message.obstacleHandling);
+            PlacementItem.setFilterMode(heldStack, message.filterMode);
             PlacementItem.setSpeciesMode(heldStack, message.speciesMode);
+            PlacementItem.setDeleteModeEnabled(heldStack, message.isDeleteModeEnabled);
         }
     }
 }

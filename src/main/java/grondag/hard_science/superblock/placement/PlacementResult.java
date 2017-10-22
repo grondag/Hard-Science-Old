@@ -17,27 +17,24 @@ import net.minecraft.util.math.BlockPos;
 public class PlacementResult
 {
     private final List<Pair<BlockPos, ItemStack>> placements;
-    private final Set<BlockPos> deletions;
+    private final Set<BlockPos> exclusions;
     private final AxisAlignedBB placementAABB;
-    private final AxisAlignedBB deletionAABB;
     private final BlockPos blockPos;
     private final PlacementEvent event;
     
-    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
-    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
+    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
+    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
     
     public PlacementResult(
             @Nullable AxisAlignedBB placementAABB, 
             @Nullable List<Pair<BlockPos, ItemStack>> placements, 
-            @Nullable AxisAlignedBB deletionAABB, 
-            @Nullable Set<BlockPos> deletions,
+            @Nullable Set<BlockPos> exclusions, 
             @Nullable BlockPos blockPos,
             @Nonnull  PlacementEvent event)
     {
         this.placementAABB = placementAABB;
         this.placements = placements;
-        this.deletionAABB = deletionAABB;
-        this.deletions = deletions;
+        this.exclusions = exclusions;
         this.blockPos = blockPos;
         this.event = event;
     }
@@ -52,7 +49,7 @@ public class PlacementResult
     
     public PlacementResult withEvent(PlacementEvent event)
     {
-        return new PlacementResult(this.placementAABB, this.placements, this.deletionAABB, this.deletions, this.blockPos, event);
+        return new PlacementResult(this.placementAABB, this.placements, this.exclusions, this.blockPos, event);
     }
     
     /**
@@ -77,15 +74,14 @@ public class PlacementResult
     }
     
     /**
-     * For deletion actions, blocks to be deleted.
-     * For placement actions, blocks that were obstacles to placement.
+     * Locations of blocks that are obstacles to the placement action.
      */
     @Nonnull
-    public Set<BlockPos> deletions()
+    public Set<BlockPos> exclusions()
     {
-        return this.deletions == null
+        return this.exclusions == null
                 ? Collections.emptySet()
-                : this.deletions;
+                : this.exclusions;
     }
 
     @Nullable
@@ -94,20 +90,9 @@ public class PlacementResult
         return this.placementAABB;
     }
     
-    @Nullable
-    public AxisAlignedBB deletionAABB()
-    {
-        return this.deletionAABB;
-    }
-    
     public boolean hasPlacementAABB()
     {
         return this.placementAABB != null;
-    }
-    
-    public boolean hasDeletiopnAABB()
-    {
-        return this.deletionAABB != null;
     }
     
     public boolean hasPlacementList()
@@ -115,9 +100,9 @@ public class PlacementResult
         return this.placements != null && !this.placements.isEmpty();
     }
     
-    public boolean hasDeletionList()
+    public boolean hasExclusionList()
     {
-        return this.deletions != null && !this.deletions.isEmpty();
+        return this.exclusions != null && !this.exclusions.isEmpty();
     }
 
     public void applyToStack(ItemStack stackIn, EntityPlayer player)

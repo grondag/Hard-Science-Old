@@ -7,7 +7,7 @@ import net.minecraft.world.World;
  * Keeps lazily-loaded objects, one-per dimension.
  * Not thread-safe.
  */
-public abstract class PerWorldReference<T> extends Int2ObjectOpenHashMap<T>
+public abstract class WorldMap<T> extends Int2ObjectOpenHashMap<T>
 {
     /**
      * 
@@ -15,7 +15,7 @@ public abstract class PerWorldReference<T> extends Int2ObjectOpenHashMap<T>
     private static final long serialVersionUID = 318003886323074885L;
 
     @Override
-    public T get(int dimension)
+    public synchronized T get(int dimension)
     {
         T result = super.get(dimension);
         if(result == null)

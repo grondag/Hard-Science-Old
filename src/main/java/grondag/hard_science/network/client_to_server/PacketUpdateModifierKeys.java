@@ -3,7 +3,6 @@ package grondag.hard_science.network.client_to_server;
 
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.player.ModPlayerCaps;
-import jline.internal.Log;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 
@@ -39,7 +38,5 @@ public class PacketUpdateModifierKeys extends AbstractPlayerToServerPacket<Packe
     protected void handle(PacketUpdateModifierKeys message, EntityPlayerMP player)
     {
         ModPlayerCaps.setPlacementModifierFlags(player, message.keyFlags);
-        //FIXME: remove
-        Log.info("keyFlags = " + message.keyFlags);
     }
 }

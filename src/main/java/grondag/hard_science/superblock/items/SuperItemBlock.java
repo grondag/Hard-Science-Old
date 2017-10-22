@@ -16,6 +16,9 @@ import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementEvent;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
+import grondag.hard_science.virtualblock.ExcavationRenderEntry;
+import grondag.hard_science.virtualblock.ExcavationRenderTracker;
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -148,7 +151,12 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
         result.applyToStack(stackIn, playerIn);
         
-        if(result.hasPlacementList())
+        if(result.event().isExcavation && !playerIn.isCreative())
+        {
+            // FIXME: use the server-side thing
+            if(worldIn.isRemote) ExcavationRenderTracker.INSTANCE.add(playerIn, new ExcavationRenderEntry(playerIn, result));
+        }
+        else if(result.hasPlacementList())
         {
             return this.doPlacements(result, stackIn, worldIn, playerIn) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
         }
@@ -162,9 +170,8 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     {
         if(!playerIn.capabilities.allowEdit) return false;
         
-        
-        ModelState modelState = PlacementItem.getStackModelState(stackIn);
-        if(modelState == null) return false;
+//        ModelState modelState = PlacementItem.getStackModelState(stackIn);
+//        if(modelState == null) return false;
 
         // supermodel blocks may need to use a different block instance depending on model/substance
         // handle this here by substituting a stack different than what player is holding, but don't
@@ -197,11 +204,13 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         for(Pair<BlockPos, ItemStack> p : placements)
         {
             ItemStack placedStack = p.getRight();
-            ModelState placedModelState = PlacementItem.getStackModelState(placedStack);
             BlockPos placedPos = p.getLeft();
-            AxisAlignedBB axisalignedbb = placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
+          
+            ModelState placedModelState = PlacementItem.getStackModelState(placedStack);
+            
+            AxisAlignedBB axisalignedbb = placedModelState == null ? Block.FULL_BLOCK_AABB : placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
 
-        
+
             if(worldIn.checkNoEntityCollision(axisalignedbb.offset(placedPos)))
             {
                 IBlockState placedState = PlacementItem.getPlacementBlockStateFromStack(placedStack);

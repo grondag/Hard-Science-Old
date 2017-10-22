@@ -22,7 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
         name = HardScience.MODNAME,
         version = HardScience.VERSION,
         acceptedMinecraftVersions = "[1.12]",
-        dependencies = "after:theoneprobe; after:Waila")
+        dependencies = "after:theoneprobe")
 
 public class HardScience 
 {
