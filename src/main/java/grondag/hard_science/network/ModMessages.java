@@ -9,7 +9,7 @@ import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
-import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.base.ItemResourceWithQuantity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;

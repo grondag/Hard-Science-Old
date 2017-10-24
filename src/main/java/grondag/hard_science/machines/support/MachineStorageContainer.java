@@ -2,10 +2,10 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineStorageTileEntity;
-import grondag.hard_science.simulator.wip.IStorage;
-import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
-import grondag.hard_science.simulator.wip.OpenContainerStorageListener;
-import grondag.hard_science.simulator.wip.StorageType;
+import grondag.hard_science.simulator.base.IStorage;
+import grondag.hard_science.simulator.base.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.base.StorageType;
+import grondag.hard_science.simulator.machine.OpenContainerStorageListener;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IContainerListener;

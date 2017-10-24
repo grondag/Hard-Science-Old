@@ -79,7 +79,19 @@ public class Useful
         }
         return result;
     }
-
+    
+    public static int min(int a, int b, int c)
+    {
+        if(a < b)
+        {
+            return a < c ? a : c;
+        }
+        else
+        {
+            return b < c ? b : c;
+        }
+    }
+    
     public static int max(int... input)
     {
         int result = Integer.MIN_VALUE;

@@ -15,13 +15,13 @@ import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.BlockRegion;
 import grondag.hard_science.library.world.HorizontalFace;
+import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -30,7 +30,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -236,10 +235,10 @@ public abstract class PlacementHandler
     /**
      * Returns an AABB aligned along block boundaries that includes both positions given.
      */
-    public static AxisAlignedBB blockBoundaryAABB(BlockPos startPos, BlockPos endPos)
+    public static IntegerAABB blockBoundaryAABB(BlockPos startPos, BlockPos endPos)
     {
-        AxisAlignedBB aabbStart = Block.FULL_BLOCK_AABB.offset(startPos.getX(), startPos.getY(), startPos.getZ());
-        AxisAlignedBB aabbEnd = Block.FULL_BLOCK_AABB.offset(endPos.getX(), endPos.getY(), endPos.getZ());
+        IntegerAABB aabbStart = new IntegerAABB(startPos);
+        IntegerAABB aabbEnd = new IntegerAABB(endPos);
         return aabbStart.union(aabbEnd);
     }
 
@@ -364,7 +363,7 @@ public abstract class PlacementHandler
         
         /** true if no obstacles */
         boolean isClear = region.exclusions().isEmpty() 
-                && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos));
+                && player.world.checkNoEntityCollision(region.toAABB());
         
         // Adjust selection to avoid exclusions if requested and necessary.
         // No point if is only a single position or a selection mode that doesn't use the selection region.
@@ -383,7 +382,7 @@ public abstract class PlacementHandler
                 BlockRegion region2 = new BlockRegion(startPos, endPos2, isHollow);
                 excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
     
-                if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos, endPos2)))
+                if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
                 {
                     endPos = endPos2;
                     region = region2;
@@ -403,7 +402,7 @@ public abstract class PlacementHandler
                     BlockPos endPos2 = endPos.offset(face);
                     BlockRegion region2 = new BlockRegion(startPos2, endPos2, isHollow);
                     excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
-                    if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(blockBoundaryAABB(startPos2, endPos2)))
+                    if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
                     {
                         endPos = endPos2;
                         region = region2;
@@ -419,7 +418,7 @@ public abstract class PlacementHandler
                 : Collections.emptyList();
         
         return new PlacementResult(
-                blockBoundaryAABB(startPos, endPos), 
+                new IntegerAABB(startPos, endPos), 
                 placements, 
                 region.exclusions(), 
                 startPos, 

@@ -2,13 +2,13 @@
 //
 //import java.util.List;
 //
-//import grondag.hard_science.simulator.wip.IResource;
-//import grondag.hard_science.simulator.wip.IResourceLocation;
-//import grondag.hard_science.simulator.wip.IResourceStack;
-//import grondag.hard_science.simulator.wip.StorageType;
-//import grondag.hard_science.simulator.wip.Domain.IDomainMember;
-//import grondag.hard_science.simulator.wip.IResourceStack.ILocatedResourceStack;
-//import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
+//import grondag.hard_science.simulator.machine.IResource;
+//import grondag.hard_science.simulator.machine.IResourceLocation;
+//import grondag.hard_science.simulator.machine.IResourceStack;
+//import grondag.hard_science.simulator.machine.StorageType;
+//import grondag.hard_science.simulator.machine.Domain.IDomainMember;
+//import grondag.hard_science.simulator.machine.IResourceStack.ILocatedResourceStack;
+//import grondag.hard_science.simulator.machine.StorageType.ITypedStorage;
 //
 ///**
 // * Responsibilities: <br>

@@ -6,10 +6,11 @@ package grondag.hard_science.machines.base;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.simulator.wip.IStorage;
-import grondag.hard_science.simulator.wip.ItemStorage;
-import grondag.hard_science.simulator.wip.StorageType;
-import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.IStorage;
+import grondag.hard_science.simulator.base.ItemStorage;
+import grondag.hard_science.simulator.base.StorageType;
+import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;
@@ -70,7 +71,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         
         if(this.storageID >= 0)
         {
-            IStorage<?> s = (this.storageID == 0) ? null : Simulator.INSTANCE.domainManager().storageIndex().get(this.storageID);
+            IStorage<?> s = (this.storageID == 0) ? null : DomainManager.INSTANCE.storageIndex().get(this.storageID);
             
             if(s == null)
             {
@@ -88,7 +89,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         {
             result = new ItemStorage(null);
             result.setLocation(pos, world);
-            Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(result);
+            DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.addStore(result);
             this.markDirty();
             
             //FIXME: remove
@@ -136,7 +137,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         //FIXME: handle duplication via pickblock in create mode
         if(store != null)
         {
-            Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(this.getStorage());
+            DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.addStore(this.getStorage());
 
             //FIXME: remove
             Log.info("reconnect storage id=" + this.storageID);
@@ -147,7 +148,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void disconnect()
     {
         if(this.isRemote()) return;
-        Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.removeStore(this.storage);
+        DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.removeStore(this.storage);
         
         //FIXME: remove
         Log.info("disconnect id=" + this.storageID);

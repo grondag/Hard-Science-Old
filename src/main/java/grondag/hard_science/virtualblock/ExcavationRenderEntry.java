@@ -14,7 +14,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Class exists on server but render methods do not.
  * Server instantiates (and generates IDs) and transmits to clients.
  */
-@SideOnly(Side.CLIENT)
 public class ExcavationRenderEntry
 {
     private static int nextID = 0;
@@ -33,13 +32,10 @@ public class ExcavationRenderEntry
     public ExcavationRenderEntry(EntityPlayer player, PlacementResult result)
     {
         this.id = nextID++;
-        this.aabb = result.placementAABB();
+        this.aabb = result.placementAABB().toAABB();
         this.visibilityBounds = this.aabb.grow(192);
     }
-    
-    /**
-     * For client side
-     */
+   
     @SideOnly(Side.CLIENT)
     public ExcavationRenderEntry(int id, AxisAlignedBB bounds)
     {
@@ -49,6 +45,7 @@ public class ExcavationRenderEntry
     }
 
     /** return true if something was drawn */
+    @SideOnly(Side.CLIENT)
     public boolean drawBounds(BufferBuilder bufferbuilder, Entity viewEntity, double d0, double d1, double d2, float partialTicks)
     {
         if(this.visibilityBounds.contains(viewEntity.getPositionEyes(partialTicks)))
@@ -65,6 +62,7 @@ public class ExcavationRenderEntry
         }
     }
     
+    @SideOnly(Side.CLIENT)
     public void drawBox(BufferBuilder bufferbuilder, Entity viewEntity, double d0, double d1, double d2, float partialTicks)
     {
         if(this.didDrawBoundsLastTime)

@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
-import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
-import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
-import grondag.hard_science.simulator.wip.StorageType;
+import grondag.hard_science.simulator.base.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.base.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.base.StorageType;
+import grondag.hard_science.simulator.machine.OpenContainerStorageProxy;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 

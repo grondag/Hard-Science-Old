@@ -13,19 +13,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 
 /**
- * Like an AABB, except defined by BlockPos.
  * Future version could in theory contain non-cubic shapes.
  */
-public class BlockRegion
+public class BlockRegion extends IntegerAABB
 {
-   
-    private final int xMin;
-    private final int yMin;
-    private final int zMin;
-    private final int xMax;
-    private final int yMax;
-    private final int zMax;
-
     private final boolean isHollow;
     
     private HashSet<BlockPos> exclusions;
@@ -35,40 +26,8 @@ public class BlockRegion
      */
     public BlockRegion(BlockPos fromPos, BlockPos toPos, boolean isHollow)
     {
+        super(fromPos, toPos);
         this.isHollow = isHollow;
-        
-        if(fromPos.getX() < toPos.getX())
-        {
-            xMin = fromPos.getX();
-            xMax = toPos.getX();
-        }
-        else
-        {
-            xMin = toPos.getX();
-            xMax = fromPos.getX();
-        }
-        
-        if(fromPos.getY() < toPos.getY())
-        {
-            yMin = fromPos.getY();
-            yMax = toPos.getY();
-        }
-        else
-        {
-            yMin = toPos.getY();
-            yMax = fromPos.getY();
-        }
-        
-        if(fromPos.getZ() < toPos.getZ())
-        {
-            zMin = fromPos.getZ();
-            zMax = toPos.getZ();
-        }
-        else
-        {
-            zMin = toPos.getZ();
-            zMax = fromPos.getZ();
-        }
     }
     
     public final boolean isHollow()
@@ -112,13 +71,13 @@ public class BlockRegion
     /** All positions contained in the region, including interior positions if it is hollow */
     public Iterable<MutableBlockPos> allPositions()
     {
-        return BlockPos.getAllInBoxMutable(xMin, yMin, zMin, xMax, yMax, zMax);
+        return BlockPos.getAllInBoxMutable(minX, minY, minZ, maxX, maxY, maxZ);
     }
     
     /** All positions on the surface of the region. Will be same as {@link #allPositions()} if region is not at least 3x3x3 */
     public Iterable<MutableBlockPos> surfacePositions()
     {
-        return getAllOnBoxSurfaceMutable(this.xMin, this.yMin, this.zMin, this.xMax, this.yMax, this.zMax);
+        return getAllOnBoxSurfaceMutable(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
     }
     
     /** Positions that belong the region, excluding interior positions if hollow, but not excluding any excluded positions. */
@@ -131,7 +90,7 @@ public class BlockRegion
     /** All positions on the surface of the region. Will be same as {@link #allPositions()} if region is not at least 3x3x3 */
     public Iterable<MutableBlockPos> adjacentPositions()
     {
-        return getAllOnBoxSurfaceMutable(this.xMin - 1, this.yMin - 1, this.zMin - 1, this.xMax + 1, this.yMax + 1, this.zMax + 1);
+        return getAllOnBoxSurfaceMutable(this.minX - 1, this.minY - 1, this.minZ - 1, this.maxX + 1, this.maxY + 1, this.maxZ + 1);
     }
     
     /**
@@ -258,7 +217,7 @@ public class BlockRegion
                                 }
                                 else
                                 {
-                                    // between Y ends, only x values are xMin and xMax
+                                    // between Y ends, only x values are minX and maxX
                                     if(this.x == x1)
                                     {
                                         this.x = x2;

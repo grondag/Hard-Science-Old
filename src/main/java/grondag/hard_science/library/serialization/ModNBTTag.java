@@ -17,8 +17,8 @@ public class ModNBTTag
     public final static String DOMAIN_USER_FLAGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_USER_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMIAN_ITEM_STORAGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMIAN_MANAGER_DOMAINS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMIAN_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String DOMAIN_MANAGER_DOMAINS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String DOMAIN_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMIAN_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMIAN_SECURITY_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMIAN_USERS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -106,4 +106,6 @@ public class ModNBTTag
     
     public final static String PLACEMENT_FILTER_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_DELETE_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    
+    public final static String PLACEMENT_REQUEST_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 }

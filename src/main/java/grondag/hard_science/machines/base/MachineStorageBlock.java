@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachinePowerSupply;
-import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.wip.IStorage;
-import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.base.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.base.IStorage;
+import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;

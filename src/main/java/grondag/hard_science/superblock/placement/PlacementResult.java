@@ -9,16 +9,16 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import grondag.hard_science.library.world.IntegerAABB;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
 public class PlacementResult
 {
     private final List<Pair<BlockPos, ItemStack>> placements;
     private final Set<BlockPos> exclusions;
-    private final AxisAlignedBB placementAABB;
+    private final IntegerAABB placementAABB;
     private final BlockPos blockPos;
     private final PlacementEvent event;
     
@@ -26,7 +26,7 @@ public class PlacementResult
     public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
     
     public PlacementResult(
-            @Nullable AxisAlignedBB placementAABB, 
+            @Nullable IntegerAABB placementAABB, 
             @Nullable List<Pair<BlockPos, ItemStack>> placements, 
             @Nullable Set<BlockPos> exclusions, 
             @Nullable BlockPos blockPos,
@@ -85,7 +85,7 @@ public class PlacementResult
     }
 
     @Nullable
-    public AxisAlignedBB placementAABB()
+    public IntegerAABB placementAABB()
     {
         return this.placementAABB;
     }

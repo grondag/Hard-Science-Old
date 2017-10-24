@@ -1,8 +1,8 @@
 //package grondag.hard_science.simulator.scratch;
 //
-//import grondag.hard_science.simulator.wip.IResource;
-//import grondag.hard_science.simulator.wip.IResourceLocation;
-//import grondag.hard_science.simulator.wip.StorageType;
+//import grondag.hard_science.simulator.machine.IResource;
+//import grondag.hard_science.simulator.machine.IResourceLocation;
+//import grondag.hard_science.simulator.machine.StorageType;
 //
 //public interface IResouceTransportRequest<V extends StorageType>
 //{

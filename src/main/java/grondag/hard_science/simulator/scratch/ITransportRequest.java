@@ -1,7 +1,7 @@
 //package grondag.hard_science.simulator.scratch;
 //
 //import grondag.hard_science.simulator.resource.IResouceRequest;
-//import grondag.hard_science.simulator.wip.IResource;
+//import grondag.hard_science.simulator.machine.IResource;
 //
 //public interface ITransportRequest<T extends IResource<T>> extends IResouceRequest<T>
 //{

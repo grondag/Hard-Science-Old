@@ -1,10 +1,8 @@
 package grondag.hard_science.virtualblock;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import grondag.hard_science.library.world.WorldMap;
-import grondag.hard_science.superblock.placement.PlacementResult;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;

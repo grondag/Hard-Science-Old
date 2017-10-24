@@ -13,9 +13,11 @@ import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.base.AssignedNumbersAuthority;
+import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.PersistenceManager;
-import grondag.hard_science.simulator.wip.DomainManager;
+import grondag.hard_science.virtualblock.ConstructionRequestTracker;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -55,7 +57,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     
     private LavaSimulator lavaSimulator;
     
-    private DomainManager domainManager;
+    private ConstructionRequestTracker constructionRequestTracker;
     
 	public static ExecutorService executor;
 	private static ExecutorService controlThread;
@@ -97,8 +99,8 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         controlThread = Executors.newSingleThreadExecutor();
 
     }
-
-	// Main control
+    
+  	// Main control
 	public void start()  
 	{
         Log.info("starting sim");
@@ -108,18 +110,24 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
 	        
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
-	     
 	        
             if(PersistenceManager.loadNode(world, this))
             {
-                this.domainManager = new DomainManager(false);
-                if(!PersistenceManager.loadNode(world, this.domainManager))
+                DomainManager dm = DomainManager.INSTANCE;
+                if(!PersistenceManager.loadNode(world, dm))
                 {
-                    Log.warn("Domain manager data not found - recreating.  Some world state may be lost.");
-                    this.domainManager = new DomainManager(true);
-                    PersistenceManager.registerNode(world, this.domainManager);                   
+                    Log.warn("Domain manager data not found.  Some world state may be lost.");
+                    dm.loadNew();
+                    PersistenceManager.registerNode(world, dm);                   
                 }
-             
+                
+                ConstructionRequestTracker crt = new ConstructionRequestTracker();
+                if(!PersistenceManager.loadNode(world, crt))
+                {
+                    Log.warn("Construction request manager data not found - recreating.  Some world state may be lost.");
+                    PersistenceManager.registerNode(world, crt);                   
+                }
+                this.constructionRequestTracker = crt;
                 
                 if(Configurator.VOLCANO.enableVolcano)
                 {
@@ -144,11 +152,12 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                 // Not found, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
     	        this.lastSimTick = 0;
+    	        
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
     	        
-    	        this.domainManager = new DomainManager(true);
-    	        PersistenceManager.registerNode(world, this.domainManager);
+    	        DomainManager.INSTANCE.loadNew();
+    	        PersistenceManager.registerNode(world, DomainManager.INSTANCE);
     	        
     	        if(Configurator.VOLCANO.enableVolcano)
                 {
@@ -193,6 +202,10 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
             }
 		}
 		
+		this.volcanoManager = null;
+		this.lavaSimulator = null;
+		DomainManager.INSTANCE.unload();
+		this.constructionRequestTracker = null;
 	    this.world = null;
 	    this.lastTickFuture = null;
 	}
@@ -261,9 +274,9 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     public World getWorld() { return this.world; }
     public int getTick() { return this.lastSimTick; }
     
+    public ConstructionRequestTracker constructionRequestTracker() { return this.constructionRequestTracker; }
     public VolcanoManager volcanoManager() { return this.volcanoManager; }
     public LavaSimulator lavaSimulator() { return this.lavaSimulator; }
-    public DomainManager domainManager() { return this.domainManager; }
     
     // Frame execution logic
     Runnable offTickFrame = new Runnable()

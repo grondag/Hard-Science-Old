@@ -2,8 +2,8 @@
 //
 //import java.util.List;
 //
-//import grondag.hard_science.simulator.wip.Domain;
-//import grondag.hard_science.simulator.wip.IResource;
+//import grondag.hard_science.simulator.machine.Domain;
+//import grondag.hard_science.simulator.machine.IResource;
 //
 //public interface IResourceManager<T extends IResource<T>> extends IExecutionManager
 //{

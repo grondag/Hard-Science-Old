@@ -5,7 +5,7 @@
 //import org.junit.Test;
 //
 //import grondag.hard_science.gui.control.TabBar;
-//import grondag.hard_science.simulator.wip.IResourceStack;
+//import grondag.hard_science.simulator.machine.IResourceStack;
 //
 //public class ResourceTests
 //{

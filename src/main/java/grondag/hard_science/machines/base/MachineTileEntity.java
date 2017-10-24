@@ -22,8 +22,8 @@ import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
-import grondag.hard_science.simulator.wip.AssignedNumber;
-import grondag.hard_science.simulator.wip.IIdentified;
+import grondag.hard_science.simulator.base.AssignedNumber;
+import grondag.hard_science.simulator.base.IIdentified;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -78,7 +78,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * Machine unique ID.  Is persisted if machine is picked and put back by player.
      * Most logic is in IIdentified.
      */
-    private int machineID = IIdentified.NO_ID;
+    private int machineID = IIdentified.UNASSIGNED_ID;
     
     /**
      * Note this isn't serialized - it's always derived from machine ID.

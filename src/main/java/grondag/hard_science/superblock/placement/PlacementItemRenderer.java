@@ -44,7 +44,7 @@ public class PlacementItemRenderer
         // render region AABB - preference given to place over deletion
         if(result.hasPlacementAABB())
         {
-            AxisAlignedBB regionAABB = result.placementAABB().offset(-d0, -d1, -d2);
+            AxisAlignedBB regionAABB = result.placementAABB().toAABB().offset(-d0, -d1, -d2);
             
             boolean isBlocked = !result.hasPlacementList() && result.hasExclusionList();
             float[] color = isBlocked ? COLOR_BLOCKED_RGBA : PlacementItem.isDeleteModeEnabled(stack) ? COLOR_DELETED_RGBA : COLOR_PLACED_RGBA;
