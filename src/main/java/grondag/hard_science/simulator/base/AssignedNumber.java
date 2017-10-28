@@ -7,5 +7,6 @@ public enum AssignedNumber
     MACHINE,
     NETWORK,
     ENDPOINT,
-    REQUEST
+    JOB,
+    TASK;
 }

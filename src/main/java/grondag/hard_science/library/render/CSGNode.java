@@ -219,7 +219,7 @@ public class CSGNode
     /**
      * Returns all quads in this tree recombined as much as possible.
      * Use instead of allRawQuads() for anything to be rendered.
-     * Generally only useful on root node!
+     * Generally only useful on job node!
      * 
      * Will only work if build was called with initCSG parameter = true
      * during initialization of the tree because it uses the information populated then.

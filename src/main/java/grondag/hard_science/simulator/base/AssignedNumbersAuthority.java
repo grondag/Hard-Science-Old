@@ -19,7 +19,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     
     public class IdentifiedIndex<T extends IIdentified> extends TIntObjectHashMap<T>
     {
-        private final AssignedNumber numberType;
+        public final AssignedNumber numberType;
         
         private IdentifiedIndex(AssignedNumber numberType)
         {

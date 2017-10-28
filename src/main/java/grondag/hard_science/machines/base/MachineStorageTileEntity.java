@@ -5,7 +5,6 @@ package grondag.hard_science.machines.base;
  */
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.IStorage;
 import grondag.hard_science.simulator.base.ItemStorage;

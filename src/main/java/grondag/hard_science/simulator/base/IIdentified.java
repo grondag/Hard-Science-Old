@@ -1,7 +1,6 @@
 package grondag.hard_science.simulator.base;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.Simulator;
 import net.minecraft.nbt.NBTTagCompound;
 
 public interface IIdentified

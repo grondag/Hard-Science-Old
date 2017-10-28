@@ -117,7 +117,7 @@ public class Useful
     /** 
      * Returns the maximum absolute magnitude of the three orthogonalAxis for the given vector.
      * Mainly useful when you know that only one of the orthogonalAxis has a non-zero value
-     * and you want to retrieve it while avoiding the need for expendisive square root.
+     * and you want to retrieve it while avoiding the need for expendisive square job.
      */
     public static int maxAxisLength(Vec3i vec)
     {

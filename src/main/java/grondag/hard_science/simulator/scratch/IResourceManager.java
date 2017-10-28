@@ -5,7 +5,7 @@
 //import grondag.hard_science.simulator.machine.Domain;
 //import grondag.hard_science.simulator.machine.IResource;
 //
-//public interface IResourceManager<T extends IResource<T>> extends IExecutionManager
+//public interface IResourceManager<T extends IResource<T>> extends IExecutor
 //{
 //    public Domain getDomain();
 //    

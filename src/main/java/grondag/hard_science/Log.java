@@ -5,8 +5,12 @@ import org.apache.logging.log4j.Logger;
 
 public class Log
 {
-
+    /**
+     * It's either a bug and should be logged, or it's trace info and should put something in config to toggle it.
+     */
+    @Deprecated
     public static final boolean DEBUG_MODE = true;
+    
     private static Logger log;
     
     private static Logger getLog()

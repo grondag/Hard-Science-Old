@@ -12,6 +12,9 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.simulator.base.AssignedNumbersAuthority.IdentifiedIndex;
+import grondag.hard_science.simulator.base.jobs.AbstractTask;
+import grondag.hard_science.simulator.base.jobs.Job;
+import grondag.hard_science.simulator.base.jobs.JobManager;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,6 +34,8 @@ public class DomainManager implements IPersistenceNode
     private final IdentifiedIndex<Domain> domains;
     
     private final IdentifiedIndex<IStorage<?>> storageIndex;
+    private final IdentifiedIndex<Job> jobIndex;
+    private final IdentifiedIndex<AbstractTask> taskIndex;
 
     private Domain defaultDomain;
     
@@ -43,8 +48,33 @@ public class DomainManager implements IPersistenceNode
         this.assignedNumbersAuthority.setDirtKeeper(this);
         this.domains = assignedNumbersAuthority().createIndex(AssignedNumber.DOMAIN);
         this.storageIndex = assignedNumbersAuthority().createIndex(AssignedNumber.STORAGE);
+        this.jobIndex = assignedNumbersAuthority().createIndex(AssignedNumber.JOB);
+        this.taskIndex = assignedNumbersAuthority().createIndex(AssignedNumber.TASK);
     }
    
+    
+    /**
+     * Called at shutdown
+     */
+    public void unload()
+    {
+        this.domains.clear();
+        this.storageIndex.clear();
+        this.jobIndex.clear();
+        this.taskIndex.clear();
+        this.assignedNumbersAuthority.clear();
+        this.isLoaded = false;
+    }
+    
+    /**
+     * Called by simulator if starting new world/simulation.
+     */
+    public void loadNew()
+    {
+        this.unload();
+        this.isLoaded = true;
+    }
+    
     /**
      * Domain for unmanaged objects.  
      */
@@ -122,6 +152,7 @@ public class DomainManager implements IPersistenceNode
         private boolean isSecurityEnabled;
         
         public final ItemStorageManager ITEM_STORAGE = new ItemStorageManager();
+        public final JobManager JOB_MANAGER = new JobManager();
         
         private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
         
@@ -129,6 +160,7 @@ public class DomainManager implements IPersistenceNode
         private Domain ()
         {
             ITEM_STORAGE.setDomain(this);
+            JOB_MANAGER.setDomain(this);
         }
         
         private Domain (NBTTagCompound tag)
@@ -241,7 +273,8 @@ public class DomainManager implements IPersistenceNode
             }
             tag.setTag(ModNBTTag.DOMIAN_USERS, nbtUsers);
             
-            tag.setTag(ModNBTTag.DOMIAN_ITEM_STORAGE, this.ITEM_STORAGE.serializeNBT());
+            tag.setTag(ModNBTTag.DOMAIN_ITEM_STORAGE, this.ITEM_STORAGE.serializeNBT());
+            tag.setTag(ModNBTTag.DOMAIN_JOB_MANAGER, this.JOB_MANAGER.serializeNBT());
         }
 
         @Override
@@ -261,7 +294,8 @@ public class DomainManager implements IPersistenceNode
                 }   
             }
             
-            this.ITEM_STORAGE.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMIAN_ITEM_STORAGE));
+            this.ITEM_STORAGE.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_ITEM_STORAGE));
+            this.JOB_MANAGER.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
         }
         
         public DomainManager domainManager()
@@ -393,6 +427,17 @@ public class DomainManager implements IPersistenceNode
 
     public AssignedNumbersAuthority assignedNumbersAuthority() { return this.assignedNumbersAuthority; }
     
+    public IdentifiedIndex<Job> jobIndex()
+    {
+        this.checkLoaded();
+        return jobIndex;
+    }
+    public IdentifiedIndex<AbstractTask> taskIndex()
+    {
+        this.checkLoaded();
+        return taskIndex;
+    }
+    
     public IdentifiedIndex<IStorage<?>> storageIndex()
     {
         this.checkLoaded();
@@ -407,25 +452,4 @@ public class DomainManager implements IPersistenceNode
         }
         return this.isLoaded;
     }
-    
-    /**
-     * Called at shutdown
-     */
-    public void unload()
-    {
-        this.domains.clear();
-        this.storageIndex.clear();
-        this.assignedNumbersAuthority.clear();
-        this.isLoaded = false;
-    }
-    
-    /**
-     * Called by simulator if starting new world/simulation.
-     */
-    public void loadNew()
-    {
-        this.unload();
-        this.isLoaded = true;
-    }
-    
 }

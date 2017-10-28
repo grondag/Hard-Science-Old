@@ -3,5 +3,5 @@
 //
 //public interface ICompletionPolicy
 //{
-//    public void scheduleContinuationIfNeeded(IJob job, IExecutionManager manager);
+//    public void scheduleContinuationIfNeeded(IJob job, IExecutor manager);
 //}

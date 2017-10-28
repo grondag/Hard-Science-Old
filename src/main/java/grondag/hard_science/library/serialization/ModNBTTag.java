@@ -16,7 +16,7 @@ public class ModNBTTag
     public final static String BASALT_BLOCKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_USER_FLAGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_USER_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMIAN_ITEM_STORAGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String DOMAIN_ITEM_STORAGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_MANAGER_DOMAINS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMIAN_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -107,5 +107,15 @@ public class ModNBTTag
     public final static String PLACEMENT_FILTER_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_DELETE_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     
-    public final static String PLACEMENT_REQUEST_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String DOMAIN_JOB_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String CONSTRUCTION_MANAGER_REQUESTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String REQUEST_STATUS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String REQUEST_PRIORITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String REQUEST_USER_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String REQUEST_DEPENDENCIES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String REQUEST_CHILDREN = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String REQUEST_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    
 }

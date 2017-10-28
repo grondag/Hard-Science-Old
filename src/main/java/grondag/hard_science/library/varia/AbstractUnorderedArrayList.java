@@ -1,8 +1,11 @@
 package grondag.hard_science.library.varia;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 import javax.annotation.Nullable;
+
+import com.google.common.collect.AbstractIterator;
 
 import grondag.hard_science.Log;
 
@@ -12,7 +15,7 @@ import grondag.hard_science.Log;
  * @author grondag
  *
  */
-public class AbstractUnorderedArrayList<T>
+public class AbstractUnorderedArrayList<T> implements Iterable<T>
 {
 
     protected Object[] items = new Object[4];
@@ -127,5 +130,20 @@ public class AbstractUnorderedArrayList<T>
     public Object[] toArray()
     {
         return Arrays.copyOf(items, this.size);
+    }
+
+    @Override
+    public Iterator<T> iterator()
+    {
+        return new AbstractIterator<T>()
+        {
+            private int i = 0;
+            
+            @Override
+            protected T computeNext()
+            {
+                if(i >= size) return this.endOfData();
+                return get(i++);
+            }};
     }
 }
