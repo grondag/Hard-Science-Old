@@ -125,18 +125,24 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
             {
                 Predicate<AbstractTask> effectivePredicate = predicate == null ? MATCH_ANY_TASK : predicate;
                 
-                for(Job j : jobs)
+                for(LinkedList<Job> list : backlogJobs)
                 {
-                    if(j.hasReadyWork())
+                    if(list != null && !list.isEmpty())
                     {
-                        for(AbstractTask t : j)
+                        for(Job j : list)
                         {
-                            if(t.requestType() == taskType
-                                    && t.getStatus() == RequestStatus.READY
-                                    && effectivePredicate.test(t))
+                            if(j.hasReadyWork())
                             {
-                                t.setStatus(RequestStatus.ACTIVE);
-                                return t;
+                                for(AbstractTask t : j)
+                                {
+                                    if(t.requestType() == taskType
+                                            && t.getStatus() == RequestStatus.READY
+                                            && effectivePredicate.test(t))
+                                    {
+                                        t.claim();
+                                        return t;
+                                    }
+                                }
                             }
                         }
                     }

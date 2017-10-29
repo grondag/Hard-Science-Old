@@ -104,12 +104,26 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
     }
     public void addTask(AbstractTask task)
     {
-        task.setJob(this);
-        tasks.add(task);
         this.isTaskStatusDirty = true;
-        if(task.getStatus() == RequestStatus.READY)
+        tasks.add(task);
+        if(task.initialize(this))
         {
             this.updateReadyWork(1);
+        }
+    }
+    
+    public void addTasks(AbstractTask... tasks)
+    {
+        if(tasks.length > 0)
+        {
+            this.isTaskStatusDirty = true;
+            int readyCount = 0;
+            for(AbstractTask t : tasks)
+            {
+                this.tasks.add(t);
+                if(t.initialize(this)) readyCount++;
+            }
+            if(readyCount > 0) this.updateReadyWork(readyCount);
         }
     }
     
@@ -265,7 +279,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
             {
                 if(subTag != null)
                 {
-                    AbstractTask t = TaskFactory.deserializeTask((NBTTagCompound) subTag, this);
+                    AbstractTask t = TaskType.deserializeTask((NBTTagCompound) subTag, this);
                     if(t != null)
                     {
                         this.tasks.add(t);
@@ -297,7 +311,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
             
             for(AbstractTask t : this.tasks)
             {
-                nbtTasks.appendTag(TaskFactory.serializeTask(t));
+                nbtTasks.appendTag(TaskType.serializeTask(t));
             }
             tag.setTag(ModNBTTag.REQUEST_CHILDREN, nbtTasks);
         }
@@ -305,6 +319,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
 
     /**
      * Called by contained tasks when they have a status change.
+     * Should NOT be called when task is first initialized.
      */
     public void notifyTaskStatusChange(AbstractTask abstractTask, RequestStatus priorStatus)
     {

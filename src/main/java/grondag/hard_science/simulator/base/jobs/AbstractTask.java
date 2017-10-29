@@ -35,11 +35,66 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
     /** DO NOT REFERENCE DIRECTLY! Use {@link #antecedents()} */
     private final SimpleUnorderedArrayList<AbstractTask> antecedents = new SimpleUnorderedArrayList<AbstractTask>();
 
-    public void setJob(@Nonnull Job job)
+    private static int spamCount = 0;
+    
+    /**
+     * Called by job when task is added.
+     * All dependencies should be added before calling.
+     * Should not be called otherwise nor called more than once.
+     * Does NOT call job to notify of status change.
+     * Return true if the task is in a ready state.
+     */
+    public boolean initialize(@Nonnull Job job)
     {
+        if(this.job != NullJob.INSTANCE && spamCount < 100)
+        {
+            Log.warn("Task initialized more than once.  This is probably a bug.");
+            spamCount++;
+        }
+        
         this.job = job;
+        if(this.getStatus() != RequestStatus.NEW  && spamCount < 100)
+        {
+            Log.warn("Task initialized in a state other than NEW.  This is probably a bug.");
+            spamCount++;
+        }
+        
+        if(this.antecedents().isEmpty())
+        {
+            // access directly to avoid callback to job
+            this.status = RequestStatus.READY;
+            return true;
+        }
+        else
+        {
+            // access directly to avoid callback to job
+            this.status = RequestStatus.WAITING;
+            return false;
+        }
+    }
+    
+    /**
+     * Moves status from READY to ACTIVE.  
+     * Called by job manager when assigning work.
+     */
+    public void claim()
+    {
+        if(this.getStatus() != RequestStatus.READY)
+            Log.warn("Task claimed in a state other than READY.  This is probably a bug.");
+        this.setStatus(RequestStatus.ACTIVE);
     }
    
+    /**
+     * Moves status from ACTIVE back to READY.  
+     * Called by worker when task must be abandoned.
+     */
+    public void abandon()
+    {
+        if(this.getStatus() != RequestStatus.ACTIVE)
+            Log.warn("Task unclaimed in a state other than ACTIVE.  This is probably a bug.");
+        this.setStatus(RequestStatus.READY);
+    }
+    
     public abstract TaskType requestType();
     
     @Override
@@ -65,13 +120,13 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
         return this.status;
     }
 
-    protected void setStatus(RequestStatus newStatus)
+    private void setStatus(RequestStatus newStatus)
     {
         if(newStatus != this.status)
         {
             RequestStatus oldStatus = this.status;
             this.status = newStatus;
-            if(newStatus.isTerminated)this.notifyConsequents();
+            if(newStatus.isTerminated && !oldStatus.isTerminated)this.onTerminated();
             this.job.notifyTaskStatusChange(this, oldStatus);
         }
     }
@@ -112,7 +167,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
      */
     public boolean requiresCleanupOnCancel() { return false; }
 
-    protected synchronized void notifyConsequents()
+    protected synchronized void onTerminated()
     {
         SimpleUnorderedArrayList<AbstractTask> consequents = this.consequents();
         
@@ -122,32 +177,29 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
         {
             r.onAntecedentTerminated(this);;
         }
+        
+        consequents.clear();
     }
 
-    public synchronized void addConsequent(AbstractTask consequent)
+    public static void link(AbstractTask antecedent, AbstractTask consequent)
+    {
+        antecedent.addConsequent(consequent);
+        consequent.addAntecedent(antecedent);
+    }
+    
+    private synchronized void addConsequent(AbstractTask consequent)
     {
         this.consequents().addIfNotPresent(consequent);
     }
 
-    public synchronized void addAntecedent(AbstractTask antecedent)
+    private synchronized void addAntecedent(AbstractTask antecedent)
     {
         this.antecedents().addIfNotPresent(antecedent);
     }
 
-    public synchronized boolean areAllAntecedentsMet()
-    {
-        SimpleUnorderedArrayList<AbstractTask> antecedents = this.antecedents();
-        
-        if(antecedents.isEmpty()) return true;
-        for(AbstractTask r : antecedents)
-        {
-            if(!r.getStatus().isComplete()) return false;
-        }
-        return true;
-    }
-
     public void onAntecedentTerminated(AbstractTask antecedent)
     {
+        this.antecedents.removeIfPresent(antecedent);
         if(antecedent.getStatus().didEndWithoutCompleting())
         {
             switch(this.status)
@@ -162,7 +214,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
                 break;
             }
         }
-        else if(this.areAllAntecedentsMet())
+        else if(this.antecedents.isEmpty())
         {
             switch(this.status)
             {
