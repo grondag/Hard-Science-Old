@@ -104,23 +104,12 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
         PlacementResult result = PlacementHandler.doRightClickBlock(player, null, null, null, stackIn);
         
-        result.applyToStack(stackIn, player);
-        
-        if(result.hasPlacementList())
+        if(!result.shouldInputEventsContinue()) 
         {
-            return new ActionResult<>(this.doPlacements(result, stackIn, world, player) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, player.getHeldItem(hand));
+            result.apply(stackIn, player);
+            this.doPlacements(result, stackIn, world, player);
+            return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
         }
-        
-        if(result.event() != PlacementEvent.NO_OPERATION_CONTINUE) return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
-        
-//        if(PlacementItem.operationInProgress(stackIn) == PlacementOperation.SELECTING && PlacementItem.isFloatingSelectionEnabled(stackIn))
-//        {
-//            BlockPos endPos = PlacementItem.getFloatingSelectionBlockPos(stackIn, player);
-//            if(endPos != null) PlacementItem.selectPlacementRegionFinish(stackIn, player, endPos, false);
-//            //FIXME: remove
-//            Log.info("Finished selection " + PlacementItem.selectedRegionLocalizedName(stackIn));
-//            return new ActionResult<>(EnumActionResult.SUCCESS, stackIn);
-//        }
         
         if (world.isRemote) 
         {
@@ -136,6 +125,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
             }
         }
+        
         return new ActionResult<>(EnumActionResult.PASS, player.getHeldItem(hand));
     }
     
@@ -149,9 +139,9 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
         PlacementResult result = PlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn);
         
-        result.applyToStack(stackIn, playerIn);
+        result.apply(stackIn, playerIn);
         
-        if(result.event().isExcavation && !playerIn.isCreative())
+        if(result.isExcavationOnly() && !playerIn.isCreative())
         {
             // FIXME: use the server-side thing
             if(worldIn.isRemote) ExcavationRenderTracker.INSTANCE.add(playerIn, new ExcavationRenderEntry(playerIn, result));
@@ -161,6 +151,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             return this.doPlacements(result, stackIn, worldIn, playerIn) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
         }
         
+        // we don't return pass because don't want GUI displayed or other events to process
         return EnumActionResult.SUCCESS;
     }
     /**

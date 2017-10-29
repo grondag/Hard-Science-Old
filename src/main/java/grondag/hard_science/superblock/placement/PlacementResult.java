@@ -13,18 +13,24 @@ import grondag.hard_science.library.world.IntegerAABB;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class PlacementResult
 {
+    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
+    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
+
+    private final PlacementEvent event;
+    private final BlockPos blockPos;
     private final List<Pair<BlockPos, ItemStack>> placements;
     private final Set<BlockPos> exclusions;
     private final IntegerAABB placementAABB;
-    private final BlockPos blockPos;
-    private final PlacementEvent event;
     
-    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
-    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
-    
+    /**
+     * @param event Identifies state changes and subsequent event processing that should occur with this result.
+     * @param blockPos If the event associated with this result requires a BlockPos for state changes,
+     * the BlockPos that should be used. Null otherwise.
+     */
     public PlacementResult(
             @Nullable IntegerAABB placementAABB, 
             @Nullable List<Pair<BlockPos, ItemStack>> placements, 
@@ -37,29 +43,6 @@ public class PlacementResult
         this.exclusions = exclusions;
         this.blockPos = blockPos;
         this.event = event;
-    }
-    
-    /**
-     * Identifies state changes and subsequent event processing that should occur with this result.
-     */
-    public PlacementEvent event()
-    {
-        return this.event;
-    }
-    
-    public PlacementResult withEvent(PlacementEvent event)
-    {
-        return new PlacementResult(this.placementAABB, this.placements, this.exclusions, this.blockPos, event);
-    }
-    
-    /**
-     * If the event associated with this result requires a BlockPos for state changes,
-     * the BlockPos that should be used. Null otherwise.
-     */
-    @Nullable
-    public BlockPos blockPos()
-    {
-        return this.blockPos;
     }
     
     /**
@@ -105,19 +88,47 @@ public class PlacementResult
         return this.exclusions != null && !this.exclusions.isEmpty();
     }
 
-    public void applyToStack(ItemStack stackIn, EntityPlayer player)
+    /**
+     * If true, the user input event (mouse click, usually) that caused this result
+     * should continue to be processed by other event handlers. True also implies
+     * that {@link #apply(ItemStack, EntityPlayer)} will have no effect.
+     */
+    public boolean shouldInputEventsContinue()
     {
-        switch(this.event())
+        return this.event == PlacementEvent.NO_OPERATION_CONTINUE;
+    }
+
+    /**
+     * True if all block changes in this result are for block removal and there are no block placements.
+     */
+    public boolean isExcavationOnly()
+    {
+        return this.event.isExcavation;
+    }
+
+    public void applyToWorld(ItemStack stackIn, EntityPlayer player, World worldIn)
+    {
+        //TODO add to undo log
+    
+    }
+
+    public void apply(ItemStack stackIn, EntityPlayer player)
+    {
+        switch(this.event)
         {
         case PLACE_AND_SET_REGION:
+            PlacementItem.selectPlacementRegionFinish(stackIn, player, blockPos, false);
+            this.applyToWorld(stackIn, player, player.world);
+            break;
+            
         case SET_PLACEMENT_REGION:
             PlacementItem.selectPlacementRegionFinish(stackIn, player, blockPos, false);
             break;
-
+    
         case PLACE:
-            // TODO: record for undo?
+            this.applyToWorld(stackIn, player, player.world);
             break;
-
+    
         case START_PLACEMENT_REGION:
             PlacementItem.selectPlacementRegionStart(stackIn, blockPos, false);
             break;
@@ -131,7 +142,6 @@ public class PlacementResult
         default:
             // NOOP
             break;
-        
         }
     }
 }

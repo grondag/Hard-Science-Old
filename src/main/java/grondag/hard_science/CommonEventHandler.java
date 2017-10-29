@@ -115,11 +115,11 @@ public class CommonEventHandler
 
         PlacementResult result = PlacementHandler.doLeftClickBlock(player, event.getPos(), event.getFace(), event.getHitVec(), stackIn);
         
-        result.applyToStack(stackIn, player);
-        
-        //TODO: do deletions
-        
-        if(result.event() != PlacementEvent.NO_OPERATION_CONTINUE) event.setCanceled(true);
+        if(!result.shouldInputEventsContinue())
+        {
+            result.apply(stackIn, player);
+            event.setCanceled(true);
+        }
     }
     
     @SubscribeEvent

@@ -82,9 +82,6 @@ public class ClientEventHandler
     {
         if(event.phase == Phase.START) 
         {
-            //FIXME: remove
-            Log.debug("debug message");
-            
             CommonProxy.updateCurrentTime();
             
             Minecraft mc = Minecraft.getMinecraft();
