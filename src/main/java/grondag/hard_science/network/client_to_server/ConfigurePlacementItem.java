@@ -4,7 +4,8 @@ package grondag.hard_science.network.client_to_server;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.SelectionMode;
+import grondag.hard_science.superblock.placement.PlacementItem.FixedRegionBounds;
+import grondag.hard_science.superblock.placement.TargetMode;
 import grondag.hard_science.superblock.placement.RegionOrientation;
 import grondag.hard_science.superblock.placement.SpeciesMode;
 import grondag.hard_science.superblock.placement.BlockOrientationAxis;
@@ -17,6 +18,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * This is a packet that can be used to update the NBT on the held item of a player.
@@ -28,7 +30,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private ModelState modelState;
     private BlockSubstance blockSubstance;
     private int lightValue;
-    private SelectionMode mode;
+    private TargetMode mode;
     private BlockOrientationAxis axis;
     private BlockOrientationFace face;
     private BlockOrientationEdge edge;
@@ -38,6 +40,9 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private FilterMode filterMode;
     private SpeciesMode speciesMode;
     private boolean isDeleteModeEnabled;
+    private boolean isFixedRegionEnabled;
+    private BlockPos regionSize;
+    
     
     public ConfigurePlacementItem() 
     {
@@ -52,7 +57,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         
         this.blockSubstance = PlacementItem.getStackSubstance(stack);
         this.lightValue = PlacementItem.getStackLightValue(stack);
-        this.mode = PlacementItem.getSelectionMode(stack);
+        this.mode = PlacementItem.getTargetMode(stack);
         this.axis = PlacementItem.getBlockOrientationAxis(stack);
         this.face = PlacementItem.getBlockOrientationFace(stack);
         this.edge = PlacementItem.getBlockOrientationEdge(stack);
@@ -62,6 +67,8 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.filterMode = PlacementItem.getFilterMode(stack);
         this.speciesMode = PlacementItem.getSpeciesMode(stack);
         this.isDeleteModeEnabled = PlacementItem.isDeleteModeEnabled(stack);
+        this.isFixedRegionEnabled = PlacementItem.isFixedRegionEnabled(stack);
+        this.regionSize = PlacementItem.getRegionSize(stack, false);
     }
 
     @Override
@@ -72,7 +79,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.modelState.fromBytes(pBuff);
         this.blockSubstance = pBuff.readEnumValue(BlockSubstance.class);
         this.lightValue = pBuff.readByte();
-        this.mode = SelectionMode.FILL_REGION.fromBytes(pBuff);
+        this.mode = TargetMode.FILL_REGION.fromBytes(pBuff);
         this.axis = BlockOrientationAxis.DYNAMIC.fromBytes(pBuff);
         this.face = BlockOrientationFace.DYNAMIC.fromBytes(pBuff);
         this.edge = BlockOrientationEdge.DYNAMIC.fromBytes(pBuff);
@@ -82,6 +89,9 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.filterMode = FilterMode.FILL_REPLACEABLE.fromBytes(pBuff);
         this.speciesMode = SpeciesMode.MATCH_CLICKED.fromBytes(pBuff);
         this.isDeleteModeEnabled = pBuff.readBoolean();
+        this.isFixedRegionEnabled = pBuff.readBoolean();
+        this.regionSize = pBuff.readBlockPos();
+
     }
 
     @Override
@@ -101,6 +111,8 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         this.filterMode.toBytes(pBuff);
         this.speciesMode.toBytes(pBuff);
         pBuff.writeBoolean(this.isDeleteModeEnabled);
+        pBuff.writeBoolean(this.isFixedRegionEnabled);
+        pBuff.writeBlockPos(this.regionSize);
     }
    
     @Override
@@ -113,7 +125,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setStackModelState(heldStack, message.modelState);
             PlacementItem.setStackSubstance(heldStack, message.blockSubstance);
             PlacementItem.setStackLightValue(heldStack, message.lightValue);
-            PlacementItem.setSelectionMode(heldStack, message.mode);
+            PlacementItem.setTargetMode(heldStack, message.mode);
             PlacementItem.setBlockOrientationAxis(heldStack, message.axis);
             PlacementItem.setBlockOrientationFace(heldStack, message.face);
             PlacementItem.setBlockOrientationEdge(heldStack, message.edge);
@@ -123,6 +135,8 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setFilterMode(heldStack, message.filterMode);
             PlacementItem.setSpeciesMode(heldStack, message.speciesMode);
             PlacementItem.setDeleteModeEnabled(heldStack, message.isDeleteModeEnabled);
+            PlacementItem.setFixedRegionEnabled(heldStack, message.isFixedRegionEnabled);
+            PlacementItem.setRegionSize(heldStack, message.regionSize);
         }
     }
 }

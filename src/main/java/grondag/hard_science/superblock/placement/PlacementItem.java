@@ -3,10 +3,15 @@ package grondag.hard_science.superblock.placement;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.mojang.realmsclient.util.Pair;
+
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -39,8 +44,8 @@ import net.minecraft.util.text.translation.I18n;
  *       normal - selecting: cancel selection
  *   
  *   Right Click
- *       select mode - ctrl: complete selection without placing
- *       select mode - none: selecting, complete and place selection
+ *       select mode - none: complete selection
+ *       select mode - ctrl: restart selection
  *       normal mode - none: place according to current mode/selection
  *       normal mode - ctrl: start new selection
  *       normal mode - alt:  place with different species      
@@ -115,9 +120,12 @@ public interface PlacementItem
         case FACE:
             return getBlockOrientationFace(stack).face.getAxis();
 
-        case NONE:
         case EDGE:
+            //TODO
         case CORNER:
+            //TODO
+            
+        case NONE:
         default:
             return EnumFacing.Axis.Y;
         }    
@@ -137,12 +145,35 @@ public interface PlacementItem
         case FACE:
             return getBlockOrientationFace(stack).face.getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
 
-        case NONE:
         case EDGE:
+            // FIXME: is this right?
+            return PlacementItem.getBlockOrientationEdge(stack).edge.face1.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE;
+        
         case CORNER:
+            //TODO
+
+        case NONE:
         default:
             return false;
         }    
+    }
+    
+    public static Rotation getBlockPlacementRotation(ItemStack stack)
+    {
+        switch(getStackModelState(stack).orientationType())
+        {
+            case EDGE:
+                return PlacementItem.getBlockOrientationEdge(stack).edge.modelRotation;
+                
+            case CORNER:
+                //TODO
+
+            case NONE:
+            case FACE:
+            case AXIS:
+            default:
+                return Rotation.ROTATE_NONE;
+        }
     }
     
     /**
@@ -347,19 +378,19 @@ public interface PlacementItem
         setRegionOrientation(stack, reverse ? Useful.prevEnumValue(getRegionOrientation(stack)) : Useful.nextEnumValue(getRegionOrientation(stack)));
     }
     
-    public static void setSelectionMode(ItemStack stack, SelectionMode mode)
+    public static void setTargetMode(ItemStack stack, TargetMode mode)
     {
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
-    public static SelectionMode getSelectionMode(ItemStack stack)
+    public static TargetMode getTargetMode(ItemStack stack)
     {
-        return SelectionMode.FILL_REGION.deserializeNBT(stack.getTagCompound());
+        return TargetMode.FILL_REGION.deserializeNBT(stack.getTagCompound());
     }
     
-    public static void cycleSelectionMode(ItemStack stack, boolean reverse)
+    public static void cycleTargetMode(ItemStack stack, boolean reverse)
     {
-        setSelectionMode(stack, reverse ? Useful.prevEnumValue(getSelectionMode(stack)) : Useful.nextEnumValue(getSelectionMode(stack)));
+        setTargetMode(stack, reverse ? Useful.prevEnumValue(getTargetMode(stack)) : Useful.nextEnumValue(getTargetMode(stack)));
     }
     
     public static void setFilterMode(ItemStack stack, FilterMode mode)
@@ -506,78 +537,221 @@ public interface PlacementItem
         Useful.getOrCreateTagCompound(stack).setBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED, enabled);
     }
     
-    public static void selectPlacementRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
+    /**
+     * Data carrier for fixed region definition to reduce number of
+     * methods and method calls for fixed regions.  Fixed regions 
+     * can be arbitrarily large and don't have to be cubic - shape
+     * depends on interpretation by the placement builder.
+     */
+    public static class FixedRegionBounds
     {
-        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        PlacementOperation.SELECTING.serializeNBT(tag);
-        RegionOrientation.XYZ.serializeNBT(tag);
+        public final BlockPos fromPos;
+        public final boolean fromIsCentered;
+        public final BlockPos toPos;
+        public final boolean toIsCentered;
         
-        SelectionMode currentMode = getSelectionMode(stack);
-        // assume user wants to fill a region  and
-        // change mode to region fill if not already set to FILL_REGION or HOLLOW_FILL
-        if(!currentMode.usesSelectionRegion) SelectionMode.FILL_REGION.serializeNBT(tag);
+        public FixedRegionBounds(BlockPos fromPos, boolean fromIsCentered, BlockPos toPos, boolean toIsCentered)
+        {
+            this.fromPos = fromPos;
+            this.fromIsCentered = fromIsCentered;
+            this.toPos = toPos;
+            this.toIsCentered = toIsCentered;
+        }
+
+        private FixedRegionBounds(NBTTagCompound tag)
+        {
+            final long from = tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS);
+            this.fromPos = PackedBlockPos.unpack(from);
+            this.fromIsCentered = PackedBlockPos.getExtra(from) == 1;
+            final long to = tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS);
+            this.toPos = PackedBlockPos.unpack(to);
+            this.toIsCentered = PackedBlockPos.getExtra(to) == 1;
+        }
+
+        private void saveToNBT(NBTTagCompound tag)
+        {
+            tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS, PackedBlockPos.pack(this.fromPos, this.fromIsCentered ? 1 : 0));
+            tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS, PackedBlockPos.pack(this.toPos, this.toIsCentered ? 1 : 0));
+        }
         
-        tag.setLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION, pos.toLong());
+        private static boolean isPresentInTag(NBTTagCompound tag)
+        {
+            return tag.hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS) 
+                    && tag.hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS);
+        }
     }
     
-    public static void selectPlacementRegionCancel(ItemStack stack)
+    public static void toggleFixedRegionEnabled(ItemStack stack)
     {
-        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        PlacementOperation.NONE.serializeNBT(tag);
-        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
+        setFixedRegionEnabled(stack, !isFixedRegionEnabled(stack));
     }
     
     /**
-     * See {@link #placementRegionPosition(ItemStack)} for some explanation.
+     * If true, any region target method should use the fixed
+     * endpoints from {@link #fixedRegionFinish(ItemStack, EntityPlayer, BlockPos, boolean)}
+     * @param stack
+     * @return
      */
-    public static BlockPos getPlayerRelativeRegionFromEndPoints(BlockPos from, BlockPos to, EntityPlayer player)
+    public static boolean isFixedRegionEnabled(ItemStack stack)
     {
-        BlockPos selectedPos = new BlockPos(1 + Math.abs(from.getX() - to.getX()), 1 + Math.abs(from.getY() - to.getY()), 1 + Math.abs(from.getZ() - to.getZ()));
-        return(player.getHorizontalFacing().getAxis() == EnumFacing.Axis.Z)
-                ? selectedPos
-                : new BlockPos(selectedPos.getZ(), selectedPos.getY(), selectedPos.getX());
+        return Useful.getOrCreateTagCompound(stack).getBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED);
     }
     
-    public static void selectPlacementRegionFinish(ItemStack stack, EntityPlayer player, BlockPos pos, boolean isCenter)
+    public static void setFixedRegionEnabled(ItemStack stack, boolean isFixedRegion)
+    {
+        Useful.getOrCreateTagCompound(stack).setBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED, isFixedRegion);
+    }
+
+    public static FixedRegionBounds getFixedRegion(ItemStack stack)
+    {
+       return new FixedRegionBounds(Useful.getOrCreateTagCompound(stack));
+    }
+    
+    /**
+     * Sets fixed region in the stack. Does not enable fixed region.
+     */
+    public static void setFixedRegion(FixedRegionBounds bounds, ItemStack stack)
+    {
+        bounds.saveToNBT(Useful.getOrCreateTagCompound(stack));
+    }
+    
+    /**
+     * Sets the begining point for a fixed region. 
+     * Does not change the current fixed region.
+     */
+    public static void fixedRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
     {
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        BlockPos startPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION));
-        BlockPos selectedPos = getPlayerRelativeRegionFromEndPoints(pos, startPos, player);
-        RegionOrientation.XYZ.serializeNBT(tag);
+        PlacementOperation.SELECTING.serializeNBT(tag);
         
-        if(selectedPos.getX() == 1 && selectedPos.getY() == 1 && selectedPos.getZ() == 1 )
+        tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS, PackedBlockPos.pack(pos, isCenter ? 1 : 0));
+        
+        TargetMode currentMode = getTargetMode(stack);
+        // assume user wants to fill a region  and
+        // change mode to region fill if not already set to FILL_REGION or HOLLOW_FILL
+        if(!currentMode.usesSelectionRegion) TargetMode.FILL_REGION.serializeNBT(tag);
+    }
+    
+    public static void fixedRegionCancel(ItemStack stack)
+    {
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        PlacementOperation.NONE.serializeNBT(tag);
+        tag.removeTag(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+        
+        //disable fixed region if we don't have one
+        if(!FixedRegionBounds.isPresentInTag(tag))
+            tag.setBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED, false);
+    }
+    
+    /**
+     * If fixed region selection in progress, returns the starting point
+     * that was set by {@link #fixedRegionStart(ItemStack, BlockPos, boolean)}
+     * Boolean valus is true if point is centered.
+     */
+    @Nullable
+    public static Pair<BlockPos, Boolean> fixedRegionSelectionPos(ItemStack stack)
+    {
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        
+        if(tag.hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS))
         {
-            SelectionMode.ON_CLICKED_FACE.serializeNBT(tag);
+            long packed = tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+            return Pair.of(PackedBlockPos.unpack(packed), PackedBlockPos.getExtra(packed) == 1);
         }
         else
         {
-            tag.setLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION, selectedPos.toLong());
+            return null;
         }
-   
-        PlacementOperation.NONE.serializeNBT(tag);
-        tag.removeTag(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION);
     }
     
+    public static void fixedRegionFinish(ItemStack stack, EntityPlayer player, BlockPos pos, boolean isCenter)
+    {
+        
+        Pair<BlockPos, Boolean> fromPos = fixedRegionSelectionPos(stack);
+
+        // if somehow missing start position, still want to cancel selection operation
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        PlacementOperation.NONE.serializeNBT(tag);
+        
+        if(fromPos == null) return;
+
+        tag.removeTag(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+        
+        setFixedRegion(new FixedRegionBounds(fromPos.first(), fromPos.second(), pos, isCenter), stack);
+        
+        setFixedRegionEnabled(stack,true);
+
+        TargetMode currentMode = getTargetMode(stack);
+        // assume user wants to fill a region  and
+        // change mode to region fill if not already set to FILL_REGION or HOLLOW_FILL
+        if(!currentMode.usesSelectionRegion) TargetMode.FILL_REGION.serializeNBT(tag);
+        
+    }
+    
+//    /**
+//     * See {@link #placementRegionPosition(ItemStack)} for some explanation.
+//     */
+//    public static BlockPos getPlayerRelativeRegionFromEndPoints(BlockPos from, BlockPos to, EntityPlayer player)
+//    {
+//        BlockPos diff = to.subtract(from); 
+//        BlockPos selectedPos = new BlockPos(
+//                diff.getX() >= 0 ? diff.getX() + 1 : diff.getX() -1,
+//                diff.getY() >= 0 ? diff.getY() + 1 : diff.getY() -1,
+//                diff.getZ() >= 0 ? diff.getZ() + 1 : diff.getZ() -1);
+//        return(player.getHorizontalFacing().getAxis() == EnumFacing.Axis.Z)
+//                ? selectedPos
+//                : new BlockPos(selectedPos.getZ(), selectedPos.getY(), selectedPos.getX());
+//    }
+    
+
     public static PlacementOperation operationInProgress(ItemStack stack)
     {
         return PlacementOperation.NONE.deserializeNBT(stack.getTagCompound());
     }
  
     /**
+     * For cubic selection regions.
      * X is left/right relative to player and Z is depth in direction player is facing.<br>
      * Y is always vertical height.<br>
      * All are always positive numbers.<br>
      * Region rotation is or isn't applied according to parameter.<br>
      */
     @Nonnull
-    public static BlockPos placementRegionPosition(ItemStack stack, boolean applyRegionRotation)
+    public static BlockPos getRegionSize(ItemStack stack, boolean applyRegionRotation)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION)) return new BlockPos(1, 1, 1);
+        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_SIZE)) return new BlockPos(1, 1, 1);
         
-        BlockPos result = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION));
+        BlockPos result = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_SIZE));
         
         return applyRegionRotation ? getRegionOrientation(stack).rotatedRegionPos(result) : result;
+    }
+    
+    /**
+     * See {@link #getRegionSize(ItemStack, boolean)}
+     */
+    @Nonnull
+    public static void setRegionSize(ItemStack stack, BlockPos pos)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, pos.toLong());
+    }
+    
+    /**
+     * See {@link #getRegionSize(ItemStack, boolean)}
+     */
+    @Nonnull
+    public static void changeRegionSize(ItemStack stack, int dx, int dy, int dz)
+    {
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        BlockPos oldPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_SIZE));
+       
+        BlockPos newPos = new BlockPos(
+                MathHelper.clamp(oldPos.getX() + dx, 1, 9),
+                MathHelper.clamp(oldPos.getY() + dy, 1, 9),
+                MathHelper.clamp(oldPos.getZ() + dz, 1, 9)
+                );
+        tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, newPos.toLong());
     }
     
     @Nullable
@@ -586,9 +760,9 @@ public interface PlacementItem
         if (operationInProgress(stack) == PlacementOperation.NONE) return null;
                         
         NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION)) return null;
+        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS)) return null;
         
-        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_OPERATION_POSITION));
+        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS));
     }
     
 //    /**
@@ -599,20 +773,20 @@ public interface PlacementItem
 //        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
 //        if(selectedPos == null)
 //        {
-//            tag.removeTag(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION);
+//            tag.removeTag(ModNBTTag.PLACEMENT_REGION_SIZE);
 //        }
 //        else
 //        {
-//            tag.setLong(ModNBTTag.PLACEMENT_REGION_PLACEMENT_POSITION, selectedPos.toLong());
+//            tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, selectedPos.toLong());
 //        }
 //    }
     
     public static String selectedRegionLocalizedName(ItemStack stack)
     {
-        switch(getSelectionMode(stack))
+        switch(getTargetMode(stack))
         {
         case FILL_REGION:
-            BlockPos pos = placementRegionPosition(stack, false);
+            BlockPos pos = getRegionSize(stack, false);
             return I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
             
         case ON_CLICKED_SURFACE:
@@ -661,6 +835,8 @@ public interface PlacementItem
     
     /**
      * Will return a meaningless result if floating selection is disabled.
+     * 
+     * TODO: remove - replaced by PlacementPosition
      */
     public static BlockPos getFloatingSelectionBlockPos(ItemStack stack, EntityLivingBase entity)
     {

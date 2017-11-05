@@ -17,13 +17,19 @@ import net.minecraft.world.World;
 
 public class PlacementResult
 {
-    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
-    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE);
+    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE, null);
+    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE, null);
 
     private final PlacementEvent event;
     private final BlockPos blockPos;
+    private final IPlacementSpecBuilder builder;
+    
+    //TODO: remove when retired
+    @Deprecated
     private final List<Pair<BlockPos, ItemStack>> placements;
+    @Deprecated
     private final Set<BlockPos> exclusions;
+    @Deprecated
     private final IntegerAABB placementAABB;
     
     /**
@@ -36,19 +42,27 @@ public class PlacementResult
             @Nullable List<Pair<BlockPos, ItemStack>> placements, 
             @Nullable Set<BlockPos> exclusions, 
             @Nullable BlockPos blockPos,
-            @Nonnull  PlacementEvent event)
+            @Nonnull  PlacementEvent event, 
+            @Nullable IPlacementSpecBuilder builder)
     {
         this.placementAABB = placementAABB;
         this.placements = placements;
         this.exclusions = exclusions;
         this.blockPos = blockPos;
         this.event = event;
+        this.builder = builder;
+    }
+    
+    public IPlacementSpecBuilder builder()
+    {
+        return this.builder;
     }
     
     /**
      * Blocks that should be placed.
      */
     @Nonnull
+    @Deprecated
     public List<Pair<BlockPos, ItemStack>> placements()
     {
         return this.placements == null
@@ -60,6 +74,7 @@ public class PlacementResult
      * Locations of blocks that are obstacles to the placement action.
      */
     @Nonnull
+    @Deprecated
     public Set<BlockPos> exclusions()
     {
         return this.exclusions == null
@@ -68,26 +83,32 @@ public class PlacementResult
     }
 
     @Nullable
+    @Deprecated
     public IntegerAABB placementAABB()
     {
         return this.placementAABB;
     }
     
+    @Deprecated
     public boolean hasPlacementAABB()
     {
         return this.placementAABB != null;
     }
     
+    @Deprecated
     public boolean hasPlacementList()
     {
         return this.placements != null && !this.placements.isEmpty();
     }
     
+    @Deprecated
     public boolean hasExclusionList()
     {
         return this.exclusions != null && !this.exclusions.isEmpty();
     }
 
+    
+    
     /**
      * If true, the user input event (mouse click, usually) that caused this result
      * should continue to be processed by other event handlers. True also implies
@@ -106,36 +127,37 @@ public class PlacementResult
         return this.event.isExcavation;
     }
 
-    public void applyToWorld(ItemStack stackIn, EntityPlayer player, World worldIn)
+    private void applyToWorld(ItemStack stackIn, EntityPlayer player, World worldIn)
     {
-        //TODO add to undo log
-    
+        this.builder.build();
     }
 
     public void apply(ItemStack stackIn, EntityPlayer player)
     {
         switch(this.event)
         {
-        case PLACE_AND_SET_REGION:
-            PlacementItem.selectPlacementRegionFinish(stackIn, player, blockPos, false);
-            this.applyToWorld(stackIn, player, player.world);
+            
+        case START_PLACEMENT_REGION:
+            PlacementItem.fixedRegionStart(stackIn, blockPos, false);
+            break;
+            
+        case CANCEL_PLACEMENT_REGION:
+            PlacementItem.fixedRegionCancel(stackIn);
             break;
             
         case SET_PLACEMENT_REGION:
-            PlacementItem.selectPlacementRegionFinish(stackIn, player, blockPos, false);
+            PlacementItem.fixedRegionFinish(stackIn, player, blockPos, false);
             break;
     
         case PLACE:
+        case EXCAVATE:
             this.applyToWorld(stackIn, player, player.world);
             break;
     
-        case START_PLACEMENT_REGION:
-            PlacementItem.selectPlacementRegionStart(stackIn, blockPos, false);
-            break;
-            
         case UNDO_PLACEMENT:
             //TODO
             break;
+
             
         case NO_OPERATION_STOP:
         case NO_OPERATION_CONTINUE:

@@ -107,7 +107,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         if(!result.shouldInputEventsContinue()) 
         {
             result.apply(stackIn, player);
-            this.doPlacements(result, stackIn, world, player);
+//            this.doPlacements(result, stackIn, world, player);
             return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
         }
         
@@ -119,7 +119,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             if (blockpos != null 
                     && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
                     && world.getBlockState(blockpos).getMaterial().isReplaceable()
-                    && ((SuperBlock)this.block).canUseControls(player))
+                    && ((SuperBlock)this.block).isVirtual())
             {
                 this.displayGui(player);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
@@ -141,22 +141,24 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
         result.apply(stackIn, playerIn);
         
-        if(result.isExcavationOnly() && !playerIn.isCreative())
-        {
-            // FIXME: use the server-side thing
-            if(worldIn.isRemote) ExcavationRenderTracker.INSTANCE.add(playerIn, new ExcavationRenderEntry(playerIn, result));
-        }
-        else if(result.hasPlacementList())
-        {
-            return this.doPlacements(result, stackIn, worldIn, playerIn) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
-        }
+//        if(result.isExcavationOnly() && !playerIn.isCreative())
+//        {
+//            // FIXME: use the server-side thing
+//            if(worldIn.isRemote) ExcavationRenderTracker.INSTANCE.add(playerIn, new ExcavationRenderEntry(playerIn, result));
+//        }
+//        else if(result.hasPlacementList())
+//        {
+//            return this.doPlacements(result, stackIn, worldIn, playerIn) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+//        }
         
         // we don't return pass because don't want GUI displayed or other events to process
         return EnumActionResult.SUCCESS;
     }
     /**
      * true if successful
+     * FIXME: remove when done transfering logic
      */
+    @Deprecated
     private boolean doPlacements(PlacementResult result, ItemStack stackIn, World worldIn, EntityPlayer playerIn)
     {
         if(!playerIn.capabilities.allowEdit) return false;

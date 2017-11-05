@@ -168,7 +168,8 @@ public abstract class PlacementHandler
                         null, 
                         null, 
                         null, 
-                        PlacementEvent.CANCEL_PLACEMENT_REGION);
+                        PlacementEvent.CANCEL_PLACEMENT_REGION,
+                        null);
             }
             
             case NONE:
@@ -185,7 +186,8 @@ public abstract class PlacementHandler
                             null, 
                             null, 
                             onPos, 
-                            PlacementEvent.UNDO_PLACEMENT);
+                            PlacementEvent.UNDO_PLACEMENT,
+                            null);
                 }
                 else
                 {
@@ -249,115 +251,94 @@ public abstract class PlacementHandler
      */
     public static PlacementResult doRightClickBlock(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, ItemStack stack)
     {
-        final boolean isFloating = PlacementItem.isFloatingSelectionEnabled(stack);
+        // don't use floating selection if not enabled
+        if(onPos == null && !PlacementItem.isFloatingSelectionEnabled(stack)) return PlacementResult.EMPTY_RESULT_CONTINUE;
         
-        // should not pass on___ info if floating - would give different result from preview and not intended behavior when floating is active
-        if(isFloating)
+        PlacementPosition pPos = new PlacementPosition(player, onPos, onFace, hitVec, stack);
+        
+        // nothing to do if no position
+        if(pPos.inPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
+        
+        // only virtual blocks support advanced placement behavior
+        // so emulate vanilla right-click behavior if we don't have one
+        if(!(stack.getItem() instanceof PlacementItem) || !((PlacementItem)stack.getItem()).getSuperBlock().isVirtual())
         {
-            onPos = null;
-            onFace = null;
-            hitVec = null;
-        }
-        
-        /**
-         * position user is activating, either by clicking against a block or with floating selection.
-         */
-        BlockPos startPos = isFloating
-                ? PlacementItem.getFloatingSelectionBlockPos(stack, player) 
-                : onPos == null || onFace == null ? null : onPos.offset(onFace);
-        
-        if(!(stack.getItem() instanceof PlacementItem) || !((PlacementItem)stack.getItem()).getSuperBlock().canUseControls(player))
-        {
-            // player not allowed to use non-vanilla features of this block
-            // so emulate vanilla right-click behavior
-            
-            // nothing to do if no position
-            if(startPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
+            ItemStack tweakedStack = stack.copy();
+            PlacementItem.setTargetMode(tweakedStack, TargetMode.ON_CLICKED_FACE);
             
             return new PlacementResult(
-                    blockBoundaryAABB(startPos, startPos),
-                    ImmutableList.of(Pair.of(startPos, stack)), 
+                    blockBoundaryAABB(pPos.inPos, pPos.inPos),
+                    ImmutableList.of(Pair.of(pPos.inPos, tweakedStack)), 
                     null, 
-                    startPos, 
-                    PlacementEvent.PLACE);
+                    pPos.inPos, 
+                    PlacementEvent.PLACE,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
         }
-                
+        
+        // Ctrl + right click: start new placement region
+        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
+        {
+            ItemStack tweakedStack = stack.copy();
+            PlacementItem.fixedRegionStart(tweakedStack, pPos.inPos, false);
+            
+            return new PlacementResult(
+                    blockBoundaryAABB(pPos.inPos, pPos.inPos),
+                    null, 
+                    null, 
+                    pPos.inPos, 
+                    PlacementEvent.START_PLACEMENT_REGION,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+        
         switch(PlacementItem.operationInProgress(stack))
         {
             case SELECTING:
             {
+                // finish placement region
+                
+                // need both positions
                 BlockPos endPos = PlacementItem.operationPosition(stack);
+                if(endPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
                 
-                // need both positions to do anything
-                if(startPos == null || endPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
+                ItemStack tweakedStack = stack.copy();
+                PlacementItem.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
                 
-                if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
-                {
-                    // Ctrl right-click while selecting - set region without placing
-                    return new PlacementResult(
-                            blockBoundaryAABB(startPos, endPos), 
-                            null, 
-                            null, 
-                            startPos, 
-                            PlacementEvent.SET_PLACEMENT_REGION);
-                }
-                else
-                {
-                    // right-click while selecting - set region and place blocks 
-                    // Note that we don't pass end pos - will be re-evaluated by placement logic
-                    // to allow for obstacle handling.
-                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, true);
-                }
+                return new PlacementResult(
+                        blockBoundaryAABB(pPos.inPos, endPos), 
+                        null, 
+                        null, 
+                        pPos.inPos, 
+                        PlacementEvent.SET_PLACEMENT_REGION,
+                        PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
             }
             
             case NONE:
             default:
-            {
-                // nothing to do if no position
-                if(startPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
-                
-                if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
-                {
-                    // Ctrl + right click: start new placement region
-                    return new PlacementResult(
-                            blockBoundaryAABB(startPos, startPos),
-                            null, 
-                            null, 
-                            startPos, 
-                            PlacementEvent.START_PLACEMENT_REGION);
-                }
-                else
-                {
-                    // normal right click on block 
-                    return doPlacement(stack, player, onPos, onFace, hitVec, startPos, false);
-                }
-            }
+                // normal right click on block 
+                return new PlacementResult(
+                        new IntegerAABB(pPos.inPos, pPos.inPos), 
+                        null, 
+                        null, 
+                        pPos.inPos, 
+                        PlacementItem.isDeleteModeEnabled(stack) ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                        PlacementSpecHelper.placementBuilder(player, pPos, stack));
         }
     }
     
-    public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, BlockPos startPos, boolean setRegion)
+    //FIXME: remove
+    public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
         
-        boolean isSelecting = PlacementItem.operationInProgress(stack) == PlacementOperation.SELECTING;
-        
-        SelectionMode selectionMode = PlacementItem.getSelectionMode(stack);
-        boolean isHollow = selectionMode == SelectionMode.HOLLOW_REGION;
+        TargetMode selectionMode = PlacementItem.getTargetMode(stack);
+        boolean isHollow = selectionMode == TargetMode.HOLLOW_REGION;
         boolean isExcavating = PlacementItem.isDeleteModeEnabled(stack);
         
         // check for a multi-block placement region
-        BlockPos placementPos = selectionMode.usesSelectionRegion ? PlacementItem.placementRegionPosition(stack, true) : null;
-        BlockPos endPos;
-        if(isSelecting)
-        {
-            endPos = PlacementItem.operationPosition(stack);
-        }
-        else
-        {
-            endPos = placementPos == null ? startPos : getPlayerRelativeOffset(startPos, placementPos, player, onFace, OffsetPosition.FLIP_NONE);
-        }
+        BlockPos placementPos = selectionMode.usesSelectionRegion ? PlacementItem.getRegionSize(stack, true) : null;
+        BlockPos endPos = placementPos == null ? pPos.inPos : getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, OffsetPosition.FLIP_NONE);
         
-        BlockRegion region = new BlockRegion(startPos, endPos, isHollow);
-        if(selectionMode.usesSelectionRegion) excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region);
+        BlockRegion region = new BlockRegion(pPos.inPos, endPos, isHollow);
+        if(selectionMode.usesSelectionRegion) excludeObstaclesInRegion(player, pPos, stack, region);
         
         boolean adjustmentEnabled = PlacementItem.getRegionOrientation(stack) == RegionOrientation.AUTOMATIC && !isExcavating;
         
@@ -371,16 +352,15 @@ public abstract class PlacementHandler
         if(     adjustmentEnabled 
              && selectionMode.usesSelectionRegion 
              && !isClear 
-             && !isSelecting 
              && placementPos != null 
-             && !startPos.equals(endPos))
+             && !pPos.inPos.equals(endPos))
         {
             for(OffsetPosition offset : OffsetPosition.ALTERNATES)
             {
                 // first try pivoting the selection box around the position being targeted
-                BlockPos endPos2 = getPlayerRelativeOffset(startPos, placementPos, player, onFace, offset);
-                BlockRegion region2 = new BlockRegion(startPos, endPos2, isHollow);
-                excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
+                BlockPos endPos2 = getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, offset);
+                BlockRegion region2 = new BlockRegion(pPos.inPos, endPos2, isHollow);
+                excludeObstaclesInRegion(player, pPos, stack, region2);
     
                 if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
                 {
@@ -394,14 +374,14 @@ public abstract class PlacementHandler
             if(!isClear)
             {
                 // that didn't work, so try nudging the region a block in each direction
-                EnumFacing[] checkOrder = faceCheckOrder(player, onFace);
+                EnumFacing[] checkOrder = faceCheckOrder(player, pPos.onFace);
                 
                 for(EnumFacing face : checkOrder)
                 {
-                    BlockPos startPos2 = startPos.offset(face);
+                    BlockPos startPos2 = pPos.inPos.offset(face);
                     BlockPos endPos2 = endPos.offset(face);
                     BlockRegion region2 = new BlockRegion(startPos2, endPos2, isHollow);
-                    excludeObstaclesInRegion(player, onPos, onFace, hitVec, stack, region2);
+                    excludeObstaclesInRegion(player, pPos, stack, region2);
                     if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
                     {
                         endPos = endPos2;
@@ -413,18 +393,17 @@ public abstract class PlacementHandler
             }
         }
         
-        List<Pair<BlockPos, ItemStack>> placements = (selectionMode != SelectionMode.COMPLETE_REGION || isClear)
-                ? placeRegion(player, onPos, onFace, hitVec, stack, region)
+        List<Pair<BlockPos, ItemStack>> placements = (selectionMode != TargetMode.COMPLETE_REGION || isClear)
+                ? placeRegion(player, pPos.onPos, pPos.onFace, new Vec3d(pPos.hitX, pPos.hitY, pPos.hitZ), stack, region)
                 : Collections.emptyList();
         
         return new PlacementResult(
-                new IntegerAABB(startPos, endPos), 
+                new IntegerAABB(pPos.inPos, endPos), 
                 placements, 
                 region.exclusions(), 
-                startPos, 
-                setRegion 
-                    ? isExcavating ? PlacementEvent.EXCAVATE_AND_SET_REGION : PlacementEvent.PLACE_AND_SET_REGION
-                    : isExcavating ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE);
+                pPos.inPos, 
+                isExcavating ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                PlacementSpecHelper.placementBuilder(player, pPos, stack));
     }
 
     /**
@@ -475,7 +454,9 @@ public abstract class PlacementHandler
        
         }
     }
-    public static void excludeObstaclesInRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, BlockRegion region)
+    
+    @Deprecated
+    public static void excludeObstaclesInRegion(EntityPlayer player, PlacementPosition pPos, ItemStack stack, BlockRegion region)
     {
         FilterMode filterMode =  PlacementItem.getFilterMode(stack);
         boolean isExcavating = PlacementItem.isDeleteModeEnabled(stack);
@@ -674,7 +655,7 @@ public abstract class PlacementHandler
         if(!PlacementItem.isPlacementItem(stack)) return Collections.emptyList();
 
         PlacementItem item = (PlacementItem)stack.getItem();
-        SelectionMode placementMode = PlacementItem.getSelectionMode(stack);
+        TargetMode placementMode = PlacementItem.getTargetMode(stack);
 
         boolean isFloating = PlacementItem.isFloatingSelectionEnabled(stack);
 

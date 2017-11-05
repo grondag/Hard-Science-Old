@@ -12,7 +12,7 @@ import net.minecraft.util.text.translation.I18n;
 /** 
  * Determines how blocks are to be selected for operation of the placement item.
  */
-public enum SelectionMode implements IMessagePlusImmutable<SelectionMode>, IReadWriteNBTImmutable<SelectionMode>, ILocalized
+public enum TargetMode implements IMessagePlusImmutable<TargetMode>, IReadWriteNBTImmutable<TargetMode>, ILocalized
 {
     /** affect a single block - normal MC  behavior*/
     ON_CLICKED_FACE(false),
@@ -39,27 +39,27 @@ public enum SelectionMode implements IMessagePlusImmutable<SelectionMode>, IRead
      */
     public final boolean usesSelectionRegion;
     
-    private SelectionMode(boolean usesSelectionRegion)
+    private TargetMode(boolean usesSelectionRegion)
     {
         this.usesSelectionRegion = usesSelectionRegion;
     }
     
     @Override
-    public SelectionMode deserializeNBT(NBTTagCompound tag)
+    public TargetMode deserializeNBT(NBTTagCompound tag)
     {
-        return Useful.safeEnumFromTag(tag, ModNBTTag.SELECTION_MODE, this);
+        return Useful.safeEnumFromTag(tag, ModNBTTag.TARGET_MODE, this);
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        Useful.saveEnumToTag(tag, ModNBTTag.SELECTION_MODE, this);
+        Useful.saveEnumToTag(tag, ModNBTTag.TARGET_MODE, this);
     }
 
     @Override
-    public SelectionMode fromBytes(PacketBuffer pBuff)
+    public TargetMode fromBytes(PacketBuffer pBuff)
     {
-        return pBuff.readEnumValue(SelectionMode.class);
+        return pBuff.readEnumValue(TargetMode.class);
     }
 
     @Override

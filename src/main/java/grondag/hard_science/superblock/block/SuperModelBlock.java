@@ -191,12 +191,6 @@ public class SuperModelBlock extends SuperBlockPlus
     }
     
     @Override
-    public boolean canUseControls(EntityPlayer player)
-    {
-        return player.capabilities.isCreativeMode || this.isVirtual();
-    }
-    
-     @Override
     public boolean isGeometryFullCube(IBlockState state)
     {
         return this.fullBlock;

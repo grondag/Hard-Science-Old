@@ -87,18 +87,20 @@ placement.message.species_mode=Changed join behavior: %s
 placement.message.filter_mode=Changed filter mode: %s
 placement.message.delete_on=Excavation mode is enabled!
 placement.message.delete_off=Excavation mode is disabled.
+placement.message.fixed_region_on=Using fixed selection for region operations.
+placement.message.fixed_region_off=Using dynamic selection for region operations.
 
 
 placement.preview.none=NONE
 placement.preview.outline=OUTLINE
 #placement.preview.ghost=GHOST
 
-placement.selection_mode.on_clicked_face=Place single block on clicked face (normal Minecraft)
-placement.selection_mode.fill_region=Replace blocks in selected region that match filter
-placement.selection_mode.hollow_region=Replace blocks on outside of selected region that match filter
-placement.selection_mode.complete_region=Replace all blocks in selected region if all match filter
-placement.selection_mode.match_clicked_block=Replace clicked blocks and matching blocks connected to it (like an Exchanger)
-placement.selection_mode.on_clicked_surface=Place block on clicked face and connected faces that match it (like a Builder's wand)
+placement.target_mode.on_clicked_face=Place single block on clicked face (normal Minecraft)
+placement.target_mode.fill_region=Replace blocks in selected region that match filter
+placement.target_mode.hollow_region=Replace blocks on outside of selected region that match filter
+placement.target_mode.complete_region=Replace all blocks in selected region if all match filter
+placement.target_mode.match_clicked_block=Replace clicked blocks and matching blocks connected to it (like an Exchanger)
+placement.target_mode.on_clicked_surface=Place block on clicked face and connected faces that match it (like a Builder's wand)
 
 placement.species_mode.match_clicked=Join with clicked face if possible (hold Alt key to break instead)
 placement.species_mode.counter_most=Break with nearby blocks if possible (hold Alt key to join clicked face)

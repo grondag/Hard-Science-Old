@@ -17,10 +17,10 @@ public enum PlacementEvent
      */
     PLACE(true, false, false),
 
-    /**
-     * Place blocks, also complete placement region selection operation, eat the event.
-     */
-    PLACE_AND_SET_REGION(true, false, true),
+//    /**
+//     * Place blocks, also complete placement region selection operation, eat the event.
+//     */
+//    PLACE_AND_SET_REGION(true, false, true),
     
     /*
      * Finish placement region selection operation in progress. Eat the event. 
@@ -41,11 +41,11 @@ public enum PlacementEvent
      */
     CANCEL_PLACEMENT_REGION(false, false, false),
     
-    /**
-     * Remove blocks, also complete region selection operation, eat the event.
-     * Block position identifies the block that was clicked.
-     */
-    EXCAVATE_AND_SET_REGION(false, true, true),
+//    /**
+//     * Remove blocks, also complete region selection operation, eat the event.
+//     * Block position identifies the block that was clicked.
+//     */
+//    EXCAVATE_AND_SET_REGION(false, true, true),
     
     /*
      * Remove blocks. Eat the event. 

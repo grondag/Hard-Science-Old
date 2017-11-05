@@ -56,7 +56,7 @@ public class CubicPlacementHandler extends PlacementHandler
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
 
         SuperItemBlock item = (SuperItemBlock)stack.getItem();
-//        SelectionMode placementMode = PlacementItem.getMode(stack);
+//        TargetMode placementMode = PlacementItem.getMode(stack);
         
         SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
