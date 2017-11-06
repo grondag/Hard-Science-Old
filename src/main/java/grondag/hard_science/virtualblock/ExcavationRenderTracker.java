@@ -2,6 +2,7 @@ package grondag.hard_science.virtualblock;
 
 import java.util.ArrayList;
 
+import grondag.hard_science.ClientProxy;
 import grondag.hard_science.library.world.WorldMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -46,18 +47,13 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
     
     public void render(RenderGlobal renderGlobal, double partialTicks)
     {
-        Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
-        if(entity == null) return;
+        Entity player = Minecraft.getMinecraft().player;
+        if(player == null) return;
 
-        Int2ObjectOpenHashMap<ExcavationRenderEntry> excavations = this.get(entity.world);
+        Int2ObjectOpenHashMap<ExcavationRenderEntry> excavations = this.get(player.world);
         if(excavations == null || excavations.isEmpty()) return;
         
-        ICamera camera = new Frustum();
-        double d0 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-        double d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-        double d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-        camera.setPosition(d0, d1, d2);
-        
+        ICamera camera = ClientProxy.camera();
         
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -71,11 +67,15 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
         
         secondPass.clear();
         
+        double d0 = ClientProxy.cameraX();
+        double d1 = ClientProxy.cameraY();
+        double d2 = ClientProxy.cameraZ();
+        
         for(ExcavationRenderEntry ex : excavations.values())
         {
             if(camera.isBoundingBoxInFrustum(ex.aabb))
             {
-                if(ex.drawBounds(bufferbuilder, entity, d0, d1, d2, (float) partialTicks)) secondPass.add(ex);
+                if(ex.drawBounds(bufferbuilder, player, d0, d1, d2, (float) partialTicks)) secondPass.add(ex);
             }
         }
         
@@ -92,7 +92,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
             bufferbuilder.begin(5, DefaultVertexFormats.POSITION_COLOR);
             for(ExcavationRenderEntry ex : secondPass)
             {
-                ex.drawBox(bufferbuilder, entity, d0, d1, d2, (float) partialTicks);
+                ex.drawBox(bufferbuilder, player, d0, d1, d2, (float) partialTicks);
             }
             tessellator.draw();
             

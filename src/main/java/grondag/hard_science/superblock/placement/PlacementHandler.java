@@ -158,10 +158,9 @@ public abstract class PlacementHandler
      */
     public static PlacementResult doLeftClickBlock(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack)
     {
-        switch(PlacementItem.operationInProgress(stack))
+        if(PlacementItem.isFixedRegionSelectionInProgress(stack))
         {
-            case SELECTING:
-            {
+           
                 // any left click while selecting cancels the operation;
                 return new PlacementResult(
                         null, 
@@ -170,31 +169,25 @@ public abstract class PlacementHandler
                         null, 
                         PlacementEvent.CANCEL_PLACEMENT_REGION,
                         null);
-            }
-            
-            case NONE:
-            default:
-            {
-                if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
-                {
-                    // Alt+left click: undo block placement
+        }
+        else if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
+        {
+            // Alt+left click: undo block placement
 
-                    //TODO
-                    Log.info("UNDO PLACEMENT LOGIC HAPPENS NOW");
-                    return new PlacementResult(
-                            null, 
-                            null, 
-                            null, 
-                            onPos, 
-                            PlacementEvent.UNDO_PLACEMENT,
-                            null);
-                }
-                else
-                {
-                    // normal left click on block - let normal MC behavior occur
-                    return PlacementResult.EMPTY_RESULT_CONTINUE;
-                }
-            }
+            //TODO
+            Log.info("UNDO PLACEMENT LOGIC HAPPENS NOW");
+            return new PlacementResult(
+                    null, 
+                    null, 
+                    null, 
+                    onPos, 
+                    PlacementEvent.UNDO_PLACEMENT,
+                    null);
+        }
+        else
+        {
+            // normal left click on block - let normal MC behavior occur
+            return PlacementResult.EMPTY_RESULT_CONTINUE;
         }
     }
 
@@ -251,13 +244,31 @@ public abstract class PlacementHandler
      */
     public static PlacementResult doRightClickBlock(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, ItemStack stack)
     {
-        // don't use floating selection if not enabled
-        if(onPos == null && !PlacementItem.isFloatingSelectionEnabled(stack)) return PlacementResult.EMPTY_RESULT_CONTINUE;
-        
         PlacementPosition pPos = new PlacementPosition(player, onPos, onFace, hitVec, stack);
+
+        // if not position, then either need to be using floating selection 
+        // or a fixed region (for preview only - see logic below) if not enabled
+        if(onPos == null && !PlacementItem.isFloatingSelectionEnabled(stack)) 
+        {
+                // don't force player to be in placement range to see big region selections
+                // but note this doesn't work for selection in progress
+                if(PlacementItem.isFixedRegionEnabled(stack) && !PlacementItem.isFixedRegionSelectionInProgress(stack))
+                {
+                    return new PlacementResult(
+                            null, 
+                            null, 
+                            null, 
+                            pPos.inPos, 
+                            PlacementEvent.NO_OPERATION_CONTINUE,
+                            PlacementSpecHelper.placementBuilder(player, pPos, stack));
+                }
+                else return PlacementResult.EMPTY_RESULT_CONTINUE;
+        }
+        
         
         // nothing to do if no position
         if(pPos.inPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
+        
         
         // only virtual blocks support advanced placement behavior
         // so emulate vanilla right-click behavior if we don't have one
@@ -290,38 +301,30 @@ public abstract class PlacementHandler
                     PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
         }
         
-        switch(PlacementItem.operationInProgress(stack))
+        if(PlacementItem.isFixedRegionSelectionInProgress(stack))
         {
-            case SELECTING:
-            {
-                // finish placement region
-                
-                // need both positions
-                BlockPos endPos = PlacementItem.operationPosition(stack);
-                if(endPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
-                
-                ItemStack tweakedStack = stack.copy();
-                PlacementItem.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
-                
-                return new PlacementResult(
-                        blockBoundaryAABB(pPos.inPos, endPos), 
-                        null, 
-                        null, 
-                        pPos.inPos, 
-                        PlacementEvent.SET_PLACEMENT_REGION,
-                        PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
-            }
+            // finish placement region
+            ItemStack tweakedStack = stack.copy();
+            PlacementItem.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
             
-            case NONE:
-            default:
-                // normal right click on block 
-                return new PlacementResult(
-                        new IntegerAABB(pPos.inPos, pPos.inPos), 
-                        null, 
-                        null, 
-                        pPos.inPos, 
-                        PlacementItem.isDeleteModeEnabled(stack) ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
-                        PlacementSpecHelper.placementBuilder(player, pPos, stack));
+            return new PlacementResult(
+                    blockBoundaryAABB(pPos.inPos, pPos.inPos), 
+                    null, 
+                    null, 
+                    pPos.inPos, 
+                    PlacementEvent.SET_PLACEMENT_REGION,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+        else
+        {
+            // normal right click on block 
+            return new PlacementResult(
+                    new IntegerAABB(pPos.inPos, pPos.inPos), 
+                    null, 
+                    null, 
+                    pPos.inPos, 
+                    PlacementItem.isDeleteModeEnabled(stack) ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                    PlacementSpecHelper.placementBuilder(player, pPos, stack));
         }
     }
     

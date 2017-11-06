@@ -370,7 +370,7 @@ public interface PlacementItem
      */
     public static RegionOrientation getRegionOrientation(ItemStack stack)
     {
-        return operationInProgress(stack) == PlacementOperation.NONE ? RegionOrientation.XYZ.deserializeNBT(stack.getTagCompound()) : RegionOrientation.XYZ;
+        return isFixedRegionSelectionInProgress(stack) ? RegionOrientation.XYZ : RegionOrientation.XYZ.deserializeNBT(stack.getTagCompound());
     }
     
     public static void cycleRegionOrientation(ItemStack stack, boolean reverse)
@@ -622,7 +622,6 @@ public interface PlacementItem
     public static void fixedRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
     {
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        PlacementOperation.SELECTING.serializeNBT(tag);
         
         tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS, PackedBlockPos.pack(pos, isCenter ? 1 : 0));
         
@@ -632,10 +631,14 @@ public interface PlacementItem
         if(!currentMode.usesSelectionRegion) TargetMode.FILL_REGION.serializeNBT(tag);
     }
     
+    public static boolean isFixedRegionSelectionInProgress(ItemStack stack)
+    {
+        return Useful.getOrCreateTagCompound(stack).hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+    }
+    
     public static void fixedRegionCancel(ItemStack stack)
     {
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        PlacementOperation.NONE.serializeNBT(tag);
         tag.removeTag(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
         
         //disable fixed region if we don't have one
@@ -671,7 +674,6 @@ public interface PlacementItem
 
         // if somehow missing start position, still want to cancel selection operation
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        PlacementOperation.NONE.serializeNBT(tag);
         
         if(fromPos == null) return;
 
@@ -703,12 +705,6 @@ public interface PlacementItem
 //                : new BlockPos(selectedPos.getZ(), selectedPos.getY(), selectedPos.getX());
 //    }
     
-
-    public static PlacementOperation operationInProgress(ItemStack stack)
-    {
-        return PlacementOperation.NONE.deserializeNBT(stack.getTagCompound());
-    }
- 
     /**
      * For cubic selection regions.
      * X is left/right relative to player and Z is depth in direction player is facing.<br>
@@ -752,17 +748,6 @@ public interface PlacementItem
                 MathHelper.clamp(oldPos.getZ() + dz, 1, 9)
                 );
         tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, newPos.toLong());
-    }
-    
-    @Nullable
-    public static BlockPos operationPosition(ItemStack stack)
-    {
-        if (operationInProgress(stack) == PlacementOperation.NONE) return null;
-                        
-        NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS)) return null;
-        
-        return BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS));
     }
     
 //    /**

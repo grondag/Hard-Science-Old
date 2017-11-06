@@ -71,13 +71,13 @@ public class BlockRegion extends IntegerAABB
     /** All positions contained in the region, including interior positions if it is hollow */
     public Iterable<MutableBlockPos> allPositions()
     {
-        return BlockPos.getAllInBoxMutable(minX, minY, minZ, maxX, maxY, maxZ);
+        return BlockPos.getAllInBoxMutable(this.minX, this.minY, this.minZ, this.maxX - 1, this.maxY - 1, this.maxZ - 1);
     }
     
     /** All positions on the surface of the region. Will be same as {@link #allPositions()} if region is not at least 3x3x3 */
     public Iterable<MutableBlockPos> surfacePositions()
     {
-        return getAllOnBoxSurfaceMutable(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
+        return getAllOnBoxSurfaceMutable(this.minX, this.minY, this.minZ, this.maxX - 1, this.maxY - 1, this.maxZ - 1);
     }
     
     /** Positions that belong the region, excluding interior positions if hollow, but not excluding any excluded positions. */
@@ -90,7 +90,7 @@ public class BlockRegion extends IntegerAABB
     /** All positions on the surface of the region. Will be same as {@link #allPositions()} if region is not at least 3x3x3 */
     public Iterable<MutableBlockPos> adjacentPositions()
     {
-        return getAllOnBoxSurfaceMutable(this.minX - 1, this.minY - 1, this.minZ - 1, this.maxX + 1, this.maxY + 1, this.maxZ + 1);
+        return getAllOnBoxSurfaceMutable(this.minX - 1, this.minY - 1, this.minZ - 1, this.maxX, this.maxY, this.maxZ);
     }
     
     /**

@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.hard_science.ClientProxy;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.BlockRegion;
@@ -12,6 +13,7 @@ import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem.FixedRegionBounds;
+import jline.internal.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -85,7 +87,7 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             this.placedStack = placedStack;
             this.player = player;
             this.pPos = pPos;
-            this.isSelectionInProgress = PlacementItem.operationInProgress(this.placedStack) == PlacementOperation.SELECTING;
+            this.isSelectionInProgress = PlacementItem.isFixedRegionSelectionInProgress(placedStack);
             this.selectionMode = PlacementItem.getTargetMode(placedStack);
             this.isExcavating = PlacementItem.isDeleteModeEnabled(placedStack);
 
@@ -110,7 +112,7 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             if(isValid == null)
             {
-                isValid = doValidate(false);
+                isValid = doValidate(isPreview);
             }
             return isValid;
         }
@@ -135,6 +137,8 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         @SideOnly(Side.CLIENT)
         protected void drawPlacementPreview(Tessellator tessellator, BufferBuilder bufferBuilder)
         {
+            if(this.previewPos() == null) return;
+            
             GlStateManager.disableDepth();
             
             ModelState placementModelState = PlacementItem.getStackModelState(this.placedStack);
@@ -460,6 +464,10 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
 
             protected BlockRegion region;
+            
+            /**
+             * Where should block shape preview sample be drawn?
+             */
             protected BlockPos previewPos;
 
             protected CuboidBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
@@ -480,7 +488,7 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 if(this.isSelectionInProgress) 
                 {
-                    this.region = new BlockRegion(pPos.inPos, PlacementItem.operationPosition(placedStack), false);
+                    this.region = new BlockRegion(pPos.inPos, PlacementItem.fixedRegionSelectionPos(this.placedStack).first(), false);
                     return true;
                 }
                 
@@ -488,14 +496,23 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 // to avoid re-orientation based on hit face
                 EnumFacing offsetFace = pPos.isFloating ? null : pPos.onFace;
                 
-
-                
                 if(this.isFixedRegion)
                 {
                     FixedRegionBounds bounds = PlacementItem.getFixedRegion(placedStack);
                     this.region = new BlockRegion(bounds.fromPos, bounds.toPos, this.isHollow);
                     this.excludeObstaclesInRegion(this.region, isPreview);
-                    return this.canPlaceRegion(region);
+                    
+                    // to place a fixed region, player must be targeting a space within it
+                    if(this.region.contains(pPos.inPos))
+                    {
+                        return this.canPlaceRegion(region);
+                    }
+                    else
+                    {
+                        // prevent block preview in nonsensical location
+                        this.previewPos = null;
+                        return false;
+                    }
                 }
                 else
                 {
@@ -590,6 +607,10 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 if(this.region == null) return;
                 
                 AxisAlignedBB box = this.region.toAABB();
+                
+                // fixed regions could be outside of view
+                if(ClientProxy.camera() == null || !ClientProxy.camera().isBoundingBoxInFrustum(box)) return;
+                
                 // draw edge without depth to show extent of region
                 GlStateManager.disableDepth();
                 GlStateManager.glLineWidth(2.0F);

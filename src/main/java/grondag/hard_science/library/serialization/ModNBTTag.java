@@ -51,7 +51,6 @@ public class ModNBTTag
     public final static String PLACEMENT_REGION_FLOATING_RANGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_REGION_ORIENTATION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_SPECIES_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_OPERATION_IN_PROGRESS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String RESOURCE_QUANTITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SERVER_SIDE_ONLY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SIMULATION_LAST_TICK = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

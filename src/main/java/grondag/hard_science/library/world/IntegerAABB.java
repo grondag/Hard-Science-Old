@@ -479,6 +479,28 @@ public class IntegerAABB
     }
 
     /**
+     * Returns if the supplied BlockPos is include inside the bounding box
+     */
+    public boolean contains(BlockPos pos)
+    {
+        if (pos.getX() >= this.minX && pos.getX() < this.maxX)
+        {
+            if (pos.getY() >= this.minY && pos.getY() < this.maxY)
+            {
+                return pos.getZ() >= this.minZ && pos.getZ() < this.maxZ;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    /**
      * Returns the average length of the edges of the bounding box.
      */
     public double getAverageEdgeLength()
