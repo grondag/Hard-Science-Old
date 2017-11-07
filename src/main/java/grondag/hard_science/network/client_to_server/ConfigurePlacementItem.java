@@ -4,7 +4,6 @@ package grondag.hard_science.network.client_to_server;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementItem.FixedRegionBounds;
 import grondag.hard_science.superblock.placement.TargetMode;
 import grondag.hard_science.superblock.placement.RegionOrientation;
 import grondag.hard_science.superblock.placement.SpeciesMode;

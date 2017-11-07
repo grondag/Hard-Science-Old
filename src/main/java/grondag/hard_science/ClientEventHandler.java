@@ -14,7 +14,6 @@ import grondag.hard_science.simulator.machine.OpenContainerStorageProxy;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementItemRenderer;
 import grondag.hard_science.superblock.placement.PlacementResult;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;

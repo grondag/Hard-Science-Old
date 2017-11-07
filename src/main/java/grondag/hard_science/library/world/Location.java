@@ -4,9 +4,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.Useful;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class Location extends BlockPos
 {
@@ -90,27 +92,25 @@ public class Location extends BlockPos
         return this.dimensionID;
     }
     
+    public World world()
+    {
+        return FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(this.dimensionID);
+    }
+    
     @Override
     public boolean equals(Object o)
     {
-        if (this == o)
-        {
-            return true;
-        }
-        else if (!(o instanceof Location))
-        {
-            return false;
-        }
-        else
-        {
-            Location loc = (Location)o;
-
-            return      this.getX() == loc.getX()
-                    &&  this.getY() == loc.getY()
-                    &&  this.getZ() == loc.getZ()
-                    &&  this.dimensionID == loc.dimensionID;
-        }
+        if( o == null || !(o instanceof Location)) return false;
+        Location other = (Location)o;
+        return      this.getX() == other.getX()
+                &&  this.getY() == other.getY()
+                &&  this.getZ() == other.getZ()
+                &&  this.dimensionID == other.dimensionID;
     }
     
-    
+    @Override
+    public int hashCode()
+    {
+        return (int) Useful.longHash((long)super.hashCode() | (this.dimensionID << 32));
+    }
 }

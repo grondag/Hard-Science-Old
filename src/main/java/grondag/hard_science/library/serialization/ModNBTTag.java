@@ -124,5 +124,13 @@ public class ModNBTTag
     public static final String PLACEMENT_FIXED_REGION_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String PLACEMENT_FIXED_REGION_SELECT_POS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String PLACEMENT_PLAYER_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String PLACEMENT_ENTRY_DATA = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String PLACEMENT_SPEC_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String PLACEMENT_SPEC_INDEX = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     
 }

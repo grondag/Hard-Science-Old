@@ -34,7 +34,7 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
     private final SimpleUnorderedArrayList<Job> jobs = new SimpleUnorderedArrayList<Job>();
     
     /**
-     * Contains tasks that are ready for execution - will typically have a WAITING status.
+     * Contains jobs with tasks that are ready for execution - will typically have a WAITING status.
      * Tasks are posted to the backlog by their parent job when the task becomes ready to execute.
      * Tasks are pulled from the front of the backlog by machines or processes that consume tasks.
      */

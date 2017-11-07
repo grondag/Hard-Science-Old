@@ -1,9 +1,7 @@
 package grondag.hard_science.superblock.placement;
 
-import javax.annotation.Nullable;
-
-import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.CSGPlacementSpec;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.CuboidPlacementSpec;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PredicatePlacementSpec;
@@ -11,9 +9,6 @@ import grondag.hard_science.superblock.placement.AbstractPlacementSpec.SinglePla
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.SurfacePlacementSpec;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 /**
  * Knows how to get the appropriate placement builder for a given stack.

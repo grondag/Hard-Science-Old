@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.hard_science.HardScience;
 import grondag.hard_science.Configurator;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.VolcanoTileEntity.VolcanoStage;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.UniversalPos;
+import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
@@ -26,7 +26,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class VolcanoManager implements ISimulationTickable, IPersistenceNode
 {
-    private HashMap<UniversalPos, VolcanoNode> nodes = new HashMap<UniversalPos, VolcanoNode>();
+    private HashMap<Location, VolcanoNode> nodes = new HashMap<Location, VolcanoNode>();
     
     private VolcanoNode activeNode = null; 
     private boolean isDirty = true;
@@ -139,13 +139,14 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
                     + " Volcano simulation state will be invalid.");
             return null;
         }
-        return this.nodes.get(new UniversalPos(pos, dimensionID));
+        return this.nodes.get(new Location(pos, dimensionID));
     }
     
     public VolcanoNode createNode(BlockPos pos, int dimensionID)
     {
-        VolcanoNode result = new VolcanoNode(new UniversalPos(pos, dimensionID));
-        this.nodes.put(new UniversalPos(pos, dimensionID), result);
+        Location loc = new Location(pos, dimensionID);
+        VolcanoNode result = new VolcanoNode(loc);
+        this.nodes.put(loc, result);
         this.setSaveDirty(true);
         return result;
     }
@@ -158,7 +159,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
     public void deserializeNBT(NBTTagCompound nbt)
     {
         this.activeNode = null;
-        nodes = new HashMap<UniversalPos, VolcanoNode>();
+        nodes = new HashMap<Location, VolcanoNode>();
         
         if(nbt != null)
         {
@@ -169,7 +170,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
                 {
                     VolcanoNode node = new VolcanoNode(null);
                     node.deserializeNBT(nbtSubNodes.getCompoundTagAt(i));
-                    nodes.put(node.getUniversalPos(), node);
+                    nodes.put(node.getLocation(), node);
                     if(node.isActive) this.activeNode = node;
                 }   
             }
@@ -217,7 +218,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         /** stores total world time of last TE update */
         private volatile long keepAlive;
         
-        private UniversalPos uPos;
+        private Location location;
         
         private boolean isDirty;
         
@@ -228,9 +229,9 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
          */
         private volatile int lastActivationTick;
         
-        public VolcanoNode(UniversalPos uPos)
+        public VolcanoNode(Location location)
         {
-            this.uPos = uPos;
+            this.location = location;
         }
         
         @Override
@@ -282,7 +283,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         {
             if(this.isActive && this.keepAlive + 2048L < Simulator.INSTANCE.getWorld().getTotalWorldTime())
             {
-                Log.warn("Active volcano tile entity at " + this.uPos.pos.toString()
+                Log.warn("Active volcano tile entity at " + this.location.toString()
                 + " has not reported in. Deactivating volcano simulation node.");
                 this.deActivate();
             }
@@ -325,7 +326,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         { 
             synchronized(this)
             {
-                this.uPos = new UniversalPos(pos, dimensionID);
+                this.location = new Location(pos, dimensionID);
                 this.setSaveDirty(true);
             }
         }
@@ -385,11 +386,11 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
             }
         }
         
-        public int getX() { return this.uPos.pos.getX(); }
-        public int getY() { return this.uPos.pos.getY(); }
-        public int getZ() { return this.uPos.pos.getZ(); }
-        public int getDimension() { return this.uPos.dimensionID; }
-        public UniversalPos getUniversalPos() { return this.uPos; }
+        public int getX() { return this.location.getX(); }
+        public int getY() { return this.location.getY(); }
+        public int getZ() { return this.location.getZ(); }
+        public int getDimension() { return this.location.dimensionID(); }
+        public Location getLocation() { return this.location; }
         public int getWeight() { return this.weight; }
         public boolean isActive() { return this.isActive; }
         public int getLastActivationTick() { return this.lastActivationTick; }

@@ -2,7 +2,6 @@ package grondag.hard_science.superblock.placement;
 
 import javax.annotation.Nullable;
 
-import jline.internal.Log;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;

@@ -1,15 +1,7 @@
 package grondag.hard_science.superblock.placement;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import net.minecraft.block.Block;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

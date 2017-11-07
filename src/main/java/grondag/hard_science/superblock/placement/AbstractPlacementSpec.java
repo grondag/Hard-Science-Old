@@ -4,6 +4,8 @@ import java.util.HashSet;
 
 import org.lwjgl.opengl.GL11;
 
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.ClientProxy;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
@@ -14,7 +16,6 @@ import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem.FixedRegionBounds;
 import jline.internal.Log;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -23,6 +24,7 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -35,10 +37,29 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.*;
 
-public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
+public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 {
     protected Location location;
 
+    protected String playerName;
+    
+    /**
+     * Make true if setting all positions to air.
+     */
+    protected boolean isExcavation;
+    
+    /**
+     * Will be adjusted to a value that makes sense if we are excavating.
+     */
+    protected FilterMode filterMode;
+    
+    /**
+     * Used for serialization, factory methods
+     */
+    public abstract PlacementSpecType specType();
+    
+    public abstract ImmutableList<PlacementSpecEntry> entries();
+    
     /**
      * Defines approximate center of the affected blocks and 
      * identifies the dimension in which placement occurs.
@@ -54,19 +75,56 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     {
         this.location = loc;
     }
-
+    
+    public String playerName()
+    {
+        return this.playerName;
+    }
+    
+    public boolean isExcavation()
+    {
+        return this.isExcavation;
+    }
+    
+    public FilterMode filterMode()
+    {
+        return this.filterMode;
+    }
+    
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeLocation(tag);
+        this.playerName = tag.getString(ModNBTTag.PLACEMENT_PLAYER_NAME);
+        this.isExcavation = tag.getBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED);
+        this.filterMode = FilterMode.FILL_REPLACEABLE.deserializeNBT(tag);
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
         this.serializeLocation(tag);
+        tag.setString(ModNBTTag.PLACEMENT_PLAYER_NAME, this.playerName);
+        tag.setBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED, this.isExcavation);
+        this.filterMode.serializeNBT(tag);
     }
 
+    /**
+     * Holds individual blocks to be placed.
+     */
+    public abstract static class PlacementSpecEntry
+    {
+        /** 0-based position within this spec - must never change because used externally to identify */
+        public abstract int index();
+        public abstract BlockPos pos();
+        
+        /** Will be air if is simple excavation */
+        public abstract ItemStack placement();
+        
+        /** Same result as checking placement() stack is air */
+        public abstract boolean isExcavation();
+    }
+    
     protected static abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
     {
         protected final ItemStack placedStack;
@@ -256,12 +314,40 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
          * Excavation-only placements that do not need this will ignore the source stack.
          */
         protected ItemStack sourceStack;
-
+        
+        protected ImmutableList<SingleStackEntry> entries;
+        
+        @Override
+        public ImmutableList<PlacementSpecEntry> entries()
+        {
+            return this.entries();
+        }
+        
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
             super.deserializeNBT(tag);
             this.sourceStack = new ItemStack(tag);
+            ImmutableList.Builder<SingleStackEntry> builder = ImmutableList.builder();
+            if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
+            {
+                int[] entryData = tag.getIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA);
+                if(entryData.length % 3 != 0)
+                {
+                    Log.warn("Detected corrupt data on NBT read of construction specification. Some data may be lost.");
+                }
+                else
+                {
+                    int i = 0;
+                    int entryIndex = 0;
+                    while(i < entryData.length)
+                    {
+                        BlockPos pos = new BlockPos(entryData[i++], entryData[i++], entryData[i++]);
+                        builder.add(new SingleStackEntry(entryIndex++, pos));
+                    }
+                }
+            }
+            this.entries = builder.build();
         }
 
         @Override
@@ -269,11 +355,58 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             super.serializeNBT(tag);
             if(this.sourceStack != null) this.sourceStack.writeToNBT(tag);
+            if(this.entries != null && !this.entries.isEmpty())
+            {
+                int i = 0;
+                int[] entryData = new int[this.entries.size() * 3];
+                for(SingleStackEntry entry : this.entries)
+                {
+                    entryData[i++] = entry.pos.getX();
+                    entryData[i++] = entry.pos.getY();
+                    entryData[i++] = entry.pos.getZ();
+                }
+                tag.setIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA, entryData);
+            }
         }
 
+        protected class SingleStackEntry extends PlacementSpecEntry
+        {
+            protected final int index;
+            protected final BlockPos pos;
+
+            protected SingleStackEntry(int index, BlockPos pos)
+            {
+                this.index = index;
+                this.pos = pos;
+            }
+            
+            @Override
+            public int index()
+            {
+                return this.index;
+            }
+
+            @Override
+            public BlockPos pos()
+            {
+                return this.pos;
+            }
+
+            @Override
+            public ItemStack placement()
+            {
+                return isExcavation ? Items.AIR.getDefaultInstance() : sourceStack;
+            }
+
+            @Override
+            public boolean isExcavation()
+            {
+                return isExcavation;
+            }
+        }
+        
         protected static abstract class SingleStackBuilder extends PlacementSpecBuilder
         {
-
             protected SingleStackBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
             {
                 super(placedStack, player, pPos);
@@ -452,6 +585,12 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         public static IPlacementSpecBuilder builder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
         {
             return new SingleBuilder(placedStack, player, pPos);
+        }
+
+        @Override
+        public PlacementSpecType specType()
+        {
+            return PlacementSpecType.SINGLE;
         }
     }
 
@@ -646,8 +785,13 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             return new CuboidBuilder(placedStack, player, pPos);
         }
-    }
 
+        @Override
+        public PlacementSpecType specType()
+        {
+            return PlacementSpecType.CUBOID;
+        }
+    }
 
     /**
      * Builder's wand type of placement
@@ -702,6 +846,12 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             return new SurfaceBuilder(placedStack, player, pPos);
         }
+
+        @Override
+        public PlacementSpecType specType()
+        {
+            return PlacementSpecType.SURFACE;
+        }
     }
 
     /**
@@ -753,6 +903,12 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             return new PredicateBuilder(placedStack, player, pPos);
         }
+
+        @Override
+        public PlacementSpecType specType()
+        {
+            return PlacementSpecType.PREDICATE;
+        }
     }
 
     /**
@@ -761,6 +917,12 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public static class AdditivePlacementSpec extends SurfacePlacementSpec
     {
+        @Override
+        public PlacementSpecType specType()
+        {
+            return PlacementSpecType.ADDITIVE;
+        }
+        
         protected static class AdditiveBuilder extends SingleStackBuilder
         {
             protected AdditiveBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
@@ -849,6 +1011,11 @@ public class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         public static IPlacementSpecBuilder builder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
         {
             return new CSGBuilder(placedStack, player, pPos);
+        }
+        @Override
+        public PlacementSpecType specType()
+        {
+            return PlacementSpecType.CSG;
         }
     }
 

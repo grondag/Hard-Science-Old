@@ -5,8 +5,6 @@ import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.virtualblock.ExcavationRenderEntry;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;

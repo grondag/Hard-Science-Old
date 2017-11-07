@@ -9,7 +9,6 @@ import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.placement.PlacementHandler;
-import grondag.hard_science.superblock.placement.PlacementEvent;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
 import jline.internal.Log;

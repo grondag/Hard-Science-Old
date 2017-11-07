@@ -7,7 +7,6 @@ import com.mojang.realmsclient.util.Pair;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.PackedBlockPos;
