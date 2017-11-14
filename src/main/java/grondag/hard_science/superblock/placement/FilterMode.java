@@ -76,25 +76,21 @@ public enum FilterMode implements IMessagePlusImmutable<FilterMode>, IReadWriteN
         switch(this)
         {
         case FILL_REPLACEABLE:
-        {
-            return block.isReplaceable(world, pos) && block.canHarvestBlock(world, pos, player);
-        }
+            return block.isReplaceable(world, pos);
         
         case REPLACE_ALL:
-            return block.isAir(blockState, world, pos) || block.canHarvestBlock(world, pos, player);
+            return true;
             
         case REPLACE_ALL_EXCEPT:
             //TODO
-            return block.isAir(blockState, world, pos) || block.canHarvestBlock(world, pos, player);
+            return true;
 
         case REPLACE_ONLY:
             //TODO
             return false;
             
         case REPLACE_SOLID:
-        {
-            return !block.isReplaceable(world, pos) && block.canHarvestBlock(world, pos, player);
-        }
+            return !block.isReplaceable(world, pos);
         
         default:
             return false;

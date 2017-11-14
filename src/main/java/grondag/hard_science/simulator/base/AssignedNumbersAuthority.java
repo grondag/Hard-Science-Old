@@ -6,12 +6,18 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.base.AssignedNumbersAuthority.IdentifiedIndex;
+import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.jobs.AbstractTask;
+import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
+import grondag.hard_science.superblock.placement.BuildManager.Build;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
 {
+    
     public <T extends IIdentified> IdentifiedIndex<T> createIndex(AssignedNumber numberType)
     {
         return new IdentifiedIndex<T>(numberType);
@@ -48,19 +54,61 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     
     private int[] lastID = new int[AssignedNumber.values().length];
     
+    
     private IDirtListener dirtKeeper = IDirtListener.NullDirtListener.INSTANCE;
+    
+    private final IdentifiedIndex<Domain> domainIndex;
+    private final IdentifiedIndex<IStorage<?>> storageIndex;
+    private final IdentifiedIndex<Job> jobIndex;
+    private final IdentifiedIndex<AbstractTask> taskIndex;
+    private final IdentifiedIndex<Build> buildIndex;
     
     public AssignedNumbersAuthority()
     {
         this.clear();
+        this.domainIndex = createIndex(AssignedNumber.DOMAIN);
+        this.storageIndex = createIndex(AssignedNumber.STORAGE);
+        this.jobIndex = createIndex(AssignedNumber.JOB);
+        this.taskIndex = createIndex(AssignedNumber.TASK);
+        this.buildIndex = createIndex(AssignedNumber.BUILD);
     }
     
     public void clear()
     {
         lastID = new int[AssignedNumber.values().length];
         Arrays.fill(lastID, 999);
+        this.domainIndex.clear();
+        this.storageIndex.clear();
+        this.jobIndex.clear();
+        this.taskIndex.clear();
+        this.buildIndex.clear();
     }
     
+    public IdentifiedIndex<Domain> domainIndex()
+    {
+        return this.domainIndex;
+    }
+    
+    public IdentifiedIndex<Job> jobIndex()
+    {
+        return this.jobIndex;
+    }
+    
+    public IdentifiedIndex<AbstractTask> taskIndex()
+    {
+        return this.taskIndex;
+    }
+    
+    public IdentifiedIndex<IStorage<?>> storageIndex()
+    {
+        return this.storageIndex;
+    }
+    
+    public IdentifiedIndex<Build> buildIndex()
+    {
+        return this.buildIndex;
+    }
+
     /** 
      * First ID returned for each type is 1000 to allow room for system IDs.
      * System ID's should start at 1 to distinguish from missing/unset ID.

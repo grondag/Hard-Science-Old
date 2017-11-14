@@ -15,7 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
+
 public class VirtualRenderChunk extends ChunkBlockMap<VirtualRenderEntry>
 {
     public VirtualRenderChunk(BlockPos pos)
@@ -23,6 +23,7 @@ public class VirtualRenderChunk extends ChunkBlockMap<VirtualRenderEntry>
         super(pos);
     }
     
+    @SideOnly(Side.CLIENT)
     public void render(double d0, double d1, double d2)
     {
         if(this.isEmpty()) return;

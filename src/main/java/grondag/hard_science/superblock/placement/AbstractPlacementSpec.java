@@ -114,15 +114,59 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public abstract static class PlacementSpecEntry
     {
+        private int index;
+        private BlockPos pos;
+
+        /**
+         * ID of associated excavation task - set by build planning task.
+         * Will be 0 if no task created.
+         */
+        public int excavationTaskID;
+        
+        /**
+         * ID of associated procurement task - set by build planning task.
+         * Fabrication task (if applies) can be obtained from the procurement task.
+         * Will be 0 if no task created.
+         */
+        public int procurementTaskID;
+        
+        /**
+         * ID of associated placement task - set by build planning task.
+         * Will be 0 if no task created.
+         */
+        public int placementTaskID; 
+        
+        protected PlacementSpecEntry(int index, BlockPos pos)
+        {
+            this.index = index;
+            this.pos = pos;
+        }
+        
+      
         /** 0-based position within this spec - must never change because used externally to identify */
-        public abstract int index();
-        public abstract BlockPos pos();
+        public int index()
+        {
+            return this.index;
+        }
+
+        public BlockPos pos()
+        {
+            return this.pos;
+        }
         
         /** Will be air if is simple excavation */
         public abstract ItemStack placement();
         
         /** Same result as checking placement() stack is air */
         public abstract boolean isExcavation();
+        
+        /** 
+         * Block state that should be placed.
+         */
+        public IBlockState blockState()
+        {
+            return PlacementItem.getPlacementBlockStateFromStack(this.placement());
+        }
     }
     
     protected static abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
@@ -155,22 +199,21 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(isExcavating && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
             this.effectiveFilterMode = filterMode;
         }
-
+        
         /**
-         * Type-specific logic for {@link #validate(boolean)}.
+         * Type-specific logic for {@link #validate()}.
          * Populate obstacles if applicable.
-         * @param isPreview TODO
          * 
-         * @return Same semantics as {@link #validate(boolean)}
+         * @return Same semantics as {@link #validate()}
          */
-        protected abstract boolean doValidate(boolean isPreview);
+        protected abstract boolean doValidate();
 
         @Override
-        public final boolean validate(boolean isPreview)
+        public final boolean validate()
         {
             if(isValid == null)
             {
-                isValid = doValidate(isPreview);
+                isValid = doValidate();
             }
             return isValid;
         }
@@ -225,7 +268,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         @Override
         public final void renderPreview(RenderWorldLastEvent event, EntityPlayerSP player)
         {
-            this.validate(true);
+            this.validate();
 
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferBuilder = tessellator.getBuffer();
@@ -281,15 +324,9 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         @Override
         public final AbstractPlacementSpec build()
         {
-            if(!this.validate(false)) return null;
+            if(!this.validate()) return null;
 
             AbstractPlacementSpec spec = this.buildSpec();
-
-            //TODO: if block is not virtual, should be a single
-            // block placement and need to place directly in world
-            // without creating job, virtual blocks, etc.
-            // perhaps create spec applicator classes to can employ
-            // different methods for placing blocks in world (single blocks, creative mode, survival mode)
 
             return spec;
         }
@@ -332,7 +369,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
             {
                 int[] entryData = tag.getIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA);
-                if(entryData.length % 3 != 0)
+                if(entryData.length % 6 != 0)
                 {
                     Log.warn("Detected corrupt data on NBT read of construction specification. Some data may be lost.");
                 }
@@ -343,7 +380,11 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     while(i < entryData.length)
                     {
                         BlockPos pos = new BlockPos(entryData[i++], entryData[i++], entryData[i++]);
-                        builder.add(new SingleStackEntry(entryIndex++, pos));
+                        SingleStackEntry entry = new SingleStackEntry(entryIndex++, pos);
+                        entry.excavationTaskID = entryData[i++];
+                        entry.procurementTaskID = entryData[i++];
+                        entry.placementTaskID = entryData[i++];
+                        builder.add(entry);
                     }
                 }
             }
@@ -358,12 +399,15 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(this.entries != null && !this.entries.isEmpty())
             {
                 int i = 0;
-                int[] entryData = new int[this.entries.size() * 3];
+                int[] entryData = new int[this.entries.size() * 6];
                 for(SingleStackEntry entry : this.entries)
                 {
-                    entryData[i++] = entry.pos.getX();
-                    entryData[i++] = entry.pos.getY();
-                    entryData[i++] = entry.pos.getZ();
+                    entryData[i++] = entry.pos().getX();
+                    entryData[i++] = entry.pos().getY();
+                    entryData[i++] = entry.pos().getZ();
+                    entryData[i++] = entry.excavationTaskID;
+                    entryData[i++] = entry.procurementTaskID;
+                    entryData[i++] = entry.placementTaskID;
                 }
                 tag.setIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA, entryData);
             }
@@ -371,25 +415,10 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 
         protected class SingleStackEntry extends PlacementSpecEntry
         {
-            protected final int index;
-            protected final BlockPos pos;
-
+        
             protected SingleStackEntry(int index, BlockPos pos)
             {
-                this.index = index;
-                this.pos = pos;
-            }
-            
-            @Override
-            public int index()
-            {
-                return this.index;
-            }
-
-            @Override
-            public BlockPos pos()
-            {
-                return this.pos;
+                super(index, pos);
             }
 
             @Override
@@ -458,19 +487,19 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             /**
              * Clears the exclusion list in the given block region and
              * adds obstacles found within the region to the exclusion list. 
+             * Does not fully validate region - is intended for preview use only.
+             * <p>
+             * Will only check up to 512 block positions and stops after finding 16 obstacles.  
+             * Checks are only  performed if the selection mode is <code>COMPLETE_REGION</code>
+             * because otherwise the placement cannot be prevented by obstructions.
              * 
              * @param region
-             * @param isPreview if true, will only check up to 512 block positions 
-             * and stops after finding 16 obstacles.  Use this option to limit
-             * compute cost when previewing placement. If true, checks are only 
-             * performed if the selection mode is <code>COMPLETE_REGION</code>
-             * because otherwise the placement cannot be prevented by obstructions.
              */
-            protected void excludeObstaclesInRegion(BlockRegion region, boolean isPreview)
+            protected void excludeObstaclesInRegion(BlockRegion region)
             {
                 region.clearExclusions();
 
-                if(isPreview && this.selectionMode != TargetMode.COMPLETE_REGION) return;
+                if(this.selectionMode != TargetMode.COMPLETE_REGION) return;
 
                 HashSet<BlockPos> set = new HashSet<BlockPos>();
 
@@ -485,7 +514,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                         if(world.isOutsideBuildHeight(pos))
                         {
                             set.add(pos.toImmutable());
-                            if(isPreview && foundCount++ == 16) break;
+                            if(foundCount++ == 16) break;
                         }
 
                         IBlockState blockState = world.getBlockState(pos);
@@ -493,9 +522,9 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                                 || !this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack, this.player))
                         {
                             set.add(pos.toImmutable());
-                            if(isPreview && foundCount++ == 16) break;
+                            if(foundCount++ == 16) break;
                         }
-                        if(isPreview && checkCount++ == 512) break;
+                        if(checkCount++ == 512) break;
                     }
                 }
                 else
@@ -505,16 +534,16 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                         if(world.isOutsideBuildHeight(pos))
                         {
                             set.add(pos.toImmutable());
-                            if(isPreview && foundCount++ == 16) break;
+                            if(foundCount++ == 16) break;
                         }
 
                         IBlockState blockState = world.getBlockState(pos);
                         if(!this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack, this.player))
                         {
                             set.add(pos.toImmutable());
-                            if(isPreview && foundCount++ == 16) break;
+                            if(foundCount++ == 16) break;
                         }
-                        if(isPreview && checkCount++ == 512) break;
+                        if(checkCount++ == 512) break;
                     }
                 }
                 region.exclude(set);
@@ -522,7 +551,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 
             /**
              * Returns true if the region has no obstacles or
-             * obstacles do not matter. Must call AFTER {@link #excludeObstaclesInRegion(BlockRegion, boolean)}
+             * obstacles do not matter. Must call AFTER {@link #excludeObstaclesInRegion(BlockRegion)}
              * or result will be meaningless. 
              */
             protected boolean canPlaceRegion(BlockRegion region)
@@ -548,12 +577,20 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             @Override
             protected AbstractPlacementSpec buildSpec()
             {
-                // TODO Auto-generated method stub
-                return null;
+                SinglePlacementSpec result = new SinglePlacementSpec();
+                result.filterMode = this.effectiveFilterMode;
+                result.isExcavation = this.isExcavating;
+                result.location = new Location(this.pPos.inPos, this.player.world);
+                result.playerName = this.player.getName();
+                result.sourceStack = this.placedStack;
+                
+                SingleStackEntry entry = result.new SingleStackEntry(0, this.pPos.inPos);
+                result.entries = ImmutableList.of(entry);
+                return result;
             }
 
             @Override
-            protected boolean doValidate(boolean isPreview)
+            protected boolean doValidate()
             {
                 if(this.player.world.isOutsideBuildHeight(this.pPos.inPos)) return false;
 
@@ -618,12 +655,31 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             @Override
             protected AbstractPlacementSpec buildSpec()
             {
-                // TODO Auto-generated method stub
-                return null;
+                CuboidPlacementSpec result = new CuboidPlacementSpec();
+                result.filterMode = this.effectiveFilterMode;
+                result.isExcavation = this.isExcavating;
+                result.location = new Location(this.region.getCenter(), this.player.world);
+                result.playerName = this.player.getName();
+                result.sourceStack = this.placedStack;
+                result.isHollow = this.isHollow;
+                
+                ImmutableList.Builder<SingleStackEntry> builder = ImmutableList.builder();
+                int i = 0;
+                
+                // note that we are ignoring exclusions from validation here
+                // those will be checked as part of the construction job
+                // this allows large regions to be checked incrementally
+                for(BlockPos pos : this.region.positions())
+                {
+                    builder.add(result.new SingleStackEntry(i++, pos));
+                }
+                
+                result.entries = builder.build();
+                return result;
             }
 
             @Override
-            protected boolean doValidate(boolean isPreview)
+            protected boolean doValidate()
             {
                 if(this.isSelectionInProgress) 
                 {
@@ -639,7 +695,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 {
                     FixedRegionBounds bounds = PlacementItem.getFixedRegion(placedStack);
                     this.region = new BlockRegion(bounds.fromPos, bounds.toPos, this.isHollow);
-                    this.excludeObstaclesInRegion(this.region, isPreview);
+                    this.excludeObstaclesInRegion(this.region);
                     
                     // to place a fixed region, player must be targeting a space within it
                     if(this.region.contains(pPos.inPos))
@@ -658,7 +714,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     BlockPos endPos = PlacementHandler.getPlayerRelativeOffset(this.pPos.inPos, this.offsetPos, this.player, offsetFace, OffsetPosition.FLIP_NONE);
                     BlockRegion region = new BlockRegion(pPos.inPos, endPos, this.isHollow);
                 
-                    this.excludeObstaclesInRegion(region, isPreview);
+                    this.excludeObstaclesInRegion(region);
                     boolean isClear = this.canPlaceRegion(region);
                     
                     // section will not happen for fixed regions
@@ -672,7 +728,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                             // first try pivoting the selection box around the position being targeted
                             BlockPos endPos2 = PlacementHandler.getPlayerRelativeOffset(this.pPos.inPos, this.offsetPos, this.player, offsetFace, offset);
                             BlockRegion region2 = new BlockRegion(pPos.inPos, endPos2, this.isHollow);
-                            this.excludeObstaclesInRegion(region2, isPreview);
+                            this.excludeObstaclesInRegion(region2);
     
                             if(this.canPlaceRegion(region2))
                             {
@@ -693,7 +749,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                                 BlockPos startPos2 = pPos.inPos.offset(face);
                                 BlockPos endPos2 = endPos.offset(face);
                                 BlockRegion region2 = new BlockRegion(startPos2, endPos2, isHollow);
-                                this.excludeObstaclesInRegion(region2, isPreview);
+                                this.excludeObstaclesInRegion(region2);
                                 if(this.canPlaceRegion(region2))
                                 {
                                     endPos = endPos2;
@@ -814,7 +870,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             }
 
             @Override
-            protected boolean doValidate(boolean isPreview)
+            protected boolean doValidate()
             {
                 // excavation doesn't make sense with this mode
                 if(this.isExcavating) return false;
@@ -875,7 +931,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             }
 
             @Override
-            protected boolean doValidate(boolean isPreview)
+            protected boolean doValidate()
             {
                 // can't replace air, water, weeds, etc.
                 return !WorldHelper.isBlockReplaceable(this.player.world, this.pPos.onPos, false);
@@ -938,7 +994,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             }
 
             @Override
-            protected boolean doValidate(boolean isPreview)
+            protected boolean doValidate()
             {
                 // TODO Auto-generated method stub
                 return false;
@@ -986,7 +1042,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             }
 
             @Override
-            protected boolean doValidate(boolean isPreview)
+            protected boolean doValidate()
             {
                 // TODO: Logic will be similar to VolumetricBuilder
                 return false;

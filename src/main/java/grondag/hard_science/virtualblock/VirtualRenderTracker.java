@@ -16,15 +16,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
 public class VirtualRenderTracker extends WorldMap<ChunkMap<VirtualRenderChunk>>
 {
     /**
      * 
      */
     private static final long serialVersionUID = -4740641406707843687L;
-    
-    public static final VirtualRenderTracker INSTANCE = new VirtualRenderTracker();
     
 
     @Override
@@ -39,6 +36,7 @@ public class VirtualRenderTracker extends WorldMap<ChunkMap<VirtualRenderChunk>>
             }});
     }
     
+    @SideOnly(Side.CLIENT)
     public void render(RenderGlobal renderGlobal, double partialTicks)
     {
         Entity entity = Minecraft.getMinecraft().getRenderViewEntity();

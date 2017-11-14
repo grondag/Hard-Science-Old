@@ -12,10 +12,12 @@ public interface IPlacementSpecBuilder
      * Checks for obstacles (if matters according to stack settings)
      * Check for world boundaries.
      * Adjusts selection to avoid obstacles (if configured to do so)
-     * Returns true is selection can be built and will have a non-empty result.
-     * @param isPreview TODO
+     * Returns true is selection can be placed and have a non-empty result.
+     * This is only called during preview and will not check every
+     * block position for large regions. Detailed checked for every position
+     * are performed incrementally by the submitted job.
      */
-    public boolean validate(boolean isPreview);
+    public boolean validate();
 
     /**
         If stack is in selection mode, renders selection region
@@ -24,7 +26,7 @@ public interface IPlacementSpecBuilder
         <p>
         For CSG shapes, this may be a shape other than a cuboid.
         <p>
-        If placement is valid (via {@link #validate(boolean)})
+        If placement is valid (via {@link #validate()})
         buffers quads or lines showing where it will be in world.
         If placement is not valid because of obstacles,
         uses color to indicate obstructed/invalid and 

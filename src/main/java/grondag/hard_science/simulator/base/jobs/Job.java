@@ -10,6 +10,7 @@ import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.base.AssignedNumber;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.IIdentified;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -48,12 +49,15 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
     
     private int id = IIdentified.UNASSIGNED_ID;
     
+    private boolean isHeld;
+    
     protected Job() {};
     
-    public Job(RequestPriority priority, String userName)
+    public Job(RequestPriority priority, EntityPlayer player)
     {
         this.priority = priority;
-        this.userName = userName;
+        this.userName = player.getName();
+        DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
     }
     
     public Job(JobManager manager, NBTTagCompound tag)
@@ -242,6 +246,35 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
         return this.status;
     }
     
+    /**
+     * True if job is held - will not process.
+     */
+    public boolean isHeld()
+    {
+        return this.isHeld;
+    }
+    
+    /**
+     * Allows a held job to run.
+     */
+    public void release()
+    {
+        if(this.isHeld)
+        {
+            this.isHeld = false;
+            this.jobManager.notifyHoldChange(this);
+        }
+    }
+    
+    public void hold()
+    {
+        if(!this.isHeld)
+        {
+            this.isHeld = true;
+            this.jobManager.notifyHoldChange(this);
+        }
+    }
+    
     public void cancel()
     {
         if(this.tasks.isEmpty())
@@ -268,8 +301,9 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
         this.priority = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_PRIORITY, RequestPriority.CRITICAL);
         this.userName = tag.getString(ModNBTTag.REQUEST_USER_NAME);
         this.status = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_STATUS, RequestStatus.NEW);
+        this.isHeld = tag.getBoolean(ModNBTTag.JOB_HELD_FLAG);
         
-        DomainManager.INSTANCE.jobIndex().register(this);
+        DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
         
         NBTTagList nbtTasks = tag.getTagList(ModNBTTag.REQUEST_CHILDREN, 10);
         if( nbtTasks != null && !nbtTasks.hasNoTags())
@@ -283,7 +317,6 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
                     if(t != null)
                     {
                         this.tasks.add(t);
-                        DomainManager.INSTANCE.taskIndex().register(t);
                         if(t.getStatus() == RequestStatus.READY) readyCount++;
                     }
                 }
@@ -305,6 +338,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
         Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_PRIORITY, this.priority);
         tag.setString(ModNBTTag.REQUEST_USER_NAME, this.userName);
         Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_STATUS, this.status);
+        tag.setBoolean(ModNBTTag.JOB_HELD_FLAG, this.isHeld);
         if(!this.tasks.isEmpty())
         {
             NBTTagList nbtTasks = new NBTTagList();

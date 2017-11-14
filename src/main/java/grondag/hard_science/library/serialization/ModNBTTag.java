@@ -19,9 +19,9 @@ public class ModNBTTag
     public final static String DOMAIN_ITEM_STORAGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_MANAGER_DOMAINS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMIAN_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMIAN_SECURITY_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMIAN_USERS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String DOMAIN_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String DOMAIN_SECURITY_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String DOMAIN_USERS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String ITEM_RESOURCE_ITEM = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String ITEM_RESOURCE_META = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String ITEM_RESOURCE_STACK_CAPS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -132,5 +132,19 @@ public class ModNBTTag
     public static final String PLACEMENT_SPEC_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String PLACEMENT_SPEC_INDEX = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String BUILDING_TASK_PLAN_TASK_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String BUILDING_TASK_ENTRY_INDEX = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String JOB_HELD_FLAG = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String BUILD_MANAGER_BUILDS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String BUILD_PLACEMENT_SPECS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String DOMAIN_BUILD_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String BUILD_JOB_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     
 }

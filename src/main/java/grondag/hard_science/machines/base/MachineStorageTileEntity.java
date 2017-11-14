@@ -70,7 +70,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         
         if(this.storageID >= 0)
         {
-            IStorage<?> s = (this.storageID == 0) ? null : DomainManager.INSTANCE.storageIndex().get(this.storageID);
+            IStorage<?> s = (this.storageID == 0) ? null : DomainManager.INSTANCE.assignedNumbersAuthority().storageIndex().get(this.storageID);
             
             if(s == null)
             {

@@ -5,6 +5,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -12,6 +14,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
+import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.NullDirtListener;
@@ -21,7 +24,19 @@ import net.minecraft.nbt.NBTTagList;
 
 public class JobManager implements IReadWriteNBT //, IDomainMember
 {
-    protected static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    protected static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
+        new ThreadFactory()
+        {
+            private AtomicInteger count = new AtomicInteger(1);
+            @Override
+            public Thread newThread(Runnable r)
+            {
+                Thread thread = new Thread(r, "Hard Science Job Manager Thread -" + count.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
+    
     
 //    protected Domain domain;
     
@@ -186,6 +201,13 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
             {
                 removeJobFromBacklogSynchronously(job);
                 jobs.removeIfPresent(job);
+                
+                // clean up id registry
+                for(AbstractTask task : job)
+                {
+                    DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().unregister(task);
+                }
+                DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().unregister(job);
             }
         });
     }
@@ -195,7 +217,7 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
      */
     public void notifyPriorityChange(Job job)
     {
-        if(job.hasReadyWork()) EXECUTOR.execute(new Runnable()
+        if(!job.isHeld() && job.hasReadyWork()) EXECUTOR.execute(new Runnable()
         {
             @Override
             public void run()
@@ -205,6 +227,35 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
         });
     }
     
+    /**
+     * Called by job when it is held or released.
+     */
+    public void notifyHoldChange(Job job)
+    {
+        if(job.isHeld())
+        {
+            EXECUTOR.execute(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    removeJobFromBacklogSynchronously(job);
+                }
+            });
+        }
+        else if(job.hasReadyWork())
+        {
+            EXECUTOR.execute(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    addOrReplaceJobInBacklogSynchronously(job);
+                }
+            });
+        }
+        
+    }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)
@@ -254,4 +305,5 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
     {
         this.dirtListener.setDirty();
     }
+  
 }

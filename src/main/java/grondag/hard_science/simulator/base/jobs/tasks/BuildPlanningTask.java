@@ -8,9 +8,12 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.TaskType;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PlacementSpecEntry;
 import grondag.hard_science.superblock.placement.PlacementSpecType;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
@@ -29,19 +32,19 @@ public class BuildPlanningTask  extends AbstractTask
     private AbstractPlacementSpec spec;
     
     /** ID of next spec entry we need to plan.  */
-    private int specIndex = 0;
+    private int indexOfNextSpecToPlan = 0;
     
     /** use this constructor to create new jobs */
     public BuildPlanningTask(AbstractPlacementSpec spec)
     {
-        super();
+        super(true);
         this.spec = spec;
     }
     
     /** This constructor meant for deserialization only. */
     public BuildPlanningTask()
     {
-        super();
+        super(false);
     }
     
     @Override
@@ -59,7 +62,7 @@ public class BuildPlanningTask  extends AbstractTask
     public void deserializeNBT(NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
-        this.specIndex = tag.getInteger(ModNBTTag.PLACEMENT_SPEC_INDEX);
+        this.indexOfNextSpecToPlan = tag.getInteger(ModNBTTag.PLACEMENT_SPEC_INDEX);
         NBTTagCompound subTag = tag.getCompoundTag(ModNBTTag.PLACEMENT_ENTRY_DATA);
         this.spec = PlacementSpecType.deserializeSpec(subTag);
     }
@@ -68,7 +71,7 @@ public class BuildPlanningTask  extends AbstractTask
     public void serializeNBT(NBTTagCompound tag)
     {
         super.serializeNBT(tag);
-        tag.setInteger(ModNBTTag.PLACEMENT_SPEC_INDEX, this.specIndex);
+        tag.setInteger(ModNBTTag.PLACEMENT_SPEC_INDEX, this.indexOfNextSpecToPlan);
         tag.setTag(ModNBTTag.PLACEMENT_ENTRY_DATA, PlacementSpecType.serializeSpec(this.spec));
     }
 
@@ -100,13 +103,13 @@ public class BuildPlanningTask  extends AbstractTask
         
         World world = this.spec.getLocation().world();
         
-        int maxIndex = Math.min(this.specIndex + howManyOperations, entries.size());
-        while(this.specIndex < maxIndex)
+        int maxIndex = Math.min(this.indexOfNextSpecToPlan + howManyOperations, entries.size());
+        while(this.indexOfNextSpecToPlan < maxIndex)
         {
-            this.planEntry(entries.get(this.specIndex++));
+            this.planEntry(world, entries.get(this.indexOfNextSpecToPlan++));
         }
         
-        if(this.specIndex >= entries.size())
+        if(this.indexOfNextSpecToPlan >= entries.size())
         {
             this.complete();
             return true;
@@ -117,9 +120,43 @@ public class BuildPlanningTask  extends AbstractTask
         }
     }
 
-    private void planEntry(PlacementSpecEntry entry)
+    private void planEntry(World world, PlacementSpecEntry entry)
     {
+        IBlockState curBlockState = world.getBlockState(entry.pos());
         
+        boolean isPlacement = !entry.isExcavation();
+        
+        //check for excavation
+        boolean needsExcavate = curBlockState != Blocks.AIR.getDefaultState();
+        
+        // schedule excavation if necessary
+        ExcavationTask exTask = null;
+        if(needsExcavate)
+        {
+            exTask = new ExcavationTask(this, entry);
+            link(this, exTask);
+            entry.excavationTaskID = exTask.getId();
+            this.job.addTask(exTask);
+        }
+        
+        if(isPlacement)
+        {
+            // schedule procurement/fabrication
+            BlockProcurementTask procTask = new BlockProcurementTask(this, entry);
+            link(this, procTask);
+            entry.procurementTaskID = procTask.getId();
+            this.job.addTask(procTask);
+            
+            // schedule placement
+            PlacementTask placeTask = new PlacementTask(this, entry);
+            if(exTask != null) link(exTask, placeTask);
+            link(procTask, placeTask);
+            entry.placementTaskID = placeTask.getId();
+            this.job.addTask(placeTask);
+            
+            // place virtual blocks...  tag them with this plan/entry so they can update if modified
+            if(!needsExcavate) placeTask.placeVirtualBlock(world);
+        }
     }
     
 }

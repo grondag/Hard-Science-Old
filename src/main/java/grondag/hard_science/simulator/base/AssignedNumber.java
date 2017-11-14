@@ -8,5 +8,6 @@ public enum AssignedNumber
     NETWORK,
     ENDPOINT,
     JOB,
-    TASK;
+    TASK, 
+    BUILD;
 }

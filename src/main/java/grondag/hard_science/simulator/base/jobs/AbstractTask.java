@@ -38,6 +38,14 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
     private static int spamCount = 0;
     
     /**
+     * @param isNew set false on deserialization.
+     */
+    protected AbstractTask(boolean isNew)
+    {
+        if(isNew) this.onLoaded();
+    }
+    
+    /**
      * Called by job when task is added.
      * All dependencies should be added before calling.
      * Should not be called otherwise nor called more than once.
@@ -167,6 +175,16 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
      */
     public boolean requiresCleanupOnCancel() { return false; }
 
+    /**
+     * Called after instance is first created or after deserialized.
+     * Deserialization call is made by external helper class
+     * so that it happens after any subclass deserialization.
+     */
+    protected synchronized void onLoaded()
+    {
+        DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().register(this);
+    }
+    
     protected synchronized void onTerminated()
     {
         SimpleUnorderedArrayList<AbstractTask> consequents = this.consequents();
@@ -254,12 +272,12 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
                 
                 if(ant == this.id)
                 {
-                    AbstractTask conReq = DomainManager.INSTANCE.taskIndex().get(con);
+                    AbstractTask conReq = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(con);
                     if(conReq != null) consequents.add(conReq);
                 }
                 else if(con == this.id)
                 {
-                    AbstractTask antReq = DomainManager.INSTANCE.taskIndex().get(ant);
+                    AbstractTask antReq = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(ant);
                     if(antReq != null) antecedents.add(antReq);
                 }
                 

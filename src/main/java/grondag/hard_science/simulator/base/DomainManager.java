@@ -17,6 +17,8 @@ import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.JobManager;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
+import grondag.hard_science.superblock.placement.BuildManager;
+import grondag.hard_science.superblock.placement.BuildManager.Build;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -31,12 +33,6 @@ public class DomainManager implements IPersistenceNode
     
     private final AssignedNumbersAuthority assignedNumbersAuthority;
 
-    private final IdentifiedIndex<Domain> domains;
-    
-    private final IdentifiedIndex<IStorage<?>> storageIndex;
-    private final IdentifiedIndex<Job> jobIndex;
-    private final IdentifiedIndex<AbstractTask> taskIndex;
-
     private Domain defaultDomain;
     
     /**
@@ -46,10 +42,6 @@ public class DomainManager implements IPersistenceNode
     {
         this.assignedNumbersAuthority = new AssignedNumbersAuthority();
         this.assignedNumbersAuthority.setDirtKeeper(this);
-        this.domains = assignedNumbersAuthority().createIndex(AssignedNumber.DOMAIN);
-        this.storageIndex = assignedNumbersAuthority().createIndex(AssignedNumber.STORAGE);
-        this.jobIndex = assignedNumbersAuthority().createIndex(AssignedNumber.JOB);
-        this.taskIndex = assignedNumbersAuthority().createIndex(AssignedNumber.TASK);
     }
    
     
@@ -58,10 +50,6 @@ public class DomainManager implements IPersistenceNode
      */
     public void unload()
     {
-        this.domains.clear();
-        this.storageIndex.clear();
-        this.jobIndex.clear();
-        this.taskIndex.clear();
         this.assignedNumbersAuthority.clear();
         this.isLoaded = false;
     }
@@ -83,14 +71,14 @@ public class DomainManager implements IPersistenceNode
         this.checkLoaded();
         if(this.defaultDomain == null)
         {
-            defaultDomain = domains.get(1);
+            defaultDomain = this.assignedNumbersAuthority().domainIndex().get(1);
             if(defaultDomain == null)
             {
                 this.defaultDomain = new Domain();
                 this.defaultDomain.setSecurityEnabled(false);
                 this.defaultDomain.setId(IIdentified.DEFAULT_ID);
                 this.defaultDomain.setName("Public");;
-                this.domains.register(defaultDomain);
+                this.assignedNumbersAuthority().domainIndex().register(defaultDomain);
             }
         }
         return this.defaultDomain;
@@ -116,20 +104,20 @@ public class DomainManager implements IPersistenceNode
     public List<Domain> getAllDomains()
     {
         this.checkLoaded();
-        return ImmutableList.copyOf(domains.valueCollection());
+        return ImmutableList.copyOf(this.assignedNumbersAuthority().domainIndex().valueCollection());
     }
 
     public Domain getDomain(int id)
     {
         this.checkLoaded();
-        return this.domains.get(id);
+        return this.assignedNumbersAuthority().domainIndex().get(id);
     }
     
     public synchronized Domain createDomain()
     {
         this.checkLoaded();
         Domain result = new Domain();
-        domains.register(result);
+        this.assignedNumbersAuthority().domainIndex().register(result);
         result.name = "Domain " + result.id;
         this.isDirty = true;
         return result;
@@ -141,7 +129,7 @@ public class DomainManager implements IPersistenceNode
     public synchronized void removeDomain(Domain domain)
     {
         this.checkLoaded();
-        domains.unregister(domain);
+        this.assignedNumbersAuthority().domainIndex().unregister(domain);
         this.isDirty = true;
     }
     
@@ -153,6 +141,7 @@ public class DomainManager implements IPersistenceNode
         
         public final ItemStorageManager ITEM_STORAGE = new ItemStorageManager();
         public final JobManager JOB_MANAGER = new JobManager();
+        public final BuildManager BUILD_MANAGER = new BuildManager();
         
         private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
         
@@ -161,6 +150,7 @@ public class DomainManager implements IPersistenceNode
         {
             ITEM_STORAGE.setDomain(this);
             JOB_MANAGER.setDomain(this);
+            BUILD_MANAGER.setDomain(this);
         }
         
         private Domain (NBTTagCompound tag)
@@ -259,8 +249,8 @@ public class DomainManager implements IPersistenceNode
         public void serializeNBT(NBTTagCompound tag)
         {
             this.serializeID(tag);
-            tag.setBoolean(ModNBTTag.DOMIAN_SECURITY_ENABLED, this.isSecurityEnabled);
-            tag.setString(ModNBTTag.DOMIAN_NAME, this.name);
+            tag.setBoolean(ModNBTTag.DOMAIN_SECURITY_ENABLED, this.isSecurityEnabled);
+            tag.setString(ModNBTTag.DOMAIN_NAME, this.name);
             
             NBTTagList nbtUsers = new NBTTagList();
             
@@ -271,20 +261,21 @@ public class DomainManager implements IPersistenceNode
                     nbtUsers.appendTag(user.serializeNBT());
                 }
             }
-            tag.setTag(ModNBTTag.DOMIAN_USERS, nbtUsers);
+            tag.setTag(ModNBTTag.DOMAIN_USERS, nbtUsers);
             
             tag.setTag(ModNBTTag.DOMAIN_ITEM_STORAGE, this.ITEM_STORAGE.serializeNBT());
             tag.setTag(ModNBTTag.DOMAIN_JOB_MANAGER, this.JOB_MANAGER.serializeNBT());
+            tag.setTag(ModNBTTag.DOMAIN_BUILD_MANAGER, this.BUILD_MANAGER.serializeNBT());
         }
 
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
             this.deserializeID(tag);
-            this.isSecurityEnabled = tag.getBoolean(ModNBTTag.DOMIAN_SECURITY_ENABLED);
-            this.name = tag.getString(ModNBTTag.DOMIAN_NAME);
+            this.isSecurityEnabled = tag.getBoolean(ModNBTTag.DOMAIN_SECURITY_ENABLED);
+            this.name = tag.getString(ModNBTTag.DOMAIN_NAME);
             
-            NBTTagList nbtUsers = tag.getTagList(ModNBTTag.DOMIAN_USERS, 10);
+            NBTTagList nbtUsers = tag.getTagList(ModNBTTag.DOMAIN_USERS, 10);
             if( nbtUsers != null && !nbtUsers.hasNoTags())
             {
                 for (int i = 0; i < nbtUsers.tagCount(); ++i)
@@ -296,6 +287,7 @@ public class DomainManager implements IPersistenceNode
             
             this.ITEM_STORAGE.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_ITEM_STORAGE));
             this.JOB_MANAGER.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
+            this.BUILD_MANAGER.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_BUILD_MANAGER));
         }
         
         public DomainManager domainManager()
@@ -395,7 +387,7 @@ public class DomainManager implements IPersistenceNode
                 for (int i = 0; i < nbtDomains.tagCount(); ++i)
                 {
                     Domain domain = new Domain(nbtDomains.getCompoundTagAt(i));
-                    this.domains.put(domain.id, domain);
+                    this.assignedNumbersAuthority().domainIndex().put(domain.id, domain);
                 }   
             }
         }
@@ -409,9 +401,9 @@ public class DomainManager implements IPersistenceNode
         
         NBTTagList nbtDomains = new NBTTagList();
         
-        if(!this.domains.isEmpty())
+        if(!this.assignedNumbersAuthority().domainIndex().isEmpty())
         {
-            for (Domain domain : this.domains.valueCollection())
+            for (Domain domain : this.assignedNumbersAuthority().domainIndex().valueCollection())
             {
                 nbtDomains.appendTag(domain.serializeNBT());
             }
@@ -426,23 +418,6 @@ public class DomainManager implements IPersistenceNode
     }
 
     public AssignedNumbersAuthority assignedNumbersAuthority() { return this.assignedNumbersAuthority; }
-    
-    public IdentifiedIndex<Job> jobIndex()
-    {
-        this.checkLoaded();
-        return jobIndex;
-    }
-    public IdentifiedIndex<AbstractTask> taskIndex()
-    {
-        this.checkLoaded();
-        return taskIndex;
-    }
-    
-    public IdentifiedIndex<IStorage<?>> storageIndex()
-    {
-        this.checkLoaded();
-        return storageIndex;
-    }
     
     private boolean checkLoaded()
     {
