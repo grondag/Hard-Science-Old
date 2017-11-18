@@ -1,7 +1,7 @@
 package grondag.hard_science.library.world;
 
 import java.util.Iterator;
-import java.util.function.Function;
+
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterators;
 
@@ -14,15 +14,12 @@ import net.minecraft.util.math.Vec3i;
  * Maintains a set of block positions for each world chunk.
  * Per-chunk data is sparse.
  */
-public class ChunkMap<T> implements Iterable<T>
+public abstract class ChunkMap<T> implements Iterable<T>
 {
     private final Long2ObjectOpenHashMap<T> chunks = new Long2ObjectOpenHashMap<T>();
-    private final Function<BlockPos, T> entryFactory;
+//    private final BiFunction<? extends ChunkMap<T>, BlockPos, T> entryFactory;
     
-    public ChunkMap(Function<BlockPos, T> entryFactory)
-    {
-        this.entryFactory = entryFactory;
-    }
+    protected abstract T newEntry(BlockPos pos);
     
     public boolean contains(BlockPos pos)
     {
@@ -38,7 +35,7 @@ public class ChunkMap<T> implements Iterable<T>
         
         if(result == null)
         {
-            result = this.entryFactory.apply(pos);
+            result = this.newEntry(pos);
             chunks.put(packedChunkPos, result);
         }
         return result;

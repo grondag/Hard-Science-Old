@@ -1,7 +1,5 @@
 package grondag.hard_science.library.world;
 
-import java.util.function.Function;
-
 import net.minecraft.util.math.BlockPos;
 
 public class WorldChunkBlockMap<T> extends WorldMap<ChunkMap<ChunkBlockMap<T>>>
@@ -15,12 +13,12 @@ public class WorldChunkBlockMap<T> extends WorldMap<ChunkMap<ChunkBlockMap<T>>>
     @Override
     protected ChunkMap<ChunkBlockMap<T>> load(int dimension)
     {
-        return new ChunkMap<ChunkBlockMap<T>>(new Function<BlockPos, ChunkBlockMap<T>>(){
+        return new ChunkMap<ChunkBlockMap<T>>() {
 
             @Override
-            public ChunkBlockMap<T> apply(BlockPos t)
+            protected ChunkBlockMap<T> newEntry(BlockPos pos)
             {
-                return new ChunkBlockMap<T>(t);
-            }});
+                return new ChunkBlockMap<T>(pos);
+            }};
     }
 }

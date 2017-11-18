@@ -6,13 +6,12 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.base.AssignedNumbersAuthority.IdentifiedIndex;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
-import grondag.hard_science.superblock.placement.BuildManager.Build;
+import grondag.hard_science.superblock.placement.Build;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier

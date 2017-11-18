@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.base.jobs.tasks;
 
-import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.BuildingTask;
 import grondag.hard_science.simulator.base.jobs.TaskType;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PlacementSpecEntry;

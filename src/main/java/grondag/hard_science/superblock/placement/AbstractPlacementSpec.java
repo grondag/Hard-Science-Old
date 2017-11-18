@@ -167,6 +167,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             return PlacementItem.getPlacementBlockStateFromStack(this.placement());
         }
+
+
+        public void applyToWorld(ItemStack result)
+        {
+            // TODO Auto-generated method stub
+            
+        }
     }
     
     protected static abstract class PlacementSpecBuilder implements IPlacementSpecBuilder

@@ -146,5 +146,7 @@ public class ModNBTTag
     public static final String DOMAIN_BUILD_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String BUILD_JOB_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String BUILD_DIMENSION_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     
 }

@@ -1,7 +1,5 @@
 package grondag.hard_science.virtualblock;
 
-import java.util.function.Function;
-
 import grondag.hard_science.library.world.ChunkMap;
 import grondag.hard_science.library.world.WorldMap;
 import net.minecraft.client.Minecraft;
@@ -27,13 +25,13 @@ public class VirtualRenderTracker extends WorldMap<ChunkMap<VirtualRenderChunk>>
     @Override
     protected ChunkMap<VirtualRenderChunk> load(int dimension)
     {
-        return new ChunkMap<VirtualRenderChunk>(new Function<BlockPos, VirtualRenderChunk>(){
+        return new ChunkMap<VirtualRenderChunk>() {
 
             @Override
-            public VirtualRenderChunk apply(BlockPos t)
+            protected VirtualRenderChunk newEntry(BlockPos pos)
             {
-                return new VirtualRenderChunk(t);
-            }});
+                return new VirtualRenderChunk(pos);
+            }};
     }
     
     @SideOnly(Side.CLIENT)

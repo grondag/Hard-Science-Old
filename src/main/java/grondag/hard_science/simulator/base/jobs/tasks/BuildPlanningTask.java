@@ -2,13 +2,11 @@ package grondag.hard_science.simulator.base.jobs.tasks;
 
 import com.google.common.collect.ImmutableList;
 
-import gnu.trove.impl.hash.TIntByteHash;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.TaskType;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PlacementSpecEntry;
 import grondag.hard_science.superblock.placement.PlacementSpecType;
