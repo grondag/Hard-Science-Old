@@ -24,7 +24,6 @@ import net.minecraft.client.gui.GuiOptions;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
@@ -57,11 +56,12 @@ public class ClientEventHandler
     public static void renderWorldLastEvent(RenderWorldLastEvent event)
     {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
-        ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
-        if (heldItem !=null && !heldItem.isEmpty() && (heldItem.getItem() instanceof PlacementItem)) 
+        ItemStack stack = PlacementItem.getHeldPlacementItem(player);
+        
+        if(stack != null)
         {
-            PlacementItem placer = (PlacementItem) heldItem.getItem();
-            PlacementResult result = PlacementHandler.predictPlacementResults(player, heldItem, placer);
+            PlacementItem placer = (PlacementItem) stack.getItem();
+            PlacementResult result = PlacementHandler.predictPlacementResults(player, stack, placer);
             if(result.builder() != null) result.builder().renderPreview(event, player);
         }
         
@@ -176,32 +176,34 @@ public class ClientEventHandler
         
         ItemStack stack = PlacementItem.getHeldPlacementItem(Minecraft.getMinecraft().player);
         
-        if(stack != null && ((PlacementItem)stack.getItem()).getSuperBlock().isVirtual())
+        if(stack != null)
         {
+            PlacementItem item = (PlacementItem)stack.getItem();
+            
             if(ModKeys.PLACEMENT_CYCLE_SELECTION_TARGET.isPressed())
             {
-                PlacementItem.cycleSelectionTargetRange(stack, false);
+                item.cycleSelectionTargetRange(stack, false);
                 ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
                 
-                String message = PlacementItem.isFloatingSelectionEnabled(stack)
-                        ? I18n.translateToLocalFormatted("placement.message.range_floating",  PlacementItem.getFloatingSelectionRange(stack))
+                String message = item.isFloatingSelectionEnabled(stack)
+                        ? I18n.translateToLocalFormatted("placement.message.range_floating",  item.getFloatingSelectionRange(stack))
                         : I18n.translateToLocal("placement.message.range_normal");
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
             
             else if(ModKeys.PLACEMENT_CYCLE_REGION_ORIENTATION.isPressed())
             {
-                PlacementItem.cycleRegionOrientation(stack, false);
+                item.cycleRegionOrientation(stack, false);
                 ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.orientation_region",  PlacementItem.getRegionOrientation(stack).localizedName());
+                String message = I18n.translateToLocalFormatted("placement.message.orientation_region",  item.getRegionOrientation(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
                 
             else if(ModKeys.PLACEMENT_CYCLE_BLOCK_ORIENTATION.isPressed())
             {
-                PlacementItem.cycleBlockOrientation(stack, false);
+                item.cycleBlockOrientation(stack, false);
                 ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.orientation_block",  PlacementItem.blockOrientationLocalizedName(stack));
+                String message = I18n.translateToLocalFormatted("placement.message.orientation_block",  item.blockOrientationLocalizedName(stack));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
             else if (ModKeys.PLACEMENT_HISTORY_FORWARD.isPressed())
@@ -212,36 +214,36 @@ public class ClientEventHandler
             {
                 // TODO
             }
-            else if(ModKeys.PLACEMENT_TOGGLE_EXCAVATION.isPressed())
-            {
-                PlacementItem.toggleDeleteMode(stack);
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message  = I18n.translateToLocal(PlacementItem.isDeleteModeEnabled(stack) ? "placement.message.delete_on" : "placement.message.delete_off");
-                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
-            }
+//            else if(ModKeys.PLACEMENT_TOGGLE_EXCAVATION.isPressed())
+//            {
+//                item.toggleDeleteMode(stack);
+//                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+//                String message  = I18n.translateToLocal(item.isDeleteModeEnabled(stack) ? "placement.message.delete_on" : "placement.message.delete_off");
+//                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+//            }
             else if(ModKeys.PLACEMENT_DISPLAY_GUI.isPressed())
             {
-                ((PlacementItem)stack.getItem()).displayGui(Minecraft.getMinecraft().player);
+                item.displayGui(Minecraft.getMinecraft().player);
             }
             else if (ModKeys.PLACEMENT_CYCLE_FILTER_MODE.isPressed())
             {
-                PlacementItem.cycleFilterMode(stack, false);
+                item.cycleFilterMode(stack, false);
                 ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.filter_mode",  PlacementItem.getFilterMode(stack).localizedName());
+                String message = I18n.translateToLocalFormatted("placement.message.filter_mode",  item.getFilterMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
             else if(ModKeys.PLACEMENT_CYCLE_SPECIES_HANDLING.isPressed())
             {
-                PlacementItem.cycleSpeciesMode(stack, false);
+                item.cycleSpeciesMode(stack, false);
                 ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.species_mode",  PlacementItem.getSpeciesMode(stack).localizedName());
+                String message = I18n.translateToLocalFormatted("placement.message.species_mode",  item.getSpeciesMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
             else if(ModKeys.PLACEMENT_CYCLE_TARGET_MODE.isPressed())
             {
-                PlacementItem.cycleTargetMode(stack, false);
+                item.cycleTargetMode(stack, false);
                 ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message = I18n.translateToLocalFormatted("placement.message.target_mode",  PlacementItem.getTargetMode(stack).localizedName());
+                String message = I18n.translateToLocalFormatted("placement.message.target_mode",  item.getTargetMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 
             }
@@ -255,9 +257,9 @@ public class ClientEventHandler
             }
             else if(ModKeys.PLACEMENT_TOGGLE_FIXED_REGION.isPressed())
             {
-                PlacementItem.toggleFixedRegionEnabled(stack);
+                item.toggleFixedRegionEnabled(stack);
                 ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message  = I18n.translateToLocal(PlacementItem.isFixedRegionEnabled(stack) ? "placement.message.fixed_region_on" : "placement.message.fixed_region_off");
+                String message  = I18n.translateToLocal(item.isFixedRegionEnabled(stack) ? "placement.message.fixed_region_on" : "placement.message.fixed_region_off");
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
         }

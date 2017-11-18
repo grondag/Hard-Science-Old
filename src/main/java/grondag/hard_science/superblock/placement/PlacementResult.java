@@ -134,19 +134,23 @@ public class PlacementResult
 
     public void apply(ItemStack stackIn, EntityPlayer player)
     {
+        if(!PlacementItem.isPlacementItem(stackIn)) return;
+        
+        PlacementItem item = (PlacementItem)stackIn.getItem();
+        
         switch(this.event)
         {
             
         case START_PLACEMENT_REGION:
-            PlacementItem.fixedRegionStart(stackIn, blockPos, false);
+            item.fixedRegionStart(stackIn, blockPos, false);
             break;
             
         case CANCEL_PLACEMENT_REGION:
-            PlacementItem.fixedRegionCancel(stackIn);
+            item.fixedRegionCancel(stackIn);
             break;
             
         case SET_PLACEMENT_REGION:
-            PlacementItem.fixedRegionFinish(stackIn, player, blockPos, false);
+            item.fixedRegionFinish(stackIn, player, blockPos, false);
             break;
     
         case PLACE:

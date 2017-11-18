@@ -169,6 +169,7 @@ item.terrain_wand.name=Terrain Wand
 item.volcano_wand.name=Volcano Wand
 item.basalt_rubble.name=Basalt Rubble
 item.lava_blob.name=Lava Ball
+item.excavation_marker.name=Excavation Marker
 
 #MATTER
 matter.tio2=Titanium Dioxide

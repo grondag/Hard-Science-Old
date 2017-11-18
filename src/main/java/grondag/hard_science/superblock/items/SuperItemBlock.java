@@ -97,9 +97,9 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         
         ItemStack stackIn = player.getHeldItem(hand);
         
-        if (stackIn.isEmpty()) return new ActionResult<>(EnumActionResult.PASS, stackIn);
+        if (stackIn.isEmpty() || stackIn.getItem() != this) return new ActionResult<>(EnumActionResult.PASS, stackIn);
         
-        PlacementResult result = PlacementHandler.doRightClickBlock(player, null, null, null, stackIn);
+        PlacementResult result = PlacementHandler.doRightClickBlock(player, null, null, null, stackIn, (SuperItemBlock)stackIn.getItem());
         
         if(!result.shouldInputEventsContinue()) 
         {
@@ -132,9 +132,9 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         if(playerIn == null) return EnumActionResult.FAIL;
         
         ItemStack stackIn = playerIn.getHeldItem(hand);
-        if (stackIn.isEmpty()) return EnumActionResult.FAIL;
+        if (stackIn.isEmpty() || stackIn.getItem() != this) return EnumActionResult.FAIL;
         
-        PlacementResult result = PlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn);
+        PlacementResult result = PlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn, (SuperItemBlock)stackIn.getItem());
         
         result.apply(stackIn, playerIn);
         
@@ -203,7 +203,10 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 
             if(worldIn.checkNoEntityCollision(axisalignedbb.offset(placedPos)))
             {
-                IBlockState placedState = PlacementItem.getPlacementBlockStateFromStack(placedStack);
+                PlacementItem item = PlacementItem.getPlacementItem(placedStack);
+                if(item == null) continue;
+                
+                IBlockState placedState = item.getPlacementBlockStateFromStack(placedStack);
                         //targetBlock.getStateFromMeta(placedStack.getMetadata());
                 if (placeBlockAt(placedStack, playerIn, worldIn, placedPos, null, 0, 0, 0, placedState))
                 {

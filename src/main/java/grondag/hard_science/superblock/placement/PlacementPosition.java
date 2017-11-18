@@ -34,11 +34,12 @@ public class PlacementPosition
     
     public PlacementPosition(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, ItemStack stack)
     {
-        
-        this.isFloating = PlacementItem.isFloatingSelectionEnabled(stack);
-        if(this.isFloating || onPos == null || onFace == null || hitVec == null)
+        PlacementItem item = PlacementItem.getPlacementItem(stack);
+            
+        this.isFloating = item != null && item.isFloatingSelectionEnabled(stack);
+        if(item != null && (this.isFloating || onPos == null || onFace == null || hitVec == null))
         {
-            int range = PlacementItem.getFloatingSelectionRange(stack);
+            int range = item.getFloatingSelectionRange(stack);
             
             Vec3d start = player.getPositionEyes(1);
             Vec3d end = start.add(player.getLookVec().scale(range));

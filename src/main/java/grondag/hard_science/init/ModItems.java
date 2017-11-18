@@ -10,6 +10,7 @@ import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.materials.Matter;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
+import grondag.hard_science.superblock.items.ExcavationMarker;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.terrain.TerrainWand;
 import net.minecraft.block.Block;
@@ -39,6 +40,7 @@ public class ModItems
             
     // tools
 //    public static final Item obj_test_model = null;
+    public static final Item excavation_marker = null;
       
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) 
@@ -57,6 +59,7 @@ public class ModItems
         }
         
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ExcavationMarker().setCreativeTab(HardScience.tabMod));
         
         for(Matter matter : Matter.values())
         {

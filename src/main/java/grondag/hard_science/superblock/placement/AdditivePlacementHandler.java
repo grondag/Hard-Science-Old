@@ -44,7 +44,9 @@ public class AdditivePlacementHandler extends PlacementHandler
 
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
         
-        if(PlacementItem.isBlockOrientationFixed(stack)) 
+        PlacementItem item = (PlacementItem)stack.getItem();
+        
+        if(item.isBlockOrientationFixed(stack)) 
             return CubicPlacementHandler.INSTANCE.getPlacementResults(playerIn, worldIn, posOn, hand, facing, hitX, hitY, hitZ, stack);
 
         final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).getBlock();

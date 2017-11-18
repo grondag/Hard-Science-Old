@@ -14,7 +14,6 @@ import grondag.hard_science.library.world.Location;
 import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.PlacementItem.FixedRegionBounds;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -157,6 +156,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         /** Will be air if is simple excavation */
         public abstract ItemStack placement();
         
+        public abstract PlacementItem placementItem();
+        
         /** Same result as checking placement() stack is air */
         public abstract boolean isExcavation();
         
@@ -165,7 +166,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
          */
         public IBlockState blockState()
         {
-            return PlacementItem.getPlacementBlockStateFromStack(this.placement());
+            return placementItem().getPlacementBlockStateFromStack(this.placement());
         }
 
 
@@ -179,6 +180,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     protected static abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
     {
         protected final ItemStack placedStack;
+        protected final PlacementItem placementItem;
         protected final EntityPlayer player;
         protected final PlacementPosition pPos;
         protected Boolean isValid = null;
@@ -196,11 +198,12 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             this.placedStack = placedStack;
             this.player = player;
             this.pPos = pPos;
-            this.isSelectionInProgress = PlacementItem.isFixedRegionSelectionInProgress(placedStack);
-            this.selectionMode = PlacementItem.getTargetMode(placedStack);
-            this.isExcavating = PlacementItem.isDeleteModeEnabled(placedStack);
+            this.placementItem = (PlacementItem)placedStack.getItem();
+            this.isSelectionInProgress = this.placementItem.isFixedRegionSelectionInProgress(placedStack);
+            this.selectionMode = this.placementItem.getTargetMode(placedStack);
+            this.isExcavating = false; //this.placementItem.isDeleteModeEnabled(placedStack);
 
-            FilterMode filterMode =  PlacementItem.getFilterMode(placedStack);
+            FilterMode filterMode =  this.placementItem.getFilterMode(placedStack);
 
             // if excavating, adjust filter mode if needed so that it does something
             if(isExcavating && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
@@ -359,6 +362,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
          */
         protected ItemStack sourceStack;
         
+        protected PlacementItem placementItem;
+        
         protected ImmutableList<SingleStackEntry> entries;
         
         @Override
@@ -372,6 +377,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             super.deserializeNBT(tag);
             this.sourceStack = new ItemStack(tag);
+            this.placementItem = (PlacementItem)sourceStack.getItem();
+            
             ImmutableList.Builder<SingleStackEntry> builder = ImmutableList.builder();
             if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
             {
@@ -422,7 +429,6 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 
         protected class SingleStackEntry extends PlacementSpecEntry
         {
-        
             protected SingleStackEntry(int index, BlockPos pos)
             {
                 super(index, pos);
@@ -438,6 +444,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             public boolean isExcavation()
             {
                 return isExcavation;
+            }
+
+            @Override
+            public PlacementItem placementItem()
+            {
+                // TODO Auto-generated method stub
+                return null;
             }
         }
         
@@ -483,12 +496,12 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 super(placedStack, player, pPos);
                 this.isHollow = this.selectionMode == TargetMode.HOLLOW_REGION;
-                this.offsetPos = PlacementItem.getRegionSize(placedStack, true);
-                this.isFixedRegion = PlacementItem.isFixedRegionEnabled(placedStack);
+                this.offsetPos = this.placementItem.getRegionSize(placedStack, true);
+                this.isFixedRegion = this.placementItem.isFixedRegionEnabled(placedStack);
                 this.isAdjustmentEnabled = !this.isFixedRegion 
                         && !this.isExcavating 
                         && !this.isSelectionInProgress
-                        && PlacementItem.getRegionOrientation(placedStack) == RegionOrientation.AUTOMATIC;
+                        && this.placementItem.getRegionOrientation(placedStack) == RegionOrientation.AUTOMATIC;
             }
 
             /**
@@ -590,6 +603,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 result.location = new Location(this.pPos.inPos, this.player.world);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
+                result.placementItem = this.placementItem;
                 
                 SingleStackEntry entry = result.new SingleStackEntry(0, this.pPos.inPos);
                 result.entries = ImmutableList.of(entry);
@@ -668,6 +682,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 result.location = new Location(this.region.getCenter(), this.player.world);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
+                result.placementItem = this.placementItem;
                 result.isHollow = this.isHollow;
                 
                 ImmutableList.Builder<SingleStackEntry> builder = ImmutableList.builder();
@@ -690,7 +705,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 if(this.isSelectionInProgress) 
                 {
-                    this.region = new BlockRegion(pPos.inPos, PlacementItem.fixedRegionSelectionPos(this.placedStack).first(), false);
+                    this.region = new BlockRegion(pPos.inPos, this.placementItem.fixedRegionSelectionPos(this.placedStack).first(), false);
                     return true;
                 }
                 
@@ -700,7 +715,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 
                 if(this.isFixedRegion)
                 {
-                    FixedRegionBounds bounds = PlacementItem.getFixedRegion(placedStack);
+                    FixedRegionBounds bounds = this.placementItem.getFixedRegion(placedStack);
                     this.region = new BlockRegion(bounds.fromPos, bounds.toPos, this.isHollow);
                     this.excludeObstaclesInRegion(this.region);
                     

@@ -28,7 +28,11 @@ public class PlacementSpecHelper
         
         BlockOrientationHandler.configureStackForPlacement(placedStack, player, pPos);
         
-        switch(PlacementItem.getTargetMode(placedStack))
+        PlacementItem item = PlacementItem.getPlacementItem(stack);
+        
+        if(item == null) return null;
+        
+        switch(item.getTargetMode(placedStack))
         {
             // meaning of following three types depends... 
             // if we are placing individual blocks in a multiblock (cubic) region

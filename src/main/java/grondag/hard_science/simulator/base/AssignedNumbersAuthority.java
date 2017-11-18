@@ -64,12 +64,12 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     
     public AssignedNumbersAuthority()
     {
-        this.clear();
         this.domainIndex = createIndex(AssignedNumber.DOMAIN);
         this.storageIndex = createIndex(AssignedNumber.STORAGE);
         this.jobIndex = createIndex(AssignedNumber.JOB);
         this.taskIndex = createIndex(AssignedNumber.TASK);
         this.buildIndex = createIndex(AssignedNumber.BUILD);
+        this.clear();
     }
     
     public void clear()

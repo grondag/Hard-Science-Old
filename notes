@@ -1,6 +1,6 @@
 Virtual Blocks
 
-PlacementSpec - list of excavations or placements to be applied to the world,
+PlacementSpec - list of placements to be applied to the world,
 	along with configuration about how they should be applied. 
 	
 	Simple - spec for a single operation, the item stacks at each position
@@ -10,33 +10,22 @@ PlacementSpec - list of excavations or placements to be applied to the world,
 	into the specified state.  Persisted as part of a build.
 	
 	Build - spec that represents the end result of a committed build. The stack
-	at each position is determined by taking real world state and applying
-	all placement specs in the build in sequence. 
+	at each position is determined by capturing state of virtual blocks in the
+	build at the time the spec is created.  
 	
-		This virtual state is stored in the virtual tracker for each active build
-		and used for both rendering and placement. The virtual tracker
-		handles execution of the end-state computation in a manner
-		to prevent tick lag from large-scale operations.
-		
-		Job submissions for committed builds must wait for the virtual
-		tracker to be caught up in computing virtual state before starting.
-		
-		Itemstack returned by this placement derived by comparing virtual state
-		with real world state and determines what work needs to be done. 
-		Will return an empty stack if no work is required, or the entry will
-		be excluded entirely from the placement list.
-		
-		If the real world changes mid-job (not as a result of the job), 
-		the survey will be redone and tasks altered as necessary.
-		
-		Build specs are persisted as part of their build mainly 
-		so that identifiers and indexes retained in jobs remain consistent.
+	Build specs are persisted as part of their build mainly 
+	so that identifiers and indexes retained in jobs remain consistent.
 
-Build - collection of placement specs that are to applied in sequence and submitted as 
-	a single job with a compiled placement spec.  Only a single build can be active
-	(and thus visible) for each player.  Players can share a build.  Sharing a build
-	means all players sharing it can see virtual blocks, make changes, and commit the build. 
-	Builds can be saved or reloaded. 
+Build - collection of virtual blocks being edited in the world, or to be placed
+	in the world from a previously saved collection of virtual blocks.  
+	
+	Only a single build can be active (and thus visible) for each player.  
+	
+	Players can share an editable build.  
+	Sharing a build means all players sharing it can see virtual blocks, 
+	make changes, and commit the build.
+	 
+	Builds can be saved or unloaded or reloaded. 
 	
 	Builds are domain members and persisted as part of their domain. When a build is committed,
 	all construction is managed by the domain of which it is a member. To share a build, a player 
@@ -47,26 +36,10 @@ Build - collection of placement specs that are to applied in sequence and submit
 	players use the default build of their active domain. Players in the same domain will
 	thus all share the same default build unless they change their active build. 
 	
-	Builds do not interact with each other.  Players can only see a single build at a time.
-	If two builds are built in the same physical space, the build that places second
-	will apply the same logic it would if a falling block or other placement occurred
-	after the build was started.
-	
-	Breaking a virtual block within an editable build removes the block entirely and is
-	recorded as a single-block excavation operation. It does not change the operation
-	that placed the block and CAN be undone.
-	
-	Using an excavation operation to remove physical blocks inside a build is also
-	recorded as an excavation operation and can be undone.
-	
-	Removing a physical block by breaking it has no impact on the build except that some
-	operations may have a different effect and it will allow a virtual blocks to placed
-	if the build calls for a placement in the location of the removed block.
-	
 	Builds can be moved to a different location in the world.  Builds can also be copied.
 	
 	Once submitted for construction, a build cannot be changed.  
-	Player can still view it, but clicking on blocks or other operations
+	Player can still view it, but clicking on virtual blocks or other operations
 	will inform the player the build is in construction and they have to reopen it to make changes.
 	
 	Builds submitted for construction can be reopened.  This cancels all active construction
@@ -89,42 +62,78 @@ Jobs/Tasks
 	If in-scope world state changes outside of the job, (detected by virtual state tracker)
 	these tasks are cancelled and the planning tasks is updated (if active) or made ready again.
 
-Virtual Block Manager
-	The virtual block manager maintains a buffer of current world state for all block positions
-	affected by an active build. "Active" means that at least one online player has the build as their
-	active (viewable) build OR that the build is being constructed, even if no player is currently viewing it.
+Virtual Block (block)
+	A virtual block represents the result of a virtual placement.
 	
-	For each block position, the tracker maintains the list of builds affecting the position.
+	All virtual blocks are associated with a build - either a build that is
+	being edited or a build that has been placed and then marked with virtual blocks.
 	
-	The first time a block position is watched, the tracker retrieves the world state during
-	the next server tick so that it can be used off-tick by builds.
+	A build that is being designed consists exclusively of virtual blocks.  Breaking
+	or replacing a virtual block in a build being edited changes the build.
 	
-	The tracker represents world state as ItemStacks instead of block states, to 
-	facilitate comparison with compiled builds, which also represent world state
-	as ItemStacks to be used for placement. 
+	A pre-designed build when placed in the world will only have virtual blocks
+	in positions that are not occupied.  Breaking a virtual block in a pre-designed
+	build that has been placed has no effect on the build - the block will still be placed.
 	
-	The tracker subscribes to block events and notifies builds when monitored world state
-	changes to something other than what the build calls for.  
+	Virtual blocks are only visible if the player viewing them has selected the build associated
+	with the virtual block as their active build.
 	
-	The tracker maintains a list of virtual blocks that are or should be placed in the world.
+	Placing a virtual block in a space already occupied by a virtual block from another build
+	will depend on configuration.  It can either fail, or it will replace the virtual block
+	and - if the replaced block was part of an editable build - change the build to which 
+	the previous block belonged.
 	
-	The tracker also handles the placement or removal of virtual blocks so that builds can
-	be visualized. If *any* active build calls for a non-air block to be placed in an 
-	air space, the tracker causes a virtual block to be placed there. When no build is active
-	for a given position, any virtual block in that space will be removed.
+Tablet Computer (physical tool)
+	Personal computer.  Required for all domain-related access functions and for viewing
+	any kind of virtual reality construct, like virtual blocks or virtual tools. Player
+	can upgrade to an implant version, which does not require an inventory slot and is accessed
+	via a keystroke.
 	
-	Client-side, virtual blocks will render the state of the current active build. If the 
-	current active build does not apply to the space containing the virtual block, the
-	virtual block will not render. Functionally, virtual blocks always behave identically to air.
-	(Except they can be broken by player editing an active build.)  
+Excavation Marker (Virtual tool)
+	Crafted using the tablet, marks real-world blocks for removal. Has several selection modes.
+	All actions are immediately submitted as jobs.
 
-	Builds are responsible for updating virtual state as the build changes, 
-	and for sending client updates on build content for rendering.
-	The tracker only maintains a buffer for the current world state that can be accessed 
-	safely off-tick, and handles the placement and removal of virtual blocks.  
+Exchange Marker (Virtual tool)
+	Crafted using the tablet, marks real-world blocks for replacement.  Has several selection modes. 
+	All actions are immediately submitted as  jobs.
 	
-	Virtual state is not persisted - it is re-derived from virtual blocks and builds as
-	they are loaded or created. 
+Excavation/Exchange Job (class instance)
+	Job containing the excavation/exchange tasks submitted by the excavation/exchange markers. Part of a domain.
+	Registers and updates excavation in the excavation render tracker, which handles client
+	state. Must re-register with the render tracker on reload, because the tracker does not persist state.
+	
+Excavation Render Tracker (class)
+	Tracks all excavation and exchange jobs in progress and transmits them to clients for rendering.
+	Not serialized. Jobs are responsible for maintaining all state in the tracker.
+	
+Virtual Builder's Wand (Virtual tool)
+	Crafted using the tablet, places virtual blocks similar to a builder's wand.  Selection can be
+	based on either real-world or virtual blocks in the active build.  Placed blocks are part of
+	the active build.
+
+Virtual Cutter (Virtual tool)
+	Removes virtual blocks, or parts of them, similar to an excavation marker but only affects
+	virtual blocks in the current build.  Crafted using the tablet. Placed blocks are part of
+	the active build.
+
+Virtual Block (Virtual tool)
+	Places virtual blocks in world, either singly or in multiblock shapes. Highly configurable.
+	Crafted using the tablet. Placed blocks are part of the active build.
+	Block placement actions are submitted as world tasks if the number of block state changes
+	is large so they can be executed incrementally. 
+
+World Task
+	Similar to a runnable future, encapsulates some action that must be run during world tick.
+	Each call to runTick() does work that should fit within a single tick and returns true if
+	the task if complete. IIdentified and NBT serializable. Once queued, world tasks persist 
+	until completed or canceled.
+	
+World Task Manager
+	Maintains a queue of world tasks and executes them in FIFO order.  Also serializes all extant
+	world tasks during world save and restores them on load.  Tasks are IIdentified, so that
+	dependent objects can re-link to them after world load.
+
+
 
 Persistence Stuff
 

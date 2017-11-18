@@ -56,18 +56,23 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
         
         this.blockSubstance = PlacementItem.getStackSubstance(stack);
         this.lightValue = PlacementItem.getStackLightValue(stack);
-        this.mode = PlacementItem.getTargetMode(stack);
-        this.axis = PlacementItem.getBlockOrientationAxis(stack);
-        this.face = PlacementItem.getBlockOrientationFace(stack);
-        this.edge = PlacementItem.getBlockOrientationEdge(stack);
-        this.corner = PlacementItem.getBlockOrientationCorner(stack);
-        this.floatingSelectionRange = PlacementItem.getFloatingSelectionRange(stack);
-        this.regionOrientation = PlacementItem.getRegionOrientation(stack);
-        this.filterMode = PlacementItem.getFilterMode(stack);
-        this.speciesMode = PlacementItem.getSpeciesMode(stack);
-        this.isDeleteModeEnabled = PlacementItem.isDeleteModeEnabled(stack);
-        this.isFixedRegionEnabled = PlacementItem.isFixedRegionEnabled(stack);
-        this.regionSize = PlacementItem.getRegionSize(stack, false);
+        
+        if(PlacementItem.isPlacementItem(stack))
+        {
+            PlacementItem item = (PlacementItem)stack.getItem();
+            this.mode = item.getTargetMode(stack);
+            this.axis = item.getBlockOrientationAxis(stack);
+            this.face = item.getBlockOrientationFace(stack);
+            this.edge = item.getBlockOrientationEdge(stack);
+            this.corner = item.getBlockOrientationCorner(stack);
+            this.floatingSelectionRange = item.getFloatingSelectionRange(stack);
+            this.regionOrientation = item.getRegionOrientation(stack);
+            this.filterMode = item.getFilterMode(stack);
+            this.speciesMode = item.getSpeciesMode(stack);
+            this.isDeleteModeEnabled = false;//item.isDeleteModeEnabled(stack);
+            this.isFixedRegionEnabled = item.isFixedRegionEnabled(stack);
+            this.regionSize = item.getRegionSize(stack, false);
+        }
     }
 
     @Override
@@ -124,18 +129,19 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
             PlacementItem.setStackModelState(heldStack, message.modelState);
             PlacementItem.setStackSubstance(heldStack, message.blockSubstance);
             PlacementItem.setStackLightValue(heldStack, message.lightValue);
-            PlacementItem.setTargetMode(heldStack, message.mode);
-            PlacementItem.setBlockOrientationAxis(heldStack, message.axis);
-            PlacementItem.setBlockOrientationFace(heldStack, message.face);
-            PlacementItem.setBlockOrientationEdge(heldStack, message.edge);
-            PlacementItem.setBlockOrientationCorner(heldStack, message.corner);
-            PlacementItem.setSelectionTargetRange(heldStack, message.floatingSelectionRange);
-            PlacementItem.setRegionOrientation(heldStack, message.regionOrientation);
-            PlacementItem.setFilterMode(heldStack, message.filterMode);
-            PlacementItem.setSpeciesMode(heldStack, message.speciesMode);
-            PlacementItem.setDeleteModeEnabled(heldStack, message.isDeleteModeEnabled);
-            PlacementItem.setFixedRegionEnabled(heldStack, message.isFixedRegionEnabled);
-            PlacementItem.setRegionSize(heldStack, message.regionSize);
+            PlacementItem item = (PlacementItem)heldStack.getItem();
+            item.setTargetMode(heldStack, message.mode);
+            item.setBlockOrientationAxis(heldStack, message.axis);
+            item.setBlockOrientationFace(heldStack, message.face);
+            item.setBlockOrientationEdge(heldStack, message.edge);
+            item.setBlockOrientationCorner(heldStack, message.corner);
+            item.setSelectionTargetRange(heldStack, message.floatingSelectionRange);
+            item.setRegionOrientation(heldStack, message.regionOrientation);
+            item.setFilterMode(heldStack, message.filterMode);
+            item.setSpeciesMode(heldStack, message.speciesMode);
+//            item.setDeleteModeEnabled(heldStack, message.isDeleteModeEnabled);
+            item.setFixedRegionEnabled(heldStack, message.isFixedRegionEnabled);
+            item.setRegionSize(heldStack, message.regionSize);
         }
     }
 }

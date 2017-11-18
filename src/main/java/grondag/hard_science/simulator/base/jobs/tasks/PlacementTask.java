@@ -58,7 +58,7 @@ public class PlacementTask extends BuildingTask
         
         BlockPos placedPos = entry.pos();
             
-        IBlockState placedState = PlacementItem.getPlacementBlockStateFromStack(placedStack);
+        IBlockState placedState = itemBlock.getPlacementBlockStateFromStack(placedStack);
         
         if (itemBlock.placeBlockAt(placedStack, null, world, placedPos, null, 0, 0, 0, placedState))
         {

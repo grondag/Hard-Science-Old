@@ -74,7 +74,7 @@ public class CubicPlacementHandler extends PlacementHandler
         }
 
         ModelState closestModelState = null;
-        if(PlacementItem.isBlockOrientationMatchClosest(stack))
+        if(item.isBlockOrientationMatchClosest(stack))
         {
             if(onBlock instanceof SuperBlock)
             {
@@ -119,19 +119,19 @@ public class CubicPlacementHandler extends PlacementHandler
         
         if(stackModelState.hasAxis())
         {
-            if(PlacementItem.isBlockOrientationMatchClosest(stack))
+            if(item.isBlockOrientationMatchClosest(stack))
             {
-                stackModelState.setAxis(PlacementItem.getBlockPlacementAxis(stack));
+                stackModelState.setAxis(item.getBlockPlacementAxis(stack));
                 if(stackModelState.hasAxisOrientation())
                 {
-                    stackModelState.setAxisInverted(PlacementItem.getBlockPlacementAxisIsInverted(stack));
+                    stackModelState.setAxisInverted(item.getBlockPlacementAxisIsInverted(stack));
                 }
             }
             else
             {
                 boolean isAxisDone = false;
                 
-                if(PlacementItem.isBlockOrientationMatchClosest(stack) && closestModelState != null)
+                if(item.isBlockOrientationMatchClosest(stack) && closestModelState != null)
                 {
                     stackModelState.setAxis(closestModelState.getAxis());
                     if(stackModelState.hasAxisOrientation())
@@ -180,11 +180,11 @@ public class CubicPlacementHandler extends PlacementHandler
         
         if(!isRotationDone && stackModelState.hasAxisRotation())
         {
-            if(PlacementItem.isBlockOrientationMatchClosest(stack) && closestModelState != null)
+            if(item.isBlockOrientationMatchClosest(stack) && closestModelState != null)
             {
                 stackModelState.setAxisRotation(closestModelState.getAxisRotation());
             }
-            else if(PlacementItem.isBlockOrientationDynamic(stack))
+            else if(item.isBlockOrientationDynamic(stack))
             {
                 stackModelState.setAxisRotation(Rotation.fromHorizontalFacing(playerIn.getHorizontalFacing().getOpposite()));
             }

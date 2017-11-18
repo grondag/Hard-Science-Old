@@ -12,7 +12,7 @@ public class ModKeys
     public static KeyBinding PLACEMENT_HISTORY_FORWARD;
     public static KeyBinding PLACEMENT_HISTORY_BACK;
     public static KeyBinding PLACEMENT_PREVIEW;
-    public static KeyBinding PLACEMENT_TOGGLE_EXCAVATION;
+//    public static KeyBinding PLACEMENT_TOGGLE_EXCAVATION;
     public static KeyBinding PLACEMENT_DISPLAY_GUI;
     public static KeyBinding PLACEMENT_CYCLE_FILTER_MODE;
     public static KeyBinding PLACEMENT_CYCLE_SPECIES_HANDLING;
@@ -43,8 +43,8 @@ public class ModKeys
                 KeyModifier.SHIFT, Keyboard.KEY_B, "key.categories.hard_science");
         PLACEMENT_HISTORY_BACK = new KeyBinding("key.placement_history_back", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
                 KeyModifier.CONTROL, Keyboard.KEY_B, "key.categories.hard_science");
-        PLACEMENT_TOGGLE_EXCAVATION = new KeyBinding("key.placement_toggle_excavation", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
-                KeyModifier.CONTROL, Keyboard.KEY_X, "key.categories.hard_science");
+//        PLACEMENT_TOGGLE_EXCAVATION = new KeyBinding("key.placement_toggle_excavation", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
+//                KeyModifier.CONTROL, Keyboard.KEY_X, "key.categories.hard_science");
         PLACEMENT_DISPLAY_GUI = new KeyBinding("key.placement_display_gui", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
                 KeyModifier.NONE, Keyboard.KEY_B, "key.categories.hard_science");
         PLACEMENT_CYCLE_FILTER_MODE = new KeyBinding("key.placement_cycle_filter_mode", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
@@ -77,7 +77,7 @@ public class ModKeys
         ClientRegistry.registerKeyBinding(PLACEMENT_HISTORY_BACK);
         ClientRegistry.registerKeyBinding(PLACEMENT_PREVIEW);
         
-        ClientRegistry.registerKeyBinding(PLACEMENT_TOGGLE_EXCAVATION);
+//        ClientRegistry.registerKeyBinding(PLACEMENT_TOGGLE_EXCAVATION);
         ClientRegistry.registerKeyBinding(PLACEMENT_DISPLAY_GUI);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_FILTER_MODE);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_SPECIES_HANDLING);

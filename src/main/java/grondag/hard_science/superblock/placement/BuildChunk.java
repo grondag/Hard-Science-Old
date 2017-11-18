@@ -46,6 +46,6 @@ class BuildChunk extends ChunkBlockMap<BuildEntry>
             Log.warn("Unable to add build entry to build chunk for unknown reason. This is a bug.");
             return;
         }
-        buildEntry.addSpec(spec);
+//        buildEntry.addSpec(spec);
     }
 }

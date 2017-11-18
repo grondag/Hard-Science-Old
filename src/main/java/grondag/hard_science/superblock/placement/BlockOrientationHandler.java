@@ -30,19 +30,20 @@ public class BlockOrientationHandler
      */
     public static void configureStackForPlacement(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
-        
         // does not attempt to configure non super-blocks
         if(!(stack.getItem() instanceof SuperItemBlock)) return;
 
-                if(PlacementItem.isBlockOrientationFixed(stack))
+        PlacementItem item = (PlacementItem)stack.getItem();
+        
+        if(item.isBlockOrientationFixed(stack))
         {
             applyFixedOrientation(stack);
         }
-        else if(PlacementItem.isBlockOrientationMatchClosest(stack))
+        else if(item.isBlockOrientationMatchClosest(stack))
         {
             applyClosestOrientation(stack, player, pPos);
         }
-        else if(PlacementItem.isBlockOrientationDynamic(stack))
+        else if(item.isBlockOrientationDynamic(stack))
         {
             applyDynamicOrientation(stack, player, pPos);
         }
@@ -50,20 +51,24 @@ public class BlockOrientationHandler
 
     private static void applyFixedOrientation(ItemStack stack)
     {
+        if(!PlacementItem.isPlacementItem(stack)) return;
+        
+        PlacementItem item = (PlacementItem)stack.getItem();
+        
         ModelState modelState = PlacementItem.getStackModelState(stack);
 
         if(modelState.hasAxis())
         {
-            modelState.setAxis(PlacementItem.getBlockPlacementAxis(stack));
+            modelState.setAxis(item.getBlockPlacementAxis(stack));
 
             if(modelState.hasAxisOrientation())
             {
-                modelState.setAxisInverted(PlacementItem.getBlockPlacementAxisIsInverted(stack));
+                modelState.setAxisInverted(item.getBlockPlacementAxisIsInverted(stack));
             }
         }
         if(modelState.hasAxisRotation())
         {
-            modelState.setAxisRotation(PlacementItem.getBlockPlacementRotation(stack));
+            modelState.setAxisRotation(item.getBlockPlacementRotation(stack));
         }
         
         PlacementItem.setStackModelState(stack, modelState);
