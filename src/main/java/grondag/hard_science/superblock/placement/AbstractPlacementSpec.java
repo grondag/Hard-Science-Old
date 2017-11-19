@@ -1,5 +1,9 @@
 package grondag.hard_science.superblock.placement;
 
+import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.OBSTRUCTED;
+import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.PLACE;
+import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.SELECT;
+
 import java.util.HashSet;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,13 +34,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.*;
 
 public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 {
@@ -187,7 +188,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         protected final PlacementPosition pPos;
         protected Boolean isValid = null;
         protected final TargetMode selectionMode;
-        protected final boolean isExcavating;
+        protected final boolean isExcavation;
         protected final boolean isSelectionInProgress;
 
         /**
@@ -203,12 +204,12 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             this.placementItem = (PlacementItem)placedStack.getItem();
             this.isSelectionInProgress = this.placementItem.isFixedRegionSelectionInProgress(placedStack);
             this.selectionMode = this.placementItem.getTargetMode(placedStack);
-            this.isExcavating = this.placementItem.isExcavator(placedStack);
+            this.isExcavation = this.placementItem.isExcavator(placedStack);
             
             FilterMode filterMode =  this.placementItem.getFilterMode(placedStack);
 
             // if excavating, adjust filter mode if needed so that it does something
-            if(isExcavating && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
+            if(isExcavation && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
             this.effectiveFilterMode = filterMode;
         }
         
@@ -254,7 +255,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         @SideOnly(Side.CLIENT)
         protected void drawPlacementPreview(Tessellator tessellator, BufferBuilder bufferBuilder)
         {
-            if(this.previewPos() == null || this.isExcavating) return;
+            if(this.previewPos() == null || this.isExcavation) return;
             
             GlStateManager.disableDepth();
             
@@ -308,7 +309,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 this.drawSelection(tessellator, bufferBuilder);
             }
-            else if(this.isExcavating)
+            else if(this.isExcavation)
             {
                 this.drawPlacement(tessellator, bufferBuilder, PlacementPreviewRenderMode.EXCAVATE);
             }
@@ -370,12 +371,12 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         
         protected PlacementItem placementItem;
         
-        protected ImmutableList<SingleStackEntry> entries;
+        protected ImmutableList<PlacementSpecEntry> entries;
         
         @Override
         public ImmutableList<PlacementSpecEntry> entries()
         {
-            return this.entries();
+            return this.entries;
         }
         
         @Override
@@ -385,7 +386,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             this.sourceStack = new ItemStack(tag);
             this.placementItem = (PlacementItem)sourceStack.getItem();
             
-            ImmutableList.Builder<SingleStackEntry> builder = ImmutableList.builder();
+            ImmutableList.Builder<PlacementSpecEntry> builder = ImmutableList.builder();
             if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
             {
                 int[] entryData = tag.getIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA);
@@ -420,7 +421,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 int i = 0;
                 int[] entryData = new int[this.entries.size() * 6];
-                for(SingleStackEntry entry : this.entries)
+                for(PlacementSpecEntry entry : this.entries)
                 {
                     entryData[i++] = entry.pos().getX();
                     entryData[i++] = entry.pos().getY();
@@ -505,7 +506,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 this.offsetPos = this.placementItem.getRegionSize(placedStack, true);
                 this.isFixedRegion = this.placementItem.isFixedRegionEnabled(placedStack);
                 this.isAdjustmentEnabled = !this.isFixedRegion 
-                        && !this.isExcavating 
+                        && !this.isExcavation 
                         && !this.isSelectionInProgress
                         && this.placementItem.getRegionOrientation(placedStack) == RegionOrientation.AUTOMATIC;
             }
@@ -533,7 +534,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 
                 int checkCount = 0, foundCount = 0;
 
-                if(this.isExcavating)
+                if(this.isExcavation)
                 {
                     for(BlockPos.MutableBlockPos pos : region.positions())
                     {
@@ -605,7 +606,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 SinglePlacementSpec result = new SinglePlacementSpec();
                 result.filterMode = this.effectiveFilterMode;
-                result.isExcavation = this.isExcavating;
+                result.isExcavation = this.isExcavation;
                 result.location = new Location(this.pPos.inPos, this.player.world);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
@@ -622,7 +623,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 if(this.player.world.isOutsideBuildHeight(this.pPos.inPos)) return false;
 
-                if(this.isExcavating)
+                if(this.isExcavation)
                 {
                     return !this.player.world.isAirBlock(this.pPos.inPos);
                 }
@@ -685,14 +686,14 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             {
                 CuboidPlacementSpec result = new CuboidPlacementSpec();
                 result.filterMode = this.effectiveFilterMode;
-                result.isExcavation = this.isExcavating;
+                result.isExcavation = this.isExcavation;
                 result.location = new Location(this.region.getCenter(), this.player.world);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
                 result.placementItem = this.placementItem;
                 result.isHollow = this.isHollow;
                 
-                ImmutableList.Builder<SingleStackEntry> builder = ImmutableList.builder();
+                ImmutableList.Builder<PlacementSpecEntry> builder = ImmutableList.builder();
                 int i = 0;
                 
                 // note that we are ignoring exclusions from validation here
@@ -735,7 +736,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     }
                 }
                 
-                else if(this.isExcavating)
+                else if(this.isExcavation)
                 {
                     // excavation regions do not take adjustment and are always
                     // relative to the "inPos" block.
@@ -960,7 +961,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             protected boolean doValidate()
             {
                 // excavation doesn't make sense with this mode
-                if(this.isExcavating) return false;
+                if(this.isExcavation) return false;
 
                 if(this.player.world.isOutsideBuildHeight(this.pPos.inPos)) return false;
 

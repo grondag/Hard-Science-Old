@@ -123,17 +123,19 @@ Virtual Block (Virtual tool)
 	is large so they can be executed incrementally. 
 
 World Task
+	Interface to be supported by all job tasks that require world access.
+	
 	Similar to a runnable future, encapsulates some action that must be run during world tick.
 	Each call to runTick() does work that should fit within a single tick and returns true if
-	the task if complete. IIdentified and NBT serializable. Once queued, world tasks persist 
-	until completed or canceled.
+	the task if complete. 
+	
 	
 World Task Manager
-	Maintains a queue of world tasks and executes them in FIFO order.  Also serializes all extant
-	world tasks during world save and restores them on load.  Tasks are IIdentified, so that
-	dependent objects can re-link to them after world load.
-
-
+	Maintains a queue of job tasks that require world access and executes them in FIFO order.  
+	
+	Ensures that all world access is synchronized, in-order, and does not exceed
+	the configured threshold for points per tick.
+	
 
 Persistence Stuff
 

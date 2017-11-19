@@ -8,6 +8,7 @@ import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
@@ -159,6 +160,8 @@ public class CommonEventHandler
         }
         else
         {
+            WorldTaskManager.doServerTick();
+            
             // thought it might be more determinism if simulator runs after block/entity ticks
             Simulator.INSTANCE.onServerTick(event);
         }
