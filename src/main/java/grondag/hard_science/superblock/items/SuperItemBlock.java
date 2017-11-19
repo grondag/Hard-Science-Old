@@ -90,67 +90,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         return SuperTileEntity.withoutServerTag(super.getNBTShareTag(stack));
     }
     
-    @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
-    {
-        if(player == null) return new ActionResult<>(EnumActionResult.PASS, null);
-        
-        ItemStack stackIn = player.getHeldItem(hand);
-        
-        if (stackIn.isEmpty() || stackIn.getItem() != this) return new ActionResult<>(EnumActionResult.PASS, stackIn);
-        
-        PlacementResult result = PlacementHandler.doRightClickBlock(player, null, null, null, stackIn, (SuperItemBlock)stackIn.getItem());
-        
-        if(!result.shouldInputEventsContinue()) 
-        {
-            result.apply(stackIn, player);
-//            this.doPlacements(result, stackIn, world, player);
-            return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
-        }
-        
-        if (world.isRemote) 
-        {
-            BlockPos blockpos = Minecraft.getMinecraft().objectMouseOver.getBlockPos();
-            //if trying to place a block but too close, is annoying to get GUI
-            //so only display if clicking on air
-            if (blockpos != null 
-                    && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
-                    && world.getBlockState(blockpos).getMaterial().isReplaceable()
-                    && ((SuperBlock)this.block).isVirtual())
-            {
-                this.displayGui(player);
-                return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
-            }
-        }
-        
-        return new ActionResult<>(EnumActionResult.PASS, player.getHeldItem(hand));
-    }
     
-    @Override
-    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
-    {
-        if(playerIn == null) return EnumActionResult.FAIL;
-        
-        ItemStack stackIn = playerIn.getHeldItem(hand);
-        if (stackIn.isEmpty() || stackIn.getItem() != this) return EnumActionResult.FAIL;
-        
-        PlacementResult result = PlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn, (SuperItemBlock)stackIn.getItem());
-        
-        result.apply(stackIn, playerIn);
-        
-//        if(result.isExcavationOnly() && !playerIn.isCreative())
-//        {
-//            // FIXME: use the server-side thing
-//            if(worldIn.isRemote) ExcavationRenderTracker.INSTANCE.add(playerIn, new ExcavationRenderEntry(playerIn, result));
-//        }
-//        else if(result.hasPlacementList())
-//        {
-//            return this.doPlacements(result, stackIn, worldIn, playerIn) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
-//        }
-        
-        // we don't return pass because don't want GUI displayed or other events to process
-        return EnumActionResult.SUCCESS;
-    }
     /**
      * true if successful
      * FIXME: remove when done transfering logic
@@ -273,5 +213,11 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     public int guiOrdinal()
     {
         return ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal();
+    }
+
+    @Override
+    public boolean isExcavator(ItemStack placedStack)
+    {
+        return false;
     }
 }

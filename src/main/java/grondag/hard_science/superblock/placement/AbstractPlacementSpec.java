@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.placement;
 
 import java.util.HashSet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.ImmutableList;
@@ -29,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -201,8 +203,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             this.placementItem = (PlacementItem)placedStack.getItem();
             this.isSelectionInProgress = this.placementItem.isFixedRegionSelectionInProgress(placedStack);
             this.selectionMode = this.placementItem.getTargetMode(placedStack);
-            this.isExcavating = false; //this.placementItem.isDeleteModeEnabled(placedStack);
-
+            this.isExcavating = this.placementItem.isExcavator(placedStack);
+            
             FilterMode filterMode =  this.placementItem.getFilterMode(placedStack);
 
             // if excavating, adjust filter mode if needed so that it does something
@@ -237,6 +239,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         /**
          * Location used for {@link #drawPlacementPreview(Tessellator, BufferBuilder)}.
          * Override if the placement region does not include target position in {@link #pPos}.
+         * Will generally not be used for excavations.
          */
         @SideOnly(Side.CLIENT)
         protected BlockPos previewPos()
@@ -244,11 +247,14 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             return this.pPos.inPos;
         }
         
-        /** draw single-block sample to show shape/orientation of block to be be placed */
+        /** 
+         * Draw single-block sample to show shape/orientation of block to be be placed.
+         * Does not render for excavations.
+         */
         @SideOnly(Side.CLIENT)
         protected void drawPlacementPreview(Tessellator tessellator, BufferBuilder bufferBuilder)
         {
-            if(this.previewPos() == null) return;
+            if(this.previewPos() == null || this.isExcavating) return;
             
             GlStateManager.disableDepth();
             
@@ -605,7 +611,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 result.sourceStack = this.placedStack;
                 result.placementItem = this.placementItem;
                 
-                SingleStackEntry entry = result.new SingleStackEntry(0, this.pPos.inPos);
+                SingleStackEntry entry 
+                    = result.new SingleStackEntry(0, this.pPos.inPos);
                 result.entries = ImmutableList.of(entry);
                 return result;
             }
@@ -709,10 +716,6 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     return true;
                 }
                 
-                // pass null face into relative offset when using floating selection
-                // to avoid re-orientation based on hit face
-                EnumFacing offsetFace = pPos.isFloating ? null : pPos.onFace;
-                
                 if(this.isFixedRegion)
                 {
                     FixedRegionBounds bounds = this.placementItem.getFixedRegion(placedStack);
@@ -731,16 +734,78 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                         return false;
                     }
                 }
+                
+                else if(this.isExcavating)
+                {
+                    // excavation regions do not take adjustment and are always
+                    // relative to the "inPos" block.
+                    BlockPos startPos = pPos.inPos;
+                    BlockPos endPos = pPos.inPos;
+                    
+                    if(this.offsetPos.getZ() > 1)
+                    {
+                        // depth
+                        endPos = endPos.offset(pPos.onFace.getOpposite(), this.offsetPos.getZ() - 1);
+                    }
+                    
+                    Pair<EnumFacing, EnumFacing> nearestCorner 
+                        = WorldHelper.closestAdjacentFaces(
+                                this.pPos.onFace, 
+                                (float)this.pPos.hitX, 
+                                (float)this.pPos.hitY, 
+                                (float)this.pPos.hitZ);
+                    
+                    // height
+                    final int h = this.offsetPos.getY();
+                    if(h > 1)
+                    {
+                        EnumFacing relativeUp = WorldHelper.relativeUp(this.player, this.pPos.onFace);
+                        final int half_h = h / 2;
+                        
+                        final boolean isUpclosest = nearestCorner.getLeft() == relativeUp
+                                || nearestCorner.getRight() == relativeUp;
+                        
+                        final boolean fullUp = (h & 1) == 1 || isUpclosest;
+                        final boolean fullDown = (h & 1) == 1 || !isUpclosest;
+                        
+                        startPos = startPos.offset(relativeUp, fullUp ? half_h : half_h - 1);
+                        endPos = endPos.offset(relativeUp.getOpposite(), fullDown ? half_h : half_h - 1);
+                    }
+                    
+                    // width
+                    final int w = this.offsetPos.getX();
+                    if(w > 1)
+                    {
+                        EnumFacing relativeLeft = WorldHelper.relativeLeft(this.player, this.pPos.onFace);
+                        final int half_w = w / 2;
+                        
+                        final boolean isLeftclosest = nearestCorner.getLeft() == relativeLeft
+                                || nearestCorner.getRight() == relativeLeft;
+                        
+                        final boolean fullLeft = (w & 1) == 1 || isLeftclosest;
+                        final boolean fullRight = (w & 1) == 1 || !isLeftclosest;
+                        
+                        startPos = startPos.offset(relativeLeft, fullLeft ? half_w : half_w - 1);
+                        endPos = endPos.offset(relativeLeft.getOpposite(), fullRight ? half_w : half_w - 1);
+                    }
+                    
+                    this.region = new BlockRegion(startPos, endPos, false);
+                    return true;
+                    
+                }
+                
                 else
                 {
+                    // pass null face into relative offset when using floating selection
+                    // to avoid re-orientation based on hit face
+                    EnumFacing offsetFace = pPos.isFloating ? null : pPos.onFace;
+                    
                     BlockPos endPos = PlacementHandler.getPlayerRelativeOffset(this.pPos.inPos, this.offsetPos, this.player, offsetFace, OffsetPosition.FLIP_NONE);
                     BlockRegion region = new BlockRegion(pPos.inPos, endPos, this.isHollow);
                 
                     this.excludeObstaclesInRegion(region);
                     boolean isClear = this.canPlaceRegion(region);
                     
-                    // section will not happen for fixed regions
-                    // because adjustement will be disabled
                     if(this.isAdjustmentEnabled && !isClear)
                     {
                         //try to adjust

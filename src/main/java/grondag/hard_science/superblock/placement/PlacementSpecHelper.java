@@ -43,13 +43,14 @@ public class PlacementSpecHelper
             case FILL_REGION:
             case HOLLOW_REGION:
                 ModelState modelState = PlacementItem.getStackModelState(placedStack);
-                if(modelState == null) return SinglePlacementSpec.builder(placedStack, player, pPos);
-                
-                if(modelState.getShape().meshFactory().stateFormat == StateFormat.MULTIBLOCK)
+                if(modelState != null && modelState.getShape().meshFactory().stateFormat == StateFormat.MULTIBLOCK)
+                {
                     return CSGPlacementSpec.builder(placedStack, player, pPos);
-                
+                }
                 else
+                {
                     return CuboidPlacementSpec.builder(placedStack, player, pPos);
+                }
                 
             case MATCH_CLICKED_BLOCK:
                 return PredicatePlacementSpec.builder(placedStack, player, pPos);

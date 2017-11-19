@@ -1,7 +1,12 @@
 package grondag.hard_science.superblock.items;
 
+import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.placement.PlacementItemFeature;
+import grondag.hard_science.superblock.placement.RegionOrientation;
+import grondag.hard_science.superblock.placement.TargetMode;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -19,6 +24,11 @@ import net.minecraft.world.World;
  */
 public class ExcavationMarker extends Item implements PlacementItem
 {
+    public static final int FEATURE_FLAGS = PlacementItem.BENUMSET_FEATURES.getFlagsForIncludedValues(
+            PlacementItemFeature.FIXED_REGION,
+            PlacementItemFeature.REGION_SIZE,
+            PlacementItemFeature.FILTER_MODE);
+    
     public ExcavationMarker()
     {
         setRegistryName("excavation_marker"); 
@@ -29,34 +39,72 @@ public class ExcavationMarker extends Item implements PlacementItem
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand)
     {
-        ItemStack stack = playerIn.getHeldItem(hand);
-        
-        if(!worldIn.isRemote)
-        {
-
-        }
-        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
+        return PlacementItem.super.onItemRightClick(worldIn, playerIn, hand);
     }    
 
     @Override
     public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        return EnumActionResult.SUCCESS;
+        return PlacementItem.super.onItemUse(playerIn, worldIn, pos, hand, facing, hitZ, hitZ, hitZ);
     }
 
     @Override
     public SuperBlock getSuperBlock()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public int guiOrdinal()
     {
-        // TODO Auto-generated method stub
+        // TODO enable feature
         return 0;
     }
+    
+    @Override
+    public TargetMode getTargetMode(ItemStack stack)
+    {
+        return TargetMode.FILL_REGION;
+    }
 
-   
+    
+    @Override
+    public RegionOrientation getRegionOrientation(ItemStack stack)
+    {
+        return RegionOrientation.XYZ;
+    }
+
+    @Override
+    public FilterMode getFilterMode(ItemStack stack)
+    {
+        FilterMode result = PlacementItem.super.getFilterMode(stack);
+        return result == FilterMode.REPLACE_ALL || result == FilterMode.REPLACE_SOLID
+                ? result : FilterMode.REPLACE_SOLID;
+    }
+
+    @Override
+    public boolean cycleFilterMode(ItemStack stack, boolean reverse)
+    {
+        boolean done = false;
+        do
+        {
+          PlacementItem.super.cycleFilterMode(stack, reverse);
+          FilterMode result = PlacementItem.super.getFilterMode(stack);
+          done = result == FilterMode.REPLACE_ALL || result == FilterMode.REPLACE_SOLID;
+        } while(!done);
+        return true;
+    }
+
+    @Override
+    public int featureFlags(ItemStack stack)
+    {
+        return FEATURE_FLAGS;
+    }
+
+    @Override
+    public boolean isExcavator(ItemStack placedStack)
+    {
+        return true;
+    }
+    
 }

@@ -135,6 +135,7 @@ public abstract class PlacementHandler
         }
    
         // assume user will click the right mouse button
+        // Pass stack copy so that predicted action doesn't affect real stack
         return doRightClickBlock(player, onPos, onFace, hitVec, stack, item);
     }
 
@@ -271,8 +272,8 @@ public abstract class PlacementHandler
         
         
         // only virtual blocks support advanced placement behavior
-        // so emulate vanilla right-click behavior if we don't have one
-        if(item.getSuperBlock() == null || !item.getSuperBlock().isVirtual())
+        // so emulate vanilla right-click behavior if we have non-virtual block
+        if(item.getSuperBlock() != null && !item.getSuperBlock().isVirtual())
         {
             ItemStack tweakedStack = stack.copy();
             item.setTargetMode(tweakedStack, TargetMode.ON_CLICKED_FACE);

@@ -6,8 +6,10 @@ import javax.annotation.Nullable;
 import com.mojang.realmsclient.util.Pair;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.library.world.Rotation;
@@ -26,11 +28,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
 
 /**
  * Intended control layout for placement items
@@ -70,6 +76,8 @@ public interface PlacementItem
     /////////////////////////////////////////////////////
     // STATIC MEMBERS
     /////////////////////////////////////////////////////
+    
+    public static BinaryEnumSet<PlacementItemFeature> BENUMSET_FEATURES = new BinaryEnumSet<PlacementItemFeature>(PlacementItemFeature.class);
     
     /**
      * Returns PlacementItem held by player in either hand, or null if player isn't holding one.
@@ -165,19 +173,44 @@ public interface PlacementItem
      */
     public SuperBlock getSuperBlock();
     
+    /**
+     * Used with {@link #BENUMSET_FEATURES} to know what features are supported.
+     * @param stack 
+     */
+    public default int featureFlags(ItemStack stack)
+    {
+        return 0xFFFFFFFF;
+    }
+    
     public int guiOrdinal();
+    
+    /** True if item places air blocks or carves empty space in CSG blocks */
+    public boolean isExcavator(ItemStack placedStack);
     
     /////////////////////////////////////////////////////
     // DEFAULT MEMBERS
     /////////////////////////////////////////////////////
     
+    public default boolean isGuiSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.GUI, this.featureFlags(stack));
+    }
+    
     public default void displayGui(EntityPlayer player)
     {
+        if(!isGuiSupported(PlacementItem.getHeldPlacementItem(player))) return;
         player.openGui(HardScience.INSTANCE, this.guiOrdinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+    }
+    
+    public default boolean isBlockOrientationSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.BLOCK_ORIENTATION, this.featureFlags(stack));
     }
     
     public default void setBlockOrientationAxis(ItemStack stack, BlockOrientationAxis orientation)
     {
+        if(!isBlockOrientationSupported(stack)) return;
+        
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
@@ -187,6 +220,8 @@ public interface PlacementItem
      */
     public default EnumFacing.Axis getBlockPlacementAxis(ItemStack stack)
     {
+        if(!isBlockOrientationSupported(stack)) return EnumFacing.Axis.Y;
+
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
@@ -212,6 +247,8 @@ public interface PlacementItem
      */
     public default boolean getBlockPlacementAxisIsInverted(ItemStack stack)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
@@ -235,6 +272,8 @@ public interface PlacementItem
     
     public default Rotation getBlockPlacementRotation(ItemStack stack)
     {
+        if(!isBlockOrientationSupported(stack)) return Rotation.ROTATE_NONE;
+
         switch(getStackModelState(stack).orientationType())
         {
             case EDGE:
@@ -256,6 +295,8 @@ public interface PlacementItem
      */
     public default boolean isBlockOrientationDynamic(ItemStack stack)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
@@ -281,6 +322,8 @@ public interface PlacementItem
      */
     public default boolean isBlockOrientationFixed(ItemStack stack)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
@@ -306,6 +349,8 @@ public interface PlacementItem
      */
     public default boolean isBlockOrientationMatchClosest(ItemStack stack)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
@@ -336,12 +381,15 @@ public interface PlacementItem
      */
     public default boolean cycleBlockOrientationAxis(ItemStack stack, boolean reverse)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+
         setBlockOrientationAxis(stack, reverse ? Useful.prevEnumValue(getBlockOrientationAxis(stack)) : Useful.nextEnumValue(getBlockOrientationAxis(stack)));
         return true;
     }
     
     public default void setBlockOrientationFace(ItemStack stack, BlockOrientationFace orientation)
     {
+        if(!isBlockOrientationSupported(stack)) return;
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
@@ -355,12 +403,16 @@ public interface PlacementItem
      */
     public default boolean cycleBlockOrientationFace(ItemStack stack, boolean reverse)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+        
         setBlockOrientationFace(stack, reverse ? Useful.prevEnumValue(getBlockOrientationFace(stack)) : Useful.nextEnumValue(getBlockOrientationFace(stack)));
         return true;
     }
     
     public default void setBlockOrientationEdge(ItemStack stack, BlockOrientationEdge orientation)
     {
+        if(!isBlockOrientationSupported(stack)) return;
+        
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
@@ -374,12 +426,16 @@ public interface PlacementItem
      */
     public default boolean cycleBlockOrientationEdge(ItemStack stack, boolean reverse)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+        
         setBlockOrientationEdge(stack, reverse ? Useful.prevEnumValue(getBlockOrientationEdge(stack)) : Useful.nextEnumValue(getBlockOrientationEdge(stack)));
         return true;
     }
     
     public default void setBlockOrientationCorner(ItemStack stack, BlockOrientationCorner orientation)
     {
+        if(!isBlockOrientationSupported(stack)) return;
+        
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
@@ -393,6 +449,8 @@ public interface PlacementItem
      */
     public default boolean cycleBlockOrientationCorner(ItemStack stack, boolean reverse)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+        
         setBlockOrientationCorner(stack, reverse ? Useful.prevEnumValue(getBlockOrientationCorner(stack)) : Useful.nextEnumValue(getBlockOrientationCorner(stack)));
         return true;
     }
@@ -403,6 +461,8 @@ public interface PlacementItem
      */
     public default boolean cycleBlockOrientation(ItemStack stack, boolean reverse)
     {
+        if(!isBlockOrientationSupported(stack)) return false;
+        
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
@@ -433,6 +493,8 @@ public interface PlacementItem
      */
     public default String blockOrientationLocalizedName(ItemStack stack)
     {
+        if(!isBlockOrientationSupported(stack)) return "NOT SUPPORTED";
+        
         switch(getStackModelState(stack).orientationType())
         {
         case AXIS:
@@ -453,8 +515,15 @@ public interface PlacementItem
         }
     }
     
+    public default boolean isRegionOrientationSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.REGION_ORIENTATION, this.featureFlags(stack));
+    }
+    
     public default void setRegionOrientation(ItemStack stack, RegionOrientation orientation)
     {
+        if(!isRegionOrientationSupported(stack)) return; 
+        
         orientation.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
 
@@ -471,12 +540,21 @@ public interface PlacementItem
      */
     public default boolean cycleRegionOrientation(ItemStack stack, boolean reverse)
     {
+        if(!isRegionOrientationSupported(stack)) return false;
+        
         setRegionOrientation(stack, reverse ? Useful.prevEnumValue(getRegionOrientation(stack)) : Useful.nextEnumValue(getRegionOrientation(stack)));
         return true;
     }
     
+    public default boolean isTargetModeSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.TARGET_MODE, this.featureFlags(stack));
+    }
+    
     public default void setTargetMode(ItemStack stack, TargetMode mode)
     {
+        if(!this.isTargetModeSupported(stack)) return;
+        
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
@@ -490,12 +568,21 @@ public interface PlacementItem
      */
     public default boolean cycleTargetMode(ItemStack stack, boolean reverse)
     {
+        if(!this.isTargetModeSupported(stack)) return false;
+        
         setTargetMode(stack, reverse ? Useful.prevEnumValue(getTargetMode(stack)) : Useful.nextEnumValue(getTargetMode(stack)));
         return true;
     }
     
+    public default boolean isFilterModeSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.FILTER_MODE, this.featureFlags(stack));
+    }
+    
     public default void setFilterMode(ItemStack stack, FilterMode mode)
     {
+        if(!this.isFilterModeSupported(stack)) return;
+        
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
@@ -509,12 +596,21 @@ public interface PlacementItem
      */
     public default boolean cycleFilterMode(ItemStack stack, boolean reverse)
     {
+        if(!this.isFilterModeSupported(stack)) return false;
+        
         setFilterMode(stack, reverse ? Useful.prevEnumValue(getFilterMode(stack)) : Useful.nextEnumValue(getFilterMode(stack)));
         return true;
     }
     
+    public default boolean isSpeciesModeSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.SPECIES_MODE, this.featureFlags(stack));
+    }
+    
     public default void setSpeciesMode(ItemStack stack, SpeciesMode mode)
     {
+        if(!this.isSpeciesModeSupported(stack)) return;
+        
         mode.serializeNBT(Useful.getOrCreateTagCompound(stack));
     }
     
@@ -528,6 +624,8 @@ public interface PlacementItem
      */
     public default boolean cycleSpeciesMode(ItemStack stack, boolean reverse)
     {
+        if(!this.isSpeciesModeSupported(stack)) return false;
+        
         setSpeciesMode(stack, reverse ? Useful.prevEnumValue(getSpeciesMode(stack)) : Useful.nextEnumValue(getSpeciesMode(stack)));
         return true;
     }
@@ -570,8 +668,6 @@ public interface PlacementItem
         }
             
     }
-    
-  
 
 //    public default void toggleDeleteMode(ItemStack stack)
 //    {
@@ -588,12 +684,25 @@ public interface PlacementItem
 //        Useful.getOrCreateTagCompound(stack).setBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED, enabled);
 //    }
     
+    public default boolean isFixedRegionSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.FIXED_REGION, this.featureFlags(stack));
+    }
+    
     /**
      * Return false if this item doesn't support this feature.
+     * Turning off cancels any region selection in progress.
      */
     public default boolean toggleFixedRegionEnabled(ItemStack stack)
     {
-        setFixedRegionEnabled(stack, !isFixedRegionEnabled(stack));
+        if(!this.isFixedRegionSupported(stack)) return false;
+        
+        boolean current = this.isFixedRegionEnabled(stack);
+        
+        if(current && this.isFixedRegionSelectionInProgress(stack))
+            this.fixedRegionCancel(stack);
+        
+        setFixedRegionEnabled(stack, !current);
         return true;
     }
     
@@ -605,11 +714,15 @@ public interface PlacementItem
      */
     public default boolean isFixedRegionEnabled(ItemStack stack)
     {
+        if(!this.isFixedRegionSupported(stack)) return false;
+        
         return Useful.getOrCreateTagCompound(stack).getBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED);
     }
     
     public default void setFixedRegionEnabled(ItemStack stack, boolean isFixedRegion)
     {
+        if(!this.isFixedRegionSupported(stack)) return;
+        
         Useful.getOrCreateTagCompound(stack).setBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED, isFixedRegion);
     }
 
@@ -623,6 +736,8 @@ public interface PlacementItem
      */
     public default void setFixedRegion(FixedRegionBounds bounds, ItemStack stack)
     {
+        if(!this.isFixedRegionSupported(stack)) return;
+        
         bounds.saveToNBT(Useful.getOrCreateTagCompound(stack));
     }
     
@@ -632,6 +747,11 @@ public interface PlacementItem
      */
     public default void fixedRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
     {
+        if(!this.isFixedRegionSupported(stack)) return;
+        
+        if(!this.isFixedRegionEnabled(stack)) 
+            this.setFixedRegionEnabled(stack, true);
+        
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         
         tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS, PackedBlockPos.pack(pos, isCenter ? 1 : 0));
@@ -644,11 +764,15 @@ public interface PlacementItem
     
     public default boolean isFixedRegionSelectionInProgress(ItemStack stack)
     {
+        if(!this.isFixedRegionSupported(stack) || !this.isFixedRegionEnabled(stack)) return false;
+        
         return Useful.getOrCreateTagCompound(stack).hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
     }
     
     public default void fixedRegionCancel(ItemStack stack)
     {
+        if(!this.isFixedRegionSupported(stack)) return;
+        
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         tag.removeTag(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
         
@@ -665,6 +789,8 @@ public interface PlacementItem
     @Nullable
     public default Pair<BlockPos, Boolean> fixedRegionSelectionPos(ItemStack stack)
     {
+        if(!this.isFixedRegionSupported(stack)) return null;
+        
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         
         if(tag.hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS))
@@ -680,6 +806,7 @@ public interface PlacementItem
     
     public default void fixedRegionFinish(ItemStack stack, EntityPlayer player, BlockPos pos, boolean isCenter)
     {
+        if(!this.isFixedRegionSupported(stack)) return;
         
         Pair<BlockPos, Boolean> fromPos = fixedRegionSelectionPos(stack);
 
@@ -716,6 +843,11 @@ public interface PlacementItem
 //                : new BlockPos(selectedPos.getZ(), selectedPos.getY(), selectedPos.getX());
 //    }
     
+    public default boolean isRegionSizeSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.REGION_SIZE, this.featureFlags(stack));
+    }
+    
     /**
      * For cubic selection regions.
      * X is left/right relative to player and Z is depth in direction player is facing.<br>
@@ -740,25 +872,31 @@ public interface PlacementItem
     @Nonnull
     public default void setRegionSize(ItemStack stack, BlockPos pos)
     {
+        if(!this.isRegionSizeSupported(stack)) return;
+        
         NBTTagCompound tag = stack.getTagCompound();
         tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, pos.toLong());
     }
     
     /**
      * See {@link #getRegionSize(ItemStack, boolean)}
+     * Returns false if feature not supported.
      */
     @Nonnull
-    public default void changeRegionSize(ItemStack stack, int dx, int dy, int dz)
+    public default boolean changeRegionSize(ItemStack stack, int dx, int dy, int dz)
     {
+        if(!this.isRegionSizeSupported(stack)) return false;
+        
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         BlockPos oldPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_SIZE));
        
         BlockPos newPos = new BlockPos(
                 MathHelper.clamp(oldPos.getX() + dx, 1, 9),
                 MathHelper.clamp(oldPos.getY() + dy, 1, 9),
-                MathHelper.clamp(oldPos.getZ() + dz, 1, 9)
+                MathHelper.clamp(oldPos.getZ() + dz, 1, this.isExcavator(stack) ? 64 : 9)
                 );
         tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, newPos.toLong());
+        return true;
     }
     
 //    /**
@@ -782,6 +920,7 @@ public interface PlacementItem
         switch(getTargetMode(stack))
         {
         case FILL_REGION:
+            if(!this.isRegionSizeSupported(stack)) return "";
             BlockPos pos = getRegionSize(stack, false);
             return I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
             
@@ -795,11 +934,18 @@ public interface PlacementItem
         }
     }
     
+    public default boolean isSelectionRangeSupported(ItemStack stack)
+    {
+        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.SELECTION_RANGE, this.featureFlags(stack));
+    }
+    
     /**
      * 0 means non-floating
      */
     public default void setSelectionTargetRange(ItemStack stack, int range)
     {
+        if(!this.isSelectionRangeSupported(stack)) return;
+        
         // subtract because external values jump from 0 to 2
         if(range > 0) range--;
         Useful.getOrCreateTagCompound(stack).setByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE, (byte)range);
@@ -810,6 +956,8 @@ public interface PlacementItem
      */
     public default int getFloatingSelectionRange(ItemStack stack)
     {
+        if(!this.isSelectionRangeSupported(stack)) return 0;
+
         NBTTagCompound tag = stack.getTagCompound();
         int range = tag == null ? 0 : MathHelper.clamp(tag.getByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE), 0, 4);
         return range == 0 ? 0 : range + 1;
@@ -820,6 +968,8 @@ public interface PlacementItem
      */
     public default boolean cycleSelectionTargetRange(ItemStack stack, boolean reverse)
     {
+        if(!this.isSelectionRangeSupported(stack)) return false;
+
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         int range = tag.getByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE) + (reverse ? -1 : 1);
         if(range > 4) range = 0;
@@ -830,6 +980,8 @@ public interface PlacementItem
     
     public default boolean isFloatingSelectionEnabled(ItemStack stack)
     {
+        if(!this.isSelectionRangeSupported(stack)) return false;
+
         return getFloatingSelectionRange(stack) != 0;
     }
     
@@ -848,5 +1000,73 @@ public interface PlacementItem
         int blockZ = MathHelper.floor(look.z * range + entity.posZ);
 
         return new BlockPos(blockX, blockY, blockZ);
+    }
+    
+    /**
+     * Default implementation of item method.
+     * Still need to override in subclass because will defer to Item/ItemBlock implementation.
+     */
+    public default EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    {
+        if(playerIn == null) return EnumActionResult.FAIL;
+        
+        ItemStack stackIn = playerIn.getHeldItem(hand);
+        if (stackIn.isEmpty() || stackIn.getItem() != this) return EnumActionResult.FAIL;
+        
+        PlacementResult result = PlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn, this);
+        
+        result.apply(stackIn, playerIn);
+        
+//        if(result.isExcavationOnly() && !playerIn.isCreative())
+//        {
+//            // FIXME: use the server-side thing
+//            if(worldIn.isRemote) ExcavationRenderTracker.INSTANCE.add(playerIn, new ExcavationRenderEntry(playerIn, result));
+//        }
+//        else if(result.hasPlacementList())
+//        {
+//            return this.doPlacements(result, stackIn, worldIn, playerIn) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+//        }
+        
+        // we don't return pass because don't want GUI displayed or other events to process
+        return EnumActionResult.SUCCESS;
+    }
+    
+    /**
+     * Default implementation of item method.
+     * Still need to override in subclass because will defer to Item/ItemBlock implementation.
+     */    
+    public default ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+    {
+        if(player == null) return new ActionResult<>(EnumActionResult.PASS, null);
+        
+        ItemStack stackIn = player.getHeldItem(hand);
+        
+        if (stackIn.isEmpty() || stackIn.getItem() != this) return new ActionResult<>(EnumActionResult.PASS, stackIn);
+        
+        PlacementResult result = PlacementHandler.doRightClickBlock(player, null, null, null, stackIn, this);
+        
+        if(!result.shouldInputEventsContinue()) 
+        {
+            result.apply(stackIn, player);
+//            this.doPlacements(result, stackIn, world, player);
+            return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+        }
+        
+        if (world.isRemote) 
+        {
+            BlockPos blockpos = Minecraft.getMinecraft().objectMouseOver.getBlockPos();
+            //if trying to place a block but too close, is annoying to get GUI
+            //so only display if clicking on air
+            if (blockpos != null 
+                    && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
+                    && world.getBlockState(blockpos).getMaterial().isReplaceable()
+                    && this.getSuperBlock().isVirtual())
+            {
+                this.displayGui(player);
+                return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+            }
+        }
+        
+        return new ActionResult<>(EnumActionResult.PASS, player.getHeldItem(hand));
     }
 }

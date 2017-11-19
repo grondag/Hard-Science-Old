@@ -21,6 +21,8 @@ import net.minecraft.util.math.Vec3d;
  * null values for hit information, so need to check floating selection
  * before calling this from an event that doesn't generate hit info, like clicking in air.
  * Such events generally display a GUI or have no effect if floating selection is off.
+ * 
+ * For excavations, inPos will be the same as onPos unless floating selection is on.
  */
 public class PlacementPosition
 {
@@ -53,8 +55,8 @@ public class PlacementPosition
             RayTraceResult hit = Blocks.DIRT.getDefaultState().collisionRayTrace(player.world, this.inPos, 
                     start.add(player.getLookVec().scale(10)), start);
 
+            this.onPos = item.isExcavator(stack) ? this.inPos : this.inPos.offset(hit.sideHit);
             this.onFace = hit.sideHit.getOpposite();
-            this.onPos = this.inPos.offset(hit.sideHit);
             this.hitX = hit.hitVec.x;
             this.hitY = hit.hitVec.y;
             this.hitZ = hit.hitVec.z;
@@ -66,7 +68,7 @@ public class PlacementPosition
             this.hitX = hitVec.x;
             this.hitY = hitVec.y;
             this.hitZ = hitVec.z;
-            this.inPos = this.onPos.offset(this.onFace);
+            this.inPos = item.isExcavator(stack) ? this.onPos : this.onPos.offset(this.onFace);
         }
     }
 }
