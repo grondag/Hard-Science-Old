@@ -108,7 +108,7 @@
 //    }
 //    
 //    /**
-//     * Extracts needed items from the input stack if found
+//     * Extracts needed items from the input stack if checked
 //     * and increases buffer according to amount accepted. 
 //     * Assumes caller checked for null / empty stack before calling.
 //     * Returns true if items were taken.
@@ -122,11 +122,11 @@
 //        if(nLPerItem == 0) return false;
 //        int requestedCount = Math.min(stack.getCount(), (int)(this.emptySpace() / nLPerItem));
 //        
-//        ItemStack found = itemHandler.extractItem(slot, requestedCount, false);
-//        if(found.isEmpty() || found.getItem() != stack.getItem()) 
+//        ItemStack checked = itemHandler.extractItem(slot, requestedCount, false);
+//        if(checked.isEmpty() || checked.getItem() != stack.getItem()) 
 //                return false;
 //        
-//        int foundCount = found.getCount();
+//        int foundCount = checked.getCount();
 //        
 //        if(foundCount > 0)
 //        {

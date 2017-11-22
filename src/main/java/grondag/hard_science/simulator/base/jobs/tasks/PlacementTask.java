@@ -17,9 +17,10 @@ public class PlacementTask extends BuildingTask
     /**
      * Use for new instances.
      */
-    public PlacementTask(BuildPlanningTask planningTask, PlacementSpecEntry entry)
+    public PlacementTask(PlacementSpecEntry entry)
     {
-        super(planningTask, entry);
+        super(entry);
+        entry.constructionTaskID = this.getId();
     }
     
     /** Use for deserialization */

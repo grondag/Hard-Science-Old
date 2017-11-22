@@ -9,6 +9,10 @@ import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.base.AssignedNumber;
 import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
+import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
+import grondag.hard_science.superblock.placement.PlacementSpecType;
 import grondag.hard_science.simulator.base.IIdentified;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
@@ -19,7 +23,7 @@ import net.minecraft.nbt.NBTTagList;
  * Collection of tasks - typically does not do any meaningful by itself.
  * Responsible for serializing tasks contained within it.
  */
-public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
+public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, IDomainMember
 {
     protected RequestPriority priority = RequestPriority.MEDIUM;
     
@@ -43,6 +47,11 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
      */
     protected boolean isTaskStatusDirty = false;
     
+    /**
+     * For construction jobs only.  Will be null otherwise.
+     */
+    private AbstractPlacementSpec spec;
+    
     protected int readyWorkCount = 0;
     
     private final SimpleUnorderedArrayList<AbstractTask> tasks =  new SimpleUnorderedArrayList<AbstractTask>();
@@ -55,8 +64,14 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
     
     public Job(RequestPriority priority, EntityPlayer player)
     {
+        this(priority, player, null);
+    }
+    
+    public Job(RequestPriority priority, EntityPlayer player, AbstractPlacementSpec spec)
+    {
         this.priority = priority;
         this.userName = player.getName();
+        this.spec = spec;
         DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
     }
     
@@ -323,6 +338,16 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
             }  
             if(readyCount > 0) this.updateReadyWork(readyCount);
         }
+        
+        if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
+        {
+            NBTTagCompound subTag = tag.getCompoundTag(ModNBTTag.PLACEMENT_ENTRY_DATA);
+            this.spec = PlacementSpecType.deserializeSpec(subTag);
+        }
+        else
+        {
+            this.spec = null;
+        }
     }
 
     @Override
@@ -348,6 +373,11 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
                 nbtTasks.appendTag(TaskType.serializeTask(t));
             }
             tag.setTag(ModNBTTag.REQUEST_CHILDREN, nbtTasks);
+        }
+        
+        if(this.spec != null)
+        {
+            tag.setTag(ModNBTTag.PLACEMENT_ENTRY_DATA, PlacementSpecType.serializeSpec(this.spec));
         }
     }
 
@@ -430,4 +460,20 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT
     {
         return this.readyWorkCount > 0;
     }
+
+    @Override
+    public Domain getDomain()
+    {
+        return this.jobManager.getDomain();
+    }
+    
+    /**
+     * For construction jobs only.  Will be null otherwise.
+     */
+    public AbstractPlacementSpec spec()
+    {
+        return this.spec;
+    }
+
+
 }

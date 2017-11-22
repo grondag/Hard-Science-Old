@@ -1,6 +1,5 @@
 package grondag.hard_science.superblock.items;
 
-import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;

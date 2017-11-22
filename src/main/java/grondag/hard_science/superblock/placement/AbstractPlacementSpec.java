@@ -4,6 +4,7 @@ import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMo
 import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.PLACE;
 import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.SELECT;
 
+import java.util.ArrayDeque;
 import java.util.HashSet;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,6 +19,12 @@ import grondag.hard_science.library.world.BlockRegion;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.library.world.WorldHelper;
+import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.jobs.IWorldTask;
+import grondag.hard_science.simulator.base.jobs.Job;
+import grondag.hard_science.simulator.base.jobs.RequestPriority;
+import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
@@ -41,6 +48,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 {
+    /**
+     * @see {@link #getLocation()}
+     */
     protected Location location;
 
     protected String playerName;
@@ -60,11 +70,37 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public abstract PlacementSpecType specType();
     
+    /**
+     * Encapsulates all work needed to apply this spec to the world.
+     * What it does will depend on the nature of the spec:<p>
+     * 
+     * Non-virtual specs: single (real) blocks, excavation and exchange
+     * specs that do not place or change virtual blocks will determine affected block
+     * positions and directly submit new construction jobs in the 
+     * player's active domain.<p>
+     * 
+     * Virtual placement specs will place or modify virtual blocks in the world,
+     * and associate those virtual blocks with the player's currently active build.<p>
+     * 
+     * Build specs will compile the active build, capturing all virtual blocks
+     * associated with the player's active build as entries, and then submit a
+     * new construction job in the player's active domain. The entries will
+     * also be saved with the build (for later re-used if desired) and the build closed.
+     */
+    public abstract IWorldTask worldTask(EntityPlayer player);
+
+    /**
+     * List of excavations and block placements in this spec.
+     * Should only be called after {@link #worldTask(EntityPlayer)} has run.
+     * Entries are in order they should be executed.
+     * Excavations and placements for same position must be 
+     * different entries.
+     */
     public abstract ImmutableList<PlacementSpecEntry> entries();
     
     /**
-     * Defines approximate center of the affected blocks and 
-     * identifies the dimension in which placement occurs.
+     * Position where the user clicked to activate the placement.
+     * Also identifies the dimension in which placement occurs.
      */
     @Override
     public Location getLocation()
@@ -120,10 +156,10 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         private BlockPos pos;
 
         /**
-         * ID of associated excavation task - set by build planning task.
+         * ID of associated excavation or placement task - set by build planning task.
          * Will be 0 if no task created.
          */
-        public int excavationTaskID;
+        public int constructionTaskID;
         
         /**
          * ID of associated procurement task - set by build planning task.
@@ -132,18 +168,11 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
          */
         public int procurementTaskID;
         
-        /**
-         * ID of associated placement task - set by build planning task.
-         * Will be 0 if no task created.
-         */
-        public int placementTaskID; 
-        
         protected PlacementSpecEntry(int index, BlockPos pos)
         {
             this.index = index;
             this.pos = pos;
         }
-        
       
         /** 0-based position within this spec - must never change because used externally to identify */
         public int index()
@@ -156,7 +185,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             return this.pos;
         }
         
-        /** Will be air if is simple excavation */
+        /** Will be air if is excavation */
         public abstract ItemStack placement();
         
         public abstract PlacementItem placementItem();
@@ -172,12 +201,6 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             return placementItem().getPlacementBlockStateFromStack(this.placement());
         }
 
-
-        public void applyToWorld(ItemStack result)
-        {
-            // TODO Auto-generated method stub
-            
-        }
     }
     
     protected static abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
@@ -344,7 +367,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(!this.validate()) return null;
 
             AbstractPlacementSpec spec = this.buildSpec();
-
+            spec.location = new Location(this.pPos.inPos, this.player.world);
             return spec;
         }
 
@@ -390,7 +413,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
             {
                 int[] entryData = tag.getIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA);
-                if(entryData.length % 6 != 0)
+                if(entryData.length % 5 != 0)
                 {
                     Log.warn("Detected corrupt data on NBT read of construction specification. Some data may be lost.");
                 }
@@ -402,9 +425,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     {
                         BlockPos pos = new BlockPos(entryData[i++], entryData[i++], entryData[i++]);
                         SingleStackEntry entry = new SingleStackEntry(entryIndex++, pos);
-                        entry.excavationTaskID = entryData[i++];
+                        entry.constructionTaskID = entryData[i++];
                         entry.procurementTaskID = entryData[i++];
-                        entry.placementTaskID = entryData[i++];
                         builder.add(entry);
                     }
                 }
@@ -420,15 +442,14 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(this.entries != null && !this.entries.isEmpty())
             {
                 int i = 0;
-                int[] entryData = new int[this.entries.size() * 6];
+                int[] entryData = new int[this.entries.size() * 5];
                 for(PlacementSpecEntry entry : this.entries)
                 {
                     entryData[i++] = entry.pos().getX();
                     entryData[i++] = entry.pos().getY();
                     entryData[i++] = entry.pos().getZ();
-                    entryData[i++] = entry.excavationTaskID;
+                    entryData[i++] = entry.constructionTaskID;
                     entryData[i++] = entry.procurementTaskID;
-                    entryData[i++] = entry.placementTaskID;
                 }
                 tag.setIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA, entryData);
             }
@@ -513,7 +534,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 
             /**
              * Clears the exclusion list in the given block region and
-             * adds obstacles found within the region to the exclusion list. 
+             * adds obstacles checked within the region to the exclusion list. 
              * Does not fully validate region - is intended for preview use only.
              * <p>
              * Will only check up to 512 block positions and stops after finding 16 obstacles.  
@@ -546,7 +567,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 
                         IBlockState blockState = world.getBlockState(pos);
                         if(blockState.getBlock().isAir(blockState, world, pos) 
-                                || !this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack, this.player))
+                                || !this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack))
                         {
                             set.add(pos.toImmutable());
                             if(foundCount++ == 16) break;
@@ -565,7 +586,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                         }
 
                         IBlockState blockState = world.getBlockState(pos);
-                        if(!this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack, this.player))
+                        if(!this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack))
                         {
                             set.add(pos.toImmutable());
                             if(foundCount++ == 16) break;
@@ -607,7 +628,6 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 SinglePlacementSpec result = new SinglePlacementSpec();
                 result.filterMode = this.effectiveFilterMode;
                 result.isExcavation = this.isExcavation;
-                result.location = new Location(this.pPos.inPos, this.player.world);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
                 result.placementItem = this.placementItem;
@@ -658,6 +678,69 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             return PlacementSpecType.SINGLE;
         }
+
+        public IWorldTask worldTask(EntityPlayer player)
+        {
+            
+            if(this.isExcavation)
+            {
+                return new IWorldTask()
+                {
+                    private boolean isDone = false;
+                    
+                    @Override
+                    public int runInServerTick(int maxOperations)
+                    {
+                        this.isDone = true;
+                        
+                        World world = location.world();
+                        
+                        if(entries.isEmpty()) return 1;
+                        
+                        BlockPos pos = entries.get(0).pos();
+                        if(pos == null) return 1;
+                            
+                        // is the position inside the world?
+                        if(world.isOutsideBuildHeight(pos)) return 1;
+                            
+                        IBlockState blockState = world.getBlockState(pos);
+                            
+                        // is the block at the position affected
+                        // by this excavation?
+                        if(SinglePlacementSpec.this.filterMode().shouldAffectBlock(
+                                blockState, 
+                                world, 
+                                pos, 
+                                SinglePlacementSpec.this.sourceStack))
+                        {
+                        
+                            Job job = new Job(RequestPriority.MEDIUM, player, SinglePlacementSpec.this);
+                            job.addTask(new ExcavationTask(entries.get(0)));
+                            Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
+                            if(domain != null)
+                            {
+                                domain.JOB_MANAGER.addJob(job);
+                            }
+                        }
+                        return 2;
+                    }
+
+                    @Override
+                    public boolean isDone()
+                    {
+                        return this.isDone;
+                    }
+                };
+            }
+            else
+            {
+                // Placement world task places virtual blocks in the currently active build
+                
+                
+                //TODO
+                return null;
+            }
+        }
     }
 
     /**
@@ -665,6 +748,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public static class CuboidPlacementSpec extends VolumetricPlacementSpec
     {
+        private BlockRegion region;
+        
         protected static class CuboidBuilder extends VolumetricBuilder
         {
 
@@ -687,24 +772,11 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 CuboidPlacementSpec result = new CuboidPlacementSpec();
                 result.filterMode = this.effectiveFilterMode;
                 result.isExcavation = this.isExcavation;
-                result.location = new Location(this.region.getCenter(), this.player.world);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
                 result.placementItem = this.placementItem;
                 result.isHollow = this.isHollow;
-                
-                ImmutableList.Builder<PlacementSpecEntry> builder = ImmutableList.builder();
-                int i = 0;
-                
-                // note that we are ignoring exclusions from validation here
-                // those will be checked as part of the construction job
-                // this allows large regions to be checked incrementally
-                for(BlockPos pos : this.region.positions())
-                {
-                    builder.add(result.new SingleStackEntry(i++, pos));
-                }
-                
-                result.entries = builder.build();
+                result.region = this.region;
                 return result;
             }
 
@@ -925,6 +997,25 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             }
         }
         
+        @Override
+        public void deserializeNBT(NBTTagCompound tag)
+        {
+            super.deserializeNBT(tag);
+            this.isHollow= tag.getBoolean(ModNBTTag.PLACMENT_IS_HOLLOW);
+            BlockPos minPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS));
+            BlockPos maxPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS));
+            this.region = new BlockRegion(minPos, maxPos, this.isHollow);
+        }
+
+        @Override
+        public void serializeNBT(NBTTagCompound tag)
+        {
+            super.serializeNBT(tag);
+            tag.setBoolean(ModNBTTag.PLACMENT_IS_HOLLOW, this.isHollow);
+            tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS, this.region.minPos().toLong());
+            tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS, this.region.maxPos().toLong());
+        }
+        
         public static IPlacementSpecBuilder builder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
         {
             return new CuboidBuilder(placedStack, player, pPos);
@@ -934,6 +1025,127 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         public PlacementSpecType specType()
         {
             return PlacementSpecType.CUBOID;
+        }
+
+        @Override
+        public IWorldTask worldTask(EntityPlayer player)
+        {
+            if(this.isExcavation)
+            {
+                // excavation world task sequences entries using
+                // a flood fill starting with the block last clicked
+                // by the player.
+                return new IWorldTask()
+                {
+                    /**
+                     * Block positions to be checked. Will initially contain
+                     * only the starting (user-clicked) position.
+                     */
+                    ArrayDeque<BlockPos> queue = new ArrayDeque<BlockPos>();
+                    
+                    /**
+                     * Block positions that have been tested.
+                     */
+                    HashSet<BlockPos> checked = new HashSet<BlockPos>();
+                    
+                    /**
+                     * Block positions that should be included in placement.
+                     */
+                    ImmutableList.Builder<PlacementSpecEntry> builder = ImmutableList.builder();
+                    
+                    World world = location.world();
+                    
+                    int index = 0;
+                    
+                    {
+                        queue.add(location);
+                    }
+                    
+                    @Override
+                    public int runInServerTick(int maxOperations)
+                    {
+                        if(queue.isEmpty()) return 0;
+                        
+                        int opCount = 0;
+                        while(opCount < maxOperations)
+                        {
+                            BlockPos pos = queue.poll();
+                            if(pos == null) break;
+                            
+                            opCount++;
+                            
+                            // mark this as checked
+                            checked.add(pos);
+                            
+                            // is the position inside our region?
+                            if(!region.contains(pos)) continue;
+                            
+                            // is the position inside the world?
+                            if(world.isOutsideBuildHeight(pos)) continue;
+                            
+                            boolean canPassThrough = false;
+                            
+                            IBlockState blockState = world.getBlockState(pos);
+                            
+                            // is the block at the position affected
+                            // by this excavation?
+                            if(CuboidPlacementSpec.this.filterMode().shouldAffectBlock(
+                                    blockState, 
+                                    world, 
+                                    pos, 
+                                    CuboidPlacementSpec.this.sourceStack))
+                            {
+                                builder.add(CuboidPlacementSpec.this.new SingleStackEntry(index++, pos));
+                                canPassThrough = true;
+                            }
+                            
+                            // even if we can't excavate the block, 
+                            // can we move through it to check others?
+                            canPassThrough = canPassThrough || !blockState.getMaterial().blocksMovement();
+                            
+                            // check adjacent blocks if are or will
+                            // be accessible and haven't already been
+                            // checked.
+                            if(canPassThrough)
+                            {
+                                opCount++;
+                                if(!checked.contains(pos.down())) queue.addLast(pos.down());
+                                if(!checked.contains(pos.east())) queue.addLast(pos.east());
+                                if(!checked.contains(pos.west())) queue.addLast(pos.west());
+                                if(!checked.contains(pos.north())) queue.addLast(pos.north());
+                                if(!checked.contains(pos.south())) queue.addLast(pos.south());
+                                if(!checked.contains(pos.up())) queue.addLast(pos.up());
+                            }
+                            
+                        }
+                        
+                        if(queue.isEmpty())
+                        {
+                            // when done, finalize entries list and submit job
+                            CuboidPlacementSpec.this.entries = builder.build();
+                            this.checked.clear();
+                            
+                            // TODO: submit job
+                        }
+                        
+                        return opCount;
+                    }
+
+                    @Override
+                    public boolean isDone()
+                    {
+                        // done if no more positions to check
+                        return queue.isEmpty();
+                    }};
+            }
+            else
+            {
+                // Placement world task places virtual blocks in the currently active build
+                
+                
+                //TODO
+                return null;
+            }
         }
     }
 
@@ -996,6 +1208,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             return PlacementSpecType.SURFACE;
         }
+
+        @Override
+        public IWorldTask worldTask(EntityPlayer player)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
     /**
@@ -1052,6 +1271,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         public PlacementSpecType specType()
         {
             return PlacementSpecType.PREDICATE;
+        }
+
+        @Override
+        public IWorldTask worldTask(EntityPlayer player)
+        {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 
@@ -1156,10 +1382,18 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         {
             return new CSGBuilder(placedStack, player, pPos);
         }
+        
         @Override
         public PlacementSpecType specType()
         {
             return PlacementSpecType.CSG;
+        }
+
+        @Override
+        public IWorldTask worldTask(EntityPlayer player)
+        {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 

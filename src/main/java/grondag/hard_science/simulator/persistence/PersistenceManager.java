@@ -14,7 +14,7 @@ public class PersistenceManager
     
     /** 
      * Use to load nodes persisted earlier.
-     * Returns true if node found and loaded, false otherwise.
+     * Returns true if node checked and loaded, false otherwise.
      */
     public static boolean loadNode(World world, IPersistenceNode node)
     {

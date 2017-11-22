@@ -9,9 +9,10 @@ public class BlockProcurementTask extends BuildingTask
     /**
      * Use for new instances.
      */
-    public BlockProcurementTask(BuildPlanningTask planningTask, PlacementSpecEntry entry)
+    public BlockProcurementTask(PlacementSpecEntry entry)
     {
-        super(planningTask, entry);
+        super(entry);
+        entry.procurementTaskID = this.getId();
     }
     
     /** Use for deserialization */

@@ -16,14 +16,18 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.NullDirtListener;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class JobManager implements IReadWriteNBT //, IDomainMember
+public class JobManager implements IReadWriteNBT, IDomainMember
 {
+    /**
+     * Should be used for job/task accounting - not for any actual work done by tasks.
+     */
     protected static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
         new ThreadFactory()
         {
@@ -38,7 +42,7 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
         });
     
     
-//    protected Domain domain;
+    protected Domain domain;
     
     protected IDirtListener dirtListener = NullDirtListener.INSTANCE;
     /**
@@ -57,7 +61,7 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
     private final LinkedList<Job>[] backlogJobs = new LinkedList[RequestPriority.values().length];
     
     /**
-     * Removes job from backlog, if it is found there.
+     * Removes job from backlog, if it is checked there.
      */
     private void removeJobFromBacklogSynchronously(Job job)
     {
@@ -72,7 +76,7 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
     }
     
     /**
-     * Removes job from backlog, if it is found there,
+     * Removes job from backlog, if it is checked there,
      * and then adds it to the end of the backlog for the
      * job's current priority.
      * 
@@ -129,7 +133,7 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
     /**
      * Searches for the fist ready task of the given type that meets the given predicate.
      * The status of the task is immediately changed to ACTIVE when it is claimed.
-     * Future will contain null if no ready task could be found.
+     * Future will contain null if no ready task could be checked.
      */
     public Future<AbstractTask> claimReadyWork(TaskType taskType, @Nullable Predicate<AbstractTask> predicate)
     {
@@ -291,19 +295,18 @@ public class JobManager implements IReadWriteNBT //, IDomainMember
     
     public void setDomain(Domain domain)
     {
-//        this.domain = domain;
+        this.domain = domain;
         this.dirtListener = domain.getDirtListener();
     }
 
-//    @Override
-//    public Domain getDomain()
-//    {
-//        return this.domain;
-//    }
+    @Override
+    public Domain getDomain()
+    {
+        return this.domain;
+    }
     
     protected void setDirty()
     {
         this.dirtListener.setDirty();
     }
-  
 }

@@ -4,7 +4,7 @@ import net.minecraft.util.math.Vec3d;
 
 /**
  * Adapted from code that bears the notice reproduced below and
- * which can be found at http://geomalgorithms.com/a03-_inclusion.html
+ * which can be checked at http://geomalgorithms.com/a03-_inclusion.html
  *
  *    // Copyright 2000 softSurfer, 2012 Dan Sunday
  *    // This code may be freely used and modified for any purpose

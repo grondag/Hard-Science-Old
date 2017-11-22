@@ -32,7 +32,7 @@ public class ModPlayerCaps implements ICapabilityProvider, IReadWriteNBT
      *  True if player is holding down the placement modifier key.  Not persisted.
      */
     private int modifierKeyFlags;
-    
+
     @Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing)
     {

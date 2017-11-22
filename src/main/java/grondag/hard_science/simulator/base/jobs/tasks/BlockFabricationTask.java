@@ -9,9 +9,9 @@ public class BlockFabricationTask extends BuildingTask
     /**
      * Use for new instances.
      */
-    public BlockFabricationTask(BuildPlanningTask planningTask, PlacementSpecEntry entry)
+    public BlockFabricationTask(PlacementSpecEntry entry)
     {
-        super(planningTask, entry);
+        super(entry);
     }
     
     /** Use for deserialization */

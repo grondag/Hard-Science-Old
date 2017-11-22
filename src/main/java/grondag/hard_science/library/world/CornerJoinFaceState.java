@@ -11,7 +11,7 @@ import net.minecraft.util.EnumFacing;
 public enum CornerJoinFaceState
 {
     NO_FACE(0, 0),
-    NONE(0, 0), //must be after NO_FACE, overwrites NO_FACE in lookup table, should never be found by lookup
+    NONE(0, 0), //must be after NO_FACE, overwrites NO_FACE in lookup table, should never be checked by lookup
     TOP(FaceSide.TOP.bitFlag, 0),
     BOTTOM(FaceSide.BOTTOM.bitFlag, 0),
     LEFT(FaceSide.LEFT.bitFlag, 0),

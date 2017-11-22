@@ -31,7 +31,7 @@ public class WorldTaskManager
         IWorldTask task = tasks.peek();
         while(operations > 0 && task != null)
         {
-            // check for canceled tasks and move to next if found
+            // check for canceled tasks and move to next if checked
             if(task.isDone())
             {
                 tasks.poll();

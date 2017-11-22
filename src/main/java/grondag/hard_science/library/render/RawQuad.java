@@ -552,7 +552,7 @@ public class RawQuad
     public static int LINE_NOT_FOUND = -1;
     /**
      * Returns the index of the edge with the given line ID.
-     * Returns LINE_NOT_FOUND if, uh, you know, it wasn't found.
+     * Returns LINE_NOT_FOUND if, uh, you know, it wasn't checked.
      */
     public int findLineIndex(long lineID)
     {

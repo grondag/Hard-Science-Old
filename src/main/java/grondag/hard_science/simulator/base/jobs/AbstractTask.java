@@ -9,10 +9,12 @@ import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.base.AssignedNumber;
 import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.base.IIdentified;
 import net.minecraft.nbt.NBTTagCompound;
 
-public abstract class AbstractTask implements IReadWriteNBT, IIdentified
+public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomainMember
 {
     protected Job job = NullJob.INSTANCE;
     private int id = IIdentified.UNASSIGNED_ID;
@@ -123,6 +125,11 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
         this.id = id;
     }
 
+    public Job job()
+    {
+        return this.job;
+    }
+    
     public RequestStatus getStatus()
     {
         return this.status;
@@ -332,5 +339,11 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified
             
             tag.setIntArray(ModNBTTag.REQUEST_DEPENDENCIES, depData);
         }
+    }
+    
+    @Override
+    public Domain getDomain()
+    {
+        return this.job.getDomain();
     }
 }

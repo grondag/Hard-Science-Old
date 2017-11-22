@@ -6,6 +6,13 @@ import net.minecraft.nbt.NBTTagCompound;
 public interface IIdentified
 {
     /**
+     * Use this value to mean something other than unassigned and indicate that 
+     * no job ID has yet been assigned. For example, may mean "TBD after something else happens"
+     * Object will this value will not be assigned an ID, and this value will never be used as an ID.
+     */
+    public static final int SIGNAL_ID = -1;
+    
+    /**
      * Initialize new objects with this value to cause them to be assigned a new ID.
      * Can also be used in a reference to an ID to mean "null" because this ID will never be assigned.
      */

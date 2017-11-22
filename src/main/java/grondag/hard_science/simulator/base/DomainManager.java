@@ -2,6 +2,7 @@ package grondag.hard_science.simulator.base;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
 
@@ -30,6 +31,17 @@ public class DomainManager implements IPersistenceNode
     private final AssignedNumbersAuthority assignedNumbersAuthority;
 
     private Domain defaultDomain;
+
+    /** 
+     * Each player has a domain that is automatically created for them
+     * and which they always own.  This will be their initially active domain.
+     */
+    private HashMap<String, Domain> playerIntrinsicDomains = new HashMap<String, Domain>();
+    
+    /** 
+     * Each player has a currently active domain. This will initially be their intrinsic domain.
+     */
+    private HashMap<String, Domain> playerActiveDomains = new HashMap<String, Domain>();
     
     /**
      * If isNew=true then won't wait for a deserialize to become loaded.
@@ -375,16 +387,35 @@ public class DomainManager implements IPersistenceNode
         // need to do this before loading domains, otherwise they will cause complaints
         this.isLoaded = true;
         
-        if(tag != null)
+        if(tag == null) return;
+        
+        NBTTagList nbtDomains = tag.getTagList(ModNBTTag.DOMAIN_MANAGER_DOMAINS, 10);
+        if( nbtDomains != null && !nbtDomains.hasNoTags())
         {
-            NBTTagList nbtDomains = tag.getTagList(ModNBTTag.DOMAIN_MANAGER_DOMAINS, 10);
-            if( nbtDomains != null && !nbtDomains.hasNoTags())
+            for (int i = 0; i < nbtDomains.tagCount(); ++i)
             {
-                for (int i = 0; i < nbtDomains.tagCount(); ++i)
-                {
-                    Domain domain = new Domain(nbtDomains.getCompoundTagAt(i));
-                    this.assignedNumbersAuthority().domainIndex().put(domain.id, domain);
-                }   
+                Domain domain = new Domain(nbtDomains.getCompoundTagAt(i));
+                this.assignedNumbersAuthority().domainIndex().put(domain.id, domain);
+            }   
+        }
+        
+        NBTTagCompound nbtPlayerDomains = tag.getCompoundTag(ModNBTTag.DOMAIN_PLAYER_DOMAINS);
+        if(nbtPlayerDomains != null && !nbtPlayerDomains.hasNoTags())
+        {
+            for(String playerName : nbtPlayerDomains.getKeySet())
+            {
+                Domain d = this.assignedNumbersAuthority().domainIndex().get(nbtPlayerDomains.getInteger(playerName));
+                if(d != null) this.playerActiveDomains.put(playerName, d);
+            }
+        }
+        
+        NBTTagCompound nbtActiveDomains = tag.getCompoundTag(ModNBTTag.DOMAIN_ACTIVE_DOMAINS);
+        if(nbtActiveDomains != null && !nbtActiveDomains.hasNoTags())
+        {
+            for(String playerName : nbtActiveDomains.getKeySet())
+            {
+                Domain d = this.assignedNumbersAuthority().domainIndex().get(nbtActiveDomains.getInteger(playerName));
+                if(d != null) this.playerActiveDomains.put(playerName, d);
             }
         }
         
@@ -405,6 +436,26 @@ public class DomainManager implements IPersistenceNode
             }
         }
         tag.setTag(ModNBTTag.DOMAIN_MANAGER_DOMAINS, nbtDomains);
+        
+        if(!this.playerIntrinsicDomains.isEmpty())
+        {
+            NBTTagCompound nbtPlayerDomains = new NBTTagCompound();
+            for(Entry<String, Domain> entry : this.playerIntrinsicDomains.entrySet())
+            {
+                nbtPlayerDomains.setInteger(entry.getKey(), entry.getValue().getId());
+            }
+            tag.setTag(ModNBTTag.DOMAIN_PLAYER_DOMAINS, nbtPlayerDomains);
+        }
+        
+        if(!this.playerActiveDomains.isEmpty())
+        {
+            NBTTagCompound nbtActiveDomains = new NBTTagCompound();
+            for(Entry<String, Domain> entry : this.playerActiveDomains.entrySet())
+            {
+                nbtActiveDomains.setInteger(entry.getKey(), entry.getValue().getId());
+            }
+            tag.setTag(ModNBTTag.DOMAIN_ACTIVE_DOMAINS, nbtActiveDomains);
+        }
     }
 
     @Override
@@ -422,5 +473,51 @@ public class DomainManager implements IPersistenceNode
             Log.warn("Domain manager accessed before it was loaded.  This is a bug and probably means simulation state has been lost.");
         }
         return this.isLoaded;
+    }
+
+
+    /**
+     * The player's currently active domain. If player
+     * has never specified, will be the player's intrinsic domain.
+     */
+    public Domain getActiveDomain(EntityPlayer player)
+    {
+        Domain result = this.playerActiveDomains.get(player.getName());
+        if(result == null)
+        {
+            synchronized(this.playerActiveDomains)
+            {
+                result = this.playerActiveDomains.get(player.getName());
+                if(result == null)
+                {
+                    result = this.getIntrinsicDomain(player);
+                    this.playerActiveDomains.put(player.getName(), result);
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * The player's private, default domain. Created if does not already exist.
+     */
+    public Domain getIntrinsicDomain(EntityPlayer player)
+    {
+        Domain result = this.playerIntrinsicDomains.get(player.getName());
+        if(result == null)
+        {
+            synchronized(this.playerIntrinsicDomains)
+            {
+                result = this.playerIntrinsicDomains.get(player.getName());
+                if(result == null)
+                {
+                    result = this.createDomain();
+                    //TODO: localize
+                    result.setName("Default domain for " + player.getName());
+                    this.playerIntrinsicDomains.put(player.getName(), result);
+                }
+            }
+        }
+        return result;
     }
 }

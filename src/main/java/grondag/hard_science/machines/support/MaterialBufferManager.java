@@ -454,7 +454,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     }
     
     /**
-     * Extracts needed items from the input stack if found
+     * Extracts needed items from the input stack if checked
      * and increases buffer according to amount accepted. 
      * Assumes caller checked for null / empty stack before calling.
      * Returns true if items were taken.

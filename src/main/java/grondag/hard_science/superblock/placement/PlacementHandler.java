@@ -324,7 +324,7 @@ public abstract class PlacementHandler
                     null, 
                     null, 
                     pPos.inPos, 
-                    PlacementEvent.PLACE, //item.isDeleteModeEnabled(stack) ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                    item.isExcavator(stack) ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
                     PlacementSpecHelper.placementBuilder(player, pPos, stack));
         }
     }
@@ -482,7 +482,7 @@ public abstract class PlacementHandler
             for(BlockPos.MutableBlockPos pos : region.positions())
             {
                 IBlockState blockState = world.getBlockState(pos);
-                if(blockState.getBlock().isAir(blockState, world, pos) || !filterMode.shouldAffectBlock(blockState, world, pos, stack, player))
+                if(blockState.getBlock().isAir(blockState, world, pos) || !filterMode.shouldAffectBlock(blockState, world, pos, stack))
                 {
                     set.add(pos.toImmutable());
                 }
@@ -493,7 +493,7 @@ public abstract class PlacementHandler
             for(BlockPos.MutableBlockPos pos : region.includedPositions())
             {
                 IBlockState blockState = world.getBlockState(pos);
-                if(!filterMode.shouldAffectBlock(blockState, world, pos, stack, player))
+                if(!filterMode.shouldAffectBlock(blockState, world, pos, stack))
                 {
                     set.add(pos.toImmutable());
                 }

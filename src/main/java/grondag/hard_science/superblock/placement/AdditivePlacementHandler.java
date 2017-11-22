@@ -30,7 +30,7 @@ import net.minecraft.world.World;
  * 
  * 2) First check for an additive block
  * in the position adjacent to the face clicked.  If an additive block is 
- * found there, add to it as in #1.  Otherwise, if the space is empty
+ * checked there, add to it as in #1.  Otherwise, if the space is empty
  * place a new additive block on the face clicked. 
  */
 public class AdditivePlacementHandler extends PlacementHandler

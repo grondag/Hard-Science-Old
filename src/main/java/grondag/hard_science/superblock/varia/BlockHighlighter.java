@@ -17,7 +17,7 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 public class BlockHighlighter 
 {
 	/**
-	 * Check for blocks that need a custom block highlight and draw if found.
+	 * Check for blocks that need a custom block highlight and draw if checked.
 	 * Adapted from the vanilla highlight code.
 	 */
 	public static void handleDrawBlockHighlightEvent(DrawBlockHighlightEvent event) 

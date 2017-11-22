@@ -54,7 +54,7 @@ Build - collection of virtual blocks being edited in the world, or to be placed
 	will not cause the interior to be excavated because that was never part of the build.
 	
 Jobs/Tasks
-	When a build is committed, it creates a planning task that references the build.
+	When a build is committed, it creates a planning task that references the build spec.
 	The planning task create excavate, procure/fab and placement
 	tasks for each block position. This work is
 	executed incrementally on the server thread during world tick.
@@ -123,19 +123,10 @@ Virtual Block (Virtual tool)
 	is large so they can be executed incrementally. 
 
 World Task
-	Interface to be supported by all job tasks that require world access.
-	
-	Similar to a runnable future, encapsulates some action that must be run during world tick.
-	Each call to runTick() does work that should fit within a single tick and returns true if
-	the task if complete. 
-	
+	(see code)
 	
 World Task Manager
-	Maintains a queue of job tasks that require world access and executes them in FIFO order.  
-	
-	Ensures that all world access is synchronized, in-order, and does not exceed
-	the configured threshold for points per tick.
-	
+ 	(see code)
 
 Persistence Stuff
 

@@ -70,7 +70,7 @@ public class ClientEventHandler
     }
 
     /**
-     * Check for blocks that need a custom block highlight and draw if found.
+     * Check for blocks that need a custom block highlight and draw if checked.
      * Adapted from the vanilla highlight code.
      */
     @SubscribeEvent

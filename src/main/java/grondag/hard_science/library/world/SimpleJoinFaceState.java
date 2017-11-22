@@ -9,7 +9,7 @@ import net.minecraft.util.EnumFacing;
 public enum SimpleJoinFaceState
 {
     NO_FACE(0),
-    NONE(0), //must be after NO_FACE, overwrites NO_FACE in lookup table, should never be found by lookup
+    NONE(0), //must be after NO_FACE, overwrites NO_FACE in lookup table, should never be checked by lookup
     TOP(FaceSide.TOP.bitFlag),
     BOTTOM(FaceSide.BOTTOM.bitFlag),
     LEFT(FaceSide.LEFT.bitFlag),

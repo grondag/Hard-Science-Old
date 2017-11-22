@@ -9,9 +9,10 @@ public class ExcavationTask extends BuildingTask
     /**
      * Use for new instances.
      */
-    public ExcavationTask(BuildPlanningTask planningTask, PlacementSpecEntry entry)
+    public ExcavationTask(PlacementSpecEntry entry)
     {
-        super(planningTask, entry);
+        super(entry);
+        entry.constructionTaskID = this.getId();
     }
     
     /** Use for deserialization */

@@ -12,6 +12,7 @@ import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.NullDirtListener;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -20,7 +21,12 @@ import net.minecraft.world.World;
 
 public class BuildManager implements IReadWriteNBT, IDomainMember
 {
-    static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
+    /**
+     * For use by builds and job tasks related to construction that do not
+     * require world access and which don't have in-world machines to service them.
+     * For anything that requires world access, create a machine or use World Task Manager.
+     */
+    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
             new ThreadFactory()
             {
                 private AtomicInteger count = new AtomicInteger(1);
@@ -39,9 +45,9 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     
     private Int2ObjectOpenHashMap<Build> builds = new Int2ObjectOpenHashMap<Build>();
     
-    public Build newBuild(World inWorld)
+    public Build newBuild(World inWorld, AbstractPlacementSpec spec)
     {
-        Build result = new Build(this, inWorld);
+        Build result = new Build(this, inWorld, spec);
         this.builds.put(result.getId(), result);
         return result;
     }
@@ -73,8 +79,7 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
             {
                 if(subTag != null)
                 {
-                    Build b = new Build(this);
-                    b.deserializeID((NBTTagCompound) subTag);
+                    Build b = new Build(this, (NBTTagCompound) subTag);
                     this.builds.put(b.getId(), b);
                 }
             }   
@@ -94,5 +99,10 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
             }
             tag.setTag(ModNBTTag.BUILD_MANAGER_BUILDS, nbtJobs);
         }        
+    }
+    
+    public static void createBuildJob(EntityPlayer player, AbstractPlacementSpec spec)
+    {
+        
     }
 }

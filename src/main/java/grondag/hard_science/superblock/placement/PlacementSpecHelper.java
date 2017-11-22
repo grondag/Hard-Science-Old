@@ -9,6 +9,7 @@ import grondag.hard_science.superblock.placement.AbstractPlacementSpec.SinglePla
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec.SurfacePlacementSpec;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * Knows how to get the appropriate placement builder for a given stack.
@@ -49,7 +50,14 @@ public class PlacementSpecHelper
                 }
                 else
                 {
-                    return CuboidPlacementSpec.builder(placedStack, player, pPos);
+                    if(!item.isFixedRegionEnabled(placedStack) && item.getRegionSize(placedStack, false).equals(new BlockPos(1, 1, 1)))
+                    {
+                        return SinglePlacementSpec.builder(placedStack, player, pPos);
+                    }
+                    else
+                    {
+                        return CuboidPlacementSpec.builder(placedStack, player, pPos);
+                    }
                 }
                 
             case MATCH_CLICKED_BLOCK:

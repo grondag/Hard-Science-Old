@@ -585,7 +585,7 @@ public class LavaCell extends AbstractLavaCell
      * 
      * @param xOffset must be in range -1 to +1
      * @param zPositive must be in range -1 to +1
-     * @return LavaCell that was found, null if none was found, self if xOffset == 0 and zOffset == 0
+     * @return LavaCell that was checked, null if none was checked, self if xOffset == 0 and zOffset == 0
      */
     private LavaCell getFloorNeighbor(int xOffset, int zOffset)
     {
@@ -1274,7 +1274,7 @@ public class LavaCell extends AbstractLavaCell
         LavaCell candidate = entryCell.firstCell();
         
         /** 
-         * Tracks if connection was found earlier so can stop once out of range for new.
+         * Tracks if connection was checked earlier so can stop once out of range for new.
          */
         boolean wasConnectionFound = false;
         

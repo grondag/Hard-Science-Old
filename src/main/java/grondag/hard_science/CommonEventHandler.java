@@ -1,5 +1,6 @@
 package grondag.hard_science;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
@@ -8,7 +9,12 @@ import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.jobs.AbstractTask;
+import grondag.hard_science.simulator.base.jobs.TaskType;
 import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
+import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
@@ -22,6 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
 import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.BlockSnapshot;
@@ -164,6 +171,26 @@ public class CommonEventHandler
             
             // thought it might be more determinism if simulator runs after block/entity ticks
             Simulator.INSTANCE.onServerTick(event);
+            
+            // TODO: remove
+            // Temporary drone service
+            for(Domain domain : DomainManager.INSTANCE.getAllDomains())
+            {
+                try
+                {
+                    ExcavationTask task = (ExcavationTask) domain.JOB_MANAGER.claimReadyWork(TaskType.EXCAVATION, null).get();
+                    if(task != null)
+                    {
+                        World world = task.job().spec().getLocation().world();
+                        world.setBlockToAir(task.entry().pos());
+                        task.complete();
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     

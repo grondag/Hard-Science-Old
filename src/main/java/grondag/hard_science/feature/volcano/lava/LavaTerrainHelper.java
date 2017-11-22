@@ -173,7 +173,7 @@ public class LavaTerrainHelper
             }
             else
             {
-                // space is open, check for nearest drop if not already found and position is visible from origin
+                // space is open, check for nearest drop if not already checked and position is visible from origin
                 if(nearestFallDistance == NOT_FOUND
                         && isVisible 
                         && isOpenTerrainSpace(worldBuffer.getBlockState(PackedBlockPos.down(targetPos))))

@@ -7,11 +7,10 @@ import grondag.hard_science.library.varia.ILocalized;
 import grondag.hard_science.library.varia.Useful;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
@@ -69,7 +68,7 @@ public enum FilterMode implements IMessagePlusImmutable<FilterMode>, IReadWriteN
     
     
 
-    public boolean shouldAffectBlock(IBlockState blockState, World world, MutableBlockPos pos, ItemStack stack, EntityPlayer player)
+    public boolean shouldAffectBlock(IBlockState blockState, World world, BlockPos pos, ItemStack stack)
     {
         Block block = blockState.getBlock();
         

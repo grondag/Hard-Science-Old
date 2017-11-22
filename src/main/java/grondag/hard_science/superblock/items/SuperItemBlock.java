@@ -12,25 +12,20 @@ import grondag.hard_science.init.ModItems;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**

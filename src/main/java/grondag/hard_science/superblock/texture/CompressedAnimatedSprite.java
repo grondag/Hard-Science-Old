@@ -172,7 +172,7 @@ public class CompressedAnimatedSprite extends EnhancedSprite
                     }
                 }
                 
-                // will throw IO Exception and we will abort if not found
+                // will throw IO Exception and we will abort if not checked
                 IResource frameResouce = manager.getResource(frameLoc);
                 runner.submit(new FrameReader(frameResouce, frameIndex++));
                 
@@ -194,7 +194,7 @@ public class CompressedAnimatedSprite extends EnhancedSprite
             
         if(frameIndex == 0)
         {
-            Log.error(String.format("Unable to load animated texture %s because textures files not found.", this.getIconName()));
+            Log.error(String.format("Unable to load animated texture %s because textures files not checked.", this.getIconName()));
             this.isValid = false;
             return true;
         }

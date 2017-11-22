@@ -10,10 +10,10 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.hard_science.library.world.IntegerAABB;
+import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class PlacementResult
 {
@@ -127,10 +127,7 @@ public class PlacementResult
         return this.event.isExcavation;
     }
 
-    private void applyToWorld(ItemStack stackIn, EntityPlayer player, World worldIn)
-    {
-        this.builder.build();
-    }
+   
 
     public void apply(ItemStack stackIn, EntityPlayer player)
     {
@@ -155,7 +152,9 @@ public class PlacementResult
     
         case PLACE:
         case EXCAVATE:
-            this.applyToWorld(stackIn, player, player.world);
+            AbstractPlacementSpec spec = this.builder.build();
+            if(spec == null) return;
+            WorldTaskManager.enqueue(spec.worldTask(player));
             break;
     
         case UNDO_PLACEMENT:

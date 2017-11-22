@@ -68,7 +68,7 @@ public class PlacementPosition
             this.hitX = hitVec.x;
             this.hitY = hitVec.y;
             this.hitZ = hitVec.z;
-            this.inPos = item.isExcavator(stack) ? this.onPos : this.onPos.offset(this.onFace);
+            this.inPos = item != null && item.isExcavator(stack) ? this.onPos : this.onPos.offset(this.onFace);
         }
     }
 }

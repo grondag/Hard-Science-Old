@@ -26,7 +26,7 @@ import net.minecraft.world.World;
 
 
 /**
- * Random utilities that have not yet found a more appropriate home.
+ * Random utilities that have not yet checked a more appropriate home.
  */
 public class Useful 
 {

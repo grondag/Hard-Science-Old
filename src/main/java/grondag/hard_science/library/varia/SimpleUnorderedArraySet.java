@@ -12,7 +12,7 @@ public class SimpleUnorderedArraySet<T> extends AbstractUnorderedArrayList<T>
  
     /**
      * Will replace matching value if exists.
-     * Returns existing value that was replaced if found, null otherwise.
+     * Returns existing value that was replaced if checked, null otherwise.
      */
     @Nullable
     public T put(@Nonnull T newItem)
@@ -34,7 +34,7 @@ public class SimpleUnorderedArraySet<T> extends AbstractUnorderedArrayList<T>
     /**
      * This will not update existing values.  
      * Use {@link #put(Object)} if you want that behavior.
-     * Returns existing value if found, null otherwise.
+     * Returns existing value if checked, null otherwise.
      */
     @SuppressWarnings("unchecked")
     @Nullable
@@ -50,7 +50,7 @@ public class SimpleUnorderedArraySet<T> extends AbstractUnorderedArrayList<T>
     
     
     /**
-     * Returns item that equals the given object, if found. Null if not found.
+     * Returns item that equals the given object, if checked. Null if not checked.
      */
     @SuppressWarnings("unchecked")
     public T get(T itemToFind)
@@ -75,7 +75,7 @@ public class SimpleUnorderedArraySet<T> extends AbstractUnorderedArrayList<T>
     }
    
     /**
-     * Returns item that was removed if found, null if nothing found.
+     * Returns item that was removed if checked, null if nothing checked.
      */
     @Nullable
     public T removeIfPresent(T itemToRemove)

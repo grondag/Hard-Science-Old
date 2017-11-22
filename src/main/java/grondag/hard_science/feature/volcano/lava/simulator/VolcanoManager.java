@@ -180,7 +180,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
-        // always save *something* to prevent "not found" warning when there are no volcanos
+        // always save *something* to prevent "not checked" warning when there are no volcanos
         nbt.setBoolean(ModNBTTag.VOLCANO_MANAGER_IS_CREATED, true);
         
         // Do first because any changes made after this point aren't guaranteed to be saved

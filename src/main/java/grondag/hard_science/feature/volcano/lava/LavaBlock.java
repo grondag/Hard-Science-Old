@@ -124,7 +124,7 @@ public class LavaBlock extends TerrainDynamicBlock
             LavaCell cell = sim.cells.getCellIfExists(pos.getX(), pos.getY(), pos.getZ());
             if(cell == null)
             {
-                probeInfo.text("Cell not found.");
+                probeInfo.text("Cell not checked.");
             }
             else
             {

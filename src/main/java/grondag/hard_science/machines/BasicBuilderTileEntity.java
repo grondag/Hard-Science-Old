@@ -253,7 +253,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
         // look for a virtual block in current target chunk
         BlockPos targetPos = VirtualBlockTracker.INSTANCE.get(this.world).dequeue(checkPos);
         
-        // if nothing found in this chunk, or if we have cycled through queue to failures, move to next chunk and exit
+        // if nothing checked in this chunk, or if we have cycled through queue to failures, move to next chunk and exit
         if(targetPos == null || this.failuresThisChunk.contains(PackedBlockPos.pack(targetPos)))
         {
             
@@ -282,7 +282,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
             return;
         }
         
-        // look for a virtual block at target position, get state if found
+        // look for a virtual block at target position, get state if checked
         IBlockState oldState = this.world.getBlockState(targetPos);
         
         if(oldState.getBlock() != ModBlocks.virtual_block) return;

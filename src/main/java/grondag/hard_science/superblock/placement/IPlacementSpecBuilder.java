@@ -37,22 +37,13 @@ public interface IPlacementSpecBuilder
     
     
     /**
-       Used if user clicks to place a valid placement. Does the following:
-       <ul>
-       <li>Finalizes affected block positions and item stacks
-       <li>Selects optimal species if needed
-       <li>creates spec
-       <li>creates job w/ spec attached, all needed tasks
-           <ul>
-           <li>place virtual blocks in empty spaces (handled by fast, cost-free service)
-               virtual blocks reference job so can update it if removed
-           <li>initial synch of preview renders for occupied blocks
-           <li>excavation tasks
-           <li>fab tasks
-           <li>placement tasks
-           </ul>
-       </ul>
-     * @return
+       Creates a placement spec that can be submitted to the build manager.
+       Captures all information necessary for the build but should not
+       do any significant computation. <p>
+       
+       Defer internal work to the {@link AbstractPlacementSpec#entries()}
+       method so that it can happen off the game thread.
+       
      */
     public AbstractPlacementSpec build();
 

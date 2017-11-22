@@ -111,7 +111,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                 DomainManager dm = DomainManager.INSTANCE;
                 if(!PersistenceManager.loadNode(world, dm))
                 {
-                    Log.warn("Domain manager data not found.  Some world state may be lost.");
+                    Log.warn("Domain manager data not checked.  Some world state may be lost.");
                     dm.loadNew();
                     PersistenceManager.registerNode(world, dm);                   
                 }
@@ -122,13 +122,13 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                     this.lavaSimulator = new LavaSimulator(this.world);
                     if(!PersistenceManager.loadNode(world, this.volcanoManager))
                     {
-                        Log.warn("Volcano manager data not found - recreating.  Some world state may be lost.");
+                        Log.warn("Volcano manager data not checked - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.volcanoManager);
                     }
                     
                     if(!PersistenceManager.loadNode(world, this.lavaSimulator))
                     {
-                        Log.warn("Lava simulator data not found - recreating.  Some world state may be lost.");
+                        Log.warn("Lava simulator data not checked - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.lavaSimulator);
                     }
                 }
@@ -136,7 +136,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
             else
     	    {
                 Log.info("Creating new simulation.");
-                // Not found, assume new game and new simulation
+                // Not checked, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
     	        this.lastSimTick = 0;
     	        
