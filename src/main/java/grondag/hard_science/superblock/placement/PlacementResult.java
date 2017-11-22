@@ -152,9 +152,12 @@ public class PlacementResult
     
         case PLACE:
         case EXCAVATE:
-            AbstractPlacementSpec spec = this.builder.build();
-            if(spec == null) return;
-            WorldTaskManager.enqueue(spec.worldTask(player));
+            if(!player.world.isRemote)
+            {
+                AbstractPlacementSpec spec = this.builder.build();
+                if(spec == null) return;
+                WorldTaskManager.enqueue(spec.worldTask(player));
+            }
             break;
     
         case UNDO_PLACEMENT:

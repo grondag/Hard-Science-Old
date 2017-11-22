@@ -21,6 +21,7 @@ import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.RequestPriority;
@@ -1037,11 +1038,15 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 // by the player.
                 return new IWorldTask()
                 {
+                    private Job job = new Job(RequestPriority.MEDIUM, player, CuboidPlacementSpec.this);
+                    Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
+                    
                     /**
                      * Block positions to be checked. Will initially contain
-                     * only the starting (user-clicked) position.
+                     * only the starting (user-clicked) position. Entry is
+                     * antecedent, or null if no dependency.
                      */
-                    ArrayDeque<BlockPos> queue = new ArrayDeque<BlockPos>();
+                    ArrayDeque<Pair<BlockPos, ExcavationTask>> queue = new ArrayDeque<Pair<BlockPos, ExcavationTask>>();
                     
                     /**
                      * Block positions that have been tested.
@@ -1058,24 +1063,29 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     int index = 0;
                     
                     {
-                        queue.add(location);
+                        scheduleVisitIfNotAlreadyVisited(location, null);
+                        
+                        Log.info("Starting excavation from " + location.toString());
                     }
                     
                     @Override
                     public int runInServerTick(int maxOperations)
                     {
+                        Log.info("Starting run, checked contains %d and queue contains %d", checked.size(), queue.size());
+                        
                         if(queue.isEmpty()) return 0;
                         
                         int opCount = 0;
                         while(opCount < maxOperations)
                         {
-                            BlockPos pos = queue.poll();
-                            if(pos == null) break;
+                            Pair<BlockPos, ExcavationTask> visit = queue.poll();
+                            if(visit == null) break;
+                            
+                            BlockPos pos = visit.getLeft();
+                            
+                            Log.info("Checking position " + pos.toString());
                             
                             opCount++;
-                            
-                            // mark this as checked
-                            checked.add(pos);
                             
                             // is the position inside our region?
                             if(!region.contains(pos)) continue;
@@ -1087,6 +1097,10 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                             
                             IBlockState blockState = world.getBlockState(pos);
                             
+                            // will be antecedent for any branches from here
+                            // if this is empty space, then will be antecedent for this visit
+                            ExcavationTask branchAntecedent = visit.getRight();
+                            
                             // is the block at the position affected
                             // by this excavation?
                             if(CuboidPlacementSpec.this.filterMode().shouldAffectBlock(
@@ -1095,8 +1109,17 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                                     pos, 
                                     CuboidPlacementSpec.this.sourceStack))
                             {
-                                builder.add(CuboidPlacementSpec.this.new SingleStackEntry(index++, pos));
+                                SingleStackEntry entry = CuboidPlacementSpec.this.new SingleStackEntry(index++, pos);
+                                builder.add(entry);
+                                branchAntecedent = new ExcavationTask(entry);
+                                job.addTask(branchAntecedent);
+                                if(visit.getRight() != null)
+                                {
+                                    AbstractTask.link(visit.getRight(), branchAntecedent);
+                                }
                                 canPassThrough = true;
+                                
+                                Log.info("Added position " + pos.toString());
                             }
                             
                             // even if we can't excavate the block, 
@@ -1108,13 +1131,15 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                             // checked.
                             if(canPassThrough)
                             {
+                                Log.info("Branching from position " + pos.toString());
+                                
                                 opCount++;
-                                if(!checked.contains(pos.down())) queue.addLast(pos.down());
-                                if(!checked.contains(pos.east())) queue.addLast(pos.east());
-                                if(!checked.contains(pos.west())) queue.addLast(pos.west());
-                                if(!checked.contains(pos.north())) queue.addLast(pos.north());
-                                if(!checked.contains(pos.south())) queue.addLast(pos.south());
-                                if(!checked.contains(pos.up())) queue.addLast(pos.up());
+                                scheduleVisitIfNotAlreadyVisited(pos.up(), branchAntecedent);
+                                scheduleVisitIfNotAlreadyVisited(pos.down(), branchAntecedent);
+                                scheduleVisitIfNotAlreadyVisited(pos.east(), branchAntecedent);
+                                scheduleVisitIfNotAlreadyVisited(pos.west(), branchAntecedent);
+                                scheduleVisitIfNotAlreadyVisited(pos.north(), branchAntecedent);
+                                scheduleVisitIfNotAlreadyVisited(pos.south(), branchAntecedent);
                             }
                             
                         }
@@ -1125,10 +1150,19 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                             CuboidPlacementSpec.this.entries = builder.build();
                             this.checked.clear();
                             
-                            // TODO: submit job
+                            Log.info("Finalizing job");
+                            
+                            if(domain != null) domain.JOB_MANAGER.addJob(job);
                         }
                         
                         return opCount;
+                    }
+                    
+                    private void scheduleVisitIfNotAlreadyVisited(BlockPos pos, ExcavationTask task)
+                    {
+                        if(this.checked.contains(pos)) return;
+                        this.checked.add(pos);
+                        this.queue.addLast(Pair.of(pos, task));
                     }
 
                     @Override
