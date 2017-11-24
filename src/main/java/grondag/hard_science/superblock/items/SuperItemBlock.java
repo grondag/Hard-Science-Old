@@ -193,7 +193,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 //        return isVirtual(stack) ? VirtualBlock.VIRTUAL_BLOCK_SOUND : getStackSubstance(stack).soundType;
     }
     
-    public static boolean isVirtual(ItemStack stack)
+    public boolean isVirtual(ItemStack stack)
     {
         return stack.getItem() == ModItems.virtual_block;
     }

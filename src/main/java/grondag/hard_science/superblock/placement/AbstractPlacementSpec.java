@@ -67,9 +67,24 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     protected boolean isExcavation;
     
     /**
+     * True if only places/removes virtual blocks. 
+     * Derived from the placement item that created this spec.
+     */
+    protected boolean isVirtual;
+    
+    /**
      * Will be adjusted to a value that makes sense if we are excavating.
      */
     protected FilterMode filterMode;
+    
+    protected AbstractPlacementSpec() {};
+            
+    protected AbstractPlacementSpec(PlacementSpecBuilder builder)
+    {
+        this.isExcavation = builder.isExcavation;
+        this.isVirtual = builder.isVirtual;
+        this.filterMode = builder.effectiveFilterMode;
+    }
     
     /**
      * Used for serialization, factory methods
@@ -141,6 +156,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         this.deserializeLocation(tag);
         this.playerName = tag.getString(ModNBTTag.PLACEMENT_PLAYER_NAME);
         this.isExcavation = tag.getBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED);
+        this.isVirtual = tag.getBoolean(ModNBTTag.PLACEMENT_IS_VIRTUAL);
         this.filterMode = FilterMode.FILL_REPLACEABLE.deserializeNBT(tag);
     }
 
@@ -150,6 +166,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         this.serializeLocation(tag);
         tag.setString(ModNBTTag.PLACEMENT_PLAYER_NAME, this.playerName);
         tag.setBoolean(ModNBTTag.PLACEMENT_DELETE_ENABLED, this.isExcavation);
+        tag.setBoolean(ModNBTTag.PLACEMENT_IS_VIRTUAL, this.isVirtual);
         this.filterMode.serializeNBT(tag);
     }
 
@@ -224,6 +241,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         protected Boolean isValid = null;
         protected final TargetMode selectionMode;
         protected final boolean isExcavation;
+        protected final boolean isVirtual;
         protected final boolean isSelectionInProgress;
 
         /**
@@ -240,6 +258,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             this.isSelectionInProgress = this.placementItem.isFixedRegionSelectionInProgress(placedStack);
             this.selectionMode = this.placementItem.getTargetMode(placedStack);
             this.isExcavation = this.placementItem.isExcavator(placedStack);
+            this.isVirtual = this.placementItem.isVirtual(placedStack);
             
             FilterMode filterMode =  this.placementItem.getFilterMode(placedStack);
 
@@ -408,6 +427,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         
         protected ImmutableList<PlacementSpecEntry> entries;
         
+        protected SingleStackPlacementSpec() {};
+
+        protected SingleStackPlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         @Override
         public ImmutableList<PlacementSpecEntry> entries()
         {
@@ -513,6 +539,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     {
         protected boolean isHollow;
 
+        protected VolumetricPlacementSpec() {};
+        
+        protected VolumetricPlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
@@ -581,7 +614,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
 
                         IBlockState blockState = world.getBlockState(pos);
                         if(blockState.getBlock().isAir(blockState, world, pos) 
-                                || !this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack))
+                                || !this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack, this.isVirtual))
                         {
                             set.add(pos.toImmutable());
                             if(foundCount++ == 16) break;
@@ -600,7 +633,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                         }
 
                         IBlockState blockState = world.getBlockState(pos);
-                        if(!this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack))
+                        if(!this.effectiveFilterMode.shouldAffectBlock(blockState, world, pos, this.placedStack, this.isVirtual))
                         {
                             set.add(pos.toImmutable());
                             if(foundCount++ == 16) break;
@@ -628,6 +661,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public static class SinglePlacementSpec extends SingleStackPlacementSpec
     {
+        protected SinglePlacementSpec() {};
+        
+        protected SinglePlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         protected static class SingleBuilder extends SingleStackBuilder
         {
 
@@ -639,9 +679,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             @Override
             protected AbstractPlacementSpec buildSpec()
             {
-                SinglePlacementSpec result = new SinglePlacementSpec();
-                result.filterMode = this.effectiveFilterMode;
-                result.isExcavation = this.isExcavation;
+                SinglePlacementSpec result = new SinglePlacementSpec(this);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
                 result.placementItem = this.placementItem;
@@ -725,7 +763,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                                 blockState, 
                                 world, 
                                 pos, 
-                                SinglePlacementSpec.this.sourceStack))
+                                SinglePlacementSpec.this.sourceStack,
+                                SinglePlacementSpec.this.isVirtual))
                         {
                         
                             Job job = new Job(RequestPriority.MEDIUM, player, SinglePlacementSpec.this);
@@ -764,6 +803,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     {
         private BlockRegion region;
         
+        protected CuboidPlacementSpec() {};
+        
+        protected CuboidPlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         protected static class CuboidBuilder extends VolumetricBuilder
         {
 
@@ -783,9 +829,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             @Override
             protected AbstractPlacementSpec buildSpec()
             {
-                CuboidPlacementSpec result = new CuboidPlacementSpec();
-                result.filterMode = this.effectiveFilterMode;
-                result.isExcavation = this.isExcavation;
+                CuboidPlacementSpec result = new CuboidPlacementSpec(this);
                 result.playerName = this.player.getName();
                 result.sourceStack = this.placedStack;
                 result.placementItem = this.placementItem;
@@ -1134,7 +1178,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                                     blockState, 
                                     world, 
                                     pos, 
-                                    CuboidPlacementSpec.this.sourceStack))
+                                    CuboidPlacementSpec.this.sourceStack,
+                                    isVirtual))
                             {
                                 SingleStackEntry entry = CuboidPlacementSpec.this.new SingleStackEntry(index++, pos);
                                 builder.add(entry);
@@ -1215,6 +1260,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public static class SurfacePlacementSpec extends SingleStackPlacementSpec
     {
+        protected SurfacePlacementSpec() {};
+        
+        protected SurfacePlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         protected static class SurfaceBuilder extends SingleStackBuilder
         {
 
@@ -1283,6 +1335,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public static class PredicatePlacementSpec extends SingleStackPlacementSpec
     {
+        protected PredicatePlacementSpec() {};
+        
+        protected PredicatePlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         protected static class PredicateBuilder extends SingleStackBuilder
         {
 
@@ -1348,6 +1407,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      */
     public static class AdditivePlacementSpec extends SurfacePlacementSpec
     {
+        protected AdditivePlacementSpec() {};
+        
+        protected AdditivePlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         @Override
         public PlacementSpecType specType()
         {
@@ -1402,6 +1468,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     /** placeholder class for CSG multiblock placements */
     public static class CSGPlacementSpec extends VolumetricPlacementSpec
     {
+        protected CSGPlacementSpec() {};
+        
+        protected CSGPlacementSpec(PlacementSpecBuilder builder)
+        {
+            super(builder);
+        }
+        
         protected static class CSGBuilder extends VolumetricBuilder
         {
             protected CSGBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)

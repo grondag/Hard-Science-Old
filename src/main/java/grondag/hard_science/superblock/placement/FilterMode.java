@@ -5,6 +5,7 @@ import grondag.hard_science.library.serialization.IReadWriteNBTImmutable;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.ILocalized;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -67,18 +68,27 @@ public enum FilterMode implements IMessagePlusImmutable<FilterMode>, IReadWriteN
     }
     
     
-
-    public boolean shouldAffectBlock(IBlockState blockState, World world, BlockPos pos, ItemStack stack)
+    /**
+     * If isVirtual then will only affect virtual blocks and empty space.
+     */
+    public boolean shouldAffectBlock(IBlockState blockState, World world, BlockPos pos, ItemStack stack, boolean isVirtual)
     {
         Block block = blockState.getBlock();
         
         switch(this)
         {
         case FILL_REPLACEABLE:
-            return block.isReplaceable(world, pos);
+            return block.isReplaceable(world, pos) && !VirtualBlock.isVirtualBlock(block);
         
         case REPLACE_ALL:
-            return true;
+            if(isVirtual)
+            {
+                return block.isReplaceable(world, pos) || VirtualBlock.isVirtualBlock(block);
+            }
+            else
+            {
+                return !VirtualBlock.isVirtualBlock(block);
+            }
             
         case REPLACE_ALL_EXCEPT:
             //TODO
@@ -89,7 +99,8 @@ public enum FilterMode implements IMessagePlusImmutable<FilterMode>, IReadWriteN
             return false;
             
         case REPLACE_SOLID:
-            return !block.isReplaceable(world, pos);
+            // test for non-virtual relies on fact that all virtual blocks are replaceable
+            return isVirtual ? VirtualBlock.isVirtualBlock(block) : !block.isReplaceable(world, pos);
         
         default:
             return false;

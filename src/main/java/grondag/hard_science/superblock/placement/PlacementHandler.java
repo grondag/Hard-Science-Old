@@ -466,6 +466,7 @@ public abstract class PlacementHandler
     {
         if(!PlacementItem.isPlacementItem(stack)) return;
         PlacementItem item = (PlacementItem)stack.getItem();
+        boolean isVirtual = item.isVirtual(stack);
         
         FilterMode filterMode =  item.getFilterMode(stack);
         boolean isExcavating = false; //item.isDeleteModeEnabled(stack);
@@ -482,7 +483,7 @@ public abstract class PlacementHandler
             for(BlockPos.MutableBlockPos pos : region.positions())
             {
                 IBlockState blockState = world.getBlockState(pos);
-                if(blockState.getBlock().isAir(blockState, world, pos) || !filterMode.shouldAffectBlock(blockState, world, pos, stack))
+                if(blockState.getBlock().isAir(blockState, world, pos) || !filterMode.shouldAffectBlock(blockState, world, pos, stack, isVirtual))
                 {
                     set.add(pos.toImmutable());
                 }
@@ -493,7 +494,7 @@ public abstract class PlacementHandler
             for(BlockPos.MutableBlockPos pos : region.includedPositions())
             {
                 IBlockState blockState = world.getBlockState(pos);
-                if(!filterMode.shouldAffectBlock(blockState, world, pos, stack))
+                if(!filterMode.shouldAffectBlock(blockState, world, pos, stack, isVirtual))
                 {
                     set.add(pos.toImmutable());
                 }

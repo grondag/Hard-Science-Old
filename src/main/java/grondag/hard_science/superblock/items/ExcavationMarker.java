@@ -105,5 +105,11 @@ public class ExcavationMarker extends Item implements PlacementItem
     {
         return true;
     }
+
+    @Override
+    public boolean isVirtual(ItemStack stack)
+    {
+        return false;
+    }
     
 }

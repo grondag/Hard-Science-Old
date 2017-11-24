@@ -187,6 +187,9 @@ public interface PlacementItem
     /** True if item places air blocks or carves empty space in CSG blocks */
     public boolean isExcavator(ItemStack placedStack);
     
+    /** True if only places/affects virtual blocks. */
+    public boolean isVirtual(ItemStack stack);
+    
     /////////////////////////////////////////////////////
     // DEFAULT MEMBERS
     /////////////////////////////////////////////////////

@@ -151,4 +151,6 @@ public class ModNBTTag
 
     public static final String DOMAIN_ACTIVE_DOMAINS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
+    public static final String PLACEMENT_IS_VIRTUAL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
 }

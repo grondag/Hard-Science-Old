@@ -47,6 +47,11 @@ public class VirtualBlock extends SuperModelBlock
     
 //    public static final SoundType VIRTUAL_BLOCK_SOUND = new SoundType(6.0F, 2.0F, SoundEvents.BLOCK_CLOTH_BREAK, SoundEvents.BLOCK_CLOTH_STEP, SoundEvents.BLOCK_CLOTH_PLACE, SoundEvents.BLOCK_CLOTH_HIT, SoundEvents.BLOCK_CLOTH_FALL);
 
+    public static boolean isVirtualBlock(Block block)
+    {
+        return block instanceof SuperBlock && ((SuperBlock)block).isVirtual();
+    }
+    
     public VirtualBlock(String blockName)
     {
         super(blockName, Material.AIR, BlockRenderMode.TESR, WorldLightOpacity.TRANSPARENT, false, false);
