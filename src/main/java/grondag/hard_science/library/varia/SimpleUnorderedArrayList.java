@@ -14,14 +14,17 @@ public class SimpleUnorderedArrayList<T> extends AbstractUnorderedArrayList<T>
         super.add(newItem);
     }
     
-    @Override
-    public void addIfNotPresent(T newItem)
+    /**
+     * Returns true if was added (not already present)
+     */
+    public boolean addIfNotPresent(T newItem)
     {
         for(int i = this.size - 1; i >= 0; i--)
         {
-            if(items[i] == newItem) return;
+            if(items[i] == newItem) return false;
         }
         this.add(newItem);
+        return true;
     }
     
     public void removeIfPresent(T target)

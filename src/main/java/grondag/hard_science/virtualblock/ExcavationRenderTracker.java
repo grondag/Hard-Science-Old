@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.world.WorldMap;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.jobs.Job;
+import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -33,6 +35,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
     public void add(Job job)
     {
         ExcavationRenderEntry entry = new ExcavationRenderEntry(job);
+        Log.info("id = %d new Entry, valid=%s", entry.id, Boolean.toString(entry.isValid()));
         if(entry.isValid())
         {
             synchronized(this)
@@ -40,14 +43,14 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
                 this.get(entry.dimensionID).put(entry.id, entry);
             }
             
-            PacketExcavationRenderUpdate packet = new PacketExcavationRenderUpdate(entry);
             for(Map.Entry<EntityPlayerMP, PlayerData> playerEntry : playerTracking.entrySet())
             {
+                
+                Log.info("adding listeners for %s", playerEntry.getKey().getName());
                 PlayerData pd = playerEntry.getValue();
                 if(pd.dimensionID == entry.dimensionID && pd.domainID == entry.domainID)
                 {
-                    entry.addListener(playerEntry.getKey());
-                    ModMessages.INSTANCE.sendTo(packet, playerEntry.getKey());
+                    entry.addListener(playerEntry.getKey(), true);
                 }
             }
         }
@@ -65,23 +68,27 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
             if(pd.dimensionID == entry.dimensionID && pd.domainID == entry.domainID)
             {
                 entry.removeListener(playerEntry.getKey());
-                ModMessages.INSTANCE.sendTo(packet, playerEntry.getKey());
+                WorldTaskManager.sendPacketFromServerThread(packet, playerEntry.getKey());
             }
         }
     }
     
     /**
-     * Should only be called from server thread.
      * Call when player joins server, changes dimension or changes active domain.
      */
     public void updatePlayerTracking(EntityPlayerMP player)
     {
+        Log.info("updatePlayerTracking for %s", player.getName());
+        
         PlayerData newData = new PlayerData(player);
         PlayerData oldData = playerTracking.get(player);
         
         if(oldData != null && oldData.dimensionID == newData.dimensionID && oldData.domainID == newData.domainID)
+        {
             // no changes
+            Log.info("updatePlayerTracking exit no changes");
             return;
+        }
         
         playerTracking.put(player, newData);
 
@@ -112,14 +119,14 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
                 {
                     if(entry.domainID == newData.domainID)
                     {
-                        entry.addListener(player);
-                        packet.addRender(entry);
+                        entry.addListener(player, false);
+                        if(entry.isFirstComputeDone()) packet.addRender(entry);
                     }
                 }
             }
         }
         
-        ModMessages.INSTANCE.sendTo(packet, player);
+        WorldTaskManager.sendPacketFromServerThread(packet, player);
     }
     
     public void stopPlayerTracking(EntityPlayerMP player)

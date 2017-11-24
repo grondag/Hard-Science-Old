@@ -2,6 +2,10 @@ package grondag.hard_science.network.server_to_client;
 
 import java.util.ArrayList;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import grondag.hard_science.Log;
 import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import grondag.hard_science.virtualblock.ExcavationRenderEntry;
@@ -24,17 +28,19 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
         final int id;
         final IntegerAABB aabb;
         final boolean isExchange;
+        final BlockPos[] positions;
         
         private RenderData(ExcavationRenderEntry entry)
         {
-            this(entry.id, entry.aabb(), entry.isExchange);
+            this(entry.id, entry.aabb(), entry.isExchange, entry.renderPositions());
         }
         
-        private RenderData(int id, IntegerAABB aabb, boolean isExchange)
+        private RenderData(int id, @Nonnull IntegerAABB aabb, boolean isExchange, @Nullable BlockPos[] positions)
         {
             this.id = id;
             this.aabb = aabb;
             this.isExchange = isExchange;
+            this.positions = positions;
         }
     }
 
@@ -53,6 +59,16 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
             pBuff.writeLong(r.aabb.minPos().toLong());
             pBuff.writeLong(r.aabb.maxPos().toLong());
             pBuff.writeBoolean(r.isExchange);
+            pBuff.writeInt(r.positions == null ? 0 : r.positions.length);
+            if(r.positions != null)
+            {
+                Log.info("id %d Refresh toBytes position count = %d", r.id, r.positions == null ? 0 : r.positions.length);
+
+                for(BlockPos pos : r.positions)
+                {
+                    pBuff.writeLong(pos.toLong());
+                }
+            }
         }
     }
 
@@ -68,7 +84,24 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
                 BlockPos minPos = BlockPos.fromLong(pBuff.readLong());
                 BlockPos maxPos = BlockPos.fromLong(pBuff.readLong());
                 boolean isExchange = pBuff.readBoolean();
-                this.renders.add(new RenderData(id, new IntegerAABB(minPos, maxPos), isExchange));
+                int positionCount = pBuff.readInt();
+                BlockPos[] list;
+                if(positionCount == 0)
+                {
+                    list = null;
+                }
+                else
+                {
+                    list = new BlockPos[positionCount];
+                    for(int j = 0; j < positionCount; j++)
+                    {
+                        list[j] = BlockPos.fromLong(pBuff.readLong());
+                    }
+                    
+                }
+                Log.info("id %d Refresh toBytes position count = %d", id, list == null ? 0 : list.length);
+
+                this.renders.add(new RenderData(id, new IntegerAABB(minPos, maxPos), isExchange, list));
             }
         }
     }
@@ -83,7 +116,7 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
             for(int i = 0; i < message.renders.size(); i++)
             {
                 RenderData data = message.renders.get(i);
-                entries[i] = new ExcavationRenderer(data.id, data.aabb.toAABB(), data.isExchange);
+                entries[i] = new ExcavationRenderer(data.id, data.aabb.toAABB(), data.isExchange, data.positions);
             }
             ExcavationRenderManager.addOrUpdate(entries);
         }

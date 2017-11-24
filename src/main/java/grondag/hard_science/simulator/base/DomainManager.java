@@ -407,7 +407,7 @@ public class DomainManager implements IPersistenceNode
             for(String playerName : nbtPlayerDomains.getKeySet())
             {
                 Domain d = this.assignedNumbersAuthority().domainIndex().get(nbtPlayerDomains.getInteger(playerName));
-                if(d != null) this.playerActiveDomains.put(playerName, d);
+                if(d != null) this.playerIntrinsicDomains.put(playerName, d);
             }
         }
         
@@ -502,8 +502,6 @@ public class DomainManager implements IPersistenceNode
     
     /**
      * Set the player's currently active domain. 
-     * Should only call from world thread, due to call
-     * to ExcavationRenderTracker, which has that constraint.
      */
     public void setActiveDomain(EntityPlayerMP player, Domain domain)
     {

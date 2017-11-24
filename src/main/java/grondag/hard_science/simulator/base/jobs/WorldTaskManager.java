@@ -2,6 +2,13 @@ package grondag.hard_science.simulator.base.jobs;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import grondag.hard_science.Log;
+import grondag.hard_science.network.ModMessages;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.server.FMLServerHandler;
+
 /**
  *  Maintains a queue of tasks that require world access and executes them in FIFO order.  
  *   
@@ -74,5 +81,30 @@ public class WorldTaskManager
     public static void enqueueImmediate(Runnable task)
     {
         immediateTasks.offer(task);
+    }
+    
+    /**
+     * Use to send packets during next world tick if not running on server thread. 
+     * Don't think network wrapper supports concurrent access.
+     */
+    public static void sendPacketFromServerThread(IMessage message, EntityPlayerMP player)
+    {
+        if(FMLCommonHandler.instance().getMinecraftServerInstance().isCallingFromMinecraftThread())
+        {
+            Log.info("sending direct packet");
+            ModMessages.INSTANCE.sendTo(message, player);
+        }
+        else
+        {
+            Log.info("sending queued packet");
+            enqueueImmediate(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    ModMessages.INSTANCE.sendTo(message, player);
+                }
+            });
+        }
     }
 }

@@ -42,16 +42,6 @@ public class AbstractUnorderedArrayList<T> implements Iterable<T>
         this.items[size++] = newItem;
     }
     
-
-    protected void addIfNotPresent(T newItem)
-    {
-        for(int i = this.size - 1; i >= 0; i--)
-        {
-            if(items[i] == newItem) return;
-        }
-        this.add(newItem);
-    }
-    
     /** returns index of item if it exists in this list. -1 if not. */
     public int findIndex(T itemToFind)
     {

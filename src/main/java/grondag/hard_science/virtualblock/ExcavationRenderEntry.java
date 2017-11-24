@@ -1,8 +1,14 @@
 package grondag.hard_science.virtualblock;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nullable;
+
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.ModMessages;
@@ -43,11 +49,16 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     
     private IntegerAABB aabb;
     
+    private boolean isFirstComputeDone = false;
+    
+    /** Non-null if should render individual renderPositions instead of AABB */
+    private BlockPos[] renderPositions = null;
+    
     private Int2ObjectMap<AtomicInteger> xCounts = new Int2ObjectOpenHashMap<AtomicInteger>();
     private Int2ObjectMap<AtomicInteger> yCounts = new Int2ObjectOpenHashMap<AtomicInteger>();
     private Int2ObjectMap<AtomicInteger> zCounts = new Int2ObjectOpenHashMap<AtomicInteger>();
     
-    private AtomicInteger totalCount = new AtomicInteger(0);
+    private Set<BlockPos> positions = Collections.synchronizedSet(new HashSet<BlockPos>());
     
     private boolean isValid = true;
     
@@ -67,7 +78,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
      * If becomes dirty while computation not in progress, 
      * {@link #setDirty()} will submit for computation.
      */
-    private AtomicBoolean isDirty = new AtomicBoolean(false);
+    private AtomicBoolean isDirty = new AtomicBoolean(true);
     
     /**
      * Players who could be viewing this excavation and should received client-side updates.
@@ -76,7 +87,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     
     private void addPos(BlockPos pos)
     {
-        totalCount.incrementAndGet();
+        this.positions.add(pos);
         
         synchronized(xCounts)
         {
@@ -126,7 +137,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
      */
     private boolean removePos(BlockPos pos)
     {
-        totalCount.decrementAndGet();
+        this.positions.remove(pos);
         boolean gotZero = xCounts.get(pos.getX()).decrementAndGet() == 0;
         gotZero = yCounts.get(pos.getY()).decrementAndGet() == 0 || gotZero;
         gotZero = zCounts.get(pos.getZ()).decrementAndGet() == 0 || gotZero;
@@ -139,11 +150,16 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     public ExcavationRenderEntry(Job job)
     {
         this.id = nextID++;
+        
+        Log.info("id = %d new Entry constructor", this.id);
+        
         this.domainID = job.getDomain().getId();
         
         AbstractPlacementSpec spec = job.spec();
         if(spec != null && spec.entries() != null && !spec.entries().isEmpty())
         {
+            Log.info("id = %d new Entry constructor - found spec with %d entries", this.id, spec.entries().size());
+            
             this.isExchange = !spec.isExcavation();
             this.dimensionID = spec.getLocation().dimensionID();
             
@@ -160,12 +176,14 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
                 }
             }
             
-            if(ExcavationRenderEntry.this.totalCount.get() == 0)
+            if(ExcavationRenderEntry.this.positions.size() == 0)
             {
+                Log.info("id = %d new Entry constructor - invalid", this.id);
                 this.isValid = false;
             }
             else
             {
+                Log.info("id = %d new Entry constructor - launching compute", this.id);
                 ExcavationRenderEntry.this.compute();
             }
         }
@@ -181,7 +199,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     public void onTaskComplete(AbstractTask task)
     {
         boolean needsCompute = this.removePos(((BuildingTask)task).entry().pos());
-        this.isValid = this.isValid && this.totalCount.get() > 0;
+        this.isValid = this.isValid && this.positions.size() > 0;
         if(this.isValid)
         {
             if(needsCompute) this.setDirty();
@@ -198,9 +216,19 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         this.isDirty.compareAndSet(false, true);
         this.compute();
     }
+    
+    /**
+     * If false, can't send packets with this.
+     * Implies compute in progress or to be scheduled.
+     */
+    public boolean isFirstComputeDone()
+    {
+        return this.isDirty.get();
+    }
 
     private void compute()
     {
+        Log.info("id = %d Compute called. Already running = %s", this.id, Boolean.toString(this.isScheduled.get()));
         if(this.isScheduled.compareAndSet(false, true))
         {
             BuildManager.EXECUTOR.execute(this);
@@ -210,10 +238,15 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     @Override
     public void run()
     {
+        Log.info("id = %d Compute running.", this.id);
+        
         this.isDirty.set(false);
         
-        if(this.totalCount.get() == 0)
+        int count = this.positions.size();
+        
+        if(count == 0)
         {
+            Log.info("id = %d Compute existing due to empty positions.", this.id);
             this.updateListeners();
             ExcavationRenderTracker.INSTANCE.remove(this);
             return;
@@ -254,13 +287,34 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         
         IntegerAABB newBox = new IntegerAABB(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
         
+        // always send first time computed
+        boolean needsListenerUpdate = !this.isFirstComputeDone;
+        this.isFirstComputeDone = true;
+        
         if(!newBox.equals(this.aabb))
         {   
             this.aabb = newBox;
-            this.updateListeners();
+            needsListenerUpdate = true;
         }
         
-        if(this.isDirty.get() && this.totalCount.get() > 0) 
+        if(count <= 16 && (this.renderPositions == null || this.renderPositions.length != count))
+        {
+            synchronized(this.positions)
+            {
+                BlockPos[] newPositions = new BlockPos[this.positions.size()];
+                newPositions = this.positions.toArray(newPositions);
+                this.renderPositions = newPositions;
+            }
+            needsListenerUpdate = true;
+            Log.info("id %d Computed render position length = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
+        }
+        
+        Log.info("id = %d Compute done, updateListeners=%s, isDirty=%s", this.id, Boolean.toString(needsListenerUpdate),
+                Boolean.toString(this.isDirty.get()));
+        
+        if(needsListenerUpdate) this.updateListeners();
+        
+        if(this.isDirty.get() && count > 0) 
             BuildManager.EXECUTOR.execute(this);
         else
             this.isScheduled.set(false);
@@ -280,11 +334,20 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         return aabb;
     }
     
-    public void addListener(EntityPlayerMP listener)
+    public void addListener(EntityPlayerMP listener, boolean sendPacketIfNew)
     {
+        Log.info("id=%d addListenger sendIfNew=%s, isValue=%s, isFirstComputeDone=%s",
+                this.id,
+                Boolean.toString(sendPacketIfNew),
+                Boolean.toString(isValid),
+                Boolean.toString(isFirstComputeDone));
+        
         synchronized(this.listeners)
         {
-            this.listeners.addIfNotPresent(listener);
+            if(this.listeners.addIfNotPresent(listener) && sendPacketIfNew && this.isValid && this.isFirstComputeDone)
+            {
+                WorldTaskManager.sendPacketFromServerThread(new PacketExcavationRenderUpdate(ExcavationRenderEntry.this), listener);
+            }
         }
     }
     
@@ -304,7 +367,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         WorldTaskManager.enqueueImmediate(new Runnable() 
         {
             PacketExcavationRenderUpdate packet = 
-                    ExcavationRenderEntry.this.isValid && ExcavationRenderEntry.this.totalCount.get() > 0
+                    ExcavationRenderEntry.this.isValid && ExcavationRenderEntry.this.positions.size() > 0
                         // update
                         ? new PacketExcavationRenderUpdate(ExcavationRenderEntry.this)
                         // remove
@@ -325,5 +388,16 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
                 }
             }
         });
+    }
+
+    /**
+     * Will be non-null if should render individual renderPositions. 
+     * Populated when position count is small enough not to be a problem.
+     */
+    @Nullable
+    public BlockPos[] renderPositions()
+    {
+        Log.info("id %d Render position retrieval = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
+        return this.renderPositions;
     }
 }

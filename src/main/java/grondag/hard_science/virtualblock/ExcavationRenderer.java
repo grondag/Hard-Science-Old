@@ -1,10 +1,15 @@
 package grondag.hard_science.virtualblock;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import grondag.hard_science.Log;
 import grondag.hard_science.library.render.RenderUtil;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -26,17 +31,25 @@ public class ExcavationRenderer
     
     private Vec3d lastEyePosition;
     
-    public ExcavationRenderer(int id, AxisAlignedBB aabb, boolean isExchange)
+    /**
+     * If non-null, then we should render individual positions instead of AABB.
+     */
+    private BlockPos[] positions;
+    
+    public ExcavationRenderer(int id, @Nonnull AxisAlignedBB aabb, boolean isExchange, @Nullable BlockPos[] positions)
     {
         this.id = id;
         this.isExchange = isExchange;
-        this.setBounds(aabb);
+        this.setBounds(aabb, positions);
     }
     
-    public void setBounds(AxisAlignedBB bounds)
+    public void setBounds(@Nonnull AxisAlignedBB bounds, @Nullable BlockPos[] positions)
     {
         this.aabb = bounds;
         this.visibilityBounds = bounds.grow(192);
+        this.positions = positions;
+        
+        Log.info("id %d Renderer setBounds position count = %d", id, positions == null ? 0 : positions.length);
     }
     
     public AxisAlignedBB bounds()
@@ -56,8 +69,21 @@ public class ExcavationRenderer
         this.lastEyePosition = viewEntity.getPositionEyes(partialTicks);
         if(this.visibilityBounds.contains(this.lastEyePosition))
         {
-            AxisAlignedBB box = this.aabb;
-            RenderGlobal.drawBoundingBox(bufferbuilder, box.minX - d0, box.minY - d1, box.minZ - d2, box.maxX - d0, box.maxY - d1, box.maxZ - d2, 1f, 0.3f, 0.3f, 1f);
+            if(this.positions == null)
+            {
+                AxisAlignedBB box = this.aabb;
+                RenderGlobal.drawBoundingBox(bufferbuilder, box.minX - d0, box.minY - d1, box.minZ - d2, box.maxX - d0, box.maxY - d1, box.maxZ - d2, 1f, 0.3f, 0.3f, 1f);
+            }
+            else
+            {
+                for(BlockPos pos : this.positions)
+                {
+                    double x = pos.getX() - d0;
+                    double y = pos.getY() - d1;
+                    double z = pos.getZ() - d2;
+                    RenderGlobal.drawBoundingBox(bufferbuilder, x, y, z, x + 1, y + 1, z + 1, 1f, 0.3f, 0.3f, 1f);
+                }
+            }
             this.didDrawBoundsLastTime = true;
             return true;
         }
@@ -71,7 +97,7 @@ public class ExcavationRenderer
     @SideOnly(Side.CLIENT)
     public void drawGrid(BufferBuilder buffer, double d0, double d1, double d2)
     {
-        if(this.didDrawBoundsLastTime)
+        if(this.didDrawBoundsLastTime && this.positions == null)
         {
             RenderUtil.drawGrid(buffer, this.aabb, this.lastEyePosition, d0, d1, d2, 1f, 0.3f, 0.3f, 0.5F);
         }
@@ -82,9 +108,21 @@ public class ExcavationRenderer
     {
         if(this.didDrawBoundsLastTime)
         {
-            AxisAlignedBB box = this.aabb;
-            RenderGlobal.addChainedFilledBoxVertices(bufferbuilder, box.minX - d0, box.minY - d1, box.minZ - d2, box.maxX - d0, box.maxY - d1, box.maxZ - d2, 1f, 0.3f, 0.3f, 0.3f);
-            this.didDrawBoundsLastTime = true;
+            if(this.positions == null)
+            {
+                AxisAlignedBB box = this.aabb;
+                RenderGlobal.addChainedFilledBoxVertices(bufferbuilder, box.minX - d0, box.minY - d1, box.minZ - d2, box.maxX - d0, box.maxY - d1, box.maxZ - d2, 1f, 0.3f, 0.3f, 0.3f);
+            }
+            else
+            {
+                for(BlockPos pos : this.positions)
+                {
+                    double x = pos.getX() - d0;
+                    double y = pos.getY() - d1;
+                    double z = pos.getZ() - d2;
+                    RenderGlobal.addChainedFilledBoxVertices(bufferbuilder, x, y, z, x + 1, y + 1, z + 1, 1f, 0.3f, 0.3f, 0.3f);
+                }
+            }
         }
     }
 }
