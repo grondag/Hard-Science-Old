@@ -31,7 +31,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
             this.numberType = numberType;
         }
         
-        public void register(T thing)
+        public synchronized void register(T thing)
         {
             IIdentified prior = this.put(thing.getId(), thing);
             
@@ -41,13 +41,18 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
             }
         }
         
-        public void unregister(T thing)
+        public synchronized void unregister(T thing)
         {
             IIdentified prior = this.remove(thing.getId());
             if(prior == null || !prior.equals(thing))
             {
                 Log.warn("Assigned number index unregistered wrong object due to index collision.  This is a bug.");
             }
+        }
+        
+        public synchronized T get(int index)
+        {
+            return super.get(index);
         }
     }
     

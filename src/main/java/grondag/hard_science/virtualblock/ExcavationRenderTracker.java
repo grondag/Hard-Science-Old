@@ -1,32 +1,28 @@
 package grondag.hard_science.virtualblock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import grondag.hard_science.ClientProxy;
 import grondag.hard_science.library.world.WorldMap;
+import grondag.hard_science.network.ModMessages;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
+import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.jobs.Job;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.entity.player.EntityPlayerMP;
 
-@SideOnly(Side.CLIENT)
 public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<ExcavationRenderEntry>>
 {
-
     /**
      * 
      */
     private static final long serialVersionUID = 3622879833810354529L;
     
     public static final ExcavationRenderTracker INSTANCE = new ExcavationRenderTracker();
+    
+    private static HashMap<EntityPlayerMP, PlayerData> playerTracking = new HashMap<EntityPlayerMP, PlayerData>();
 
     @Override
     protected Int2ObjectOpenHashMap<ExcavationRenderEntry> load(int dimension)
@@ -34,73 +30,126 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
         return new Int2ObjectOpenHashMap<ExcavationRenderEntry>();
     }
     
-    public synchronized void add(EntityPlayer player, ExcavationRenderEntry entry)
+    public void add(Job job)
     {
-        this.get(player.world).put(entry.id, entry);
+        ExcavationRenderEntry entry = new ExcavationRenderEntry(job);
+        if(entry.isValid())
+        {
+            synchronized(this)
+            {
+                this.get(entry.dimensionID).put(entry.id, entry);
+            }
+            
+            PacketExcavationRenderUpdate packet = new PacketExcavationRenderUpdate(entry);
+            for(Map.Entry<EntityPlayerMP, PlayerData> playerEntry : playerTracking.entrySet())
+            {
+                PlayerData pd = playerEntry.getValue();
+                if(pd.dimensionID == entry.dimensionID && pd.domainID == entry.domainID)
+                {
+                    entry.addListener(playerEntry.getKey());
+                    ModMessages.INSTANCE.sendTo(packet, playerEntry.getKey());
+                }
+            }
+        }
+    }
+    
+    public synchronized void remove(ExcavationRenderEntry entry)
+    {
+        this.get(entry.dimensionID).remove(entry.id);
+        
+        PacketExcavationRenderUpdate packet = new PacketExcavationRenderUpdate(entry.id);
+        
+        for(Map.Entry<EntityPlayerMP, PlayerData> playerEntry : playerTracking.entrySet())
+        {
+            PlayerData pd = playerEntry.getValue();
+            if(pd.dimensionID == entry.dimensionID && pd.domainID == entry.domainID)
+            {
+                entry.removeListener(playerEntry.getKey());
+                ModMessages.INSTANCE.sendTo(packet, playerEntry.getKey());
+            }
+        }
     }
     
     /**
-     * Keep reference to avoid garbage creation
+     * Should only be called from server thread.
+     * Call when player joins server, changes dimension or changes active domain.
      */
-    private static final ArrayList<ExcavationRenderEntry> secondPass = new ArrayList<ExcavationRenderEntry>();
-    
-    public void render(RenderGlobal renderGlobal, double partialTicks)
+    public void updatePlayerTracking(EntityPlayerMP player)
     {
-        Entity player = Minecraft.getMinecraft().player;
-        if(player == null) return;
+        PlayerData newData = new PlayerData(player);
+        PlayerData oldData = playerTracking.get(player);
+        
+        if(oldData != null && oldData.dimensionID == newData.dimensionID && oldData.domainID == newData.domainID)
+            // no changes
+            return;
+        
+        playerTracking.put(player, newData);
 
-        Int2ObjectOpenHashMap<ExcavationRenderEntry> excavations = this.get(player.world);
-        if(excavations == null || excavations.isEmpty()) return;
-        
-        ICamera camera = ClientProxy.camera();
-        
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture2D();
-        GlStateManager.depthMask(false);
-        GlStateManager.disableDepth();
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
-        
-        secondPass.clear();
-        
-        double d0 = ClientProxy.cameraX();
-        double d1 = ClientProxy.cameraY();
-        double d2 = ClientProxy.cameraZ();
-        
-        for(ExcavationRenderEntry ex : excavations.values())
+        // remove old listeners if needed
+        if(oldData != null)
         {
-            if(camera.isBoundingBoxInFrustum(ex.aabb))
+            synchronized(this)
             {
-                if(ex.drawBounds(bufferbuilder, player, d0, d1, d2, (float) partialTicks)) secondPass.add(ex);
+                Int2ObjectOpenHashMap<ExcavationRenderEntry> entries = this.get(oldData.dimensionID);
+                if(entries != null && !entries.isEmpty())
+                {
+                    for(ExcavationRenderEntry entry : entries.values())
+                    {
+                        if(entry.domainID == oldData.domainID) entry.removeListener(player);
+                    }
+                }
             }
         }
         
-        tessellator.draw();
-        
-        GlStateManager.enableDepth();
-
-        if(!secondPass.isEmpty())
+        // build refresh
+        PacketExcavationRenderRefresh packet = new PacketExcavationRenderRefresh();
+        synchronized(this)
         {
-            // prevent z-fighting
-            GlStateManager.enablePolygonOffset();
-            GlStateManager.doPolygonOffset(-1, -1);
-            
-            bufferbuilder.begin(5, DefaultVertexFormats.POSITION_COLOR);
-            for(ExcavationRenderEntry ex : secondPass)
+            Int2ObjectOpenHashMap<ExcavationRenderEntry> entries = this.get(newData.dimensionID);
+            if(entries != null && !entries.isEmpty())
             {
-                ex.drawBox(bufferbuilder, player, d0, d1, d2, (float) partialTicks);
+                for(ExcavationRenderEntry entry : entries.values())
+                {
+                    if(entry.domainID == newData.domainID)
+                    {
+                        entry.addListener(player);
+                        packet.addRender(entry);
+                    }
+                }
             }
-            tessellator.draw();
-            
-            GlStateManager.disablePolygonOffset();
         }
         
-        GlStateManager.depthMask(true);
-        GlStateManager.enableTexture2D();
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlpha();
+        ModMessages.INSTANCE.sendTo(packet, player);
+    }
+    
+    public void stopPlayerTracking(EntityPlayerMP player)
+    {
+        PlayerData oldData = playerTracking.get(player);
+        
+        if(oldData == null) return;
+        
+        synchronized(this)
+        {
+            Int2ObjectOpenHashMap<ExcavationRenderEntry> entries = this.get(oldData.dimensionID);
+            if(entries != null && !entries.isEmpty())
+            {
+                for(ExcavationRenderEntry entry : entries.values())
+                {
+                    if(entry.domainID == oldData.domainID) entry.removeListener(player);
+                }
+            }
+        }
+    }
+    
+    private static class PlayerData
+    {
+        private final int domainID;
+        private final int dimensionID;
+        
+        private PlayerData(EntityPlayerMP player)
+        {
+            this.domainID = DomainManager.INSTANCE.getActiveDomain(player).getId();
+            this.dimensionID = player.dimension;
+        }
     }
 }

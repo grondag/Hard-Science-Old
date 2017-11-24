@@ -7,6 +7,7 @@ import grondag.hard_science.init.ModTileEntities;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.virtualblock.ExcavationRenderTracker;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -64,6 +65,7 @@ public class CommonProxy
 
     public void serverStarted(FMLServerStartedEvent event)
     {
+        ExcavationRenderTracker.INSTANCE.clear();
         Simulator.INSTANCE.start();
     }
 

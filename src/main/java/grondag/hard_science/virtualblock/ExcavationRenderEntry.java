@@ -1,75 +1,329 @@
 package grondag.hard_science.virtualblock;
 
-import grondag.hard_science.superblock.placement.PlacementResult;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
+import grondag.hard_science.library.world.IntegerAABB;
+import grondag.hard_science.network.ModMessages;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
+import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.IIdentified;
+import grondag.hard_science.simulator.base.jobs.AbstractTask;
+import grondag.hard_science.simulator.base.jobs.BuildingTask;
+import grondag.hard_science.simulator.base.jobs.ITaskListener;
+import grondag.hard_science.simulator.base.jobs.Job;
+import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
+import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
+import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PlacementSpecEntry;
+import grondag.hard_science.superblock.placement.BuildManager;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * Class exists on server but render methods do not.
  * Server instantiates (and generates IDs) and transmits to clients.
  */
-public class ExcavationRenderEntry
+public class ExcavationRenderEntry implements ITaskListener, Runnable
 {
     private static int nextID = 0;
     
     public final int id;
     
-    public final AxisAlignedBB aabb;
+    /**
+     * If true, is replacement instead of straight excavation.
+     */
+    public final boolean isExchange;
     
-    public final AxisAlignedBB visibilityBounds;
+    public final int dimensionID;
     
-    private boolean didDrawBoundsLastTime = false;
+    public final int domainID;
+    
+    private IntegerAABB aabb;
+    
+    private Int2ObjectMap<AtomicInteger> xCounts = new Int2ObjectOpenHashMap<AtomicInteger>();
+    private Int2ObjectMap<AtomicInteger> yCounts = new Int2ObjectOpenHashMap<AtomicInteger>();
+    private Int2ObjectMap<AtomicInteger> zCounts = new Int2ObjectOpenHashMap<AtomicInteger>();
+    
+    private AtomicInteger totalCount = new AtomicInteger(0);
+    
+    private boolean isValid = true;
+    
+    /**
+     * True if has been submitted for re-computation.
+     * If true, will not be resubmitted when becomes dirty.
+     */
+    private AtomicBoolean isScheduled = new AtomicBoolean();
+    
+    /**
+     * If true, has changed after the start of the last computation.  
+     * Cleared at start of computation run. <p>
+     *  
+     * If dirty when computation completes,
+     * computation will resubmit self to queue for recomputation.<p>
+     * 
+     * If becomes dirty while computation not in progress, 
+     * {@link #setDirty()} will submit for computation.
+     */
+    private AtomicBoolean isDirty = new AtomicBoolean(false);
+    
+    /**
+     * Players who could be viewing this excavation and should received client-side updates.
+     */
+    private SimpleUnorderedArrayList<EntityPlayerMP> listeners = new SimpleUnorderedArrayList<EntityPlayerMP>();
+    
+    private void addPos(BlockPos pos)
+    {
+        totalCount.incrementAndGet();
+        
+        synchronized(xCounts)
+        {
+            AtomicInteger xCounter = xCounts.get(pos.getX());
+            if(xCounter == null)
+            {
+                xCounter = new AtomicInteger(1);
+                xCounts.put(pos.getX(), xCounter);
+            }
+            else
+            {
+                xCounter.incrementAndGet();
+            }
+        }
+        
+        synchronized(yCounts)
+        {
+            AtomicInteger yCounter = yCounts.get(pos.getY());
+            if(yCounter == null)
+            {
+                yCounter = new AtomicInteger(1);
+                yCounts.put(pos.getY(), yCounter);
+            }
+            else
+            {
+                yCounter.incrementAndGet();
+            }
+        }
+        
+        synchronized(zCounts)
+        {
+            AtomicInteger zCounter = zCounts.get(pos.getZ());
+            if(zCounter == null)
+            {
+                zCounter = new AtomicInteger(1);
+                zCounts.put(pos.getZ(), zCounter);
+            }
+            else
+            {
+                zCounter.incrementAndGet();
+            }
+        }
+    }
+    
+    /** 
+     * Returns true if any dimension had a count drop to zero
+     */
+    private boolean removePos(BlockPos pos)
+    {
+        totalCount.decrementAndGet();
+        boolean gotZero = xCounts.get(pos.getX()).decrementAndGet() == 0;
+        gotZero = yCounts.get(pos.getY()).decrementAndGet() == 0 || gotZero;
+        gotZero = zCounts.get(pos.getZ()).decrementAndGet() == 0 || gotZero;
+        return gotZero;
+    }
     
     /**
      * For server side
      */
-    public ExcavationRenderEntry(EntityPlayer player, PlacementResult result)
+    public ExcavationRenderEntry(Job job)
     {
         this.id = nextID++;
-        this.aabb = result.placementAABB().toAABB();
-        this.visibilityBounds = this.aabb.grow(192);
-    }
-   
-    @SideOnly(Side.CLIENT)
-    public ExcavationRenderEntry(int id, AxisAlignedBB bounds)
-    {
-        this.id = nextID++;
-        this.aabb = bounds;
-        this.visibilityBounds = this.aabb.grow(Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16);
-    }
-
-    /** return true if something was drawn */
-    @SideOnly(Side.CLIENT)
-    public boolean drawBounds(BufferBuilder bufferbuilder, Entity viewEntity, double d0, double d1, double d2, float partialTicks)
-    {
-        if(this.visibilityBounds.contains(viewEntity.getPositionEyes(partialTicks)))
+        this.domainID = job.getDomain().getId();
+        
+        AbstractPlacementSpec spec = job.spec();
+        if(spec != null && spec.entries() != null && !spec.entries().isEmpty())
         {
-            AxisAlignedBB box = this.aabb;
-            RenderGlobal.drawBoundingBox(bufferbuilder, box.minX - d0, box.minY - d1, box.minZ - d2, box.maxX - d0, box.maxY - d1, box.maxZ - d2, 1f, 0.3f, 0.3f, 1f);
-            this.didDrawBoundsLastTime = true;
-            return true;
+            this.isExchange = !spec.isExcavation();
+            this.dimensionID = spec.getLocation().dimensionID();
+            
+            for(PlacementSpecEntry entry : spec.entries())
+            {
+                if(entry.excavationTaskID != IIdentified.UNASSIGNED_ID)
+                {
+                    AbstractTask task = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(entry.excavationTaskID);
+                    if(task != null && !task.isTerminated())
+                    {
+                        task.addListener(ExcavationRenderEntry.this);
+                        this.addPos(entry.pos());
+                    }
+                }
+            }
+            
+            if(ExcavationRenderEntry.this.totalCount.get() == 0)
+            {
+                this.isValid = false;
+            }
+            else
+            {
+                ExcavationRenderEntry.this.compute();
+            }
         }
         else
         {
-            this.didDrawBoundsLastTime = false;
-            return false;
+            this.isExchange = false;
+            this.dimensionID = 0;
+            this.isValid = false;
         }
     }
     
-    @SideOnly(Side.CLIENT)
-    public void drawBox(BufferBuilder bufferbuilder, Entity viewEntity, double d0, double d1, double d2, float partialTicks)
+    @Override
+    public void onTaskComplete(AbstractTask task)
     {
-        if(this.didDrawBoundsLastTime)
+        boolean needsCompute = this.removePos(((BuildingTask)task).entry().pos());
+        this.isValid = this.isValid && this.totalCount.get() > 0;
+        if(this.isValid)
         {
-            AxisAlignedBB box = this.aabb;
-            RenderGlobal.addChainedFilledBoxVertices(bufferbuilder, box.minX - d0, box.minY - d1, box.minZ - d2, box.maxX - d0, box.maxY - d1, box.maxZ - d2, 1f, 0.3f, 0.3f, 0.3f);
-            this.didDrawBoundsLastTime = true;
+            if(needsCompute) this.setDirty();
         }
+        else
+        {
+            this.updateListeners();
+            ExcavationRenderTracker.INSTANCE.remove(this);
+        }
+    }
+    
+    private void setDirty()
+    {
+        this.isDirty.compareAndSet(false, true);
+        this.compute();
+    }
+
+    private void compute()
+    {
+        if(this.isScheduled.compareAndSet(false, true))
+        {
+            BuildManager.EXECUTOR.execute(this);
+        }
+    }
+    
+    @Override
+    public void run()
+    {
+        this.isDirty.set(false);
+        
+        if(this.totalCount.get() == 0)
+        {
+            this.updateListeners();
+            ExcavationRenderTracker.INSTANCE.remove(this);
+            return;
+        }
+        
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        for(Int2ObjectMap.Entry<AtomicInteger> x : this.xCounts.int2ObjectEntrySet())
+        {
+            if(x.getValue().get() > 0)
+            {
+                minX = Math.min(minX, x.getIntKey());
+                maxX = Math.max(maxX, x.getIntKey());
+            }
+        }
+        
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        for(Int2ObjectMap.Entry<AtomicInteger> y : this.yCounts.int2ObjectEntrySet())
+        {
+            if(y.getValue().get() > 0)
+            {
+                minY = Math.min(minY, y.getIntKey());
+                maxY = Math.max(maxY, y.getIntKey());
+            }
+        }
+        
+        int minZ = Integer.MAX_VALUE;
+        int maxZ = Integer.MIN_VALUE;
+        for(Int2ObjectMap.Entry<AtomicInteger> z : this.zCounts.int2ObjectEntrySet())
+        {
+            if(z.getValue().get() > 0)
+            {
+                minZ = Math.min(minZ, z.getIntKey());
+                maxZ = Math.max(maxZ, z.getIntKey());
+            }
+        }
+        
+        IntegerAABB newBox = new IntegerAABB(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
+        
+        if(!newBox.equals(this.aabb))
+        {   
+            this.aabb = newBox;
+            this.updateListeners();
+        }
+        
+        if(this.isDirty.get() && this.totalCount.get() > 0) 
+            BuildManager.EXECUTOR.execute(this);
+        else
+            this.isScheduled.set(false);
+    }
+
+    /**
+     * Checked by excavation tracker on creation and will not add if false.
+     * {@link #onTaskComplete(AbstractTask)} also uses as signal to remove this instance from tracker.
+     */
+    public boolean isValid()
+    {
+        return isValid;
+    }
+
+    public IntegerAABB aabb()
+    {
+        return aabb;
+    }
+    
+    public void addListener(EntityPlayerMP listener)
+    {
+        synchronized(this.listeners)
+        {
+            this.listeners.addIfNotPresent(listener);
+        }
+    }
+    
+    public void removeListener(EntityPlayerMP listener)
+    {
+        synchronized(this.listeners)
+        {
+            this.listeners.removeIfPresent(listener);
+        }
+    }
+    
+    public void updateListeners()
+    {
+        if(this.listeners.isEmpty()) return;
+        
+        // think network operations need to run in world tick
+        WorldTaskManager.enqueueImmediate(new Runnable() 
+        {
+            PacketExcavationRenderUpdate packet = 
+                    ExcavationRenderEntry.this.isValid && ExcavationRenderEntry.this.totalCount.get() > 0
+                        // update
+                        ? new PacketExcavationRenderUpdate(ExcavationRenderEntry.this)
+                        // remove
+                        : new PacketExcavationRenderUpdate(ExcavationRenderEntry.this.id);
+                        
+            @Override
+            public void run()
+            {
+                synchronized(ExcavationRenderEntry.this.listeners)
+                {
+                    if(!ExcavationRenderEntry.this.listeners.isEmpty())
+                    {
+                        for(EntityPlayerMP player : listeners)
+                        {
+                            ModMessages.INSTANCE.sendTo(packet, player);
+                        }
+                    }
+                }
+            }
+        });
     }
 }

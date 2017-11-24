@@ -39,6 +39,7 @@ public enum TaskType
         AbstractTask result = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_TYPE, TaskType.NO_OPERATION).supplier.get();
         if(result != null)
         {
+            result.job = job;
             result.deserializeNBT(tag);
             result.onLoaded();
         }

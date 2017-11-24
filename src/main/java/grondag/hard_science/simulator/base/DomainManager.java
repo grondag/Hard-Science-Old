@@ -16,7 +16,9 @@ import grondag.hard_science.simulator.base.jobs.JobManager;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.superblock.placement.BuildManager;
+import grondag.hard_science.virtualblock.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
@@ -480,7 +482,7 @@ public class DomainManager implements IPersistenceNode
      * The player's currently active domain. If player
      * has never specified, will be the player's intrinsic domain.
      */
-    public Domain getActiveDomain(EntityPlayer player)
+    public Domain getActiveDomain(EntityPlayerMP player)
     {
         Domain result = this.playerActiveDomains.get(player.getName());
         if(result == null)
@@ -499,9 +501,26 @@ public class DomainManager implements IPersistenceNode
     }
     
     /**
+     * Set the player's currently active domain. 
+     * Should only call from world thread, due to call
+     * to ExcavationRenderTracker, which has that constraint.
+     */
+    public void setActiveDomain(EntityPlayerMP player, Domain domain)
+    {
+        synchronized(this.playerActiveDomains)
+        {
+            Domain result = this.playerActiveDomains.put(player.getName(), domain);
+            if(result == null || result != domain )
+            {
+                ExcavationRenderTracker.INSTANCE.updatePlayerTracking(player);
+            }
+        }
+    }
+    
+    /**
      * The player's private, default domain. Created if does not already exist.
      */
-    public Domain getIntrinsicDomain(EntityPlayer player)
+    public Domain getIntrinsicDomain(EntityPlayerMP player)
     {
         Domain result = this.playerIntrinsicDomains.get(player.getName());
         if(result == null)

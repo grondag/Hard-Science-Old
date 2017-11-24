@@ -13,6 +13,7 @@ import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
 import grondag.hard_science.superblock.placement.PlacementSpecType;
+import grondag.hard_science.virtualblock.ExcavationRenderTracker;
 import grondag.hard_science.simulator.base.IIdentified;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
@@ -75,15 +76,36 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
     }
     
+    /**
+     * Called by job manager during deserialization.
+     */
     public Job(JobManager manager, NBTTagCompound tag)
     {
         this.jobManager = manager;
-        this.deserializeID(tag);
+        this.deserializeNBT(tag);
     }
     
-    public void setJobManager(JobManager manager)
+    /**
+     * Called when a new job is added to the job manager.
+     * Is not called during deserialization.
+     */
+    public void onJobAdded(JobManager manager)
     {
         this.jobManager = manager;
+        this.onLoaded();
+    }
+    
+    /**
+     * Called just before a new job is added to the job manager
+     * and when a job is deserialized right before tasks are available to be executed.
+     * Called only 1X in each case.
+     */
+    protected void onLoaded()
+    {
+        if(this.spec() != null && this.spec().isExcavation())
+        {
+            ExcavationRenderTracker.INSTANCE.add(this);
+        }
     }
     
     protected void updateReadyWork(int delta)
@@ -320,10 +342,20 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         
         DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
         
+        if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
+        {
+            NBTTagCompound subTag = tag.getCompoundTag(ModNBTTag.PLACEMENT_ENTRY_DATA);
+            this.spec = PlacementSpecType.deserializeSpec(subTag);
+        }
+        else
+        {
+            this.spec = null;
+        }
+        
+        int readyCount = 0;
         NBTTagList nbtTasks = tag.getTagList(ModNBTTag.REQUEST_CHILDREN, 10);
         if( nbtTasks != null && !nbtTasks.hasNoTags())
         {
-            int readyCount = 0;
             for(NBTBase subTag : nbtTasks)
             {
                 if(subTag != null)
@@ -336,18 +368,13 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
                     }
                 }
             }  
-            if(readyCount > 0) this.updateReadyWork(readyCount);
         }
         
-        if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
-        {
-            NBTTagCompound subTag = tag.getCompoundTag(ModNBTTag.PLACEMENT_ENTRY_DATA);
-            this.spec = PlacementSpecType.deserializeSpec(subTag);
-        }
-        else
-        {
-            this.spec = null;
-        }
+        this.isTaskStatusDirty = true;
+        
+        if(!this.getStatus().isTerminated) this.onLoaded();
+        
+        if(readyCount > 0) this.updateReadyWork(readyCount);
     }
 
     @Override

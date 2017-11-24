@@ -7,6 +7,8 @@ import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListe
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.base.ItemResourceWithQuantity;
@@ -38,6 +40,8 @@ public class ModMessages
         INSTANCE.registerMessage(PacketOpenContainerItemStorageRefresh.class, PacketOpenContainerItemStorageRefresh.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(ItemResourceWithQuantity.OpenContainerPacketHandler.class, ItemResourceWithQuantity.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(PacketMachineStatusUpdateListener.class, PacketMachineStatusUpdateListener.class, packetID++, Side.CLIENT);
+        INSTANCE.registerMessage(PacketExcavationRenderUpdate.class, PacketExcavationRenderUpdate.class, packetID++, Side.CLIENT);
+        INSTANCE.registerMessage(PacketExcavationRenderRefresh.class, PacketExcavationRenderRefresh.class, packetID++, Side.CLIENT);
     }
     
     /**

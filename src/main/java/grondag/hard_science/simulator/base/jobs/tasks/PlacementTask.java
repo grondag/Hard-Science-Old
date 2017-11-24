@@ -20,7 +20,7 @@ public class PlacementTask extends BuildingTask
     public PlacementTask(PlacementSpecEntry entry)
     {
         super(entry);
-        entry.constructionTaskID = this.getId();
+        entry.placementTaskID = this.getId();
     }
     
     /** Use for deserialization */

@@ -14,7 +14,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class WorldTaskManager
 {
+    /**
+     * Metered tasks - run based on budget consumption until drained.
+     */
     private static ConcurrentLinkedQueue<IWorldTask> tasks = new ConcurrentLinkedQueue<IWorldTask>();
+    
+    /**
+     * Immediate tasks - queue is fully drained each tick.
+     */
+    private static ConcurrentLinkedQueue<Runnable> immediateTasks = new ConcurrentLinkedQueue<Runnable>();
     
     public static void clear()
     {
@@ -23,6 +31,12 @@ public class WorldTaskManager
     
     public static void doServerTick()
     {
+        while(!immediateTasks.isEmpty())
+        {
+            Runnable r = immediateTasks.poll();
+            r.run();
+        }
+        
         if(tasks.isEmpty()) return;
         
         //TODO: make configurable
@@ -52,5 +66,13 @@ public class WorldTaskManager
     public static void enqueue(IWorldTask task)
     {
         tasks.offer(task);
+    }
+    
+    /**
+     * Use for short-running operations that should run on next tick.
+     */
+    public static void enqueueImmediate(Runnable task)
+    {
+        immediateTasks.offer(task);
     }
 }

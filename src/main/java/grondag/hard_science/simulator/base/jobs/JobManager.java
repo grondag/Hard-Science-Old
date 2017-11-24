@@ -109,12 +109,12 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     /** Asynchronously adds job to backlog */
     public void addJob(Job job)
     {
-        job.setJobManager(this);
         EXECUTOR.execute(new Runnable()
         {
             @Override
             public void run()
             {
+                job.onJobAdded(JobManager.this);
                 jobs.addIfNotPresent(job);
                 if(job.hasReadyWork()) addOrReplaceJobInBacklogSynchronously(job);
             }
@@ -128,7 +128,7 @@ public class JobManager implements IReadWriteNBT, IDomainMember
         {
             return true;
         }
-};
+    };
     
     /**
      * Searches for the fist ready task of the given type that meets the given predicate.
@@ -272,7 +272,7 @@ public class JobManager implements IReadWriteNBT, IDomainMember
                 if(subTag != null)
                 {
                     Job j = new Job(this, (NBTTagCompound) subTag);
-                    this.jobs.add(j);
+                    if(!j.getStatus().isTerminated) this.jobs.add(j);
                 }
             }   
         }        

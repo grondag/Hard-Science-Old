@@ -1,7 +1,5 @@
 package grondag.hard_science.simulator.base.jobs.tasks;
 
-import com.google.common.collect.ImmutableList;
-
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.TaskType;
 import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
@@ -47,7 +45,7 @@ public class BuildPlanningTask  extends AbstractTask
             // schedule excavation if necessary
             ExcavationTask exTask = new ExcavationTask(entry);
             link(this, exTask);
-            entry.constructionTaskID = exTask.getId();
+            entry.excavationTaskID = exTask.getId();
             this.job.addTask(exTask);
         }
         else
@@ -61,7 +59,7 @@ public class BuildPlanningTask  extends AbstractTask
             // schedule placement
             PlacementTask placeTask = new PlacementTask(entry);
             link(procTask, placeTask);
-            entry.constructionTaskID = placeTask.getId();
+            entry.placementTaskID = placeTask.getId();
             this.job.addTask(placeTask);
         }
     }

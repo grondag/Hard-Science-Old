@@ -132,6 +132,12 @@ public class AbstractUnorderedArrayList<T> implements Iterable<T>
         return Arrays.copyOf(items, this.size);
     }
 
+    /**
+     * Iterator does not fail on concurrent modification but is
+     * not reliable if there are deletions.  Will generally
+     * be consistent if all modifications are additions. Will skip
+     * items if deletions occur while iterator is active.
+     */
     @Override
     public Iterator<T> iterator()
     {

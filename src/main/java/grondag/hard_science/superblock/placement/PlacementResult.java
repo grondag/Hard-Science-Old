@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
@@ -156,7 +157,7 @@ public class PlacementResult
             {
                 AbstractPlacementSpec spec = this.builder.build();
                 if(spec == null) return;
-                WorldTaskManager.enqueue(spec.worldTask(player));
+                WorldTaskManager.enqueue(spec.worldTask((EntityPlayerMP)player));
             }
             break;
     

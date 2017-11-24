@@ -37,6 +37,12 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     /** DO NOT REFERENCE DIRECTLY! Use {@link #antecedents()} */
     private final SimpleUnorderedArrayList<AbstractTask> antecedents = new SimpleUnorderedArrayList<AbstractTask>();
 
+    /**
+     * Objects wanting a callback when task is completed. Null if none. 
+     * Not persisted.
+     */
+    private final SimpleUnorderedArrayList<ITaskListener> listeners = new SimpleUnorderedArrayList<ITaskListener>();
+    
     private static int spamCount = 0;
     
     /**
@@ -174,6 +180,22 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         }
         this.setStatus(RequestStatus.COMPLETE);
     }
+    
+    public void addListener(ITaskListener listener)
+    {
+        synchronized(this.listeners)
+        {
+            if(!this.isTerminated()) this.listeners.addIfNotPresent(listener);
+        }
+    }
+    
+    public void removeListener(ITaskListener listener)
+    {
+        synchronized(this.listeners)
+        {
+            this.listeners.removeIfPresent(listener);
+        }
+    }
 
     /**
      * True if this request needs to do some cleanup when cancelled and should
@@ -194,16 +216,23 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     
     protected synchronized void onTerminated()
     {
-        SimpleUnorderedArrayList<AbstractTask> consequents = this.consequents();
-        
-        if(consequents.isEmpty()) return;
-        
-        for(AbstractTask r : consequents)
+        if(!consequents.isEmpty())
         {
-            r.onAntecedentTerminated(this);;
+            for(AbstractTask r : consequents)
+            {
+                r.onAntecedentTerminated(this);;
+            }
+            consequents.clear();
         }
         
-        consequents.clear();
+        if(!listeners.isEmpty())
+        {
+            for(ITaskListener l : listeners)
+            {
+                l.onTaskComplete(this);
+            }
+            listeners.clear();
+        }
     }
 
     public static void link(AbstractTask antecedent, AbstractTask consequent)
@@ -269,8 +298,6 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     {
         if(this.dependencyData != null)
         {
-            SimpleUnorderedArrayList<AbstractTask> antecedents = this.antecedents();
-            SimpleUnorderedArrayList<AbstractTask> consequents = this.consequents();
             int i = 0;
             while(i < this.dependencyData.length)
             {
@@ -280,12 +307,12 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
                 if(ant == this.id)
                 {
                     AbstractTask conReq = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(con);
-                    if(conReq != null) consequents.add(conReq);
+                    if(conReq != null) this.consequents.add(conReq);
                 }
                 else if(con == this.id)
                 {
                     AbstractTask antReq = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(ant);
-                    if(antReq != null) antecedents.add(antReq);
+                    if(antReq != null) this.antecedents.add(antReq);
                 }
                 
             }

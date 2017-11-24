@@ -37,7 +37,8 @@ public class IntegerAABB
                 this.maxZ = Useful.max(this.maxZ, z1, z2);
             }
             else
-            {            
+            {   
+                this.seenFirst = true;
                 this.minX = Math.min(x1, x2);
                 this.minY = Math.min(y1, y2);
                 this.minZ = Math.min(z1, z2);

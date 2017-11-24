@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.ClientProxy;
+import grondag.hard_science.library.render.RenderUtil;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.BlockRegion;
@@ -21,6 +22,7 @@ import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.IIdentified;
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.simulator.base.jobs.Job;
@@ -29,13 +31,16 @@ import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -88,7 +93,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
      * new construction job in the player's active domain. The entries will
      * also be saved with the build (for later re-used if desired) and the build closed.
      */
-    public abstract IWorldTask worldTask(EntityPlayer player);
+    public abstract IWorldTask worldTask(EntityPlayerMP player);
 
     /**
      * List of excavations and block placements in this spec.
@@ -157,17 +162,23 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         private BlockPos pos;
 
         /**
-         * ID of associated excavation or placement task - set by build planning task.
-         * Will be 0 if no task created.
+         * ID of associated excavation task.
+         * Will be unassigned if no task created.
          */
-        public int constructionTaskID;
+        public int excavationTaskID = IIdentified.UNASSIGNED_ID;
+        
+        /**
+         * ID of associated placement task.
+         * Will be unassigned if no task created.
+         */
+        public int placementTaskID = IIdentified.UNASSIGNED_ID;
         
         /**
          * ID of associated procurement task - set by build planning task.
          * Fabrication task (if applies) can be obtained from the procurement task.
-         * Will be 0 if no task created.
+         * Will be unassigned if no task created.
          */
-        public int procurementTaskID;
+        public int procurementTaskID = IIdentified.UNASSIGNED_ID;
         
         protected PlacementSpecEntry(int index, BlockPos pos)
         {
@@ -414,7 +425,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
             {
                 int[] entryData = tag.getIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA);
-                if(entryData.length % 5 != 0)
+                if(entryData.length % 6 != 0)
                 {
                     Log.warn("Detected corrupt data on NBT read of construction specification. Some data may be lost.");
                 }
@@ -426,7 +437,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     {
                         BlockPos pos = new BlockPos(entryData[i++], entryData[i++], entryData[i++]);
                         SingleStackEntry entry = new SingleStackEntry(entryIndex++, pos);
-                        entry.constructionTaskID = entryData[i++];
+                        entry.excavationTaskID = entryData[i++];
+                        entry.placementTaskID = entryData[i++];
                         entry.procurementTaskID = entryData[i++];
                         builder.add(entry);
                     }
@@ -443,13 +455,14 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             if(this.entries != null && !this.entries.isEmpty())
             {
                 int i = 0;
-                int[] entryData = new int[this.entries.size() * 5];
+                int[] entryData = new int[this.entries.size() * 6];
                 for(PlacementSpecEntry entry : this.entries)
                 {
                     entryData[i++] = entry.pos().getX();
                     entryData[i++] = entry.pos().getY();
                     entryData[i++] = entry.pos().getZ();
-                    entryData[i++] = entry.constructionTaskID;
+                    entryData[i++] = entry.excavationTaskID;
+                    entryData[i++] = entry.placementTaskID;
                     entryData[i++] = entry.procurementTaskID;
                 }
                 tag.setIntArray(ModNBTTag.PLACEMENT_ENTRY_DATA, entryData);
@@ -680,7 +693,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
             return PlacementSpecType.SINGLE;
         }
 
-        public IWorldTask worldTask(EntityPlayer player)
+        public IWorldTask worldTask(EntityPlayerMP player)
         {
             
             if(this.isExcavation)
@@ -967,13 +980,27 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                 // fixed regions could be outside of view
                 if(ClientProxy.camera() == null || !ClientProxy.camera().isBoundingBoxInFrustum(box)) return;
                 
-                // draw edge without depth to show extent of region
+                // draw edges without depth to show extent of region
                 GlStateManager.disableDepth();
                 GlStateManager.glLineWidth(2.0F);
                 bufferBuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
                 RenderGlobal.drawBoundingBox(bufferBuilder, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, previewMode.red, previewMode.green, previewMode.blue, 1f);
                 tessellator.draw();
 
+                Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+                if(entity != null)
+                {
+                    GlStateManager.glLineWidth(1.0F);
+                    bufferBuilder.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+                    RenderUtil.drawGrid(
+                            bufferBuilder, 
+                            box, 
+                            entity.getPositionEyes(Minecraft.getMinecraft().getRenderPartialTicks()),
+                            0, 0, 0, previewMode.red, previewMode.green, previewMode.blue, 0.5f);
+                    
+                    tessellator.draw();
+                }
+                
                 if(previewMode == OBSTRUCTED)
                 {
                     // try to show where obstructions are
@@ -1029,7 +1056,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         }
 
         @Override
-        public IWorldTask worldTask(EntityPlayer player)
+        public IWorldTask worldTask(EntityPlayerMP player)
         {
             if(this.isExcavation)
             {
@@ -1065,13 +1092,13 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                     {
                         scheduleVisitIfNotAlreadyVisited(location, null);
                         
-                        Log.info("Starting excavation from " + location.toString());
+//                        Log.info("Starting excavation from " + location.toString());
                     }
                     
                     @Override
                     public int runInServerTick(int maxOperations)
                     {
-                        Log.info("Starting run, checked contains %d and queue contains %d", checked.size(), queue.size());
+//                        Log.info("Starting run, checked contains %d and queue contains %d", checked.size(), queue.size());
                         
                         if(queue.isEmpty()) return 0;
                         
@@ -1083,7 +1110,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                             
                             BlockPos pos = visit.getLeft();
                             
-                            Log.info("Checking position " + pos.toString());
+//                            Log.info("Checking position " + pos.toString());
                             
                             opCount++;
                             
@@ -1119,7 +1146,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                                 }
                                 canPassThrough = true;
                                 
-                                Log.info("Added position " + pos.toString());
+//                                Log.info("Added position " + pos.toString());
                             }
                             
                             // even if we can't excavate the block, 
@@ -1131,7 +1158,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                             // checked.
                             if(canPassThrough)
                             {
-                                Log.info("Branching from position " + pos.toString());
+//                                Log.info("Branching from position " + pos.toString());
                                 
                                 opCount++;
                                 scheduleVisitIfNotAlreadyVisited(pos.up(), branchAntecedent);
@@ -1150,7 +1177,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
                             CuboidPlacementSpec.this.entries = builder.build();
                             this.checked.clear();
                             
-                            Log.info("Finalizing job");
+//                            Log.info("Finalizing job");
                             
                             if(domain != null) domain.JOB_MANAGER.addJob(job);
                         }
@@ -1244,7 +1271,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         }
 
         @Override
-        public IWorldTask worldTask(EntityPlayer player)
+        public IWorldTask worldTask(EntityPlayerMP player)
         {
             // TODO Auto-generated method stub
             return null;
@@ -1308,7 +1335,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         }
 
         @Override
-        public IWorldTask worldTask(EntityPlayer player)
+        public IWorldTask worldTask(EntityPlayerMP player)
         {
             // TODO Auto-generated method stub
             return null;
@@ -1424,7 +1451,7 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         }
 
         @Override
-        public IWorldTask worldTask(EntityPlayer player)
+        public IWorldTask worldTask(EntityPlayerMP player)
         {
             // TODO Auto-generated method stub
             return null;

@@ -1,6 +1,5 @@
 package grondag.hard_science;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
@@ -11,13 +10,14 @@ import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.TaskType;
 import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
 import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
+import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
+import grondag.hard_science.virtualblock.ExcavationRenderTracker;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,6 +40,10 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
@@ -178,11 +182,18 @@ public class CommonEventHandler
             {
                 try
                 {
-                    ExcavationTask task = (ExcavationTask) domain.JOB_MANAGER.claimReadyWork(TaskType.EXCAVATION, null).get();
-                    if(task != null)
+                    for(int i = 0; i < 8; i++)
                     {
-                        World world = task.job().spec().getLocation().world();
-                        world.setBlockToAir(task.entry().pos());
+                        ExcavationTask task = (ExcavationTask) domain.JOB_MANAGER.claimReadyWork(TaskType.EXCAVATION, null).get();
+                        if(task == null) break;
+                        
+                        AbstractPlacementSpec spec = task.job().spec();
+                        if(spec != null && spec.getLocation() != null)
+                        {
+                            World world = spec.getLocation().world();
+                            if(world != null) world.setBlockToAir(task.entry().pos());
+                        }
+                        
                         task.complete();
                     }
                 }
@@ -244,6 +255,41 @@ public class CommonEventHandler
         }
     }
     
+    @SubscribeEvent
+    public static void onPlayerChangedDimension(PlayerChangedDimensionEvent event)
+    {
+        if(event.player instanceof EntityPlayerMP)
+        {
+            ExcavationRenderTracker.INSTANCE.updatePlayerTracking((EntityPlayerMP) event.player);
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerRespawnEvent event)
+    {
+        if(event.player instanceof EntityPlayerMP)
+        {
+            ExcavationRenderTracker.INSTANCE.updatePlayerTracking((EntityPlayerMP) event.player);
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerLoggedInEvent event)
+    {
+        if(event.player instanceof EntityPlayerMP)
+        {
+            ExcavationRenderTracker.INSTANCE.updatePlayerTracking((EntityPlayerMP) event.player);
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerLoggedOutEvent event)
+    {
+        if(event.player instanceof EntityPlayerMP)
+        {
+            ExcavationRenderTracker.INSTANCE.stopPlayerTracking((EntityPlayerMP) event.player);
+        }
+    }
 //	@SubscribeEvent
 //	public void onReplaceBiomeBlocks(ReplaceBiomeBlocks.ReplaceBiomeBlocks event) {
 //		if (event.getWorld().provider.getDimension() == 0) {

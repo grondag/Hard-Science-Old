@@ -17,7 +17,7 @@ import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
-import grondag.hard_science.virtualblock.ExcavationRenderTracker;
+import grondag.hard_science.virtualblock.ExcavationRenderManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiOptions;
@@ -66,7 +66,7 @@ public class ClientEventHandler
             if(result.builder() != null) result.builder().renderPreview(event, player);
         }
         
-        ExcavationRenderTracker.INSTANCE.render(event.getContext(), event.getPartialTicks());
+        ExcavationRenderManager.render(event.getContext(), event.getPartialTicks());
     }
 
     /**
