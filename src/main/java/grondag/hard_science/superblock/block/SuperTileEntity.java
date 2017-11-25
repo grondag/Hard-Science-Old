@@ -6,7 +6,6 @@ import javax.annotation.Nonnull;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.model.state.RenderPassSet;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTBase;
@@ -14,7 +13,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -68,7 +66,7 @@ public class SuperTileEntity extends TileEntity
     ////////////////////////////////////////////////////////////////////////
     
     protected ModelState modelState = new ModelState();
-    
+  
     //  public IExtendedBlockState exBlockState;
     private boolean isModelStateCacheDirty = true;
 
@@ -283,7 +281,7 @@ public class SuperTileEntity extends TileEntity
      * Parameter should always be true except in case of changing
      * dynamic blocks to static without altering appearance. 
      */
-    private void onModelStateChange(boolean refreshClientRenderState)
+    protected void onModelStateChange(boolean refreshClientRenderState)
     {
         /**
          * This can be called by onBlockPlaced after we've already been established.
@@ -301,26 +299,6 @@ public class SuperTileEntity extends TileEntity
                 this.markDirty();
             }
         }
-    }
-    
-    @Override
-    public boolean shouldRenderInPass(int pass)
-    {
-        if(this.modelState == null || this.isModelStateCacheDirty)
-        {
-            IBlockState myState = this.world.getBlockState(getPos());
-            
-            if(this.modelState == null) this.modelState = ((SuperBlock)myState.getBlock()).getDefaultModelState();
-            
-            this.modelState.refreshFromWorld(myState, world, pos);
-            this.isModelStateCacheDirty = false;
-            
-        }
-        
-        RenderPassSet rps = this.modelState.getRenderPassSet();
-        return !rps.canRenderAsNormalBlock() 
-                    && rps.renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
-        
     }
     
     /**

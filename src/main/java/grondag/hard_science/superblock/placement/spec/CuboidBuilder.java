@@ -150,7 +150,6 @@ public class CuboidBuilder extends VolumetricBuilder
 
             this.region = new CubicBlockRegion(startPos, endPos, false);
             return true;
-
         }
 
         else

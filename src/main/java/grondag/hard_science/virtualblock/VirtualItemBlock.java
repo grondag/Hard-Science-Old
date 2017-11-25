@@ -1,10 +1,15 @@
 package grondag.hard_science.virtualblock;
 
 import grondag.hard_science.gui.ModGuiHandler;
+import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
@@ -49,5 +54,30 @@ public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
     public FilterMode getFilterMode(ItemStack stack)
     {
         return FilterMode.FILL_REPLACEABLE;
+    }
+    
+    /**
+     * Gets the appropriate virtual block to place from a given item stack if it is
+     * a virtual item stack. Returns block state for AIR otherwise.
+     * May be different than the stack block because virtul in-world blocks are dependent 
+     * rendering needs.
+     */
+    @Override
+    public IBlockState getPlacementBlockStateFromStack(ItemStack stack)
+    {
+        Item item = stack.getItem();
+        if(item instanceof VirtualItemBlock)
+        {
+            ModelState modelState = PlacementItem.getStackModelState(stack);
+            if(modelState == null) return null;
+
+            VirtualBlock targetBlock = ModSuperModelBlocks.findAppropriateVirtualBlock(modelState);
+            
+            return targetBlock.getStateFromMeta(stack.getMetadata());
+        }
+        else
+        {
+            return Blocks.AIR.getDefaultState();
+        }
     }
 }

@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.world.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.Rotation;
@@ -20,6 +19,7 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockTests;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import grondag.hard_science.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -64,10 +64,10 @@ public class CubicPlacementHandler extends PlacementHandler
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
-        BlockPos posPlaced = (onBlock != ModBlocks.virtual_block && onBlock.isReplaceable(worldIn, posOn)) ? posOn : posOn.offset(facing);
+        BlockPos posPlaced = (!VirtualBlock.isVirtualBlock(onBlock) && onBlock.isReplaceable(worldIn, posOn)) ? posOn : posOn.offset(facing);
         
         // abort if target space is occupied
-        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced, stackBlock != ModBlocks.virtual_block))
+        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced, !VirtualBlock.isVirtualBlock(stackBlock)))
         {
             return Collections.emptyList();
         }

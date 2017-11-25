@@ -2,7 +2,7 @@ package grondag.hard_science.library.world;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
@@ -56,7 +56,7 @@ public class WorldHelper
         else
         {
             Block block = worldIn.getBlockState(pos).getBlock();
-            return block != ModBlocks.virtual_block && block.isReplaceable(worldIn, pos);
+            return !VirtualBlock.isVirtualBlock(block) && block.isReplaceable(worldIn, pos);
         }
         
     }

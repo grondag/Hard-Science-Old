@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.virtualblock.VirtualItemBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -73,7 +73,7 @@ public class AdditivePlacementHandler extends PlacementHandler
                     
                     // confirm have space to add - the ItemStack handler will allow us to get 
                     // here if the adjacent position contains another additive block
-                    if(onModelState.getMetaData() < 0xF || WorldHelper.isBlockReplaceable(worldIn, posOn.offset(facing), stackBlock != ModBlocks.virtual_block))
+                    if(onModelState.getMetaData() < 0xF || WorldHelper.isBlockReplaceable(worldIn, posOn.offset(facing), !VirtualBlock.isVirtualBlock(stackBlock)))
                     {
                         return addToBlockAtPosition(worldIn, stack, stackModelState, onModelState, posOn);
                     }
@@ -143,7 +143,7 @@ public class AdditivePlacementHandler extends PlacementHandler
                 }
             }
 
-            if(WorldHelper.isBlockReplaceable(worldIn, posOn.offset(addFace), stack.getItem() != ModItems.virtual_block))
+            if(WorldHelper.isBlockReplaceable(worldIn, posOn.offset(addFace), stack.getItem() instanceof VirtualItemBlock))
             {
                 ItemStack newStack = stack.copy();
                 newStack.setItemDamage(targetMeta);

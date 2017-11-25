@@ -15,8 +15,8 @@ import grondag.hard_science.materials.MatterCube;
 import grondag.hard_science.materials.MatterCubeItemModel;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
-import grondag.hard_science.superblock.block.SuperModelTileEntity;
-import grondag.hard_science.superblock.block.SuperTileEntity;
+import grondag.hard_science.superblock.block.SuperModelTileEntityTESR;
+import grondag.hard_science.superblock.block.SuperTileEntityTESR;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.texture.EnhancedSprite;
@@ -27,8 +27,8 @@ import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
-import grondag.hard_science.virtualblock.VirtualBlockTESR;
-import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
+import grondag.hard_science.virtualblock.VirtualTESR;
+import grondag.hard_science.virtualblock.VirtualTileEntityTESR;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;
@@ -326,12 +326,11 @@ public class ModModels
         }
         
         // Bind TESR to tile entity
-        ClientRegistry.bindTileEntitySpecialRenderer(SuperTileEntity.class, SuperBlockTESR.INSTANCE);
-        ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntity.class, SuperBlockTESR.INSTANCE);
-        ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(SuperTileEntityTESR.class, SuperBlockTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntityTESR.class, SuperBlockTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(VirtualTileEntityTESR.class, VirtualTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(BasicBuilderTileEntity.class, BasicBuilderTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(SmartChestTileEntity.class, SmartChestTESR.INSTANCE);
-        
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

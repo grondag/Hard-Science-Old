@@ -14,7 +14,6 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.network.ModMessages;
@@ -33,6 +32,7 @@ import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
+import grondag.hard_science.virtualblock.VirtualItemBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
@@ -860,7 +860,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
             {
                 ItemStack heldStack = player.getHeldItemMainhand();
                 
-                if(heldStack.getItem() == ModItems.virtual_block)
+                if(heldStack.getItem() instanceof VirtualItemBlock)
                 {
                     PlacementItem.setStackModelState(heldStack, PlacementItem.getStackModelState(picked));
                     PlacementItem.setStackLightValue(heldStack, PlacementItem.getStackLightValue(picked));

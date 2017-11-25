@@ -36,7 +36,6 @@ public class ModItems
     public static final Item basalt_cobble = null;
     public static final Item basalt_cut = null;
     
-    public static final Item virtual_block = null;
     public static final Item smart_chest = null;
     public static final Item solar_cell = null;
             

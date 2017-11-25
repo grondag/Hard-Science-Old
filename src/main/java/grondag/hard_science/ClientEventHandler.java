@@ -1,7 +1,6 @@
 package grondag.hard_science;
 
 import grondag.hard_science.Configurator.Render.PreviewMode;
-import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.library.render.QuadCache;
 import grondag.hard_science.library.varia.Useful;
@@ -107,25 +106,6 @@ public class ClientEventHandler
                 }
             }
            
-            // render virtual blocks only if player is holding item that enables it
-            boolean renderVirtual = Configurator.BLOCKS.alwaysRenderVirtualBlocks;
-            if(!renderVirtual)
-            {
-                if(player != null)
-                {
-                    ItemStack stack = player.getHeldItemMainhand();
-                    if(stack != null && stack.getItem() == ModItems.virtual_block) renderVirtual = true;
-                    if(!renderVirtual)
-                    {
-                        stack = player.getHeldItemOffhand();
-                        if(stack != null && stack.getItem() == ModItems.virtual_block) renderVirtual = true;
-                    }
-                }
-            }
-            if(renderVirtual != ClientProxy.isVirtualBlockRenderingEnabled())
-            {
-                ClientProxy.setVirtualBlockRenderingEnabled(renderVirtual);
-            }
        
             int keyFlags = (GuiScreen.isCtrlKeyDown() ? ModPlayerCaps.ModifierKey.CTRL_KEY.flag : 0) 
                      | (GuiScreen.isAltKeyDown() ? ModPlayerCaps.ModifierKey.ALT_KEY.flag : 0);

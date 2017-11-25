@@ -285,13 +285,13 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
         // look for a virtual block at target position, get state if checked
         IBlockState oldState = this.world.getBlockState(targetPos);
         
-        if(oldState.getBlock() != ModBlocks.virtual_block) return;
+        if(!VirtualBlock.isVirtualBlock(oldState.getBlock())) return;
         
         TileEntity rawTE = world.getTileEntity(targetPos);
         if(rawTE == null || !(rawTE instanceof SuperModelTileEntity)) return;
         SuperModelTileEntity oldTE = (SuperModelTileEntity)rawTE;
         
-        ModelState modelState = ((VirtualBlock)ModBlocks.virtual_block).getModelStateAssumeStateIsCurrent(oldState, world, targetPos, true);
+        ModelState modelState = ((VirtualBlock)oldState.getBlock()).getModelStateAssumeStateIsCurrent(oldState, world, targetPos, true);
 
         BlockSubstance substance = this.prepareFabrication(modelState, oldTE);
         
@@ -379,7 +379,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
             IBlockState oldState = this.world.getBlockState(targetPos);
             
             // confirm virtual block matching our fabricated block still located at target position
-            if(oldState.getBlock() == ModBlocks.virtual_block && oldState.getValue(SuperBlock.META) == newMeta) 
+            if(VirtualBlock.isVirtualBlock(oldState.getBlock()) && oldState.getValue(SuperBlock.META) == newMeta) 
             {
                 TileEntity rawTE = world.getTileEntity(targetPos);
                 if(rawTE != null && rawTE instanceof SuperModelTileEntity)
@@ -388,7 +388,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
                     
                     if(oldTE.getLightValue() == newLightValue && oldTE.getSubstance() == newSubstance)
                     {
-                        ModelState oldModelState = ((VirtualBlock)ModBlocks.virtual_block).getModelStateAssumeStateIsCurrent(oldState, world, targetPos, true);
+                        ModelState oldModelState = ((VirtualBlock)oldState.getBlock()).getModelStateAssumeStateIsCurrent(oldState, world, targetPos, true);
                         if(newModelState.equals(oldModelState))
                         {
                             // match!  place the block and exit, resume searching for work

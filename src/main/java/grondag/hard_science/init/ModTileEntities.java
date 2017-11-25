@@ -6,7 +6,7 @@ import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
+import grondag.hard_science.virtualblock.VirtualTileEntity;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -23,7 +23,7 @@ public class ModTileEntities
 
         GameRegistry.registerTileEntity(SuperTileEntity.class, "SuperTileEntity");
         GameRegistry.registerTileEntity(SuperModelTileEntity.class, "SuperModelTileEntity");
-        GameRegistry.registerTileEntity(VirtualBlockTileEntity.class, "VirtualBlockTileEntity");
+        GameRegistry.registerTileEntity(VirtualTileEntity.class, "VirtualTileEntity");
         
         GameRegistry.registerTileEntity(SmartChestTileEntity.class, "SmartChestTileEntity");
         GameRegistry.registerTileEntity(BasicBuilderTileEntity.class, "BasicBuilderTileEntity");

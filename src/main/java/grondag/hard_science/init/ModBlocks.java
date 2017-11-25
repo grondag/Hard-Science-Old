@@ -25,7 +25,6 @@ import grondag.hard_science.superblock.terrain.TerrainStaticBlock;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockSubstance;
-import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -56,7 +55,6 @@ public class ModBlocks
     public static final Block lava_dynamic_height = null;
     public static final Block lava_dynamic_filler = null;
     
-    public static final Block virtual_block = null;
     public static final Block smart_chest = null;
     public static final Block basic_builder = null;
     public static final Block solar_cell = null;
@@ -173,8 +171,6 @@ public class ModBlocks
         }
         
         // VIRTUAL BLOCKS
-        event.getRegistry().register(new VirtualBlock("virtual_block"));
-        
         event.getRegistry().register(new SmartChestBlock("smart_chest"));
         event.getRegistry().register(new BasicBuilderBlock("basic_builder"));
         event.getRegistry().register(new SolarCellBlock("solar_cell"));

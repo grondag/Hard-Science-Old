@@ -3,16 +3,12 @@ package grondag.hard_science.virtualblock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-
 import grondag.hard_science.HardScience;
-import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
-import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -29,7 +25,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -44,12 +39,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class VirtualBlock extends SuperModelBlock
 {
-    
-//    public static final SoundType VIRTUAL_BLOCK_SOUND = new SoundType(6.0F, 2.0F, SoundEvents.BLOCK_CLOTH_BREAK, SoundEvents.BLOCK_CLOTH_STEP, SoundEvents.BLOCK_CLOTH_PLACE, SoundEvents.BLOCK_CLOTH_HIT, SoundEvents.BLOCK_CLOTH_FALL);
-
     public static boolean isVirtualBlock(Block block)
     {
-        return block instanceof SuperBlock && ((SuperBlock)block).isVirtual();
+        return block instanceof VirtualBlock;
     }
     
     /**
@@ -64,9 +56,9 @@ public class VirtualBlock extends SuperModelBlock
                 || (VirtualBlock.isVirtualBlock(blockState.getBlock()));
     }
     
-    public VirtualBlock(String blockName)
+    public VirtualBlock(String blockName, BlockRenderMode renderMode)
     {
-        super(blockName, Material.AIR, BlockRenderMode.TESR, WorldLightOpacity.TRANSPARENT, false, false);
+        super(blockName, Material.AIR, renderMode, WorldLightOpacity.TRANSPARENT, false, false);
     }
     
     @Override
@@ -161,19 +153,28 @@ public class VirtualBlock extends SuperModelBlock
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta)
     {
-        return new VirtualBlockTileEntity();
+        return this.blockRenderMode == BlockRenderMode.TESR 
+                ? new VirtualTileEntityTESR()
+                : new VirtualTileEntity();
     }
-
+    
     @Override
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        return false;
+        return this.isVisible(state, world, pos) ? super.doesSideBlockRendering(state, world, pos, face) : false;
     }
     
-    public boolean doesSideBlockVirtualRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
-    {
-        return super.doesSideBlockRendering(state, world, pos, face);
-    }
+//
+//    @Override
+//    public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
+//    {
+//        return false;
+//    }
+//    
+//    public boolean doesSideBlockVirtualRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
+//    {
+//        return super.doesSideBlockRendering(state, world, pos, face);
+//    }
     
     @Override
     public PathNodeType getAiPathNodeType(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -277,24 +278,6 @@ public class VirtualBlock extends SuperModelBlock
     {
         return  HardScience.proxy.allowCollisionWithVirtualBlocks(null) ? Material.STRUCTURE_VOID : Material.AIR;
     }
-
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState iBlockState)
-    {
-      return EnumBlockRenderType.INVISIBLE;
-    }
-
-//     @Override
-//    public SoundType getSoundType()
-//    {
-//        return VIRTUAL_BLOCK_SOUND;
-//    }
-
-//    @Override
-//    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, Entity entity)
-//    {
-//        return VIRTUAL_BLOCK_SOUND;
-//    }
 
     @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list)
@@ -446,91 +429,29 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @SideOnly(Side.CLIENT)
+    public boolean isVisible(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+    {
+        TileEntity te = blockAccess.getTileEntity(pos);
+        if (te == null) return false;
+        return ((VirtualTileEntity)te).isVisible();
+    }
+    
+    @SideOnly(Side.CLIENT)
+    @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
+        return isVisible(blockState, blockAccess, pos) 
+                ? super.shouldSideBeRendered(blockState, blockAccess, pos, side)
+                : false;
+    }
 
-        if(this.getSubstance(blockState, blockAccess, pos).isTranslucent)
-        {
-            BlockPos otherPos = pos.offset(side);
-            IBlockState otherBlockState = blockAccess.getBlockState(otherPos);
-            Block block = otherBlockState.getBlock();
-            if(block instanceof SuperBlock)
-            {
-                SuperBlock sBlock = (SuperBlock)block;
-                if(((SuperBlock) block).getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
-                {
-                    ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
-                    ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
-                    // for transparent blocks, want blocks with same apperance and species to join
-                    return (myModelState.hasSpecies() && myModelState.getSpecies() != otherModelState.getSpecies())
-                            || !myModelState.doShapeAndAppearanceMatch(otherModelState);
-
-                }
-            }
-        }
-        
-        AxisAlignedBB axisalignedbb = blockState.getBoundingBox(blockAccess, pos);
-
-        switch (side)
-        {
-            case DOWN:
-
-                if (axisalignedbb.minY > 0.0D)
-                {
-                    return true;
-                }
-
-                break;
-            case UP:
-
-                if (axisalignedbb.maxY < 1.0D)
-                {
-                    return true;
-                }
-
-                break;
-            case NORTH:
-
-                if (axisalignedbb.minZ > 0.0D)
-                {
-                    return true;
-                }
-
-                break;
-            case SOUTH:
-
-                if (axisalignedbb.maxZ < 1.0D)
-                {
-                    return true;
-                }
-
-                break;
-            case WEST:
-
-                if (axisalignedbb.minX > 0.0D)
-                {
-                    return true;
-                }
-
-                break;
-            case EAST:
-
-                if (axisalignedbb.maxX < 1.0D)
-                {
-                    return true;
-                }
-        }
-
-        BlockPos otherPos = pos.offset(side);
-        IBlockState otherBlockState = blockAccess.getBlockState(otherPos);
-        if(otherBlockState.getBlock() == ModBlocks.virtual_block)
-        {
-            return !((VirtualBlock)ModBlocks.virtual_block).doesSideBlockVirtualRendering(otherBlockState, blockAccess, otherPos, side.getOpposite());
-        }
-        else
-        {
-            return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
-        }
-    }    
+    @Override
+    public void onBlockExploded(World world, BlockPos pos, Explosion explosion)
+    {
+        // not affected by explosions, because not really there
+        // probably won't be called anyway, because material is air
+    } 
+    
+    
 }
 

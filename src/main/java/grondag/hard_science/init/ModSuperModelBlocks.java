@@ -5,6 +5,7 @@ import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.event.RegistryEvent;
@@ -17,12 +18,24 @@ public class ModSuperModelBlocks
     /** dimensions are BlockRenderMode, worldOpacity, hypermatter (y = 1 /n = 0), cube (y = 1 /n = 0) */
     public static final SuperModelBlock[][][][] superModelBlocks = new SuperModelBlock[BlockRenderMode.values().length][WorldLightOpacity.values().length][2][2];
 
+    /**
+     * Virtual blocks only vary by render mode
+     */
+    public static final VirtualBlock[] virtualBlocks = new VirtualBlock[BlockRenderMode.values().length];
+
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         int superModelIndex = 0;
+        int virualBlockIndex = 0;
+        
         for(BlockRenderMode blockRenderMode : BlockRenderMode.values())
         {
+            virtualBlocks[blockRenderMode.ordinal()]
+                    = (VirtualBlock) new VirtualBlock("virtual_block" + virualBlockIndex++, blockRenderMode)
+                        .setUnlocalizedName("virtual_block"); //all virtual blocks have same display name
+            event.getRegistry().register(virtualBlocks[blockRenderMode.ordinal()]);
+            
             for(WorldLightOpacity opacity : WorldLightOpacity.values())
             {
                 // mundane non-cube
@@ -52,6 +65,7 @@ public class ModSuperModelBlocks
             }
         }
     }
+    
     public static SuperModelBlock findAppropriateSuperModelBlock(BlockSubstance substance, ModelState modelState)
     {
         WorldLightOpacity opacity = WorldLightOpacity.getClosest(substance, modelState);
@@ -59,5 +73,11 @@ public class ModSuperModelBlocks
         int hypermaterIndex = substance.isHyperMaterial ? 1 : 0;
         int cubeIndex = modelState.isCube() ? 1 : 0;
         return superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][hypermaterIndex][cubeIndex];
+    }
+    
+    public static VirtualBlock findAppropriateVirtualBlock(ModelState modelState)
+    {
+        BlockRenderMode blockRenderMode = modelState.getRenderPassSet().blockRenderMode;
+        return virtualBlocks[blockRenderMode.ordinal()];
     }
 }

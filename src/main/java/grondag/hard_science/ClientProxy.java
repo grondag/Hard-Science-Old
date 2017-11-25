@@ -22,9 +22,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy
 {
-
-    private static boolean isVirtualBlockRenderingEnabled = false;
-
     /**
      * Nulled out at start of each render and then initialized if needed.
      * Allows reuse whereever needed
@@ -115,21 +112,11 @@ public class ClientProxy extends CommonProxy
         // uses client proxy when running local so still have to check world for side
         if(world == null)
         {
-            return isVirtualBlockRenderingEnabled && FMLCommonHandler.instance().getEffectiveSide() ==  Side.CLIENT;
+            return FMLCommonHandler.instance().getEffectiveSide() ==  Side.CLIENT;
         }
         else
         {
-            return world.isRemote && isVirtualBlockRenderingEnabled;
+            return world.isRemote;
         }
-    }
-
-    public static void setVirtualBlockRenderingEnabled(boolean isEnabled)
-    {
-        isVirtualBlockRenderingEnabled = isEnabled;
-    }
-
-    public static boolean isVirtualBlockRenderingEnabled()
-    {
-        return isVirtualBlockRenderingEnabled;
     }
 }

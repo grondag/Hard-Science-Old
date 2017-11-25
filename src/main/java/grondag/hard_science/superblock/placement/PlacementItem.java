@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 import com.mojang.realmsclient.util.Pair;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
@@ -18,6 +17,7 @@ import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -1084,7 +1084,7 @@ public interface PlacementItem
             //if trying to place a block but too close, is annoying to get GUI
             //so only display if clicking on air
             if (blockpos != null 
-                    && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
+                    && !VirtualBlock.isVirtualBlock(world.getBlockState(blockpos).getBlock())
                     && world.getBlockState(blockpos).getMaterial().isReplaceable()
                     && this.isVirtual(stackIn))
             {
