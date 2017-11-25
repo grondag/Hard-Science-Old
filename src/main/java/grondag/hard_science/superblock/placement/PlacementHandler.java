@@ -11,9 +11,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.BlockRegion;
+import grondag.hard_science.library.world.CubicBlockRegion;
 import grondag.hard_science.library.world.HorizontalFace;
 import grondag.hard_science.library.world.IBlockRegion;
 import grondag.hard_science.library.world.IntegerAABB;
@@ -22,6 +23,7 @@ import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
 import net.minecraft.block.Block;
@@ -336,7 +338,7 @@ public abstract class PlacementHandler
         BlockPos placementPos = selectionMode.usesSelectionRegion ? item.getRegionSize(stack, true) : null;
         BlockPos endPos = placementPos == null ? pPos.inPos : getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, OffsetPosition.FLIP_NONE);
 
-        BlockRegion region = new BlockRegion(pPos.inPos, endPos, isHollow);
+        CubicBlockRegion region = new CubicBlockRegion(pPos.inPos, endPos, isHollow);
         if(selectionMode.usesSelectionRegion) excludeObstaclesInRegion(player, pPos, stack, region);
 
         boolean adjustmentEnabled = item.getRegionOrientation(stack) == RegionOrientation.AUTOMATIC && !isExcavating;
@@ -358,7 +360,7 @@ public abstract class PlacementHandler
             {
                 // first try pivoting the selection box around the position being targeted
                 BlockPos endPos2 = getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, offset);
-                BlockRegion region2 = new BlockRegion(pPos.inPos, endPos2, isHollow);
+                CubicBlockRegion region2 = new CubicBlockRegion(pPos.inPos, endPos2, isHollow);
                 excludeObstaclesInRegion(player, pPos, stack, region2);
 
                 if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
@@ -379,7 +381,7 @@ public abstract class PlacementHandler
                 {
                     BlockPos startPos2 = pPos.inPos.offset(face);
                     BlockPos endPos2 = endPos.offset(face);
-                    BlockRegion region2 = new BlockRegion(startPos2, endPos2, isHollow);
+                    CubicBlockRegion region2 = new CubicBlockRegion(startPos2, endPos2, isHollow);
                     excludeObstaclesInRegion(player, pPos, stack, region2);
                     if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
                     {
@@ -491,7 +493,7 @@ public abstract class PlacementHandler
     }
 
     @Deprecated
-    public static void excludeObstaclesInRegion(EntityPlayer player, PlacementPosition pPos, ItemStack stack, BlockRegion region)
+    public static void excludeObstaclesInRegion(EntityPlayer player, PlacementPosition pPos, ItemStack stack, CubicBlockRegion region)
     {
         if(!PlacementItem.isPlacementItem(stack)) return;
         PlacementItem item = (PlacementItem)stack.getItem();
@@ -539,7 +541,7 @@ public abstract class PlacementHandler
      */
     @Deprecated
     public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stackIn, 
-            BlockRegion region)
+            CubicBlockRegion region)
     {
 
         ItemStack stack;
@@ -589,8 +591,7 @@ public abstract class PlacementHandler
         ModelState modelState = PlacementItem.getStackModelState(stack);
         if(modelState.hasSpecies())
         {
-            //TODO: pass region
-            int species = speciesForPlacement(specBuilder.player(), pPos.onPos, pPos.onFace, stack, null);
+            int species = speciesForPlacement(specBuilder.player(), pPos.onPos, pPos.onFace, stack, specBuilder.region());
             if(species >= 0) 
             {
                 modelState.setSpecies(species);
@@ -636,41 +637,48 @@ public abstract class PlacementHandler
 
         // if no region provided or species mode used clicked block then 
         // result is based on the clicked face
-        if(region == null || (mode == SpeciesMode.MATCH_CLICKED && onPos != null && onFace != null))
+        if(region == null 
+                || ((mode == SpeciesMode.MATCH_CLICKED || mode == SpeciesMode.MATCH_MOST)
+                        && onPos != null && onFace != null))
         {
             int clickedSpecies = SuperBlockHelper.getJoinableSpecies(world, onPos, withBlockState, withModelState);
             
             // if no region, then return something different than what is clicked,
             // unless didn't get a species - will return 0 in that case.
-            if(region == null) return shouldBreak || clickedSpecies <0 ? clickedSpecies + 1 : clickedSpecies;
+            if(region == null) return shouldBreak || clickedSpecies < 0 ? clickedSpecies + 1 : clickedSpecies;
                 
             if(clickedSpecies >= 0) return clickedSpecies;
         }
         
         int[] adjacentCount = new int[16];
-        int[] interiorCount = new int[16];
+        int[] surfaceCount = new int[16];
 
-        for(BlockPos pos : region.includedPositions())
-        {
-            int interiorSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
-            if(interiorSpecies >= 0 && interiorSpecies <= 15) interiorCount[interiorSpecies]++;
-        }
-
+        /** limit block positions checked for very large regions */
+        int checkCount = 0;
+        
         for(BlockPos pos : region.adjacentPositions())
         {
             int adjacentSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
             if(adjacentSpecies >= 0 && adjacentSpecies <= 15) adjacentCount[adjacentSpecies]++;
+            if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
+        }
+        
+        for(BlockPos pos : region.surfacePositions())
+        {
+            int interiorSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
+            if(interiorSpecies >= 0 && interiorSpecies <= 15) surfaceCount[interiorSpecies]++;
+            if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
         }
 
         if(shouldBreak)
         {
             // find a species that matches as few things as possible
             int bestSpecies = 0;
-            int bestCount = adjacentCount[0] + interiorCount[0];
+            int bestCount = adjacentCount[0] + surfaceCount[0];
 
             for(int i = 1; i < 16; i++)
             {
-                int tryCount = adjacentCount[i] + interiorCount[i];
+                int tryCount = adjacentCount[i] + surfaceCount[i];
                 if(tryCount < bestCount) 
                 {
                     bestCount = tryCount;
@@ -682,15 +690,15 @@ public abstract class PlacementHandler
         else
         {
             // find the most common species and match with that
-            // give preference to species that are included in the region if any
+            // give preference to species that are included in the region surface if any
             int bestSpecies = 0;
-            int bestCount = interiorCount[0];
+            int bestCount = surfaceCount[0];
 
             for(int i = 1; i < 16; i++)
             {
-                if(interiorCount[i] > bestCount)
+                if(surfaceCount[i] > bestCount)
                 {
-                    bestCount = interiorCount[i];
+                    bestCount = surfaceCount[i];
                     bestSpecies = i;
                 }
             }

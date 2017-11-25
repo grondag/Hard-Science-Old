@@ -1067,7 +1067,7 @@ public interface PlacementItem
             if (blockpos != null 
                     && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
                     && world.getBlockState(blockpos).getMaterial().isReplaceable()
-                    && this.getSuperBlock().isVirtual())
+                    && this.isVirtual(stackIn))
             {
                 this.displayGui(player);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));

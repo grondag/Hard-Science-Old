@@ -12,10 +12,8 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 
-/**
- * Future version could in theory contain non-cubic shapes.
- */
-public class BlockRegion extends IntegerAABB implements IBlockRegion
+
+public class CubicBlockRegion extends IntegerAABB implements IBlockRegion
 {
     private final boolean isHollow;
     
@@ -24,7 +22,7 @@ public class BlockRegion extends IntegerAABB implements IBlockRegion
     /**
      * Created region includes from from and to positions.
      */
-    public BlockRegion(BlockPos fromPos, BlockPos toPos, boolean isHollow)
+    public CubicBlockRegion(BlockPos fromPos, BlockPos toPos, boolean isHollow)
     {
         super(fromPos, toPos);
         this.isHollow = isHollow;
@@ -124,7 +122,7 @@ public class BlockRegion extends IntegerAABB implements IBlockRegion
     /** convenience method - returns set of all block positions in AABB defined by inputs, inclusive */
     public static Set<BlockPos> positionsInRegion(BlockPos from, BlockPos to)
     {
-        BlockRegion temp = new BlockRegion(from, to, false);
+        CubicBlockRegion temp = new CubicBlockRegion(from, to, false);
         ImmutableSet.Builder<BlockPos> builder = ImmutableSet.builder();
         
         for(BlockPos.MutableBlockPos pos : temp.allPositions())

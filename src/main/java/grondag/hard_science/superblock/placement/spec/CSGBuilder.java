@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.placement.spec;
 
+import grondag.hard_science.library.world.IBlockRegion;
 import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
@@ -43,6 +44,13 @@ public class CSGBuilder extends VolumetricBuilder
     
     @Override
     public IWorldTask worldTask(EntityPlayerMP player)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IBlockRegion region()
     {
         // TODO Auto-generated method stub
         return null;

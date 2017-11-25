@@ -6,7 +6,6 @@ import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.FilterMode;
-import grondag.hard_science.superblock.placement.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;

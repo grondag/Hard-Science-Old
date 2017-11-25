@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.placement.spec;
 
+import grondag.hard_science.library.world.IBlockRegion;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.superblock.placement.PlacementPosition;
@@ -45,6 +46,13 @@ public class PredicateBuilder extends SingleStackBuilder
     
     @Override
     public IWorldTask worldTask(EntityPlayerMP player)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IBlockRegion region()
     {
         // TODO Auto-generated method stub
         return null;

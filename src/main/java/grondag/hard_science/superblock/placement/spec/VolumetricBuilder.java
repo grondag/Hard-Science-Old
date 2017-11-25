@@ -2,7 +2,8 @@ package grondag.hard_science.superblock.placement.spec;
 
 import java.util.HashSet;
 
-import grondag.hard_science.library.world.BlockRegion;
+import grondag.hard_science.Configurator;
+import grondag.hard_science.library.world.CubicBlockRegion;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.RegionOrientation;
 import grondag.hard_science.superblock.placement.TargetMode;
@@ -36,13 +37,13 @@ abstract class VolumetricBuilder extends SingleStackBuilder
      * adds obstacles checked within the region to the exclusion list. 
      * Does not fully validate region - is intended for preview use only.
      * <p>
-     * Will only check up to 512 block positions and stops after finding 16 obstacles.  
+     * Stops checking after finding 16 obstacles.  
      * Checks are only  performed if the selection mode is <code>COMPLETE_REGION</code>
      * because otherwise the placement cannot be prevented by obstructions.
      * 
      * @param region
      */
-    protected void excludeObstaclesInRegion(BlockRegion region)
+    protected void excludeObstaclesInRegion(CubicBlockRegion region)
     {
         region.clearExclusions();
 
@@ -71,7 +72,7 @@ abstract class VolumetricBuilder extends SingleStackBuilder
                     set.add(pos.toImmutable());
                     if(foundCount++ == 16) break;
                 }
-                if(checkCount++ == 512) break;
+                if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
             }
         }
         else
@@ -90,7 +91,7 @@ abstract class VolumetricBuilder extends SingleStackBuilder
                     set.add(pos.toImmutable());
                     if(foundCount++ == 16) break;
                 }
-                if(checkCount++ == 512) break;
+                if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
             }
         }
         region.exclude(set);
@@ -98,10 +99,10 @@ abstract class VolumetricBuilder extends SingleStackBuilder
 
     /**
      * Returns true if the region has no obstacles or
-     * obstacles do not matter. Must call AFTER {@link #excludeObstaclesInRegion(BlockRegion)}
+     * obstacles do not matter. Must call AFTER {@link #excludeObstaclesInRegion(CubicBlockRegion)}
      * or result will be meaningless. 
      */
-    protected boolean canPlaceRegion(BlockRegion region)
+    protected boolean canPlaceRegion(CubicBlockRegion region)
     {
         return region.exclusions().isEmpty() || this.selectionMode != TargetMode.COMPLETE_REGION;
     }

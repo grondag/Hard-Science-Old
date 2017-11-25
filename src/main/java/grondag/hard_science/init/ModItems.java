@@ -13,6 +13,8 @@ import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.ExcavationMarker;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.terrain.TerrainWand;
+import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.virtualblock.VirtualItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -82,6 +84,10 @@ public class ModItems
                 if(block instanceof MachineBlock)
                 {
                     itemBlock = new MachineItemBlock((MachineBlock)block);
+                }
+                else if(block instanceof VirtualBlock)
+                {
+                    itemBlock = new VirtualItemBlock((VirtualBlock)block);
                 }
                 else if(block instanceof SuperBlock)
                 {

@@ -51,7 +51,6 @@ public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
     {
         return FilterMode.FILL_REPLACEABLE;
     }
-
     
     @Override
     public RegionOrientation getRegionOrientation(ItemStack stack)

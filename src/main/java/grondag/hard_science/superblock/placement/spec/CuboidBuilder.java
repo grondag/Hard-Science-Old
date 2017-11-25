@@ -14,7 +14,8 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.ClientProxy;
 import grondag.hard_science.library.render.RenderUtil;
-import grondag.hard_science.library.world.BlockRegion;
+import grondag.hard_science.library.world.CubicBlockRegion;
+import grondag.hard_science.library.world.IBlockRegion;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
@@ -50,7 +51,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class CuboidBuilder extends VolumetricBuilder
 {
 
-    protected BlockRegion region;
+    protected CubicBlockRegion region;
 
     /**
      * Where should block shape preview sample be drawn?
@@ -76,14 +77,14 @@ public class CuboidBuilder extends VolumetricBuilder
     {
         if(this.isSelectionInProgress) 
         {
-            this.region = new BlockRegion(pPos.inPos, this.placementItem.fixedRegionSelectionPos(this.placedStack()).first(), false);
+            this.region = new CubicBlockRegion(pPos.inPos, this.placementItem.fixedRegionSelectionPos(this.placedStack()).first(), false);
             return true;
         }
 
         if(this.isFixedRegion)
         {
             FixedRegionBounds bounds = this.placementItem.getFixedRegion(this.placedStack());
-            this.region = new BlockRegion(bounds.fromPos, bounds.toPos, this.isHollow);
+            this.region = new CubicBlockRegion(bounds.fromPos, bounds.toPos, this.isHollow);
             this.excludeObstaclesInRegion(this.region);
 
             this.outputStack = PlacementHandler.cubicPlacementStack(this);
@@ -155,7 +156,7 @@ public class CuboidBuilder extends VolumetricBuilder
                 endPos = endPos.offset(relativeLeft.getOpposite(), fullRight ? half_w : half_w - 1);
             }
 
-            this.region = new BlockRegion(startPos, endPos, false);
+            this.region = new CubicBlockRegion(startPos, endPos, false);
             return true;
 
         }
@@ -167,7 +168,7 @@ public class CuboidBuilder extends VolumetricBuilder
             EnumFacing offsetFace = pPos.isFloating ? null : pPos.onFace;
 
             BlockPos endPos = PlacementHandler.getPlayerRelativeOffset(this.pPos.inPos, this.offsetPos, this.player, offsetFace, OffsetPosition.FLIP_NONE);
-            BlockRegion region = new BlockRegion(pPos.inPos, endPos, this.isHollow);
+            CubicBlockRegion region = new CubicBlockRegion(pPos.inPos, endPos, this.isHollow);
 
             this.excludeObstaclesInRegion(region);
             boolean isClear = this.canPlaceRegion(region);
@@ -180,7 +181,7 @@ public class CuboidBuilder extends VolumetricBuilder
                 {
                     // first try pivoting the selection box around the position being targeted
                     BlockPos endPos2 = PlacementHandler.getPlayerRelativeOffset(this.pPos.inPos, this.offsetPos, this.player, offsetFace, offset);
-                    BlockRegion region2 = new BlockRegion(pPos.inPos, endPos2, this.isHollow);
+                    CubicBlockRegion region2 = new CubicBlockRegion(pPos.inPos, endPos2, this.isHollow);
                     this.excludeObstaclesInRegion(region2);
 
                     if(this.canPlaceRegion(region2))
@@ -201,7 +202,7 @@ public class CuboidBuilder extends VolumetricBuilder
                     {
                         BlockPos startPos2 = pPos.inPos.offset(face);
                         BlockPos endPos2 = endPos.offset(face);
-                        BlockRegion region2 = new BlockRegion(startPos2, endPos2, isHollow);
+                        CubicBlockRegion region2 = new CubicBlockRegion(startPos2, endPos2, isHollow);
                         this.excludeObstaclesInRegion(region2);
                         if(this.canPlaceRegion(region2))
                         {
@@ -460,5 +461,11 @@ public class CuboidBuilder extends VolumetricBuilder
             //TODO
             return null;
         }
+    }
+
+    @Override
+    public IBlockRegion region()
+    {
+        return this.region;
     }
 }

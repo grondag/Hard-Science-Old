@@ -10,6 +10,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -100,4 +102,22 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     {
         return false;
     }
+
+    // override is necessary because will use ItemBlock implementation
+    // instead of PlacementItem implementation without override
+    @Override
+    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    {
+        return PlacementItem.super.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+    }
+
+    // override is necessary because will use ItemBlock implementation
+    // instead of PlacementItem implementation without override
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
+    {
+        return PlacementItem.super.onItemRightClick(worldIn, playerIn, handIn);
+    }
+    
+    
 }

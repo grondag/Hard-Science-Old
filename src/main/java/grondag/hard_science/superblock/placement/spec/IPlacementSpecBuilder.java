@@ -1,5 +1,6 @@
-package grondag.hard_science.superblock.placement;
+package grondag.hard_science.superblock.placement.spec;
 
+import grondag.hard_science.library.world.IBlockRegion;
 import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -64,4 +65,11 @@ public interface IPlacementSpecBuilder
      * @return
      */
     public boolean isExcavation();
+    
+    /**
+     * Enumerates block positions potentially affected.
+     * Intended for use by species selection, 
+     * but could have other uses in future.
+     */
+    public IBlockRegion region();
 }

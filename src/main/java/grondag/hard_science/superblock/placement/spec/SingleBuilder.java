@@ -2,6 +2,8 @@ package grondag.hard_science.superblock.placement.spec;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.hard_science.library.world.IBlockRegion;
+import grondag.hard_science.library.world.SingleBlockRegion;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
@@ -29,7 +31,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SingleBuilder extends SingleStackBuilder
 {
-
     public SingleBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
@@ -198,5 +199,11 @@ public class SingleBuilder extends SingleStackBuilder
                 }
             };
         }
+    }
+
+    @Override
+    public IBlockRegion region()
+    {
+        return new SingleBlockRegion(this.pPos.inPos);
     }
 }

@@ -16,10 +16,10 @@ public class Configurator
 {
     
     @Comment("Enable tracing for machine packets and processing. Highly verbose. Intended for dev environment and troubleshooeting.")
-    public static boolean logMachineNetwork = true;
+    public static boolean logMachineNetwork = false;
     
     @Comment("Enable tracing for excavation render tracking. Highly verbose. Intended for dev environment and troubleshooeting.")
-    public static boolean logExcavationRenderTracking = true;
+    public static boolean logExcavationRenderTracking = false;
     
     public static void recalcDerived()
     {
@@ -215,6 +215,13 @@ public class Configurator
 
         @Comment("Set true to enable tracing output for block model state.  Can spam the log quite a bit, so leave false unless having problems.")
         public boolean debugModelState = true;
+
+        @Comment({"Maximum number of block states checked before placing virtual blocks.",
+            " Try smaller values if placing large multi-block regions is causing FPS problems.",
+            " With smaller values, species (connected textures) may not be selected properly ",
+            " for large multi-block placements."})
+        @RangeDouble(min = 16, max = 4096)
+        public int maxPlacementCheckCount = 512;
     }
     
     ////////////////////////////////////////////////////        

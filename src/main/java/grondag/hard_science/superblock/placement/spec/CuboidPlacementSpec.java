@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.BlockRegion;
+import grondag.hard_science.library.world.CubicBlockRegion;
 import grondag.hard_science.superblock.placement.PlacementSpecType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
      */
     public class CuboidPlacementSpec extends VolumetricPlacementSpec
     {
-        BlockRegion region;
+        CubicBlockRegion region;
         
         public CuboidPlacementSpec() {};
         
@@ -27,7 +27,7 @@ import net.minecraft.util.math.BlockPos;
             this.isHollow= tag.getBoolean(ModNBTTag.PLACMENT_IS_HOLLOW);
             BlockPos minPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS));
             BlockPos maxPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS));
-            this.region = new BlockRegion(minPos, maxPos, this.isHollow);
+            this.region = new CubicBlockRegion(minPos, maxPos, this.isHollow);
         }
 
         @Override
