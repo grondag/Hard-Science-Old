@@ -52,6 +52,18 @@ public class VirtualBlock extends SuperModelBlock
         return block instanceof SuperBlock && ((SuperBlock)block).isVirtual();
     }
     
+    /**
+     * True if block at the given position is actually solid (not replaceable)
+     * or is virtual and visible to the given player.
+     */
+    public static boolean isVirtuallySolid(BlockPos pos, EntityPlayer player)
+    {
+        //TODO: check for player visibility
+        IBlockState blockState = player.world.getBlockState(pos);
+        return !blockState.getMaterial().isReplaceable() 
+                || (VirtualBlock.isVirtualBlock(blockState.getBlock()));
+    }
+    
     public VirtualBlock(String blockName)
     {
         super(blockName, Material.AIR, BlockRenderMode.TESR, WorldLightOpacity.TRANSPARENT, false, false);

@@ -251,11 +251,9 @@ public class ClientEventHandler
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
             
-            else if(ModKeys.PLACEMENT_TOGGLE_FIXED_REGION.isPressed() && item.toggleFixedRegionEnabled(stack))
+            else if(ModKeys.PLACEMENT_UNDO.isPressed())
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
-                String message  = I18n.translateToLocal(item.isFixedRegionEnabled(stack) ? "placement.message.fixed_region_on" : "placement.message.fixed_region_off");
-                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+               //TODO
             }
             
             else if(ModKeys.PLACEMENT_DECREASE_DEPTH.isPressed() && item.changeRegionSize(stack, 0, 0, -1))

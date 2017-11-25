@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.library.world.CubicBlockRegion;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.RegionOrientation;
 import grondag.hard_science.superblock.placement.TargetMode;
@@ -17,6 +18,10 @@ abstract class VolumetricBuilder extends SingleStackBuilder
 {
     protected final boolean isHollow;
     protected final BlockPos offsetPos;
+    /**
+     * Reference this instead of {@link PlacementItem#isFixedRegionEnabled(ItemStack)}
+     * because stack property is typically reset after builder is instantiated.
+     */
     protected final boolean isFixedRegion;
     protected final boolean isAdjustmentEnabled;
 

@@ -6,6 +6,7 @@ import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMo
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
@@ -44,6 +45,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -88,18 +90,8 @@ public class CuboidBuilder extends VolumetricBuilder
             this.excludeObstaclesInRegion(this.region);
 
             this.outputStack = PlacementHandler.cubicPlacementStack(this);
-
-            // to place a fixed region, player must be targeting a space within it
-            if(this.region.contains(pPos.inPos))
-            {
-                return this.canPlaceRegion(region);
-            }
-            else
-            {
-                // prevent block preview in nonsensical location
-                this.previewPos = null;
-                return false;
-            }
+            return this.canPlaceRegion(region);
+            
         }
 
         else if(this.isExcavation)
@@ -344,15 +336,11 @@ public class CuboidBuilder extends VolumetricBuilder
 
                 {
                     scheduleVisitIfNotAlreadyVisited(spec.getLocation(), null);
-
-                    //                            Log.info("Starting excavation from " + location.toString());
                 }
 
                 @Override
                 public int runInServerTick(int maxOperations)
                 {
-                    //                            Log.info("Starting run, checked contains %d and queue contains %d", checked.size(), queue.size());
-
                     if(queue.isEmpty()) return 0;
 
                     int opCount = 0;
@@ -362,8 +350,6 @@ public class CuboidBuilder extends VolumetricBuilder
                         if(visit == null) break;
 
                         BlockPos pos = visit.getLeft();
-
-                        //                                Log.info("Checking position " + pos.toString());
 
                         opCount++;
 
@@ -399,8 +385,6 @@ public class CuboidBuilder extends VolumetricBuilder
                                 AbstractTask.link(visit.getRight(), branchAntecedent);
                             }
                             canPassThrough = true;
-
-                            //                                    Log.info("Added position " + pos.toString());
                         }
 
                         // even if we can't excavate the block, 
@@ -412,8 +396,6 @@ public class CuboidBuilder extends VolumetricBuilder
                         // checked.
                         if(canPassThrough)
                         {
-                            //                                    Log.info("Branching from position " + pos.toString());
-
                             opCount++;
                             scheduleVisitIfNotAlreadyVisited(pos.up(), branchAntecedent);
                             scheduleVisitIfNotAlreadyVisited(pos.down(), branchAntecedent);
@@ -430,9 +412,6 @@ public class CuboidBuilder extends VolumetricBuilder
                         // when done, finalize entries list and submit job
                         spec.entries = builder.build();
                         this.checked.clear();
-
-                        //                                Log.info("Finalizing job");
-
                         if(domain != null) domain.JOB_MANAGER.addJob(job);
                     }
 
@@ -456,10 +435,53 @@ public class CuboidBuilder extends VolumetricBuilder
         else
         {
             // Placement world task places virtual blocks in the currently active build
+            return new IWorldTask()
+            {
+                /**
+                 * Block positions to be checked. 
+                 */
+                Iterator<MutableBlockPos> positionIterator = CuboidBuilder.this.region.includedPositions().iterator();
 
+                World world = player.world;
 
-            //TODO
-            return null;
+                @Override
+                public int runInServerTick(int maxOperations)
+                {
+                    int opCount = 0;
+                    while(opCount < maxOperations && positionIterator.hasNext())
+                    {
+                        BlockPos pos = positionIterator.next().toImmutable();
+                        opCount++;
+
+                        // is the position inside the world?
+                        if(world.isOutsideBuildHeight(pos)) continue;
+
+                        IBlockState blockState = world.getBlockState(pos);
+
+                        // is the block at the position affected
+                        // by this excavation?
+                        if(CuboidBuilder.this.effectiveFilterMode.shouldAffectBlock(
+                                blockState, 
+                                world, 
+                                pos, 
+                                CuboidBuilder.this.placedStack(),
+                                CuboidBuilder.this.isVirtual))
+                        {
+                            //TODO: set virtual block build/domain
+                            PlacementHandler.placeVirtualBlock(world, CuboidBuilder.this.outputStack, player, pos);
+                            opCount += 5;
+                        }
+
+                    }
+                    return opCount;
+                }
+
+                @Override
+                public boolean isDone()
+                {
+                    // done if no more positions to check
+                    return !this.positionIterator.hasNext();
+                }};
         }
     }
 

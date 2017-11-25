@@ -750,6 +750,7 @@ public interface PlacementItem
     
     /**
      * Sets the begining point for a fixed region. 
+     * Enables fixed region.
      * Does not change the current fixed region.
      */
     public default void fixedRegionStart(ItemStack stack, BlockPos pos, boolean isCenter)
@@ -903,6 +904,24 @@ public interface PlacementItem
                 MathHelper.clamp(oldPos.getZ() + dz, 1, this.isExcavator(stack) ? 64 : 9)
                 );
         tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, newPos.toLong());
+        
+        if(newPos.getX() == 1 && newPos.getY() == 1 && newPos.getZ() == 1)
+        {
+            // change to single-block mode if region size is single block
+            if(this.getTargetMode(stack).usesSelectionRegion && this.isTargetModeSupported(stack))
+            {
+                this.setTargetMode(stack, TargetMode.ON_CLICKED_FACE);
+            }
+        }
+        else
+        {
+            // change to multiblock mode if region size is single block
+            if(!this.getTargetMode(stack).usesSelectionRegion && this.isTargetModeSupported(stack))
+            {
+                this.setTargetMode(stack, TargetMode.FILL_REGION);
+            }
+        }
+        
         return true;
     }
     

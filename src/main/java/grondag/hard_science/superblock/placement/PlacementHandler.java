@@ -26,6 +26,7 @@ import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -130,7 +131,7 @@ public abstract class PlacementHandler
 
                 // if block out of range there will be no "placed on" position
                 if(onPos.distanceSq(onPos) > Useful.squared(mc.playerController.getBlockReachDistance() + 1)
-                        || player.world.getBlockState(onPos).getMaterial().isReplaceable())
+                        && !VirtualBlock.isVirtuallySolid(onPos, player))
                 {
                     onPos = null;
                 }
@@ -147,6 +148,7 @@ public abstract class PlacementHandler
         return doRightClickBlock(player, onPos, onFace, hitVec, stack, item);
     }
 
+    
     /**
      * Call when item is left clicked on a block.
      * Returns true if the click was handled and input processing should stop.
@@ -300,27 +302,21 @@ public abstract class PlacementHandler
             // finish placement region
             ItemStack tweakedStack = stack.copy();
             item.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
-
+            IPlacementSpecBuilder builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            
             return new PlacementResult(
                     pPos.inPos, 
-                    PlacementEvent.SET_PLACEMENT_REGION,
+                    builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
                     PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
         }
         else
         {
             // normal right click on block 
             IPlacementSpecBuilder builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
-            if(builder.validate())
-            {
-                return new PlacementResult(
-                        pPos.inPos, 
-                        builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
-                        builder);
-            }
-            else
-            {
-                return PlacementResult.EMPTY_RESULT_CONTINUE;
-            }
+            return new PlacementResult(
+                    pPos.inPos, 
+                    builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                    builder);
         }
     }
 
@@ -424,22 +420,15 @@ public abstract class PlacementHandler
 
         SoundType soundtype = PlacementItem.getStackSubstance(stack).soundType;
 
-        ModelState placedModelState = PlacementItem.getStackModelState(stack);
+        PlacementItem item = PlacementItem.getPlacementItem(stack);
+        if(item == null) return;
 
-        AxisAlignedBB axisalignedbb = placedModelState == null ? Block.FULL_BLOCK_AABB : placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
-
-        if(world.checkNoEntityCollision(axisalignedbb.offset(pos)))
+        IBlockState placedState = item.getPlacementBlockStateFromStack(stack);
+        //targetBlock.getStateFromMeta(placedStack.getMetadata());
+        
+        if (placeBlockAt(stack, player, world, pos, null, 0, 0, 0, placedState))
         {
-            PlacementItem item = PlacementItem.getPlacementItem(stack);
-            if(item == null) return;
-
-            IBlockState placedState = item.getPlacementBlockStateFromStack(stack);
-            //targetBlock.getStateFromMeta(placedStack.getMetadata());
-            
-            if (placeBlockAt(stack, player, world, pos, null, 0, 0, 0, placedState))
-            {
-                world.playSound(null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-            }
+            world.playSound(null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
         }
     }
 
@@ -581,7 +570,12 @@ public abstract class PlacementHandler
 
     /**
      * Returns modified copy of stack adjusted for context-dependent state.
-     * Intended for single and cubic region placements of non-CSG virtual blocks
+     * Right now this is just species.
+     * Intended for single and cubic region placements of non-CSG virtual blocks.<p>
+     * 
+     * Assumes block rotation was already set in stack by calling 
+     * {@link BlockOrientationHandler#configureStackForPlacement(ItemStack, EntityPlayer, PlacementPosition)}
+     * when spec was constructed.
      */
     public static ItemStack cubicPlacementStack(SingleStackBuilder specBuilder)
     {
@@ -602,9 +596,6 @@ public abstract class PlacementHandler
                 }
             }
         }
-        
-        // TODO: block rotation, etc.
-        
         return stack;
     }
     
@@ -746,10 +737,6 @@ public abstract class PlacementHandler
         TargetMode placementMode = item.getTargetMode(stack);
 
         boolean isFloating = item.isFloatingSelectionEnabled(stack);
-
-        SuperBlock stackBlock = item.getSuperBlock();
-
-        ModelState stackModelState = PlacementItem.getStackModelState(stack);
 
         switch(placementMode)
         {

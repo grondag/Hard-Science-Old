@@ -12,14 +12,13 @@ public class ModKeys
     public static KeyBinding PLACEMENT_HISTORY_FORWARD;
     public static KeyBinding PLACEMENT_HISTORY_BACK;
     public static KeyBinding PLACEMENT_PREVIEW;
-//    public static KeyBinding PLACEMENT_TOGGLE_EXCAVATION;
     public static KeyBinding PLACEMENT_DISPLAY_GUI;
     public static KeyBinding PLACEMENT_CYCLE_FILTER_MODE;
     public static KeyBinding PLACEMENT_CYCLE_SPECIES_HANDLING;
     public static KeyBinding PLACEMENT_CYCLE_TARGET_MODE;
     public static KeyBinding PLACEMENT_CYCLE_BLOCK_ORIENTATION;
     public static KeyBinding PLACEMENT_CYCLE_REGION_ORIENTATION;
-    public static KeyBinding PLACEMENT_TOGGLE_FIXED_REGION;
+    public static KeyBinding PLACEMENT_UNDO;
     public static KeyBinding PLACEMENT_INCREASE_WIDTH;
     public static KeyBinding PLACEMENT_DECREASE_WIDTH;
     public static KeyBinding PLACEMENT_INCREASE_HEIGHT;
@@ -43,8 +42,6 @@ public class ModKeys
                 KeyModifier.SHIFT, Keyboard.KEY_B, "key.categories.hard_science");
         PLACEMENT_HISTORY_BACK = new KeyBinding("key.placement_history_back", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
                 KeyModifier.CONTROL, Keyboard.KEY_B, "key.categories.hard_science");
-//        PLACEMENT_TOGGLE_EXCAVATION = new KeyBinding("key.placement_toggle_excavation", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
-//                KeyModifier.CONTROL, Keyboard.KEY_X, "key.categories.hard_science");
         PLACEMENT_DISPLAY_GUI = new KeyBinding("key.placement_display_gui", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
                 KeyModifier.NONE, Keyboard.KEY_B, "key.categories.hard_science");
         PLACEMENT_CYCLE_FILTER_MODE = new KeyBinding("key.placement_cycle_filter_mode", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
@@ -67,31 +64,26 @@ public class ModKeys
                 KeyModifier.NONE, Keyboard.KEY_UP, "key.categories.hard_science");
         PLACEMENT_DECREASE_DEPTH = new KeyBinding("key.placement_decrease_depth", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
                 KeyModifier.NONE, Keyboard.KEY_DOWN, "key.categories.hard_science");
-        PLACEMENT_TOGGLE_FIXED_REGION = new KeyBinding("key.placement_toggle_fixed_region", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
-                KeyModifier.SHIFT, Keyboard.KEY_R, "key.categories.hard_science");
-        
-//        PLACEMENT_MOVE_SELECTION = new KeyBinding("key.placement_move_selection", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
-//                KeyModifier.CONTROL, Keyboard.KEY_V, "key.categories.hard_science");
+        PLACEMENT_UNDO = new KeyBinding("key.placement_undo", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
+                KeyModifier.CONTROL, Keyboard.KEY_Z, "key.categories.hard_science");
         
         ClientRegistry.registerKeyBinding(PLACEMENT_HISTORY_FORWARD);
         ClientRegistry.registerKeyBinding(PLACEMENT_HISTORY_BACK);
         ClientRegistry.registerKeyBinding(PLACEMENT_PREVIEW);
         
-//        ClientRegistry.registerKeyBinding(PLACEMENT_TOGGLE_EXCAVATION);
         ClientRegistry.registerKeyBinding(PLACEMENT_DISPLAY_GUI);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_FILTER_MODE);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_SPECIES_HANDLING);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_TARGET_MODE);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_BLOCK_ORIENTATION);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_REGION_ORIENTATION);
-        ClientRegistry.registerKeyBinding(PLACEMENT_TOGGLE_FIXED_REGION);
+        ClientRegistry.registerKeyBinding(PLACEMENT_UNDO);
         ClientRegistry.registerKeyBinding(PLACEMENT_INCREASE_WIDTH);
         ClientRegistry.registerKeyBinding(PLACEMENT_DECREASE_WIDTH);
         ClientRegistry.registerKeyBinding(PLACEMENT_INCREASE_HEIGHT);
         ClientRegistry.registerKeyBinding(PLACEMENT_DECREASE_HEIGHT);
         ClientRegistry.registerKeyBinding(PLACEMENT_INCREASE_DEPTH);
         ClientRegistry.registerKeyBinding(PLACEMENT_DECREASE_DEPTH);
-//        ClientRegistry.registerKeyBinding(PLACEMENT_MOVE_SELECTION);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_SELECTION_TARGET);
     }
 

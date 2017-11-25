@@ -67,19 +67,31 @@ machine.power_stored=Stored Energy %,d joules
 
 #KEYS
 key.categories.hard_science=Hard Science
-key.placement_mode=Toggle Block Placement Mode
-key.placement_orientation=Cycle Block Placement Orientation
-key.placement_history=Cycle Block Placement History
 key.placement_preview=Toggle Block Placement Preview Mode
+key.placement_cycle_block_orientation=Change Block Orientation
+key.placement_cycle_filter_mode=Change Filter Mode
+key.placement_cycle_region_orientation=Change Region Orientation
+key.placement_cycle_selection_target=Floating/Normal Block Selection
+key.placement_cycle_species_handling=Change Join Behavior
+key.placement_cycle_target_mode=Change Target Mode
+key.placement_decrease_depth=Decrease Region Depth
+key.placement_decrease_height=Decrease Region Height
+key.placement_decrease_width=Decrease Region Width
+key.placement_display_gui=Display Item GUI
+key.placement_history_back=History Previous
+key.placement_history_forward=History Next
+key.placement_increase_depth=Increase Region Depth
+key.placement_increase_height=Increase Region Height
+key.placement_increase_width=Increase Region Width
+key.placement_undo=Undo Placement Action
 
 #PLACEMENT
 placement.message.range_normal=Block targeting set to normal Minecraft behavior.
 placement.message.range_floating=Block targeting set to %d blocks in direction player is looking.
 placement.message.orientation_block=Block orientation set to %s
 placement.message.orientation_region=Region orientation set to %s
-
+placement.message.target_mode=Changed target mode: %s
 placement.message.preview_set=Placement preview mode set to %s
-placement.message.selection_mode=Changed selection behavior: %s
 placement.message.region_single=Placement region is a single block
 placement.message.region_additive=Placement region is determined by existing blocks.
 placement.message.region_box=Placement region is %d x %d x %d blocks

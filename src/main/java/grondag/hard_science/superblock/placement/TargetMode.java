@@ -72,6 +72,6 @@ public enum TargetMode implements IMessagePlusImmutable<TargetMode>, IReadWriteN
     @Override
     public String localizedName()
     {
-        return I18n.translateToLocal("placement.selection_mode." + this.name().toLowerCase());
+        return I18n.translateToLocal("placement.target_mode." + this.name().toLowerCase());
     }
 }

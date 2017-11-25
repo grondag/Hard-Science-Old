@@ -75,16 +75,20 @@ public class PlacementResult
         case CANCEL_PLACEMENT_REGION:
             item.fixedRegionCancel(stackIn);
             break;
-            
-        case SET_PLACEMENT_REGION:
-            item.fixedRegionFinish(stackIn, player, blockPos, false);
-            break;
     
         case PLACE:
         case EXCAVATE:
             if(!player.world.isRemote)
             {
-                WorldTaskManager.enqueue(this.builder.worldTask((EntityPlayerMP)player));
+                if(this.builder.validate())
+                {
+                    // Turn off fixed region when completing a successful fixed region
+                    // Did this because did not want to require two clicks to place a fixed region
+                    // and no point in leaving the region there once placed.
+                    if(item.isFixedRegionEnabled(stackIn)) item.setFixedRegionEnabled(stackIn, false);
+                    
+                    WorldTaskManager.enqueue(this.builder.worldTask((EntityPlayerMP)player));
+                }
             }
             break;
     
