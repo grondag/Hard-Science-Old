@@ -15,7 +15,7 @@ import net.minecraft.util.math.BlockPos.MutableBlockPos;
 /**
  * Future version could in theory contain non-cubic shapes.
  */
-public class BlockRegion extends IntegerAABB
+public class BlockRegion extends IntegerAABB implements IBlockRegion
 {
     private final boolean isHollow;
     
@@ -68,6 +68,7 @@ public class BlockRegion extends IntegerAABB
     {
         if(this.exclusions != null) this.exclusions.clear();
     }
+    
     /** All positions contained in the region, including interior positions if it is hollow */
     public Iterable<MutableBlockPos> allPositions()
     {
@@ -86,7 +87,6 @@ public class BlockRegion extends IntegerAABB
         return isHollow ? surfacePositions() : allPositions();
     }
     
-    
     /** All positions on the surface of the region. Will be same as {@link #allPositions()} if region is not at least 3x3x3 */
     public Iterable<MutableBlockPos> adjacentPositions()
     {
@@ -94,7 +94,7 @@ public class BlockRegion extends IntegerAABB
     }
     
     /**
-     * All positions included in the region. Excludes interior positions if hollow, and excludes and excluded positions.
+     * All positions included in the region. Excludes interior positions if hollow, and excludes any excluded positions.
      */
     public Iterable<MutableBlockPos> includedPositions()
     {

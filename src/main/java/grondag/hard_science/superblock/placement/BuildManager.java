@@ -11,6 +11,7 @@ import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.NullDirtListener;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;

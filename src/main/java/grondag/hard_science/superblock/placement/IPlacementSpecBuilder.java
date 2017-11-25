@@ -1,6 +1,9 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.hard_science.simulator.base.jobs.IWorldTask;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -47,5 +50,22 @@ public interface IPlacementSpecBuilder
      */
     public AbstractPlacementSpec build();
 
-    
+    /**
+     * Encapsulates all work needed to build a spec and apply it to the world.
+     * What it does will depend on the nature of the spec:<p>
+     * 
+     * Non-virtual specs: single (real) blocks, excavation and exchange
+     * specs that do not place or change virtual blocks will determine affected block
+     * positions and directly submit new construction jobs in the 
+     * player's active domain.<p>
+     * 
+     * Virtual placement specs will place or modify virtual blocks in the world,
+     * and associate those virtual blocks with the player's currently active build.<p>
+     * 
+     * Build specs will compile the active build, capturing all virtual blocks
+     * associated with the player's active build as entries, and then submit a
+     * new construction job in the player's active domain. The entries will
+     * also be saved with the build (for later re-used if desired) and the build closed.
+     */
+    public abstract IWorldTask worldTask(EntityPlayerMP player);
 }

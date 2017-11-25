@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.base.jobs;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PlacementSpecEntry;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.PlacementSpecEntry;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class BuildingTask extends AbstractTask

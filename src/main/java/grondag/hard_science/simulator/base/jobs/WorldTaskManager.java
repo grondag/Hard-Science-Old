@@ -7,7 +7,6 @@ import grondag.hard_science.network.ModMessages;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.server.FMLServerHandler;
 
 /**
  *  Maintains a queue of tasks that require world access and executes them in FIFO order.  

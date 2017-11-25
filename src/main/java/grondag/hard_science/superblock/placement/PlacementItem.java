@@ -173,17 +173,6 @@ public interface PlacementItem
      */
     public SuperBlock getSuperBlock();
     
-    /**
-     * Used with {@link #BENUMSET_FEATURES} to know what features are supported.
-     * @param stack 
-     */
-    public default int featureFlags(ItemStack stack)
-    {
-        return 0xFFFFFFFF;
-    }
-    
-    public int guiOrdinal();
-    
     /** True if item places air blocks or carves empty space in CSG blocks */
     public boolean isExcavator(ItemStack placedStack);
     
@@ -193,6 +182,21 @@ public interface PlacementItem
     /////////////////////////////////////////////////////
     // DEFAULT MEMBERS
     /////////////////////////////////////////////////////
+    
+    /**
+     * Used with {@link #BENUMSET_FEATURES} to know what features are supported.
+     * @param stack 
+     */
+    public default int featureFlags(ItemStack stack)
+    {
+        return 0xFFFFFFFF;
+    }
+    
+    /** won't be called unless gui feature is supported */
+    public default int guiOrdinal()
+    {
+        return 0;
+    }
     
     public default boolean isGuiSupported(ItemStack stack)
     {

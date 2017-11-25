@@ -4,12 +4,13 @@ import java.util.function.Supplier;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.AdditivePlacementSpec;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.CSGPlacementSpec;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.CuboidPlacementSpec;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PredicatePlacementSpec;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.SinglePlacementSpec;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.SurfacePlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.AdditivePlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.CSGPlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.CuboidPlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.PredicatePlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.SinglePlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.SurfacePlacementSpec;
 import net.minecraft.nbt.NBTTagCompound;
 
 public enum PlacementSpecType

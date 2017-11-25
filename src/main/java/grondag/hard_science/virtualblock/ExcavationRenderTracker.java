@@ -1,12 +1,10 @@
 package grondag.hard_science.virtualblock;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.world.WorldMap;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.base.DomainManager;

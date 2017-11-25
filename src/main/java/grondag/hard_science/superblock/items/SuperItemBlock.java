@@ -1,30 +1,17 @@
 package grondag.hard_science.superblock.items;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import grondag.hard_science.gui.ModGuiHandler;
-import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModItems;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementResult;
-import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.state.IBlockState;
+import grondag.hard_science.superblock.placement.PlacementItemFeature;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -33,6 +20,10 @@ import net.minecraft.world.World;
  */
 public class SuperItemBlock extends ItemBlock implements PlacementItem
 {
+    
+    public static final int FEATURE_FLAGS = PlacementItem.BENUMSET_FEATURES.getFlagsForIncludedValues(
+            PlacementItemFeature.BLOCK_ORIENTATION,
+            PlacementItemFeature.SPECIES_MODE);
     
     /**
      * Called client-side before {@link #onItemUse(EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}.  
@@ -49,11 +40,12 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     {
         super(block);
         setHasSubtypes(true);
-        if(this.block == ModBlocks.virtual_block)
-        {
-            this.setMaxDamage(0);
-            this.setMaxStackSize(1);
-        }
+    }
+    
+    @Override
+    public int featureFlags(ItemStack stack)
+    {
+        return FEATURE_FLAGS;
     }
     
     @Override
@@ -85,129 +77,22 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         return SuperTileEntity.withoutServerTag(super.getNBTShareTag(stack));
     }
     
-    
-    /**
-     * true if successful
-     * FIXME: remove when done transfering logic
-     */
-    @Deprecated
-    private boolean doPlacements(PlacementResult result, ItemStack stackIn, World worldIn, EntityPlayer playerIn)
-    {
-        if(!playerIn.capabilities.allowEdit) return false;
-        
-//        ModelState modelState = PlacementItem.getStackModelState(stackIn);
-//        if(modelState == null) return false;
-
-        // supermodel blocks may need to use a different block instance depending on model/substance
-        // handle this here by substituting a stack different than what player is holding, but don't
-        // change what is in player's hand.
-//        SuperBlock targetBlock = (SuperBlock) this.block;
-//
-//        if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
-//        {
-//            BlockSubstance substance = PlacementItem.getStackSubstance(stackIn);
-//            if(substance == null) return false;
-//            targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
-//            
-//            if(targetBlock != this.block)
-//            {
-//                ItemStack tempStack = new ItemStack(targetBlock);
-//                tempStack.setCount(stackIn.getCount());
-//                tempStack.setItemDamage(stackIn.getItemDamage());
-//                tempStack.setTagCompound(stackIn.getTagCompound());
-//                stackIn = tempStack;
-//            }
-//        }
-        
-        List<Pair<BlockPos, ItemStack>> placements = result.placements(); // placementHandler.getPlacementResults(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ, stackIn);
-        
-        if(placements.isEmpty()) return false;
-        
-        SoundType soundtype = getPlacementSound(stackIn);
-        boolean didPlace = false;
-        
-        for(Pair<BlockPos, ItemStack> p : placements)
-        {
-            ItemStack placedStack = p.getRight();
-            BlockPos placedPos = p.getLeft();
-          
-            ModelState placedModelState = PlacementItem.getStackModelState(placedStack);
-            
-            AxisAlignedBB axisalignedbb = placedModelState == null ? Block.FULL_BLOCK_AABB : placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
-
-
-            if(worldIn.checkNoEntityCollision(axisalignedbb.offset(placedPos)))
-            {
-                PlacementItem item = PlacementItem.getPlacementItem(placedStack);
-                if(item == null) continue;
-                
-                IBlockState placedState = item.getPlacementBlockStateFromStack(placedStack);
-                        //targetBlock.getStateFromMeta(placedStack.getMetadata());
-                if (placeBlockAt(placedStack, playerIn, worldIn, placedPos, null, 0, 0, 0, placedState))
-                {
-                    didPlace = true;
-                    worldIn.playSound(playerIn, placedPos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                    if(!(playerIn.isCreative() || isVirtual(stackIn)))
-                    {
-                        stackIn.shrink(1);
-                        if(stackIn.isEmpty()) break;
-                    }
-                }
-            }
-        }
-        return didPlace;
-    }
-   
-     /**
-     * Called to actually place the block, after the location is determined
-     * and all permission checks have been made.
-     *
-     * @param stack The item stack that was used to place the block. This can be changed inside the method.
-     * @param player The player who is placing the block. Can be null if the block is not being placed by a player.
-     * @param side The side the player (or machine) right-clicked on.
-     */
-    @Override
-    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
-    { 
-        // world.setBlockState returns false if the state was already the requested state
-        // this is OK normally, but if we need to update the TileEntity it is the opposite of OK
-        boolean wasUpdated = world.setBlockState(pos, newState, 3)
-                || world.getBlockState(pos) == newState;
-            
-        if(!wasUpdated) 
-            return false;
-        
-        this.block.onBlockPlacedBy(world, pos, newState, player, stack);
-        return true;
-    }
-
     @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
         return ((SuperBlock)this.block).getItemStackDisplayName(stack);
     }
     
-    private static SoundType getPlacementSound(ItemStack stack)
-    {
-        return PlacementItem.getStackSubstance(stack).soundType;
-//        return isVirtual(stack) ? VirtualBlock.VIRTUAL_BLOCK_SOUND : getStackSubstance(stack).soundType;
-    }
-    
+    @Override
     public boolean isVirtual(ItemStack stack)
     {
-        return stack.getItem() == ModItems.virtual_block;
+        return false;
     }
 
     @Override
     public SuperBlock getSuperBlock()
     {
         return (SuperBlock) this.block;
-    }
-
-    @Override
-    public int guiOrdinal()
-    {
-        return ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal();
     }
 
     @Override

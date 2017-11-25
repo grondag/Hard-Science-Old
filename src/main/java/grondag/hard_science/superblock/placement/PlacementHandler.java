@@ -15,13 +15,17 @@ import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.BlockRegion;
 import grondag.hard_science.library.world.HorizontalFace;
+import grondag.hard_science.library.world.IBlockRegion;
 import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.SingleStackPlacementSpec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
+import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -29,6 +33,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -64,21 +70,21 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class PlacementHandler
 {
-   
-//    /**
-//     * This and similarly-named variables cache the last result of {@link #predictPlacementResults(EntityPlayerSP, ItemStack, PlacementItem)}.
-//     */
-//    @SideOnly(Side.CLIENT)
-//    private static PlacementResult lastPredictionResult = null;
-//    @SideOnly(Side.CLIENT)
-//    private static ItemStack lastPredicionStack = ItemStack.EMPTY;
-//    @SideOnly(Side.CLIENT)
-//    private static BlockPos lastPredictionPos = null;
-//    @SideOnly(Side.CLIENT)
-//    private static EnumFacing lastPredictionFace = null;
-//    @SideOnly(Side.CLIENT)
-//    private static Vec3d lastPredictionHitVec = null;
-    
+
+    //    /**
+    //     * This and similarly-named variables cache the last result of {@link #predictPlacementResults(EntityPlayerSP, ItemStack, PlacementItem)}.
+    //     */
+    //    @SideOnly(Side.CLIENT)
+    //    private static PlacementResult lastPredictionResult = null;
+    //    @SideOnly(Side.CLIENT)
+    //    private static ItemStack lastPredicionStack = ItemStack.EMPTY;
+    //    @SideOnly(Side.CLIENT)
+    //    private static BlockPos lastPredictionPos = null;
+    //    @SideOnly(Side.CLIENT)
+    //    private static EnumFacing lastPredictionFace = null;
+    //    @SideOnly(Side.CLIENT)
+    //    private static Vec3d lastPredictionHitVec = null;
+
     /**
      * Called client-side by overlay renderer to know
      * what should be rendered for player. If no operation is in progress,
@@ -90,7 +96,7 @@ public abstract class PlacementHandler
     @Nonnull
     public static PlacementResult predictPlacementResults(EntityPlayerSP player, @Nonnull ItemStack stack, @Nonnull PlacementItem item)
     {
-        
+
         /* if player is in range to a solid block and floating selection is off, 
          * the block against which we would place our block(s).  Null if out of range or floating
          * selection is on.
@@ -133,7 +139,7 @@ public abstract class PlacementHandler
                 }
             }
         }
-   
+
         // assume user will click the right mouse button
         // Pass stack copy so that predicted action doesn't affect real stack
         return doRightClickBlock(player, onPos, onFace, hitVec, stack, item);
@@ -158,18 +164,15 @@ public abstract class PlacementHandler
     {
         if(!PlacementItem.isPlacementItem(stack)) return PlacementResult.EMPTY_RESULT_CONTINUE;
         PlacementItem item = (PlacementItem)stack.getItem();
-        
+
         if(item.isFixedRegionSelectionInProgress(stack))
         {
-           
-                // any left click while selecting cancels the operation;
-                return new PlacementResult(
-                        null, 
-                        null, 
-                        null, 
-                        null, 
-                        PlacementEvent.CANCEL_PLACEMENT_REGION,
-                        null);
+
+            // any left click while selecting cancels the operation;
+            return new PlacementResult(
+                    null, 
+                    PlacementEvent.CANCEL_PLACEMENT_REGION,
+                    null);
         }
         else if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
         {
@@ -178,9 +181,6 @@ public abstract class PlacementHandler
             //TODO
             Log.info("UNDO PLACEMENT LOGIC HAPPENS NOW");
             return new PlacementResult(
-                    null, 
-                    null, 
-                    null, 
                     onPos, 
                     PlacementEvent.UNDO_PLACEMENT,
                     null);
@@ -203,7 +203,7 @@ public abstract class PlacementHandler
         Vec3d lookVec = player.getLookVec();
         int xFactor = lookVec.x > 0 ? 1 : -1;
         int zFactor = lookVec.z > 0 ? 1 : -1;
-        
+
         if(onFace != null)
         {
             switch(onFace.getAxis())
@@ -251,67 +251,55 @@ public abstract class PlacementHandler
         // or a fixed region (for preview only - see logic below) if not enabled
         if(onPos == null && !item.isFloatingSelectionEnabled(stack)) 
         {
-                // don't force player to be in placement range to see big region selections
-                // but note this doesn't work for selection in progress
-                if(item.isFixedRegionEnabled(stack) && !item.isFixedRegionSelectionInProgress(stack))
-                {
-                    return new PlacementResult(
-                            null, 
-                            null, 
-                            null, 
-                            pPos.inPos, 
-                            PlacementEvent.NO_OPERATION_CONTINUE,
-                            PlacementSpecHelper.placementBuilder(player, pPos, stack));
-                }
-                else return PlacementResult.EMPTY_RESULT_CONTINUE;
+            // don't force player to be in placement range to see big region selections
+            // but note this doesn't work for selection in progress
+            if(item.isFixedRegionEnabled(stack) && !item.isFixedRegionSelectionInProgress(stack))
+            {
+                return new PlacementResult(
+                        pPos.inPos, 
+                        PlacementEvent.NO_OPERATION_CONTINUE,
+                        PlacementSpecHelper.placementBuilder(player, pPos, stack));
+            }
+            else return PlacementResult.EMPTY_RESULT_CONTINUE;
         }
-        
-        
+
+
         // nothing to do if no position
         if(pPos.inPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
-        
-        
+
+
         // only virtual blocks support advanced placement behavior
         // so emulate vanilla right-click behavior if we have non-virtual block
         if(item.getSuperBlock() != null && !item.getSuperBlock().isVirtual())
         {
             ItemStack tweakedStack = stack.copy();
             item.setTargetMode(tweakedStack, TargetMode.ON_CLICKED_FACE);
-            
+
             return new PlacementResult(
-                    blockBoundaryAABB(pPos.inPos, pPos.inPos),
-                    ImmutableList.of(Pair.of(pPos.inPos, tweakedStack)), 
-                    null, 
                     pPos.inPos, 
                     PlacementEvent.PLACE,
                     PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
         }
-        
+
         // Ctrl + right click: start new placement region
         if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
         {
             ItemStack tweakedStack = stack.copy();
             item.fixedRegionStart(tweakedStack, pPos.inPos, false);
-            
+
             return new PlacementResult(
-                    blockBoundaryAABB(pPos.inPos, pPos.inPos),
-                    null, 
-                    null, 
                     pPos.inPos, 
                     PlacementEvent.START_PLACEMENT_REGION,
                     PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
         }
-        
+
         if(item.isFixedRegionSelectionInProgress(stack))
         {
             // finish placement region
             ItemStack tweakedStack = stack.copy();
             item.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
-            
+
             return new PlacementResult(
-                    blockBoundaryAABB(pPos.inPos, pPos.inPos), 
-                    null, 
-                    null, 
                     pPos.inPos, 
                     PlacementEvent.SET_PLACEMENT_REGION,
                     PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
@@ -320,46 +308,43 @@ public abstract class PlacementHandler
         {
             // normal right click on block 
             return new PlacementResult(
-                    new IntegerAABB(pPos.inPos, pPos.inPos), 
-                    null, 
-                    null, 
                     pPos.inPos, 
                     item.isExcavator(stack) ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
-                    PlacementSpecHelper.placementBuilder(player, pPos, stack));
+                            PlacementSpecHelper.placementBuilder(player, pPos, stack));
         }
     }
-    
+
     //FIXME: remove
     public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
         if(!PlacementItem.isPlacementItem(stack)) return PlacementResult.EMPTY_RESULT_CONTINUE;
         PlacementItem item = (PlacementItem)stack.getItem();
-        
+
         TargetMode selectionMode = item.getTargetMode(stack);
         boolean isHollow = selectionMode == TargetMode.HOLLOW_REGION;
         boolean isExcavating = false; //item.isDeleteModeEnabled(stack);
-        
+
         // check for a multi-block placement region
         BlockPos placementPos = selectionMode.usesSelectionRegion ? item.getRegionSize(stack, true) : null;
         BlockPos endPos = placementPos == null ? pPos.inPos : getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, OffsetPosition.FLIP_NONE);
-        
+
         BlockRegion region = new BlockRegion(pPos.inPos, endPos, isHollow);
         if(selectionMode.usesSelectionRegion) excludeObstaclesInRegion(player, pPos, stack, region);
-        
+
         boolean adjustmentEnabled = item.getRegionOrientation(stack) == RegionOrientation.AUTOMATIC && !isExcavating;
-        
+
         /** true if no obstacles */
         boolean isClear = region.exclusions().isEmpty() 
                 && player.world.checkNoEntityCollision(region.toAABB());
-        
+
         // Adjust selection to avoid exclusions if requested and necessary.
         // No point if is only a single position or a selection mode that doesn't use the selection region.
         // Also can't do this if user is currently selecting a region
         if(     adjustmentEnabled 
-             && selectionMode.usesSelectionRegion 
-             && !isClear 
-             && placementPos != null 
-             && !pPos.inPos.equals(endPos))
+                && selectionMode.usesSelectionRegion 
+                && !isClear 
+                && placementPos != null 
+                && !pPos.inPos.equals(endPos))
         {
             for(OffsetPosition offset : OffsetPosition.ALTERNATES)
             {
@@ -367,7 +352,7 @@ public abstract class PlacementHandler
                 BlockPos endPos2 = getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, offset);
                 BlockRegion region2 = new BlockRegion(pPos.inPos, endPos2, isHollow);
                 excludeObstaclesInRegion(player, pPos, stack, region2);
-    
+
                 if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
                 {
                     endPos = endPos2;
@@ -376,12 +361,12 @@ public abstract class PlacementHandler
                     break;
                 }
             }
-            
+
             if(!isClear)
             {
                 // that didn't work, so try nudging the region a block in each direction
                 EnumFacing[] checkOrder = faceCheckOrder(player, pPos.onFace);
-                
+
                 for(EnumFacing face : checkOrder)
                 {
                     BlockPos startPos2 = pPos.inPos.offset(face);
@@ -398,18 +383,54 @@ public abstract class PlacementHandler
                 }
             }
         }
-        
+
         List<Pair<BlockPos, ItemStack>> placements = (selectionMode != TargetMode.COMPLETE_REGION || isClear)
                 ? placeRegion(player, pPos.onPos, pPos.onFace, new Vec3d(pPos.hitX, pPos.hitY, pPos.hitZ), stack, region)
-                : Collections.emptyList();
+                        : Collections.emptyList();
+
+                return new PlacementResult(
+                        pPos.inPos, 
+                        isExcavating ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                                PlacementSpecHelper.placementBuilder(player, pPos, stack));
+    }
+
+    private static boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
+    { 
+        // world.setBlockState returns false if the state was already the requested state
+        // this is OK normally, but if we need to update the TileEntity it is the opposite of OK
+        boolean wasUpdated = world.setBlockState(pos, newState, 3)
+                || world.getBlockState(pos) == newState;
+            
+        if(!wasUpdated) 
+            return false;
         
-        return new PlacementResult(
-                new IntegerAABB(pPos.inPos, endPos), 
-                placements, 
-                region.exclusions(), 
-                pPos.inPos, 
-                isExcavating ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
-                PlacementSpecHelper.placementBuilder(player, pPos, stack));
+        newState.getBlock().onBlockPlacedBy(world, pos, newState, player, stack);
+        return true;
+    }
+    
+    public static void placeVirtualBlock(World world, ItemStack stack, EntityPlayer player, BlockPos pos)
+    {
+        if(!player.capabilities.allowEdit) return;
+
+        SoundType soundtype = PlacementItem.getStackSubstance(stack).soundType;
+
+        ModelState placedModelState = PlacementItem.getStackModelState(stack);
+
+        AxisAlignedBB axisalignedbb = placedModelState == null ? Block.FULL_BLOCK_AABB : placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
+
+        if(world.checkNoEntityCollision(axisalignedbb.offset(pos)))
+        {
+            PlacementItem item = PlacementItem.getPlacementItem(stack);
+            if(item == null) return;
+
+            IBlockState placedState = item.getPlacementBlockStateFromStack(stack);
+            //targetBlock.getStateFromMeta(placedStack.getMetadata());
+            
+            if (placeBlockAt(stack, player, world, pos, null, 0, 0, 0, placedState))
+            {
+                world.playSound(null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+            }
+        }
     }
 
     /**
@@ -429,55 +450,55 @@ public abstract class PlacementHandler
             result[5] = EnumFacing.DOWN;
             return result;
         }
-       
-        
+
+
         switch(onFace)
         {
-            case DOWN:
-                final EnumFacing[] DOWN_RESULT = {EnumFacing.DOWN, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.UP, };
-                return DOWN_RESULT;
-                
-            case UP:
-                final EnumFacing[] UP_RESULT = {EnumFacing.UP, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.DOWN};
-                return UP_RESULT;
+        case DOWN:
+            final EnumFacing[] DOWN_RESULT = {EnumFacing.DOWN, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.UP, };
+            return DOWN_RESULT;
 
-            case EAST:
-                final EnumFacing[]  EAST_RESULT = {EnumFacing.EAST, EnumFacing.NORTH,  EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN};
-                return EAST_RESULT;
+        case UP:
+            final EnumFacing[] UP_RESULT = {EnumFacing.UP, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.DOWN};
+            return UP_RESULT;
 
-            case NORTH:
-                final EnumFacing[] NORTH_RESULT = {EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.UP, EnumFacing.DOWN};
-                return NORTH_RESULT;
+        case EAST:
+            final EnumFacing[]  EAST_RESULT = {EnumFacing.EAST, EnumFacing.NORTH,  EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN};
+            return EAST_RESULT;
 
-            case SOUTH:
-                final EnumFacing[] SOUTH_RESULT = {EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.UP, EnumFacing.DOWN};
-                return SOUTH_RESULT;
+        case NORTH:
+            final EnumFacing[] NORTH_RESULT = {EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.UP, EnumFacing.DOWN};
+            return NORTH_RESULT;
 
-            case WEST:
-            default:
-                final EnumFacing[] WEST_RESULT = {EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.UP, EnumFacing.DOWN};
-                return WEST_RESULT;
-       
+        case SOUTH:
+            final EnumFacing[] SOUTH_RESULT = {EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.UP, EnumFacing.DOWN};
+            return SOUTH_RESULT;
+
+        case WEST:
+        default:
+            final EnumFacing[] WEST_RESULT = {EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.UP, EnumFacing.DOWN};
+            return WEST_RESULT;
+
         }
     }
-    
+
     @Deprecated
     public static void excludeObstaclesInRegion(EntityPlayer player, PlacementPosition pPos, ItemStack stack, BlockRegion region)
     {
         if(!PlacementItem.isPlacementItem(stack)) return;
         PlacementItem item = (PlacementItem)stack.getItem();
         boolean isVirtual = item.isVirtual(stack);
-        
+
         FilterMode filterMode =  item.getFilterMode(stack);
         boolean isExcavating = false; //item.isDeleteModeEnabled(stack);
-        
+
         // if excavating, adjust filter mode if needed so that it does something
         if(isExcavating && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
-                
+
         World world = player.world;
-        
+
         HashSet<BlockPos> set = new HashSet<BlockPos>();
-        
+
         if(isExcavating)
         {
             for(BlockPos.MutableBlockPos pos : region.positions())
@@ -502,106 +523,143 @@ public abstract class PlacementHandler
         }
         region.exclude(set);
     }
-    
+
     /**
      * Generates positions and item stacks that should be placed in the given region 
      * according to current stack settings.
      * The 
      */
+    @Deprecated
     public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stackIn, 
             BlockRegion region)
     {
-        
+
         ItemStack stack;
-        
-//        if(PlacementItem.isDeleteModeEnabled(stackIn))
-//        {
-//            stack = Items.AIR.getDefaultInstance();
-//        }
-//        else
-//        {
-            stack = stackIn.copy();
-        
-            ModelState modelState = PlacementItem.getStackModelState(stack);
-            if(modelState.hasSpecies())
+
+        //        if(PlacementItem.isDeleteModeEnabled(stackIn))
+        //        {
+        //            stack = Items.AIR.getDefaultInstance();
+        //        }
+        //        else
+        //        {
+        stack = stackIn.copy();
+
+        ModelState modelState = PlacementItem.getStackModelState(stack);
+        if(modelState.hasSpecies())
+        {
+            int species = speciesForPlacement(player, onPos, onFace, stack, region);
+            if(species >= 0) 
             {
-                int species = speciesForPlacement(player, onPos, onFace, hitVec, stack, region);
-                if(species >= 0) 
+                modelState.setSpecies(species);
+                PlacementItem.setStackModelState(stack, modelState);
+                if(modelState.metaUsage() == MetaUsage.SPECIES)
                 {
-                    modelState.setSpecies(species);
-                    PlacementItem.setStackModelState(stack, modelState);
-                    if(modelState.metaUsage() == MetaUsage.SPECIES)
-                    {
-                        stack.setItemDamage(species);
-                    }
+                    stack.setItemDamage(species);
                 }
             }
-//        }
-        
+        }
+        //        }
+
         ImmutableList.Builder<Pair<BlockPos, ItemStack>> builder = ImmutableList.builder();
-        
+
         for(BlockPos.MutableBlockPos pos : region.includedPositions())
         {
             builder.add(Pair.of(pos.toImmutable(), stack));
         }
         return builder.build();
     }
+
+    /**
+     * Returns modified copy of stack adjusted for context-dependent state.
+     * Intended for single and cubic region placements of non-CSG virtual blocks
+     */
+    public static ItemStack cubicPlacementStack(SingleStackBuilder specBuilder)
+    {
+
+        ItemStack stack = specBuilder.placedStack().copy();
+        PlacementPosition pPos = specBuilder.placementPosition();
+        ModelState modelState = PlacementItem.getStackModelState(stack);
+        if(modelState.hasSpecies())
+        {
+            //TODO: pass region
+            int species = speciesForPlacement(specBuilder.player(), pPos.onPos, pPos.onFace, stack, null);
+            if(species >= 0) 
+            {
+                modelState.setSpecies(species);
+                PlacementItem.setStackModelState(stack, modelState);
+                if(modelState.metaUsage() == MetaUsage.SPECIES)
+                {
+                    stack.setItemDamage(species);
+                }
+            }
+        }
+        
+        // TODO: block rotation, etc.
+        
+        return stack;
+    }
     
     /**
      * Determines species that should be used for placing a region
      * according to current stack settings.
      */
-    public static int speciesForPlacement(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack, BlockRegion region)
+    public static int speciesForPlacement(EntityPlayer player, BlockPos onPos, EnumFacing onFace, ItemStack stack, IBlockRegion region)
     {
         // ways this can happen:
         // have a species we want to match because we clicked on a face
         // break with everything - need to know adjacent species
         // match with most - need to know adjacent species
-        
+
         if(!PlacementItem.isPlacementItem(stack)) return 0;
         PlacementItem item = (PlacementItem)stack.getItem();
-        
+
         SpeciesMode mode = item.getSpeciesMode(stack);
         if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY)) mode = mode.alternate();
-        
+
         boolean shouldBreak = mode != SpeciesMode.MATCH_MOST;
-        
+
         ModelState  withModelState = PlacementItem.getStackModelState(stack);
         if(withModelState == null || !withModelState.hasSpecies()) return 0;
-        
+
         World world = player.world;
         if(world == null) return 0;
-        
+
         IBlockState withBlockState = item.getPlacementBlockStateFromStack(stack);
-        
-        if(mode == SpeciesMode.MATCH_CLICKED && onPos != null && onFace != null)
+
+        // if no region provided or species mode used clicked block then 
+        // result is based on the clicked face
+        if(region == null || (mode == SpeciesMode.MATCH_CLICKED && onPos != null && onFace != null))
         {
             int clickedSpecies = SuperBlockHelper.getJoinableSpecies(world, onPos, withBlockState, withModelState);
+            
+            // if no region, then return something different than what is clicked,
+            // unless didn't get a species - will return 0 in that case.
+            if(region == null) return shouldBreak || clickedSpecies <0 ? clickedSpecies + 1 : clickedSpecies;
+                
             if(clickedSpecies >= 0) return clickedSpecies;
-            // if doesn't find on clicked face will default to break, because shouldBreak will be true
         }
         
         int[] adjacentCount = new int[16];
         int[] interiorCount = new int[16];
-        
-        for(BlockPos.MutableBlockPos pos : region.includedPositions())
+
+        for(BlockPos pos : region.includedPositions())
         {
             int interiorSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
             if(interiorSpecies >= 0 && interiorSpecies <= 15) interiorCount[interiorSpecies]++;
         }
-        
-        for(BlockPos.MutableBlockPos pos : region.adjacentPositions())
+
+        for(BlockPos pos : region.adjacentPositions())
         {
             int adjacentSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
             if(adjacentSpecies >= 0 && adjacentSpecies <= 15) adjacentCount[adjacentSpecies]++;
         }
-        
+
         if(shouldBreak)
         {
             // find a species that matches as few things as possible
             int bestSpecies = 0;
             int bestCount = adjacentCount[0] + interiorCount[0];
-            
+
             for(int i = 1; i < 16; i++)
             {
                 int tryCount = adjacentCount[i] + interiorCount[i];
@@ -619,7 +677,7 @@ public abstract class PlacementHandler
             // give preference to species that are included in the region if any
             int bestSpecies = 0;
             int bestCount = interiorCount[0];
-            
+
             for(int i = 1; i < 16; i++)
             {
                 if(interiorCount[i] > bestCount)
@@ -628,7 +686,7 @@ public abstract class PlacementHandler
                     bestSpecies = i;
                 }
             }
-            
+
             if(bestCount == 0)
             {
                 for(int i = 1; i < 16; i++)
@@ -643,7 +701,7 @@ public abstract class PlacementHandler
             return bestSpecies;
         }
     }
-    
+
     /**
      * Returns list of stacks to be placed.
      * Responsible for confirming that all positions placed are air or replaceable.
@@ -662,12 +720,13 @@ public abstract class PlacementHandler
      * 
      * List should be empty if nothing can be placed.
      */
+    @Deprecated
     public List<Pair<BlockPos, ItemStack>> getPlacementResults(EntityPlayer playerIn, World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
             float hitY, float hitZ, ItemStack stack)
     {
         if(!PlacementItem.isPlacementItem(stack)) return Collections.emptyList();
         PlacementItem item = (PlacementItem)stack.getItem();
-        
+
         TargetMode placementMode = item.getTargetMode(stack);
 
         boolean isFloating = item.isFloatingSelectionEnabled(stack);

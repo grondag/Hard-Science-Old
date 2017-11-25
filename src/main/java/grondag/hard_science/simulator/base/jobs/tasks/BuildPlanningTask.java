@@ -2,8 +2,8 @@ package grondag.hard_science.simulator.base.jobs.tasks;
 
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.TaskType;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec;
-import grondag.hard_science.superblock.placement.AbstractPlacementSpec.PlacementSpecEntry;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.PlacementSpecEntry;
 
 /**
  * Stores the placement specification for a construction 

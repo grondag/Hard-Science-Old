@@ -1,15 +1,8 @@
 package grondag.hard_science.superblock.placement;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -18,20 +11,12 @@ import net.minecraft.util.math.BlockPos;
 
 public class PlacementResult
 {
-    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE, null);
-    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, null, null, null, PlacementEvent.NO_OPERATION_CONTINUE, null);
+    public static final PlacementResult EMPTY_RESULT_STOP = new PlacementResult(null, PlacementEvent.NO_OPERATION_CONTINUE, null);
+    public static final PlacementResult EMPTY_RESULT_CONTINUE = new PlacementResult(null, PlacementEvent.NO_OPERATION_CONTINUE, null);
 
     private final PlacementEvent event;
     private final BlockPos blockPos;
     private final IPlacementSpecBuilder builder;
-    
-    //TODO: remove when retired
-    @Deprecated
-    private final List<Pair<BlockPos, ItemStack>> placements;
-    @Deprecated
-    private final Set<BlockPos> exclusions;
-    @Deprecated
-    private final IntegerAABB placementAABB;
     
     /**
      * @param event Identifies state changes and subsequent event processing that should occur with this result.
@@ -39,16 +24,10 @@ public class PlacementResult
      * the BlockPos that should be used. Null otherwise.
      */
     public PlacementResult(
-            @Nullable IntegerAABB placementAABB, 
-            @Nullable List<Pair<BlockPos, ItemStack>> placements, 
-            @Nullable Set<BlockPos> exclusions, 
             @Nullable BlockPos blockPos,
             @Nonnull  PlacementEvent event, 
             @Nullable IPlacementSpecBuilder builder)
     {
-        this.placementAABB = placementAABB;
-        this.placements = placements;
-        this.exclusions = exclusions;
         this.blockPos = blockPos;
         this.event = event;
         this.builder = builder;
@@ -58,57 +37,6 @@ public class PlacementResult
     {
         return this.builder;
     }
-    
-    /**
-     * Blocks that should be placed.
-     */
-    @Nonnull
-    @Deprecated
-    public List<Pair<BlockPos, ItemStack>> placements()
-    {
-        return this.placements == null
-                ? Collections.emptyList()
-                : this.placements;
-    }
-    
-    /**
-     * Locations of blocks that are obstacles to the placement action.
-     */
-    @Nonnull
-    @Deprecated
-    public Set<BlockPos> exclusions()
-    {
-        return this.exclusions == null
-                ? Collections.emptySet()
-                : this.exclusions;
-    }
-
-    @Nullable
-    @Deprecated
-    public IntegerAABB placementAABB()
-    {
-        return this.placementAABB;
-    }
-    
-    @Deprecated
-    public boolean hasPlacementAABB()
-    {
-        return this.placementAABB != null;
-    }
-    
-    @Deprecated
-    public boolean hasPlacementList()
-    {
-        return this.placements != null && !this.placements.isEmpty();
-    }
-    
-    @Deprecated
-    public boolean hasExclusionList()
-    {
-        return this.exclusions != null && !this.exclusions.isEmpty();
-    }
-
-    
     
     /**
      * If true, the user input event (mouse click, usually) that caused this result
@@ -155,9 +83,7 @@ public class PlacementResult
         case EXCAVATE:
             if(!player.world.isRemote)
             {
-                AbstractPlacementSpec spec = this.builder.build();
-                if(spec == null) return;
-                WorldTaskManager.enqueue(spec.worldTask((EntityPlayerMP)player));
+                WorldTaskManager.enqueue(this.builder.worldTask((EntityPlayerMP)player));
             }
             break;
     

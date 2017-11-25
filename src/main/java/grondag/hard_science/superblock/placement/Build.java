@@ -11,6 +11,7 @@ import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.base.IIdentified;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.RequestPriority;
+import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
