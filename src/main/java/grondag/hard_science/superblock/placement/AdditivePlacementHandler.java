@@ -37,7 +37,6 @@ public class AdditivePlacementHandler extends PlacementHandler
 {
     public static final AdditivePlacementHandler INSTANCE = new AdditivePlacementHandler();
 
-    @Override
     public List<Pair<BlockPos, ItemStack>> getPlacementResults(EntityPlayer playerIn, World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
             float hitY, float hitZ, ItemStack stack)
     {

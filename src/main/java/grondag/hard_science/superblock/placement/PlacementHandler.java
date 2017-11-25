@@ -1,33 +1,21 @@
 package grondag.hard_science.superblock.placement;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.CubicBlockRegion;
 import grondag.hard_science.library.world.HorizontalFace;
 import grondag.hard_science.library.world.IBlockRegion;
-import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
-import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
 import grondag.hard_science.virtualblock.VirtualBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -35,9 +23,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -233,16 +219,6 @@ public abstract class PlacementHandler
     }
 
     /**
-     * Returns an AABB aligned along block boundaries that includes both positions given.
-     */
-    public static IntegerAABB blockBoundaryAABB(BlockPos startPos, BlockPos endPos)
-    {
-        IntegerAABB aabbStart = new IntegerAABB(startPos);
-        IntegerAABB aabbEnd = new IntegerAABB(endPos);
-        return aabbStart.union(aabbEnd);
-    }
-
-    /**
      * Determines outcome when player right clicks on the face of a block.
      *  if no hit block is known or if floating selection is known to be enabled, pass onPos, onFace, and hitVec = null instead.
      * DOES NOT UPDATE STATE.
@@ -320,85 +296,6 @@ public abstract class PlacementHandler
         }
     }
 
-    //FIXME: remove
-    public static PlacementResult doPlacement(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
-    {
-        if(!PlacementItem.isPlacementItem(stack)) return PlacementResult.EMPTY_RESULT_CONTINUE;
-        PlacementItem item = (PlacementItem)stack.getItem();
-
-        TargetMode selectionMode = item.getTargetMode(stack);
-        boolean isHollow = selectionMode == TargetMode.HOLLOW_REGION;
-        boolean isExcavating = false; //item.isDeleteModeEnabled(stack);
-
-        // check for a multi-block placement region
-        BlockPos placementPos = selectionMode.usesSelectionRegion ? item.getRegionSize(stack, true) : null;
-        BlockPos endPos = placementPos == null ? pPos.inPos : getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, OffsetPosition.FLIP_NONE);
-
-        CubicBlockRegion region = new CubicBlockRegion(pPos.inPos, endPos, isHollow);
-        if(selectionMode.usesSelectionRegion) excludeObstaclesInRegion(player, pPos, stack, region);
-
-        boolean adjustmentEnabled = item.getRegionOrientation(stack) == RegionOrientation.AUTOMATIC && !isExcavating;
-
-        /** true if no obstacles */
-        boolean isClear = region.exclusions().isEmpty() 
-                && player.world.checkNoEntityCollision(region.toAABB());
-
-        // Adjust selection to avoid exclusions if requested and necessary.
-        // No point if is only a single position or a selection mode that doesn't use the selection region.
-        // Also can't do this if user is currently selecting a region
-        if(     adjustmentEnabled 
-                && selectionMode.usesSelectionRegion 
-                && !isClear 
-                && placementPos != null 
-                && !pPos.inPos.equals(endPos))
-        {
-            for(OffsetPosition offset : OffsetPosition.ALTERNATES)
-            {
-                // first try pivoting the selection box around the position being targeted
-                BlockPos endPos2 = getPlayerRelativeOffset(pPos.inPos, placementPos, player, pPos.onFace, offset);
-                CubicBlockRegion region2 = new CubicBlockRegion(pPos.inPos, endPos2, isHollow);
-                excludeObstaclesInRegion(player, pPos, stack, region2);
-
-                if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
-                {
-                    endPos = endPos2;
-                    region = region2;
-                    isClear = true;
-                    break;
-                }
-            }
-
-            if(!isClear)
-            {
-                // that didn't work, so try nudging the region a block in each direction
-                EnumFacing[] checkOrder = faceCheckOrder(player, pPos.onFace);
-
-                for(EnumFacing face : checkOrder)
-                {
-                    BlockPos startPos2 = pPos.inPos.offset(face);
-                    BlockPos endPos2 = endPos.offset(face);
-                    CubicBlockRegion region2 = new CubicBlockRegion(startPos2, endPos2, isHollow);
-                    excludeObstaclesInRegion(player, pPos, stack, region2);
-                    if(region2.exclusions().isEmpty() && player.world.checkNoEntityCollision(region2.toAABB()))
-                    {
-                        endPos = endPos2;
-                        region = region2;
-                        isClear = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        List<Pair<BlockPos, ItemStack>> placements = (selectionMode != TargetMode.COMPLETE_REGION || isClear)
-                ? placeRegion(player, pPos.onPos, pPos.onFace, new Vec3d(pPos.hitX, pPos.hitY, pPos.hitZ), stack, region)
-                        : Collections.emptyList();
-
-                return new PlacementResult(
-                        pPos.inPos, 
-                        isExcavating ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
-                                PlacementSpecHelper.placementBuilder(player, pPos, stack));
-    }
 
     private static boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     { 
@@ -481,92 +378,6 @@ public abstract class PlacementHandler
         }
     }
 
-    @Deprecated
-    public static void excludeObstaclesInRegion(EntityPlayer player, PlacementPosition pPos, ItemStack stack, CubicBlockRegion region)
-    {
-        if(!PlacementItem.isPlacementItem(stack)) return;
-        PlacementItem item = (PlacementItem)stack.getItem();
-        boolean isVirtual = item.isVirtual(stack);
-
-        FilterMode filterMode =  item.getFilterMode(stack);
-        boolean isExcavating = false; //item.isDeleteModeEnabled(stack);
-
-        // if excavating, adjust filter mode if needed so that it does something
-        if(isExcavating && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
-
-        World world = player.world;
-
-        HashSet<BlockPos> set = new HashSet<BlockPos>();
-
-        if(isExcavating)
-        {
-            for(BlockPos.MutableBlockPos pos : region.positions())
-            {
-                IBlockState blockState = world.getBlockState(pos);
-                if(blockState.getBlock().isAir(blockState, world, pos) || !filterMode.shouldAffectBlock(blockState, world, pos, stack, isVirtual))
-                {
-                    set.add(pos.toImmutable());
-                }
-            }
-        }
-        else
-        {
-            for(BlockPos.MutableBlockPos pos : region.includedPositions())
-            {
-                IBlockState blockState = world.getBlockState(pos);
-                if(!filterMode.shouldAffectBlock(blockState, world, pos, stack, isVirtual))
-                {
-                    set.add(pos.toImmutable());
-                }
-            }
-        }
-        region.exclude(set);
-    }
-
-    /**
-     * Generates positions and item stacks that should be placed in the given region 
-     * according to current stack settings.
-     * The 
-     */
-    @Deprecated
-    public static List<Pair<BlockPos, ItemStack>> placeRegion(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stackIn, 
-            CubicBlockRegion region)
-    {
-
-        ItemStack stack;
-
-        //        if(PlacementItem.isDeleteModeEnabled(stackIn))
-        //        {
-        //            stack = Items.AIR.getDefaultInstance();
-        //        }
-        //        else
-        //        {
-        stack = stackIn.copy();
-
-        ModelState modelState = PlacementItem.getStackModelState(stack);
-        if(modelState.hasSpecies())
-        {
-            int species = speciesForPlacement(player, onPos, onFace, stack, region);
-            if(species >= 0) 
-            {
-                modelState.setSpecies(species);
-                PlacementItem.setStackModelState(stack, modelState);
-                if(modelState.metaUsage() == MetaUsage.SPECIES)
-                {
-                    stack.setItemDamage(species);
-                }
-            }
-        }
-        //        }
-
-        ImmutableList.Builder<Pair<BlockPos, ItemStack>> builder = ImmutableList.builder();
-
-        for(BlockPos.MutableBlockPos pos : region.includedPositions())
-        {
-            builder.add(Pair.of(pos.toImmutable(), stack));
-        }
-        return builder.build();
-    }
 
     /**
      * Returns modified copy of stack adjusted for context-dependent state.
@@ -709,94 +520,6 @@ public abstract class PlacementHandler
         }
     }
 
-    /**
-     * Returns list of stacks to be placed.
-     * Responsible for confirming that all positions placed are air or replaceable.
-     * Has to be checked here because some placement methods may legitimately replace
-     * existing non-air blocks. (Stackable plates, for example.) 
-     * Checking that normally happens before this in ItemBlock is skipped for SuperBlocks.<br><br>
-     * 
-     * Caller expected to confirm that player has edit rights 
-     * and to skip any positions occupied by entities. <br><br>
-     * 
-     * Stacks that are returned should be copies of the input stack.
-     * (Do not modify the input stack!) <br><br>
-     * 
-     * Output stacks should have correct metadata and other properties for the blocks to be placed
-     * This also include modelState and any other TE properties that must be transferred to the world. <br><br>
-     * 
-     * List should be empty if nothing can be placed.
-     */
-    @Deprecated
-    public List<Pair<BlockPos, ItemStack>> getPlacementResults(EntityPlayer playerIn, World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
-            float hitY, float hitZ, ItemStack stack)
-    {
-        if(!PlacementItem.isPlacementItem(stack)) return Collections.emptyList();
-        PlacementItem item = (PlacementItem)stack.getItem();
-
-        TargetMode placementMode = item.getTargetMode(stack);
-
-        boolean isFloating = item.isFloatingSelectionEnabled(stack);
-
-        switch(placementMode)
-        {
-        case FILL_REGION:
-            return isFloating 
-                    ? floatingMultiBlockResults()
-                            : multiBlockResults();
-
-        case ON_CLICKED_SURFACE:
-            additiveResults();
-
-        case ON_CLICKED_FACE:
-        default:
-            return isFloating 
-                    ? floatingSingleBlockResult()
-                            : singleBlockResult(worldIn, posOn, hand, facing, hitZ, hitZ, hitZ, stack);
-        }
-    }
-
-    /**
-     * Conventional block placement - placed on a given face, so that face can be used for context
-     */
-    public List<Pair<BlockPos, ItemStack>> singleBlockResult(World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
-            float hitY, float hitZ, ItemStack stack)
-    {
-        return Collections.emptyList();
-    }
-
-
-    /**
-     * Single block placed at an arbitrary location, so there is no "placed on" face that can be used for context
-     */
-    public List<Pair<BlockPos, ItemStack>> floatingSingleBlockResult()
-    {
-        return Collections.emptyList();
-    }
-
-    /**
-     * Multiple blocks but still placed on a given face, so that face can still be used for context
-     */
-    public List<Pair<BlockPos, ItemStack>> multiBlockResults()
-    {
-        return Collections.emptyList();
-    }
-
-    /**
-     * Multiple blocks placed at an arbitrary location, so there is no "placed on" face that can be used for context
-     */
-    public List<Pair<BlockPos, ItemStack>> floatingMultiBlockResults()
-    {
-        return Collections.emptyList();
-    }
-
-    /**
-     * "Builders wand" style of placement.
-     */
-    public List<Pair<BlockPos, ItemStack>> additiveResults()
-    {
-        return Collections.emptyList();
-    }
 
 
 

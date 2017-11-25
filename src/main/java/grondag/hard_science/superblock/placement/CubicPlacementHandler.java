@@ -49,7 +49,6 @@ public class CubicPlacementHandler extends PlacementHandler
 //          .getPlacementResults(player, player.world, onPos, player.getActiveHand(), onFace, xHit, 
 //                  yHit, zHit, stack);
     
-    @Override
     public List<Pair<BlockPos, ItemStack>> getPlacementResults(EntityPlayer playerIn, World worldIn, BlockPos posOn, EnumHand hand, EnumFacing facing, float hitX,
             float hitY, float hitZ, ItemStack stack)
     {

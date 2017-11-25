@@ -5,7 +5,6 @@ import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;
-import grondag.hard_science.superblock.placement.RegionOrientation;
 import net.minecraft.item.ItemStack;
 
 public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
