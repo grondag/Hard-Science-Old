@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
@@ -62,7 +63,7 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
             pBuff.writeInt(r.positions == null ? 0 : r.positions.length);
             if(r.positions != null)
             {
-                Log.info("id %d Refresh toBytes position count = %d", r.id, r.positions == null ? 0 : r.positions.length);
+                if(Configurator.logExcavationRenderTracking) Log.info("id %d Refresh toBytes position count = %d", r.id, r.positions == null ? 0 : r.positions.length);
 
                 for(BlockPos pos : r.positions)
                 {
@@ -99,7 +100,7 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
                     }
                     
                 }
-                Log.info("id %d Refresh toBytes position count = %d", id, list == null ? 0 : list.length);
+                if(Configurator.logExcavationRenderTracking) Log.info("id %d Refresh toBytes position count = %d", id, list == null ? 0 : list.length);
 
                 this.renders.add(new RenderData(id, new IntegerAABB(minPos, maxPos), isExchange, list));
             }

@@ -16,25 +16,25 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     /**
      * @see {@link #getLocation()}
      */
-    protected Location location;
+    private Location location;
 
-    protected String playerName;
+    private String playerName;
     
     /**
      * Make true if setting all positions to air.
      */
-    protected boolean isExcavation;
+    private boolean isExcavation;
     
     /**
      * True if only places/removes virtual blocks. 
      * Derived from the placement item that created this spec.
      */
-    protected boolean isVirtual;
+    private boolean isVirtual;
     
     /**
      * Will be adjusted to a value that makes sense if we are excavating.
      */
-    protected FilterMode filterMode;
+    private FilterMode filterMode;
     
     protected AbstractPlacementSpec() {};
             
@@ -43,6 +43,8 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
         this.isExcavation = builder.isExcavation;
         this.isVirtual = builder.isVirtual;
         this.filterMode = builder.effectiveFilterMode;
+        this.location = new Location(builder.placementPosition().inPos, builder.player().world);
+        this.playerName = builder.player().getName();
     }
     
     /**
@@ -83,6 +85,11 @@ public abstract class AbstractPlacementSpec implements ILocated, IReadWriteNBT
     public boolean isExcavation()
     {
         return this.isExcavation;
+    }
+    
+    public boolean isVirtual()
+    {
+        return this.isVirtual;
     }
     
     public FilterMode filterMode()

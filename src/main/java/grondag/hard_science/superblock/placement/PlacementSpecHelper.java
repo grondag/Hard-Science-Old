@@ -1,12 +1,12 @@
 package grondag.hard_science.superblock.placement;
 
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.spec.CSGPlacementSpec;
-import grondag.hard_science.superblock.placement.spec.CuboidPlacementSpec;
-import grondag.hard_science.superblock.placement.spec.PredicatePlacementSpec;
-import grondag.hard_science.superblock.placement.spec.SinglePlacementSpec;
-import grondag.hard_science.superblock.placement.spec.SurfacePlacementSpec;
 import grondag.hard_science.superblock.model.state.StateFormat;
+import grondag.hard_science.superblock.placement.spec.CSGBuilder;
+import grondag.hard_science.superblock.placement.spec.CuboidBuilder;
+import grondag.hard_science.superblock.placement.spec.PredicateBuilder;
+import grondag.hard_science.superblock.placement.spec.SingleBuilder;
+import grondag.hard_science.superblock.placement.spec.SurfaceBuilder;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -46,29 +46,29 @@ public class PlacementSpecHelper
                 ModelState modelState = PlacementItem.getStackModelState(placedStack);
                 if(modelState != null && modelState.getShape().meshFactory().stateFormat == StateFormat.MULTIBLOCK)
                 {
-                    return CSGPlacementSpec.builder(placedStack, player, pPos);
+                    return new CSGBuilder(placedStack, player, pPos);
                 }
                 else
                 {
                     if(!item.isFixedRegionEnabled(placedStack) && item.getRegionSize(placedStack, false).equals(new BlockPos(1, 1, 1)))
                     {
-                        return SinglePlacementSpec.builder(placedStack, player, pPos);
+                        return new SingleBuilder(placedStack, player, pPos);
                     }
                     else
                     {
-                        return CuboidPlacementSpec.builder(placedStack, player, pPos);
+                        return new CuboidBuilder(placedStack, player, pPos);
                     }
                 }
                 
             case MATCH_CLICKED_BLOCK:
-                return PredicatePlacementSpec.builder(placedStack, player, pPos);
+                return new PredicateBuilder(placedStack, player, pPos);
                 
             case ON_CLICKED_SURFACE:
-                return SurfacePlacementSpec.builder(placedStack, player, pPos);
+                return new SurfaceBuilder(placedStack, player, pPos);
                 
             case ON_CLICKED_FACE:
             default:
-                return SinglePlacementSpec.builder(placedStack, player, pPos);
+                return new SingleBuilder(placedStack, player, pPos);
         }
     }
 }

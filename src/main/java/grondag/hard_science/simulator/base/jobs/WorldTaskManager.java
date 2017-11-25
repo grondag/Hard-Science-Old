@@ -85,10 +85,14 @@ public class WorldTaskManager
     /**
      * Use to send packets during next world tick if not running on server thread. 
      * Don't think network wrapper supports concurrent access.
+     * 
+     * @param forceToQueue  If false, will queue packet even if running on server thread.  Use this
+     * when need to preserve sequence of packets that may be generated with correct order but
+     * from different threads.
      */
-    public static void sendPacketFromServerThread(IMessage message, EntityPlayerMP player)
+    public static void sendPacketFromServerThread(IMessage message, EntityPlayerMP player, boolean sendNowIfPossible)
     {
-        if(FMLCommonHandler.instance().getMinecraftServerInstance().isCallingFromMinecraftThread())
+        if(sendNowIfPossible && FMLCommonHandler.instance().getMinecraftServerInstance().isCallingFromMinecraftThread())
         {
             Log.info("sending direct packet");
             ModMessages.INSTANCE.sendTo(message, player);

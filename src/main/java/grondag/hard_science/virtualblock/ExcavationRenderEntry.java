@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.IntegerAABB;
@@ -151,14 +152,14 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     {
         this.id = nextID++;
         
-        Log.info("id = %d new Entry constructor", this.id);
+        if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor", this.id);
         
         this.domainID = job.getDomain().getId();
         
         AbstractPlacementSpec spec = job.spec();
         if(spec != null && spec.entries() != null && !spec.entries().isEmpty())
         {
-            Log.info("id = %d new Entry constructor - found spec with %d entries", this.id, spec.entries().size());
+            if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - found spec with %d entries", this.id, spec.entries().size());
             
             this.isExchange = !spec.isExcavation();
             this.dimensionID = spec.getLocation().dimensionID();
@@ -178,12 +179,12 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
             
             if(ExcavationRenderEntry.this.positions.size() == 0)
             {
-                Log.info("id = %d new Entry constructor - invalid", this.id);
+                if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - invalid", this.id);
                 this.isValid = false;
             }
             else
             {
-                Log.info("id = %d new Entry constructor - launching compute", this.id);
+                if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - launching compute", this.id);
                 ExcavationRenderEntry.this.compute();
             }
         }
@@ -206,7 +207,6 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         }
         else
         {
-            this.updateListeners();
             ExcavationRenderTracker.INSTANCE.remove(this);
         }
     }
@@ -228,7 +228,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
 
     private void compute()
     {
-        Log.info("id = %d Compute called. Already running = %s", this.id, Boolean.toString(this.isScheduled.get()));
+        if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute called. Already running = %s", this.id, Boolean.toString(this.isScheduled.get()));
         if(this.isScheduled.compareAndSet(false, true))
         {
             BuildManager.EXECUTOR.execute(this);
@@ -238,7 +238,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     @Override
     public void run()
     {
-        Log.info("id = %d Compute running.", this.id);
+        if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute running.", this.id);
         
         this.isDirty.set(false);
         
@@ -246,7 +246,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         
         if(count == 0)
         {
-            Log.info("id = %d Compute existing due to empty positions.", this.id);
+            if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute existing due to empty positions.", this.id);
             this.updateListeners();
             ExcavationRenderTracker.INSTANCE.remove(this);
             return;
@@ -306,10 +306,10 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
                 this.renderPositions = newPositions;
             }
             needsListenerUpdate = true;
-            Log.info("id %d Computed render position length = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
+            if(Configurator.logExcavationRenderTracking) Log.info("id %d Computed render position length = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
         }
         
-        Log.info("id = %d Compute done, updateListeners=%s, isDirty=%s", this.id, Boolean.toString(needsListenerUpdate),
+        if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute done, updateListeners=%s, isDirty=%s", this.id, Boolean.toString(needsListenerUpdate),
                 Boolean.toString(this.isDirty.get()));
         
         if(needsListenerUpdate) this.updateListeners();
@@ -336,7 +336,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     
     public void addListener(EntityPlayerMP listener, boolean sendPacketIfNew)
     {
-        Log.info("id=%d addListenger sendIfNew=%s, isValue=%s, isFirstComputeDone=%s",
+        if(Configurator.logExcavationRenderTracking) Log.info("id=%d addListenger sendIfNew=%s, isValue=%s, isFirstComputeDone=%s",
                 this.id,
                 Boolean.toString(sendPacketIfNew),
                 Boolean.toString(isValid),
@@ -346,7 +346,8 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         {
             if(this.listeners.addIfNotPresent(listener) && sendPacketIfNew && this.isValid && this.isFirstComputeDone)
             {
-                WorldTaskManager.sendPacketFromServerThread(new PacketExcavationRenderUpdate(ExcavationRenderEntry.this), listener);
+                if(Configurator.logExcavationRenderTracking) Log.info("id=%d addListenger scheduling packet.", this.id);
+                WorldTaskManager.sendPacketFromServerThread(new PacketExcavationRenderUpdate(ExcavationRenderEntry.this), listener, true);
             }
         }
     }
@@ -397,7 +398,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     @Nullable
     public BlockPos[] renderPositions()
     {
-        Log.info("id %d Render position retrieval = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
+        if(Configurator.logExcavationRenderTracking) Log.info("id %d Render position retrieval, count = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
         return this.renderPositions;
     }
 }

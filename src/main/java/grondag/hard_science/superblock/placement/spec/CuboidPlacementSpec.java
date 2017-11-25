@@ -2,11 +2,7 @@ package grondag.hard_science.superblock.placement.spec;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.BlockRegion;
-import grondag.hard_science.superblock.placement.IPlacementSpecBuilder;
-import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementSpecType;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
@@ -19,9 +15,9 @@ import net.minecraft.util.math.BlockPos;
         
         public CuboidPlacementSpec() {};
         
-        protected CuboidPlacementSpec(PlacementSpecBuilder builder, ItemStack sourceStack)
+        protected CuboidPlacementSpec(CuboidBuilder builder)
         {
-            super(builder, sourceStack);
+            super(builder);
         }
         
         @Override
@@ -41,11 +37,6 @@ import net.minecraft.util.math.BlockPos;
             tag.setBoolean(ModNBTTag.PLACMENT_IS_HOLLOW, this.isHollow);
             tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS, this.region.minPos().toLong());
             tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS, this.region.maxPos().toLong());
-        }
-        
-        public static IPlacementSpecBuilder builder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
-        {
-            return new CuboidBuilder(placedStack, player, pPos);
         }
 
         @Override

@@ -1,5 +1,6 @@
 package grondag.hard_science.network.server_to_client;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
@@ -36,7 +37,7 @@ public class PacketExcavationRenderUpdate extends AbstractServerToPlayerPacket<P
         this.aabb = entry.aabb();
         this.isExchange = entry.isExchange;
         this.positions = entry.renderPositions();
-        Log.info("id %d New update packet position count = %d, aabb=%s", this.id, this.positions == null ? 0 : this.positions.length, this.aabb.toString());
+        if(Configurator.logExcavationRenderTracking) Log.info("id %d New update packet position count = %d, aabb=%s", this.id, this.positions == null ? 0 : this.positions.length, this.aabb == null ? "null" : this.aabb.toString());
     }
         
     /**
@@ -52,7 +53,7 @@ public class PacketExcavationRenderUpdate extends AbstractServerToPlayerPacket<P
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
-        Log.info("id %d Update toBytes position count = %d", this.id, this.positions == null ? 0 : this.positions.length);
+        if(Configurator.logExcavationRenderTracking) Log.info("id %d Update toBytes position count = %d", this.id, this.positions == null ? 0 : this.positions.length);
 
         pBuff.writeInt(this.id);
         // deletion flag
@@ -105,14 +106,14 @@ public class PacketExcavationRenderUpdate extends AbstractServerToPlayerPacket<P
                 }
             }
         }
-        Log.info("id %d Update fromBytes position count = %d", this.id, this.positions == null ? 0 : this.positions.length);
+        if(Configurator.logExcavationRenderTracking) Log.info("id %d Update fromBytes position count = %d", this.id, this.positions == null ? 0 : this.positions.length);
 
     }
 
     @Override
     protected void handle(PacketExcavationRenderUpdate message, MessageContext context)
     {
-        Log.info("id %d Update handler position count = %d, aabb=%s", message.id, message.positions == null ? 0 : message.positions.length, message.aabb == null ? "null" : message.aabb.toString());
+        if(Configurator.logExcavationRenderTracking) Log.info("id %d Update handler position count = %d, aabb=%s", message.id, message.positions == null ? 0 : message.positions.length, message.aabb == null ? "null" : message.aabb.toString());
 
         if(message.aabb == null)
         {

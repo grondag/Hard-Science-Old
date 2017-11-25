@@ -1,10 +1,8 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import grondag.hard_science.superblock.placement.IPlacementSpecBuilder;
-import grondag.hard_science.superblock.placement.PlacementPosition;
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.superblock.placement.PlacementSpecType;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 
 /**
      * Places a single block.
@@ -13,14 +11,11 @@ import net.minecraft.item.ItemStack;
     {
         public SinglePlacementSpec() {};
         
-        protected SinglePlacementSpec(PlacementSpecBuilder builder, ItemStack sourceStack)
+        protected SinglePlacementSpec(SingleStackBuilder builder)
         {
-            super(builder, sourceStack);
-        }
-        
-        public static IPlacementSpecBuilder builder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
-        {
-            return new SingleBuilder(placedStack, player, pPos);
+            super(builder);
+            SingleStackEntry entry = new SingleStackEntry(0, builder.placementPosition().inPos);
+            this.entries = ImmutableList.of(entry);
         }
 
         @Override

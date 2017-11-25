@@ -12,19 +12,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-class SurfaceBuilder extends SingleStackBuilder
+public class SurfaceBuilder extends SingleStackBuilder
 {
 
-    protected SurfaceBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    public SurfaceBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
-    }
-
-    @Override
-    protected AbstractPlacementSpec buildSpec()
-    {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override

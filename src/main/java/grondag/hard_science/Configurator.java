@@ -15,8 +15,11 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class Configurator
 {
     
-    @Comment("Enable for tracing machine packets and processing. Highly verbose. Intended for dev environment and troubleshooeting.")
+    @Comment("Enable tracing for machine packets and processing. Highly verbose. Intended for dev environment and troubleshooeting.")
     public static boolean logMachineNetwork = true;
+    
+    @Comment("Enable tracing for excavation render tracking. Highly verbose. Intended for dev environment and troubleshooeting.")
+    public static boolean logExcavationRenderTracking = true;
     
     public static void recalcDerived()
     {

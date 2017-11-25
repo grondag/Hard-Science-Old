@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.ClientProxy;
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -118,20 +119,20 @@ public class ExcavationRenderManager
             excavations.put(render.id, render);
         }
         renderCopy = excavations.values().toArray(new ExcavationRenderer[excavations.size()]);
-        Log.info("mass update, excavationSize = %d, renderSize = %d", excavations.size(), renderCopy.length);
+        if(Configurator.logExcavationRenderTracking) Log.info("mass update, excavationSize = %d, renderSize = %d", excavations.size(), renderCopy.length);
     }
     
     public static void addOrUpdate(ExcavationRenderer render)
     {
         excavations.put(render.id, render);
         renderCopy = excavations.values().toArray(new ExcavationRenderer[excavations.size()]);
-        Log.info("addOrUpdate id = %d, excavationSize = %d, renderSize = %d", render.id, excavations.size(), renderCopy.length);
+        if(Configurator.logExcavationRenderTracking) Log.info("addOrUpdate id = %d, excavationSize = %d, renderSize = %d", render.id, excavations.size(), renderCopy.length);
     }
     
     public static void remove(int id)
     {
         excavations.remove(id);
         renderCopy = excavations.values().toArray(new ExcavationRenderer[excavations.size()]);
-        Log.info("remove id = %d, excavationSize = %d, renderSize = %d", id, excavations.size(), renderCopy.length);
+        if(Configurator.logExcavationRenderTracking) Log.info("remove id = %d, excavationSize = %d, renderSize = %d", id, excavations.size(), renderCopy.length);
     }
 }

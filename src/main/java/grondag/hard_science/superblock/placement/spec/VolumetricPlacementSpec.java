@@ -1,7 +1,6 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -14,9 +13,9 @@ abstract class VolumetricPlacementSpec extends SingleStackPlacementSpec
 
     protected VolumetricPlacementSpec() {};
     
-    protected VolumetricPlacementSpec(PlacementSpecBuilder builder, ItemStack sourceStack)
+    protected VolumetricPlacementSpec(VolumetricBuilder builder)
     {
-        super(builder, sourceStack);
+        super(builder);
     }
     
     @Override

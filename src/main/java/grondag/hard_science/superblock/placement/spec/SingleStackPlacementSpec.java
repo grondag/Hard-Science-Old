@@ -27,7 +27,9 @@ public abstract class SingleStackPlacementSpec extends AbstractPlacementSpec
      * Some placements (CSG) need a model state to define the placement geometry.
      * Excavation-only placements that do not need this will ignore the source stack.
      */
-    private ItemStack sourceStack;
+    private ItemStack outputStack;
+    
+    private PlacementItem placementItem;
     
     protected ImmutableList<PlacementSpecEntry> entries;
     
@@ -36,10 +38,11 @@ public abstract class SingleStackPlacementSpec extends AbstractPlacementSpec
     /** 
      * Source stack should be already be modified for in-world placement context.
      */
-    protected SingleStackPlacementSpec(PlacementSpecBuilder builder, ItemStack sourceStack)
+    protected SingleStackPlacementSpec(SingleStackBuilder builder)
     {
         super(builder);
-        this.sourceStack = sourceStack;
+        this.outputStack = builder.outputStack;
+        this.placementItem = PlacementItem.getPlacementItem(outputStack);
     }
     
     @Override
@@ -51,16 +54,17 @@ public abstract class SingleStackPlacementSpec extends AbstractPlacementSpec
     /**
      * Stack is modified for placement context.
      */
-    public ItemStack sourceStack()
+    public ItemStack outputStack()
     {
-        return this.sourceStack;
+        return this.outputStack;
     }
     
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
-        this.sourceStack = new ItemStack(tag);
+        this.outputStack = new ItemStack(tag);
+        this.placementItem = PlacementItem.getPlacementItem(this.outputStack);
         
         ImmutableList.Builder<PlacementSpecEntry> builder = ImmutableList.builder();
         if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
@@ -92,7 +96,7 @@ public abstract class SingleStackPlacementSpec extends AbstractPlacementSpec
     public void serializeNBT(NBTTagCompound tag)
     {
         super.serializeNBT(tag);
-        if(this.sourceStack != null) this.sourceStack.writeToNBT(tag);
+        if(this.outputStack != null) this.outputStack.writeToNBT(tag);
         if(this.entries != null && !this.entries.isEmpty())
         {
             int i = 0;
@@ -120,20 +124,19 @@ public abstract class SingleStackPlacementSpec extends AbstractPlacementSpec
         @Override
         public ItemStack placement()
         {
-            return isExcavation ? Items.AIR.getDefaultInstance() : sourceStack;
-        }
-
-        @Override
-        public boolean isExcavation()
-        {
-            return isExcavation;
+            return isExcavation() ? Items.AIR.getDefaultInstance() : outputStack;
         }
 
         @Override
         public PlacementItem placementItem()
         {
-            // TODO Auto-generated method stub
-            return null;
+            return SingleStackPlacementSpec.this.placementItem;
+        }
+
+        @Override
+        public boolean isExcavation()
+        {
+            return SingleStackPlacementSpec.this.isExcavation();
         }
     }
 }

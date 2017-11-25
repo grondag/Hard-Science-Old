@@ -3,6 +3,7 @@ package grondag.hard_science.virtualblock;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.render.RenderUtil;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -49,7 +50,7 @@ public class ExcavationRenderer
         this.visibilityBounds = bounds.grow(192);
         this.positions = positions;
         
-        Log.info("id %d Renderer setBounds position count = %d", id, positions == null ? 0 : positions.length);
+        if(Configurator.logExcavationRenderTracking) Log.info("id %d Renderer setBounds position count = %d", id, positions == null ? 0 : positions.length);
     }
     
     public AxisAlignedBB bounds()

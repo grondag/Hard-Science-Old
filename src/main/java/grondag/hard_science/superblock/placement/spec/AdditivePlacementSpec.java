@@ -1,10 +1,6 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import grondag.hard_science.superblock.placement.IPlacementSpecBuilder;
-import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementSpecType;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 
 /**
  * Surface, but adds to height of existing block surfaces 
@@ -14,19 +10,14 @@ public class AdditivePlacementSpec extends SurfacePlacementSpec
 {
     public AdditivePlacementSpec() {};
     
-    protected AdditivePlacementSpec(PlacementSpecBuilder builder, ItemStack sourceStack)
+    protected AdditivePlacementSpec(AdditiveBuilder builder)
     {
-        super(builder, sourceStack);
+        super(builder);
     }
     
     @Override
     public PlacementSpecType specType()
     {
         return PlacementSpecType.ADDITIVE;
-    }
-    
-    public static IPlacementSpecBuilder builder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
-    {
-        return new AdditiveBuilder(placedStack, player, pPos);
     }
 }

@@ -4,7 +4,6 @@ import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMo
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.library.world.Location;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.IPlacementSpecBuilder;
@@ -28,7 +27,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
 {
-    private final ItemStack placedStack;
+    /**
+     * Stack player is holding to do the placement.
+     */
+    private final ItemStack heldStack;
+    
     protected final PlacementItem placementItem;
     protected final EntityPlayer player;
     protected final PlacementPosition pPos;
@@ -43,18 +46,18 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
      */
     protected final FilterMode effectiveFilterMode;
 
-    protected PlacementSpecBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    protected PlacementSpecBuilder(ItemStack heldStack, EntityPlayer player, PlacementPosition pPos)
     {
-        this.placedStack = placedStack;
+        this.heldStack = heldStack;
         this.player = player;
         this.pPos = pPos;
-        this.placementItem = (PlacementItem)placedStack.getItem();
-        this.isSelectionInProgress = this.placementItem.isFixedRegionSelectionInProgress(placedStack);
-        this.selectionMode = this.placementItem.getTargetMode(placedStack);
-        this.isExcavation = this.placementItem.isExcavator(placedStack);
-        this.isVirtual = this.placementItem.isVirtual(placedStack);
+        this.placementItem = (PlacementItem)heldStack.getItem();
+        this.isSelectionInProgress = this.placementItem.isFixedRegionSelectionInProgress(heldStack);
+        this.selectionMode = this.placementItem.getTargetMode(heldStack);
+        this.isExcavation = this.placementItem.isExcavator(heldStack);
+        this.isVirtual = this.placementItem.isVirtual(heldStack);
         
-        FilterMode filterMode =  this.placementItem.getFilterMode(placedStack);
+        FilterMode filterMode =  this.placementItem.getFilterMode(heldStack);
 
         // if excavating, adjust filter mode if needed so that it does something
         if(isExcavation && filterMode == FilterMode.FILL_REPLACEABLE) filterMode = FilterMode.REPLACE_SOLID;
@@ -96,9 +99,19 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
         return this.pPos.inPos;
     }
     
+    /**
+     * The model state (if applies) that should be used to 
+     * render placement preview. Override with context-dependent
+     * version if available.
+     */
+    protected ModelState previewModelState()
+    {
+        return PlacementItem.getStackModelState(this.heldStack);
+    }
+    
     public ItemStack placedStack()
     {
-        return placedStack;
+        return heldStack;
     }
     
     public PlacementPosition placementPosition()
@@ -122,7 +135,7 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
         
         GlStateManager.disableDepth();
         
-        ModelState placementModelState = PlacementItem.getStackModelState(this.placedStack);
+        ModelState placementModelState = this.previewModelState();
         if(placementModelState == null)
         {
             // No model state, draw generic box
@@ -193,21 +206,5 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
         GlStateManager.enableAlpha();
-    }
-
-
-    /**
-     * Builds the type-specific spec, only called if validate is successful.
-     */
-    protected abstract AbstractPlacementSpec buildSpec();
-
-    @Override
-    public final AbstractPlacementSpec build()
-    {
-        if(!this.validate()) return null;
-
-        AbstractPlacementSpec spec = this.buildSpec();
-        spec.location = new Location(this.pPos.inPos, this.player.world);
-        return spec;
     }
 }
