@@ -1,11 +1,11 @@
 package grondag.hard_science.superblock.placement;
 
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.CSGPlacementSpec;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.CuboidPlacementSpec;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.PredicatePlacementSpec;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.SinglePlacementSpec;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.SurfacePlacementSpec;
+import grondag.hard_science.superblock.placement.spec.CSGPlacementSpec;
+import grondag.hard_science.superblock.placement.spec.CuboidPlacementSpec;
+import grondag.hard_science.superblock.placement.spec.PredicatePlacementSpec;
+import grondag.hard_science.superblock.placement.spec.SinglePlacementSpec;
+import grondag.hard_science.superblock.placement.spec.SurfacePlacementSpec;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;

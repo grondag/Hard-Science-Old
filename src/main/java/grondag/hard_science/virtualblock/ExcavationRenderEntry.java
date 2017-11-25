@@ -22,7 +22,7 @@ import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
 import grondag.hard_science.superblock.placement.BuildManager;
 import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.PlacementSpecEntry;
+import grondag.hard_science.superblock.placement.spec.PlacementSpecEntry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;

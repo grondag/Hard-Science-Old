@@ -1,0 +1,58 @@
+package grondag.hard_science.superblock.placement.spec;
+
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.world.BlockRegion;
+import grondag.hard_science.superblock.placement.IPlacementSpecBuilder;
+import grondag.hard_science.superblock.placement.PlacementPosition;
+import grondag.hard_science.superblock.placement.PlacementSpecType;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
+
+/**
+     * Multi-block placement of the same block in a cuboid region
+     */
+    public class CuboidPlacementSpec extends VolumetricPlacementSpec
+    {
+        BlockRegion region;
+        
+        public CuboidPlacementSpec() {};
+        
+        protected CuboidPlacementSpec(PlacementSpecBuilder builder, ItemStack sourceStack)
+        {
+            super(builder, sourceStack);
+        }
+        
+        @Override
+        public void deserializeNBT(NBTTagCompound tag)
+        {
+            super.deserializeNBT(tag);
+            this.isHollow= tag.getBoolean(ModNBTTag.PLACMENT_IS_HOLLOW);
+            BlockPos minPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS));
+            BlockPos maxPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS));
+            this.region = new BlockRegion(minPos, maxPos, this.isHollow);
+        }
+
+        @Override
+        public void serializeNBT(NBTTagCompound tag)
+        {
+            super.serializeNBT(tag);
+            tag.setBoolean(ModNBTTag.PLACMENT_IS_HOLLOW, this.isHollow);
+            tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_START_POS, this.region.minPos().toLong());
+            tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_END_POS, this.region.maxPos().toLong());
+        }
+        
+        public static IPlacementSpecBuilder builder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+        {
+            return new CuboidBuilder(placedStack, player, pPos);
+        }
+
+        @Override
+        public PlacementSpecType specType()
+        {
+            return PlacementSpecType.CUBOID;
+        }
+
+ 
+    }

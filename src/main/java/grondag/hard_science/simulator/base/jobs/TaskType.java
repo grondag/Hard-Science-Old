@@ -6,7 +6,6 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.base.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.base.jobs.tasks.BlockProcurementTask;
-import grondag.hard_science.simulator.base.jobs.tasks.BuildPlanningTask;
 import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
 import grondag.hard_science.simulator.base.jobs.tasks.PlacementTask;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,7 +16,6 @@ public enum TaskType
     EXCAVATION(new Supplier<AbstractTask>() { public AbstractTask get() {return new ExcavationTask(); }}),
     BLOCK_FABRICATION(new Supplier<AbstractTask>() { public AbstractTask get() {return new BlockFabricationTask(); }}),
     PLACEMENT(new Supplier<AbstractTask>() { public AbstractTask get() {return new PlacementTask(); }}),
-    BUILD_PLANNING(new Supplier<AbstractTask>() { public AbstractTask get() {return new BuildPlanningTask(); }}), 
     BLOCK_PROCUREMENT(new Supplier<AbstractTask>() { public AbstractTask get() {return new BlockProcurementTask(); }});
     
     private final Supplier<AbstractTask> supplier;

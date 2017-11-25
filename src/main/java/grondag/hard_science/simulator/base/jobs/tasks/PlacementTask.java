@@ -4,7 +4,7 @@ import grondag.hard_science.simulator.base.jobs.BuildingTask;
 import grondag.hard_science.simulator.base.jobs.TaskType;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.PlacementSpecEntry;
+import grondag.hard_science.superblock.placement.spec.PlacementSpecEntry;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;

@@ -22,7 +22,7 @@ import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec.SingleStackPlacementSpec.SingleStackBuilder;
+import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
