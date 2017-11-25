@@ -223,7 +223,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
      */
     public boolean isFirstComputeDone()
     {
-        return this.isDirty.get();
+        return this.isFirstComputeDone;
     }
 
     private void compute()

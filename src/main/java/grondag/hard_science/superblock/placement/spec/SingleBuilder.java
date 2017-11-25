@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
+import org.lwjgl.opengl.GL11;
+
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
@@ -12,10 +14,14 @@ import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -63,7 +69,36 @@ public class SingleBuilder extends SingleStackBuilder
     @Override
     protected void drawPlacement(Tessellator tessellator, BufferBuilder bufferBuilder, PlacementPreviewRenderMode previewMode)
     {
-        this.drawPlacementPreview(tessellator, bufferBuilder);
+        switch(previewMode)
+        {
+        case EXCAVATE:
+            
+            AxisAlignedBB box = new AxisAlignedBB(this.pPos.inPos);
+
+            // draw edges without depth to show extent of region
+            GlStateManager.disableDepth();
+            GlStateManager.glLineWidth(2.0F);
+            bufferBuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+            RenderGlobal.drawBoundingBox(bufferBuilder, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, previewMode.red, previewMode.green, previewMode.blue, 1f);
+            tessellator.draw();
+            
+            // draw sides with depth to better show what parts are unobstructed
+            GlStateManager.enableDepth();
+            bufferBuilder.begin(GL11.GL_TRIANGLE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+            RenderGlobal.addChainedFilledBoxVertices(bufferBuilder, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, previewMode.red, previewMode.green, previewMode.blue, 0.4f);
+            tessellator.draw();
+            
+            break;
+        case PLACE:
+            this.drawPlacementPreview(tessellator, bufferBuilder);
+            break;
+            
+        case SELECT:
+        case OBSTRUCTED:
+        default:
+            break;
+        
+        }
     }
 
     public IWorldTask worldTask(EntityPlayerMP player)

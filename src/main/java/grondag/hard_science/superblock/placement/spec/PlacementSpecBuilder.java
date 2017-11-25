@@ -81,6 +81,11 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
         }
         return isValid;
     }
+    
+    public boolean isExcavation()
+    {
+        return this.isExcavation;
+    }
 
     @SideOnly(Side.CLIENT)
     protected abstract void drawSelection(Tessellator tessellator, BufferBuilder bufferBuilder);

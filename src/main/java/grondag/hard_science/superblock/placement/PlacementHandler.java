@@ -307,10 +307,18 @@ public abstract class PlacementHandler
         else
         {
             // normal right click on block 
-            return new PlacementResult(
-                    pPos.inPos, 
-                    item.isExcavator(stack) ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
-                            PlacementSpecHelper.placementBuilder(player, pPos, stack));
+            IPlacementSpecBuilder builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            if(builder.validate())
+            {
+                return new PlacementResult(
+                        pPos.inPos, 
+                        builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                        builder);
+            }
+            else
+            {
+                return PlacementResult.EMPTY_RESULT_CONTINUE;
+            }
         }
     }
 

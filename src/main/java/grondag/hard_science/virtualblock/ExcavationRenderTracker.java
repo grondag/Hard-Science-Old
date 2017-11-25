@@ -23,7 +23,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
     
     public static final ExcavationRenderTracker INSTANCE = new ExcavationRenderTracker();
     
-    private static HashMap<String, PlayerData> playerTracking = new HashMap<String, PlayerData>();
+    private HashMap<String, PlayerData> playerTracking = new HashMap<String, PlayerData>();
 
     @Override
     protected Int2ObjectOpenHashMap<ExcavationRenderEntry> load(int dimension)
@@ -162,5 +162,12 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
             this.dimensionID = player.dimension;
             this.player = player;
         }
+    }
+    
+    @Override
+    public void clear()
+    {
+        super.clear();
+        playerTracking.clear();
     }
 }

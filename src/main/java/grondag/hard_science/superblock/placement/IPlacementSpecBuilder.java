@@ -15,9 +15,12 @@ public interface IPlacementSpecBuilder
      * Check for world boundaries.
      * Adjusts selection to avoid obstacles (if configured to do so)
      * Returns true is selection can be placed and have a non-empty result.
-     * This is only called during preview and will not check every
-     * block position for large regions. Detailed checked for every position
-     * are performed incrementally in {@link #worldTask(EntityPlayerMP)}.
+     * This is called during preview and will not check every
+     * block position for large regions. Also called before placement
+     * and placement will not occur if returns false.<P>
+     * 
+     * Detailed checked for every position are performed incrementally 
+     * in {@link #worldTask(EntityPlayerMP)}.
      */
     public boolean validate();
 
@@ -55,4 +58,10 @@ public interface IPlacementSpecBuilder
      * also be saved with the build (for later re-used if desired) and the build closed.
      */
     public abstract IWorldTask worldTask(EntityPlayerMP player);
+    
+    /**
+     * True if builder is consistent with EXCAVATION placement result type.
+     * @return
+     */
+    public boolean isExcavation();
 }
