@@ -10,6 +10,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.library.world.Location;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
@@ -26,7 +27,6 @@ import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateLi
 import grondag.hard_science.simulator.base.AssignedNumber;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.base.IIdentified;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
@@ -50,7 +50,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public abstract class MachineTileEntity extends SuperTileEntity implements IIdentified, ITickable, IDomainMember
+public abstract class MachineTileEntity extends SuperTileEntity implements IMachine, ITickable
 {
     ////////////////////////////////////////////////////////////////////////
     //  STATIC MEMBERS
@@ -672,7 +672,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public int getId()
     {
         //disable ID generation on client
-        return (this.world == null || this.world.isRemote ? this.getIdRaw() : IIdentified.super.getId());
+        return (this.world == null || this.world.isRemote ? this.getIdRaw() : IMachine.super.getId());
     }
     
     public String machineName()
@@ -851,4 +851,24 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         this.domain = domain;
         this.markDirty();
     }
+
+    @Override
+    public Location getLocation()
+    {
+        return new Location(this.pos, this.world);
+    }
+
+    @Override
+    public void setLocation(Location loc)
+    {
+        Log.warn("Unsupported setLocation call on MachineTileEntity. This is a bug.");
+    }
+
+    @Override
+    public void setLocation(BlockPos pos, World world)
+    {
+        Log.warn("Unsupported setLocation call on MachineTileEntity. This is a bug.");
+    }
+    
+    
 }

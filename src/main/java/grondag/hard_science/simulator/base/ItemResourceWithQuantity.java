@@ -2,8 +2,8 @@ package grondag.hard_science.simulator.base;
 
 import javax.annotation.Nonnull;
 
+import grondag.hard_science.machines.support.OpenContainerStorageProxy;
 import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.machine.OpenContainerStorageProxy;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;

@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.machine;
+package grondag.hard_science.machines.support;
 
 import java.util.Collections;
 import java.util.Comparator;

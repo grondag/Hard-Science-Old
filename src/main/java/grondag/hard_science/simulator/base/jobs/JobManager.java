@@ -11,7 +11,6 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
