@@ -52,7 +52,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 
-public class BasicBuilderTileEntity extends MachineContainerTileEntity
+public class BlockFabricatorTileEntity extends MachineContainerTileEntity
 {
 
     ////////////////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
     private final MaterialBufferDelegate bufferYellow;
     private final MaterialBufferDelegate bufferTiO2;   
     
-    public BasicBuilderTileEntity()
+    public BlockFabricatorTileEntity()
     {
         super();
         MaterialBufferManager bufferManager = new MaterialBufferManager(BUFFER_SPECS);
@@ -224,7 +224,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
                 break;
                 
             case TRANSPORTING:
-                this.placeFabricatedBlock();
+                this.outputFabricatedBlock();
                 break;
                 
             default:
@@ -345,7 +345,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity
         }
     }
     
-    private void placeFabricatedBlock()
+    private void outputFabricatedBlock()
     {
         
         ModelState newModelState = this.getControlState().getModelState();

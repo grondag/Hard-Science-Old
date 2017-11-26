@@ -1,6 +1,6 @@
 package grondag.hard_science.gui;
 
-import grondag.hard_science.machines.BasicBuilderTileEntity;
+import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.SolarAggregatorTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
@@ -19,7 +19,7 @@ public class ModGuiHandler implements IGuiHandler
     {
         SUPERMODEL_ITEM,
         SMART_CHEST,
-        BASIC_BUILDER,
+        BLOCK_FABRICATOR,
         SOLAR_AGGREGATOR;
     }
     
@@ -35,13 +35,13 @@ public class ModGuiHandler implements IGuiHandler
                 return new MachineStorageContainer(player.inventory, (SmartChestTileEntity) te, GuiSmartChest.LAYOUT);
             }
         }
-//        else if(id == ModGui.BASIC_BUILDER.ordinal())
+//        else if(id == ModGui.BLOCK_FABRICATOR.ordinal())
 //        {
 //            BlockPos pos = new BlockPos(x, y, z);
 //            TileEntity te = world.getTileEntity(pos);
-//            if (te instanceof BasicBuilderTileEntity) 
+//            if (te instanceof BlockFabricatorTileEntity) 
 //            {
-//                return new BasicBuilderContainer(player.inventory, (BasicBuilderTileEntity) te, GuiBasicBuilder.LAYOUT);
+//                return new BlockFabricatorContainer(player.inventory, (BlockFabricatorTileEntity) te, GuiBasicBuilder.LAYOUT);
 //            }
 //        }
         return null;
@@ -69,13 +69,13 @@ public class ModGuiHandler implements IGuiHandler
                     return null;
                 }
                 
-                case BASIC_BUILDER:
+                case BLOCK_FABRICATOR:
                 {
                     BlockPos pos = new BlockPos(x, y, z);
                     TileEntity te = world.getTileEntity(pos);
-                    if (te instanceof BasicBuilderTileEntity) 
+                    if (te instanceof BlockFabricatorTileEntity) 
                     {
-                        BasicBuilderTileEntity containerTileEntity = (BasicBuilderTileEntity) te;
+                        BlockFabricatorTileEntity containerTileEntity = (BlockFabricatorTileEntity) te;
                         return new GuiBasicBuilder(containerTileEntity);
                     }
                     return null;

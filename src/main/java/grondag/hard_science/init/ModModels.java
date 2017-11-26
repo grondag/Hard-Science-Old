@@ -7,8 +7,8 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.library.font.RasterFont;
-import grondag.hard_science.machines.BasicBuilderTESR;
-import grondag.hard_science.machines.BasicBuilderTileEntity;
+import grondag.hard_science.machines.BlockFabricatorTESR;
+import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.SmartChestTESR;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.materials.MatterCube;
@@ -210,7 +210,7 @@ public class ModModels
         FONT_RENDERER_SMALL.postLoad();
         FONT_RENDERER_LARGE.postLoad();
         
-        BasicBuilderTileEntity.initRenderSpecs();
+        BlockFabricatorTileEntity.initRenderSpecs();
 
     }
     
@@ -329,7 +329,7 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(SuperTileEntityTESR.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntityTESR.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(VirtualTileEntityTESR.class, VirtualTESR.INSTANCE);
-        ClientRegistry.bindTileEntitySpecialRenderer(BasicBuilderTileEntity.class, BasicBuilderTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(BlockFabricatorTileEntity.class, BlockFabricatorTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(SmartChestTileEntity.class, SmartChestTESR.INSTANCE);
     }
     

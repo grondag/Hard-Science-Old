@@ -15,10 +15,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
 
-public class BasicBuilderContainer extends MachineContainer
+public class BlockFabricatorContainer extends MachineContainer
 {
  
-    public BasicBuilderContainer(IInventory playerInventory, MachineContainerTileEntity te, ContainerLayout layout) 
+    public BlockFabricatorContainer(IInventory playerInventory, MachineContainerTileEntity te, ContainerLayout layout) 
     {
         super(playerInventory, te, layout);
     }

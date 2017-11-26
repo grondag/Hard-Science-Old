@@ -9,15 +9,15 @@ import grondag.hard_science.gui.control.machine.MachineFuelCell;
 import grondag.hard_science.gui.control.machine.MachinePowerUsage;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
-import grondag.hard_science.machines.BasicBuilderTileEntity;
+import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class GuiBasicBuilder extends AbstractSimpleGui<BasicBuilderTileEntity>
+public class GuiBasicBuilder extends AbstractSimpleGui<BlockFabricatorTileEntity>
 {
-    public GuiBasicBuilder(BasicBuilderTileEntity containerTileEntity) 
+    public GuiBasicBuilder(BlockFabricatorTileEntity containerTileEntity) 
     {
         super(containerTileEntity);
     }
@@ -29,15 +29,15 @@ public class GuiBasicBuilder extends AbstractSimpleGui<BasicBuilderTileEntity>
         // should just scale the bounds being passed in on construction, or at least
         // don't pass the same bounds twice as arguments each line.
         
-        for(RadialGaugeSpec spec : BasicBuilderTileEntity.BASIC_BUILDER_GAUGE_SPECS)
+        for(RadialGaugeSpec spec : BlockFabricatorTileEntity.BASIC_BUILDER_GAUGE_SPECS)
         {
             mainPanel.add(sizeControl(mainPanel, new MachineBufferGauge(te, spec), spec));
         }
         
         mainPanel.add(sizeControl(mainPanel, new MachineCMYGauge(te,
-                BasicBuilderTileEntity.BUFFER_INDEX_CYAN, 
-                BasicBuilderTileEntity.BUFFER_INDEX_MAGENTA, 
-                BasicBuilderTileEntity.BUFFER_INDEX_YELLOW, 
+                BlockFabricatorTileEntity.BUFFER_INDEX_CYAN, 
+                BlockFabricatorTileEntity.BUFFER_INDEX_MAGENTA, 
+                BlockFabricatorTileEntity.BUFFER_INDEX_YELLOW, 
                 RenderBounds.BOUNDS_BOTTOM_0), RenderBounds.BOUNDS_BOTTOM_0));
 
         mainPanel.add(sizeControl(mainPanel, new MachineFabricationProgressGauge(te, RenderBounds.BOUNDS_PROGRESS), RenderBounds.BOUNDS_PROGRESS));

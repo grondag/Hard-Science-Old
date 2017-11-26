@@ -5,6 +5,9 @@ import java.util.List;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.base.DomainManager.Domain;
+import grondag.hard_science.simulator.base.DomainManager.Privilege;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
@@ -42,6 +45,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -237,7 +241,18 @@ public abstract class MachineBlock extends SuperBlockPlus
         TileEntity blockTE = worldIn.getTileEntity(pos);
         if (blockTE != null && blockTE instanceof MachineTileEntity) 
         {
-            ((MachineTileEntity)blockTE).reconnect();
+            MachineTileEntity mte = (MachineTileEntity)blockTE;
+            // assign domain for placed blocks
+            if(mte.getDomain() == null && placer instanceof EntityPlayerMP)
+            {
+                Domain domain = DomainManager.INSTANCE.getActiveDomain((EntityPlayerMP) placer);
+                if(domain != null && domain.hasPrivilege((EntityPlayer) placer, Privilege.ADD_NODE))
+                {
+                    mte.setDomain(domain);
+                }
+            }
+            mte.reconnect();
+            
         }
     }
     
@@ -313,8 +328,12 @@ public abstract class MachineBlock extends SuperBlockPlus
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        //NOOP for now on machines - don't want all the stuff we get for normal superblocks
+        MachineTileEntity mte = (MachineTileEntity) this.getTileEntityReliably(world, data.getPos());
+        
+        probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 
+                mte.getDomain() == null ? I18n.translateToLocal("misc.unassigned") : mte.getDomain().getName()));
     }
+    
     
     
 }

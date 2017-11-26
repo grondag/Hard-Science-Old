@@ -11,17 +11,17 @@ import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
-public class BasicBuilderBlock extends MachineBlock
+public class BlockFabricatorBlock extends MachineBlock
 {
-    public BasicBuilderBlock(String name)
+    public BlockFabricatorBlock(String name)
     {
-        super(name, ModGui.BASIC_BUILDER.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_FILMSTRIP));
+        super(name, ModGui.BLOCK_FABRICATOR.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_FILMSTRIP));
     }
 
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta)
     {
-        return new BasicBuilderTileEntity();
+        return new BlockFabricatorTileEntity();
     }
 
     @Override
