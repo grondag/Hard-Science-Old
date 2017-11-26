@@ -287,7 +287,7 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
             this.getBufferManager().demandManager().consumeAllDemandsAndClear();
 
             // save placement info
-            this.getControlState().setModelState(modelState);
+            this.getControlState().setModelState(PlacementItem.getStackModelState(stack));
             this.getControlState().setTargetPos(task.procurementTask().pos());
             this.getControlState().setLightValue(PlacementItem.getStackLightValue(stack));
             this.getControlState().setSubstance(substance);
