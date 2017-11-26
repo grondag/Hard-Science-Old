@@ -38,39 +38,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
-/**
- * Intended control layout for placement items
- *
- *   Click 
- *    Done
- *       normal - not selecting: break blocks in region
- *       alt - undo last placement
- *       ctrl - select filter block
- *       normal - selecting: cancel selection
- *   
- *   Right Click
- *       select mode - none: complete selection
- *       select mode - ctrl: restart selection
- *       normal mode - none: place according to current mode/selection
- *       normal mode - ctrl: start new selection
- *       normal mode - alt:  place with different species      
- *       
- *   R - normal: cycle block orientation
- *       ctrl: cycle selection floating / range
- *       alt: cycle region orientation / assist / fixed
- *       shift: reverse
- *
- *   B - normal: show block menu
- *       ctrl: don't use - activates MC narrator
- *       alt: toggle delete mode
- *       shift: reverse 
- *       
- *   V - ctrl: cycle filter mode 
- *       alt: cycle species handling
- *       normal: cycle selection mode
- *       shift: reverse
- *       
- */
 public interface PlacementItem
 {
     /////////////////////////////////////////////////////
