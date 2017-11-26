@@ -17,13 +17,15 @@ public class BlockFabricationTask extends AbstractTask
     private BlockProcurementTask procurementTask;
     
     /**
-     * Use for new instances.
+     * Use for new instances. Automatically
+     * make procurement task dependent on this task.
      */
     public BlockFabricationTask(@Nonnull BlockProcurementTask procurementTask)
     {
         super(true);
         this.procurementTaskID = procurementTask.getId();
         this.procurementTask = procurementTask;
+        AbstractTask.link(this, procurementTask);
     }
     
     /** Use for deserialization */

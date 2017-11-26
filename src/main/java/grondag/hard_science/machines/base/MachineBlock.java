@@ -100,10 +100,13 @@ public abstract class MachineBlock extends SuperBlockPlus
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
-        TileEntity myTE = worldIn.getTileEntity(pos);
-        if(myTE != null && myTE instanceof MachineTileEntity)
+        if(!worldIn.isRemote)
         {
-            ((MachineTileEntity)myTE).disconnect();
+            TileEntity myTE = worldIn.getTileEntity(pos);
+            if(myTE != null && myTE instanceof MachineTileEntity)
+            {
+                ((MachineTileEntity)myTE).disconnect();
+            }
         }
         super.breakBlock(worldIn, pos, state);
     }

@@ -6,17 +6,20 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
-public abstract class BuildingTask extends AbstractTask
+/**
+ * Task with a position attribute.
+ */
+public abstract class AbstractPositionedTask extends AbstractTask
 {
     private BlockPos pos;
   
-    protected BuildingTask(@Nonnull BlockPos pos)
+    protected AbstractPositionedTask(@Nonnull BlockPos pos)
     {
         super(true);
         this.pos = pos;
     }
     
-    protected BuildingTask()
+    protected AbstractPositionedTask()
     {
         super(false);
     }
@@ -25,14 +28,14 @@ public abstract class BuildingTask extends AbstractTask
     public void deserializeNBT(NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
-        this.pos = BlockPos.fromLong(tag.getLong(ModNBTTag.BUILDING_TASK_POSITION));
+        this.pos = BlockPos.fromLong(tag.getLong(ModNBTTag.TASK_POSITION));
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
         super.serializeNBT(tag);
-        tag.setLong(ModNBTTag.BUILDING_TASK_POSITION, this.pos.toLong());
+        tag.setLong(ModNBTTag.TASK_POSITION, this.pos.toLong());
     }
     
     public BlockPos pos()

@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
@@ -308,5 +309,14 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     protected void setDirty()
     {
         this.dirtListener.setDirty();
+    }
+
+    /**
+     * Returns estimated count of tasks of given type in the queue.
+     */
+    public int getQueueDepth(TaskType blockFabrication)
+    {
+        // TODO Not a real implementation
+        return this.domain.domainManager().assignedNumbersAuthority().taskIndex().size();
     }
 }

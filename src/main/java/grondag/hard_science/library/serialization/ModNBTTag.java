@@ -131,7 +131,7 @@ public class ModNBTTag
 
     public static final String PLACEMENT_SPEC_INDEX = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String BUILDING_TASK_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String TASK_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String JOB_HELD_FLAG = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
@@ -155,7 +155,7 @@ public class ModNBTTag
 
     public static final String BUILD_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String BUILDING_TASK_STACK = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String TASK_STACK = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String PROCUREMENT_TASK_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 

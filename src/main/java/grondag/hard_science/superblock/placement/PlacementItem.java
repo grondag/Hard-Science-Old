@@ -152,6 +152,27 @@ public interface PlacementItem
         return tag == null ? 0 : tag.getByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE);
     }
 
+    public static void setStackPosition(ItemStack stack, @Nullable BlockPos pos)
+    {
+        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
+        if(pos == null)
+        {
+            if(tag.hasKey(ModNBTTag.LOCATION_POSITION))
+                tag.removeTag(ModNBTTag.LOCATION_POSITION);
+        }
+        else
+        {
+            tag.setLong(ModNBTTag.LOCATION_POSITION, pos.toLong());
+        }
+    }
+    
+    public static @Nullable BlockPos getStackPosition(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag == null || !tag.hasKey(ModNBTTag.LOCATION_POSITION) 
+                ? null : BlockPos.fromLong(tag.getLong(ModNBTTag.LOCATION_POSITION));
+    }
+    
     public static void setStackSubstance(ItemStack stack, BlockSubstance substance)
     {
         if(substance != null) substance.serializeNBT(Useful.getOrCreateTagCompound(stack));

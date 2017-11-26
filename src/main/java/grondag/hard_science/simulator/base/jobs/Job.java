@@ -98,6 +98,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     {
         this.jobManager = manager;
         this.onLoaded();
+        this.setDirty();
     }
     
     /**
@@ -150,27 +151,35 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     }
     public void addTask(AbstractTask task)
     {
-        this.isTaskStatusDirty = true;
-        tasks.add(task);
-        if(task.initialize(this))
+        synchronized(this.tasks)
         {
-            this.updateReadyWork(1);
+            this.isTaskStatusDirty = true;
+            tasks.add(task);
+            if(task.initialize(this))
+            {
+                this.updateReadyWork(1);
+            }
         }
+        this.setDirty();
     }
     
     public void addTasks(AbstractTask... tasks)
     {
-        if(tasks.length > 0)
+        synchronized(this.tasks)
         {
-            this.isTaskStatusDirty = true;
-            int readyCount = 0;
-            for(AbstractTask t : tasks)
+            if(tasks.length > 0)
             {
-                this.tasks.add(t);
-                if(t.initialize(this)) readyCount++;
+                this.isTaskStatusDirty = true;
+                int readyCount = 0;
+                for(AbstractTask t : tasks)
+                {
+                    this.tasks.add(t);
+                    if(t.initialize(this)) readyCount++;
+                }
+                if(readyCount > 0) this.updateReadyWork(readyCount);
             }
-            if(readyCount > 0) this.updateReadyWork(readyCount);
         }
+        this.setDirty();
     }
     
     public RequestPriority getPriority()
@@ -184,6 +193,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         {
             this.priority = priority;
             this.jobManager.notifyPriorityChange(this);
+            this.setDirty();
         }
     }
     
@@ -201,6 +211,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
             {
                 this.jobManager.notifyTerminated(this);
             }
+            this.setDirty();
         }
     }
     
@@ -305,6 +316,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         {
             this.isHeld = false;
             this.jobManager.notifyHoldChange(this);
+            this.setDirty();
         }
     }
     
@@ -314,22 +326,26 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         {
             this.isHeld = true;
             this.jobManager.notifyHoldChange(this);
+            this.setDirty();
         }
     }
     
     public void cancel()
     {
-        if(this.tasks.isEmpty())
+        synchronized(this.tasks)
         {
-            setStatus(RequestStatus.CANCELLED);
-        }
-        else
-        {
-            this.isTaskStatusDirty = true;
-            this.setStatus(RequestStatus.CANCEL_IN_PROGRESS);
-            for(AbstractTask t : this.tasks)
+            if(this.tasks.isEmpty())
             {
-                if(!t.isTerminated()) t.cancel();
+                setStatus(RequestStatus.CANCELLED);
+            }
+            else
+            {
+                this.isTaskStatusDirty = true;
+                this.setStatus(RequestStatus.CANCEL_IN_PROGRESS);
+                for(AbstractTask t : this.tasks)
+                {
+                    if(!t.isTerminated()) t.cancel();
+                }
             }
         }
     }
@@ -498,6 +514,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     public void setBuildID(int buildID)
     {
         this.buildID = buildID;
+        this.setDirty();
     }
     
     public Build getBuild()
@@ -510,10 +527,16 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         return dimensionID;
     }
 
+    public void setDirty()
+    {
+        this.jobManager.setDirty();
+    }
+    
     public void setDimensionID(int dimensionID)
     {
         this.dimensionID = dimensionID;
         this.world = null;
+        this.setDirty();
     }
     
     public World world()

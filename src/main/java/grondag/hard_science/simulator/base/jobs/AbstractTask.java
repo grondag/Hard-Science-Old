@@ -75,6 +75,8 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
             spamCount++;
         }
         
+        this.job.setDirty();
+        
         if(this.antecedents().isEmpty())
         {
             // access directly to avoid callback to job
@@ -149,6 +151,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
             this.status = newStatus;
             if(newStatus.isTerminated && !oldStatus.isTerminated)this.onTerminated();
             this.job.notifyTaskStatusChange(this, oldStatus);
+            this.job.setDirty();
         }
     }
 
@@ -244,16 +247,19 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     private synchronized void addConsequent(AbstractTask consequent)
     {
         this.consequents().addIfNotPresent(consequent);
+        this.job.setDirty();
     }
 
     private synchronized void addAntecedent(AbstractTask antecedent)
     {
         this.antecedents().addIfNotPresent(antecedent);
+        this.job.setDirty();
     }
 
     public void onAntecedentTerminated(AbstractTask antecedent)
     {
         this.antecedents.removeIfPresent(antecedent);
+        this.job.setDirty();
         if(antecedent.getStatus().didEndWithoutCompleting())
         {
             switch(this.status)

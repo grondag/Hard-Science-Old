@@ -56,7 +56,7 @@ public class ModBlocks
     public static final Block lava_dynamic_filler = null;
     
     public static final Block smart_chest = null;
-    public static final Block basic_builder = null;
+    public static final Block block_fabricator = null;
     public static final Block solar_cell = null;
 //    public static final Block solar_aggregator = null;
     

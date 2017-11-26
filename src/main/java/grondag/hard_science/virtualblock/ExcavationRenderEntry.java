@@ -15,7 +15,7 @@ import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
-import grondag.hard_science.simulator.base.jobs.BuildingTask;
+import grondag.hard_science.simulator.base.jobs.AbstractPositionedTask;
 import grondag.hard_science.simulator.base.jobs.ITaskListener;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
@@ -191,7 +191,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     @Override
     public void onTaskComplete(AbstractTask task)
     {
-        boolean needsCompute = this.removePos(((BuildingTask)task).pos());
+        boolean needsCompute = this.removePos(((AbstractPositionedTask)task).pos());
         this.isValid = this.isValid && this.positions.size() > 0;
         if(this.isValid)
         {

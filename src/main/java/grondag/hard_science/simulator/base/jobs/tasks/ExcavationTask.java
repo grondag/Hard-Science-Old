@@ -1,11 +1,11 @@
 package grondag.hard_science.simulator.base.jobs.tasks;
 
-import grondag.hard_science.simulator.base.jobs.BuildingTask;
+import grondag.hard_science.simulator.base.jobs.AbstractPositionedTask;
 import grondag.hard_science.simulator.base.jobs.RequestStatus;
 import grondag.hard_science.simulator.base.jobs.TaskType;
 import net.minecraft.util.math.BlockPos;
 
-public class ExcavationTask extends BuildingTask
+public class ExcavationTask extends AbstractPositionedTask
 {
     /**
      * Use for new instances.

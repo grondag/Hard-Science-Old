@@ -1,6 +1,5 @@
 package grondag.hard_science;
 
-import grondag.hard_science.virtualblock.VirtualBlockTracker;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -48,7 +47,6 @@ public class ServerProxy extends CommonProxy
     public void serverAboutToStart(FMLServerAboutToStartEvent event)
     {
         super.serverAboutToStart(event);
-        VirtualBlockTracker.INSTANCE.clear();
     }
 	
 	

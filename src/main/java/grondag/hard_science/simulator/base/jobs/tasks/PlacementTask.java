@@ -7,6 +7,10 @@ import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.TaskType;
 import net.minecraft.nbt.NBTTagCompound;
 
+/**
+ * For placing blocks. Relies on procurement task for data.
+ *
+ */
 public class PlacementTask extends AbstractTask
 {
     private int procurementTaskID;
