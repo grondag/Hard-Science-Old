@@ -639,10 +639,11 @@ public interface PlacementItem
     
     /**
      * Gets the appropriate super block to place from a given item stack if it is
-     * a SuperItemBlock stack. Null otherwise.
-     * May be different than the stack block because SuperModel in-world blocks are dependent on substance and other properties stored in the stack.
+     * a SuperItemBlock stack. Otherwise tries to get a regular block state.
+     * May be different than the stack block because SuperModel in-world 
+     * blocks are dependent on substance and other properties stored in the stack.
      */
-    public default IBlockState getPlacementBlockStateFromStack(ItemStack stack)
+    public static IBlockState getPlacementBlockStateFromStackStatically(ItemStack stack)
     {
         // supermodel blocks may need to use a different block instance depending on model/substance
         // handle this here by substituting a stack different than what we received
@@ -674,6 +675,11 @@ public interface PlacementItem
             return Blocks.AIR.getDefaultState();
         }
             
+    }
+    
+    public default IBlockState getPlacementBlockStateFromStack(ItemStack stack)
+    {
+        return getPlacementBlockStateFromStackStatically(stack);
     }
 
 //    public default void toggleDeleteMode(ItemStack stack)

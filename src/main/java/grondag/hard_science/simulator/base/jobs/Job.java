@@ -11,14 +11,15 @@ import grondag.hard_science.simulator.base.AssignedNumber;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
-import grondag.hard_science.superblock.placement.PlacementSpecType;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
+import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.virtualblock.ExcavationRenderTracker;
 import grondag.hard_science.simulator.base.IIdentified;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Collection of tasks - typically does not do any meaningful by itself.
@@ -27,6 +28,21 @@ import net.minecraft.nbt.NBTTagList;
 public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, IDomainMember
 {
     protected RequestPriority priority = RequestPriority.MEDIUM;
+    
+    /**
+     * If assigned means this is a construction job.
+     */
+    private int buildID = IIdentified.UNASSIGNED_ID;
+    
+    /**
+     * Dimension in which work is done, if applies.
+     */
+    private int dimensionID = 0;
+    
+    /**
+     * Lazily set from dimensionID
+     */
+    private World world = null;
     
     /**
      * Used by job manager to know prior sort bucket when priority changes.
@@ -48,11 +64,6 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
      */
     protected boolean isTaskStatusDirty = false;
     
-    /**
-     * For construction jobs only.  Will be null otherwise.
-     */
-    private AbstractPlacementSpec spec;
-    
     protected int readyWorkCount = 0;
     
     private final SimpleUnorderedArrayList<AbstractTask> tasks =  new SimpleUnorderedArrayList<AbstractTask>();
@@ -65,14 +76,8 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     
     public Job(RequestPriority priority, EntityPlayer player)
     {
-        this(priority, player, null);
-    }
-    
-    public Job(RequestPriority priority, EntityPlayer player, AbstractPlacementSpec spec)
-    {
         this.priority = priority;
         this.userName = player.getName();
-        this.spec = spec;
         DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
     }
     
@@ -102,7 +107,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
      */
     protected void onLoaded()
     {
-        if(this.spec() != null && this.spec().isExcavation())
+        if(this.buildID != IIdentified.UNASSIGNED_ID)
         {
             ExcavationRenderTracker.INSTANCE.add(this);
         }
@@ -339,18 +344,10 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         this.userName = tag.getString(ModNBTTag.REQUEST_USER_NAME);
         this.status = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_STATUS, RequestStatus.NEW);
         this.isHeld = tag.getBoolean(ModNBTTag.JOB_HELD_FLAG);
+        this.buildID = tag.getInteger(ModNBTTag.BUILD_ID);
+        this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
         
         DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
-        
-        if(tag.hasKey(ModNBTTag.PLACEMENT_ENTRY_DATA))
-        {
-            NBTTagCompound subTag = tag.getCompoundTag(ModNBTTag.PLACEMENT_ENTRY_DATA);
-            this.spec = PlacementSpecType.deserializeSpec(subTag);
-        }
-        else
-        {
-            this.spec = null;
-        }
         
         int readyCount = 0;
         NBTTagList nbtTasks = tag.getTagList(ModNBTTag.REQUEST_CHILDREN, 10);
@@ -375,6 +372,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         if(!this.getStatus().isTerminated) this.onLoaded();
         
         if(readyCount > 0) this.updateReadyWork(readyCount);
+        
     }
 
     @Override
@@ -391,6 +389,9 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         tag.setString(ModNBTTag.REQUEST_USER_NAME, this.userName);
         Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_STATUS, this.status);
         tag.setBoolean(ModNBTTag.JOB_HELD_FLAG, this.isHeld);
+        tag.setInteger(ModNBTTag.BUILD_ID, this.buildID);
+        tag.setInteger(ModNBTTag.BUILD_DIMENSION_ID, this.dimensionID);
+        
         if(!this.tasks.isEmpty())
         {
             NBTTagList nbtTasks = new NBTTagList();
@@ -400,11 +401,6 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
                 nbtTasks.appendTag(TaskType.serializeTask(t));
             }
             tag.setTag(ModNBTTag.REQUEST_CHILDREN, nbtTasks);
-        }
-        
-        if(this.spec != null)
-        {
-            tag.setTag(ModNBTTag.PLACEMENT_ENTRY_DATA, PlacementSpecType.serializeSpec(this.spec));
         }
     }
 
@@ -493,14 +489,39 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     {
         return this.jobManager.getDomain();
     }
-    
-    /**
-     * For construction jobs only.  Will be null otherwise.
-     */
-    public AbstractPlacementSpec spec()
+
+    public int getBuildID()
     {
-        return this.spec;
+        return buildID;
     }
 
+    public void setBuildID(int buildID)
+    {
+        this.buildID = buildID;
+    }
+    
+    public Build getBuild()
+    {
+        return this.getDomain().domainManager().assignedNumbersAuthority().buildIndex().get(buildID);
+    }
 
+    public int getDimensionID()
+    {
+        return dimensionID;
+    }
+
+    public void setDimensionID(int dimensionID)
+    {
+        this.dimensionID = dimensionID;
+        this.world = null;
+    }
+    
+    public World world()
+    {
+        if(this.world == null)
+        {
+            this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(this.dimensionID);
+        }
+        return this.world;
+    }
 }

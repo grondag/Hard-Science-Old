@@ -1,67 +1,43 @@
 package grondag.hard_science.simulator.base.jobs;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.superblock.placement.spec.PlacementSpecEntry;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 
 public abstract class BuildingTask extends AbstractTask
 {
-    /**
-     * Use for new instances.
-     */
-    protected BuildingTask(PlacementSpecEntry entry)
+    private BlockPos pos;
+  
+    protected BuildingTask(@Nonnull BlockPos pos)
     {
         super(true);
-        this.entryIndex = entry.index();
-        this.entry = entry;
+        this.pos = pos;
     }
     
-    /**
-     * Use for deserialization.
-     */
     protected BuildingTask()
     {
         super(false);
-    }
-    
-    /**
-     * Identifies what position/stack we are handling within
-     * the build specification.
-     */
-    protected int entryIndex;
-    
-    /**
-     * The position/stack info we are handling.
-     * Lazily retrieved via {@link #entry()}
-     */
-    private PlacementSpecEntry entry;
-    
-    /**
-     * The position/stack info we are handling.
-     */
-    public PlacementSpecEntry entry()
-    {
-        if(this.entry == null)
-        {
-            this.entry = this.job.spec().entries().get(this.entryIndex);
-        }
-        return this.entry;
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
-        this.entryIndex = tag.getInteger(ModNBTTag.BUILDING_TASK_ENTRY_INDEX);
+        this.pos = BlockPos.fromLong(tag.getLong(ModNBTTag.BUILDING_TASK_POSITION));
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
         super.serializeNBT(tag);
-        tag.setInteger(ModNBTTag.BUILDING_TASK_ENTRY_INDEX, this.entryIndex);
+        tag.setLong(ModNBTTag.BUILDING_TASK_POSITION, this.pos.toLong());
     }
     
-  
+    public BlockPos pos()
+    {
+        return this.pos;
+    }
 
 }

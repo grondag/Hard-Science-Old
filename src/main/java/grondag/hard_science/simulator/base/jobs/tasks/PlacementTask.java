@@ -1,32 +1,36 @@
 package grondag.hard_science.simulator.base.jobs.tasks;
 
-import grondag.hard_science.simulator.base.jobs.BuildingTask;
-import grondag.hard_science.simulator.base.jobs.TaskType;
-import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.spec.PlacementSpecEntry;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import javax.annotation.Nonnull;
 
-public class PlacementTask extends BuildingTask
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.base.jobs.AbstractTask;
+import grondag.hard_science.simulator.base.jobs.TaskType;
+import net.minecraft.nbt.NBTTagCompound;
+
+public class PlacementTask extends AbstractTask
 {
-    /**
-     * Use for new instances.
+    private int procurementTaskID;
+    
+    /** 
+     * Don't use directly - lazily deserialized.
      */
-    public PlacementTask(PlacementSpecEntry entry)
+    private BlockProcurementTask procurementTask;
+    
+    /**
+     * Use for new instances. Creates dependency on input task.
+     */
+    public PlacementTask(@Nonnull BlockProcurementTask procurementTask)
     {
-        super(entry);
-        entry.placementTaskID = this.getId();
+        super(true);
+        this.procurementTaskID = procurementTask.getId();
+        this.procurementTask = procurementTask;
+        AbstractTask.link(procurementTask, this);
     }
     
     /** Use for deserialization */
     public PlacementTask()
     {
-        super();
+        super(false);
     }
     
     @Override
@@ -35,44 +39,26 @@ public class PlacementTask extends BuildingTask
         return TaskType.PLACEMENT;
     }
 
-    /**
-     * Places a virtual block for this placement.
-     * Called by build planner when the placement is scheduled
-     * if the space is unoccupied, or by excavation task
-     * after excavation task if the space is occupied.
-     * <p>
-     * This method expects the item stack for 
-     * any placement task to contain a virtual block.
-     * So it does not do any translation to the physical block.
-     */
-    public void placeVirtualBlock(World world)
+    @Override
+    public void deserializeNBT(NBTTagCompound tag)
     {
-        PlacementSpecEntry entry = this.entry();
-        
-        if(entry == null) return;
-        
-        ItemStack placedStack = entry.placement();
-        
-        if(!(placedStack.getItem() instanceof SuperItemBlock)) return;
-        
-        SuperItemBlock itemBlock = (SuperItemBlock)placedStack.getItem();
-        
-        BlockPos placedPos = entry.pos();
-            
-        IBlockState placedState = itemBlock.getPlacementBlockStateFromStack(placedStack);
-        
-        if (itemBlock.placeBlockAt(placedStack, null, world, placedPos, null, 0, 0, 0, placedState))
+        super.deserializeNBT(tag);
+        this.procurementTaskID = tag.getInteger(ModNBTTag.PROCUREMENT_TASK_ID);
+    }
+
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        super.serializeNBT(tag);
+        tag.setInteger(ModNBTTag.PROCUREMENT_TASK_ID, this.procurementTaskID);
+    }
+    
+    public BlockProcurementTask procurementTask()
+    {
+        if(this.procurementTask == null)
         {
-            SoundType sound = PlacementItem.getStackSubstance(placedStack).soundType;
-            
-            world.playSound(
-                    null,
-                    placedPos, 
-                    sound.getPlaceSound(), 
-                    SoundCategory.BLOCKS, 
-                    (sound.getVolume() + 1.0F) / 2.0F, 
-                    sound.getPitch() * 0.8F);
+            this.procurementTask = (BlockProcurementTask) this.getDomain().domainManager().assignedNumbersAuthority().taskIndex().get(procurementTaskID);
         }
-        
+        return this.procurementTask;
     }
 }

@@ -11,8 +11,6 @@ import java.util.Iterator;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
-import com.google.common.collect.ImmutableList;
-
 import grondag.hard_science.ClientProxy;
 import grondag.hard_science.library.render.RenderUtil;
 import grondag.hard_science.library.world.CubicBlockRegion;
@@ -30,7 +28,6 @@ import grondag.hard_science.superblock.placement.OffsetPosition;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
-import grondag.hard_science.superblock.placement.spec.SingleStackPlacementSpec.SingleStackEntry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -66,13 +63,13 @@ public class CuboidBuilder extends VolumetricBuilder
         this.previewPos = pPos.inPos;
     }
 
-    protected CuboidPlacementSpec buildSpec()
-    {
-        CuboidPlacementSpec result = new CuboidPlacementSpec(this);
-        result.isHollow = this.isHollow;
-        result.region = this.region;
-        return result;
-    }
+//    protected CuboidPlacementSpec buildSpec()
+//    {
+//        CuboidPlacementSpec result = new CuboidPlacementSpec(this);
+//        result.isHollow = this.isHollow;
+//        result.region = this.region;
+//        return result;
+//    }
 
     @Override
     protected boolean doValidate()
@@ -308,8 +305,8 @@ public class CuboidBuilder extends VolumetricBuilder
             // by the player.
             return new IWorldTask()
             {
-                private CuboidPlacementSpec spec = (CuboidPlacementSpec) buildSpec();
-                private Job job = new Job(RequestPriority.MEDIUM, player, spec);
+//                private CuboidPlacementSpec spec = (CuboidPlacementSpec) buildSpec();
+                private Job job = new Job(RequestPriority.MEDIUM, player);
                 Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
 
                 /**
@@ -324,17 +321,10 @@ public class CuboidBuilder extends VolumetricBuilder
                  */
                 HashSet<BlockPos> checked = new HashSet<BlockPos>();
 
-                /**
-                 * Block positions that should be included in placement.
-                 */
-                ImmutableList.Builder<PlacementSpecEntry> builder = ImmutableList.builder();
-
-                World world = spec.getLocation().world();
-
-                int index = 0;
+                World world = player.world;
 
                 {
-                    scheduleVisitIfNotAlreadyVisited(spec.getLocation(), null);
+                    scheduleVisitIfNotAlreadyVisited(pPos.inPos, null);
                 }
 
                 @Override
@@ -368,16 +358,14 @@ public class CuboidBuilder extends VolumetricBuilder
 
                         // is the block at the position affected
                         // by this excavation?
-                        if(spec.filterMode().shouldAffectBlock(
+                        if(effectiveFilterMode.shouldAffectBlock(
                                 blockState, 
                                 world, 
                                 pos, 
-                                spec.outputStack(),
+                                outputStack,
                                 isVirtual))
                         {
-                            SingleStackEntry entry = spec.new SingleStackEntry(index++, pos);
-                            builder.add(entry);
-                            branchAntecedent = new ExcavationTask(entry);
+                            branchAntecedent = new ExcavationTask(pos);
                             job.addTask(branchAntecedent);
                             if(visit.getRight() != null)
                             {
@@ -409,7 +397,6 @@ public class CuboidBuilder extends VolumetricBuilder
                     if(queue.isEmpty())
                     {
                         // when done, finalize entries list and submit job
-                        spec.entries = builder.build();
                         this.checked.clear();
                         if(domain != null) domain.JOB_MANAGER.addJob(job);
                     }

@@ -15,8 +15,11 @@ import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.simulator.base.jobs.JobManager;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
+import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.BuildManager;
 import grondag.hard_science.virtualblock.ExcavationRenderTracker;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -309,7 +312,9 @@ public class DomainManager implements IPersistenceNode
         {
             public String userName;
             
-            private int priveledgeFlags;
+            private int privilegeFlags;
+            
+            private Int2IntOpenHashMap activeBuilds = new Int2IntOpenHashMap();
             
             private DomainUser(String playerName)
             {
@@ -322,25 +327,25 @@ public class DomainManager implements IPersistenceNode
             }
           
             /**
-             * Will return true for admin users, regardless of other Priveledge grants.
+             * Will return true for admin users, regardless of other Privilege grants.
              * Will also return true if security is disabled for the domain.
              */
             public boolean hasPriveledge(Priveledge p)
             {
                 return  !isSecurityEnabled
-                        || PRIVLEDGE_FLAG_SET.isFlagSetForValue(Priveledge.ADMIN, priveledgeFlags)
-                        || PRIVLEDGE_FLAG_SET.isFlagSetForValue(p, priveledgeFlags);
+                        || PRIVLEDGE_FLAG_SET.isFlagSetForValue(Priveledge.ADMIN, privilegeFlags)
+                        || PRIVLEDGE_FLAG_SET.isFlagSetForValue(p, privilegeFlags);
             }
             
             public void grantPriveledge(Priveledge p, boolean hasPriveledge)
             {
-                this.priveledgeFlags = PRIVLEDGE_FLAG_SET.setFlagForValue(p, priveledgeFlags, hasPriveledge);
+                this.privilegeFlags = PRIVLEDGE_FLAG_SET.setFlagForValue(p, privilegeFlags, hasPriveledge);
                 isDirty = true;
             }
             
             public void setPriveledges(Priveledge... granted)
             {
-                this.priveledgeFlags = PRIVLEDGE_FLAG_SET.getFlagsForIncludedValues(granted);
+                this.privilegeFlags = PRIVLEDGE_FLAG_SET.getFlagsForIncludedValues(granted);
                 isDirty = true;
             }
 
@@ -348,7 +353,18 @@ public class DomainManager implements IPersistenceNode
             public void serializeNBT(NBTTagCompound nbt)
             {
                 nbt.setString(ModNBTTag.DOMAIN_USER_NAME, this.userName);
-                nbt.setInteger(ModNBTTag.DOMAIN_USER_FLAGS, this.priveledgeFlags);
+                nbt.setInteger(ModNBTTag.DOMAIN_USER_FLAGS, this.privilegeFlags);
+                if(!this.activeBuilds.isEmpty())
+                {
+                    int[] buildData = new int[this.activeBuilds.size() * 2];
+                    int i = 0;
+                    for(Int2IntMap.Entry entry : this.activeBuilds.int2IntEntrySet())
+                    {
+                        buildData[i++] = entry.getIntKey();
+                        buildData[i++] = entry.getIntValue();
+                    }
+                    nbt.setIntArray(ModNBTTag.BUILD_ID, buildData);
+                }
                 ITEM_STORAGE.serializeNBT(nbt);
             }
 
@@ -356,9 +372,51 @@ public class DomainManager implements IPersistenceNode
             public void deserializeNBT(NBTTagCompound nbt)
             {
                 this.userName = nbt.getString(ModNBTTag.DOMAIN_USER_NAME);
-                this.priveledgeFlags = nbt.getInteger(ModNBTTag.DOMAIN_USER_FLAGS);
+                this.privilegeFlags = nbt.getInteger(ModNBTTag.DOMAIN_USER_FLAGS);
+                
+                if(nbt.hasKey(ModNBTTag.BUILD_ID))
+                {
+                    int[] buildData = nbt.getIntArray(ModNBTTag.BUILD_ID);
+                    if(buildData != null && buildData.length > 0 && (buildData.length & 1) == 0)
+                    {
+                        int i = 0;
+                        while(i < buildData.length)
+                        {
+                            this.activeBuilds.put(buildData[i++], buildData[i++]);
+                        }
+                    }
+                }
+                        
                 ITEM_STORAGE.deserializeNBT(nbt);
             }
+            
+            /**
+             * Retrieves active build in given dimension if exists,
+             * creates new build in this domain and makes
+             * it the active build for the player otherwise.
+             */
+            public Build getActiveBuild(int dimensionID)
+            {
+                int buildID = this.activeBuilds.get(dimensionID);
+                Build result = DomainManager.INSTANCE.assignedNumbersAuthority().buildIndex().get(buildID);
+                if(result == null || !result.isOpen())
+                {
+                    result = BUILD_MANAGER.newBuild(dimensionID);
+                    this.activeBuilds.put(dimensionID, result.getId());
+                }
+                return result;
+            }
+            
+            /**
+             * Makes given build the active build in its dimension.
+             * Note that if the given build is not open, will be
+             * re-assigned to a new build on retrieval.
+             */
+            public void setActiveBuild(Build build)
+            {
+                this.activeBuilds.put(build.dimensionID(), build.getId());
+            }
+            
         }
         @Override
         public IDirtListener getDirtListener()

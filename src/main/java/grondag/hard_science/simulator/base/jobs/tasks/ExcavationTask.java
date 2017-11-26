@@ -3,17 +3,16 @@ package grondag.hard_science.simulator.base.jobs.tasks;
 import grondag.hard_science.simulator.base.jobs.BuildingTask;
 import grondag.hard_science.simulator.base.jobs.RequestStatus;
 import grondag.hard_science.simulator.base.jobs.TaskType;
-import grondag.hard_science.superblock.placement.spec.PlacementSpecEntry;
+import net.minecraft.util.math.BlockPos;
 
 public class ExcavationTask extends BuildingTask
 {
     /**
      * Use for new instances.
      */
-    public ExcavationTask(PlacementSpecEntry entry)
+    public ExcavationTask(BlockPos pos)
     {
-        super(entry);
-        entry.excavationTaskID = this.getId();
+        super(pos);
     }
     
     /** Use for deserialization */

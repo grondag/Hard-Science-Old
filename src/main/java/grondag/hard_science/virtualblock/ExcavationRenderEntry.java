@@ -14,16 +14,14 @@ import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
-import grondag.hard_science.simulator.base.DomainManager;
-import grondag.hard_science.simulator.base.IIdentified;
 import grondag.hard_science.simulator.base.jobs.AbstractTask;
 import grondag.hard_science.simulator.base.jobs.BuildingTask;
 import grondag.hard_science.simulator.base.jobs.ITaskListener;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
+import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
+import grondag.hard_science.simulator.base.jobs.tasks.PlacementTask;
 import grondag.hard_science.superblock.placement.BuildManager;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
-import grondag.hard_science.superblock.placement.spec.PlacementSpecEntry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -156,50 +154,44 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         
         this.domainID = job.getDomain().getId();
         
-        AbstractPlacementSpec spec = job.spec();
-        if(spec != null && spec.entries() != null && !spec.entries().isEmpty())
+        this.dimensionID = job.getDimensionID();
+        
+        boolean isExchange = false;
+        
+        for(AbstractTask task : job)
         {
-            if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - found spec with %d entries", this.id, spec.entries().size());
-            
-            this.isExchange = !spec.isExcavation();
-            this.dimensionID = spec.getLocation().dimensionID();
-            
-            for(PlacementSpecEntry entry : spec.entries())
+            if(task instanceof ExcavationTask)
             {
-                if(entry.excavationTaskID != IIdentified.UNASSIGNED_ID)
+                if(!task.isTerminated())
                 {
-                    AbstractTask task = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(entry.excavationTaskID);
-                    if(task != null && !task.isTerminated())
-                    {
-                        task.addListener(ExcavationRenderEntry.this);
-                        this.addPos(entry.pos());
-                    }
+                    task.addListener(ExcavationRenderEntry.this);
+                    this.addPos(((ExcavationTask)task).pos());
                 }
             }
-            
-            if(ExcavationRenderEntry.this.positions.size() == 0)
+            else if(!isExchange && task instanceof PlacementTask)
             {
-                if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - invalid", this.id);
-                this.isValid = false;
+                isExchange = true;
             }
-            else
-            {
-                if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - launching compute", this.id);
-                ExcavationRenderEntry.this.compute();
-            }
+        }
+        
+        this.isExchange = isExchange;
+        
+        if(ExcavationRenderEntry.this.positions.size() == 0)
+        {
+            if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - invalid", this.id);
+            this.isValid = false;
         }
         else
         {
-            this.isExchange = false;
-            this.dimensionID = 0;
-            this.isValid = false;
+            if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - launching compute", this.id);
+            ExcavationRenderEntry.this.compute();
         }
     }
     
     @Override
     public void onTaskComplete(AbstractTask task)
     {
-        boolean needsCompute = this.removePos(((BuildingTask)task).entry().pos());
+        boolean needsCompute = this.removePos(((BuildingTask)task).pos());
         this.isValid = this.isValid && this.positions.size() > 0;
         if(this.isValid)
         {

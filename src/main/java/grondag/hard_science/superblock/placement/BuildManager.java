@@ -11,9 +11,9 @@ import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.NullDirtListener;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -44,11 +44,16 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
 
     protected IDirtListener dirtListener = NullDirtListener.INSTANCE;
     
-    private Int2ObjectOpenHashMap<Build> builds = new Int2ObjectOpenHashMap<Build>();
+    private Int2ObjectMap<Build> builds =Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<Build>());
     
-    public Build newBuild(World inWorld, AbstractPlacementSpec spec)
+    public Build newBuild(World inWorld)
     {
-        Build result = new Build(this, inWorld, spec);
+        return newBuild(inWorld.provider.getDimension());
+    }
+    
+    public Build newBuild(int dimensionID)
+    {
+        Build result = new Build(this, dimensionID);
         this.builds.put(result.getId(), result);
         return result;
     }
@@ -101,9 +106,5 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
             tag.setTag(ModNBTTag.BUILD_MANAGER_BUILDS, nbtJobs);
         }        
     }
-    
-    public static void createBuildJob(EntityPlayer player, AbstractPlacementSpec spec)
-    {
-        
-    }
+ 
 }

@@ -394,7 +394,7 @@ public abstract class PlacementHandler
         ItemStack stack = specBuilder.placedStack().copy();
         PlacementPosition pPos = specBuilder.placementPosition();
         ModelState modelState = PlacementItem.getStackModelState(stack);
-        if(modelState.hasSpecies())
+        if(modelState != null && modelState.hasSpecies())
         {
             int species = speciesForPlacement(specBuilder.player(), pPos.onPos, pPos.onFace, stack, specBuilder.region());
             if(species >= 0) 

@@ -134,9 +134,9 @@ public class SingleBuilder extends SingleStackBuilder
                             SingleBuilder.this.placedStack(),
                             SingleBuilder.this.isVirtual))
                     {
-                        SinglePlacementSpec spec = new SinglePlacementSpec(SingleBuilder.this);
-                        Job job = new Job(RequestPriority.MEDIUM, player, spec);
-                        job.addTask(new ExcavationTask(spec.entries.get(0)));
+                        Job job = new Job(RequestPriority.MEDIUM, player);
+                        job.setDimensionID(world.provider.getDimension());
+                        job.addTask(new ExcavationTask(pos));
                         Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
                         if(domain != null)
                         {

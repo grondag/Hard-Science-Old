@@ -16,7 +16,6 @@ import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
 import grondag.hard_science.virtualblock.ExcavationRenderTracker;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
@@ -187,12 +186,8 @@ public class CommonEventHandler
                         ExcavationTask task = (ExcavationTask) domain.JOB_MANAGER.claimReadyWork(TaskType.EXCAVATION, null).get();
                         if(task == null) break;
                         
-                        AbstractPlacementSpec spec = task.job().spec();
-                        if(spec != null && spec.getLocation() != null)
-                        {
-                            World world = spec.getLocation().world();
-                            if(world != null) world.setBlockToAir(task.entry().pos());
-                        }
+                        World world = task.job().world();
+                        if(world != null) world.setBlockToAir(task.pos());
                         
                         task.complete();
                     }

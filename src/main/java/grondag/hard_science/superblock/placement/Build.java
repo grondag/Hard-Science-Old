@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.placement;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.base.AssignedNumber;
@@ -9,11 +10,20 @@ import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.base.IIdentified;
+import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.RequestPriority;
-import grondag.hard_science.superblock.placement.spec.AbstractPlacementSpec;
+import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
+import grondag.hard_science.simulator.base.jobs.tasks.BlockProcurementTask;
+import grondag.hard_science.simulator.base.jobs.tasks.PlacementTask;
+import grondag.hard_science.virtualblock.VirtualBlock;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -29,10 +39,12 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
          * Don't use directly. Use {@link #world()} instead.
          * Is lazily retrieved after deserialization.
          */
-        @Deprecated
         private World world;
         
-        private AbstractPlacementSpec spec;
+        /**
+         * Tracks positions of all virtual blocks that belong to this build.  
+         */
+        private LongOpenHashSet positions = new LongOpenHashSet();
         
         /** 
          * If set, means build is under construction. Persisted. 
@@ -50,12 +62,16 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
             this.buildManager = buildManager;
         };
         
-        public Build(BuildManager buildManager, World inWorld, AbstractPlacementSpec spec)
+        public Build(BuildManager buildManager, World inWorld)
+        {
+            this(buildManager, inWorld.provider.getDimension());
+            this.world = inWorld;
+        }
+        
+        public Build(BuildManager buildManager, int dimensionID)
         {
             this(buildManager);
-            this.dimensionID = inWorld.provider.getDimension();
-            this.world = inWorld;
-            this.spec = spec;
+            this.dimensionID = dimensionID;
         }
         
         public Build(BuildManager buildManager, NBTTagCompound tag)
@@ -63,8 +79,12 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
             this(buildManager);
             this.deserializeNBT(tag);
             
-            // re-launch if prior launch failed to complete
-            if(this.jobID == IIdentified.SIGNAL_ID) this.launch();
+            // re-open if prior launch failed to complete
+            if(this.jobID == IIdentified.SIGNAL_ID) 
+            {
+                this.jobID = IIdentified.UNASSIGNED_ID;
+                buildManager.setDirty();
+            }
         }
 
         public int dimensionID()
@@ -82,19 +102,43 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
         }
         
         /**
-         * If not already in construction, creates a new
-         * job in this build's domain.  Build can no longer be 
-         * changed unless the job is cancelled.
-         * @return
+         * Begin tracking virtual block at position
+         * as part of this build.  Does NOT tag the block
+         * with the build ID.
          */
-        public synchronized Job construct(RequestPriority priority, EntityPlayer player)
+        public void addPosition(BlockPos pos)
         {
-            Job result = new Job(priority, player);
-            this.buildManager.domain.JOB_MANAGER.addJob(result);
-            this.jobID = result.getId();
-            this.job = result;
+            if(!this.isOpen())
+            {
+                Log.warn("Build manager rejected attempt to modify an unopen build. This is a bug.");
+                return;
+            }
+            
+            synchronized(this.positions)
+            {
+                positions.add(pos.toLong());
+            }
             this.buildManager.setDirty();
-            return result;
+        }
+        
+        /**
+         * Stop tracking virtual block at position
+         * as part of this build.  Does NOT un-tag or
+         * remove the block. Has no effect if build is not open.
+         */
+        public void removePosition(BlockPos pos)
+        {
+            if(!this.isOpen())
+            {
+                Log.warn("Build manager rejected attempt to modify an unopen build. This is a bug.");
+                return;
+            }
+            
+            synchronized(this.positions)
+            {
+                positions.remove(pos.toLong());
+            }
+            this.buildManager.setDirty();
         }
         
         /**
@@ -136,7 +180,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
          * Unassigned job ID means not running.
          * Any other job ID means launch completed and job was submitted.
          */
-        public void launch()
+        public void launch(RequestPriority priority, EntityPlayer player)
         {
             // abort if already launched or assigned
             if(this.jobID != IIdentified.UNASSIGNED_ID) return; 
@@ -144,7 +188,74 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
             this.jobID = IIdentified.SIGNAL_ID;
             this.buildManager.setDirty();
             
-            //TODO, create a new spec from this build and submit it to world task queue
+            
+            WorldTaskManager.enqueue(new IWorldTask() 
+            {
+                private Job job = new Job(priority, player);
+                
+                private boolean isDone = false;
+                
+                LongIterator iterator = positions.iterator();
+                
+                World world = player.world;
+
+                @Override
+                public int runInServerTick(int maxOperations)
+                {
+                    if(isDone) return 0;
+                    
+                    int opCount = 0;
+                    
+                    while(opCount < maxOperations && iterator.hasNext())
+                    {
+                        BlockPos pos = BlockPos.fromLong(iterator.nextLong());
+                        IBlockState blockState = world.getBlockState(pos);
+                        if(VirtualBlock.isVirtualBlock(blockState.getBlock()))
+                        {
+                            ItemStack stack = VirtualBlock.getSuperModelStack(world, blockState, pos);
+                            if(stack == null)
+                            {
+                                Log.warn("Build manager unable to retrieve stack from virtual block. This is a bug");
+                            }
+                            else
+                            {
+                                BlockProcurementTask procTask = new BlockProcurementTask(pos, stack);
+                                job.addTask(procTask);
+                                PlacementTask placeTask = new PlacementTask(procTask);
+                                job.addTask(placeTask);
+                            }
+                        }
+                        else
+                        {
+                            iterator.remove();
+                        }
+                        opCount += 2;
+                    }
+                    
+                    if(!iterator.hasNext())
+                    {
+                        complete();
+                        opCount += 2;
+                    }
+                    
+                    return opCount;
+                }
+                
+                private void complete()
+                {
+                    buildManager.domain.JOB_MANAGER.addJob(job);
+                    Build.this.jobID = job.getId();
+                    buildManager.setDirty();
+                    this.isDone = true;
+                }
+
+                @Override
+                public boolean isDone()
+                {
+                    return this.isDone;
+                }
+            });
+            
         }
         
         
@@ -161,9 +272,18 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
             DomainManager.INSTANCE.assignedNumbersAuthority().buildIndex().register(this);
             this.jobID = tag.getInteger(ModNBTTag.BUILD_JOB_ID);
             this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
-            
-            NBTTagCompound nbtSpec = tag.getCompoundTag(ModNBTTag.BUILD_PLACEMENT_SPECS);
-            this.spec = PlacementSpecType.deserializeSpec(nbtSpec);
+            if(tag.hasKey(ModNBTTag.BUILD_POSITIONS))
+            {
+                int[] posData = tag.getIntArray(ModNBTTag.BUILD_POSITIONS);
+                if(posData != null && posData.length > 0 && (posData.length & 1) == 0)
+                {
+                    int i = 0;
+                    while(i < posData.length)
+                    {
+                        this.positions.add((((long)posData[i++]) << 32) | (posData[i++] & 0xffffffffL));
+                    }
+                }
+            }
         }
 
         @Override
@@ -172,7 +292,20 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
             this.serializeID(tag);
             tag.setInteger(ModNBTTag.BUILD_JOB_ID, this.jobID);
             tag.setInteger(ModNBTTag.BUILD_DIMENSION_ID,  this.dimensionID);
-            tag.setTag(ModNBTTag.BUILD_PLACEMENT_SPECS, PlacementSpecType.serializeSpec(this.spec));
+            synchronized(this.positions)
+            {
+                if(!this.positions.isEmpty())
+                {
+                    int i = 0;
+                    int[] posData = new int[this.positions.size() * 2];
+                    for(long pos : this.positions)
+                    {
+                        posData[i++] = (int)(pos >> 32);
+                        posData[i++] = (int)pos;
+                    }
+                    tag.setIntArray(ModNBTTag.BUILD_POSITIONS, posData);
+                }
+            }
         }
 
         @Override
@@ -191,5 +324,15 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
         public AssignedNumber idType()
         {
             return AssignedNumber.BUILD;
+        }
+
+        /**
+         * True if build is open for edits.
+         * Means it has not been submitted for construction
+         * or job was canceled and was reopened.
+         */
+        public boolean isOpen()
+        {
+            return this.jobID == IIdentified.UNASSIGNED_ID;
         }
     }

@@ -143,6 +143,13 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
     
+    /**
+     * Note this does not send an update to client.
+     * At this time, isn't needed because model state is always
+     * set on server immediately after block state is set, in the
+     * same thread, and so tile entity data always goes along with 
+     * block state packet.
+     */
     public void setModelState(World world, BlockPos pos, ModelState modelState)
     {
         TileEntity blockTE = world.getTileEntity(pos);

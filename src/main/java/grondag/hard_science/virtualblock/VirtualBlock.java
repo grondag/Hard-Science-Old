@@ -3,12 +3,19 @@ package grondag.hard_science.virtualblock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import grondag.hard_science.HardScience;
+import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -54,6 +61,38 @@ public class VirtualBlock extends SuperModelBlock
         IBlockState blockState = player.world.getBlockState(pos);
         return !blockState.getMaterial().isReplaceable() 
                 || (VirtualBlock.isVirtualBlock(blockState.getBlock()));
+    }
+    
+    /**
+     * Retrieves item stack that can be used to place a super block in place of
+     * virtual block currently at position.  Null if no virtual block located there.
+     */
+    @Nullable
+    public static ItemStack getSuperModelStack(@Nonnull World world, @Nonnull IBlockState blockState, @Nonnull BlockPos pos)
+    {
+        Block block = blockState.getBlock();
+        if(!(block instanceof VirtualBlock)) return null;
+        
+        VirtualBlock vBlock = (VirtualBlock)block;
+        
+        ModelState modelState = vBlock.getModelState(world, pos, true);
+        if(modelState == null) return null;
+        
+        TileEntity te = world.getTileEntity(pos);
+        if(!(te instanceof VirtualTileEntity)) return null;
+        VirtualTileEntity vte = (VirtualTileEntity)te;
+        
+        modelState.setStatic(true);
+        
+        SuperModelBlock smb = ModSuperModelBlocks.findAppropriateSuperModelBlock(vte.getSubstance(), modelState);
+        
+        ItemStack result = smb.getSubItems().get(vBlock.getMetaFromState(blockState)).copy();
+        
+        PlacementItem.setStackModelState(result, modelState);
+        PlacementItem.setStackLightValue(result, vte.getLightValue());
+        PlacementItem.setStackSubstance(result, vte.getSubstance());
+        
+        return result;
     }
     
     public VirtualBlock(String blockName, BlockRenderMode renderMode)
@@ -161,7 +200,22 @@ public class VirtualBlock extends SuperModelBlock
     @Override
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        return this.isVisible(state, world, pos) ? super.doesSideBlockRendering(state, world, pos, face) : false;
+        if(this.isVisible(state, world, pos))
+        {
+            // can only occlude other virtual blocks
+            if(world.getBlockState(pos.offset(face)).getBlock() instanceof VirtualBlock)
+            {
+                return super.doesSideBlockRendering(state, world, pos, face);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
     }
     
 //
@@ -282,7 +336,13 @@ public class VirtualBlock extends SuperModelBlock
     @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list)
     {
-        list.add(this.getSubItems().get(0));
+        // We only want to show one item for virtual blocks
+        // Otherwise will spam creative search / JEI
+        // All do the same thing in the end.
+        if(this.blockRenderMode == BlockRenderMode.SOLID_SHADED)
+        {
+            list.add(this.getSubItems().get(0));
+        }
     }
 
     @Override
@@ -351,6 +411,11 @@ public class VirtualBlock extends SuperModelBlock
         return false;
     }
 
+    // Problem with this is can’t cause chunk culling.
+    // But can't have domain-dependent visibility without it.
+    // Could probably work around by overriding shouldRefresh
+    // and trapping the chunk load event and then setting
+    // block state on client side each time - but is an egregious hack
     @Override
     public boolean isOpaqueCube(IBlockState blockState)
     {
