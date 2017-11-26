@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.Priveledge;
+import grondag.hard_science.simulator.base.DomainManager.Privilege;
 import grondag.hard_science.simulator.base.DomainManager.Domain.DomainUser;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -22,13 +22,13 @@ public class DomainManagerTest
         d1.setSecurityEnabled(true);
         
         DomainUser bob = d1.addUser("Bob");
-        bob.setPriveledges(Priveledge.ACCESS_INVENTORY, Priveledge.ADD_NODE, Priveledge.REMOVE_NODE, Priveledge.ADMIN);
-        bob.grantPriveledge(Priveledge.ADMIN, false);
-        bob.grantPriveledge(Priveledge.REMOVE_NODE, false);
+        bob.setPrivileges(Privilege.ACCESS_INVENTORY, Privilege.ADD_NODE, Privilege.REMOVE_NODE, Privilege.ADMIN);
+        bob.grantPrivilege(Privilege.ADMIN, false);
+        bob.grantPrivilege(Privilege.REMOVE_NODE, false);
         
         DomainUser sally = d1.addUser("Sally");
         dm.setSaveDirty(false);
-        sally.grantPriveledge(Priveledge.ADMIN, true);
+        sally.grantPrivilege(Privilege.ADMIN, true);
         assert(dm.isSaveDirty());
         
         Domain d2 = dm.createDomain();
@@ -48,26 +48,26 @@ public class DomainManagerTest
         assert(d1.isSecurityEnabled());
         
         bob = d1.findUser("Bob");
-        assert(bob.hasPriveledge(Priveledge.ACCESS_INVENTORY));
-        assert(bob.hasPriveledge(Priveledge.ADD_NODE));
-        assert(!bob.hasPriveledge(Priveledge.REMOVE_NODE));
-        assert(!bob.hasPriveledge(Priveledge.ADMIN));
+        assert(bob.hasPrivilege(Privilege.ACCESS_INVENTORY));
+        assert(bob.hasPrivilege(Privilege.ADD_NODE));
+        assert(!bob.hasPrivilege(Privilege.REMOVE_NODE));
+        assert(!bob.hasPrivilege(Privilege.ADMIN));
         
         sally = d1.findUser("Sally");
-        assert(sally.hasPriveledge(Priveledge.ACCESS_INVENTORY));
-        assert(sally.hasPriveledge(Priveledge.ADD_NODE));
-        assert(sally.hasPriveledge(Priveledge.REMOVE_NODE));
-        assert(sally.hasPriveledge(Priveledge.ADMIN));
+        assert(sally.hasPrivilege(Privilege.ACCESS_INVENTORY));
+        assert(sally.hasPrivilege(Privilege.ADD_NODE));
+        assert(sally.hasPrivilege(Privilege.REMOVE_NODE));
+        assert(sally.hasPrivilege(Privilege.ADMIN));
         
         d2 = dm.getDomain(1001);
         assert(d2.getName() == "second");
         assert(!d2.isSecurityEnabled());
         
         pat = d2.findUser("pat");
-        assert(pat.hasPriveledge(Priveledge.ACCESS_INVENTORY));
-        assert(pat.hasPriveledge(Priveledge.ADD_NODE));
-        assert(pat.hasPriveledge(Priveledge.REMOVE_NODE));
-        assert(pat.hasPriveledge(Priveledge.ADMIN));
+        assert(pat.hasPrivilege(Privilege.ACCESS_INVENTORY));
+        assert(pat.hasPrivilege(Privilege.ADD_NODE));
+        assert(pat.hasPrivilege(Privilege.REMOVE_NODE));
+        assert(pat.hasPrivilege(Privilege.ADMIN));
         
         assert dm.createDomain().getId() == 1002;
     }

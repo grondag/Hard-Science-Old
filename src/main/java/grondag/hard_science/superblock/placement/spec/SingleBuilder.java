@@ -11,6 +11,8 @@ import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.RequestPriority;
 import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
+import grondag.hard_science.superblock.placement.Build;
+import grondag.hard_science.superblock.placement.BuildManager;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
@@ -25,6 +27,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -165,6 +169,14 @@ public class SingleBuilder extends SingleStackBuilder
                 {
                     this.isDone = true;
 
+                    Build build = BuildManager.getActiveBuildForPlayer(player);
+                    if(build == null || !build.isOpen())
+                    {                        
+                        String chatMessage = I18n.translateToLocal("placement.message.no_build");
+                        player.sendMessage(new TextComponentString(chatMessage));
+                        return 1;
+                    }
+                    
                     World world = player.world;
 
                     BlockPos pos = SingleBuilder.this.pPos.inPos;
@@ -184,9 +196,7 @@ public class SingleBuilder extends SingleStackBuilder
                             SingleBuilder.this.placedStack(),
                             SingleBuilder.this.isVirtual))
                     {
-                        //TODO: set virtual block build/domain
-                        //                                Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
-                        PlacementHandler.placeVirtualBlock(world, SingleBuilder.this.outputStack, player, pos);
+                        PlacementHandler.placeVirtualBlock(world, SingleBuilder.this.outputStack, player, pos, build);
                         return 5;
                     }
                     return 3;

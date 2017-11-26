@@ -27,7 +27,7 @@ import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -294,7 +294,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
     {
         if(hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {
-            ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(itemPreview.previewItem));
+            ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(itemPreview.previewItem));
             hasUpdates = false;
         }
         mc.displayGuiScreen((GuiScreen)null);

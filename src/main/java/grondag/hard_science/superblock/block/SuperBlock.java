@@ -17,7 +17,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -865,7 +865,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
                     PlacementItem.setStackModelState(heldStack, PlacementItem.getStackModelState(picked));
                     PlacementItem.setStackLightValue(heldStack, PlacementItem.getStackLightValue(picked));
                     PlacementItem.setStackSubstance(heldStack, PlacementItem.getStackSubstance(picked));
-                    ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(heldStack));
+                    ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(heldStack));
                 }
             }
             return ItemStack.EMPTY;

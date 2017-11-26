@@ -11,10 +11,12 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
+import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
+import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
@@ -515,8 +517,28 @@ public class VirtualBlock extends SuperModelBlock
     {
         // not affected by explosions, because not really there
         // probably won't be called anyway, because material is air
-    } 
+    }
     
-    
+    @Override
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.breakBlock(worldIn, pos, state);
+        
+        // disassociate with build
+        if(!worldIn.isRemote)
+        {
+            TileEntity te = worldIn.getTileEntity(pos);
+            if(te != null && te instanceof VirtualTileEntity)
+            {
+                Build build = DomainManager.INSTANCE.assignedNumbersAuthority()
+                        .buildIndex().get(((VirtualTileEntity)te).buildID());
+                
+                if(build != null && build.isOpen())
+                {
+                    build.removePosition(pos);
+                }
+            }
+        }
+    }
 }
 

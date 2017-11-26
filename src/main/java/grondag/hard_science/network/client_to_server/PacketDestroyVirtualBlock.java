@@ -38,7 +38,6 @@ public class PacketDestroyVirtualBlock extends AbstractPlayerToServerPacket<Pack
     public void fromBytes(PacketBuffer pBuff)
     {
         this.blockPos = pBuff.readBlockPos();
-        
     }
 
     @Override

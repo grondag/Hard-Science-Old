@@ -3,6 +3,7 @@ package grondag.hard_science.init;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -27,8 +28,7 @@ public class ModKeys
     public static KeyBinding PLACEMENT_DECREASE_DEPTH;
     public static KeyBinding PLACEMENT_MOVE_SELECTION;
     public static KeyBinding PLACEMENT_CYCLE_SELECTION_TARGET;
-    
-
+    public static KeyBinding PLACEMENT_LAUNCH_BUILD;
 
     public static void init(FMLInitializationEvent event)
     {
@@ -66,11 +66,12 @@ public class ModKeys
                 KeyModifier.NONE, Keyboard.KEY_DOWN, "key.categories.hard_science");
         PLACEMENT_UNDO = new KeyBinding("key.placement_undo", ModKeyConflictContext.HOLDING_PLACEMENT_ITEM, 
                 KeyModifier.CONTROL, Keyboard.KEY_Z, "key.categories.hard_science");
+        PLACEMENT_LAUNCH_BUILD = new KeyBinding("key.placement_launch_build", KeyConflictContext.IN_GAME, 
+                KeyModifier.CONTROL, Keyboard.KEY_L, "key.categories.hard_science");
         
         ClientRegistry.registerKeyBinding(PLACEMENT_HISTORY_FORWARD);
         ClientRegistry.registerKeyBinding(PLACEMENT_HISTORY_BACK);
         ClientRegistry.registerKeyBinding(PLACEMENT_PREVIEW);
-        
         ClientRegistry.registerKeyBinding(PLACEMENT_DISPLAY_GUI);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_FILTER_MODE);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_SPECIES_HANDLING);
@@ -85,6 +86,7 @@ public class ModKeys
         ClientRegistry.registerKeyBinding(PLACEMENT_INCREASE_DEPTH);
         ClientRegistry.registerKeyBinding(PLACEMENT_DECREASE_DEPTH);
         ClientRegistry.registerKeyBinding(PLACEMENT_CYCLE_SELECTION_TARGET);
+        ClientRegistry.registerKeyBinding(PLACEMENT_LAUNCH_BUILD);
     }
 
 }

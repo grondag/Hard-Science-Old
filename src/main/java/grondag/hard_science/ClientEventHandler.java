@@ -6,7 +6,8 @@ import grondag.hard_science.library.render.QuadCache;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketSimpleAction;
 import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.simulator.machine.OpenContainerStorageProxy;
@@ -154,7 +155,6 @@ public class ClientEventHandler
     @SubscribeEvent
     public static void onKeyInput(InputEvent.KeyInputEvent event)
     {
-        
         ItemStack stack = PlacementItem.getHeldPlacementItem(Minecraft.getMinecraft().player);
         
         if(stack != null)
@@ -163,7 +163,7 @@ public class ClientEventHandler
             
             if(ModKeys.PLACEMENT_CYCLE_SELECTION_TARGET.isPressed() && item.cycleSelectionTargetRange(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 
                 String message = item.isFloatingSelectionEnabled(stack)
                         ? I18n.translateToLocalFormatted("placement.message.range_floating",  item.getFloatingSelectionRange(stack))
@@ -173,14 +173,14 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_CYCLE_REGION_ORIENTATION.isPressed() && item.cycleRegionOrientation(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.orientation_region",  item.getRegionOrientation(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
                 
             else if(ModKeys.PLACEMENT_CYCLE_BLOCK_ORIENTATION.isPressed() && item.cycleBlockOrientation(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.orientation_block",  item.blockOrientationLocalizedName(stack));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
@@ -202,21 +202,21 @@ public class ClientEventHandler
             
             else if (ModKeys.PLACEMENT_CYCLE_FILTER_MODE.isPressed() && item.cycleFilterMode(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.filter_mode",  item.getFilterMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
             
             else if(ModKeys.PLACEMENT_CYCLE_SPECIES_HANDLING.isPressed() && item.cycleSpeciesMode(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.species_mode",  item.getSpeciesMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
             
             else if(ModKeys.PLACEMENT_CYCLE_TARGET_MODE.isPressed() && item.cycleTargetMode(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.target_mode",  item.getTargetMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 
@@ -238,7 +238,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_DECREASE_DEPTH.isPressed() && item.changeRegionSize(stack, 0, 0, -1))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -246,7 +246,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_DECREASE_HEIGHT.isPressed() && item.changeRegionSize(stack, 0, -1, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -254,7 +254,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_DECREASE_WIDTH.isPressed() && item.changeRegionSize(stack, -1, 0, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -262,7 +262,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_INCREASE_DEPTH.isPressed() && item.changeRegionSize(stack, 0, 0, 1))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -270,7 +270,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_INCREASE_HEIGHT.isPressed() && item.changeRegionSize(stack, 0, 1, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -278,9 +278,16 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_INCREASE_WIDTH.isPressed() && item.changeRegionSize(stack, 1, 0, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new ConfigurePlacementItem(stack));
+                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
+                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
+            }
+            
+            else if(ModKeys.PLACEMENT_LAUNCH_BUILD.isPressed())
+            {
+                ModMessages.INSTANCE.sendToServer(new PacketSimpleAction(PacketSimpleAction.ActionType.LAUNCH_CURRENT_BUILD));
+                String message  = I18n.translateToLocal("placement.message.launch_build");
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
         }

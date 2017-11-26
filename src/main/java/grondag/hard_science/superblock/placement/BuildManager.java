@@ -5,15 +5,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
 import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
+import grondag.hard_science.simulator.base.DomainManager.Privilege;
+import grondag.hard_science.simulator.base.DomainManager.Domain.DomainUser;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.NullDirtListener;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -40,6 +46,19 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
                 }
             });
     
+    
+    /**
+     * Convenience method - retrieves active build for given player
+     * in the player's current dimension.
+     * Will fail if user doesn't have construction rights in current domain.
+     */
+    @Nullable
+    public static Build getActiveBuildForPlayer(EntityPlayerMP player)
+    {
+        DomainUser user = DomainManager.INSTANCE.getActiveDomain(player).findPlayer(player);
+        return user == null || !user.hasPrivilege(Privilege.CONSTRUCTION_EDIT) ? null : user.getActiveBuild(player.world.provider.getDimension());
+    }
+    
     protected Domain domain;
 
     protected IDirtListener dirtListener = NullDirtListener.INSTANCE;
@@ -55,6 +74,7 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     {
         Build result = new Build(this, dimensionID);
         this.builds.put(result.getId(), result);
+        domain.domainManager().assignedNumbersAuthority().buildIndex().register(result);
         return result;
     }
     

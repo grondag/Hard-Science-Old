@@ -57,8 +57,11 @@ public class VirtualTileEntity extends SuperModelTileEntity
      */
     public void setDomain(Domain domain)
     {
-        this.domainID = domain.getId();
-        this.markDirty();
+        if(domain != null)
+        {
+            this.domainID = domain.getId();
+            this.markDirty();
+        }
     }
     
     /**
@@ -76,11 +79,16 @@ public class VirtualTileEntity extends SuperModelTileEntity
     
     /**
      * See {@link #buildID}
+     * Also sets domain.
      */
     public void setBuild(Build build)
     {
-        this.buildID = build.getId();
-        this.markDirty();
+        if(build != null)
+        {
+            this.buildID = build.getId();
+            this.setDomain(build.getDomain());
+            this.markDirty();
+        }
     }
     
     @SideOnly(Side.CLIENT)

@@ -23,6 +23,8 @@ import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.simulator.base.jobs.Job;
 import grondag.hard_science.simulator.base.jobs.RequestPriority;
 import grondag.hard_science.simulator.base.jobs.tasks.ExcavationTask;
+import grondag.hard_science.superblock.placement.Build;
+import grondag.hard_science.superblock.placement.BuildManager;
 import grondag.hard_science.superblock.placement.FixedRegionBounds;
 import grondag.hard_science.superblock.placement.OffsetPosition;
 import grondag.hard_science.superblock.placement.PlacementHandler;
@@ -43,6 +45,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -426,15 +430,27 @@ public class CuboidBuilder extends VolumetricBuilder
                 /**
                  * Block positions to be checked. 
                  */
-                Iterator<MutableBlockPos> positionIterator = CuboidBuilder.this.region.includedPositions().iterator();
+                private Iterator<MutableBlockPos> positionIterator = CuboidBuilder.this.region.includedPositions().iterator();
 
-                World world = player.world;
+                private World world = player.world;
+                
+                private Build build = BuildManager.getActiveBuildForPlayer(player);
 
+                {
+                    if(build == null)
+                    {
+                        String chatMessage = I18n.translateToLocal("placement.message.no_build");
+                        player.sendMessage(new TextComponentString(chatMessage));
+                    }
+                }
+                
                 @Override
                 public int runInServerTick(int maxOperations)
                 {
+                    if(build == null) return 0;
+                    
                     int opCount = 0;
-                    while(opCount < maxOperations && positionIterator.hasNext())
+                    while(opCount < maxOperations && positionIterator.hasNext() && build.isOpen())
                     {
                         BlockPos pos = positionIterator.next().toImmutable();
                         opCount++;
@@ -453,8 +469,7 @@ public class CuboidBuilder extends VolumetricBuilder
                                 CuboidBuilder.this.placedStack(),
                                 CuboidBuilder.this.isVirtual))
                         {
-                            //TODO: set virtual block build/domain
-                            PlacementHandler.placeVirtualBlock(world, CuboidBuilder.this.outputStack, player, pos);
+                            PlacementHandler.placeVirtualBlock(world, CuboidBuilder.this.outputStack, player, pos, build);
                             opCount += 5;
                         }
 
@@ -465,8 +480,8 @@ public class CuboidBuilder extends VolumetricBuilder
                 @Override
                 public boolean isDone()
                 {
-                    // done if no more positions to check
-                    return !this.positionIterator.hasNext();
+                    // done if no active build or more positions to check
+                    return build == null || !build.isOpen() || !this.positionIterator.hasNext();
                 }};
         }
     }

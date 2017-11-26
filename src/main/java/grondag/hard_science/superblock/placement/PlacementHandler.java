@@ -16,12 +16,14 @@ import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
 import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.virtualblock.VirtualTileEntity;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -311,9 +313,9 @@ public abstract class PlacementHandler
         return true;
     }
     
-    public static void placeVirtualBlock(World world, ItemStack stack, EntityPlayer player, BlockPos pos)
+    public static void placeVirtualBlock(World world, ItemStack stack, EntityPlayer player, BlockPos pos, Build build)
     {
-        if(!player.capabilities.allowEdit) return;
+        if(!player.capabilities.allowEdit || build == null || !build.isOpen()) return;
 
         SoundType soundtype = PlacementItem.getStackSubstance(stack).soundType;
 
@@ -321,11 +323,18 @@ public abstract class PlacementHandler
         if(item == null) return;
 
         IBlockState placedState = item.getPlacementBlockStateFromStack(stack);
-        //targetBlock.getStateFromMeta(placedStack.getMetadata());
         
         if (placeBlockAt(stack, player, world, pos, null, 0, 0, 0, placedState))
         {
+            build.addPosition(pos);
+
             world.playSound(null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+        
+            TileEntity blockTE = world.getTileEntity(pos);
+            if (blockTE != null && blockTE instanceof VirtualTileEntity) 
+            {
+                ((VirtualTileEntity)blockTE).setBuild(build);
+            }
         }
     }
 

@@ -22,7 +22,7 @@ import net.minecraft.util.math.BlockPos;
 /**
  * This is a packet that can be used to update the NBT on the held item of a player.
  */
-public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<ConfigurePlacementItem>
+public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<PacketConfigurePlacementItem>
 {
     
     private int meta;
@@ -43,11 +43,11 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     private BlockPos regionSize;
     
     
-    public ConfigurePlacementItem() 
+    public PacketConfigurePlacementItem() 
     {
     }
     
-    public ConfigurePlacementItem(ItemStack stack) 
+    public PacketConfigurePlacementItem(ItemStack stack) 
     {
         this.meta = stack.getItemDamage();
         
@@ -120,7 +120,7 @@ public class ConfigurePlacementItem extends AbstractPlayerToServerPacket<Configu
     }
    
     @Override
-    protected void handle(ConfigurePlacementItem message, EntityPlayerMP player)
+    protected void handle(PacketConfigurePlacementItem message, EntityPlayerMP player)
     {
         ItemStack heldStack = player.getHeldItem(EnumHand.MAIN_HAND);
         if(PlacementItem.isPlacementItem(heldStack))

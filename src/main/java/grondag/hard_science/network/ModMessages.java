@@ -5,7 +5,8 @@ import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
-import grondag.hard_science.network.client_to_server.ConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketSimpleAction;
+import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
@@ -27,14 +28,14 @@ public class ModMessages
 
     public static void registerNetworkMessages() 
     {
-
-        // Packed handled on Server side, sent from Client
-        INSTANCE.registerMessage(ConfigurePlacementItem.class, ConfigurePlacementItem.class, packetID++, Side.SERVER);
+        // Packets handled on Server side, sent from Client
+        INSTANCE.registerMessage(PacketConfigurePlacementItem.class, PacketConfigurePlacementItem.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketUpdateModifierKeys.class, PacketUpdateModifierKeys.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketDestroyVirtualBlock.class, PacketDestroyVirtualBlock.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketOpenContainerStorageInteraction.class, PacketOpenContainerStorageInteraction.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketMachineStatusAddListener.class, PacketMachineStatusAddListener.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketMachineInteraction.class, PacketMachineInteraction.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketSimpleAction.class, PacketSimpleAction.class, packetID++, Side.SERVER);
         
         // Packets handled on Client side, sent from Server        
         INSTANCE.registerMessage(PacketOpenContainerItemStorageRefresh.class, PacketOpenContainerItemStorageRefresh.class, packetID++, Side.CLIENT);

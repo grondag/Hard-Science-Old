@@ -84,6 +84,7 @@ key.placement_increase_depth=Increase Region Depth
 key.placement_increase_height=Increase Region Height
 key.placement_increase_width=Increase Region Width
 key.placement_undo=Undo Placement Action
+key.placement_launch_build=Launch Current Build
 
 #PLACEMENT
 placement.message.range_normal=Block targeting set to normal Minecraft behavior.
@@ -101,6 +102,10 @@ placement.message.delete_on=Excavation mode is enabled!
 placement.message.delete_off=Excavation mode is disabled.
 placement.message.fixed_region_on=Using fixed selection for region operations.
 placement.message.fixed_region_off=Using dynamic selection for region operations.
+placement.message.launch_build=Closing and launching current build. New build will be created when you place a virtual block.
+placement.message.launch_build_confirm=Launched build %d
+placement.message.launch_build_fail=Unable to launch build - active build in this dimension may be empty or you may not have construction rights in your current domain.
+placement.message.no_build=Unable to place virtual block(s) - make sure you have construction rights in your active domain.
 
 
 placement.preview.none=NONE

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -12,6 +13,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
+import grondag.hard_science.simulator.base.DomainManager.Domain.DomainUser;
 import grondag.hard_science.simulator.base.jobs.JobManager;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
@@ -64,6 +66,9 @@ public class DomainManager implements IPersistenceNode
     public void unload()
     {
         this.assignedNumbersAuthority.clear();
+        this.playerActiveDomains.clear();
+        this.playerIntrinsicDomains.clear();
+        this.defaultDomain = null;
         this.isLoaded = false;
     }
     
@@ -102,7 +107,7 @@ public class DomainManager implements IPersistenceNode
         public Domain getDomain();
     }
     
-    public static enum Priveledge
+    public static enum Privilege
     {
         ADMIN,
         REMOVE_NODE,
@@ -112,7 +117,7 @@ public class DomainManager implements IPersistenceNode
         CONSTRUCTION_EDIT
     }
     
-    private static final BinaryEnumSet<Priveledge> PRIVLEDGE_FLAG_SET = new BinaryEnumSet<Priveledge>(Priveledge.class);
+    private static final BinaryEnumSet<Privilege> PRIVILEGE_FLAG_SET = new BinaryEnumSet<Privilege>(Privilege.class);
     
     public List<Domain> getAllDomains()
     {
@@ -189,10 +194,10 @@ public class DomainManager implements IPersistenceNode
             return this.users.get(userName);
         }
         
-        public boolean hasPriviledge(EntityPlayer player, Priveledge priviledge)
+        public boolean hasPrivilege(EntityPlayer player, Privilege privilege)
         {
             DomainUser user = findPlayer(player);
-            return user == null ? false : user.hasPriveledge(priviledge);
+            return user == null ? false : user.hasPrivilege(privilege);
         }
         
         /** 
@@ -330,22 +335,22 @@ public class DomainManager implements IPersistenceNode
              * Will return true for admin users, regardless of other Privilege grants.
              * Will also return true if security is disabled for the domain.
              */
-            public boolean hasPriveledge(Priveledge p)
+            public boolean hasPrivilege(Privilege p)
             {
                 return  !isSecurityEnabled
-                        || PRIVLEDGE_FLAG_SET.isFlagSetForValue(Priveledge.ADMIN, privilegeFlags)
-                        || PRIVLEDGE_FLAG_SET.isFlagSetForValue(p, privilegeFlags);
+                        || PRIVILEGE_FLAG_SET.isFlagSetForValue(Privilege.ADMIN, privilegeFlags)
+                        || PRIVILEGE_FLAG_SET.isFlagSetForValue(p, privilegeFlags);
             }
             
-            public void grantPriveledge(Priveledge p, boolean hasPriveledge)
+            public void grantPrivilege(Privilege p, boolean hasPrivilege)
             {
-                this.privilegeFlags = PRIVLEDGE_FLAG_SET.setFlagForValue(p, privilegeFlags, hasPriveledge);
+                this.privilegeFlags = PRIVILEGE_FLAG_SET.setFlagForValue(p, privilegeFlags, hasPrivilege);
                 isDirty = true;
             }
             
-            public void setPriveledges(Priveledge... granted)
+            public void setPrivileges(Privilege... granted)
             {
-                this.privilegeFlags = PRIVLEDGE_FLAG_SET.getFlagsForIncludedValues(granted);
+                this.privilegeFlags = PRIVILEGE_FLAG_SET.getFlagsForIncludedValues(granted);
                 isDirty = true;
             }
 
@@ -540,6 +545,7 @@ public class DomainManager implements IPersistenceNode
      * The player's currently active domain. If player
      * has never specified, will be the player's intrinsic domain.
      */
+    @Nonnull
     public Domain getActiveDomain(EntityPlayerMP player)
     {
         Domain result = this.playerActiveDomains.get(player.getName());
@@ -576,6 +582,7 @@ public class DomainManager implements IPersistenceNode
     /**
      * The player's private, default domain. Created if does not already exist.
      */
+    @Nonnull
     public Domain getIntrinsicDomain(EntityPlayerMP player)
     {
         Domain result = this.playerIntrinsicDomains.get(player.getName());
@@ -587,8 +594,11 @@ public class DomainManager implements IPersistenceNode
                 if(result == null)
                 {
                     result = this.createDomain();
+                    result.setSecurityEnabled(true);
                     //TODO: localize
                     result.setName("Default domain for " + player.getName());
+                    DomainUser user = result.addPlayer(player);
+                    user.setPrivileges(Privilege.ADMIN);
                     this.playerIntrinsicDomains.put(player.getName(), result);
                 }
             }
