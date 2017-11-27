@@ -6,7 +6,6 @@ import java.util.function.Predicate;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location.ILocated;
-import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.base.StorageType.ITypedStorage;
 import grondag.hard_science.Log;
 
@@ -60,35 +59,6 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
     public default StorageWithResourceAndQuantity<T> withResourceAndQuantity(IResource<T> resource, long quantity)
     {
         return new StorageWithResourceAndQuantity<T>(this, resource, quantity);
-    }
-    
-    /**
-     * Simple data class for returning store-related inquiry results.
-     */
-    public static class StorageWithQuantity<T extends StorageType<T>>
-    {
-        public final IStorage<T> storage;
-        public final long quantity;
-        
-        public StorageWithQuantity(IStorage<T> storage, long quantity)
-        {
-            this.storage = storage;
-            this.quantity = quantity;
-        }
-    }
-    
-    /**
-     * Simple data class for returning store-related inquiry results.
-     */
-    public static class StorageWithResourceAndQuantity<T extends StorageType<T>> extends StorageWithQuantity<T>
-    {
-        public final IResource<T> resource;
-        
-        public StorageWithResourceAndQuantity(IStorage<T> storage, IResource<T> resource, long quantity)
-        {
-            super(storage, quantity);
-            this.resource = resource;
-        }
     }
     
     /**

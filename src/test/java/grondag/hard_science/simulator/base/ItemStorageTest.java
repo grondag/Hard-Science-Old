@@ -11,8 +11,6 @@ import grondag.hard_science.simulator.base.ItemResource;
 import grondag.hard_science.simulator.base.ItemStorage;
 import grondag.hard_science.simulator.base.ItemStorageManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.IStorage.StorageWithQuantity;
-import grondag.hard_science.simulator.base.IStorage.StorageWithResourceAndQuantity;
 import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
 

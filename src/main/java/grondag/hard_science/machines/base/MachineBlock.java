@@ -7,7 +7,7 @@ import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.Privilege;
+import grondag.hard_science.simulator.base.Privilege;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;

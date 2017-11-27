@@ -16,7 +16,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
+import grondag.hard_science.simulator.base.IDomainMember;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.NullDirtListener;
 import net.minecraft.nbt.NBTBase;

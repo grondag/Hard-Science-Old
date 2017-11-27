@@ -13,6 +13,7 @@ import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefre
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.base.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.base.OpenContainerPacketHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -39,7 +40,7 @@ public class ModMessages
         
         // Packets handled on Client side, sent from Server        
         INSTANCE.registerMessage(PacketOpenContainerItemStorageRefresh.class, PacketOpenContainerItemStorageRefresh.class, packetID++, Side.CLIENT);
-        INSTANCE.registerMessage(ItemResourceWithQuantity.OpenContainerPacketHandler.class, ItemResourceWithQuantity.class, packetID++, Side.CLIENT);
+        INSTANCE.registerMessage(OpenContainerPacketHandler.class, ItemResourceWithQuantity.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(PacketMachineStatusUpdateListener.class, PacketMachineStatusUpdateListener.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(PacketExcavationRenderUpdate.class, PacketExcavationRenderUpdate.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(PacketExcavationRenderRefresh.class, PacketExcavationRenderRefresh.class, packetID++, Side.CLIENT);

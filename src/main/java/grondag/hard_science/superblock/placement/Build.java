@@ -8,7 +8,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.base.AssignedNumber;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
+import grondag.hard_science.simulator.base.IDomainMember;
 import grondag.hard_science.simulator.base.IIdentified;
 import grondag.hard_science.simulator.base.jobs.IWorldTask;
 import grondag.hard_science.simulator.base.jobs.Job;

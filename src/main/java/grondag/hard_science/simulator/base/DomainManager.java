@@ -102,21 +102,6 @@ public class DomainManager implements IPersistenceNode
         return this.defaultDomain;
     }
     
-    public static interface IDomainMember
-    {
-        public Domain getDomain();
-    }
-    
-    public static enum Privilege
-    {
-        ADMIN,
-        REMOVE_NODE,
-        ADD_NODE,
-        ACCESS_INVENTORY,
-        CONSTRUCTION_VIEW,
-        CONSTRUCTION_EDIT
-    }
-    
     private static final BinaryEnumSet<Privilege> PRIVILEGE_FLAG_SET = new BinaryEnumSet<Privilege>(Privilege.class);
     
     public List<Domain> getAllDomains()

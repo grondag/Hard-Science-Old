@@ -10,7 +10,7 @@ import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.base.AssignedNumber;
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
+import grondag.hard_science.simulator.base.IDomainMember;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.virtualblock.ExcavationRenderTracker;
 import grondag.hard_science.simulator.base.IIdentified;

@@ -4,8 +4,8 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Location.ILocated;
+import grondag.hard_science.simulator.base.IDomainMember;
 import grondag.hard_science.simulator.base.IIdentified;
-import grondag.hard_science.simulator.base.DomainManager.IDomainMember;
 
 public interface IMachine extends IIdentified, IDomainMember, ILocated
 {

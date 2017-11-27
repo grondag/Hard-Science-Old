@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import grondag.hard_science.simulator.base.DomainManager;
 import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.Privilege;
 import grondag.hard_science.simulator.base.DomainManager.Domain.DomainUser;
 import net.minecraft.nbt.NBTTagCompound;
 

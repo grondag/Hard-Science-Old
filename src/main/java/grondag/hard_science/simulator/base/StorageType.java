@@ -13,15 +13,6 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public abstract class StorageType<T extends StorageType<T>>
 {
-    public static enum EnumStorageType
-    {
-        NONE,
-        ITEM,
-        FLUID,
-        GAS,
-        POWER
-    }
-    
     public static StorageType<?> fromEnum(EnumStorageType e)
     {
         switch(e)
