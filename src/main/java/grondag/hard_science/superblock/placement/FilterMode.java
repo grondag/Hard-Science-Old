@@ -5,7 +5,7 @@ import grondag.hard_science.library.serialization.IReadWriteNBTImmutable;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.ILocalized;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;

@@ -8,7 +8,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.placement.Build;
-import grondag.hard_science.virtualblock.ExcavationRenderTracker;
+import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;

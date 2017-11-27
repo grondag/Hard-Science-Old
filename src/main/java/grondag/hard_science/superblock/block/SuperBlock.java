@@ -32,7 +32,7 @@ import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
-import grondag.hard_science.virtualblock.VirtualItemBlock;
+import grondag.hard_science.superblock.virtual.VirtualItemBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;

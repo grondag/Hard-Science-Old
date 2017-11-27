@@ -1,12 +1,12 @@
 package grondag.hard_science.init;
 
 import grondag.hard_science.Configurator;
-import grondag.hard_science.feature.volcano.VolcanoTileEntity;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.virtualblock.VirtualTileEntity;
+import grondag.hard_science.superblock.virtual.VirtualTileEntity;
+import grondag.hard_science.volcano.VolcanoTileEntity;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;

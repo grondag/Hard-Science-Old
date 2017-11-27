@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.terrain;
 
-import grondag.hard_science.feature.volcano.lava.LavaTerrainHelper;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

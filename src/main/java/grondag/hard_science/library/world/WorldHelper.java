@@ -2,7 +2,7 @@ package grondag.hard_science.library.world;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;

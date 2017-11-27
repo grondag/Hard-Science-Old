@@ -14,7 +14,7 @@ import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
-import grondag.hard_science.virtualblock.ExcavationRenderTracker;
+import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;

@@ -16,7 +16,7 @@ import grondag.hard_science.simulator.storage.jobs.RequestPriority;
 import grondag.hard_science.simulator.storage.jobs.WorldTaskManager;
 import grondag.hard_science.simulator.storage.jobs.tasks.BlockProcurementTask;
 import grondag.hard_science.simulator.storage.jobs.tasks.PlacementTask;
-import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.superblock.virtual.VirtualBlock;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.block.state.IBlockState;

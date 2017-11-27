@@ -4,8 +4,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
 
-import grondag.hard_science.feature.volcano.lava.LavaBlock;
-import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.domain.Domain;
@@ -16,7 +14,9 @@ import grondag.hard_science.simulator.storage.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
-import grondag.hard_science.virtualblock.ExcavationRenderTracker;
+import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
+import grondag.hard_science.volcano.lava.LavaBlock;
+import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

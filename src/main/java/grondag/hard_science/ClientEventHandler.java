@@ -17,7 +17,7 @@ import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
-import grondag.hard_science.virtualblock.ExcavationRenderManager;
+import grondag.hard_science.superblock.virtual.ExcavationRenderManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiOptions;

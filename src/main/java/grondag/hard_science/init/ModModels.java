@@ -25,10 +25,10 @@ import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePa
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
+import grondag.hard_science.superblock.virtual.VirtualTESR;
+import grondag.hard_science.superblock.virtual.VirtualTileEntityTESR;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
-import grondag.hard_science.virtualblock.VirtualTESR;
-import grondag.hard_science.virtualblock.VirtualTileEntityTESR;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;

@@ -19,7 +19,7 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockTests;
-import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.hard_science.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

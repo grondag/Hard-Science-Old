@@ -2,9 +2,9 @@ package grondag.hard_science.init;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.feature.volcano.lava.EntityLavaBlob;
-import grondag.hard_science.feature.volcano.lava.RenderLavaBlob;
 import grondag.hard_science.player.ModPlayerCaps;
+import grondag.hard_science.volcano.lava.EntityLavaBlob;
+import grondag.hard_science.volcano.lava.RenderLavaBlob;
 import mcjty.theoneprobe.TheOneProbe;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
