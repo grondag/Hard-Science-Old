@@ -20,8 +20,8 @@ import grondag.hard_science.simulator.persistence.IDirtNotifier;
 import grondag.hard_science.simulator.persistence.NullDirtListener;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.resource.StorageType.ITypedStorage;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 

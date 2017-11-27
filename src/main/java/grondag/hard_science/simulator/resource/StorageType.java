@@ -133,10 +133,5 @@ public abstract class StorageType<T extends StorageType<T>>
         }
     }
     
-    public static interface ITypedStorage<V extends StorageType<V>>
-    {
-        public V storageType();
-    }
-    
    
 }

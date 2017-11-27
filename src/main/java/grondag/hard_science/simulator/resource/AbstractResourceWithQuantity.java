@@ -7,7 +7,6 @@ import javax.annotation.Nonnull;
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.resource.StorageType.ITypedStorage;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 import net.minecraft.nbt.NBTTagCompound;

@@ -10,8 +10,8 @@ import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.resource.StorageType.ITypedStorage;
 import grondag.hard_science.Log;
 
 public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILocated, IDomainMember, ISizedContainer, ITypedStorage<T>, IIdentified
