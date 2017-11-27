@@ -13,7 +13,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.PersistenceManager;
 import net.minecraft.nbt.NBTTagCompound;

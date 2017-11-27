@@ -7,11 +7,11 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
-import grondag.hard_science.simulator.base.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.base.IStorage;
-import grondag.hard_science.simulator.base.IStorageListener;
-import grondag.hard_science.simulator.base.StorageType;
-import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.IStorageListener;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 

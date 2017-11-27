@@ -1,8 +1,8 @@
 package grondag.hard_science.virtualblock;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.IIdentified;
+import grondag.hard_science.simulator.domain.Domain;
+import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.placement.Build;
 import net.minecraft.nbt.NBTTagCompound;

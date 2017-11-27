@@ -11,7 +11,7 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
-import grondag.hard_science.simulator.base.DomainManager;
+import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;

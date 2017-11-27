@@ -2,9 +2,9 @@ package grondag.hard_science.simulator.base;
 
 import org.junit.Test;
 
-import grondag.hard_science.simulator.base.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.base.ItemResource;
-import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
 
 public class ResourceWithQuantityTest

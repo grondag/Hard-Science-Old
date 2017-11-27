@@ -5,11 +5,11 @@ package grondag.hard_science.machines.base;
  */
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.base.DomainManager;
-import grondag.hard_science.simulator.base.IStorage;
-import grondag.hard_science.simulator.base.ItemStorage;
-import grondag.hard_science.simulator.base.StorageType;
-import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.ItemStorage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;

@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.base;
 
 import org.junit.Test;
 
-import grondag.hard_science.simulator.base.ItemResource;
+import grondag.hard_science.simulator.resource.ItemResource;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 

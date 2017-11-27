@@ -5,13 +5,15 @@ import java.util.function.Predicate;
 
 import org.junit.Test;
 
-import grondag.hard_science.simulator.base.DomainManager;
-import grondag.hard_science.simulator.base.IResource;
-import grondag.hard_science.simulator.base.ItemResource;
-import grondag.hard_science.simulator.base.ItemStorage;
-import grondag.hard_science.simulator.base.ItemStorageManager;
-import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.domain.Domain;
+import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.ItemStorage;
+import grondag.hard_science.simulator.storage.ItemStorageManager;
+import grondag.hard_science.simulator.storage.StorageWithQuantity;
+import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 import net.minecraft.item.Item;
 
 public class ItemStorageTest

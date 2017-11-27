@@ -4,10 +4,10 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.machines.base.IMachine;
-import grondag.hard_science.simulator.base.AssignedNumber;
-import grondag.hard_science.simulator.base.DomainManager;
-import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.IIdentified;
+import grondag.hard_science.simulator.domain.Domain;
+import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.persistence.AssignedNumber;
+import grondag.hard_science.simulator.persistence.IIdentified;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class Drone implements IMachine, IReadWriteNBT

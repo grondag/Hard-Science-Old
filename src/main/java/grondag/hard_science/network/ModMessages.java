@@ -12,8 +12,8 @@ import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdat
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
-import grondag.hard_science.simulator.base.ItemResourceWithQuantity;
-import grondag.hard_science.simulator.base.OpenContainerPacketHandler;
+import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.storage.OpenContainerPacketHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;

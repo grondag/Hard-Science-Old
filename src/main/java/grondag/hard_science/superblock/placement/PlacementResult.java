@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.placement;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.hard_science.simulator.base.jobs.WorldTaskManager;
+import grondag.hard_science.simulator.storage.jobs.WorldTaskManager;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;

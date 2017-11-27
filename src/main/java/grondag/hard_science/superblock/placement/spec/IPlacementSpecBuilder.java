@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import grondag.hard_science.library.world.IBlockRegion;
-import grondag.hard_science.simulator.base.jobs.IWorldTask;
+import grondag.hard_science.simulator.storage.jobs.IWorldTask;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.client.event.RenderWorldLastEvent;

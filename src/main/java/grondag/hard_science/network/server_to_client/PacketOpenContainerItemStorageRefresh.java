@@ -7,9 +7,9 @@ import java.util.List;
 
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
-import grondag.hard_science.simulator.base.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.base.ItemResourceWithQuantity;
-import grondag.hard_science.simulator.base.StorageType;
+import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.resource.StorageType;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 

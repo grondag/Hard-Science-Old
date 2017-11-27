@@ -2,9 +2,10 @@ package grondag.hard_science.simulator.base;
 
 import org.junit.Test;
 
-import grondag.hard_science.simulator.base.DomainManager;
-import grondag.hard_science.simulator.base.DomainManager.Domain;
-import grondag.hard_science.simulator.base.DomainManager.Domain.DomainUser;
+import grondag.hard_science.simulator.domain.Domain;
+import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.domain.Privilege;
+import grondag.hard_science.simulator.domain.DomainUser;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class DomainManagerTest

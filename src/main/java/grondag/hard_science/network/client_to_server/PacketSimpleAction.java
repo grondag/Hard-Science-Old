@@ -1,7 +1,7 @@
 package grondag.hard_science.network.client_to_server;
 
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
-import grondag.hard_science.simulator.base.jobs.RequestPriority;
+import grondag.hard_science.simulator.storage.jobs.RequestPriority;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.BuildManager;
 import net.minecraft.entity.player.EntityPlayerMP;

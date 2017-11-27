@@ -14,6 +14,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.persistence.IDirtKeeper;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;

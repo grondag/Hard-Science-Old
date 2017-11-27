@@ -17,7 +17,7 @@ import grondag.hard_science.machines.support.ContainerLayout;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachineStorageContainer;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
-import grondag.hard_science.simulator.base.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.inventory.Slot;
 import net.minecraftforge.fml.common.Loader;
