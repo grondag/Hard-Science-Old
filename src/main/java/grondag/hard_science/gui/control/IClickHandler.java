@@ -7,7 +7,7 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction.Action;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -41,7 +41,7 @@ public interface IClickHandler<T>
             
             // if alt/right/middle clicking on same resource, don't count that as a depsit
             if(heldStack != null && !heldStack.isEmpty() && 
-                    !(ItemResource.fromStack(heldStack).equals(target.resource()) && (GuiScreen.isAltKeyDown() || mouseButton > 0)))
+                    !(ItemResourceCache.fromStack(heldStack).equals(target.resource()) && (GuiScreen.isAltKeyDown() || mouseButton > 0)))
             {
                 // putting something in
                 if(mouseButton == GuiUtil.MOUSE_LEFT && !GuiScreen.isAltKeyDown())

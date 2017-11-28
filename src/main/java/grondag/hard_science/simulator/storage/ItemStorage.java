@@ -4,12 +4,12 @@ import grondag.hard_science.init.ModItems;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 /**
  * FIXME: going to have problems with IItemHandler if storages are modified concurrently
  * by simulation during world tick.  Tiles from other mods will expect item stack
@@ -65,13 +65,13 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     {
         if(slot < 0) return stack;
         
-        ItemResource stackResource = ItemResource.fromStack(stack);
+        ItemResource stackResource = ItemResourceCache.fromStack(stack);
 
         if(slot < slots.size())
         {
             // reject if trying to put in a mismatched slot - will force it to add to end slot
             AbstractResourceWithQuantity<StorageTypeStack> rwq = this.slots.get(slot);
-            if(!ItemHandlerHelper.canItemStacksStack(stack, ((ItemResource)rwq.resource()).sampleItemStack())) return stack;
+            if(stackResource != ((ItemResource)rwq.resource())) return stack;
         }
         
         long added = this.add(stackResource.withQuantity(stack.getCount()), simulate);

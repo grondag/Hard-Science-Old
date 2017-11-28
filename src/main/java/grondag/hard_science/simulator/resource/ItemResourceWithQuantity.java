@@ -21,7 +21,7 @@ public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<Stora
     public static ItemResourceWithQuantity fromStack(ItemStack stack)
     {
         if(stack == null || stack.isEmpty()) return (ItemResourceWithQuantity) StorageType.ITEM.emptyResource.withQuantity(0);
-        return new ItemResourceWithQuantity(ItemResource.fromStack(stack), stack.getCount());
+        return new ItemResourceWithQuantity(ItemResourceCache.fromStack(stack), stack.getCount());
     }
     
     @Override

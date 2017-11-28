@@ -113,4 +113,22 @@ public class ItemHelper
   
         return hash;
     }
+    
+    /**
+     * Retrieves item cap NBT - for comparison and storage purposes.
+     */
+    public static NBTTagCompound itemCapsNBT(ItemStack stack)
+    {
+        NBTTagCompound caps;
+        if(stack.areCapsCompatible(ItemStack.EMPTY))
+        {
+            caps = null;
+        }
+        {
+            // See what you make us do, Lex?
+            NBTTagCompound lookForCaps = stack.serializeNBT();
+            caps = lookForCaps.hasKey("ForgeCaps") ? lookForCaps.getCompoundTag("ForgeCaps") : null;
+        }
+        return caps;
+    }
 }

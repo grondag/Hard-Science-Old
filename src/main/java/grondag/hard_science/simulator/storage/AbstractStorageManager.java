@@ -320,6 +320,9 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
             summary.stores.addIfNotPresent(storage);
         }
         
+        
+        //TODO: this part stays
+        
         // update total quantity
         this.used += added;
         if(this.used > this.capacity) 

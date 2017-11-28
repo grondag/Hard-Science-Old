@@ -1,5 +1,6 @@
 package grondag.hard_science.machines;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
@@ -23,6 +24,10 @@ import grondag.hard_science.materials.Matter;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.ItemResourceCache;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.RequestStatus;
 import grondag.hard_science.simulator.storage.jobs.TaskType;
@@ -34,14 +39,9 @@ import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 
 public class BlockFabricatorTileEntity extends MachineContainerTileEntity
@@ -346,6 +346,11 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
         }
     }
     
+    /**
+     * Unlike inputs, outputs need to go into domain-managed storage
+     * so that drones can locate them for pickup. If no domain storage
+     * available, then stall.
+     */
     private void outputFabricatedBlock()
     {
         if(this.isTaskAbandoned()) return;
@@ -356,10 +361,11 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
             return;
         }
         
-        // if we got to this point, we have a fabricated block
-        // put it in an adjacent container if there is one with room
-        // and tag the task with the location of the block so drone can find it
+        // If we got to this point, we have a fabricated block.
+        // Put it in domain storage if there is room for it
+        // and tag the task with the location of the resource so drone can find it
         // otherwise stall
+        if(this.getDomain() == null) return;
         
         ItemStack stack = this.task().procurementTask().getStack().copy();
         stack.setItemDamage(this.getControlState().getMeta());
@@ -367,34 +373,22 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
         PlacementItem.setStackSubstance(stack, this.getControlState().getSubstance());
         PlacementItem.setStackModelState(stack, this.getControlState().getModelState());
         
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            BlockPos checkPos = this.pos.offset(face);
-            TileEntity tileentity = this.world.getTileEntity(checkPos);
-            if (tileentity != null)
-            {
-                IItemHandler itemHandler = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-                if(itemHandler != null)
-                {
-                    PlacementItem.setStackPosition(stack, checkPos);
-                    
-                    ItemStack remaining = ItemHandlerHelper.insertItem(itemHandler, stack.copy(), false);
-                    if(remaining.isEmpty())
-                    {
-                        // this all needs to happen in any case
-                        this.task.procurementTask().setStack(stack);
-                        this.task.complete();
-                        this.task = null;
-                        this.taskID = IIdentified.UNASSIGNED_ID;
-                        this.getControlState().setModelState(null);
-                        this.getControlState().setTargetPos(null);
-                        this.getControlState().setMachineState(MachineState.THINKING);
-                        this.markDirty();
-                        return;
-                    }
-                }
-            }
-        }
+        ItemResource res = ItemResourceCache.fromStack(stack);
+        
+        List<StorageWithQuantity<StorageTypeStack>> locations = this.getDomain().ITEM_STORAGE.findSpaceFor(res, 1);
+        
+        if(locations.isEmpty()) return;
+        
+       // this all needs to happen in any case
+          this.task.procurementTask().setStack(stack);
+          this.task.complete();
+          this.task = null;
+          this.taskID = IIdentified.UNASSIGNED_ID;
+          this.getControlState().setModelState(null);
+          this.getControlState().setTargetPos(null);
+          this.getControlState().setMachineState(MachineState.THINKING);
+          this.markDirty();
+          return;
         
     }
    

@@ -10,6 +10,7 @@ import com.google.common.base.Objects;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.ItemHelper;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -19,9 +20,11 @@ import net.minecraft.network.PacketBuffer;
 /**
  * Identifier for resources.
  * Instances with same inputs will have same hashCode and return true for equals().
+ * Moreover, due to caching, instances with same inputs should always be the same instance.
  */
 public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
 {
+    
     private Item item;
     private NBTTagCompound tag;
     private NBTTagCompound caps;
@@ -51,31 +54,6 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         super(nbt);
     }
    
-    /**
-     * Does NOT keep a reference to the given stack.
-     */
-    public static ItemResource fromStack(ItemStack stack)
-    {
-        if(stack == null || stack.isEmpty()) return (ItemResource) StorageType.ITEM.emptyResource;
-        
-        Item item = stack.getItem();
-        int meta = stack.getMetadata();
-        NBTTagCompound tag = stack.getTagCompound();
-
-        NBTTagCompound caps;
-        if(stack.areCapsCompatible(ItemStack.EMPTY))
-        {
-            caps = null;
-        }
-        {
-            // See what you make us do, Lex?
-            NBTTagCompound lookForCaps = stack.serializeNBT();
-            caps = lookForCaps.hasKey("ForgeCaps") ? lookForCaps.getCompoundTag("ForgeCaps") : null;
-        }
-        
-        return new ItemResource(item, meta, tag, caps);
-    }
-    
     /**
      * Returns a new stack containing one of this item.
      * For performance sake, may be the same instance returned by earlier calls.
@@ -150,19 +128,37 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     @Override
     public boolean isResourceEqual(IResource<StorageTypeStack> other)
     {
+        // This first line should work for matches 
+        // all the time due to cached references.
         if(other == this) return true;
         if(other == null) return false;
         if(other instanceof ItemResource)
         {
             ItemResource resource = (ItemResource)other;
-            return resource.item == this.item
+            boolean result = resource.item == this.item
                 && resource.meta == this.meta
                 && Objects.equal(resource.tag, this.tag)
                 && Objects.equal(resource.caps, this.caps);
+            
+            if(result) 
+                Log.warn("Found matching item resource with different instances. "
+                        + "This is probably a bug with item resource caching.");
+            
+            return result;
         }
         return false;
     }
 
+    public boolean isStackEqual(ItemStack stack)
+    {
+        if(stack == null || stack.isEmpty()) return this == StorageType.ITEM.emptyResource;
+        
+        return stack.getItem() == this.item
+            && stack.getMetadata() == this.meta
+            && Objects.equal(stack.getTagCompound(), this.tag)
+            && Objects.equal(ItemHelper.itemCapsNBT(stack), this.caps);
+    }
+    
     @Override
     public void serializeNBT(@Nonnull NBTTagCompound nbt)
     {
