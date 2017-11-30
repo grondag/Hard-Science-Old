@@ -7,8 +7,8 @@ import grondag.hard_science.simulator.resource.StorageType;
 
 /**
  * For classes that want to receive updates when the contents of an IStorage changes.
- * Doesn't send in/out, just gives the new quantity.
- * This works because IStorage doesn't expose slots or locations, only resource and quantity.
+ * Doesn't send in/out, just gives the new quantityStored.
+ * This works because IStorage doesn't expose slots or locations, only resource and quantityStored.
  * Update does identify which storage is calling, in case a listener subscribes to more than one.
  */
 public interface IStorageListener<T extends StorageType<T>>

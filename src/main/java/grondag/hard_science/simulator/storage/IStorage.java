@@ -31,7 +31,7 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
     }
     
      /**
-     * Increases quantity and returns quantity actually added.
+     * Increases quantityStored and returns quantityStored actually added.
      * If simulate==true, will return forecasted result without making changes.
      * Intended to be thread-safe.
      */

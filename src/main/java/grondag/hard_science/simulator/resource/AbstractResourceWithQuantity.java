@@ -100,7 +100,7 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     }
 
     /**
-     * Increases quantity and returns quantity actually added.
+     * Increases quantityStored and returns quantityStored actually added.
      * Intended to be thread-safe.
      */
     public synchronized long add(long howMany)

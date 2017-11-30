@@ -3,12 +3,15 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -47,6 +50,7 @@ public class MachineStorageBlock extends MachineContainerBlock
                 
                 if(store.usedCapacity() == 0) return result;
                 
+                // save client-side display info
                 NBTTagCompound displayTag = result.getOrCreateSubCompound("display");
                     
                 NBTTagList loreTag = new NBTTagList(); 

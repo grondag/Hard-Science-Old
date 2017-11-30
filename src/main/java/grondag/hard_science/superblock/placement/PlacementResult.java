@@ -87,7 +87,16 @@ public class PlacementResult
                     // and no point in leaving the region there once placed.
                     if(item.isFixedRegionEnabled(stackIn)) item.setFixedRegionEnabled(stackIn, false);
                     
-                    WorldTaskManager.enqueue(this.builder.worldTask((EntityPlayerMP)player));
+                    if(item.isVirtual(stackIn))
+                    {
+                        WorldTaskManager.enqueue(this.builder.worldTask((EntityPlayerMP)player));
+                    }
+                    else
+                    {
+                        // non-virtual placement operations happen immediately
+                        // such actions are typically single blocks
+                        this.builder.worldTask((EntityPlayerMP)player).runInServerTick(Integer.MAX_VALUE);
+                    }
                 }
             }
             break;

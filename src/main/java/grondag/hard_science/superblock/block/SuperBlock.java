@@ -764,6 +764,14 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     }
 
     /**
+     * Number of supported meta values for this block.
+     */
+    public int getMetaCount()
+    {
+        return this.metaCount;
+    }
+    
+    /**
      * Usage of meta is overloaded and dependent on other aspects of state, so just storing the raw value.
      */
     @Override

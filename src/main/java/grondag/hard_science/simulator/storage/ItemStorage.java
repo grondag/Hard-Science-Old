@@ -10,6 +10,7 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;
+
 /**
  * FIXME: going to have problems with IItemHandler if storages are modified concurrently
  * by simulation during world tick.  Tiles from other mods will expect item stack

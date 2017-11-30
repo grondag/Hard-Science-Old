@@ -34,6 +34,12 @@ public class PlacementSpecHelper
         
         if(item == null) return null;
         
+        // non-virtual items should always be single block placements
+        if(!item.isVirtual(placedStack))
+        {
+            return new SingleBuilder(placedStack, player, pPos);
+        }
+        
         switch(item.getTargetMode(placedStack))
         {
             // meaning of following three types depends... 

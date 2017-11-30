@@ -66,7 +66,7 @@ public class VolumetricIngredientList
     
     /**
      * Returns zero Item if stack is not an accepted ingredient, or nano liters per item if it us.
-     * Does NOT multiply by quantity in the stack.
+     * Does NOT multiply by quantityStored in the stack.
      */
     public long getNanoLitersPerItem(@Nullable ItemStack target)
     {

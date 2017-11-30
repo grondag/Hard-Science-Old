@@ -1,17 +1,11 @@
 package grondag.hard_science.simulator.storage;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import net.minecraft.nbt.NBTTagCompound;
-/**
- * Tracks all instances and claims of a single resource within a domain.
- * TODO: replace StorageSummary with this class
 
- */
-public abstract class AbstractResourceManager<T extends StorageType<T>> implements IReadWriteNBT
+class StorageResourceManager<T extends StorageType<T>>
 {
     /**
      * Resource this instance manages.
@@ -19,16 +13,16 @@ public abstract class AbstractResourceManager<T extends StorageType<T>> implemen
     public final IResource<T> resource;
     
     /**
-     * Total quantityStored of this resoure within the domain.
+     * Total quantityStored of this resource within the domain.
      */
     private long quantityStored;
     
     /**
      * List of all storage instances in the domain that contain this resource.
      */
-    private final SimpleUnorderedArrayList<IStorage<T>> stores = new SimpleUnorderedArrayList<IStorage<T>>();
+    final SimpleUnorderedArrayList<IStorage<T>> stores = new SimpleUnorderedArrayList<IStorage<T>>();
 
-    public AbstractResourceManager(IResource<T> resource, long quantity, IStorage<T> firstStorage)
+    StorageResourceManager(IResource<T> resource, long quantity, IStorage<T> firstStorage)
     {
         this.resource = resource;
         this.quantityStored = quantity;
@@ -40,7 +34,7 @@ public abstract class AbstractResourceManager<T extends StorageType<T>> implemen
         return this.quantity();
     }
     
-    public synchronized void notifyTaken(IStorage<T> storage, long taken, int claimID)
+    public synchronized void notifyTaken(IStorage<T> storage, long taken)
     {
         if(taken == 0) return;
         
@@ -59,7 +53,7 @@ public abstract class AbstractResourceManager<T extends StorageType<T>> implemen
         }
     }
 
-    public synchronized void notifyAdded(IStorage<T> storage, long added, int claimID)
+    public synchronized void notifyAdded(IStorage<T> storage, long added)
     {
         if(added == 0) return;
 
@@ -68,19 +62,5 @@ public abstract class AbstractResourceManager<T extends StorageType<T>> implemen
         
         // track store for this resource
         this.stores.addIfNotPresent(storage);
-    }
-
-    @Override
-    public void deserializeNBT(NBTTagCompound tag)
-    {
-        this.resource.deserializeNBT(tag);
-        
-    }
-
-    @Override
-    public void serializeNBT(NBTTagCompound tag)
-    {
-        // TODO Auto-generated method stub
-        
     }
 }

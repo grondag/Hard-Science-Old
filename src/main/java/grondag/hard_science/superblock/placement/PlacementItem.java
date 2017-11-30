@@ -15,6 +15,7 @@ import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
@@ -630,12 +631,16 @@ public interface PlacementItem
                 targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
             }
             
-            return targetBlock.getStateFromMeta(stack.getMetadata());
+            int meta = modelState.metaUsage() == MetaUsage.NONE 
+                    ? 0 
+                    : Math.min(targetBlock.getMetaCount() - 1, stack.getMetadata());
+            
+            return targetBlock.getStateFromMeta(meta);
         }
         else if(item instanceof ItemBlock)
         {
             Block targetBlock = (Block)((ItemBlock)stack.getItem()).getBlock();
-            return targetBlock.getStateFromMeta(stack.getMetadata());
+            return targetBlock.getStateFromMeta(Math.min(15, stack.getMetadata()));
         }
         else
         {

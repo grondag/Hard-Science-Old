@@ -10,6 +10,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.ItemStorage;
+import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;
@@ -34,7 +35,13 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     
     private IStorage<StorageType.StorageTypeStack> storage;
     
-    
+    /** 
+     * On deserialization, server contents tag is put here if found.
+     * If we are restoring from item stack, will not find storage ID
+     * and can use this to reconstitue our storage.  Wiped after used
+     * or determined no longer needed.
+     */
+    private NBTTagCompound loadedStorageNBT = null;
     
     private void setStorage(IStorage<StorageType.StorageTypeStack> storage)
     {
@@ -74,9 +81,18 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
             
             if(s == null)
             {
-                Log.error("Unable to read storage info for tile entity @ " + this.pos.toString());
-                Log.error("Storage will be reinitialized and prior contents, if any, will be lost.");
-                Log.error("This may be bug or may be caused by world corruption.");
+                if(this.loadedStorageNBT == null)
+                {
+                    Log.error("Unable to read storage info for tile entity @ " + this.pos.toString());
+                    Log.error("Storage will be reinitialized and prior contents, if any, will be lost.");
+                    Log.error("This may be bug or may be caused by world corruption.");
+                }
+                else
+                {
+                    result = new ItemStorage(this.loadedStorageNBT);
+                    result.setLocation(this.pos, this.world);
+                    this.getDomain().ITEM_STORAGE.addStore(result);
+                }
             }
             else
             {
@@ -84,20 +100,21 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
             }
         }
         
+        this.loadedStorageNBT = null;
+        
         if(result == null)
         {
             result = new ItemStorage(null);
             result.setLocation(pos, world);
             DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.addStore(result);
-            this.markDirty();
             
             //FIXME: remove
-            Log.info("created new storge, id = " + this.storageID);
+            Log.info("created new storage, id = " + result.getId());
         }
         else
         {
             //FIXME: remove
-            Log.info("retrieved storage, id = " + this.storageID);
+            Log.info("retrieved storage, id = " + result.getId());
         }
         return result;
     }
@@ -108,22 +125,37 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     {
         super.onChunkUnload();
         if(this.isRemote()) return;
-        this.setStorage(null);
+        this.storage = null;
     }
     
     @Override
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        this.storageID = getServerTag(compound).getInteger(ModNBTTag.STORAGE_ID);
-        
+        if(!this.world.isRemote)
+        {
+            NBTTagCompound serverTag = getServerTag(compound);
+            this.storageID = serverTag.getInteger(ModNBTTag.STORAGE_ID);
+            this.loadedStorageNBT = serverTag.getCompoundTag(ModNBTTag.STORAGE_CONTENTS);
+        }
     }
 
     @Override
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
-        getServerTag(compound).setInteger(ModNBTTag.STORAGE_ID, this.storageID);
+        
+        if(!this.world.isRemote)
+        {
+            NBTTagCompound serverTag = getServerTag(compound);
+            serverTag.setInteger(ModNBTTag.STORAGE_ID, this.storageID);
+            // save stored items
+            IStorage<StorageTypeStack> store = this.getStorage();
+            if(store != null)
+            {
+                serverTag.setTag(ModNBTTag.STORAGE_CONTENTS, store.serializeNBT());
+            }
+        }
     }
 
     @Override

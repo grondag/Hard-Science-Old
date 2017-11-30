@@ -1,8 +1,8 @@
 package grondag.hard_science.simulator.storage;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.IDirtKeeper;
@@ -38,7 +37,7 @@ import net.minecraft.nbt.NBTTagList;
 public abstract class AbstractStorageManager<T extends StorageType<T>> 
     implements IDirtNotifier, IDirtListener, IDomainMember, ISizedContainer, IReadWriteNBT, ITypedStorage<T>
 {
-    protected final HashMap<IResource<T>, StorageSummary> map = new HashMap<IResource<T>, StorageSummary>();
+    protected final IdentityHashMap<IResource<T>, StorageResourceManager<T>> map = new IdentityHashMap<IResource<T>, StorageResourceManager<T>>();
     protected final HashSet<IStorage<T>> stores = new HashSet<IStorage<T>>();
     protected long capacity = 0;
     protected long used = 0;
@@ -51,20 +50,6 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         this.storageType = storageType;
     }
 
-    private class StorageSummary
-    {
-        private final IResource<T> resource;
-        private long quantity;
-        private final SimpleUnorderedArrayList<IStorage<T>> stores = new SimpleUnorderedArrayList<IStorage<T>>();
-
-        private StorageSummary(IResource<T> resource, long quantity, IStorage<T> firstStorage)
-        {
-            this.resource = resource;
-            this.quantity = quantity;
-            if(firstStorage != null) this.stores.add(firstStorage);
-        }
-    }
-    
     @Override
     public T storageType()
     {
@@ -113,19 +98,19 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     
     public long getQuantityStored(IResource<T> resource)
     {
-        StorageSummary stored = map.get(resource);
-        return stored == null ? 0 : stored.quantity;
+        StorageResourceManager<T> stored = map.get(resource);
+        return stored == null ? 0 : stored.quantity();
     }
     
     public List<AbstractResourceWithQuantity<T>> findQuantity(Predicate<IResource<T>> predicate)
     {
         ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
-        for(StorageSummary entry : map.values())
+        for(StorageResourceManager<T> entry : map.values())
         {
             if(predicate.test(entry.resource))
             {
-                builder.add(entry.resource.withQuantity(entry.quantity));
+                builder.add(entry.resource.withQuantity(entry.quantity()));
             }
         }
         
@@ -136,7 +121,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     {
         ImmutableList.Builder<StorageWithResourceAndQuantity<T>> builder = ImmutableList.builder();
         
-        for(StorageSummary entry : map.values())
+        for(StorageResourceManager<T> entry : map.values())
         {
             if(predicate.test(entry.resource))
             {
@@ -174,7 +159,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     
     public List<StorageWithQuantity<T>> getLocations(IResource<T> resource)
     {
-        StorageSummary summary = map.get(resource);
+        StorageResourceManager<T> summary = map.get(resource);
         
         if(summary == null || summary.stores.isEmpty()) return Collections.emptyList();
 
@@ -269,26 +254,14 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     {
         if(taken == 0) return;
         
-        StorageSummary summary = this.map.get(resource);
+        StorageResourceManager<T> summary = this.map.get(resource);
         if(summary == null)
         {
             Log.warn("Storage manager encounted missing resource on resource removal.  This is a bug.");
             return;
         }
         
-        // update resource qty
-        summary.quantity -= taken;
-        if(summary.quantity < 0)
-        {
-            summary.quantity = 0;
-            Log.warn("Storage manager encounted negative inventory level.  This is a bug.");
-        }
-        
-        // remove storage from list if no longer holding resource
-        if(storage.getQuantityStored(resource) == 0)
-        {
-            summary.stores.removeIfPresent(storage);
-        }
+        summary.notifyTaken(storage, taken);
         
         // update overall qty
         this.used -= taken;
@@ -305,25 +278,18 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     {
         if(added == 0) return;
 
-        StorageSummary summary = this.map.get(resource);
+        StorageResourceManager<T> summary = this.map.get(resource);
         if(summary == null)
         {
-            summary = new StorageSummary(resource, added, storage);
+            summary = new StorageResourceManager<T>(resource, added, storage);
             this.map.put(resource, summary);
         }
         else
         {
-            // update resource qty
-            summary.quantity += added;
-            
-            // track store for this resource
-            summary.stores.addIfNotPresent(storage);
+            summary.notifyAdded(storage, added);
         }
         
-        
-        //TODO: this part stays
-        
-        // update total quantity
+        // update total quantityStored
         this.used += added;
         if(this.used > this.capacity) 
         {
