@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachinePowerSupply;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -52,17 +52,18 @@ public class MachineStorageBlock extends MachineContainerBlock
                     
                 NBTTagList loreTag = new NBTTagList(); 
 
-                List<AbstractResourceWithQuantity<StorageTypeStack>> items = store.find(store.storageType().MATCH_ANY).stream()
-                        .sorted(AbstractResourceWithQuantity.SORT_BY_QTY_DESC).collect(Collectors.toList());
+                List<AbstractResourceDelegate<StorageTypeStack>> items = store.findDelegates(store.storageType().MATCH_ANY)
+                        .stream()
+                        .sorted(AbstractResourceDelegate.SORT_BY_QTY_DESC).collect(Collectors.toList());
 
                 if(!items.isEmpty())
                 {
                     long printedQty = 0;
                     int printedCount = 0;
-                    for(AbstractResourceWithQuantity<StorageTypeStack> item : items)
+                    for(AbstractResourceDelegate<StorageTypeStack> item : items)
                     {
                         loreTag.appendTag(new NBTTagString(item.toString()));
-                        printedQty += item.getQuantity();
+                        printedQty += item.quantity();
                         if(++printedCount == 10)
                         {
                             //FIXME: localize

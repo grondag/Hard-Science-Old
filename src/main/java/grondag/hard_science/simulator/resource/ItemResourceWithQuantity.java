@@ -35,4 +35,10 @@ public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<Stora
     {
         return StorageType.ITEM;
     }
+
+    @Override
+    public AbstractResourceDelegate<StorageTypeStack> toDelegate()
+    {
+        return new ItemResourceDelegate((ItemResource) this.resource(), this.quantity);
+    }
 }

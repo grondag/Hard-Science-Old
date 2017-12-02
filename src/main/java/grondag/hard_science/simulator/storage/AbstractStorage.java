@@ -15,6 +15,7 @@ import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IDirtListener;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -78,6 +79,23 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             if(predicate.test(rwq.resource()))
             {
                 builder.add(rwq.clone());
+            }
+        }
+        
+        return builder.build();
+    }
+    
+    @Override
+    public List<AbstractResourceDelegate<T>> findDelegates(Predicate<IResource<T>> predicate)
+    {
+        ImmutableList.Builder<AbstractResourceDelegate<T>> builder = ImmutableList.builder();
+        
+        for(int i = 0; i < slots.size(); i++)
+        {
+            AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
+            if(predicate.test(rwq.resource()))
+            {
+                builder.add(rwq.toDelegate());
             }
         }
         

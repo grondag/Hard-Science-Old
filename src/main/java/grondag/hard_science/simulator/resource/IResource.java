@@ -11,14 +11,22 @@ package grondag.hard_science.simulator.resource;
  * that each unique resource has exactly one instance.  This is
  * because IResource instance is used as a key in an IdentityHashMap
  * within the storage manager, and more generally because
- * equality operations on some resources (ItemStacks) are expensive.
+ * equality operations on some resources (ItemStacks) are expensive.<p>
+ * 
+ * Client-side references should use a delegate class with same interface
+ * and any client/server communication should use {@link #handle()}
+ * to identify resources involved in a transaction.
  * 
  */
 public interface IResource<V extends StorageType<V>>
 {
     public V storageType();
-    public int computeResourceHashCode();
-    public boolean isResourceEqual(IResource<V> other);
     public String displayName();
-    public AbstractResourceWithQuantity<V> withQuantity(long quantity);       
+    public AbstractResourceWithQuantity<V> withQuantity(long quantity);
+    /**
+     * Transient identifier, assigned at run time to uniquely 
+     * identify resources across client/server and as a an
+     * efficient hash code.
+     */
+    public int handle();
 }

@@ -7,19 +7,14 @@ public abstract class AbstractResource<V extends StorageType<V>> implements IRes
     @Override
     public int hashCode()
     {
-        return this.computeResourceHashCode();
+        return this.handle();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object other)
     {
-        boolean result = false;
-        try
-        {
-            result = this.isResourceEqual((IResource<V>) other);
-        } finally {}
-       
-        return result;
+        return this == other;
     }
+    
+    public abstract AbstractResourceDelegate<V> getDelegate();
 }

@@ -1,18 +1,14 @@
 package grondag.hard_science.simulator.resource;
 
-import java.util.Comparator;
-
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
 
-public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> implements IReadWriteNBT, IMessagePlus, ITypedStorage<V>
+public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> implements IReadWriteNBT, ITypedStorage<V>
 {
     private IResource<V> resource;
     protected long quantity;
@@ -34,6 +30,8 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
         this.deserializeNBT(tag);
     }
     
+    public abstract AbstractResourceDelegate<V> toDelegate();
+    
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
@@ -48,20 +46,6 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
         this.resource = this.storageType().fromNBT(nbt.getCompoundTag(ModNBTTag.RESOURCE_IDENTITY));
     }
 
-    @Override
-    public void fromBytes(PacketBuffer pBuff)
-    {
-        this.quantity = pBuff.readLong();
-        this.resource = this.storageType().fromPacket(pBuff);
-    }
-
-    @Override
-    public void toBytes(PacketBuffer pBuff)
-    {
-        pBuff.writeLong(this.quantity);
-        this.storageType().toPacket(pBuff, this.resource);
-    }
-    
     public IResource<V> resource()
     {
         return this.resource;
@@ -134,77 +118,4 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
         return this.resource.withQuantity(quantity);
     }
     
-    /////////////////////////////////////////
-    // SORTING UTILITIES
-    /////////////////////////////////////////
-    
-    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_NAME_ASC = new Comparator<AbstractResourceWithQuantity<?>>()
-    {
-        @Override
-        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
-        {
-            if(o1 == null)
-            {
-                if(o2 == null) 
-                {
-                    return 0;
-                }
-                return 1;
-            }
-            else if(o2 == null) 
-            {
-                return -1;
-            }
-            
-            String s1 = o1.resource().displayName();
-            String s2 = o2.resource().displayName();
-            return s1.compareTo(s2);
-        }
-    };
-    
-    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_NAME_DESC = new Comparator<AbstractResourceWithQuantity<?>>()
-    {
-        @Override
-        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
-        {
-            return SORT_BY_NAME_ASC.compare(o2, o1);
-        }
-    };
-    
-    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_QTY_ASC = new Comparator<AbstractResourceWithQuantity<?>>()
-    {
-        @Override
-        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
-        {   
-            if(o1 == null)
-            {
-                if(o2 == null) 
-                {
-                    return 0;
-                }
-                return  1;
-            }
-            else if(o2 == null) 
-            {
-                return -1;
-            }
-            int result = Long.compare(o1.getQuantity(), o2.getQuantity());
-            return result == 0 ? SORT_BY_NAME_ASC.compare(o1, o2) : result;
-        }
-    };
-    
-    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_QTY_DESC = new Comparator<AbstractResourceWithQuantity<?>>()
-    {
-        @Override
-        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
-        {
-            return SORT_BY_QTY_ASC.compare(o2, o1);
-        }
-    };
-    
-    //FIXME: localize
-    public static final int SORT_COUNT = 4;
-    public static final String[] SORT_LABELS = {"A-Z", "Z-A", "1-2-3", "3-2-1" };
-    @SuppressWarnings("rawtypes")
-    public static final Comparator[] SORT = { SORT_BY_NAME_ASC, SORT_BY_NAME_DESC, SORT_BY_QTY_ASC, SORT_BY_QTY_DESC };
 }

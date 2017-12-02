@@ -2,19 +2,18 @@ package grondag.hard_science.machines.support;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.concurrency.ConcurrentForwardingList;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.IStorageListener;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -24,14 +23,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class OpenContainerStorageProxy<T extends StorageType<T>> implements IStorageListener<T>
 {    
-    // needs to come *after* the sort declaration, dumbass...
     public static OpenContainerStorageProxy<StorageTypeStack> ITEM_PROXY = new OpenContainerStorageProxy<StorageTypeStack>();
     
     private OpenContainerStorageProxy() {};
 
-    private HashMap<IResource<T>, AbstractResourceWithQuantity<T>> MAP = new HashMap<IResource<T>, AbstractResourceWithQuantity<T>>();
+    private Int2ObjectOpenHashMap<AbstractResourceDelegate<T>> MAP = new Int2ObjectOpenHashMap<AbstractResourceDelegate<T>>();
     
-    public final ConcurrentForwardingList<AbstractResourceWithQuantity<T>> LIST = new ConcurrentForwardingList<AbstractResourceWithQuantity<T>>(Collections.emptyList());
+    public final ConcurrentForwardingList<AbstractResourceDelegate<T>> LIST = new ConcurrentForwardingList<AbstractResourceDelegate<T>>(Collections.emptyList());
     
     private boolean isDirty = false;
     
@@ -50,7 +48,7 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
         if(!this.isDirty) return false;
         
         @SuppressWarnings("unchecked")
-        Comparator<AbstractResourceWithQuantity<?>> sort = AbstractResourceWithQuantity.SORT[this.sortIndex];
+        Comparator<AbstractResourceDelegate<?>> sort = AbstractResourceDelegate.SORT[this.sortIndex];
         
         LIST.setDelegate(ImmutableList.copyOf(MAP.values().stream().sorted(sort).collect(Collectors.toList())));
         
@@ -60,34 +58,34 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
     }
     
     @Override
-    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceWithQuantity<T>> update, long capacity)
+    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceDelegate<T>> update, long capacity)
     {
         this.MAP.clear();
         this.capacity = capacity;
         this.usedCapacity = 0;
-        for(AbstractResourceWithQuantity<T> item : update )
+        for(AbstractResourceDelegate<T> item : update )
         {
-            this.MAP.put(item.resource(), item);
-            this.usedCapacity += item.getQuantity();
+            this.MAP.put(item.handle(), item);
+            this.usedCapacity += item.quantity();
         }
         this.isDirty = true;
         this.refreshListIfNeeded();
     }
 
     @Override
-    public void handleStorageUpdate(IStorage<T> sender, AbstractResourceWithQuantity<T> update)
+    public void handleStorageUpdate(IStorage<T> sender, AbstractResourceDelegate<T> update)
     {
-        AbstractResourceWithQuantity<T> prior = this.MAP.get(update.resource());
-        if(prior != null) this.usedCapacity -= prior.getQuantity();
+        AbstractResourceDelegate<T> prior = this.MAP.get(update.handle());
+        if(prior != null) this.usedCapacity -= prior.quantity();
 
-        if(update.getQuantity() == 0)
+        if(update.quantity() == 0)
         {
-            this.MAP.remove(update.resource());
+            this.MAP.remove(update.handle());
         }
         else
         {
-            this.MAP.put(update.resource(), update);
-            this.usedCapacity += update.getQuantity();
+            this.MAP.put(update.handle(), update);
+            this.usedCapacity += update.quantity();
         }
         this.isDirty = true;
     }

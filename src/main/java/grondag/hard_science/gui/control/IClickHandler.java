@@ -3,11 +3,11 @@ package grondag.hard_science.gui.control;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.library.varia.ItemHelper;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction.Action;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.ItemResourceCache;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -24,14 +24,14 @@ public interface IClickHandler<T>
     public void handleMouseClick(Minecraft mc, int mouseButton, @Nonnull T target);
     public void handleMouseDrag(Minecraft mc, int mouseButton, @Nonnull T target);
     
-    public static class StorageClickHandlerStack implements IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>>
+    public static class StorageClickHandlerStack implements IClickHandler<AbstractResourceDelegate<StorageTypeStack>>
     {
         public static final StorageClickHandlerStack INSTANCE = new StorageClickHandlerStack();
         
         private StorageClickHandlerStack() {}
         
         @Override
-        public void handleMouseClick(Minecraft mc, int mouseButton, @Nonnull AbstractResourceWithQuantity<StorageTypeStack> target)
+        public void handleMouseClick(Minecraft mc, int mouseButton, @Nonnull AbstractResourceDelegate<StorageTypeStack> target)
         {
             Action action = null;
             
@@ -39,9 +39,9 @@ public interface IClickHandler<T>
             
             ItemStack heldStack = mc.player.inventory.getItemStack();
             
-            // if alt/right/middle clicking on same resource, don't count that as a depsit
+            // if alt/right/middle clicking on same resource, don't count that as a deposit
             if(heldStack != null && !heldStack.isEmpty() && 
-                    !(ItemResourceCache.fromStack(heldStack).equals(target.resource()) && (GuiScreen.isAltKeyDown() || mouseButton > 0)))
+                    !(ItemHelper.canStacksCombine(heldStack, target.displayStack()) && (GuiScreen.isAltKeyDown() || mouseButton > 0)))
             {
                 // putting something in
                 if(mouseButton == GuiUtil.MOUSE_LEFT && !GuiScreen.isAltKeyDown())
@@ -69,11 +69,11 @@ public interface IClickHandler<T>
                 }
             }
             
-            if(action != null) ModMessages.INSTANCE.sendToServer(new PacketOpenContainerStorageInteraction(action, target.resource()));
+            if(action != null) ModMessages.INSTANCE.sendToServer(new PacketOpenContainerStorageInteraction(action, target));
         }
 
         @Override
-        public void handleMouseDrag(Minecraft mc, int mouseButton, @Nonnull AbstractResourceWithQuantity<StorageTypeStack> target)
+        public void handleMouseDrag(Minecraft mc, int mouseButton, @Nonnull AbstractResourceDelegate<StorageTypeStack> target)
         {
             // doesn't seem like a useful interaction
         }

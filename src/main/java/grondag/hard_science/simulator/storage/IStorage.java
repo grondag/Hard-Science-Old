@@ -8,6 +8,7 @@ import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
@@ -56,6 +57,11 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
      */
     List<AbstractResourceWithQuantity<T>> find(Predicate<IResource<T>> predicate);
   
+    /**
+     * Just like {@link #find(Predicate)} but returns delegates instead.
+     */
+    List<AbstractResourceDelegate<T>> findDelegates(Predicate<IResource<T>> predicate);
+    
     public default StorageWithQuantity<T> withQuantity(long quantity)
     {
         return new StorageWithQuantity<T>(this, quantity);
@@ -86,7 +92,7 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
             clearClosedListeners();
             
             this.listeners().addIfNotPresent(listener);
-            listener.handleStorageRefresh(this, this.find(this.storageType().MATCH_ANY), this.getCapacity());
+            listener.handleStorageRefresh(this, this.findDelegates(this.storageType().MATCH_ANY), this.getCapacity());
         }
     }
 
@@ -136,7 +142,7 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
             //FIXME: remove
             Log.info(String.format("refreshing %d listeners for storage %d", listeners.size(), this.getId()));
             
-            List<AbstractResourceWithQuantity<T>> refresh = this.find(this.storageType().MATCH_ANY);
+            List<AbstractResourceDelegate<T>> refresh = this.findDelegates(this.storageType().MATCH_ANY);
             for(Object listener : listeners.toArray())
             {
                 IStorageListener<T> l = (IStorageListener<T>)listener;
@@ -166,6 +172,8 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
         //FIXME: remove
         Log.info(String.format("updating %d listeners for storage %d", listeners.size(), this.getId()));
 
+        AbstractResourceDelegate<T> delegate = update.toDelegate();
+        
         for(Object listener : listeners.toArray())
         {
             @SuppressWarnings("unchecked")
@@ -179,7 +187,7 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
             }
             else
             {
-                l.handleStorageUpdate(this, update);
+                l.handleStorageUpdate(this, delegate);
             }
         }
     }

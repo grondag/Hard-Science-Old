@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.storage;
 
 import java.util.List;
 
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType;
 
 /**
@@ -17,13 +17,13 @@ public interface IStorageListener<T extends StorageType<T>>
      * Sends entire contents of the storage.
      * Will be called after listener subscribes, or if there are mass updates afterwards.
      */
-    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceWithQuantity<T>> update, long capacity);
+    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceDelegate<T>> update, long capacity);
 
     /**
      * Sends updates since last refresh. Quantity replaces whatever was before.
      * Quantity 0 means item no longer present.
      */
-    void handleStorageUpdate(IStorage<T> sender, AbstractResourceWithQuantity<T> update);
+    void handleStorageUpdate(IStorage<T> sender, AbstractResourceDelegate<T> update);
     
     
     /**

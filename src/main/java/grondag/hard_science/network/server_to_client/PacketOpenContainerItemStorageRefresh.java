@@ -7,8 +7,8 @@ import java.util.List;
 
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
+import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -19,14 +19,14 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class PacketOpenContainerItemStorageRefresh extends AbstractServerToPlayerPacket<PacketOpenContainerItemStorageRefresh>
 {
     
-    private List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items;
+    private List<AbstractResourceDelegate<StorageType.StorageTypeStack>> items;
     private long capacity;
     
-    public List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items() { return this.items; };
+    public List<AbstractResourceDelegate<StorageType.StorageTypeStack>> items() { return this.items; };
     
     public PacketOpenContainerItemStorageRefresh() {};
     
-    public PacketOpenContainerItemStorageRefresh(List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items, long capacity) 
+    public PacketOpenContainerItemStorageRefresh(List<AbstractResourceDelegate<StorageType.StorageTypeStack>> items, long capacity) 
     {
         this.items = items;
         this.capacity = capacity;
@@ -43,10 +43,10 @@ public class PacketOpenContainerItemStorageRefresh extends AbstractServerToPlaye
         }
         else
         {
-            this.items = new ArrayList<AbstractResourceWithQuantity<StorageType.StorageTypeStack>>(count);
+            this.items = new ArrayList<AbstractResourceDelegate<StorageType.StorageTypeStack>>(count);
             for(int i = 0; i < count; i++)
             {
-                ItemResourceWithQuantity item = new ItemResourceWithQuantity();
+                ItemResourceDelegate item = new ItemResourceDelegate();
                 item.fromBytes(pBuff);
                 this.items.add(item);
             }

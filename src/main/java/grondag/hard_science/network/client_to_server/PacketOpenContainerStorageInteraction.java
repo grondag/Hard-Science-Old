@@ -6,8 +6,8 @@ import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineContainerTileEntity;
 import grondag.hard_science.machines.base.MachineStorageTileEntity;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.EnumStorageType;
-import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -53,9 +53,9 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     
     private Action action;
     private StorageType<?> storageType;
-    private IResource<?> target;
+    private AbstractResourceDelegate<?> target;
     
-    public PacketOpenContainerStorageInteraction(@Nonnull Action action, @Nonnull IResource<?> target)
+    public PacketOpenContainerStorageInteraction(@Nonnull Action action, @Nonnull AbstractResourceDelegate<?> target)
     {
         this.action = action;
         this.target = target;
@@ -77,7 +77,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     {
         pBuff.writeEnumValue(this.action);
         pBuff.writeByte(this.storageType.ordinal);
-        this.storageType.toPacket(pBuff, this.target);
+        this.target.toBytes(pBuff);
     }
 
     public Action getAction()
@@ -90,7 +90,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         return this.storageType;
     }
     
-    public IResource<?> getTarget()
+    public AbstractResourceDelegate<?> getTarget()
     {
         return target;
     }
@@ -106,8 +106,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
 
         if(storage.storageType() != StorageType.ITEM) return;
         
-        ItemResource targetResource = (ItemResource) message.target;
-        if(targetResource == null) targetResource = (ItemResource) StorageType.ITEM.emptyResource;
+        ItemResource targetResource = ItemResource.byHandle(message.target.handle());
         
         switch(message.action)
         {
@@ -180,7 +179,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         if(howMany == 0) return;
         int toMove = (int) storage.takeUpTo(targetResource, howMany, false);
         if(toMove == 0) return;
-        ItemStack newStack = targetResource.sampleItemStack().copy();
+        ItemStack newStack = targetResource.sampleItemStack();
         newStack.setCount(toMove);
         player.inventory.addItemStackToInventory(newStack);
         if(!newStack.isEmpty())
@@ -201,7 +200,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         if(heldStack != null && !heldStack.isEmpty())
         {
             ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(heldStack);
-            boolean heldStackMatchesTarget = targetResource.isResourceEqual(heldResource.resource());
+            boolean heldStackMatchesTarget = targetResource.handle() == heldResource.resource().handle();
             if(!heldStackMatchesTarget) return;
             if(heldStack.getCount() >= heldStack.getMaxStackSize()) return;
             int toAdd = (int) storage.takeUpTo(targetResource, howMany, false);

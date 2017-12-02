@@ -17,7 +17,7 @@ import grondag.hard_science.machines.support.ContainerLayout;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachineStorageContainer;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.inventory.Slot;
 import net.minecraftforge.fml.common.Loader;
@@ -104,7 +104,7 @@ public class GuiSmartChest extends AbstractContainerGui<SmartChestTileEntity>
         Button butt = new Button(BUTTON_ID_SORT, 
                 this.guiLeft + this.xSize - 40 - this.layout.externalMargin, this.guiTop + this.layout.externalMargin - 2, 
                 40, this.fontRenderer.FONT_HEIGHT + 2,
-                AbstractResourceWithQuantity.SORT_LABELS[OpenContainerStorageProxy.ITEM_PROXY.getSortIndex()]);
+                AbstractResourceDelegate.SORT_LABELS[OpenContainerStorageProxy.ITEM_PROXY.getSortIndex()]);
         butt.textColor = 0xFF444444;
         this.addButton(butt);
         
@@ -182,8 +182,8 @@ public class GuiSmartChest extends AbstractContainerGui<SmartChestTileEntity>
         if(button.id == BUTTON_ID_SORT)
         {
             int nextSortIndex = OpenContainerStorageProxy.ITEM_PROXY.getSortIndex() + 1;
-            if(nextSortIndex >= AbstractResourceWithQuantity.SORT_COUNT) nextSortIndex = 0;
-            button.displayString = AbstractResourceWithQuantity.SORT_LABELS[nextSortIndex];
+            if(nextSortIndex >= AbstractResourceDelegate.SORT_COUNT) nextSortIndex = 0;
+            button.displayString = AbstractResourceDelegate.SORT_LABELS[nextSortIndex];
             OpenContainerStorageProxy.ITEM_PROXY.setSortIndex(nextSortIndex);
             OpenContainerStorageProxy.ITEM_PROXY.refreshListIfNeeded();
         }

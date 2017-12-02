@@ -21,7 +21,7 @@ public class ItemResourceKey //implements IMessagePlus, IReadWriteNBT
     
     ItemResourceKey(ItemStack stack)
     {
-        this.stack = stack.copy();
+        this.stack = stack;
 
         // needed so hashes match
         if(this.stack != null && !this.stack.isEmpty()) this.stack.setCount(1);

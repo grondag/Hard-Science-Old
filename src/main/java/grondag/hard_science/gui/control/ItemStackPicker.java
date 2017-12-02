@@ -6,9 +6,8 @@ import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
+import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -21,14 +20,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<StorageTypeStack>>
+public class ItemStackPicker extends TabBar<AbstractResourceDelegate<StorageTypeStack>>
 {
     protected final FontRenderer fontRenderer;
     
-    protected final IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>> clickHandler;
+    protected final IClickHandler<AbstractResourceDelegate<StorageTypeStack>> clickHandler;
     
-    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer,  
-                IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>> clickHandler)
+    public ItemStackPicker(List<AbstractResourceDelegate<StorageTypeStack>> items, FontRenderer fontRenderer,  
+                IClickHandler<AbstractResourceDelegate<StorageTypeStack>> clickHandler)
     {
         super(items);
         this.fontRenderer = fontRenderer;
@@ -70,18 +69,18 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
 
 
     @Override
-    protected void drawItem(AbstractResourceWithQuantity<StorageTypeStack> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
+    protected void drawItem(AbstractResourceDelegate<StorageTypeStack> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
         int x = (int)left;
         int y = (int)top;
         
-        ItemStack stack = ((ItemResource)item.resource()).sampleItemStack();
+        ItemStack stack = item.displayStack();
         GlStateManager.enableLighting();
-        itemRender.renderItemAndEffectIntoGUI(((ItemResource)item.resource()).sampleItemStack(), x, y);
+        itemRender.renderItemAndEffectIntoGUI(stack, x, y);
         itemRender.renderItemOverlayIntoGUI(mc.fontRenderer, stack, x, y, "");
         
         // itemRender doesn't clean this up, messes up highlight boxes
-        this.drawQuantity(item.getQuantity(), x, y);
+        this.drawQuantity(item.quantity(), x, y);
      }
     
     protected void drawQuantity(long qty, int left, int top)
@@ -147,16 +146,16 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
         }
     }
     
-    private AbstractResourceWithQuantity<StorageTypeStack> resourceForClickHandler()
+    private AbstractResourceDelegate<StorageTypeStack> resourceForClickHandler()
     {
-        AbstractResourceWithQuantity<StorageTypeStack> res = this.get(currentMouseIndex);
-        return res == null ? StorageType.ITEM.emptyResource.withQuantity(0) : res;
+        AbstractResourceDelegate<StorageTypeStack> res = this.get(currentMouseIndex);
+        return res == null ? ItemResourceDelegate.EMPTY : res;
     }
 
     @Override
-    protected void drawToolTip(AbstractResourceWithQuantity<StorageTypeStack> item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    protected void drawToolTip(AbstractResourceDelegate<StorageTypeStack> item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        renderContext.drawToolTip(((ItemResource)item.resource()).sampleItemStack(), mouseX, mouseY);
+        renderContext.drawToolTip(item.displayStack(), mouseX, mouseY);
         
     }
 }

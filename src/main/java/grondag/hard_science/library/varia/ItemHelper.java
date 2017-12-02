@@ -57,7 +57,7 @@ public class ItemHelper
     /**
      * True if item stacks can stack with each other - does not check for stack limit
      */
-    public static boolean canStacksCombine(TestItemStack stack1, TestItemStack stack2)
+    public static boolean canStacksCombine(ItemStack stack1, ItemStack stack2)
     //public static boolean canStacksCombine(ItemStack stack1, ItemStack stack2)
     {
         if (stack1.getItem() != stack2.getItem())

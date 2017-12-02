@@ -1,11 +1,9 @@
 package grondag.hard_science.simulator.resource;
 
-import java.io.IOException;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.Log;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -60,9 +58,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public abstract NBTTagCompound toNBT(IResource<T> resource);
     
     @Nullable
-    public abstract IResource<T> fromPacket(PacketBuffer pBuff);
-    
-    public abstract void toPacket(PacketBuffer pBuff, IResource<?> resource);
+    public abstract AbstractResourceDelegate<T> fromPacket(PacketBuffer pBuff);
     
     @Nullable
     public abstract AbstractResourceWithQuantity<T> fromNBTWithQty(NBTTagCompound nbt);
@@ -89,15 +85,9 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeNone> fromPacket(PacketBuffer pBuff)
+        public AbstractResourceDelegate<StorageTypeNone> fromPacket(PacketBuffer pBuff)
         {
             return null;
-        }
-
-        @Override
-        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
-        {
-            
         }
 
         @Override
@@ -135,24 +125,11 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeStack> fromPacket(PacketBuffer pBuff)
+        public AbstractResourceDelegate<StorageTypeStack> fromPacket(PacketBuffer pBuff)
         {
-            try
-            {
-                return ItemResourceCache.fromStack(pBuff.readItemStack());
-            }
-            catch (IOException e)
-            {
-                Log.warn("Unable to read Item Resource from packet buffer");
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
-        {
-            pBuff.writeItemStack(((ItemResource)resource).sampleItemStack());
+            ItemResourceDelegate result = new ItemResourceDelegate();
+            result.fromBytes(pBuff);
+            return result;
         }
 
         @Override
@@ -185,17 +162,10 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeFluid> fromPacket(PacketBuffer pBuff)
+        public AbstractResourceDelegate<StorageTypeFluid> fromPacket(PacketBuffer pBuff)
         {
             // TODO Auto-generated method stub
             return null;
-        }
-
-        @Override
-        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
-        {
-            // TODO Auto-generated method stub
-            
         }
 
         @Override
@@ -229,17 +199,10 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeGas> fromPacket(PacketBuffer pBuff)
+        public AbstractResourceDelegate<StorageTypeGas> fromPacket(PacketBuffer pBuff)
         {
             // TODO Auto-generated method stub
             return null;
-        }
-
-        @Override
-        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
-        {
-            // TODO Auto-generated method stub
-            
         }
 
         @Override
@@ -277,20 +240,11 @@ public abstract class StorageType<T extends StorageType<T>>
 
 
         @Override
-        public IResource<StorageTypePower> fromPacket(PacketBuffer pBuff)
+        public AbstractResourceDelegate<StorageTypePower> fromPacket(PacketBuffer pBuff)
         {
             // TODO Auto-generated method stub
             return null;
         }
-
-
-        @Override
-        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
-        {
-            // TODO Auto-generated method stub
-            
-        }
-
 
         @Override
         public AbstractResourceWithQuantity<StorageTypePower> fromNBTWithQty(NBTTagCompound nbt)

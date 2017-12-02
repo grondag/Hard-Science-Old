@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
@@ -51,13 +51,13 @@ public abstract class OpenContainerStorageListener<T extends StorageType<T>> imp
         }
 
         @Override
-        public void handleStorageRefresh(IStorage<StorageTypeStack> sender, List<AbstractResourceWithQuantity<StorageTypeStack>> update, long capacity)
+        public void handleStorageRefresh(IStorage<StorageTypeStack> sender, List<AbstractResourceDelegate<StorageTypeStack>> update, long capacity)
         {
             ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(update, capacity), player);
         }
 
         @Override
-        public void handleStorageUpdate(IStorage<StorageTypeStack> sender, AbstractResourceWithQuantity<StorageTypeStack> update)
+        public void handleStorageUpdate(IStorage<StorageTypeStack> sender, AbstractResourceDelegate<StorageTypeStack> update)
         {
             ModMessages.INSTANCE.sendTo(update, player);
         }

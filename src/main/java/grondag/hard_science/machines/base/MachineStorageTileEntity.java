@@ -12,8 +12,6 @@ import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.ItemStorage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.items.IItemHandler;
 
 /**

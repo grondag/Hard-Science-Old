@@ -1,11 +1,13 @@
 package grondag.hard_science.simulator.resource;
 
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.annotation.Nullable;
 
 import com.google.common.base.Objects;
 
-import grondag.hard_science.Log;
+import grondag.hard_science.library.concurrency.SimpleConcurrentList;
 import grondag.hard_science.library.varia.ItemHelper;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
@@ -19,12 +21,21 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
 {
+    private static AtomicInteger nextHandle = new AtomicInteger(0);
+    private static final SimpleConcurrentList<ItemResource> ALL_ITEM_RESOURCES = SimpleConcurrentList.create(null);
+    public static ItemResource byHandle(int handle)
+    {
+        if(handle < 0 || handle >= ALL_ITEM_RESOURCES.size()) 
+            return ItemResourceCache.fromStack(ItemStack.EMPTY);
+        
+        return ALL_ITEM_RESOURCES.get(handle);
+    }
     
+    private final int handle = nextHandle.getAndIncrement();
     private Item item;
     private NBTTagCompound tag;
     private NBTTagCompound caps;
     private int meta;
-    private int hash = -1;
     
     // lazy instantiate and cache
     private ItemStack stack;
@@ -40,12 +51,12 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         this.tag = tag;
         this.caps = caps;
         this.stack = null;
+        ALL_ITEM_RESOURCES.add(this);
     }
     
     /**
      * Returns a new stack containing one of this item.
-     * For performance sake, may be the same instance returned by earlier calls.
-     */
+     * Will always be a new instance/copy.     */
     public ItemStack sampleItemStack()
     {
         ItemStack stack = this.stack;
@@ -55,7 +66,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
             if(this.tag != null) stack.setTagCompound(this.tag);
             this.stack = stack;
         }
-        return stack;
+        return stack.copy();
     }
     
     public Item getItem()
@@ -85,58 +96,6 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         return StorageType.ITEM;
     }
 
-    @Override
-    public int computeResourceHashCode()
-    {
-        int h = this.hash;
-        if(h == -1)
-        {
-            h = this.item == null ? 0 : this.item.hashCode();
-            
-            if(this.tag != null)
-            {
-                h = h * 7919 + this.tag.hashCode();
-            }
-            
-            if(this.caps != null)
-            {
-                h = h * 7919 + this.caps.hashCode();
-            }
-            
-            if(this.meta != 0) 
-            {
-                h = h * 7919 + this.meta;
-            }
-            
-            this.hash = h;
-        }
-        return h;
-    }
-
-    @Override
-    public boolean isResourceEqual(IResource<StorageTypeStack> other)
-    {
-        // This first line should work for matches 
-        // all the time due to cached references.
-        if(other == this) return true;
-        if(other == null) return false;
-        if(other instanceof ItemResource)
-        {
-            ItemResource resource = (ItemResource)other;
-            boolean result = resource.item == this.item
-                && resource.meta == this.meta
-                && Objects.equal(resource.tag, this.tag)
-                && Objects.equal(resource.caps, this.caps);
-            
-            if(result) 
-                Log.warn("Found matching item resource with different instances. "
-                        + "This is probably a bug with item resource caching.");
-            
-            return result;
-        }
-        return false;
-    }
-
     public boolean isStackEqual(ItemStack stack)
     {
         if(stack == null || stack.isEmpty()) return this == StorageType.ITEM.emptyResource;
@@ -150,7 +109,9 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     @Override
     public String displayName()
     {
-        return this.sampleItemStack().getDisplayName();
+        return this.stack == null 
+                ? this.sampleItemStack().getDisplayName()
+                : this.stack.getDisplayName();
     }
 
     @Override
@@ -163,5 +124,17 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     public String toString()
     {
         return this.displayName();
+    }
+
+    @Override
+    public int handle()
+    {
+        return this.handle;
+    }
+
+    @Override
+    public AbstractResourceDelegate<StorageTypeStack> getDelegate()
+    {
+        return null;
     }
 }
