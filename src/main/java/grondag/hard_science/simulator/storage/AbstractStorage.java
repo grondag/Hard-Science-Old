@@ -204,7 +204,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
                 NBTTagCompound subTag = nbtContents.getCompoundTagAt(i);
                 if(subTag != null)
                 {
-                    AbstractResourceWithQuantity<T> rwq = sType.makeResource(subTag).withQuantity(1);
+                    AbstractResourceWithQuantity<T> rwq = sType.fromNBT(subTag).withQuantity(1);
                     rwq.deserializeNBT(subTag);
                     this.add(rwq, false);
                 }

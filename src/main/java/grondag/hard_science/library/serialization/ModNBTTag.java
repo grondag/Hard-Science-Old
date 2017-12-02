@@ -22,10 +22,6 @@ public class ModNBTTag
     public final static String DOMAIN_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_SECURITY_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_USERS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String ITEM_RESOURCE_ITEM = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String ITEM_RESOURCE_META = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String ITEM_RESOURCE_STACK_CAPS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String ITEM_RESOURCE_STACK_TAG = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String LAVA_ADD_EVENTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String LAVA_CELLS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String LAVA_PARTICLE_AMOUNT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -52,6 +48,7 @@ public class ModNBTTag
     public final static String PLACEMENT_REGION_ORIENTATION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_SPECIES_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String RESOURCE_QUANTITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String RESOURCE_IDENTITY= "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SERVER_SIDE_ONLY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SIMULATION_LAST_TICK = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SIMULATION_WORLD_TICK_OFFSET = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

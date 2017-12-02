@@ -14,7 +14,7 @@ import net.minecraft.network.PacketBuffer;
 
 public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> implements IReadWriteNBT, IMessagePlus, ITypedStorage<V>
 {
-    private final IResource<V> resource;
+    private IResource<V> resource;
     protected long quantity;
      
     public AbstractResourceWithQuantity(@Nonnull IResource<V> resource, long quantity)
@@ -26,13 +26,18 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     // needed for IMessage support
     public AbstractResourceWithQuantity()
     {
-        this.resource = this.storageType().makeResource(null);
+        this.resource = this.storageType().fromNBT(null);
+    }
+    
+    public AbstractResourceWithQuantity(NBTTagCompound tag)
+    {
+        this.deserializeNBT(tag);
     }
     
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        this.resource.serializeNBT(tag);
+        tag.setTag(ModNBTTag.RESOURCE_IDENTITY, this.storageType().toNBT(this.resource));
         tag.setLong(ModNBTTag.RESOURCE_QUANTITY, this.quantity);
     }
 
@@ -40,21 +45,21 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     public void deserializeNBT(NBTTagCompound nbt)
     {
         this.quantity = nbt.getLong(ModNBTTag.RESOURCE_QUANTITY);
-        this.resource.deserializeNBT(nbt);
+        this.resource = this.storageType().fromNBT(nbt.getCompoundTag(ModNBTTag.RESOURCE_IDENTITY));
     }
 
     @Override
     public void fromBytes(PacketBuffer pBuff)
     {
         this.quantity = pBuff.readLong();
-        this.resource.fromBytes(pBuff);
+        this.resource = this.storageType().fromPacket(pBuff);
     }
 
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
         pBuff.writeLong(this.quantity);
-        this.resource.toBytes(pBuff);
+        this.storageType().toPacket(pBuff, this.resource);
     }
     
     public IResource<V> resource()

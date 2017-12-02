@@ -10,9 +10,10 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.ItemStorage;
-import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.items.IItemHandler;
 
 /**
@@ -75,28 +76,17 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     {
         IStorage<StorageTypeStack> result = null;
         
-        if(this.storageID >= 0)
+        if(this.storageID > 0)
         {
-            IStorage<?> s = (this.storageID == 0) ? null : DomainManager.INSTANCE.assignedNumbersAuthority().storageIndex().get(this.storageID);
-            
-            if(s == null)
+            result = (IStorage<StorageTypeStack>) DomainManager.INSTANCE.assignedNumbersAuthority().storageIndex().get(this.storageID);
+        }
+        
+        if(result == null)
+        {
+            if(this.loadedStorageNBT != null && !this.loadedStorageNBT.hasNoTags())
             {
-                if(this.loadedStorageNBT == null)
-                {
-                    Log.error("Unable to read storage info for tile entity @ " + this.pos.toString());
-                    Log.error("Storage will be reinitialized and prior contents, if any, will be lost.");
-                    Log.error("This may be bug or may be caused by world corruption.");
-                }
-                else
-                {
-                    result = new ItemStorage(this.loadedStorageNBT);
-                    result.setLocation(this.pos, this.world);
-                    this.getDomain().ITEM_STORAGE.addStore(result);
-                }
-            }
-            else
-            {
-                result = (IStorage<StorageTypeStack>) s;
+                result = new ItemStorage(this.loadedStorageNBT);
+                result.setLocation(this.pos, this.world);
             }
         }
         
@@ -132,11 +122,13 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        if(!this.world.isRemote)
+        
+        // can't rely on world here, because won't be set yet on reload
+        if(!this.isRemote())
         {
             NBTTagCompound serverTag = getServerTag(compound);
             this.storageID = serverTag.getInteger(ModNBTTag.STORAGE_ID);
-            this.loadedStorageNBT = serverTag.getCompoundTag(ModNBTTag.STORAGE_CONTENTS);
+            this.loadedStorageNBT = serverTag.getCompoundTag(ModNBTTag.STORAGE_CONTENTS).copy();
         }
     }
 
@@ -168,6 +160,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         //FIXME: handle duplication via pickblock in create mode
         if(store != null)
         {
+            //FIXME: is necessary? Does getStorage always do this already?
             DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.addStore(this.getStorage());
 
             //FIXME: remove

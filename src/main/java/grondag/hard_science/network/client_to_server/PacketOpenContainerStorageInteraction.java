@@ -69,8 +69,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     {
         this.action = pBuff.readEnumValue(Action.class);
         this.storageType = StorageType.fromEnum(EnumStorageType.values()[pBuff.readByte()]);
-        this.target = this.storageType.makeResource(null);
-        target.fromBytes(pBuff);
+        this.target = this.storageType.fromPacket(pBuff);
     }
 
     @Override
@@ -78,7 +77,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     {
         pBuff.writeEnumValue(this.action);
         pBuff.writeByte(this.storageType.ordinal);
-        this.target.toBytes(pBuff);
+        this.storageType.toPacket(pBuff, this.target);
     }
 
     public Action getAction()
@@ -181,7 +180,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         if(howMany == 0) return;
         int toMove = (int) storage.takeUpTo(targetResource, howMany, false);
         if(toMove == 0) return;
-        ItemStack newStack = targetResource.sampleItemStack();
+        ItemStack newStack = targetResource.sampleItemStack().copy();
         newStack.setCount(toMove);
         player.inventory.addItemStackToInventory(newStack);
         if(!newStack.isEmpty())

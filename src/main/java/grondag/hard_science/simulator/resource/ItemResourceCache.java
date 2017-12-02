@@ -216,12 +216,12 @@ public class ItemResourceCache
                 else
                 {
                     // out of room in list, upgrade to hash set
-                    HashMap<ItemStackKey, ItemResource> map = new HashMap<ItemStackKey, ItemResource>();
+                    HashMap<ItemResourceKey, ItemResource> map = new HashMap<ItemResourceKey, ItemResource>();
                     for(ItemResource res : list)
                     {
-                        map.put(new ItemStackKey(res.sampleItemStack()), res);
+                        map.put(new ItemResourceKey(res.sampleItemStack()), res);
                     }
-                    map.put(new ItemStackKey(newRes.sampleItemStack()), newRes);
+                    map.put(new ItemResourceKey(newRes.sampleItemStack()), newRes);
                     this.reference = map;
                 }
                 return newRes;
@@ -230,9 +230,9 @@ public class ItemResourceCache
             {
                 // 9 or more, so using hash map
                 @SuppressWarnings("unchecked")
-                HashMap<ItemStackKey, ItemResource> map = (HashMap<ItemStackKey, ItemResource>) this.reference;
+                HashMap<ItemResourceKey, ItemResource> map = (HashMap<ItemResourceKey, ItemResource>) this.reference;
                 
-                ItemStackKey key = new ItemStackKey(stack);
+                ItemResourceKey key = new ItemResourceKey(stack);
                 ItemResource res = map.get(key);
                 if(res == null)
                 {
@@ -248,69 +248,6 @@ public class ItemResourceCache
     public static void clear()
     {
         items = new MetaResourceMap[size];
-    }
-    
-    /**
-     * For use in hash map.
-     * Distinguishes between ItemResources
-     * with different NBT 
-     */
-    private static class ItemStackKey
-    {
-        private final ItemStack stack;
-        private int hash = -1;
-        
-        private ItemStackKey(ItemStack stack)
-        {
-            this.stack = stack.copy();
-
-            // needed so hashes match
-            if(this.stack != null && !this.stack.isEmpty()) this.stack.setCount(1);
-        }
-
-        @Override
-        public int hashCode()
-        {
-            if(this.hash == -1)
-            {
-                if(this.stack == null || this.stack.isEmpty())
-                {
-                    this.hash = 0;
-                }
-                else
-                {
-                    this.hash = this.stack.serializeNBT().hashCode();
-                }
-            }
-            return this.hash;
-        }
-
-        @Override
-        public boolean equals(Object obj)
-        {
-            if(obj == null || !(obj instanceof ItemStackKey)) return false;
-         
-            ItemStackKey otherKey = (ItemStackKey)obj;
-            
-            NBTTagCompound thisTag = this.stack.getTagCompound();
-            NBTTagCompound otherTag = otherKey.stack.getTagCompound();
-            
-            if(thisTag == null)
-            {
-                if(otherTag != null) return false;
-            }
-            else
-            {
-                if(!thisTag.equals(otherTag)) return false;
-            }
-            
-            if(!this.stack.areCapsCompatible(otherKey.stack)) return false;
-            
-            // do these last because should always match for items in same map
-            return this.stack.getItem() == otherKey.stack.getItem()
-                    && this.stack.getMetadata() == otherKey.stack.getMetadata();
-        }
-        
     }
     
     /**

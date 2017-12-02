@@ -54,13 +54,13 @@ public class ItemResourceTest
         assert !r2a.equals(r2b);
         assert r2a.hashCode() != r2b.hashCode();
         
-        NBTTagCompound save = r2a.serializeNBT();
-        
-        // would not normally be used this way!
-        r2b.deserializeNBT(save);
-        
-        assert r2a.equals(r2b);
-        assert r2a.hashCode() == r2b.hashCode();
+//        NBTTagCompound save = r2a.storageType().toNBT(r2a);
+//        
+//        // would not normally be used this way!
+//        r2b = (ItemResource) r2b.storageType().fromNBT(save);
+//        
+//        assert r2a.equals(r2b);
+//        assert r2a.hashCode() == r2b.hashCode();
     }
 
 }

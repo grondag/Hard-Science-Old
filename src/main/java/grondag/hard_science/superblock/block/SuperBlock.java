@@ -897,7 +897,9 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
 
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return this.getSubItems().get(this.damageDropped(state));
+        ItemStack result = this.getSubItems().get(this.damageDropped(state));
+        // important to copy here - otherwise end up updating instance held in block
+        return result == null ? ItemStack.EMPTY : result.copy();
     }
 
     @Override

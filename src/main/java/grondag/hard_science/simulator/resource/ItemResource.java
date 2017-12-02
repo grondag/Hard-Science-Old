@@ -1,21 +1,16 @@
 package grondag.hard_science.simulator.resource;
 
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Objects;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.ItemHelper;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
 
 /**
  * Identifier for resources.
@@ -35,7 +30,8 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     private ItemStack stack;
     
     /** 
-     * This version is mainly for unit testing.
+     * NEVER USE DIRECTLY EXCEPT FOR UNIT TESTING.
+     * Use cached instances from ItemResourceCache.
      */
     public ItemResource(Item item, int meta, NBTTagCompound tag, NBTTagCompound caps)
     {
@@ -46,14 +42,6 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         this.stack = null;
     }
     
-    /**
-     * Use this for resources saved via {@link #serializeNBT()}
-     */
-    public ItemResource(@Nullable NBTTagCompound nbt)
-    {
-        super(nbt);
-    }
-   
     /**
      * Returns a new stack containing one of this item.
      * For performance sake, may be the same instance returned by earlier calls.
@@ -157,64 +145,6 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
             && stack.getMetadata() == this.meta
             && Objects.equal(stack.getTagCompound(), this.tag)
             && Objects.equal(ItemHelper.itemCapsNBT(stack), this.caps);
-    }
-    
-    @Override
-    public void serializeNBT(@Nonnull NBTTagCompound nbt)
-    {
-        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_ITEM, Item.getIdFromItem(this.item));
-        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_META, this.meta);
-        if(this.tag != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG, this.tag);
-        if(this.caps != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS, this.caps);
-    }
-
-    @Override
-    public void deserializeNBT(@Nonnull NBTTagCompound nbt)
-    {
-        this.item = Item.getItemById(nbt.getInteger(ModNBTTag.ITEM_RESOURCE_ITEM));
-        this.meta = nbt.getInteger(ModNBTTag.ITEM_RESOURCE_META);
-        this.tag = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_TAG) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG) : null;
-        this.caps = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_CAPS) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS) : null;
-        this.hash = -1;
-        this.stack = null;
-    }
-
-    @Override
-    public void fromBytes(PacketBuffer buf)
-    {
-        this.item = Item.getItemById(buf.readInt());
-        this.meta = buf.readInt();
-        try
-        {
-            this.tag = buf.readCompoundTag();
-        }
-        catch (IOException e)
-        {
-            Log.warn("Error reading storage packet");
-            e.printStackTrace();
-            this.tag = null;
-        }
-        try
-        {
-            this.caps = buf.readCompoundTag();
-        }
-        catch (IOException e)
-        {
-            Log.warn("Error reading storage packet");
-            e.printStackTrace();
-            this.caps = null;
-        }
-        this.hash = -1;
-        this.stack = null;
-    }
-
-    @Override
-    public void toBytes(PacketBuffer buf)
-    {
-        buf.writeInt(Item.getIdFromItem(this.item));
-        buf.writeInt(this.meta);
-        buf.writeCompoundTag(this.tag);
-        buf.writeCompoundTag(this.caps);
     }
     
     @Override

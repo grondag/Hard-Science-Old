@@ -1,7 +1,5 @@
 package grondag.hard_science.simulator.resource;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 
 /** 
  * A resource is something that can be produced and consumed.
@@ -16,7 +14,7 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
  * equality operations on some resources (ItemStacks) are expensive.
  * 
  */
-public interface IResource<V extends StorageType<V>> extends IReadWriteNBT, IMessagePlus
+public interface IResource<V extends StorageType<V>>
 {
     public V storageType();
     public int computeResourceHashCode();

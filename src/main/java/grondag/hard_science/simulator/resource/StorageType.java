@@ -1,10 +1,14 @@
 package grondag.hard_science.simulator.resource;
 
+import java.io.IOException;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Log;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 
 
 /**
@@ -36,11 +40,12 @@ public abstract class StorageType<T extends StorageType<T>>
     public final int ordinal;
     public final Predicate<IResource<T>> MATCH_ANY;
     
+    @SuppressWarnings("unchecked")
     private StorageType(EnumStorageType enumType)
     {
         this.enumType = enumType;
         this.ordinal = enumType.ordinal();
-        this.emptyResource = this.makeResource(null);
+        this.emptyResource = (IResource<T>) new ItemResource(ItemStack.EMPTY.getItem(), ItemStack.EMPTY.getMetadata(), null, null);
         this.MATCH_ANY = new Predicate<IResource<T>>()
         {
             @Override
@@ -49,7 +54,16 @@ public abstract class StorageType<T extends StorageType<T>>
     }
     
     @Nullable
-    public abstract IResource<T> makeResource(NBTTagCompound nbt);
+    public abstract IResource<T> fromNBT(NBTTagCompound nbt);
+    
+    @Nullable
+    public abstract NBTTagCompound toNBT(IResource<T> resource);
+    
+    @Nullable
+    public abstract IResource<T> fromPacket(PacketBuffer pBuff);
+    
+    public abstract void toPacket(PacketBuffer pBuff, IResource<?> resource);
+    
     
     /** 
      * Resources that must be consumed as they are produced - storage is not possible.
@@ -60,10 +74,27 @@ public abstract class StorageType<T extends StorageType<T>>
         private StorageTypeNone() {super(EnumStorageType.NONE);}
         
         @Override
-        public IResource<StorageTypeNone> makeResource(NBTTagCompound nbt)
+        public IResource<StorageTypeNone> fromNBT(NBTTagCompound nbt)
         {
-            //TODO
             return null;
+        }
+
+        @Override
+        public NBTTagCompound toNBT(IResource<StorageTypeNone> resource)
+        {
+            return null;
+        }
+
+        @Override
+        public IResource<StorageTypeNone> fromPacket(PacketBuffer pBuff)
+        {
+            return null;
+        }
+
+        @Override
+        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
+        {
+            
         }
     }
     
@@ -76,10 +107,43 @@ public abstract class StorageType<T extends StorageType<T>>
     { 
         private StorageTypeStack() {super(EnumStorageType.ITEM);}
         
+        /**
+         * Note that this expects to get an ItemStack NBT, which
+         * is what ItemResource serialization outputs.
+         */
         @Override
-        public IResource<StorageTypeStack> makeResource(NBTTagCompound nbt) 
+        public IResource<StorageTypeStack> fromNBT(NBTTagCompound nbt) 
         {
-            return new ItemResource(nbt);
+            if(nbt == null) return this.emptyResource;
+            
+            return ItemResourceCache.fromStack(new ItemStack(nbt));
+        }
+
+        @Override
+        public NBTTagCompound toNBT(IResource<StorageTypeStack> resource)
+        {
+            return ((ItemResource)resource).sampleItemStack().serializeNBT();
+        }
+
+        @Override
+        public IResource<StorageTypeStack> fromPacket(PacketBuffer pBuff)
+        {
+            try
+            {
+                return ItemResourceCache.fromStack(pBuff.readItemStack());
+            }
+            catch (IOException e)
+            {
+                Log.warn("Unable to read Item Resource from packet buffer");
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
+        {
+            pBuff.writeItemStack(((ItemResource)resource).sampleItemStack());
         }
     }
             
@@ -92,10 +156,31 @@ public abstract class StorageType<T extends StorageType<T>>
         private StorageTypeFluid() {super(EnumStorageType.FLUID);}
 
         @Override
-        public IResource<StorageTypeFluid> makeResource(NBTTagCompound nbt)
+        public IResource<StorageTypeFluid> fromNBT(NBTTagCompound nbt)
         {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public NBTTagCompound toNBT(IResource<StorageTypeFluid> resource)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public IResource<StorageTypeFluid> fromPacket(PacketBuffer pBuff)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
+        {
+            // TODO Auto-generated method stub
+            
         }
     }
     
@@ -108,10 +193,31 @@ public abstract class StorageType<T extends StorageType<T>>
         private StorageTypeGas() {super(EnumStorageType.GAS);}
     
         @Override
-        public IResource<StorageTypeGas> makeResource(NBTTagCompound nbt)
+        public IResource<StorageTypeGas> fromNBT(NBTTagCompound nbt)
         {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public NBTTagCompound toNBT(IResource<StorageTypeGas> resource)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public IResource<StorageTypeGas> fromPacket(PacketBuffer pBuff)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
+        {
+            // TODO Auto-generated method stub
+            
         }
     }
     
@@ -126,12 +232,35 @@ public abstract class StorageType<T extends StorageType<T>>
        
 
         @Override
-        public IResource<StorageTypePower> makeResource(NBTTagCompound nbt)
+        public IResource<StorageTypePower> fromNBT(NBTTagCompound nbt)
         {
             // TODO Auto-generated method stub
             return null;
         }
+
+
+        @Override
+        public NBTTagCompound toNBT(IResource<StorageTypePower> resource)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+
+        @Override
+        public IResource<StorageTypePower> fromPacket(PacketBuffer pBuff)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+
+        @Override
+        public void toPacket(PacketBuffer pBuff, IResource<?> resource)
+        {
+            // TODO Auto-generated method stub
+            
+        }
     }
-    
    
 }
