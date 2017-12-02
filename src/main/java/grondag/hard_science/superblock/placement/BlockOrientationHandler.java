@@ -159,7 +159,7 @@ public class BlockOrientationHandler
     }
 
     /** handle hit-sensitive placement for stairs, wedges */
-    private static void applyDynamicOrientation(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
+    public static void applyDynamicOrientation(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
         ModelState outputModelState = PlacementItem.getStackModelState(stack);
 

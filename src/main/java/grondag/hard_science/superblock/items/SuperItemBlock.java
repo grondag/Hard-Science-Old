@@ -5,8 +5,10 @@ import javax.annotation.Nullable;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.placement.BlockOrientationHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;
+import grondag.hard_science.superblock.placement.PlacementPosition;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -21,6 +23,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
@@ -166,7 +169,17 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 
        IBlockState placedState = PlacementItem.getPlacementBlockStateFromStackStatically(stackIn);
        
-       if (placeBlockAt(stackIn, playerIn, worldIn, pos, facing, hitX, hitY, hitZ, placedState))
+       /**
+        * Adjust block rotation if supported.
+        */
+       ItemStack placedStack = stackIn.copy();
+       if(!modelState.isStatic())
+       {
+           BlockOrientationHandler.applyDynamicOrientation(placedStack, playerIn, 
+                   new PlacementPosition(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), placedStack));
+       }
+       
+       if (placeBlockAt(placedStack, playerIn, worldIn, pos, facing, hitX, hitY, hitZ, placedState))
        {
            placedState = worldIn.getBlockState(pos);
            SoundType soundtype = placedState.getBlock().getSoundType(placedState, worldIn, pos, playerIn);
