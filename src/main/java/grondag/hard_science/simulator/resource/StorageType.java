@@ -64,6 +64,9 @@ public abstract class StorageType<T extends StorageType<T>>
     
     public abstract void toPacket(PacketBuffer pBuff, IResource<?> resource);
     
+    @Nullable
+    public abstract AbstractResourceWithQuantity<T> fromNBTWithQty(NBTTagCompound nbt);
+    
     
     /** 
      * Resources that must be consumed as they are produced - storage is not possible.
@@ -95,6 +98,12 @@ public abstract class StorageType<T extends StorageType<T>>
         public void toPacket(PacketBuffer pBuff, IResource<?> resource)
         {
             
+        }
+
+        @Override
+        public AbstractResourceWithQuantity<StorageTypeNone> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            return null;
         }
     }
     
@@ -145,6 +154,12 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             pBuff.writeItemStack(((ItemResource)resource).sampleItemStack());
         }
+
+        @Override
+        public AbstractResourceWithQuantity<StorageTypeStack> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            return new ItemResourceWithQuantity(nbt);
+        }
     }
             
     /**
@@ -182,6 +197,13 @@ public abstract class StorageType<T extends StorageType<T>>
             // TODO Auto-generated method stub
             
         }
+
+        @Override
+        public AbstractResourceWithQuantity<StorageTypeFluid> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
     
     /**
@@ -218,6 +240,13 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             // TODO Auto-generated method stub
             
+        }
+
+        @Override
+        public AbstractResourceWithQuantity<StorageTypeGas> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
     
@@ -260,6 +289,14 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             // TODO Auto-generated method stub
             
+        }
+
+
+        @Override
+        public AbstractResourceWithQuantity<StorageTypePower> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
    

@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<StorageType.StorageTypeStack>
 {
@@ -16,6 +17,11 @@ public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<Stora
     public ItemResourceWithQuantity()
     {
         super();
+    }
+    
+    public ItemResourceWithQuantity(NBTTagCompound tag)
+    {
+        super(tag);
     }
     
     public static ItemResourceWithQuantity fromStack(ItemStack stack)
