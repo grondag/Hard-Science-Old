@@ -94,7 +94,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         {
             result = new ItemStorage(null);
             result.setLocation(pos, world);
-            DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.addStore(result);
+            DomainManager.INSTANCE.defaultDomain().itemStorage.addStore(result);
             
             //FIXME: remove
             Log.info("created new storage, id = " + result.getId());
@@ -159,7 +159,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         if(store != null)
         {
             //FIXME: is necessary? Does getStorage always do this already?
-            DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.addStore(this.getStorage());
+            DomainManager.INSTANCE.defaultDomain().itemStorage.addStore(this.getStorage());
 
             //FIXME: remove
             Log.info("reconnect storage id=" + this.storageID);
@@ -170,7 +170,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void disconnect()
     {
         if(this.isRemote()) return;
-        DomainManager.INSTANCE.defaultDomain().ITEM_STORAGE.removeStore(this.storage);
+        DomainManager.INSTANCE.defaultDomain().itemStorage.removeStore(this.storage);
         
         //FIXME: remove
         Log.info("disconnect id=" + this.storageID);

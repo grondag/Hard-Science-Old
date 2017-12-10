@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.resource;
 
-
 /** 
  * A resource is something that can be produced and consumed.
  * Most resources can be stored. (Computation can't.)
@@ -15,10 +14,12 @@ package grondag.hard_science.simulator.resource;
  * 
  * Client-side references should use a delegate class with same interface
  * and any client/server communication should use {@link #handle()}
- * to identify resources involved in a transaction.
+ * to identify resources involved in a transaction.<p>
+ * 
+ * Implements Predicate interface as equality test for self.
  * 
  */
-public interface IResource<V extends StorageType<V>>
+public interface IResource<V extends StorageType<V>> extends IResourcePredicate<V>
 {
     public V storageType();
     public String displayName();
@@ -29,4 +30,16 @@ public interface IResource<V extends StorageType<V>>
      * efficient hash code.
      */
     public int handle();
+    
+    @Override
+    public default boolean test(Object t)
+    {
+        return t.equals(this);
+    }
+    
+    @Override
+    public default boolean isEqualityPredicate()
+    {
+        return true;
+    }
 }

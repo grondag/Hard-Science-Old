@@ -183,7 +183,7 @@ public class CommonEventHandler
                 {
                     for(int i = 0; i < 1; i++)
                     {
-                        ExcavationTask task = (ExcavationTask) domain.JOB_MANAGER.claimReadyWork(TaskType.EXCAVATION, null).get();
+                        ExcavationTask task = (ExcavationTask) domain.jobManager.claimReadyWork(TaskType.EXCAVATION, null).get();
                         if(task == null) break;
                         
                         World world = task.job().world();

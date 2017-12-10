@@ -104,13 +104,30 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     /**
      * Called just before a new job is added to the job manager
      * and when a job is deserialized right before tasks are available to be executed.
-     * Called only 1X in each case.
+     * Called only 1X in each case.<p>
+     * 
+     * Job manager will always be non-null at this point and
+     * any tasks that exist before now will be initialized at 
+     * this point so that they have access to domain objects.<p>
+     * 
+     * Does not call {@link #updateReadyWork(int)} if initialized
+     * tasks are ready but does increment {@link #readyWorkCount}
+     * because job manager will check {@link #hasReadyWork()} right
+     * after this runs.  So no need to notify job manager of ready tasks.
      */
     protected void onLoaded()
     {
         if(this.buildID != IIdentified.UNASSIGNED_ID)
         {
             ExcavationRenderTracker.INSTANCE.add(this);
+        }
+        
+        synchronized(this.tasks)
+        {
+            for(AbstractTask t : tasks)
+            {
+                if(t.initialize(this)) this.readyWorkCount++;
+            }
         }
     }
     
@@ -149,15 +166,24 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
             }
         }
     }
+    
+    /**
+     * Adds task to this job. Task will be initialized 
+     * immediately if job is already in the domain job 
+     * manager. Otherwise will be initialized right 
+     * after this job is added to the domain job manager.
+     */
     public void addTask(AbstractTask task)
     {
         synchronized(this.tasks)
         {
             this.isTaskStatusDirty = true;
             tasks.add(task);
-            if(task.initialize(this))
+            
+            // don't initialize tasks until part of the domain
+            if(this.jobManager != null && this.jobManager != NullJobManager.INSTANCE)
             {
-                this.updateReadyWork(1);
+                if(task.initialize(this)) this.updateReadyWork(1);
             }
         }
         this.setDirty();
@@ -174,7 +200,11 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
                 for(AbstractTask t : tasks)
                 {
                     this.tasks.add(t);
-                    if(t.initialize(this)) readyCount++;
+                    if(this.jobManager != null)
+                    {
+                        // don't initialize tasks until we are part of the domain
+                        if(t.initialize(this)) readyCount++;
+                    }
                 }
                 if(readyCount > 0) this.updateReadyWork(readyCount);
             }
@@ -222,7 +252,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
             this.isTaskStatusDirty = false;
 
             @SuppressWarnings("unused")
-            int abend = 0, active = 0, ready = 0, cancelled = 0, cancel_ip = 0, complete = 0, is_new = 0, waiting = 0;
+            int abend = 0, active = 0, ready = 0, cancelled = 0, complete = 0, is_new = 0, waiting = 0;
             for(AbstractTask t : this.tasks)
             {
                 switch(t.getStatus())
@@ -238,9 +268,6 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
                     break;
                 case CANCELLED:
                     cancelled++;
-                    break;
-                case CANCEL_IN_PROGRESS:
-                    cancel_ip++;
                     break;
                 case COMPLETE:
                     complete++;
@@ -260,36 +287,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
             if(complete + cancelled + abend == tasks.size())
             {
                 // no active tasks
-                
-                if(this.status == RequestStatus.CANCEL_IN_PROGRESS)
-                {
-                    this.setStatus(RequestStatus.CANCELLED);
-                }
-                else
-                {
-                    this.setStatus(abend == 0 ? RequestStatus.COMPLETE : RequestStatus.ABEND);
-                }
-            }
-            // if one or more active tasks and cancel is in progress, result can only be cancel in progress
-            // meaning we continue to wait for the active tasks to end
-            else if(this.status != RequestStatus.CANCEL_IN_PROGRESS)
-            {
-                if(is_new == tasks.size())
-                {
-                    this.setStatus(RequestStatus.NEW);
-                }
-                else if(active > 0)
-                {
-                    this.setStatus(RequestStatus.ACTIVE);
-                }
-                else if(ready > 0)
-                {
-                    this.setStatus(RequestStatus.READY);
-                }
-                else
-                {
-                    this.setStatus(RequestStatus.WAITING);
-                }
+                this.setStatus(abend == 0 ? RequestStatus.COMPLETE : RequestStatus.ABEND);
             }
         }
     }
@@ -334,14 +332,10 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     {
         synchronized(this.tasks)
         {
-            if(this.tasks.isEmpty())
-            {
-                setStatus(RequestStatus.CANCELLED);
-            }
-            else
+            setStatus(RequestStatus.CANCELLED);
+            if(!this.tasks.isEmpty())
             {
                 this.isTaskStatusDirty = true;
-                this.setStatus(RequestStatus.CANCEL_IN_PROGRESS);
                 for(AbstractTask t : this.tasks)
                 {
                     if(!t.isTerminated()) t.cancel();
@@ -391,6 +385,18 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         
     }
 
+    /**
+     * Called after all domain deserialization is complete.  
+     * Hook for tasks to handle actions that may require other objects to be deserialized first.
+     */
+    public void afterDeserialization()
+    {
+        for(AbstractTask t : this.tasks)
+        {
+            t.afterDeserialization();
+        }
+    }
+    
     @Override
     public AssignedNumber idType()
     {

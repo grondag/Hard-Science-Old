@@ -23,6 +23,8 @@ public class DomainManager implements IPersistenceNode
 {  
     public static final DomainManager INSTANCE = new DomainManager();
     
+    private boolean isDeserializationInProgress = false;
+    
     boolean isDirty = false;
     
     private boolean isLoaded = false;
@@ -143,6 +145,8 @@ public class DomainManager implements IPersistenceNode
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
+        this.isDeserializationInProgress = true;
+        
         this.unload();
         
         this.assignedNumbersAuthority.deserializeNBT(tag);
@@ -182,6 +186,7 @@ public class DomainManager implements IPersistenceNode
             }
         }
         
+        this.isDeserializationInProgress = false;
     }
 
     @Override
@@ -302,5 +307,10 @@ public class DomainManager implements IPersistenceNode
             }
         }
         return result;
+    }
+    
+    public boolean isDeserializationInProgress()
+    {
+        return this.isDeserializationInProgress;
     }
 }

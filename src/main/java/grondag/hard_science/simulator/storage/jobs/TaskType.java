@@ -6,8 +6,10 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.storage.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.storage.jobs.tasks.BlockProcurementTask;
+import grondag.hard_science.simulator.storage.jobs.tasks.DeliveryTask;
 import grondag.hard_science.simulator.storage.jobs.tasks.ExcavationTask;
 import grondag.hard_science.simulator.storage.jobs.tasks.PlacementTask;
+import grondag.hard_science.simulator.storage.jobs.tasks.SimpleProcurementTask;
 import net.minecraft.nbt.NBTTagCompound;
 
 public enum TaskType
@@ -16,7 +18,17 @@ public enum TaskType
     EXCAVATION(new Supplier<AbstractTask>() { public AbstractTask get() {return new ExcavationTask(); }}),
     BLOCK_FABRICATION(new Supplier<AbstractTask>() { public AbstractTask get() {return new BlockFabricationTask(); }}),
     PLACEMENT(new Supplier<AbstractTask>() { public AbstractTask get() {return new PlacementTask(); }}),
-    BLOCK_PROCUREMENT(new Supplier<AbstractTask>() { public AbstractTask get() {return new BlockProcurementTask(); }});
+    BLOCK_PROCUREMENT(new Supplier<AbstractTask>() { public AbstractTask get() {return new BlockProcurementTask(); }}), 
+    SIMPLE_PROCUREMENT(new Supplier<AbstractTask>()
+    { 
+        @SuppressWarnings("rawtypes")
+        public AbstractTask get() {return new SimpleProcurementTask(); }
+    }),
+    DELIVERY(new Supplier<AbstractTask>()
+    { 
+        @SuppressWarnings("rawtypes")
+        public AbstractTask get() {return new DeliveryTask(); }
+    });
     
     private final Supplier<AbstractTask> supplier;
     

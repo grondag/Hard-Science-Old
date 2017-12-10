@@ -1,0 +1,125 @@
+package grondag.hard_science.simulator.demand;
+
+import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.IResourcePredicateWithQuantity;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.storage.AbstractStorageManager;
+import grondag.hard_science.simulator.storage.IStorageResourceListener;
+
+public class InventoryProducer<V extends StorageType<V>> 
+    implements IProducer<V>, IStorageResourceListener<V>
+{
+    /**
+     * Broker that is tracking demand for our resource.
+     * If null, means {@link #tearDown()} has run
+     * and we should ignore any incomimng requests.
+     */
+    private SimpleBroker<V> broker;
+    
+    /**
+     * Resource we monitor, derived from broker
+     */
+    private final IResource<V> resource;
+    
+    private final AbstractStorageManager<V> storageManager;
+    
+    /**
+     * True while we are filling demand - means we 
+     * should ignore callbacks to {@link #onAvailabilityChange(IResource, long)} 
+     * from storage system because we are causing them.
+     * Would get into infinite loop otherwise.
+     */
+    private boolean itMe = false;
+    
+    public InventoryProducer(SimpleBroker<V> broker)
+    {
+        this.broker = broker;
+        this.resource = broker.resource();
+        this.storageManager = broker.brokerManager.getDomain().getStorageManager(resource.storageType());
+        storageManager.registerResourceListener(broker.resource(), this);
+    }
+    
+    public synchronized void tearDown()
+    {
+        storageManager.unregisterResourceListener(this.resource, this);
+        this.broker = null;
+    }
+    
+    @Override
+    public void cancelWIP(IProcurementRequest<V> request)
+    {
+        // NOOP because inventory producer does not track WIP
+    }
+
+    @Override
+    public void notifyNewDemand(IBroker<V> broker, IProcurementRequest<V> request)
+    {
+        assert this.broker != null
+                : "Inventory Producer received new demand after tear down.";
+                
+        if(this.storageManager.getQuantityAvailable(this.resource) > 0)
+        {
+            this.fillDemand(request);
+        }
+    }
+
+    /*
+     * Synchronization is to prevent being called on a different thread
+     * from {@link #fillDemand(IProcurementRequest)} so that we can 
+     * reliably ignore callback from storage while we are allocating demand.
+     */
+    private synchronized void fillDemand(IProcurementRequest<V> request)
+    {
+        
+        for( IResourcePredicateWithQuantity<V> demand : request.openDemands())
+        {
+            if(demand.predicate().test(this.resource))
+            {
+                this.itMe = true;
+                long allocated = this.storageManager.changeAllocation(this.resource, demand.getQuantity(), request);
+                this.itMe = false;
+                
+                // found some inventory, so give it to the request
+                if(allocated > 0)
+                {
+                    long claimed = request.startWIP(this.resource, allocated, this);
+                    if(claimed > 0)
+                    {
+                        request.completeWIP(this.resource, claimed, this);
+                    }
+                    
+                    if(claimed < allocated)
+                    {
+                        // unwind if somehow all or part of the request got fulfilled some other way
+                        this.itMe = true;
+                        this.storageManager.changeAllocation(this.resource, claimed - allocated, request);
+                        this.itMe = false;
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    /**
+     * Check for unmet demand we can fill if new inventory is added. <p>
+     * 
+     * Synchronization is to prevent being called on a different thread
+     * from {@link #fillDemand(IProcurementRequest)} so that we can 
+     * reliably ignore callback from storage while we are allocating demand.
+     * 
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void onAvailabilityChange(IResource<V> resource, long availableQuantity)
+    {
+        if(!itMe && availableQuantity > 0 && this.broker != null && !this.broker.requests.isEmpty())
+        {
+            for(IProcurementRequest<V> request : this.broker.requests)
+            {
+                this.fillDemand(request);
+                if(this.storageManager.getQuantityAvailable(this.resource) == 0) break;
+            }
+        }
+    }
+}

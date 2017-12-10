@@ -144,7 +144,7 @@ public class SingleBuilder extends SingleStackBuilder
                         Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
                         if(domain != null)
                         {
-                            domain.JOB_MANAGER.addJob(job);
+                            domain.jobManager.addJob(job);
                         }
                     }
                     return 2;

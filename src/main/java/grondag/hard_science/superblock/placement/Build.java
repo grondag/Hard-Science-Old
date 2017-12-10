@@ -243,7 +243,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
 
             private void complete()
             {
-                buildManager.domain.JOB_MANAGER.addJob(job);
+                buildManager.domain.jobManager.addJob(job);
                 Build.this.jobID = job.getId();
                 buildManager.setDirty();
                 this.isDone = true;

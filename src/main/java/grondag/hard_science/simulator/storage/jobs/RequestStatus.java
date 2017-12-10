@@ -29,11 +29,6 @@ public enum RequestStatus
     CANCELLED(true),
     
     /**
-     * Request cancel has been requested, but Request should still execute to allow for clean up.
-     */
-    CANCEL_IN_PROGRESS(false),
-    
-    /**
      * Sometimes bad things happen to good Requests...
      */
     ABEND(true);

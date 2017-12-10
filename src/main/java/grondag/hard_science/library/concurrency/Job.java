@@ -22,7 +22,7 @@ public abstract class Job
     public abstract int run();
     
     /** 
-     * Submits all batches to the given executor and adds futures to the given list.
+     * Submits all batches to the given SIMULATION_POOL and adds futures to the given list.
      * Return value is the approximate number of things that ran - for performance counting.
      */
     public abstract int executeOn(Executor executor, List<RunnableFuture<Void>> futures);

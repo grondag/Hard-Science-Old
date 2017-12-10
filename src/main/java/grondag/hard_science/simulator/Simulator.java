@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.collect.Lists;
 
 import grondag.hard_science.Configurator;
@@ -54,8 +57,40 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     
     private LavaSimulator lavaSimulator;
     
-	public static ExecutorService executor;
-	private static ExecutorService controlThread;
+    /**
+     * General-purpose thread pool. Use for any simulation-related activity
+     * so long as it doesn't have specific timing or sequencing requirements.
+     */
+	public static final ExecutorService SIMULATION_POOL 
+	    = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+            new ThreadFactory()
+            {
+                private AtomicInteger count = new AtomicInteger(1);
+                @Override
+                public Thread newThread(Runnable r)
+                {
+                    Thread thread = new Thread(r, "Hard Science Simulation Thread -" + count.getAndIncrement());
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            });
+    
+    
+	/**
+	 * For simulation step control - do not use for actual work.
+	 */
+	private static final ExecutorService CONTROL_THREAD = Executors.newSingleThreadExecutor(
+	        new ThreadFactory()
+	        {
+	            private AtomicInteger count = new AtomicInteger(1);
+	            @Override
+	            public Thread newThread(Runnable r)
+	            {
+	                Thread thread = new Thread(r, "Hard Science Simulation Control Thread -" + count.getAndIncrement());
+	                thread.setDaemon(true);
+	                return thread;
+	            }
+	        });
 	
 	private List<ISimulationTickable> tickables = new ArrayList<ISimulationTickable>();
 	
@@ -86,14 +121,6 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
 	 * Updated on server post tick, *after* all world tick events should be submitted.
 	 */
 	private volatile long worldTickOffset = 0; 
-
-    static
-    {
-        // would a bounded backing queue be faster due to cache coherence?
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        controlThread = Executors.newSingleThreadExecutor();
-
-    }
     
   	// Main control
 	public void start()  
@@ -236,7 +263,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                     }
                 }
                 
-                lastTickFuture = controlThread.submit(this.offTickFrame);
+                lastTickFuture = CONTROL_THREAD.submit(this.offTickFrame);
             }
         }
     }

@@ -22,6 +22,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+// TODO: remove after salvaging placement logic
+
 /*
  * Implements the following logic for shapes that are additive: <br>
  * 
@@ -33,6 +35,7 @@ import net.minecraft.world.World;
  * checked there, add to it as in #1.  Otherwise, if the space is empty
  * place a new additive block on the face clicked. 
  */
+@Deprecated
 public class AdditivePlacementHandler extends PlacementHandler
 {
     public static final AdditivePlacementHandler INSTANCE = new AdditivePlacementHandler();

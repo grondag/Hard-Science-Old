@@ -6,11 +6,15 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.IDirtKeeper;
@@ -35,7 +39,8 @@ import net.minecraft.nbt.NBTTagList;
 *Not responsible for optimizing storage.
 */
 public abstract class AbstractStorageManager<T extends StorageType<T>> 
-    implements IDirtNotifier, IDirtListener, IDomainMember, ISizedContainer, IReadWriteNBT, ITypedStorage<T>
+    implements IDirtNotifier, IDirtListener, IDomainMember, 
+               ISizedContainer, IReadWriteNBT, ITypedStorage<T>
 {
     protected final IdentityHashMap<IResource<T>, StorageResourceManager<T>> map = new IdentityHashMap<IResource<T>, StorageResourceManager<T>>();
     protected final HashSet<IStorage<T>> stores = new HashSet<IStorage<T>>();
@@ -45,9 +50,11 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     protected Domain domain;
     protected final T storageType;
     
-    public AbstractStorageManager(T storageType)
+    public AbstractStorageManager(T storageType, Domain domain)
     {
         this.storageType = storageType;
+        this.domain = domain;
+        this.dirtListener = domain == null ? NullDirtListener.INSTANCE : domain.getDirtListener();
     }
 
     @Override
@@ -71,7 +78,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         
         for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
-            this.notifyAdded(store, stack.resource(), stack.getQuantity());
+            this.notifyAdded(store, stack.resource(), stack.getQuantity(), null);
         }
         store.setOwner(this);
         this.setDirty();
@@ -87,7 +94,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         
         for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
-            this.notifyTaken(store, stack.resource(), stack.getQuantity());
+            this.notifyTaken(store, stack.resource(), stack.getQuantity(), null);
         }
         store.setOwner(null);
         this.domain.domainManager().assignedNumbersAuthority().storageIndex().unregister(store);
@@ -99,10 +106,22 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     public long getQuantityStored(IResource<T> resource)
     {
         StorageResourceManager<T> stored = map.get(resource);
-        return stored == null ? 0 : stored.quantity();
+        return stored == null ? 0 : stored.quantityStored();
     }
     
-    public List<AbstractResourceWithQuantity<T>> findQuantity(Predicate<IResource<T>> predicate)
+    public long getQuantityAvailable(IResource<T> resource)
+    {
+        StorageResourceManager<T> stored = map.get(resource);
+        return stored == null ? 0 : stored.quantityAvailable();
+    }
+    
+    public long getQuantityAllocated(IResource<T> resource)
+    {
+        StorageResourceManager<T> stored = map.get(resource);
+        return stored == null ? 0 : stored.quantityAllocated();
+    }
+    
+    public List<AbstractResourceWithQuantity<T>> findQuantityAvailable(Predicate<Object> predicate)
     {
         ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
@@ -110,14 +129,17 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         {
             if(predicate.test(entry.resource))
             {
-                builder.add(entry.resource.withQuantity(entry.quantity()));
+                builder.add(entry.resource.withQuantity(entry.quantityAvailable()));
             }
         }
         
         return builder.build();
     }
     
-    public List<StorageWithResourceAndQuantity<T>> findStorageWithQuantity(Predicate<IResource<T>> predicate)
+    /**
+     * Returns a list of stores that have the given resource with quantity included.
+     */
+    public List<StorageWithResourceAndQuantity<T>> findStorageWithQuantity(Predicate<Object> predicate)
     {
         ImmutableList.Builder<StorageWithResourceAndQuantity<T>> builder = ImmutableList.builder();
         
@@ -125,29 +147,20 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         {
             if(predicate.test(entry.resource))
             {
-                for(int i = entry.stores.size() - 1; i >= 0; i--)
-                {
-                    IStorage<T> store = entry.stores.get(i);
-                    long quantity = store.getQuantityStored(entry.resource);
-                    if(quantity > 0)
-                    {
-                        builder.add(store.withResourceAndQuantity(entry.resource, quantity));
-                    }
-                }
-                
+                entry.addStoragesWithQuantityToBuilder(builder);
             }
         }
         
         return builder.build();
     }
     
-    public List<StorageWithQuantity<T>> findSpaceFor(IResource<T> resource, long quantity)
+    public List<StorageWithQuantity<T>> findSpaceFor(IResource<T> resource, long quantity, @Nullable IProcurementRequest<T> request)
     {
         ImmutableList.Builder<StorageWithQuantity<T>> builder = ImmutableList.builder();
         
         for(IStorage<T> store : this.stores)
         {
-            long space = store.add(resource, quantity, true);
+            long space = store.add(resource, quantity, true, request);
             if(space > 0)
             {
                 builder.add(store.withQuantity(space));
@@ -157,23 +170,19 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         return builder.build();
     }
     
+    /**
+     * Returns all locations where the resource is stored.
+     * Note that the resource may be allocated so the stored
+     * quantities may not be available for use, but allocations
+     * are not stored by location.
+     */
     public List<StorageWithQuantity<T>> getLocations(IResource<T> resource)
     {
         StorageResourceManager<T> summary = map.get(resource);
         
-        if(summary == null || summary.stores.isEmpty()) return Collections.emptyList();
+        if(summary == null || summary.quantityStored() == 0) return Collections.emptyList();
 
-        ImmutableList.Builder<StorageWithQuantity<T>> builder = ImmutableList.builder();
-        for(int i = summary.stores.size() - 1; i >= 0; i--)
-        {
-            IStorage<T> store = summary.stores.get(i);
-            long quantity = store.getQuantityStored(resource);
-            if(quantity > 0)
-            {
-                builder.add(store.withQuantity(quantity));
-            }
-        }
-        return builder.build();
+        return summary.getLocations(resource);
     }
     
     @Override
@@ -226,12 +235,6 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         return this.used;
     }
     
-    public void setDomain(Domain domain)
-    {
-        this.domain = domain;
-        this.dirtListener = domain == null ? null : domain.getDirtListener();
-    }
-    
     @Override
     public Domain getDomain()
     {
@@ -250,43 +253,53 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         this.dirtListener.setDirty();
     }
     
-    public synchronized void notifyTaken(IStorage<T> storage, IResource<T> resource, long taken)
+    /**
+     * Called by storage instances, or by self when a storage is removed.
+     * If request is non-null, then the amount taken reduces any allocation to that request.
+     */
+    public synchronized void notifyTaken(IStorage<T> storage, IResource<T> resource, long taken, @Nullable IProcurementRequest<T> request)
     {
         if(taken == 0) return;
         
         StorageResourceManager<T> summary = this.map.get(resource);
-        if(summary == null)
-        {
-            Log.warn("Storage manager encounted missing resource on resource removal.  This is a bug.");
-            return;
-        }
         
-        summary.notifyTaken(storage, taken);
+        assert summary != null
+            : "Storage manager encounted missing resource on resource removal.";
+        
+        if(summary == null) return;
+        
+        summary.notifyTaken(storage, taken, request);
         
         // update overall qty
         this.used -= taken;
-        if(this.used < 0) 
-        {
-            used = 0;
-            Log.warn("Storage manager encounted negative inventory level.  This is a bug.");
-        }
+        
+        assert used >= 0
+                : "Storage manager encounted negative inventory level.";
+        
+        if(this.used < 0) used = 0;
+        
+        if(summary.isEmpty()) 
+            this.map.remove(resource);
         
         this.setDirty();
     }
 
-    public synchronized void notifyAdded(IStorage<T> storage, IResource<T> resource, long added)
+    /**
+     * If request is non-null, then the amount added is immediately allocated to that request.
+     */
+    public synchronized void notifyAdded(IStorage<T> storage, IResource<T> resource, long added, @Nullable IProcurementRequest<T> request)
     {
         if(added == 0) return;
 
         StorageResourceManager<T> summary = this.map.get(resource);
         if(summary == null)
         {
-            summary = new StorageResourceManager<T>(resource, added, storage);
+            summary = new StorageResourceManager<T>(resource, storage, added, request);
             this.map.put(resource, summary);
         }
         else
         {
-            summary.notifyAdded(storage, added);
+            summary.notifyAdded(storage, added, request);
         }
         
         // update total quantityStored
@@ -311,4 +324,62 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         }
         this.setDirty();
     }
+    
+    /**
+     * Sets allocation for the given request to the provided, non-negative value.
+     * Returns allocation that was actually set.  Will not set negative allocations
+     * and will not set allocation so that total allocated is more the total available.
+     * Provides no notification to the request.
+     */
+    public long setAllocation(
+            @Nonnull IResource<T> resource, 
+            @Nonnull IProcurementRequest<T> request, 
+            long requestedAllocation)
+    {
+        assert requestedAllocation >= 0
+                : "AbstractStorageManager.setAllocation got negative allocation request.";
+        
+        StorageResourceManager<T> stored = map.get(resource);
+        return stored == null ? 0 : stored.setAllocation(request, requestedAllocation);    
+    }
+    
+    /**
+     * Adds delta to the allocation of this resource for the given request.
+     * Return value is the quantity removed or added, which could be different than
+     * amount requested if not enough is available or would reduce allocation below 0.
+     * Total quantity allocated can be different from return value if request already had an allocation.
+     * Provides no notification to the request.
+     */
+    public long changeAllocation(
+            @Nonnull IResource<T> resource,
+            long quantityRequested, 
+            @Nonnull IProcurementRequest<T> request)
+    {        
+        StorageResourceManager<T> stored = map.get(resource);
+        return stored == null ? 0 : stored.changeAllocation(request, quantityRequested);    
+    }
+
+    public synchronized void registerResourceListener(IResource<T> resource, IStorageResourceListener<T> listener)
+    {
+        StorageResourceManager<T> summary = this.map.get(resource);
+        if(summary == null)
+        {
+            summary = new StorageResourceManager<T>(resource, null, 0, null);
+            this.map.put(resource, summary);
+        }
+        summary.registerResourceListener(listener);
+    }
+    
+    public synchronized void unregisterResourceListener(IResource<T> resource, IStorageResourceListener<T> listener)
+    {
+        StorageResourceManager<T> summary = this.map.get(resource);
+        if(summary != null)
+        {
+            summary.unregisterResourceListener(listener);
+            if(summary.isEmpty()) 
+                this.map.remove(resource);
+        }
+    }
+    
+  
 }

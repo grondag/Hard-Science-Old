@@ -388,13 +388,13 @@ public class SimpleLoadingCacheTest
         
         // not really a unit test, so disable unless actually want to run
         
-//        ExecutorService executor;
-//        executor = Executors.newFixedThreadPool(THREAD_COUNT);
+//        ExecutorService SIMULATION_POOL;
+//        SIMULATION_POOL = Executors.newFixedThreadPool(THREAD_COUNT);
 //        
 //        System.out.println("WARM UP RUN");
-//        doTestOuter(executor);
+//        doTestOuter(SIMULATION_POOL);
 //        
 //        System.out.println("TEST RUN");
-//        doTestOuter(executor);
+//        doTestOuter(SIMULATION_POOL);
     }
 }

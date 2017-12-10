@@ -167,7 +167,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         if(heldStack != null && !heldStack.isEmpty())
         {
             ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(heldStack);
-            int added = (int) storage.add(heldResource.resource(), single ? 1 : heldStack.getCount(), false);
+            int added = (int) storage.add(heldResource.resource(), single ? 1 : heldStack.getCount(), false, null);
             if(added > 0) heldStack.shrink(added);
             player.updateHeldItem();
         }
@@ -177,7 +177,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     private void doQuickMove(int howMany, EntityPlayerMP player, ItemResource targetResource, IStorage<StorageTypeStack> storage)
     {
         if(howMany == 0) return;
-        int toMove = (int) storage.takeUpTo(targetResource, howMany, false);
+        int toMove = (int) storage.takeUpTo(targetResource, howMany, false, null);
         if(toMove == 0) return;
         ItemStack newStack = targetResource.sampleItemStack();
         newStack.setCount(toMove);
@@ -203,14 +203,14 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
             boolean heldStackMatchesTarget = targetResource.handle() == heldResource.resource().handle();
             if(!heldStackMatchesTarget) return;
             if(heldStack.getCount() >= heldStack.getMaxStackSize()) return;
-            int toAdd = (int) storage.takeUpTo(targetResource, howMany, false);
+            int toAdd = (int) storage.takeUpTo(targetResource, howMany, false, null);
             if(toAdd == 0) return;
             heldStack.grow(toAdd);
             player.updateHeldItem();
         }
         else
         {
-            int toAdd = (int) storage.takeUpTo(targetResource, howMany, false);
+            int toAdd = (int) storage.takeUpTo(targetResource, howMany, false, null);
             if(toAdd == 0) return;
             ItemStack newStack = targetResource.sampleItemStack();
             newStack.setCount(toAdd);

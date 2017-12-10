@@ -1,13 +1,15 @@
 package grondag.hard_science.simulator.storage.jobs;
 
-import grondag.hard_science.simulator.domain.Domain;
 import net.minecraft.nbt.NBTTagCompound;
 
 /** version of job manager that eats all method calls */
 public class NullJobManager extends JobManager
 {
     public static final NullJobManager INSTANCE = new NullJobManager();
-    private NullJobManager() {}
+    private NullJobManager()
+    {
+        super(null);
+    }
     
     @Override
     public void notifyReadyStatus(Job job)
@@ -38,18 +40,6 @@ public class NullJobManager extends JobManager
     {
         // NOOP
     }
-    
-    @Override
-    public void setDomain(Domain domain)
-    {
-        // NOOP
-    }
-    
-//    @Override
-//    public Domain getDomain()
-//    {
-//        return null;
-//    }
     
     @Override
     protected void setDirty()

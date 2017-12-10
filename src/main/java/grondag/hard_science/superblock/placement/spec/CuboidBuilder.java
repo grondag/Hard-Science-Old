@@ -402,7 +402,7 @@ public class CuboidBuilder extends VolumetricBuilder
                     {
                         // when done, finalize entries list and submit job
                         this.checked.clear();
-                        if(domain != null) domain.JOB_MANAGER.addJob(job);
+                        if(domain != null) domain.jobManager.addJob(job);
                     }
 
                     return opCount;

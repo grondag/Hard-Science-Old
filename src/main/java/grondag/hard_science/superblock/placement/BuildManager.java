@@ -47,6 +47,12 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
             });
     
     
+    public BuildManager(Domain domain)
+    {
+        this.domain = domain;
+        this.dirtListener = domain == null ? NullDirtListener.INSTANCE : domain.getDirtListener();
+    }
+
     /**
      * Convenience method - retrieves active build for given player
      * in the player's current dimension.
@@ -82,12 +88,6 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     public Domain getDomain()
     {
         return this.domain;
-    }
-    
-    public void setDomain(Domain domain)
-    {
-        this.domain = domain;
-        this.dirtListener = domain.getDirtListener();
     }
     
     void setDirty()

@@ -12,6 +12,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IDirtListener;
@@ -103,7 +104,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     }
     
     @Override
-    public synchronized long takeUpTo(IResource<T> resource, long limit, boolean simulate)
+    public synchronized long takeUpTo(IResource<T> resource, long limit, boolean simulate, @Nullable IProcurementRequest<T> request)
     {
         if(limit < 1) return 0;
         
@@ -134,7 +135,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
                 slots.remove(foundIndex);
             }
             
-            if(this.owner != null) this.owner.notifyTaken(this, resource, taken);
+            if(this.owner != null) this.owner.notifyTaken(this, resource, taken, request);
             this.updateListeners(resource.withQuantity(rwq.getQuantity()));
             this.setDirty();
         }
@@ -143,7 +144,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     }
 
     @Override
-    public synchronized long add(IResource<T> resource, long howMany, boolean simulate)
+    public synchronized long add(IResource<T> resource, long howMany, boolean simulate, @Nullable IProcurementRequest<T> request)
     {
         if(howMany < 1 || !this.isResourceAllowed(resource)) return 0;
         
@@ -172,7 +173,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
 
             
             this.used += added;
-            if(this.owner != null) this.owner.notifyAdded(this, resource, added);
+            if(this.owner != null) this.owner.notifyAdded(this, resource, added, request);
             this.updateListeners(resource.withQuantity(newQuantity));
             this.setDirty();
         }
@@ -194,7 +195,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             for(int i = 0; i < slots.size(); i++)
             {
                 AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
-                nbtContents.appendTag(rwq.serializeNBT());
+                nbtContents.appendTag(rwq.toNBT());
             }
             nbt.setTag(ModNBTTag.STORAGE_CONTENTS, nbtContents);
         }
@@ -223,7 +224,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
                 if(subTag != null)
                 {
                     AbstractResourceWithQuantity<T> rwq = sType.fromNBTWithQty(subTag);
-                    this.add(rwq, false);
+                    this.add(rwq, false, null);
                 }
             }   
         }
@@ -299,6 +300,4 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         if(this.owner != null) this.owner.setDirty();
     }
-
- 
 }

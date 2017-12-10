@@ -71,7 +71,7 @@ public class DomainUser implements IReadWriteNBT
             }
             nbt.setIntArray(ModNBTTag.BUILD_ID, buildData);
         }
-        this.domain.ITEM_STORAGE.serializeNBT(nbt);
+        this.domain.itemStorage.serializeNBT(nbt);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class DomainUser implements IReadWriteNBT
             }
         }
                 
-        this.domain.ITEM_STORAGE.deserializeNBT(nbt);
+        this.domain.itemStorage.deserializeNBT(nbt);
     }
     
     /**
@@ -107,7 +107,7 @@ public class DomainUser implements IReadWriteNBT
         Build result = DomainManager.INSTANCE.assignedNumbersAuthority().buildIndex().get(buildID);
         if(result == null || !result.isOpen())
         {
-            result = this.domain.BUILD_MANAGER.newBuild(dimensionID);
+            result = this.domain.buildManager.newBuild(dimensionID);
             this.activeBuilds.put(dimensionID, result.getId());
         }
         return result;

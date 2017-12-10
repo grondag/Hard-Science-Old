@@ -9,10 +9,13 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.demand.BrokerManager;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListenerProvider;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.storage.AbstractStorageManager;
 import grondag.hard_science.simulator.storage.ItemStorageManager;
 import grondag.hard_science.simulator.storage.jobs.JobManager;
 import grondag.hard_science.superblock.placement.BuildManager;
@@ -30,19 +33,21 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     String name;
     boolean isSecurityEnabled;
     
-    public final ItemStorageManager ITEM_STORAGE = new ItemStorageManager();
-    public final JobManager JOB_MANAGER = new JobManager();
-    public final BuildManager BUILD_MANAGER = new BuildManager();
+    public final ItemStorageManager itemStorage;
+    public final JobManager jobManager;
+    public final BuildManager buildManager;
+    public final BrokerManager brokerManager;
     
     private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
     
     // private constructor
     Domain (DomainManager domainManager)
     {
-        this.domainManager = domainManager;
-        ITEM_STORAGE.setDomain(this);
-        JOB_MANAGER.setDomain(this);
-        BUILD_MANAGER.setDomain(this);
+        this.domainManager = domainManager;    
+        this.itemStorage = new ItemStorageManager(this);
+        this.jobManager = new JobManager(this);
+        this.buildManager = new BuildManager(this);
+        this.brokerManager = new BrokerManager(this);
     }
     
     Domain (DomainManager domainManager, NBTTagCompound tag)
@@ -56,6 +61,26 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         return ImmutableList.copyOf(users.values());
     }
     
+    @SuppressWarnings("unchecked")
+    public <V extends StorageType<V>> AbstractStorageManager<V> getStorageManager(StorageType<V> storeType)
+    {
+        switch(storeType.enumType)
+        {
+        case FLUID:
+            return null;
+        case GAS:
+            return null;
+        case ITEM:
+            return (AbstractStorageManager<V>) this.itemStorage;
+            
+        case POWER:
+            return null;
+        case NONE:
+        default:
+            return null;
+        
+        }
+    }
     @Nullable
     public DomainUser findPlayer(EntityPlayer player)
     {
@@ -160,9 +185,9 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         }
         tag.setTag(ModNBTTag.DOMAIN_USERS, nbtUsers);
         
-        tag.setTag(ModNBTTag.DOMAIN_ITEM_STORAGE, this.ITEM_STORAGE.serializeNBT());
-        tag.setTag(ModNBTTag.DOMAIN_JOB_MANAGER, this.JOB_MANAGER.serializeNBT());
-        tag.setTag(ModNBTTag.DOMAIN_BUILD_MANAGER, this.BUILD_MANAGER.serializeNBT());
+        tag.setTag(ModNBTTag.DOMAIN_ITEM_STORAGE, this.itemStorage.serializeNBT());
+        tag.setTag(ModNBTTag.DOMAIN_JOB_MANAGER, this.jobManager.serializeNBT());
+        tag.setTag(ModNBTTag.DOMAIN_BUILD_MANAGER, this.buildManager.serializeNBT());
     }
 
     @Override
@@ -182,9 +207,10 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
             }   
         }
         
-        this.ITEM_STORAGE.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_ITEM_STORAGE));
-        this.JOB_MANAGER.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
-        this.BUILD_MANAGER.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_BUILD_MANAGER));
+        this.itemStorage.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_ITEM_STORAGE));
+        this.jobManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
+        this.buildManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_BUILD_MANAGER));
+        this.jobManager.afterDeserialization();
     }
     
     public DomainManager domainManager()

@@ -38,7 +38,7 @@ public class MachineStorageContainer extends MachineContainer
                 IStorage<StorageType.StorageTypeStack> storage = ((MachineStorageTileEntity)this.te).getStorage();
                 if(storage == null) return ItemStack.EMPTY;
                 
-                int consumed = (int) storage.add(ItemResourceWithQuantity.fromStack(slotStack), false);
+                int consumed = (int) storage.add(ItemResourceWithQuantity.fromStack(slotStack), false, null);
                 if(consumed > 0)
                 {
                     slotStack.shrink(consumed);

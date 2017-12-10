@@ -209,7 +209,7 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
             
             if((tick & 0x1F) == 0x1F)
             {
-                this.setCurrentBacklog(this.getDomain().JOB_MANAGER.getQueueDepth(TaskType.BLOCK_FABRICATION));
+                this.setCurrentBacklog(this.getDomain().jobManager.getQueueDepth(TaskType.BLOCK_FABRICATION));
             }
             
             switch(this.getControlState().getMachineState())
@@ -246,7 +246,7 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
         // find a job
         if(this.taskSearch == null)
         {
-            this.taskSearch = this.getDomain().JOB_MANAGER.claimReadyWork(TaskType.BLOCK_FABRICATION, null);
+            this.taskSearch = this.getDomain().jobManager.claimReadyWork(TaskType.BLOCK_FABRICATION, null);
             return;
         }
         else if(this.taskSearch.isDone())
@@ -375,7 +375,8 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
         
         ItemResource res = ItemResourceCache.fromStack(stack);
         
-        List<StorageWithQuantity<StorageTypeStack>> locations = this.getDomain().ITEM_STORAGE.findSpaceFor(res, 1);
+        //TODO: pass in procurement request
+        List<StorageWithQuantity<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, 1, null);
         
         if(locations.isEmpty()) return;
         

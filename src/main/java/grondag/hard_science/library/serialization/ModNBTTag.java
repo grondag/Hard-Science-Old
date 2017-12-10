@@ -156,4 +156,14 @@ public class ModNBTTag
 
     public static final String PROCUREMENT_TASK_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
+    public static final String TASK_ALLOCATED_QTY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String TASK_REQUESTED_QTY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String RESOURCE_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String RESOURCE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String PREDICATE_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
 }

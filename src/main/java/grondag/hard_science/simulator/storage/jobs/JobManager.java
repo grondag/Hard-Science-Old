@@ -28,7 +28,7 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     /**
      * Should be used for job/task accounting - not for any actual work done by tasks.
      */
-    protected static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
+    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
         new ThreadFactory()
         {
             private AtomicInteger count = new AtomicInteger(1);
@@ -60,6 +60,12 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     @SuppressWarnings("unchecked")
     private final LinkedList<Job>[] backlogJobs = new LinkedList[RequestPriority.values().length];
     
+    public JobManager(Domain domain)
+    {
+        this.domain = domain;
+        this.dirtListener = domain == null ? NullDirtListener.INSTANCE : domain.getDirtListener();
+    }
+
     /**
      * Removes job from backlog, if it is checked there.
      */
@@ -278,6 +284,21 @@ public class JobManager implements IReadWriteNBT, IDomainMember
         }        
     }
 
+    /**
+     * Called after all domain deserialization is complete.  
+     * Hook for tasks to handle actions that may require other objects to be deserialized first.
+     */
+    public void afterDeserialization()
+    {
+        if(!this.jobs.isEmpty())
+        {
+            for(Job j : this.jobs)
+            {
+                j.afterDeserialization();
+            }
+        }    
+    };
+    
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
@@ -293,12 +314,6 @@ public class JobManager implements IReadWriteNBT, IDomainMember
         }        
     }
     
-    public void setDomain(Domain domain)
-    {
-        this.domain = domain;
-        this.dirtListener = domain.getDirtListener();
-    }
-
     @Override
     public Domain getDomain()
     {

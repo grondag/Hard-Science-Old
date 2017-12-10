@@ -32,12 +32,6 @@ public class ExcavationTask extends AbstractPositionedTask
     }
 
     @Override
-    protected synchronized void onTerminated()
-    {
-        super.onTerminated();
-    }
-
-    @Override
     public TaskType requestType()
     {
         return TaskType.EXCAVATION;

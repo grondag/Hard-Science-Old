@@ -2,17 +2,23 @@ package grondag.hard_science.simulator.resource;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 import net.minecraft.nbt.NBTTagCompound;
 
-public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> implements IReadWriteNBT, ITypedStorage<V>
+public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> 
+implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
 {
     private IResource<V> resource;
     protected long quantity;
      
+    @Override
+    public IResourcePredicate<V> predicate()
+    {
+        return this.resource;
+    }
+
     public AbstractResourceWithQuantity(@Nonnull IResource<V> resource, long quantity)
     {
         this.resource = resource;
@@ -27,23 +33,18 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     
     public AbstractResourceWithQuantity(NBTTagCompound tag)
     {
-        this.deserializeNBT(tag);
+        this.quantity = tag.getLong(ModNBTTag.RESOURCE_QUANTITY);
+        this.resource = this.storageType().fromNBT(tag.getCompoundTag(ModNBTTag.RESOURCE_IDENTITY));
     }
     
     public abstract AbstractResourceDelegate<V> toDelegate();
     
-    @Override
-    public void serializeNBT(NBTTagCompound tag)
+    public NBTTagCompound toNBT()
     {
+        NBTTagCompound tag = new NBTTagCompound();
         tag.setTag(ModNBTTag.RESOURCE_IDENTITY, this.storageType().toNBT(this.resource));
         tag.setLong(ModNBTTag.RESOURCE_QUANTITY, this.quantity);
-    }
-
-    @Override
-    public void deserializeNBT(NBTTagCompound nbt)
-    {
-        this.quantity = nbt.getLong(ModNBTTag.RESOURCE_QUANTITY);
-        this.resource = this.storageType().fromNBT(nbt.getCompoundTag(ModNBTTag.RESOURCE_IDENTITY));
+        return tag;
     }
 
     public IResource<V> resource()
@@ -64,12 +65,19 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     /**
      * returns new value
      */
+    @Override
     public long changeQuantity(long delta)
     {
         this.quantity += delta;
         return this.quantity;
     }
 
+    @Override
+    public void setQuantity(long quantity)
+    {
+        this.quantity = quantity;
+    }
+    
     public boolean isEmpty()
     {
         return this.quantity == 0;

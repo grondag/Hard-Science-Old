@@ -229,11 +229,10 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         this.worldBuffer = new WorldStateBuffer(world, Configurator.VOLCANO.enablePerformanceLogging, perfCollectorOnTick);
         this.terrainHelper = new LavaTerrainHelper(worldBuffer);
         this.particleManager = new LavaBlobManager();
-        this.LAVA_THREAD_POOL = Simulator.executor;
+        this.LAVA_THREAD_POOL = Simulator.SIMULATION_POOL;
         this.basaltCoolingJob = new CountedJob<AgedBlockPos>(this.basaltBlocks, this.basaltCoolingTask, 1024, 
                 Configurator.VOLCANO.enablePerformanceLogging, "Basalt Cooling", perfCollectorOnTick);    
     }
- 
     
     /**
     * Signal to let volcano know should switch to cooling mode.

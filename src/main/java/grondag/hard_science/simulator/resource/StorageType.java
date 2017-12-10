@@ -4,6 +4,8 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.Useful;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -63,6 +65,20 @@ public abstract class StorageType<T extends StorageType<T>>
     @Nullable
     public abstract AbstractResourceWithQuantity<T> fromNBTWithQty(NBTTagCompound nbt);
     
+    public static <V extends StorageType<V>> NBTTagCompound toNBTWithType(IResource<V> resource)
+    {
+        NBTTagCompound result = resource.storageType().toNBT(resource);
+        Useful.saveEnumToTag(result, ModNBTTag.RESOURCE_TYPE, resource.storageType().enumType);
+        return result;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <V extends StorageType<V>> IResource<V> fromNBTWithType(NBTTagCompound tag)
+    {
+        StorageType<?> sType = StorageType
+                .fromEnum(Useful.safeEnumFromTag(tag, ModNBTTag.RESOURCE_TYPE, EnumStorageType.ITEM));
+        return (IResource<V>) sType.fromNBT(tag);
+    }
     
     /** 
      * Resources that must be consumed as they are produced - storage is not possible.

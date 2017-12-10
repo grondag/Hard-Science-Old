@@ -75,7 +75,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
             if(stackResource != ((ItemResource)rwq.resource())) return stack;
         }
         
-        long added = this.add(stackResource.withQuantity(stack.getCount()), simulate);
+        long added = this.add(stackResource.withQuantity(stack.getCount()), simulate, null);
         
         if(added == 0)
         {
@@ -88,7 +88,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         else
         {
             ItemStack result = stack.copy();
-            stack.shrink((int)added);
+            result.shrink((int)added);
             return result;
         }
     }
@@ -108,7 +108,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         
         int limit = Math.min(amount, ((ItemResource)rwq.resource()).sampleItemStack().getMaxStackSize());
 
-        long taken = this.takeUpTo(rwq.resource(), limit, simulate);
+        long taken = this.takeUpTo(rwq.resource(), limit, simulate, null);
         
         if(taken == 0) return ItemStack.EMPTY;
         

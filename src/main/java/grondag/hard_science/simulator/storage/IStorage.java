@@ -3,9 +3,13 @@ package grondag.hard_science.simulator.storage;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
+import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location.ILocated;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
@@ -13,7 +17,6 @@ import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.Log;
 
 public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILocated, IDomainMember, ISizedContainer, ITypedStorage<T>, IIdentified
 {
@@ -34,22 +37,28 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
      /**
      * Increases quantityStored and returns quantityStored actually added.
      * If simulate==true, will return forecasted result without making changes.
-     * Intended to be thread-safe.
+     * Intended to be thread-safe. <p>
+     * 
+     * If request is non-null and not simulated, the amount added will be
+     * allocated (domain-wide) to the given request.
      */
-    long add(IResource<T> resource, long howMany, boolean simulate);
+    long add(IResource<T> resource, long howMany, boolean simulate, @Nullable IProcurementRequest<T> request);
 
     /** Alternative syntax for {@link #add(IResource, long, boolean)} */
-    default long add(AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate)
+    default long add(AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate, @Nullable IProcurementRequest<T> request)
     {
-        return this.add(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate);
+        return this.add(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate, request);
     }
     
     /**
      * Takes up to limit from this stack and returns how many were actually taken.
      * If simulate==true, will return forecasted result without making changes.
-     * Intended to be thread-safe.
+     * Intended to be thread-safe. <p>
+     * 
+     * If request is non-null and not simulated, the amount taken will reduce any
+     * allocation (domain-wide) to the given request.
      */
-    long takeUpTo(IResource<T> resource, long limit, boolean simulate);
+    long takeUpTo(IResource<T> resource, long limit, boolean simulate, @Nullable IProcurementRequest<T> request);
 
     /**
      * Returned resource stacks are disconnected from this collection.
@@ -191,5 +200,4 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
             }
         }
     }
-    
 }

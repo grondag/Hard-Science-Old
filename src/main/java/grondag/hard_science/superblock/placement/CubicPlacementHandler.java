@@ -32,6 +32,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+//TODO: remove
+@Deprecated
 public class CubicPlacementHandler extends PlacementHandler
 {
     public static final CubicPlacementHandler INSTANCE = new CubicPlacementHandler();

@@ -7,14 +7,15 @@ import org.junit.Test;
 
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.simulator.storage.ItemStorageManager;
 import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 
 public class ItemStorageTest
 {
@@ -27,8 +28,7 @@ public class ItemStorageTest
         
         Domain d = dm.createDomain();
         
-        ItemStorageManager ism = new ItemStorageManager();
-        ism.setDomain(d);
+        ItemStorageManager ism = new ItemStorageManager(d);
         
         ItemStorage store1 = new ItemStorage(null);
         store1.setCapacity(100);
@@ -42,29 +42,23 @@ public class ItemStorageTest
         ItemStorage store4 = new ItemStorage(null);
         store4.setCapacity(400);
         
-        Item i1 = new Item().setRegistryName("one");
-        Item i2 = new Item().setRegistryName("two");
-        Item i3 = new Item().setRegistryName("three");
-        Item.REGISTRY.register(1, i1.getRegistryName(), i1);
-        Item.REGISTRY.register(2, i2.getRegistryName(), i2);
-        Item.REGISTRY.register(3, i3.getRegistryName(), i3);
+        ItemResource res1 = ItemResourceCache.fromStack(Items.BEEF.getDefaultInstance());
+        ItemResource res2 = ItemResourceCache.fromStack(Items.BAKED_POTATO.getDefaultInstance());
+        ItemResource res3 = ItemResourceCache.fromStack(Items.BREWING_STAND.getDefaultInstance());
         
-        ItemResource res1 = new ItemResource(i1, 0, null, null);
-        ItemResource res2 = new ItemResource(i2, 0, null, null);
-        ItemResource res3 = new ItemResource(i3, 0, null, null);
-        
-        store1.add(res1, 10, false);
+        store1.add(res1, 10, false, null);
         assert store1.getQuantityStored(res1) == 10;
         assert store1.availableCapacity() == 90;
         
-        store1.add(res1, 10, false);
-        assert store1.add(res1, 1000, true) == 80;
+        store1.add(res1, 10, false, null);
+        assert store1.add(res1, 1000, true, null) == 80;
         
+        // TODO: should fail
         assert store1.getQuantityStored(res1) == 20;
         assert store1.availableCapacity() == 80;
         
-        store1.add(res2, 22, false);
-        store1.add(res3, 33, false);
+        store1.add(res2, 22, false, null);
+        store1.add(res3, 33, false, null);
         
         store2.deserializeNBT(store1.serializeNBT());
         
@@ -76,10 +70,10 @@ public class ItemStorageTest
         store2 = new ItemStorage(null);
         store2.setCapacity(200);
         
-        store2.add(res2, 100, false);
-        store3.add(res1, 100, false);
-        store3.add(res2, 100, false);
-        store3.add(res3, 100, false);
+        store2.add(res2, 100, false, null);
+        store3.add(res1, 100, false, null);
+        store3.add(res2, 100, false, null);
+        store3.add(res3, 100, false, null);
         
         ism.addStore(store1);
         assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1);
@@ -98,7 +92,7 @@ public class ItemStorageTest
         assert ism.getQuantityStored(res3) == store1.getQuantityStored(res3) + store2.getQuantityStored(res3) + store3.getQuantityStored(res3);
         assert ism.getCapacity() == store1.getCapacity() + store2.getCapacity() + store3.getCapacity() + store4.getCapacity();
         
-        store2.add(res1,  5, false);
+        store2.add(res1,  5, false, null);
         
         List<StorageWithQuantity<StorageTypeStack>> list = ism.getLocations(res1);
         assert list.size() == 3;
@@ -106,25 +100,25 @@ public class ItemStorageTest
         assert confirmStoreAndQuantity(list, store2, store2.getQuantityStored(res1));
         assert confirmStoreAndQuantity(list, store3, store3.getQuantityStored(res1));
         
-        list = ism.findSpaceFor(res3, 2000);
+        list = ism.findSpaceFor(res3, 2000, null);
         assert list.size() == 3;
         assert confirmStoreAndQuantity(list, store1, store1.availableCapacity());
         assert confirmStoreAndQuantity(list, store2, store2.availableCapacity());
         assert confirmStoreAndQuantity(list, store4, store4.availableCapacity());
         
-        assert ism.findQuantity(new Predicate<IResource<StorageTypeStack>>() 
+        assert ism.findQuantityAvailable(new Predicate<Object>() 
         {
             @Override
-            public boolean test(IResource<StorageTypeStack> t)
+            public boolean test(Object t)
             {
                 return t.equals(res2);
             }
         }).get(0).getQuantity() == ism.getQuantityStored(res2);
         
-        List<StorageWithResourceAndQuantity<StorageTypeStack>> findList = ism.findStorageWithQuantity(new Predicate<IResource<StorageTypeStack>>() 
+        List<StorageWithResourceAndQuantity<StorageTypeStack>> findList = ism.findStorageWithQuantity(new Predicate<Object>() 
         {
             @Override
-            public boolean test(IResource<StorageTypeStack> t)
+            public boolean test(Object t)
             {
                 return t.equals(res1);
             }
@@ -136,7 +130,7 @@ public class ItemStorageTest
         assert findList.get(0).quantity + findList.get(1).quantity + findList.get(2).quantity == ism.getQuantityStored(res1);
         
         dm.setSaveDirty(false);
-        assert store3.takeUpTo(res1, 1, false) == 1;
+        assert store3.takeUpTo(res1, 1, false, null) == 1;
         assert dm.isSaveDirty();
 
         dm.setSaveDirty(false);
@@ -156,58 +150,57 @@ public class ItemStorageTest
         assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1) + store2.getQuantityStored(res1) + store3.getQuantityStored(res1);
         
         dm.loadNew();
-        ItemStorageManager ism2 = new ItemStorageManager();
-        ism2.setDomain(dm.defaultDomain());
+        ItemStorageManager ism2 = new ItemStorageManager(dm.defaultDomain());
         ism2.deserializeNBT(ism.serializeNBT());
         assert ism2.availableCapacity() == ism.availableCapacity();
         assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2);
-        store4.add(res2, 7, false);
+        store4.add(res2, 7, false, null);
         assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2) - 7;
         
         
         // IItemHandler tests
-//        ItemStorage ihStore = new ItemStorage(null);
-//        ihStore.setCapacity(64);
-//        assert ihStore.getSlots() == 1;
-//        assert ihStore.getSlotLimit(0) == 64;
-//        assert ihStore.extractItem(0, 100, false) == null;
-//        
-//        ItemStack stack = i1.getDefaultInstance();
-//        stack.setCount(32);
-//        assert ihStore.insertItem(0, stack, true) == ItemStack.EMPTY;
-//        assert ihStore.insertItem(0, stack, false) == ItemStack.EMPTY;
-//        assert ihStore.usedCapacity() == 32;
-//        assert ihStore.getSlots() == 2;
-//        assert ihStore.getSlotLimit(0) == 64;
-//        assert ihStore.getSlotLimit(1) == 64 - 32;
-//        
-//        stack = i2.getDefaultInstance();
-//        stack.setCount(64);
-//        
-//        ItemStack returnStack = ihStore.insertItem(0, stack, false);
-//        assert returnStack.getCount() == 32;
-//        assert returnStack.getItem() == stack.getItem();
-//        assert ihStore.usedCapacity() == 64;
-//        assert ihStore.getSlots() == 2;
-//        assert ihStore.getSlotLimit(0) == 32;
-//        assert ihStore.getSlotLimit(1) == 32;
-//        
-//        stack = i1.getDefaultInstance();
-//        returnStack = ihStore.extractItem(0, 16, false);
-//        assert returnStack.getCount() == 16;
-//        assert returnStack.getItem() == stack.getItem();
-//        assert ihStore.usedCapacity() == 48;
-//        assert ihStore.getSlots() == 3;
-//        assert ihStore.getSlotLimit(0) == 32;
-//        assert ihStore.getSlotLimit(1) == 48;
-//        
-//        returnStack = ihStore.extractItem(0, 64, false);
-//        assert returnStack.getCount() == 16;
-//        assert returnStack.getItem() == stack.getItem();
-//        assert ihStore.usedCapacity() == 32;
-//        assert ihStore.getSlots() == 2;
-//        assert ihStore.getSlotLimit(0) == 64;
-//        assert ihStore.getSlotLimit(1) == 32;
+        ItemStorage ihStore = new ItemStorage(null);
+        ihStore.setCapacity(64);
+        assert ihStore.getSlots() == 1;
+        assert ihStore.getSlotLimit(0) == 64;
+        assert ihStore.extractItem(0, 100, false) == ItemStack.EMPTY;
+        
+        ItemStack stack = res1.sampleItemStack();
+        stack.setCount(32);
+        assert ihStore.insertItem(0, stack, true) == ItemStack.EMPTY;
+        assert ihStore.insertItem(0, stack, false) == ItemStack.EMPTY;
+        assert ihStore.usedCapacity() == 32;
+        assert ihStore.getSlots() == 2;
+        assert ihStore.getSlotLimit(0) == 64;
+        assert ihStore.getSlotLimit(1) == 64 - 32;
+        
+        stack = res2.sampleItemStack();
+        stack.setCount(64);
+        
+        ItemStack returnStack = ihStore.insertItem(1, stack, false);
+        assert returnStack.getCount() == 32;
+        assert returnStack.getItem() == stack.getItem();
+        assert ihStore.usedCapacity() == 64;
+        assert ihStore.getSlots() == 2;
+        assert ihStore.getSlotLimit(0) == 32;
+        assert ihStore.getSlotLimit(1) == 32;
+        
+        stack = res1.sampleItemStack();
+        returnStack = ihStore.extractItem(0, 16, false);
+        assert returnStack.getCount() == 16;
+        assert returnStack.getItem() == stack.getItem();
+        assert ihStore.usedCapacity() == 48;
+        assert ihStore.getSlots() == 3;
+        assert ihStore.getSlotLimit(0) == 32;
+        assert ihStore.getSlotLimit(1) == 48;
+        
+        returnStack = ihStore.extractItem(0, 64, false);
+        assert returnStack.getCount() == 16;
+        assert returnStack.getItem() == stack.getItem();
+        assert ihStore.usedCapacity() == 32;
+        assert ihStore.getSlots() == 2;
+        assert ihStore.getSlotLimit(0) == 64;
+        assert ihStore.getSlotLimit(1) == 32;
     }
 
     private boolean confirmStoreAndQuantity(List<StorageWithQuantity<StorageTypeStack>> list, ItemStorage store, long quantity)
