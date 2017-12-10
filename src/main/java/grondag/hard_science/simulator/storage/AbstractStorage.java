@@ -26,16 +26,15 @@ import net.minecraft.nbt.NBTTagList;
 public abstract class AbstractStorage<T extends StorageType<T>> implements IStorage<T>, IDirtListener
 {
     /**
-     * Map of all unique resources contained in this storage
+     * All unique resources contained in this storage
      */
-//    protected final Object2LongOpenHashMap<IResource<T>> map;
     protected final SimpleUnorderedArrayList<AbstractResourceWithQuantity<T>> slots = new SimpleUnorderedArrayList<AbstractResourceWithQuantity<T>>();
     
     protected long capacity = 2000;
     protected long used = 0;
     protected Location location;
     protected int id;
-    protected AbstractStorageManager<T> owner = null;
+    protected StorageManager<T> owner = null;
     protected SimpleUnorderedArrayList<IStorageListener<T>> listeners = new SimpleUnorderedArrayList<IStorageListener<T>>();
     
     public AbstractStorage(@Nullable NBTTagCompound tag)
@@ -53,7 +52,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     }
 
     @Override
-    public void setOwner(AbstractStorageManager<T> owner)
+    public void setOwner(StorageManager<T> owner)
     {
         this.owner = owner;
     }

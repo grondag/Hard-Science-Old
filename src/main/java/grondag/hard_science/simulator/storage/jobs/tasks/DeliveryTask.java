@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.AbstractStorageManager;
+import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.TaskType;
@@ -66,7 +66,7 @@ public class DeliveryTask<V extends StorageType<V>> extends AbstractTask
         this.claim();
         
         super.complete();
-        AbstractStorageManager<V> sm = this.getDomain().getStorageManager(this.procurementTask.storageType());
+        StorageManager<V> sm = this.getDomain().getStorageManager(this.procurementTask.storageType());
         
         for(AbstractResourceWithQuantity<V> rwq : this.procurementTask.allocatedDemands())
         {

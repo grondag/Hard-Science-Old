@@ -11,7 +11,7 @@ import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.IResourcePredicateWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.AbstractStorageManager;
+import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.storage.jobs.Job;
 import grondag.hard_science.simulator.storage.jobs.RequestStatus;
 import grondag.hard_science.simulator.storage.jobs.TaskType;
@@ -247,7 +247,7 @@ public class SimpleProcurementTask<V extends StorageType<V>> extends Procurement
      */
     protected void reallocateAfterDeserialization()
     {
-        AbstractStorageManager<V> storageManager = this.getDomain().getStorageManager(this.storageType());
+        StorageManager<V> storageManager = this.getDomain().getStorageManager(this.storageType());
         this.allocatedQuantity = storageManager.setAllocation(this.resource, this, this.allocatedQuantity);
     }
 

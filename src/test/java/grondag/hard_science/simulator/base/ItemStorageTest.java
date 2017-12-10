@@ -11,7 +11,7 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorage;
-import grondag.hard_science.simulator.storage.ItemStorageManager;
+import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 import net.minecraft.init.Items;
@@ -28,7 +28,7 @@ public class ItemStorageTest
         
         Domain d = dm.createDomain();
         
-        ItemStorageManager ism = new ItemStorageManager(d);
+        StorageManager<StorageTypeStack> ism = StorageManager.itemStorage(d);
         
         ItemStorage store1 = new ItemStorage(null);
         store1.setCapacity(100);
@@ -79,9 +79,6 @@ public class ItemStorageTest
         assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1);
         assert ism.getCapacity() == store1.getCapacity();
         assert ism.availableCapacity() == store1.availableCapacity();
-        
-        // this should generate a warning
-        ism.addStore(store1);
         
         ism.addStore(store2);
         ism.addStore(store3);
@@ -137,8 +134,7 @@ public class ItemStorageTest
         long oldCapacity = ism.getCapacity();
         long oldAvailable = ism.availableCapacity();
         ism.removeStore(store1);
-        // should generate a warning
-        ism.removeStore(store1);
+        
         assert dm.isSaveDirty();
         assert ism.getCapacity() == oldCapacity - store1.getCapacity();
         assert ism.availableCapacity() == oldAvailable - store1.availableCapacity();
@@ -150,7 +146,7 @@ public class ItemStorageTest
         assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1) + store2.getQuantityStored(res1) + store3.getQuantityStored(res1);
         
         dm.loadNew();
-        ItemStorageManager ism2 = new ItemStorageManager(dm.defaultDomain());
+        StorageManager<StorageTypeStack> ism2 = StorageManager.itemStorage(dm.defaultDomain());
         ism2.deserializeNBT(ism.serializeNBT());
         assert ism2.availableCapacity() == ism.availableCapacity();
         assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2);

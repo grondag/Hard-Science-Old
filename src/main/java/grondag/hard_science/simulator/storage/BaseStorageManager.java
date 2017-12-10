@@ -11,50 +11,30 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.persistence.IDirtKeeper;
-import grondag.hard_science.simulator.persistence.IDirtListener;
-import grondag.hard_science.simulator.persistence.IDirtNotifier;
-import grondag.hard_science.simulator.persistence.NullDirtListener;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 
-/**
-* Responsibilities: <br>
-* + Tracking the location of all resources for a storage type within a domain.<br>
-* + Tracking all empty storage for a storage type within a domain. <br>
-* + Storing and retrieving items.
-* + Answering inquiries about storage of a given type based on tracking. <br>
-* + Notifies listeners when total storage changes
-*<br>
-*Not responsible for optimizing storage.
-*/
-public abstract class AbstractStorageManager<T extends StorageType<T>> 
-    implements IDirtNotifier, IDirtListener, IDomainMember, 
-               ISizedContainer, IReadWriteNBT, ITypedStorage<T>
+public class BaseStorageManager<T extends StorageType<T>> 
+    implements ITypedStorage<T>, IDomainMember, ISizedContainer
 {
-    protected final IdentityHashMap<IResource<T>, StorageResourceManager<T>> map = new IdentityHashMap<IResource<T>, StorageResourceManager<T>>();
     protected final HashSet<IStorage<T>> stores = new HashSet<IStorage<T>>();
-    protected long capacity = 0;
-    protected long used = 0;
-    protected IDirtListener dirtListener = NullDirtListener.INSTANCE;
     protected Domain domain;
     protected final T storageType;
     
-    public AbstractStorageManager(T storageType, Domain domain)
+    protected final IdentityHashMap<IResource<T>, StorageResourceManager<T>> map = new IdentityHashMap<IResource<T>, StorageResourceManager<T>>();
+    protected long capacity = 0;
+    protected long used = 0;
+
+    public BaseStorageManager(T storageType, Domain domain)
     {
+        super();
         this.storageType = storageType;
         this.domain = domain;
-        this.dirtListener = domain == null ? NullDirtListener.INSTANCE : domain.getDirtListener();
     }
 
     @Override
@@ -62,45 +42,69 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     {
         return this.storageType;
     }
-    
-    public synchronized void addStore(IStorage<T> store)
+
+    public List<StorageWithQuantity<T>> findSpaceFor(IResource<T> resource, long quantity, @Nullable IProcurementRequest<T> request)
     {
-        if(stores.contains(store))
+        ImmutableList.Builder<StorageWithQuantity<T>> builder = ImmutableList.builder();
+        
+        for(IStorage<T> store : this.stores)
         {
-            Log.warn("Storage manager received request to add store it already has.  This is a bug.");
-            return;
+            long space = store.add(resource, quantity, true, request);
+            if(space > 0)
+            {
+                builder.add(store.withQuantity(space));
+            }
         }
         
+        return builder.build();
+    }
+
+    /**
+     * Returns all locations where the resource is stored.
+     * Note that the resource may be allocated so the stored
+     * quantities may not be available for use, but allocations
+     * are not stored by location.
+     */
+    public List<StorageWithQuantity<T>> getLocations(IResource<T> resource)
+    {
+        StorageResourceManager<T> summary = map.get(resource);
+        
+        if(summary == null || summary.quantityStored() == 0) return Collections.emptyList();
+    
+        return summary.getLocations(resource);
+    }
+
+    @Override
+    public Domain getDomain()
+    {
+        return this.domain;
+    }
+
+    public synchronized void addStore(IStorage<T> store)
+    {
+        assert !stores.contains(store)
+            : "Storage manager received request to add store it already has.";
+        
         this.stores.add(store);
-        this.domain.domainManager().assignedNumbersAuthority().storageIndex().register(store);
-        
         this.capacity += store.getCapacity();
-        
+
         for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
             this.notifyAdded(store, stack.resource(), stack.getQuantity(), null);
         }
-        store.setOwner(this);
-        this.setDirty();
     }
     
     public synchronized void removeStore(IStorage<T> store)
     {
-        if(!stores.contains(store))
-        {
-            Log.warn("Storage manager received request to remove store it doesn't have.  This is a bug.");
-            return;
-        }
+        assert stores.contains(store)
+         : "Storage manager received request to remove store it doesn't have.";
         
         for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
             this.notifyTaken(store, stack.resource(), stack.getQuantity(), null);
         }
-        store.setOwner(null);
-        this.domain.domainManager().assignedNumbersAuthority().storageIndex().unregister(store);
         this.stores.remove(store);
         this.capacity -= store.getCapacity();
-        this.setDirty();
     }
     
     public long getQuantityStored(IResource<T> resource)
@@ -154,75 +158,6 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         return builder.build();
     }
     
-    public List<StorageWithQuantity<T>> findSpaceFor(IResource<T> resource, long quantity, @Nullable IProcurementRequest<T> request)
-    {
-        ImmutableList.Builder<StorageWithQuantity<T>> builder = ImmutableList.builder();
-        
-        for(IStorage<T> store : this.stores)
-        {
-            long space = store.add(resource, quantity, true, request);
-            if(space > 0)
-            {
-                builder.add(store.withQuantity(space));
-            }
-        }
-        
-        return builder.build();
-    }
-    
-    /**
-     * Returns all locations where the resource is stored.
-     * Note that the resource may be allocated so the stored
-     * quantities may not be available for use, but allocations
-     * are not stored by location.
-     */
-    public List<StorageWithQuantity<T>> getLocations(IResource<T> resource)
-    {
-        StorageResourceManager<T> summary = map.get(resource);
-        
-        if(summary == null || summary.quantityStored() == 0) return Collections.emptyList();
-
-        return summary.getLocations(resource);
-    }
-    
-    @Override
-    public void serializeNBT(NBTTagCompound nbt)
-    {
-        if(!this.stores.isEmpty())
-        {
-            NBTTagList nbtStores = new NBTTagList();
-            
-            for(IStorage<T> store : stores)
-            {
-                nbtStores.appendTag(store.serializeNBT());
-            }
-            nbt.setTag(ModNBTTag.STORAGE_MANAGER_STORES, nbtStores);
-        }
-    }
-
-    protected abstract IStorage<T> makeStorage(NBTTagCompound nbt);
-    
-    @Override
-    public void deserializeNBT(NBTTagCompound nbt)
-    {
-        this.stores.clear();
-        this.capacity = 0;
-        this.used = 0;
-        NBTTagList nbtStores = nbt.getTagList(ModNBTTag.STORAGE_MANAGER_STORES, 10);
-        if( nbtStores != null && !nbtStores.hasNoTags())
-        {
-            for (int i = 0; i < nbtStores.tagCount(); ++i)
-            {
-                NBTTagCompound subTag = nbtStores.getCompoundTagAt(i);
-                if(subTag != null)
-                {
-                    IStorage<T> store = makeStorage(subTag);
-                    this.addStore(store);
-                }
-            }   
-        }
-    }
-
     @Override
     public long getCapacity()
     {
@@ -233,24 +168,6 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
     public long usedCapacity()
     {
         return this.used;
-    }
-    
-    @Override
-    public Domain getDomain()
-    {
-        return this.domain;
-    }
-
-    @Override
-    public void setDirtKeeper(IDirtKeeper listener)
-    {
-        this.dirtListener = listener;
-    }
-    
-    @Override
-    public void setDirty()
-    {
-        this.dirtListener.setDirty();
     }
     
     /**
@@ -280,8 +197,6 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         
         if(summary.isEmpty()) 
             this.map.remove(resource);
-        
-        this.setDirty();
     }
 
     /**
@@ -304,25 +219,19 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         
         // update total quantityStored
         this.used += added;
-        if(this.used > this.capacity) 
-        {
-            Log.warn("Storage manager usage greater than total storage capacity.  This is a bug.");
-        }
         
-        this.setDirty();
+        assert this.used <= this.capacity
+            : "Storage manager usage greater than total storage capacity.";
     }
-
+    
     public synchronized void notifyCapacityChanged(long delta)
     {
         if(delta == 0) return;
         
         this.capacity += delta;
-        if(this.capacity < 0)
-        {
-            this.capacity = 0;
-            Log.warn("Storage manager encounted negative capacity level.  This is a bug.");
-        }
-        this.setDirty();
+        
+        assert this.capacity >= 0
+            : "Storage manager encounted negative capacity level.";
     }
     
     /**
@@ -380,6 +289,4 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
                 this.map.remove(resource);
         }
     }
-    
-  
 }

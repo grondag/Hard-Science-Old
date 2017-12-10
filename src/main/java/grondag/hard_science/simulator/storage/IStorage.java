@@ -22,7 +22,7 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
 {
     long getQuantityStored(IResource<T> resource);
     
-    void setOwner(AbstractStorageManager<T> owner);
+    void setOwner(StorageManager<T> owner);
     
     default boolean isResourceAllowed(IResource<T> resource) { return true; }
     

@@ -15,8 +15,8 @@ import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListenerProvider;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.AbstractStorageManager;
-import grondag.hard_science.simulator.storage.ItemStorageManager;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.storage.jobs.JobManager;
 import grondag.hard_science.superblock.placement.BuildManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,7 +33,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     String name;
     boolean isSecurityEnabled;
     
-    public final ItemStorageManager itemStorage;
+    public final StorageManager<StorageTypeStack> itemStorage;
     public final JobManager jobManager;
     public final BuildManager buildManager;
     public final BrokerManager brokerManager;
@@ -44,7 +44,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     Domain (DomainManager domainManager)
     {
         this.domainManager = domainManager;    
-        this.itemStorage = new ItemStorageManager(this);
+        this.itemStorage = StorageManager.itemStorage(this);
         this.jobManager = new JobManager(this);
         this.buildManager = new BuildManager(this);
         this.brokerManager = new BrokerManager(this);
@@ -62,7 +62,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     }
     
     @SuppressWarnings("unchecked")
-    public <V extends StorageType<V>> AbstractStorageManager<V> getStorageManager(StorageType<V> storeType)
+    public <V extends StorageType<V>> StorageManager<V> getStorageManager(StorageType<V> storeType)
     {
         switch(storeType.enumType)
         {
@@ -71,7 +71,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         case GAS:
             return null;
         case ITEM:
-            return (AbstractStorageManager<V>) this.itemStorage;
+            return (StorageManager<V>) this.itemStorage;
             
         case POWER:
             return null;

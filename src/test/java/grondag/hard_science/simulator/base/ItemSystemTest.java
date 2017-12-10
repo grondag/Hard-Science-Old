@@ -95,6 +95,7 @@ public class ItemSystemTest
         DomainManager.INSTANCE.unload();
         
         Log.info("Item System Tests Complete");
+        
     }
 
     /**

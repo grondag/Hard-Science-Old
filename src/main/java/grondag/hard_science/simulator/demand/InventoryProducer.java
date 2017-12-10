@@ -3,8 +3,8 @@ package grondag.hard_science.simulator.demand;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.IResourcePredicateWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.AbstractStorageManager;
 import grondag.hard_science.simulator.storage.IStorageResourceListener;
+import grondag.hard_science.simulator.storage.StorageManager;
 
 public class InventoryProducer<V extends StorageType<V>> 
     implements IProducer<V>, IStorageResourceListener<V>
@@ -21,7 +21,7 @@ public class InventoryProducer<V extends StorageType<V>>
      */
     private final IResource<V> resource;
     
-    private final AbstractStorageManager<V> storageManager;
+    private final StorageManager<V> storageManager;
     
     /**
      * True while we are filling demand - means we 
