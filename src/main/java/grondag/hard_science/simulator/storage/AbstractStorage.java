@@ -4,6 +4,7 @@ package grondag.hard_science.simulator.storage;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -20,6 +21,7 @@ import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.TransportSubNet;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
@@ -36,6 +38,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     protected int id;
     protected StorageManager<T> owner = null;
     protected SimpleUnorderedArrayList<IStorageListener<T>> listeners = new SimpleUnorderedArrayList<IStorageListener<T>>();
+    protected TransportSubNet subnet = TransportSubNet.NONE;
     
     public AbstractStorage(@Nullable NBTTagCompound tag)
     {
@@ -298,5 +301,17 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     public void setDirty()
     {
         if(this.owner != null) this.owner.setDirty();
+    }
+    
+    @Override
+    public TransportSubNet getTransportSubNet()
+    {
+        return this.subnet;
+    }
+    
+    @Override
+    public void setTransportSubNet(@Nonnull TransportSubNet net)
+    {
+        this.subnet = net;
     }
 }

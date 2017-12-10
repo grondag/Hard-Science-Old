@@ -17,8 +17,11 @@ import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.ITransportNode;
 
-public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILocated, IDomainMember, ISizedContainer, ITypedStorage<T>, IIdentified
+public interface IStorage<T extends StorageType<T>> 
+    extends IReadWriteNBT, ILocated, IDomainMember, 
+        ISizedContainer, ITypedStorage<T>, IIdentified, ITransportNode
 {
     long getQuantityStored(IResource<T> resource);
     
