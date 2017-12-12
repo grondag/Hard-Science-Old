@@ -53,12 +53,12 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     
     private Action action;
     private StorageType<?> storageType;
-    private AbstractResourceDelegate<?> target;
+    private int resourceHandle;
     
     public PacketOpenContainerStorageInteraction(@Nonnull Action action, @Nonnull AbstractResourceDelegate<?> target)
     {
         this.action = action;
-        this.target = target;
+        this.resourceHandle = target.handle();
         this.storageType = target.storageType();
     }
     
@@ -69,7 +69,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     {
         this.action = pBuff.readEnumValue(Action.class);
         this.storageType = StorageType.fromEnum(EnumStorageType.values()[pBuff.readByte()]);
-        this.target = this.storageType.fromPacket(pBuff);
+        this.resourceHandle = pBuff.readInt();
     }
 
     @Override
@@ -77,7 +77,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     {
         pBuff.writeEnumValue(this.action);
         pBuff.writeByte(this.storageType.ordinal);
-        this.target.toBytes(pBuff);
+        pBuff.writeInt(this.resourceHandle);
     }
 
     public Action getAction()
@@ -88,11 +88,6 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     public StorageType<?> getStorageType()
     {
         return this.storageType;
-    }
-    
-    public AbstractResourceDelegate<?> getTarget()
-    {
-        return target;
     }
 
     @Override
@@ -106,7 +101,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
 
         if(storage.storageType() != StorageType.ITEM) return;
         
-        ItemResource targetResource = ItemResource.byHandle(message.target.handle());
+        ItemResource targetResource = (ItemResource) storage.getResourceForHandle(message.resourceHandle);
         
         switch(message.action)
         {
@@ -199,8 +194,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         
         if(heldStack != null && !heldStack.isEmpty())
         {
-            ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(heldStack);
-            boolean heldStackMatchesTarget = targetResource.handle() == heldResource.resource().handle();
+            boolean heldStackMatchesTarget = targetResource.isStackEqual(heldStack);
             if(!heldStackMatchesTarget) return;
             if(heldStack.getCount() >= heldStack.getMaxStackSize()) return;
             int toAdd = (int) storage.takeUpTo(targetResource, howMany, false, null);

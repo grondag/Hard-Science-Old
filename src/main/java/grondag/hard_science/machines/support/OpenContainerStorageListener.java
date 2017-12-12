@@ -10,7 +10,7 @@ import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStor
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.IListenableStorage;
 import grondag.hard_science.simulator.storage.IStorageListener;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -31,7 +31,7 @@ public abstract class OpenContainerStorageListener<T extends StorageType<T>> imp
     }
  
     @Override
-    public void handleStorageDisconnect(IStorage<T> storage)
+    public void handleStorageDisconnect(IListenableStorage<T> storage)
     {
         ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(Collections.emptyList(), storage.getCapacity()), player);
     }
@@ -51,13 +51,13 @@ public abstract class OpenContainerStorageListener<T extends StorageType<T>> imp
         }
 
         @Override
-        public void handleStorageRefresh(IStorage<StorageTypeStack> sender, List<AbstractResourceDelegate<StorageTypeStack>> update, long capacity)
+        public void handleStorageRefresh(IListenableStorage<StorageTypeStack> sender, List<AbstractResourceDelegate<StorageTypeStack>> update, long capacity)
         {
             ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(update, capacity), player);
         }
 
         @Override
-        public void handleStorageUpdate(IStorage<StorageTypeStack> sender, AbstractResourceDelegate<StorageTypeStack> update)
+        public void handleStorageUpdate(IListenableStorage<StorageTypeStack> sender, AbstractResourceDelegate<StorageTypeStack> update)
         {
             ModMessages.INSTANCE.sendTo(update, player);
         }

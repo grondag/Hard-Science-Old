@@ -1,8 +1,8 @@
 package grondag.hard_science.simulator.storage;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -26,7 +26,7 @@ public class BaseStorageManager<T extends StorageType<T>>
     protected Domain domain;
     protected final T storageType;
     
-    protected final IdentityHashMap<IResource<T>, StorageResourceManager<T>> map = new IdentityHashMap<IResource<T>, StorageResourceManager<T>>();
+    protected final HashMap<IResource<T>, StorageResourceManager<T>> map = new HashMap<IResource<T>, StorageResourceManager<T>>();
     protected long capacity = 0;
     protected long used = 0;
 

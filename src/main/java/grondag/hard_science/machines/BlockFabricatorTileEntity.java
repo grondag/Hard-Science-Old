@@ -25,7 +25,6 @@ import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
@@ -373,7 +372,7 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
         PlacementItem.setStackSubstance(stack, this.getControlState().getSubstance());
         PlacementItem.setStackModelState(stack, this.getControlState().getModelState());
         
-        ItemResource res = ItemResourceCache.fromStack(stack);
+        ItemResource res = ItemResource.fromStack(stack);
         
         //TODO: pass in procurement request
         List<StorageWithQuantity<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, 1, null);

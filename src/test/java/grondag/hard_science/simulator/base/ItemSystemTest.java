@@ -8,7 +8,6 @@ import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.simulator.storage.StorageWithQuantity;
@@ -62,12 +61,12 @@ public class ItemSystemTest
         store2 = new ItemStorage(null);
         domain.itemStorage.addStore(store2);
         
-        beef = ItemResourceCache.fromStack(Items.BEEF.getDefaultInstance());
-        ironIngot = ItemResourceCache.fromStack(Items.IRON_INGOT.getDefaultInstance());
-        ironNugget = ItemResourceCache.fromStack(Items.IRON_NUGGET.getDefaultInstance());
-        ironBlock = ItemResourceCache.fromStack(Item.getItemFromBlock(Blocks.IRON_BLOCK).getDefaultInstance());
-        superBlock1 = ItemResourceCache.fromStack(this.makeSuperModelStack(0, Textures.BIGTEX_ASPHALT));
-        superBlock2 = ItemResourceCache.fromStack(this.makeSuperModelStack(1, Textures.BIGTEX_MARBLE));
+        beef = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
+        ironIngot = ItemResource.fromStack(Items.IRON_INGOT.getDefaultInstance());
+        ironNugget = ItemResource.fromStack(Items.IRON_NUGGET.getDefaultInstance());
+        ironBlock = ItemResource.fromStack(Item.getItemFromBlock(Blocks.IRON_BLOCK).getDefaultInstance());
+        superBlock1 = ItemResource.fromStack(this.makeSuperModelStack(0, Textures.BIGTEX_ASPHALT));
+        superBlock2 = ItemResource.fromStack(this.makeSuperModelStack(1, Textures.BIGTEX_MARBLE));
     }
     
     @Test

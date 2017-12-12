@@ -24,10 +24,28 @@ public interface IResource<V extends StorageType<V>> extends IResourcePredicate<
     public V storageType();
     public String displayName();
     public AbstractResourceWithQuantity<V> withQuantity(long quantity);
+    public int computeResourceHashCode();
+    public boolean isResourceEqual(IResource<V> other);
+    
     /**
-     * Transient identifier, assigned at run time to uniquely 
-     * identify resources across client/server and as a an
-     * efficient hash code.
+     * Per-session unique identifier for this <em>instance.</em>  
+     * Two separate instances of resource with equals() == true
+     * will not have the same handle values.<p>
+     * 
+     * Primary usage is as a client-side identifier that can be reliably
+     * transmitted back and forth in lieu of item stacks. Item stacks
+     * with large NBT value are not fully transmitted to clients and so 
+     * require a different way to reliably identify resource targets for
+     * actions initiated on the client.  Item slot number does not work
+     * because of potentially concurrent changes to slot layout in storage.<p>
+     * 
+     * When using handle value as a surrogate key for a resource, must
+     * take care to ensure that all comparison of handle values will be 
+     * with the same instance from which the handle values were taken.
+     * This is best done by grabbing the handle from the resource that 
+     * is already used as the key within the collection.  May also be necessary
+     * to ensure that referenced handle values are not removed while 
+     * any potential message could be received that references the value.
      */
     public int handle();
     

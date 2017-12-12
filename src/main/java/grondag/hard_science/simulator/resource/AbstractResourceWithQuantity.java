@@ -12,7 +12,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
 {
     private IResource<V> resource;
     protected long quantity;
-     
+    
     @Override
     public IResourcePredicate<V> predicate()
     {
@@ -37,7 +37,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
         this.resource = this.storageType().fromNBT(tag.getCompoundTag(ModNBTTag.RESOURCE_IDENTITY));
     }
     
-    public abstract AbstractResourceDelegate<V> toDelegate();
+    public abstract AbstractResourceDelegate<V> toDelegate(int handle);
     
     public NBTTagCompound toNBT()
     {

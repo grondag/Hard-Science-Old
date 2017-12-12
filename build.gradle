@@ -16,6 +16,7 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
+
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
@@ -38,8 +39,25 @@ task deobfJar(type: Jar) {
     classifier = 'dev'
 }
 
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+reobf {
+    jar {
+            extraLines += [ "PK: org/magicwerk/brownies/collections grondag/hard_science/shade/org/magicwerk/brownies/collections" ]
+    			extraLines += [ "PK: org/magicwerk/brownies/collections/exceptions grondag/hard_science/shade/org/magicwerk/brownies/collections/exceptions" ]
+		    extraLines += [ "PK: org/magicwerk/brownies/collections/function grondag/hard_science/shade/org/magicwerk/brownies/collections/function" ]
+		    extraLines += [ "PK: org/magicwerk/brownies/collections/helper grondag/hard_science/shade/org/magicwerk/brownies/collections/helper" ]
+		    extraLines += [ "PK: org/magicwerk/brownies/collections/helper/primitive grondag/hard_science/shade/org/magicwerk/brownies/collections/helper/primitive" ]
+		    extraLines += [ "PK: org/magicwerk/brownies/collections/primitive grondag/hard_science/shade/org/magicwerk/brownies/collections/primitive" ]
+    }
+}
+
 repositories {
 
+	mavenCentral()
 	
     maven { url "http://maven.amadornes.com/" }
         
@@ -83,11 +101,16 @@ artifacts {
 }
 
 dependencies {
+
+
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
-      
+    
+    deobfCompile "org.magicwerk:brownies-collections:0.9.13"
+    shade "org.magicwerk:brownies-collections:0.9.13"
+    
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
@@ -155,6 +178,14 @@ sourceSets {
     test {
         java {
             exclude 'grondag/**'
+        }
+    }
+}
+
+jar {
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
         }
     }
 }

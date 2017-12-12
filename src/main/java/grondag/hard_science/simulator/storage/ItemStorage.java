@@ -4,7 +4,6 @@ import grondag.hard_science.init.ModItems;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.ItemStack;
@@ -66,16 +65,17 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     {
         if(slot < 0) return stack;
         
-        ItemResource stackResource = ItemResourceCache.fromStack(stack);
 
         if(slot < slots.size())
         {
             // reject if trying to put in a mismatched slot - will force it to add to end slot
             AbstractResourceWithQuantity<StorageTypeStack> rwq = this.slots.get(slot);
-            if(stackResource != ((ItemResource)rwq.resource())) return stack;
+            if(!((ItemResource)rwq.resource()).isStackEqual(stack)) return stack;
         }
         
-        long added = this.add(stackResource.withQuantity(stack.getCount()), simulate, null);
+        ItemResource stackResource = ItemResource.fromStack(stack);
+        
+        long added = this.add(stackResource, stack.getCount(), simulate, null);
         
         if(added == 0)
         {
@@ -139,6 +139,4 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         ItemResource itemRes = (ItemResource)resource;
         return !(itemRes.getItem() == ModItems.smart_chest && itemRes.hasTagCompound());
     }
-    
-    
 }

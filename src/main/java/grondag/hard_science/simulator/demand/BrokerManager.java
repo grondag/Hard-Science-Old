@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.demand;
 
+import java.util.HashMap;
+
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.resource.IResource;
@@ -8,7 +10,6 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 public class BrokerManager implements IDomainMember
 {
@@ -18,8 +19,8 @@ public class BrokerManager implements IDomainMember
 //    public final SimpleBroker<StorageTypeStack> POWER_BROKER = new SimpleBroker<StorageTypeStack>(this);
 //    public final SimpleBroker<StorageTypeStack> BLOCK_BROKER = new SimpleBroker<StorageTypeStack>(this);
     
-    private final Int2ObjectOpenHashMap<IBroker<?>> simpleBrokers 
-        = new Int2ObjectOpenHashMap<IBroker<?>>();
+    private final HashMap<IResource<?>, IBroker<?>> simpleBrokers 
+        = new HashMap<IResource<?>, IBroker<?>>();
     
     private final Domain domain;
     
@@ -70,11 +71,11 @@ public class BrokerManager implements IDomainMember
     {
         synchronized(this.simpleBrokers)
         {
-            IBroker<?> result = this.simpleBrokers.get(resource.handle());
+            IBroker<?> result = this.simpleBrokers.get(resource);
             if(result == null)
             {
                 result = new SimpleBroker<T>(this, resource);
-                this.simpleBrokers.put(resource.handle(), result);
+                this.simpleBrokers.put(resource, result);
             }
             return (IBroker<T>) result;
         }
@@ -94,7 +95,7 @@ public class BrokerManager implements IDomainMember
     {
         synchronized(this.simpleBrokers)
         {
-            this.simpleBrokers.remove(simpleBroker.resource().handle());
+            this.simpleBrokers.remove(simpleBroker.resource());
         }        
     }
 }

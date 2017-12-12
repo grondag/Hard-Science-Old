@@ -11,7 +11,7 @@ import grondag.hard_science.library.concurrency.ConcurrentForwardingList;
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.IListenableStorage;
 import grondag.hard_science.simulator.storage.IStorageListener;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraftforge.fml.relauncher.Side;
@@ -58,7 +58,7 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
     }
     
     @Override
-    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceDelegate<T>> update, long capacity)
+    public void handleStorageRefresh(IListenableStorage<T> sender, List<AbstractResourceDelegate<T>> update, long capacity)
     {
         this.MAP.clear();
         this.capacity = capacity;
@@ -73,7 +73,7 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
     }
 
     @Override
-    public void handleStorageUpdate(IStorage<T> sender, AbstractResourceDelegate<T> update)
+    public void handleStorageUpdate(IListenableStorage<T> sender, AbstractResourceDelegate<T> update)
     {
         AbstractResourceDelegate<T> prior = this.MAP.get(update.handle());
         if(prior != null) this.usedCapacity -= prior.quantity();
@@ -91,7 +91,7 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
     }
 
     @Override
-    public void handleStorageDisconnect(IStorage<T> storage)
+    public void handleStorageDisconnect(IListenableStorage<T> storage)
     {
         this.MAP.clear();
         this.LIST.setDelegate(Collections.emptyList());

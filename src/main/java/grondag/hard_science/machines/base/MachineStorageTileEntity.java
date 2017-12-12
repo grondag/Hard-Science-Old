@@ -1,9 +1,5 @@
 package grondag.hard_science.machines.base;
 
-/**
- * Hides the mechanics of storage access to ensure consistency of handling.
- */
-import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -95,14 +91,6 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
             result = new ItemStorage(null);
             result.setLocation(pos, world);
             DomainManager.INSTANCE.defaultDomain().itemStorage.addStore(result);
-            
-            //FIXME: remove
-            Log.info("created new storage, id = " + result.getId());
-        }
-        else
-        {
-            //FIXME: remove
-            Log.info("retrieved storage, id = " + result.getId());
         }
         return result;
     }
@@ -153,29 +141,19 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     {
         if(this.isRemote()) return;
      
-        IStorage<StorageTypeStack> store = this.getStorage();
-        
-        //FIXME: handle duplication via pickblock in create mode
-        if(store != null)
-        {
-            //FIXME: is necessary? Does getStorage always do this already?
-            DomainManager.INSTANCE.defaultDomain().itemStorage.addStore(this.getStorage());
-
-            //FIXME: remove
-            Log.info("reconnect storage id=" + this.storageID);
-        }
+        this.getStorage();
     }
     
     @Override
     public void disconnect()
     {
         if(this.isRemote()) return;
-        DomainManager.INSTANCE.defaultDomain().itemStorage.removeStore(this.storage);
         
-        //FIXME: remove
-        Log.info("disconnect id=" + this.storageID);
-        
-        this.setStorage(null);
+        if(this.storage != null)
+        {
+            DomainManager.INSTANCE.defaultDomain().itemStorage.removeStore(this.storage);
+            this.setStorage(null);
+        }
     }
 
     public boolean canInteractWith(EntityPlayer playerIn)

@@ -131,7 +131,7 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             if(nbt == null) return this.emptyResource;
             
-            return ItemResourceCache.fromStack(new ItemStack(nbt));
+            return ItemResource.fromStack(new ItemStack(nbt));
         }
 
         @Override

@@ -1,13 +1,10 @@
 package grondag.hard_science.simulator.resource;
 
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.annotation.Nullable;
 
 import com.google.common.base.Objects;
 
-import grondag.hard_science.library.concurrency.SimpleConcurrentList;
 import grondag.hard_science.library.varia.ItemHelper;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
@@ -21,28 +18,17 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
 {
-    private static AtomicInteger nextHandle = new AtomicInteger(0);
-    private static final SimpleConcurrentList<ItemResource> ALL_ITEM_RESOURCES = SimpleConcurrentList.create(null);
-    public static ItemResource byHandle(int handle)
-    {
-        if(handle < 0 || handle >= ALL_ITEM_RESOURCES.size()) 
-            return ItemResourceCache.fromStack(ItemStack.EMPTY);
-        
-        return ALL_ITEM_RESOURCES.get(handle);
-    }
-    
-    private final int handle = nextHandle.getAndIncrement();
     private Item item;
     private NBTTagCompound tag;
     private NBTTagCompound caps;
     private int meta;
+    private int hash = -1;
     
     // lazy instantiate and cache
     private ItemStack stack;
     
     /** 
      * NEVER USE DIRECTLY EXCEPT FOR UNIT TESTING.
-     * Use cached instances from ItemResourceCache.
      */
     public ItemResource(Item item, int meta, NBTTagCompound tag, NBTTagCompound caps)
     {
@@ -51,7 +37,18 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         this.tag = tag;
         this.caps = caps;
         this.stack = null;
-        ALL_ITEM_RESOURCES.add(this);
+    }
+    
+    public static ItemResource fromStack(ItemStack stack)
+    {
+        if(stack == null || stack.isEmpty()) return (ItemResource) StorageType.ITEM.emptyResource;
+        
+        Item item = stack.getItem();
+        int meta = stack.getMetadata();
+        NBTTagCompound tag = stack.getTagCompound();
+        NBTTagCompound caps = ItemHelper.itemCapsNBT(stack);
+        
+        return new ItemResource(item, meta, tag, caps);
     }
     
     /**
@@ -127,14 +124,54 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     }
 
     @Override
-    public int handle()
+    public int computeResourceHashCode()
     {
-        return this.handle;
+        int h = this.hash;
+        if(h == -1)
+        {
+            h = this.item == null ? 0 : this.item.hashCode();
+            
+            if(this.tag != null)
+            {
+                h = h * 7919 + this.tag.hashCode();
+            }
+            
+            if(this.caps != null)
+            {
+                h = h * 7919 + this.caps.hashCode();
+            }
+            
+            if(this.meta != 0) 
+            {
+                h = h * 7919 + this.meta;
+            }
+            
+            this.hash = h;
+        }
+        return h;
     }
 
     @Override
     public AbstractResourceDelegate<StorageTypeStack> getDelegate()
     {
         return null;
+    }
+    
+    @Override
+    public boolean isResourceEqual(IResource<StorageTypeStack> other)
+    {
+        if(other == this) return true;
+        if(other == null) return false;
+        if(other instanceof ItemResource)
+        {
+            ItemResource resource = (ItemResource)other;
+            boolean result = resource.item == this.item
+                && resource.meta == this.meta
+                && Objects.equal(resource.tag, this.tag)
+                && Objects.equal(resource.caps, this.caps);
+            
+            return result;
+        }
+        return false;
     }
 }

@@ -4,7 +4,6 @@ package grondag.hard_science.simulator.base;
 import org.junit.Test;
 
 import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.simulator.storage.StorageResourceManager;
@@ -16,7 +15,7 @@ public class StorageResourceManagerTest
     @Test
     public void test()
     {
-        ItemResource res = ItemResourceCache.fromStack(Items.COOKED_CHICKEN.getDefaultInstance());
+        ItemResource res = ItemResource.fromStack(Items.COOKED_CHICKEN.getDefaultInstance());
         
         ItemStorage store1 = new ItemStorage(null);
         ItemStorage store2 = new ItemStorage(null);

@@ -4,12 +4,12 @@ package grondag.hard_science.simulator.storage;
 import java.util.List;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.google.common.collect.ImmutableList;
+import org.magicwerk.brownies.collections.Key2List;
+import org.magicwerk.brownies.collections.function.IFunction;
 
-import grondag.hard_science.Log;
+import com.google.common.collect.ImmutableList;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
@@ -21,24 +21,35 @@ import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.TransportSubNet;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
 public abstract class AbstractStorage<T extends StorageType<T>> implements IStorage<T>, IDirtListener
 {
+
+    protected final static IFunction<AbstractResourceWithQuantity<?>, Integer> handleMapper
+         = new IFunction<AbstractResourceWithQuantity<?>, Integer>() {
+            @Override
+            public Integer apply(AbstractResourceWithQuantity<?> elem)
+            {
+                return elem.resource().handle();
+            }};
+    
     /**
      * All unique resources contained in this storage
      */
-    protected final SimpleUnorderedArrayList<AbstractResourceWithQuantity<T>> slots = new SimpleUnorderedArrayList<AbstractResourceWithQuantity<T>>();
-    
+    protected Key2List<AbstractResourceWithQuantity<T>, IResource<T>, Integer> slots 
+        = new Key2List.Builder<AbstractResourceWithQuantity<T>, IResource<T>, Integer>().
+              withPrimaryKey1Map(AbstractResourceWithQuantity::resource).
+              withUniqueKey2Map(handleMapper).
+              build();
+      
     protected long capacity = 2000;
     protected long used = 0;
     protected Location location;
     protected int id;
     protected StorageManager<T> owner = null;
     protected SimpleUnorderedArrayList<IStorageListener<T>> listeners = new SimpleUnorderedArrayList<IStorageListener<T>>();
-    protected TransportSubNet subnet = TransportSubNet.NONE;
     
     public AbstractStorage(@Nullable NBTTagCompound tag)
     {
@@ -63,12 +74,8 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     @Override
     public long getQuantityStored(IResource<T> resource)
     {
-        for(int i = 0; i < slots.size(); i++)
-        {
-            AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
-            if(rwq.resource().equals(resource)) return rwq.getQuantity();
-        }
-        return 0;
+        AbstractResourceWithQuantity<T> rwq = this.slots.getByKey1(resource);
+        return rwq == null ? 0 : rwq.getQuantity();
     }
     
     @Override
@@ -76,9 +83,8 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
-        for(int i = 0; i < slots.size(); i++)
+        for(AbstractResourceWithQuantity<T> rwq : this.slots)
         {
-            AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
             if(predicate.test(rwq.resource()))
             {
                 builder.add(rwq.clone());
@@ -93,12 +99,11 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         ImmutableList.Builder<AbstractResourceDelegate<T>> builder = ImmutableList.builder();
         
-        for(int i = 0; i < slots.size(); i++)
+        for(AbstractResourceWithQuantity<T> rwq : this.slots)
         {
-            AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
             if(predicate.test(rwq.resource()))
             {
-                builder.add(rwq.toDelegate());
+                builder.add(rwq.toDelegate(rwq.resource().handle()));
             }
         }
         
@@ -110,31 +115,22 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         if(limit < 1) return 0;
         
-        AbstractResourceWithQuantity<T> rwq = null;
-        int foundIndex = -1;
+        AbstractResourceWithQuantity<T> rwq = this.slots.getByKey1(resource);
+
+        if(rwq == null) return 0;
         
-        for(int i = 0; i < slots.size(); i++)
-        {
-            rwq = this.slots.get(i);
-            if(rwq != null && rwq.resource().equals(resource))
-            {
-                foundIndex = i;
-                break;
-            }
-        }
-        
-        long current = rwq == null ? 0 : rwq.getQuantity();
+        long current = rwq.getQuantity();
         
         long taken = Math.min(limit, current);
         
-        if(taken > 0 && rwq != null && !simulate)
+        if(taken > 0 && !simulate)
         {
             rwq.changeQuantity(-taken);
             this.used -= taken;
             
             if(rwq.getQuantity() == 0)
             {
-                slots.remove(foundIndex);
+                slots.removeByKey1(resource);
             }
             
             if(this.owner != null) this.owner.notifyTaken(this, resource, taken, request);
@@ -157,22 +153,17 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         if(!simulate)
         {
             long newQuantity = -1;
-            for(int i = 0; i < slots.size(); i++)
-            {
-                AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
-                if(rwq.resource().equals(resource))
-                {
-                    newQuantity = rwq.changeQuantity(added);
-                    break;
-                }
-            }
+            AbstractResourceWithQuantity<T> rwq = this.slots.getByKey1(resource);
             
-            if(newQuantity == -1)
+            if(rwq != null)
+            {
+                newQuantity = rwq.changeQuantity(added);
+            }
+            else
             {
                 this.slots.add(resource.withQuantity(added));
                 newQuantity = added;
             }
-
             
             this.used += added;
             if(this.owner != null) this.owner.notifyAdded(this, resource, added, request);
@@ -194,15 +185,12 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         {
             NBTTagList nbtContents = new NBTTagList();
             
-            for(int i = 0; i < slots.size(); i++)
+            for(AbstractResourceWithQuantity<T> rwq : this.slots)
             {
-                AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
                 nbtContents.appendTag(rwq.toNBT());
             }
             nbt.setTag(ModNBTTag.STORAGE_CONTENTS, nbtContents);
         }
-        //FIXME: remove
-        Log.info("saved storage, id = " + this.id + " used =" + this.used);
     }
     
     @Override
@@ -233,9 +221,6 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         
         /** highly unlikely we have any at this point, but... */
         this.refreshAllListeners();
-        
-        //FIXME: remove
-        Log.info("loaded storage, id = " + this.id + " used =" + this.used);
     }
 
     @Override
@@ -304,14 +289,16 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     }
     
     @Override
-    public TransportSubNet getTransportSubNet()
+    public int getHandleForResource(IResource<T> resource)
     {
-        return this.subnet;
+        AbstractResourceWithQuantity<T> rwq = this.slots.getByKey1(resource);
+        return rwq == null ? -1 : rwq.resource().handle();
     }
-    
+
     @Override
-    public void setTransportSubNet(@Nonnull TransportSubNet net)
+    public IResource<T> getResourceForHandle(int handle)
     {
-        this.subnet = net;
+        AbstractResourceWithQuantity<T> rwq = this.slots.getByKey2(handle);
+        return rwq == null ? null : rwq.resource();
     }
 }

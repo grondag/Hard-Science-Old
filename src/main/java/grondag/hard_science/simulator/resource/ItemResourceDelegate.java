@@ -6,16 +6,16 @@ import net.minecraft.item.ItemStack;
 public class ItemResourceDelegate extends AbstractResourceDelegate<StorageType.StorageTypeStack>
 {
     public static final ItemResourceDelegate EMPTY 
-     = new ItemResourceDelegate(ItemResourceCache.fromStack(ItemStack.EMPTY), 0);    
+     = new ItemResourceDelegate(-1, ItemResource.fromStack(ItemStack.EMPTY), 0);    
     
     public ItemResourceDelegate()
     {
         super();
     }
     
-    public ItemResourceDelegate(ItemResource resource, long quantity)
+    public ItemResourceDelegate(int handle, ItemResource resource, long quantity)
     {
-        super(resource, quantity, resource.sampleItemStack());
+        super(handle, quantity, resource.sampleItemStack());
     }
     
     @Override

@@ -8,7 +8,6 @@ import org.junit.Test;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.ItemResourceCache;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.simulator.storage.StorageManager;
@@ -42,9 +41,9 @@ public class ItemStorageTest
         ItemStorage store4 = new ItemStorage(null);
         store4.setCapacity(400);
         
-        ItemResource res1 = ItemResourceCache.fromStack(Items.BEEF.getDefaultInstance());
-        ItemResource res2 = ItemResourceCache.fromStack(Items.BAKED_POTATO.getDefaultInstance());
-        ItemResource res3 = ItemResourceCache.fromStack(Items.BREWING_STAND.getDefaultInstance());
+        ItemResource res1 = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
+        ItemResource res2 = ItemResource.fromStack(Items.BAKED_POTATO.getDefaultInstance());
+        ItemResource res3 = ItemResource.fromStack(Items.BREWING_STAND.getDefaultInstance());
         
         store1.add(res1, 10, false, null);
         assert store1.getQuantityStored(res1) == 10;

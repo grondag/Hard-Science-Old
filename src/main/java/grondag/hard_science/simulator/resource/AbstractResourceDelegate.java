@@ -21,9 +21,9 @@ public abstract class AbstractResourceDelegate<V extends StorageType<V>> impleme
      */
     protected AbstractResourceDelegate() {};
     
-    protected AbstractResourceDelegate(IResource<V> resource, long quantity, ItemStack displayStack)
+    protected AbstractResourceDelegate(int handle, long quantity, ItemStack displayStack)
     {
-        this.handle = resource.handle();
+        this.handle = handle;
         this.quantity = quantity;
         this.displayStack = displayStack == null ? ItemStack.EMPTY : displayStack.copy();
     }

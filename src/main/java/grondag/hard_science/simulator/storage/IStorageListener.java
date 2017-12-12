@@ -17,20 +17,20 @@ public interface IStorageListener<T extends StorageType<T>>
      * Sends entire contents of the storage.
      * Will be called after listener subscribes, or if there are mass updates afterwards.
      */
-    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceDelegate<T>> update, long capacity);
+    public void handleStorageRefresh(IListenableStorage<T> sender, List<AbstractResourceDelegate<T>> update, long capacity);
 
     /**
      * Sends updates since last refresh. Quantity replaces whatever was before.
      * Quantity 0 means item no longer present.
      */
-    void handleStorageUpdate(IStorage<T> sender, AbstractResourceDelegate<T> update);
+    void handleStorageUpdate(IListenableStorage<T> sender, AbstractResourceDelegate<T> update);
     
     
     /**
      * Will be called if the storage is destroyed or goes offline.
      * Storage will not send a refresh to remove all items - listener should handle that.
      */
-    public void handleStorageDisconnect(IStorage<T> storage);
+    public void handleStorageDisconnect(IListenableStorage<T> storage);
     
     /**
      * Used by IStorage to remove orphaned/dead listeners.
