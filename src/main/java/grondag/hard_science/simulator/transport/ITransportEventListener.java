@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.transport;
 
-import com.raoulvdberge.refinedstorage.api.network.node.INetworkNode;
 
 import grondag.hard_science.simulator.domain.DomainManager;
 
@@ -16,7 +15,7 @@ public interface ITransportEventListener
      * {@link DomainManager#isDeserializationInProgress()}
      * if you need to filter out additions during reload.
      */
-    public default void onNodeAdded(INetworkNode node) {};
+    public default void onNodeAdded(ITransportNode node) {};
     
     /**
      * Called just before a node is removed from the domain.
@@ -25,5 +24,5 @@ public interface ITransportEventListener
      * Is NOT called when a connection is broken, because the
      * node is still a domain member. 
      */
-    public default void onNodeRemoved(INetworkNode node) {};
+    public default void onNodeRemoved(ITransportNode node) {};
 }

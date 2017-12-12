@@ -26,9 +26,13 @@ archivesBaseName = "hard_science"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+// Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
 
 minecraft {
-    version = "1.12.2-14.23.0.2503"
+    version = "1.12.2-14.23.1.2562"
     runDir = "run"
     mappings = "snapshot_20171003"
     useDepAts = true
@@ -123,15 +127,15 @@ dependencies {
     //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
-    deobfCompile "mezz.jei:jei_1.12.2:4.8.0.105"
-    deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.18-10"
+    deobfCompile "mezz.jei:jei_1.12.2:4.8.5.136"
+    deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.19-11"
 
 	// not currently using these APIs
 	// here to support compatibility testing in dev environment
 	// or because thinking about using the APIs
-    deobfCompile "MCMultiPart2:MCMultiPart:2.3.2"
-    deobfCompile "mod.chiselsandbits:chiselsandbits:14.0.88" 
-    deobfCompile "refinedstorage:refinedstorage:1.5.19-1377"
+    deobfCompile "MCMultiPart2:MCMultiPart:2.3.3"
+    // deobfCompile "mod.chiselsandbits:chiselsandbits:14.0.88" 
+    // deobfCompile "refinedstorage:refinedstorage:1.5.19-1377"
     
 
     // deobfCompile "mcp.mobius.waila:Hwyla:1.8.18-B32_1.12:api"
