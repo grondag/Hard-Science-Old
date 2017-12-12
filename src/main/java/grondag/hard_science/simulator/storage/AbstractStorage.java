@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -50,6 +51,13 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     protected int id;
     protected StorageManager<T> owner = null;
     protected SimpleUnorderedArrayList<IStorageListener<T>> listeners = new SimpleUnorderedArrayList<IStorageListener<T>>();
+    
+    /**
+     * Set to true by {@link #takeUpTo(IResource, long, boolean, IProcurementRequest)}
+     * whenever an existing slot becomes empty.  Set false when 
+     * {@link #cleanupEmptySlots()} runs without any active listeners.
+     */
+    protected boolean hasEmptySlots = false;
     
     public AbstractStorage(@Nullable NBTTagCompound tag)
     {
@@ -130,17 +138,54 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             
             if(rwq.getQuantity() == 0)
             {
-                slots.removeByKey1(resource);
+                this.hasEmptySlots = true;
+                this.cleanupEmptySlots();
             }
             
-            if(this.owner != null) this.owner.notifyTaken(this, resource, taken, request);
-            this.updateListeners(resource.withQuantity(rwq.getQuantity()));
+            if(this.owner != null) this.owner.notifyTaken(this, rwq.resource(), taken, request);
+            
+            // note that we have to use the resource instance from slot
+            // for notification instead of the input resource so that
+            // resource handle matches what listener saw earlier.
+            this.updateListeners(rwq.resource().withQuantity(rwq.getQuantity()));
             this.setDirty();
         }
         
         return taken;
     }
+    
+    /**
+     * Removes all empty slots if there are no active listeners
+     * and {@link #hasEmptySlots} is true.  We do not want to
+     * remove empty slots while there are active listeners
+     * because resource handles are instance-specific and 
+     * we would lose resource handles that may be held by listeners.
+     */
+    protected synchronized void cleanupEmptySlots()
+    {
+        if(this.hasEmptySlots && this.listeners.isEmpty())
+        {
+            this.hasEmptySlots = false;
+            
+            Iterator<AbstractResourceWithQuantity<T>> iterator 
+             = this.slots.iterator();
+            while(iterator.hasNext())
+            {
+                if(iterator.next().getQuantity() == 0)
+                {
+                    iterator.remove();
+                }
+            }
+        }
+    }
 
+    @Override
+    public synchronized void removeListener(IStorageListener<T> listener)
+    {
+        IStorage.super.removeListener(listener);
+        this.cleanupEmptySlots();
+    }
+    
     @Override
     public synchronized long add(IResource<T> resource, long howMany, boolean simulate, @Nullable IProcurementRequest<T> request)
     {
@@ -161,13 +206,18 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             }
             else
             {
-                this.slots.add(resource.withQuantity(added));
+                rwq = resource.withQuantity(added);
+                this.slots.add(rwq);
                 newQuantity = added;
             }
             
             this.used += added;
-            if(this.owner != null) this.owner.notifyAdded(this, resource, added, request);
-            this.updateListeners(resource.withQuantity(newQuantity));
+            if(this.owner != null) this.owner.notifyAdded(this, rwq.resource(), added, request);
+            
+            // note that we have to use the resource instance from slot
+            // for notification instead of the input resource so that
+            // resource handle matches what listener saw earlier / will see later
+            this.updateListeners(rwq.resource().withQuantity(newQuantity));
             this.setDirty();
         }
         
