@@ -2,26 +2,24 @@ package grondag.hard_science.simulator.persistence;
 
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.storage.IStorage;
-import grondag.hard_science.simulator.storage.jobs.AbstractTask;
-import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.superblock.placement.Build;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
 {
     
-    public <T extends IIdentified> IdentifiedIndex<T> createIndex(AssignedNumber numberType)
+    public IdentifiedIndex createIndex(AssignedNumber numberType)
     {
-        return new IdentifiedIndex<T>(numberType);
+        return new IdentifiedIndex(numberType);
     }
     
-    public class IdentifiedIndex<T extends IIdentified> extends TIntObjectHashMap<T>
+    public class IdentifiedIndex extends TIntObjectHashMap<IIdentified>
     {
         public final AssignedNumber numberType;
         
@@ -30,7 +28,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
             this.numberType = numberType;
         }
         
-        public synchronized void register(T thing)
+        public synchronized void register(IIdentified thing)
         {
             IIdentified prior = this.put(thing.getId(), thing);
             
@@ -40,7 +38,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
             }
         }
         
-        public synchronized void unregister(T thing)
+        public synchronized void unregister(IIdentified thing)
         {
             IIdentified prior = this.remove(thing.getId());
             if(prior == null || !prior.equals(thing))
@@ -49,7 +47,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
             }
         }
         
-        public synchronized T get(int index)
+        public synchronized IIdentified get(int index)
         {
             return super.get(index);
         }
@@ -60,57 +58,44 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     
     private IDirtListener dirtKeeper = NullDirtListener.INSTANCE;
     
-    private final IdentifiedIndex<Domain> domainIndex;
-    private final IdentifiedIndex<IStorage<?>> storageIndex;
-    private final IdentifiedIndex<Job> jobIndex;
-    private final IdentifiedIndex<AbstractTask> taskIndex;
-    private final IdentifiedIndex<Build> buildIndex;
+    private final IdentifiedIndex[] indexes;
     
     public AssignedNumbersAuthority()
     {
-        this.domainIndex = createIndex(AssignedNumber.DOMAIN);
-        this.storageIndex = createIndex(AssignedNumber.STORAGE);
-        this.jobIndex = createIndex(AssignedNumber.JOB);
-        this.taskIndex = createIndex(AssignedNumber.TASK);
-        this.buildIndex = createIndex(AssignedNumber.BUILD);
+        this.indexes = new IdentifiedIndex[AssignedNumber.values().length];
+        for(int i = 0; i < AssignedNumber.values().length; i++)
+        {
+            this.indexes[i] = createIndex(AssignedNumber.values()[i]);
+        }
         this.clear();
+    }
+    
+    public void register(@Nonnull IIdentified registrant)
+    {
+        this.indexes[registrant.idType().ordinal()].register(registrant);
+    }
+    
+    public void unregister(@Nonnull IIdentified registrant)
+    {
+        this.indexes[registrant.idType().ordinal()].unregister(registrant);
+    }
+    
+    @Nullable
+    public IIdentified get(int id, @Nonnull AssignedNumber idType)
+    {
+        return this.indexes[idType.ordinal()].get(id);
     }
     
     public void clear()
     {
         lastID = new int[AssignedNumber.values().length];
         Arrays.fill(lastID, 999);
-        this.domainIndex.clear();
-        this.storageIndex.clear();
-        this.jobIndex.clear();
-        this.taskIndex.clear();
-        this.buildIndex.clear();
+        for(int i = 0; i < AssignedNumber.values().length; i++)
+        {
+            this.indexes[i].clear();
+        }
     }
     
-    public IdentifiedIndex<Domain> domainIndex()
-    {
-        return this.domainIndex;
-    }
-    
-    public IdentifiedIndex<Job> jobIndex()
-    {
-        return this.jobIndex;
-    }
-    
-    public IdentifiedIndex<AbstractTask> taskIndex()
-    {
-        return this.taskIndex;
-    }
-    
-    public IdentifiedIndex<IStorage<?>> storageIndex()
-    {
-        return this.storageIndex;
-    }
-    
-    public IdentifiedIndex<Build> buildIndex()
-    {
-        return this.buildIndex;
-    }
 
     /** 
      * First ID returned for each type is 1000 to allow room for system IDs.
@@ -162,6 +147,11 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     public void setDirtKeeper(IDirtKeeper keeper)
     {
         this.dirtKeeper = keeper;
+    }
+
+    public IdentifiedIndex getIndex(AssignedNumber idType)
+    {
+        return this.indexes[idType.ordinal()];
     }
     
 }

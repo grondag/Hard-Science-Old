@@ -80,7 +80,7 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     {
         Build result = new Build(this, dimensionID);
         this.builds.put(result.getId(), result);
-        domain.domainManager().assignedNumbersAuthority().buildIndex().register(result);
+        domain.domainManager().assignedNumbersAuthority().register(result);
         return result;
     }
     

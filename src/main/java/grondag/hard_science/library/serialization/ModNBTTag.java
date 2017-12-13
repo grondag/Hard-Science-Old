@@ -11,7 +11,6 @@ public class ModNBTTag
 {
     private static int nextID = 0;
 
-    public final static String ASSIGNED_IDENTIFER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String ASSIGNED_NUMBERS_AUTHORITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String BASALT_BLOCKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_USER_FLAGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

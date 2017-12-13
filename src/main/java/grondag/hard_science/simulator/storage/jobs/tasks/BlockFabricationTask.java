@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.storage.jobs.tasks;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.TaskType;
 import net.minecraft.nbt.NBTTagCompound;
@@ -58,7 +59,7 @@ public class BlockFabricationTask extends AbstractTask
     {
         if(this.procurementTask == null)
         {
-            this.procurementTask = (BlockProcurementTask) this.getDomain().domainManager().assignedNumbersAuthority().taskIndex().get(procurementTaskID);
+            this.procurementTask = (BlockProcurementTask) DomainManager.taskFromId(procurementTaskID);
         }
         return this.procurementTask;
     }

@@ -11,9 +11,20 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
+import grondag.hard_science.machines.base.IMachine;
+import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority;
+import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.jobs.AbstractTask;
+import grondag.hard_science.simulator.storage.jobs.Job;
+import grondag.hard_science.simulator.transport.ITransportNode;
+import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -83,14 +94,14 @@ public class DomainManager implements IPersistenceNode
         this.checkLoaded();
         if(this.defaultDomain == null)
         {
-            defaultDomain = this.assignedNumbersAuthority().domainIndex().get(1);
+            defaultDomain = domainFromId(1);
             if(defaultDomain == null)
             {
                 this.defaultDomain = new Domain(this);
                 this.defaultDomain.setSecurityEnabled(false);
                 this.defaultDomain.setId(IIdentified.DEFAULT_ID);
                 this.defaultDomain.setName("Public");;
-                this.assignedNumbersAuthority().domainIndex().register(defaultDomain);
+                this.assignedNumbersAuthority.register(defaultDomain);
             }
         }
         return this.defaultDomain;
@@ -101,20 +112,25 @@ public class DomainManager implements IPersistenceNode
     public List<Domain> getAllDomains()
     {
         this.checkLoaded();
-        return ImmutableList.copyOf(this.assignedNumbersAuthority().domainIndex().valueCollection());
+        ImmutableList.Builder<Domain> builder = ImmutableList.builder();
+        for (IIdentified domain : this.assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN).valueCollection())
+        {
+            builder.add((Domain)domain);
+        }
+        return builder.build();
     }
 
     public Domain getDomain(int id)
     {
         this.checkLoaded();
-        return this.assignedNumbersAuthority().domainIndex().get(id);
+        return domainFromId(id);
     }
     
     public synchronized Domain createDomain()
     {
         this.checkLoaded();
         Domain result = new Domain(this);
-        this.assignedNumbersAuthority().domainIndex().register(result);
+        this.assignedNumbersAuthority.register(result);
         result.name = "Domain " + result.id;
         this.isDirty = true;
         return result;
@@ -126,7 +142,7 @@ public class DomainManager implements IPersistenceNode
     public synchronized void removeDomain(Domain domain)
     {
         this.checkLoaded();
-        this.assignedNumbersAuthority().domainIndex().unregister(domain);
+        this.assignedNumbersAuthority().unregister(domain);
         this.isDirty = true;
     }
     
@@ -162,7 +178,7 @@ public class DomainManager implements IPersistenceNode
             for (int i = 0; i < nbtDomains.tagCount(); ++i)
             {
                 Domain domain = new Domain(this, nbtDomains.getCompoundTagAt(i));
-                this.assignedNumbersAuthority().domainIndex().put(domain.id, domain);
+                this.assignedNumbersAuthority().register(domain);
             }   
         }
         
@@ -171,7 +187,7 @@ public class DomainManager implements IPersistenceNode
         {
             for(String playerName : nbtPlayerDomains.getKeySet())
             {
-                Domain d = this.assignedNumbersAuthority().domainIndex().get(nbtPlayerDomains.getInteger(playerName));
+                Domain d = domainFromId(nbtPlayerDomains.getInteger(playerName));
                 if(d != null) this.playerIntrinsicDomains.put(playerName, d);
             }
         }
@@ -181,7 +197,7 @@ public class DomainManager implements IPersistenceNode
         {
             for(String playerName : nbtActiveDomains.getKeySet())
             {
-                Domain d = this.assignedNumbersAuthority().domainIndex().get(nbtActiveDomains.getInteger(playerName));
+                Domain d = domainFromId(nbtActiveDomains.getInteger(playerName));
                 if(d != null) this.playerActiveDomains.put(playerName, d);
             }
         }
@@ -196,11 +212,13 @@ public class DomainManager implements IPersistenceNode
         
         NBTTagList nbtDomains = new NBTTagList();
         
-        if(!this.assignedNumbersAuthority().domainIndex().isEmpty())
+        IdentifiedIndex domains = this.assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN);
+        
+        if(!domains.isEmpty())
         {
-            for (Domain domain : this.assignedNumbersAuthority().domainIndex().valueCollection())
+            for (IIdentified domain : domains.valueCollection())
             {
-                nbtDomains.appendTag(domain.serializeNBT());
+                nbtDomains.appendTag(((Domain)domain).serializeNBT());
             }
         }
         tag.setTag(ModNBTTag.DOMAIN_MANAGER_DOMAINS, nbtDomains);
@@ -312,5 +330,54 @@ public class DomainManager implements IPersistenceNode
     public boolean isDeserializationInProgress()
     {
         return this.isDeserializationInProgress;
+    }
+    
+    // convenience object lookup methods
+    public static Domain domainFromId(int id)
+    {
+        return (Domain) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.DOMAIN);
+    }
+    
+    public static IStorage<?> storageFromId(int id)
+    {
+        return (IStorage<?>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.STORAGE);
+    }
+    
+    public static IMachine machineFromId(int id)
+    {
+        return (IMachine) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.MACHINE);
+    }
+    
+    public static Job jobFromId(int id)
+    {
+        return (Job) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.JOB);
+    }
+    
+    public static AbstractTask taskFromId(int id)
+    {
+        return (AbstractTask) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TASK);
+    }
+    
+    public static Build buildFromId(int id)
+    {
+        return (Build) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.BUILD);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static ITransportNode<StorageTypeStack> itemNodeFromId(int id)
+    {
+        return (ITransportNode<StorageTypeStack>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_ITEM);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static ITransportNode<StorageTypeFluid> fluidNodeFromId(int id)
+    {
+        return (ITransportNode<StorageTypeFluid>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_FLUID);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static ITransportNode<StorageTypePower> powerNodeFromId(int id)
+    {
+        return (ITransportNode<StorageTypePower>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_POWER);
     }
 }

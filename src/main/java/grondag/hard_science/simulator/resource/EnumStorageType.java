@@ -5,6 +5,5 @@ public enum EnumStorageType
     NONE,
     ITEM,
     FLUID,
-    GAS,
     POWER
 }

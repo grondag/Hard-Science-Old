@@ -68,8 +68,6 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         {
         case FLUID:
             return null;
-        case GAS:
-            return null;
         case ITEM:
             return (StorageManager<V>) this.itemStorage;
             

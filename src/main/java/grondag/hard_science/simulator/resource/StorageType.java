@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.simulator.persistence.AssignedNumber;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -23,8 +24,6 @@ public abstract class StorageType<T extends StorageType<T>>
         {
         case FLUID:
             return StorageType.FLUID;
-        case GAS:
-            return StorageType.GAS;
         case ITEM:
             return StorageType.ITEM;
         case POWER:
@@ -39,10 +38,18 @@ public abstract class StorageType<T extends StorageType<T>>
     public final IResource<T> emptyResource;
     public final int ordinal;
     public final Predicate<IResource<T>> MATCH_ANY;
+    /**
+     * Assigned Number type for transport nodes that handle
+     * resources of this storage type. Allows serialization
+     * of these IDs without conflicts and having separate ID pools
+     * allows for more efficient look ups by ID.
+     */
+    public final AssignedNumber nodeIdType;
     
     @SuppressWarnings("unchecked")
-    private StorageType(EnumStorageType enumType)
+    private StorageType(EnumStorageType enumType, AssignedNumber nodeIdType)
     {
+        this.nodeIdType = nodeIdType;
         this.enumType = enumType;
         this.ordinal = enumType.ordinal();
         this.emptyResource = (IResource<T>) new ItemResource(ItemStack.EMPTY.getItem(), ItemStack.EMPTY.getMetadata(), null, null);
@@ -86,7 +93,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeNone NONE = new StorageTypeNone();
     public static class StorageTypeNone extends StorageType<StorageTypeNone> 
     { 
-        private StorageTypeNone() {super(EnumStorageType.NONE);}
+        private StorageTypeNone() {super(EnumStorageType.NONE, null);}
         
         @Override
         public IResource<StorageTypeNone> fromNBT(NBTTagCompound nbt)
@@ -120,7 +127,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeStack ITEM = new StorageTypeStack();
     public static class StorageTypeStack extends StorageType<StorageTypeStack> 
     { 
-        private StorageTypeStack() {super(EnumStorageType.ITEM);}
+        private StorageTypeStack() {super(EnumStorageType.ITEM, AssignedNumber.TRANSPORT_NODE_ITEM);}
         
         /**
          * Note that this expects to get an ItemStack NBT, which
@@ -161,7 +168,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeFluid FLUID = new StorageTypeFluid();
     public static class StorageTypeFluid extends StorageType<StorageTypeFluid>
     {
-        private StorageTypeFluid() {super(EnumStorageType.FLUID);}
+        private StorageTypeFluid() {super(EnumStorageType.FLUID, AssignedNumber.TRANSPORT_NODE_FLUID);}
 
         @Override
         public IResource<StorageTypeFluid> fromNBT(NBTTagCompound nbt)
@@ -192,42 +199,6 @@ public abstract class StorageType<T extends StorageType<T>>
         }
     }
     
-    /**
-     * Like fluid, but can't be stored in an open basin.
-     */
-    public static final StorageTypeGas GAS = new StorageTypeGas();
-    public static class StorageTypeGas extends StorageType<StorageTypeGas>
-    {
-        private StorageTypeGas() {super(EnumStorageType.GAS);}
-    
-        @Override
-        public IResource<StorageTypeGas> fromNBT(NBTTagCompound nbt)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public NBTTagCompound toNBT(IResource<StorageTypeGas> resource)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public AbstractResourceDelegate<StorageTypeGas> fromPacket(PacketBuffer pBuff)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public AbstractResourceWithQuantity<StorageTypeGas> fromNBTWithQty(NBTTagCompound nbt)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-    }
     
     /**
      * Must be stored in a battery.  Note that fuel is not counted as power 
@@ -236,7 +207,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypePower POWER = new StorageTypePower();
     public static class StorageTypePower extends StorageType<StorageTypePower>
     {
-        private StorageTypePower() {super(EnumStorageType.POWER);}
+        private StorageTypePower() {super(EnumStorageType.POWER, AssignedNumber.TRANSPORT_NODE_POWER);}
        
 
         @Override

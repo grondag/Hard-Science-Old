@@ -2,6 +2,7 @@ package grondag.hard_science.simulator.domain;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.superblock.placement.Build;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -104,7 +105,7 @@ public class DomainUser implements IReadWriteNBT
     public Build getActiveBuild(int dimensionID)
     {
         int buildID = this.activeBuilds.get(dimensionID);
-        Build result = DomainManager.INSTANCE.assignedNumbersAuthority().buildIndex().get(buildID);
+        Build result = (Build) DomainManager.INSTANCE.assignedNumbersAuthority().get(buildID, AssignedNumber.BUILD);
         if(result == null || !result.isOpen())
         {
             result = this.domain.buildManager.newBuild(dimensionID);

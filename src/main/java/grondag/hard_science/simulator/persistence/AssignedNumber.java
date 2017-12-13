@@ -5,9 +5,18 @@ public enum AssignedNumber
     DOMAIN,
     STORAGE,
     MACHINE,
-    NETWORK,
-    ENDPOINT,
     JOB,
     TASK, 
-    BUILD;
+    BUILD,
+    TRANSPORT_NODE_ITEM,
+    TRANSPORT_NODE_FLUID,
+    TRANSPORT_NODE_POWER;
+    
+    public final String tagName;
+    
+    private AssignedNumber()
+    {
+        this.tagName = "hsanum" + this.ordinal();
+    }
+    
 }

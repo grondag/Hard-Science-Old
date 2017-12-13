@@ -78,7 +78,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     {
         this.priority = priority;
         this.userName = player.getName();
-        DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
+        DomainManager.INSTANCE.assignedNumbersAuthority().register(this);
     }
     
     /**
@@ -357,7 +357,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         this.buildID = tag.getInteger(ModNBTTag.BUILD_ID);
         this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
         
-        DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().register(this);
+        DomainManager.INSTANCE.assignedNumbersAuthority().register(this);
         
         int readyCount = 0;
         NBTTagList nbtTasks = tag.getTagList(ModNBTTag.REQUEST_CHILDREN, 10);
@@ -525,7 +525,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     
     public Build getBuild()
     {
-        return this.getDomain().domainManager().assignedNumbersAuthority().buildIndex().get(buildID);
+        return DomainManager.buildFromId(buildID);
     }
 
     public int getDimensionID()

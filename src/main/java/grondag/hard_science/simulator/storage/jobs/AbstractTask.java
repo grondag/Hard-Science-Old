@@ -236,7 +236,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
      */
     protected synchronized void onLoaded()
     {
-        DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().register(this);
+        DomainManager.INSTANCE.assignedNumbersAuthority().register(this);
     }
     
     protected synchronized void notifyConsequentsTerminated()
@@ -371,12 +371,12 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
                         
                         if(ant == this.id)
                         {
-                            AbstractTask conReq = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(con);
+                            AbstractTask conReq = DomainManager.taskFromId(con);
                             if(conReq != null) this.consequents.add(conReq);
                         }
                         else if(con == this.id)
                         {
-                            AbstractTask antReq = DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().get(ant);
+                            AbstractTask antReq = DomainManager.taskFromId(ant);
                             if(antReq != null) this.antecedents.add(antReq);
                         }
                         

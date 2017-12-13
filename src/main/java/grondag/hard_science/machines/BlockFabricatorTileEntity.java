@@ -172,8 +172,7 @@ public class BlockFabricatorTileEntity extends MachineContainerTileEntity
     {
         if(this.task == null && this.taskID != IIdentified.UNASSIGNED_ID)
         {
-            this.task = (BlockFabricationTask) DomainManager.INSTANCE
-                    .assignedNumbersAuthority().taskIndex().get(this.taskID);
+            this.task = (BlockFabricationTask) DomainManager.taskFromId(this.taskID);
         }
         return this.task;
     }

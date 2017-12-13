@@ -17,6 +17,7 @@ import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
+import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.NullDirtListener;
 import net.minecraft.nbt.NBTBase;
@@ -215,9 +216,9 @@ public class JobManager implements IReadWriteNBT, IDomainMember
                 // clean up id registry
                 for(AbstractTask task : job)
                 {
-                    DomainManager.INSTANCE.assignedNumbersAuthority().taskIndex().unregister(task);
+                    DomainManager.INSTANCE.assignedNumbersAuthority().unregister(task);
                 }
-                DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().unregister(job);
+                DomainManager.INSTANCE.assignedNumbersAuthority().unregister(job);
             }
         });
     }
@@ -331,6 +332,6 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     public int getQueueDepth(TaskType blockFabrication)
     {
         // TODO Not a real implementation
-        return this.domain.domainManager().assignedNumbersAuthority().taskIndex().size();
+        return this.domain.domainManager().assignedNumbersAuthority().getIndex(AssignedNumber.TASK).size();
     }
 }

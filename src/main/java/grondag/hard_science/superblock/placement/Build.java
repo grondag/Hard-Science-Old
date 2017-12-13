@@ -151,7 +151,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     {
         if(this.job == null && this.jobID != IIdentified.UNASSIGNED_ID)
         {
-            this.job = DomainManager.INSTANCE.assignedNumbersAuthority().jobIndex().get(this.jobID);
+            this.job = DomainManager.jobFromId(this.jobID);
         }
         return this.job;
     }
@@ -269,7 +269,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
-        DomainManager.INSTANCE.assignedNumbersAuthority().buildIndex().register(this);
+        DomainManager.INSTANCE.assignedNumbersAuthority().register(this);
         this.jobID = tag.getInteger(ModNBTTag.BUILD_JOB_ID);
         this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
         if(tag.hasKey(ModNBTTag.BUILD_POSITIONS))

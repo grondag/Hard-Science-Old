@@ -2,6 +2,7 @@ package grondag.hard_science.simulator.storage.jobs.tasks;
 
 import javax.annotation.Nonnull;
 
+import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.StorageManager;
@@ -52,7 +53,7 @@ public class DeliveryTask<V extends StorageType<V>> extends AbstractTask
     {
         if(this.procurementTask == null)
         {
-            this.procurementTask = (ProcurementTask<V>) this.getDomain().domainManager().assignedNumbersAuthority().taskIndex().get(procurementTaskID);
+            this.procurementTask = (ProcurementTask<V>) DomainManager.taskFromId(procurementTaskID);
         }
         return this.procurementTask;
     }

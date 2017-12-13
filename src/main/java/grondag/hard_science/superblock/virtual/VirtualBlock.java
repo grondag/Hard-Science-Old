@@ -530,8 +530,7 @@ public class VirtualBlock extends SuperModelBlock
             TileEntity te = worldIn.getTileEntity(pos);
             if(te != null && te instanceof VirtualTileEntity)
             {
-                Build build = DomainManager.INSTANCE.assignedNumbersAuthority()
-                        .buildIndex().get(((VirtualTileEntity)te).buildID());
+                Build build = DomainManager.buildFromId(((VirtualTileEntity)te).buildID());
                 
                 if(build != null && build.isOpen())
                 {

@@ -54,7 +54,6 @@ public class BrokerManager implements IDomainMember
 //                    return (IBroker<T>) this.POWER_BROKER;
                     
                 case FLUID:
-                case GAS:
                 case NONE:
                 default:
                     //use per-resource default

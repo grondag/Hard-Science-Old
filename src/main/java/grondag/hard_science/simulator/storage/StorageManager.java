@@ -55,7 +55,7 @@ public abstract class StorageManager<T extends StorageType<T>> extends BaseStora
     {
         super.addStore(store);
 
-        this.domain.domainManager().assignedNumbersAuthority().storageIndex().register(store);
+        this.domain.domainManager().assignedNumbersAuthority().register(store);
         
         //TODO: add for sub networks
         
@@ -71,7 +71,7 @@ public abstract class StorageManager<T extends StorageType<T>> extends BaseStora
         //TODO: remove for sub networks
         
         store.setOwner(null);
-        this.domain.domainManager().assignedNumbersAuthority().storageIndex().unregister(store);
+        this.domain.domainManager().assignedNumbersAuthority().unregister(store);
         this.setDirty();
     }
     

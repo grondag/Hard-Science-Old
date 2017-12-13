@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.persistence;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.domain.DomainManager;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -48,7 +47,7 @@ public interface IIdentified
     public default void serializeID(NBTTagCompound tag)
     {
         int id = this.getId();
-        if(id > 0) tag.setInteger(ModNBTTag.ASSIGNED_IDENTIFER, id);
+        if(id > 0) tag.setInteger(this.idType().tagName, id);
     }
     
     /**
@@ -56,6 +55,8 @@ public interface IIdentified
      */
     public default void deserializeID(NBTTagCompound tag)
     {
-        this.setId(tag.hasKey(ModNBTTag.ASSIGNED_IDENTIFER) ? tag.getInteger(ModNBTTag.ASSIGNED_IDENTIFER) : UNASSIGNED_ID);
+        this.setId(tag.hasKey(this.idType().tagName) ? tag.getInteger(this.idType().tagName) : UNASSIGNED_ID);
     }
+    
+       
 }

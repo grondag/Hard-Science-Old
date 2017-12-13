@@ -16,8 +16,8 @@ public class AssignedNumbersAuthorityTest
         
         assert subject.newNumber(AssignedNumber.DOMAIN) == 1000;
         assert subject.newNumber(AssignedNumber.DOMAIN) == 1001;
-        assert subject.newNumber(AssignedNumber.NETWORK) == 1000;
-        assert subject.newNumber(AssignedNumber.NETWORK) == 1001;
+        assert subject.newNumber(AssignedNumber.BUILD) == 1000;
+        assert subject.newNumber(AssignedNumber.BUILD) == 1001;
         assert subject.newNumber(AssignedNumber.DOMAIN) == 1002;
         
         NBTTagCompound tag = new NBTTagCompound();
@@ -25,20 +25,20 @@ public class AssignedNumbersAuthorityTest
         subject.serializeNBT(tag);
         
         assert subject.newNumber(AssignedNumber.DOMAIN) == 1003;
-        assert subject.newNumber(AssignedNumber.NETWORK) == 1002;
-        assert subject.newNumber(AssignedNumber.ENDPOINT) == 1000;
+        assert subject.newNumber(AssignedNumber.BUILD) == 1002;
+        assert subject.newNumber(AssignedNumber.TASK) == 1000;
         
         subject.deserializeNBT(tag);
         
         assert subject.newNumber(AssignedNumber.DOMAIN) == 1003;
-        assert subject.newNumber(AssignedNumber.NETWORK) == 1002;
-        assert subject.newNumber(AssignedNumber.ENDPOINT) == 1000;
+        assert subject.newNumber(AssignedNumber.BUILD) == 1002;
+        assert subject.newNumber(AssignedNumber.TASK) == 1000;
         
         subject.deserializeNBT(new NBTTagCompound()); 
         
         assert subject.newNumber(AssignedNumber.DOMAIN) == 1000;
-        assert subject.newNumber(AssignedNumber.NETWORK) == 1000;
-        assert subject.newNumber(AssignedNumber.ENDPOINT) == 1000;
+        assert subject.newNumber(AssignedNumber.BUILD) == 1000;
+        assert subject.newNumber(AssignedNumber.TASK) == 1000;
     }
 
 }
