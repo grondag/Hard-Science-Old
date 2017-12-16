@@ -1,19 +1,18 @@
 package grondag.hard_science.volcano.lava.simulator;
 
 import java.util.Collection;
-import java.util.concurrent.Executor;
 
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.concurrency.CountedJob;
+import grondag.hard_science.library.concurrency.CountedJobTask;
 import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCollector;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.concurrency.CountedJob.CountedJobTask;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
@@ -25,8 +24,8 @@ import grondag.hard_science.volcano.lava.AgedBlockPos;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.volcano.lava.EntityLavaBlob;
 import grondag.hard_science.volcano.lava.LavaBlobManager;
-import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import grondag.hard_science.volcano.lava.LavaBlobManager.ParticleInfo;
+import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import grondag.hard_science.volcano.lava.simulator.BlockEventList.BlockEvent;
 import grondag.hard_science.volcano.lava.simulator.BlockEventList.BlockEventHandler;
 import grondag.hard_science.volcano.lava.simulator.LavaConnections.SortBucket;
@@ -42,8 +41,6 @@ import net.minecraft.world.World;
 
 public class LavaSimulator implements IPersistenceNode, ISimulationTickable
 {
-    public final Executor LAVA_THREAD_POOL;
-    
     public final PerformanceCollector perfCollectorAllTick = new PerformanceCollector("Lava Simulator Whole tick");
     public final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Lava Simulator On tick");
     public final PerformanceCollector perfCollectorOffTick = new PerformanceCollector("Lava Simulator Off tick");
@@ -229,7 +226,6 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         this.worldBuffer = new WorldStateBuffer(world, Configurator.VOLCANO.enablePerformanceLogging, perfCollectorOnTick);
         this.terrainHelper = new LavaTerrainHelper(worldBuffer);
         this.particleManager = new LavaBlobManager();
-        this.LAVA_THREAD_POOL = Simulator.SIMULATION_POOL;
         this.basaltCoolingJob = new CountedJob<AgedBlockPos>(this.basaltBlocks, this.basaltCoolingTask, 1024, 
                 Configurator.VOLCANO.enablePerformanceLogging, "Basalt Cooling", perfCollectorOnTick);    
     }
@@ -341,7 +337,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         
         this.lastEligibleBasaltCoolingTick = Simulator.INSTANCE.getTick() - BLOCK_COOLING_DELAY_TICKS;
 
-        this.basaltCoolingJob.runOn(LAVA_THREAD_POOL);
+        this.basaltCoolingJob.runOn(Simulator.SIMULATION_POOL);
         this.basaltBlocks.removeSomeDeletedItems(AgedBlockPos.REMOVAL_PREDICATE);
     }
 
@@ -541,7 +537,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         
         // This job can access world objects concurrently, however all access is 
         // read only and is synchronized by the worldBuffer.
-        this.cells.provideBlockUpdateJob.runOn(LAVA_THREAD_POOL);
+        this.cells.provideBlockUpdateJob.runOn(Simulator.SIMULATION_POOL);
         
         
         this.itMe = true;
@@ -552,7 +548,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         // validate individual cells right now. 
         // For chunks that require full validation, buffer entire chunk state.
         // Actual load/validation for full chunks can be performed post=tick.
-        this.cells.validateOrBufferChunks(LAVA_THREAD_POOL);
+        this.cells.validateOrBufferChunks(Simulator.SIMULATION_POOL);
         
         // do these on alternate ticks to help avoid ticks that are too long
         if(Simulator.INSTANCE.getTick() >= this.nextCoolTick)
@@ -561,7 +557,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
             if(this.nextCoolTickIsLava)
             {
                 this.nextCoolTickIsLava = false;
-                this.cells.doCoolingJob.runOn(LAVA_THREAD_POOL);
+                this.cells.doCoolingJob.runOn(Simulator.SIMULATION_POOL);
             }
             else
             {
@@ -571,7 +567,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         }
         
         // needs to happen after lava cooling because cooled cell have new floors
-        this.cells.updateRetentionJob.runOn(LAVA_THREAD_POOL);
+        this.cells.updateRetentionJob.runOn(Simulator.SIMULATION_POOL);
         
         // After this could be post-tick
         this.worldBuffer.isMCWorldAccessAppropriate = false;
@@ -589,22 +585,22 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     {
        if(Configurator.VOLCANO.enablePerformanceLogging) perfOffTick.startRun();
        
-       this.cells.updateSmoothedRetentionJob.runOn(LAVA_THREAD_POOL);
+       this.cells.updateSmoothedRetentionJob.runOn(Simulator.SIMULATION_POOL);
      
         // update connections as needed, handle pressure propagation, or other housekeeping
-        this.cells.updateStuffJob.runOn(LAVA_THREAD_POOL);
+        this.cells.updateStuffJob.runOn(Simulator.SIMULATION_POOL);
        
         // determines which connections can flow
         // MUST happen BEFORE connection sorting
-        this.connections.setupTickJob.runOn(LAVA_THREAD_POOL);
+        this.connections.setupTickJob.runOn(Simulator.SIMULATION_POOL);
 
         // connection sorting 
         // MUST happen AFTER all connections are updated/formed and flow direction is determined
         // If not, will include connections with a flow type of NONE and may try to output from empty cells
         // Could add a check for this, but is wasteful/impactful in hot inner loop - simply should not be there
-        this.cells.prioritizeConnectionsJob.runOn(LAVA_THREAD_POOL);
+        this.cells.prioritizeConnectionsJob.runOn(Simulator.SIMULATION_POOL);
         
-        this.connections.refreshSortBucketsIfNeeded(LAVA_THREAD_POOL);
+        this.connections.refreshSortBucketsIfNeeded(Simulator.SIMULATION_POOL);
         
         this.doFirstStep();
         
@@ -630,7 +626,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
      
 
         // Apply world events that may depend on new chunks that were just loaded
-        this.lavaAddEvents.processAllEventsOn(LAVA_THREAD_POOL);
+        this.lavaAddEvents.processAllEventsOn(Simulator.SIMULATION_POOL);
 
 
         // Apply pending lava block placements
@@ -641,7 +637,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         // extra tick to fully handle block placement events.
         // However, lava blocks are not normally expected to be placed or broken except by the simulation
         // which does not rely on world events for that purpose.
-        this.lavaBlockPlacementEvents.processAllEventsOn(LAVA_THREAD_POOL);
+        this.lavaBlockPlacementEvents.processAllEventsOn(Simulator.SIMULATION_POOL);
         
         // unload cell chunks that are no longer necessary
         // important that this run right after cell update so that
@@ -772,7 +768,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         
         for(SortBucket bucket : SortBucket.values())
         {
-            this.connections.firstStepJob[bucket.ordinal()].runOn(LAVA_THREAD_POOL);
+            this.connections.firstStepJob[bucket.ordinal()].runOn(Simulator.SIMULATION_POOL);
         }
         
         if(Configurator.VOLCANO.enableFlowTracking)
@@ -796,7 +792,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         
         for(SortBucket bucket : SortBucket.values())
         {
-            this.connections.stepJob[bucket.ordinal()].runOn(LAVA_THREAD_POOL);
+            this.connections.stepJob[bucket.ordinal()].runOn(Simulator.SIMULATION_POOL);
         }
         
         if(Configurator.VOLCANO.enableFlowTracking)

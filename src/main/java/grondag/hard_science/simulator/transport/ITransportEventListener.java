@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.transport;
 
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.L2.ITransportNode;
 
 /**
  * Implement and override the events of interest

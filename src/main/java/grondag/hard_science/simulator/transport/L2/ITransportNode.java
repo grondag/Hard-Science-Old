@@ -1,6 +1,7 @@
-package grondag.hard_science.simulator.transport;
+package grondag.hard_science.simulator.transport.L2;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
@@ -25,6 +26,11 @@ public interface ITransportNode<T extends StorageType<T>>
     {
         return this.storageType().nodeIdType;
     }
+    
+    /**
+     * Owning device
+     */
+    public IDevice device();
     
     /**
      * True if this node can transmit resources on the transport network.<p>

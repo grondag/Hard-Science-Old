@@ -8,10 +8,10 @@ import java.util.concurrent.Executor;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.concurrency.CountedJob;
+import grondag.hard_science.library.concurrency.CountedJobTask;
 import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
-import grondag.hard_science.library.concurrency.CountedJob.CountedJobTask;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.Simulator;
@@ -479,14 +479,14 @@ public class LavaCells
             // Raw retention should be mostly current, but compute for any cells
             // that were awaiting computation at last world save.
             this.sim.worldBuffer.isMCWorldAccessAppropriate = true;
-            this.updateRetentionJob.runOn(this.sim.LAVA_THREAD_POOL);
+            this.updateRetentionJob.runOn(Simulator.SIMULATION_POOL);
             this.sim.worldBuffer.isMCWorldAccessAppropriate = false;
             
             // Smoothed retention will need to be computed for all cells, but can be parallel.
-            this.updateSmoothedRetentionJob.runOn(this.sim.LAVA_THREAD_POOL);
+            this.updateSmoothedRetentionJob.runOn(Simulator.SIMULATION_POOL);
             
             // Make sure other stuff is up to date
-            this.updateStuffJob.runOn(this.sim.LAVA_THREAD_POOL);
+            this.updateStuffJob.runOn(Simulator.SIMULATION_POOL);
             
             Log.info("Loaded " + this.cellList.size() + " lava cells.");
         }

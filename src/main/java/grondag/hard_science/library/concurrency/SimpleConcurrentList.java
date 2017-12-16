@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.concurrency.CountedJob.CountedJobProviderBacker;
 
 /**
  * Provides functionality similar to an array list, but with low overhead and high concurrency 
@@ -28,7 +27,7 @@ import grondag.hard_science.library.concurrency.CountedJob.CountedJobProviderBac
  *
  */
 
-public class SimpleConcurrentList<T> implements Iterable<T>, CountedJobProviderBacker<T>
+public class SimpleConcurrentList<T> implements Iterable<T>, ICountedJobBacker
 {
     protected Object[]  items; 
     private volatile int capacity;
@@ -57,7 +56,9 @@ public class SimpleConcurrentList<T> implements Iterable<T>, CountedJobProviderB
     public PerformanceCounter removalPerfCounter() { return null; }
     
     /**
-     * @return Current number of items in the list.
+     * Current number of items in the list.  Note
+     * that it cannot be fully trusted as a limit
+     * for numeric operation due to concurrent updates.
      */
     public int size()
     {

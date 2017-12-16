@@ -1,6 +1,5 @@
-package grondag.hard_science.simulator.transport;
+package grondag.hard_science.simulator.transport.L2;
 
-import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.resource.StorageType;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -21,13 +20,6 @@ public abstract class TransportNode<T extends StorageType<T>> implements ITransp
     }
 
     @Override
-    public AssignedNumber idType()
-    {
-        return null;
-    }
-
-
-    @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
@@ -36,9 +28,6 @@ public abstract class TransportNode<T extends StorageType<T>> implements ITransp
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        // TODO Auto-generated method stub
-        
+        this.serializeID(tag);
     }
-
-
 }

@@ -3,8 +3,10 @@ package grondag.hard_science.simulator.base;
 
 import org.junit.Test;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.init.ModSuperModelBlocks;
+import grondag.hard_science.library.world.Location;
+import grondag.hard_science.simulator.device.DeviceManager;
+import grondag.hard_science.simulator.device.impl.TestDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -26,16 +28,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 /** 
- * End-to-end acceptance test for 
- * item storage, demand management, procurement systems.
+ * End-to-end acceptance test for game systems.
  * Because of run-time requirements has to be run within game.
  * And must run with -ea vm argument.
- * @author grondag
- *
  */
-public class ItemSystemTest
+public class SystemTests
 {
     Domain domain;
     ItemStorage store1;
@@ -51,6 +51,7 @@ public class ItemSystemTest
     private void setup()
     {
         DomainManager.INSTANCE.unload();
+        DeviceManager.INSTANCE.unload();
         DomainManager.INSTANCE.loadNew();
         
         domain = DomainManager.INSTANCE.createDomain();
@@ -72,6 +73,7 @@ public class ItemSystemTest
     @Test
     public void test()
     {
+        this.testSerialization();
         this.testDomainQueries();
         this.testUserExtract();
         
@@ -92,11 +94,52 @@ public class ItemSystemTest
         
         // clean up
         DomainManager.INSTANCE.unload();
-        
-        Log.info("Item System Tests Complete");
+        DeviceManager.INSTANCE.unload();
         
     }
 
+    private void testSerialization()
+    {
+        this.setup();
+        store1.add(this.beef.withQuantity(10), false, null);
+        store2.add(this.ironBlock.withQuantity(20), false, null);
+        
+        TestDevice td = new TestDevice();
+        td.setLocation(new Location(1, 2, 3, -1));
+        td.setDomain(domain);
+        
+        DeviceManager.INSTANCE.addDevice(td);
+        
+        int tdId = td.getId();
+        int storeId1 = this.store1.getId();
+        int storeId2 = this.store2.getId();
+        int domId = domain.getId();
+        
+        NBTTagCompound domTag = DomainManager.INSTANCE.serializeNBT();
+        NBTTagCompound devTag = DeviceManager.INSTANCE.serializeNBT();
+        
+        DeviceManager.INSTANCE.unload();
+        DomainManager.INSTANCE.unload();
+        
+        DomainManager.INSTANCE.deserializeNBT(domTag);
+        DeviceManager.INSTANCE.deserializeNBT(devTag);
+        
+        assert DomainManager.storageFromId(storeId1) == null;
+        assert DeviceManager.INSTANCE.getDevice(tdId) == null;
+        
+        this.store1 = (ItemStorage) DomainManager.storageFromId(storeId1);
+        this.store2 = (ItemStorage) DomainManager.storageFromId(storeId2);
+        td = (TestDevice) DeviceManager.INSTANCE.getDevice(tdId);
+        
+        assert store1.getQuantityStored(beef) == 10;
+        assert store2.getQuantityStored(ironBlock) == 20;
+        assert store1.getDomain().getId() == domId;
+        assert td.getLocation().dimensionID() == -1;
+        assert td.getLocation().getX() == 1;
+        assert td.getLocation().getY() == 2;
+        assert td.getLocation().getZ() == 3;
+    }
+    
     /**
      * Test user extraction scenarios
      */

@@ -7,51 +7,11 @@ import java.util.concurrent.RunnableFuture;
 
 public class CountedJob<V> extends Job
 {
-    public interface CountedJobProviderBacker<V>
-    {
-        /** 
-         * Returns an array where the contiguous elements from 0 to size() - 1 are operands.
-         * Array MAY BE LONGER THAN size()! 
-         */
-        public abstract Object[] getOperands();
-        public abstract int size();
-        
-    }
-    
-//    private static class MapBackerWrapper<V> implements CountedJobProviderBacker<V>
-//    {
-//        private final Map<?, V> map;
-//        
-//        private MapBackerWrapper(Map<?, V> map)
-//        {
-//            this.map = map;
-//        }
-//
-//        @Override
-//        public Object[] getOperands()
-//        {
-//            return map.values().toArray();
-//        }
-//
-//        @Override
-//        public int size()
-//        {
-//            return map.size();
-//        }
-//        
-//    }
-    
-    public interface CountedJobTask<V>
-    {
-        public abstract void doJobTask(V operand);
-    }
-    
-
-    private final CountedJobProviderBacker<V> backer;
+    private final ICountedJobBacker backer;
     private final int batchSize;
     private final CountedJobTask<V> task;
 
-    public CountedJob(CountedJobProviderBacker<V> backer, CountedJobTask<V> task, int batchSize, boolean enablePerfCounting, String jobTitle, PerformanceCollector perfCollector)
+    public CountedJob(ICountedJobBacker backer, CountedJobTask<V> task, int batchSize, boolean enablePerfCounting, String jobTitle, PerformanceCollector perfCollector)
     {
         super(enablePerfCounting, jobTitle, perfCollector);
         this.backer = backer;
@@ -59,22 +19,21 @@ public class CountedJob<V> extends Job
         this.batchSize = batchSize;
     }
     
-    public CountedJob(CountedJobProviderBacker<V> backer, CountedJobTask<V> task, int batchSize, PerformanceCounter perfCounter)
+    public CountedJob(ICountedJobBacker backer, CountedJobTask<V> task, int batchSize, PerformanceCounter perfCounter)
     {
         super(perfCounter);
         this.backer = backer;
         this.task = task;
         this.batchSize = batchSize;
     }
-//    public CountedJob(Map<?, V> backingMap, CountedJobTask<V> task, int batchSize)
-//    {
-//        this(new MapBackerWrapper<V>(backingMap), task, batchSize);
-//    }
     
+    /**
+     * Check occurs during the run.
+     */
     @Override
     public boolean canRun()
     {
-        return this.backer.size() > 0;
+        return true;
     }
 
     @Override
@@ -89,38 +48,26 @@ public class CountedJob<V> extends Job
     {
         Object[] items = backer.getOperands();
         
-        int size = backer.size();
-        if(size == 1) 
+        for(int i = 0; i < items.length; i++)
         {
-            task.doJobTask((V)items[0]);
+            if(items[i] == null) return i;
+            task.doJobTask((V)items[i]);
         }
-        else
-        {
-            for(int i = 0; i < size; i++)
-            {
-                task.doJobTask((V)items[i]);
-            }
-        }
-        return size;
+        return items.length;
     }
 
     @Override
     public int executeOn(Executor executor, List<RunnableFuture<Void>> futures)
     {
-        int size = backer.size();
         Object[] operands = backer.getOperands();
+        int size = Math.min(backer.size(), operands.length);
         
-        if(size == 1)
+        if(size == 1 || this.batchSize == 1)
         {
-            @SuppressWarnings("unchecked")
-            RunnableFuture<Void> f = new FutureTask<Void>(new SingleJobBatch((V)operands[0]), null);
-            executor.execute(f);
-            futures.add(f);
-        }
-        else if(this.batchSize == 1)
-        {
-            for(int i = 0; i < size; i++)
+            for(int i = 0; i < operands.length; i++)
             {
+                if(operands[i] == null) break;
+                
                 @SuppressWarnings("unchecked")
                 RunnableFuture<Void> f = new FutureTask<Void>(new SingleJobBatch((V)operands[i]), null);
                 executor.execute(f);
@@ -130,9 +77,9 @@ public class CountedJob<V> extends Job
         else
         {
             int start = 0;
-            while(start < size)
+            while(start < operands.length && operands[start] != null)
             {
-                int end = Math.min(size, start + batchSize);
+                int end = Math.min(operands.length, start + batchSize);
                 RunnableFuture<Void> f = new FutureTask<Void>(new CountedJobBatch(start, end, operands), null);
                 executor.execute(f);
                 start = end;
@@ -140,6 +87,7 @@ public class CountedJob<V> extends Job
             }
         }
         
+        // not exact, but close enough
         return size;
     }
     
@@ -178,6 +126,7 @@ public class CountedJob<V> extends Job
         {
             for(int i = start; i < end; i++)
             {
+                if(operands[i] == null) break;
                 task.doJobTask((V)operands[i]);
             }
         }

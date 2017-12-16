@@ -6,9 +6,9 @@ import java.util.function.Predicate;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.library.concurrency.CountedJob;
+import grondag.hard_science.library.concurrency.CountedJobTask;
 import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
-import grondag.hard_science.library.concurrency.CountedJob.CountedJobTask;
 import grondag.hard_science.simulator.Simulator;
 
 @SuppressWarnings("unused")

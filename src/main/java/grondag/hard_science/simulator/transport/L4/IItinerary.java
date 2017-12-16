@@ -1,8 +1,10 @@
-package grondag.hard_science.simulator.transport;
+package grondag.hard_science.simulator.transport.L4;
 
 import java.util.List;
 
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.TransportStatus;
+import grondag.hard_science.simulator.transport.L3.IRoute;
 
 public interface IItinerary<T extends StorageType<T>> extends IRoute<T>
 {

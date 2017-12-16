@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.PersistenceManager;
@@ -52,65 +53,65 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLoadingCallback
 {
     public static final Simulator INSTANCE = new Simulator();
-	
+
     private VolcanoManager volcanoManager;
-    
+
     private LavaSimulator lavaSimulator;
-    
+
     /**
      * General-purpose thread pool. Use for any simulation-related activity
      * so long as it doesn't have specific timing or sequencing requirements.
      */
-	public static final ExecutorService SIMULATION_POOL 
-	    = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+    public static final ExecutorService SIMULATION_POOL 
+    = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+            new ThreadFactory()
+    {
+        private AtomicInteger count = new AtomicInteger(1);
+        @Override
+        public Thread newThread(Runnable r)
+        {
+            Thread thread = new Thread(r, "Hard Science Simulation Thread -" + count.getAndIncrement());
+            thread.setDaemon(true);
+            return thread;
+        }
+    });
+
+
+    /**
+     * For simulation step control - do not use for actual work.
+     */
+    private static final ExecutorService CONTROL_THREAD = Executors.newSingleThreadExecutor(
             new ThreadFactory()
             {
                 private AtomicInteger count = new AtomicInteger(1);
                 @Override
                 public Thread newThread(Runnable r)
                 {
-                    Thread thread = new Thread(r, "Hard Science Simulation Thread -" + count.getAndIncrement());
+                    Thread thread = new Thread(r, "Hard Science Simulation Control Thread -" + count.getAndIncrement());
                     thread.setDaemon(true);
                     return thread;
                 }
             });
-    
-    
-	/**
-	 * For simulation step control - do not use for actual work.
-	 */
-	private static final ExecutorService CONTROL_THREAD = Executors.newSingleThreadExecutor(
-	        new ThreadFactory()
-	        {
-	            private AtomicInteger count = new AtomicInteger(1);
-	            @Override
-	            public Thread newThread(Runnable r)
-	            {
-	                Thread thread = new Thread(r, "Hard Science Simulation Control Thread -" + count.getAndIncrement());
-	                thread.setDaemon(true);
-	                return thread;
-	            }
-	        });
-	
-	private List<ISimulationTickable> tickables = new ArrayList<ISimulationTickable>();
-	
-	private Future<?> lastTickFuture = null;
-    
+
+    private List<ISimulationTickable> tickables = new ArrayList<ISimulationTickable>();
+
+    private Future<?> lastTickFuture = null;
+
     /** used for world time */
     private World world;
-    
+
     private boolean isDirty;
-    
+
     private volatile boolean isRunning = false;
     public boolean isRunning() { return isRunning; }
-    
+
     /** true if we've warned once about clock going backwards - prevents log spam */
     private boolean isClockSetbackNotificationNeeded = true;
-    
- //   private AtomicInteger nextNodeID = new AtomicInteger(NodeRoots.FIRST_NORMAL_NODE_ID);
-//    private static final String TAG_NEXT_NODE_ID = "nxid";
-	
-	
+
+    //   private AtomicInteger nextNodeID = new AtomicInteger(NodeRoots.FIRST_NORMAL_NODE_ID);
+    //    private static final String TAG_NEXT_NODE_ID = "nxid";
+
+
     /** 
      * Set to worldTickOffset + lastWorldTick at end of server tick.
      * If equal to currentSimTick, means simulation is caught up with world ticks.
@@ -118,31 +119,39 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     private volatile int lastSimTick = 0;
 
     /** worldTickOffset + lastWorldTick = max value of current simulation tick.
-	 * Updated on server post tick, *after* all world tick events should be submitted.
-	 */
-	private volatile long worldTickOffset = 0; 
-    
-  	// Main control
-	public void start()  
-	{
+     * Updated on server post tick, *after* all world tick events should be submitted.
+     */
+    private volatile long worldTickOffset = 0; 
+
+    // Main control
+    public void start()  
+    {
         Log.info("starting sim");
-	    synchronized(this)
-	    {
-	        this.tickables.clear();
-	        
-	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
-	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
-	        
+        synchronized(this)
+        {
+            this.tickables.clear();
+
+            // we're going to assume for now that all the dimensions we care about are using the overworld clock
+            this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
+
             if(PersistenceManager.loadNode(world, this))
             {
                 DomainManager dm = DomainManager.INSTANCE;
                 if(!PersistenceManager.loadNode(world, dm))
                 {
-                    Log.warn("Domain manager data not checked.  Some world state may be lost.");
+                    Log.warn("Domain manager data not found.  Some world state may be lost.");
                     dm.loadNew();
                     PersistenceManager.registerNode(world, dm);                   
                 }
-                
+
+                DeviceManager devMgr = DeviceManager.INSTANCE;
+                devMgr.clear();
+                if(!PersistenceManager.loadNode(world, devMgr))
+                {
+                    Log.warn("Device manager data not found.  Some world state may be lost.");
+                    PersistenceManager.registerNode(world, devMgr);                   
+                }
+
                 if(Configurator.VOLCANO.enableVolcano)
                 {
                     this.volcanoManager = new VolcanoManager();
@@ -152,60 +161,66 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                         Log.warn("Volcano manager data not checked - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.volcanoManager);
                     }
-                    
+
                     if(!PersistenceManager.loadNode(world, this.lavaSimulator))
                     {
                         Log.warn("Lava simulator data not checked - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.lavaSimulator);
                     }
                 }
+                DomainManager.INSTANCE.afterDeserialization();
+                DeviceManager.INSTANCE.afterDeserialization();
+                
             }
             else
-    	    {
+            {
                 Log.info("Creating new simulation.");
                 // Not checked, assume new game and new simulation
-    	        this.worldTickOffset = -world.getWorldTime();
-    	        this.lastSimTick = 0;
-    	        
-    	        this.setSaveDirty(true);
-    	        PersistenceManager.registerNode(world, this);
-    	        
-    	        DomainManager.INSTANCE.loadNew();
-    	        PersistenceManager.registerNode(world, DomainManager.INSTANCE);
-    	        
-    	        if(Configurator.VOLCANO.enableVolcano)
+                this.worldTickOffset = -world.getWorldTime();
+                this.lastSimTick = 0;
+
+                this.setSaveDirty(true);
+                PersistenceManager.registerNode(world, this);
+
+                DomainManager.INSTANCE.loadNew();
+                DeviceManager.INSTANCE.clear();
+                PersistenceManager.registerNode(world, DomainManager.INSTANCE);
+
+                if(Configurator.VOLCANO.enableVolcano)
                 {
                     this.volcanoManager = new VolcanoManager();
                     this.lavaSimulator = new LavaSimulator(this.world);
-        	        PersistenceManager.registerNode(world, this.volcanoManager);
-        	        PersistenceManager.registerNode(world, this.lavaSimulator);
+                    PersistenceManager.registerNode(world, this.volcanoManager);
+                    PersistenceManager.registerNode(world, this.lavaSimulator);
                 }
-    	    }
+            }
 
             if(Configurator.VOLCANO.enableVolcano)
             {
                 this.tickables.add(this.volcanoManager);
                 this.tickables.add(this.lavaSimulator);
             }
-    		this.isRunning = true;
+            this.tickables.add(DeviceManager.INSTANCE);
+            
+            this.isRunning = true;
             Log.info("starting first simulation frame");
-	    }
-	}
-	
+        }
+    }
+
     /** 
      * Called from ServerStopping event.
      * Should be no more ticks after that.
      */
-	public synchronized void stop()
-	{
+    public synchronized void stop()
+    {
         Log.info("stopping server");
-		this.isRunning = false;
-        
-		// wait for simulation to catch up
-		if(this.lastTickFuture != null && !this.lastTickFuture.isDone())
-		{
-		    Log.info("waiting for last frame task completion");
-		    try
+        this.isRunning = false;
+
+        // wait for simulation to catch up
+        if(this.lastTickFuture != null && !this.lastTickFuture.isDone())
+        {
+            Log.info("waiting for last frame task completion");
+            try
             {
                 this.lastTickFuture.get(5, TimeUnit.SECONDS);
             }
@@ -214,15 +229,16 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                 Log.warn("Timeout waiting for simulation shutdown");
                 e.printStackTrace();
             }
-		}
-		
-		this.volcanoManager = null;
-		this.lavaSimulator = null;
-		DomainManager.INSTANCE.unload();
-	    this.world = null;
-	    this.lastTickFuture = null;
-	}
-	
+        }
+
+        this.volcanoManager = null;
+        this.lavaSimulator = null;
+        DomainManager.INSTANCE.unload();
+        DeviceManager.INSTANCE.unload();
+        this.world = null;
+        this.lastTickFuture = null;
+    }
+
     public void onServerTick(ServerTickEvent event) 
     {
         if(this.isRunning)
@@ -231,7 +247,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
             {
 
                 int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
-    
+
                 // Simulation clock can't move backwards.
                 // NB: don't need CAS because only ever changed by game thread in this method
                 if(newLastSimTick > lastSimTick)
@@ -254,7 +270,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                         isClockSetbackNotificationNeeded = false;
                     }
                 }
-                
+
                 if(!Simulator.this.tickables.isEmpty())
                 {
                     for(ISimulationTickable tickable : Simulator.this.tickables)
@@ -262,7 +278,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                         tickable.doOnTick();
                     }
                 }
-                
+
                 lastTickFuture = CONTROL_THREAD.submit(this.offTickFrame);
             }
         }
@@ -275,7 +291,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         this.lastSimTick = nbt.getInteger(ModNBTTag.SIMULATION_LAST_TICK);
         this.worldTickOffset = nbt.getLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET);
     }
-  
+
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
@@ -283,13 +299,13 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         nbt.setInteger(ModNBTTag.SIMULATION_LAST_TICK, lastSimTick);
         nbt.setLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET, worldTickOffset);
     }
-    
+
     public World getWorld() { return this.world; }
     public int getTick() { return this.lastSimTick; }
-    
+
     public VolcanoManager volcanoManager() { return this.volcanoManager; }
     public LavaSimulator lavaSimulator() { return this.lavaSimulator; }
-    
+
     // Frame execution logic
     Runnable offTickFrame = new Runnable()
     {
@@ -311,10 +327,10 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                 }
             }
         }    
-     };
-    
+    };
+
     // CHUNK LOADING START UP HANDLERS
-    
+
     @Override
     public void ticketsLoaded(List<Ticket> tickets, World world)
     {
@@ -342,7 +358,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     public void setSaveDirty(boolean isDirty)
     {
         this.isDirty = true;
-        
+
     }
 
     @Override
@@ -351,5 +367,5 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         return ModNBTTag.SIMULATOR;
     }
 
- 
+
 }

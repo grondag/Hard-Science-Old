@@ -64,4 +64,11 @@ public class Log
     {
         getLog().error(message, t);
     }
+    
+    public static void error(String message, Object o1, Object o2)
+    {
+        getLog().error(message, o1, o2);
+    }
+    
+    
 }

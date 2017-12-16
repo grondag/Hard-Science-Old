@@ -50,5 +50,4 @@ public class SolarAggregatorTileEntity extends MachineTileEntity
         // TODO Auto-generated method stub
         
     }
-
 }

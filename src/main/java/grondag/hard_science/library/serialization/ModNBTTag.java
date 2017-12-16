@@ -165,4 +165,10 @@ public class ModNBTTag
 
     public static final String PREDICATE_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
+    public static final String DEVICE_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String DEVICE_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String DEVICE_MANAGER_DEVICES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
 }

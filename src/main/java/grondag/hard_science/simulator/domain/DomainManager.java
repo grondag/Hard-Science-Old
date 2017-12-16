@@ -23,7 +23,7 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.simulator.transport.ITransportNode;
+import grondag.hard_science.simulator.transport.L2.ITransportNode;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -379,5 +379,21 @@ public class DomainManager implements IPersistenceNode
     public static ITransportNode<StorageTypePower> powerNodeFromId(int id)
     {
         return (ITransportNode<StorageTypePower>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_POWER);
+    }
+
+    /**
+     * Called after all deserialization is complete during simulation reload.
+     */
+    public void afterDeserialization()
+    {
+        IdentifiedIndex domains = this.assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN);
+        
+        if(!domains.isEmpty())
+        {
+            for (IIdentified domain : domains.valueCollection())
+            {
+                ((Domain)domain).afterDeserialization();
+            }
+        }
     }
 }

@@ -56,6 +56,11 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         this.deserializeNBT(tag);
     }
     
+    public void afterDeserialization()
+    {
+        this.jobManager.afterDeserialization();
+    }
+    
     public List<DomainUser> getAllUsers()
     {
         return ImmutableList.copyOf(users.values());
@@ -208,7 +213,6 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         this.itemStorage.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_ITEM_STORAGE));
         this.jobManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
         this.buildManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_BUILD_MANAGER));
-        this.jobManager.afterDeserialization();
     }
     
     public DomainManager domainManager()

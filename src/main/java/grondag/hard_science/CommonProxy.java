@@ -1,6 +1,7 @@
 package grondag.hard_science;
 
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModDevices;
 import grondag.hard_science.init.ModEntities;
 import grondag.hard_science.init.ModRecipes;
 import grondag.hard_science.init.ModTileEntities;
@@ -9,7 +10,7 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.base.ItemResourceTest;
 import grondag.hard_science.simulator.base.ItemStorageTest;
-import grondag.hard_science.simulator.base.ItemSystemTest;
+import grondag.hard_science.simulator.base.SystemTests;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
@@ -49,6 +50,7 @@ public class CommonProxy
 
 		ModTileEntities.preInit(event);
 		ModEntities.preInit(event);
+	    ModDevices.preInit(event);
 		
         ForgeChunkManager.setForcedChunkLoadingCallback(HardScience.INSTANCE, Simulator.INSTANCE);
 	}
@@ -63,10 +65,10 @@ public class CommonProxy
 
 	public void postInit(FMLPostInitializationEvent event) 
 	{
-	    //NOOP
-        	    new ItemStorageTest().test();
-        	    new ItemResourceTest().test();
-        	    new ItemSystemTest().test();
+    	    new ItemStorageTest().test();
+    	    new ItemResourceTest().test();
+    	    new SystemTests().test();
+        Log.info("In-Game System Tests Complete");
 	}
 
     public void serverStarted(FMLServerStartedEvent event)

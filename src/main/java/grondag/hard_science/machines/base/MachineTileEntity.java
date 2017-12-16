@@ -26,7 +26,6 @@ import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListe
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
@@ -685,12 +684,6 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
         return this.machineName;
     }
     
-    @Override
-    public AssignedNumber idType()
-    {
-        return AssignedNumber.MACHINE;
-    }
-
     /**
      * Handles packet from player to toggle power on or off.
      * Returns false if denied.

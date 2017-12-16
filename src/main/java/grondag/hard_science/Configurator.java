@@ -495,6 +495,12 @@ public class Configurator
                   "Lower values may improve performance in worlds with many machines."})
         @RangeInt(min = 5, max = 16)
         public int machineMaxRenderDistance = 8;
+
+        @RequiresMcRestart
+        @Comment({"If true, machine simulation will periodically output performance statistics to log.",
+            "Does cause minor additional overhead and log spam so should generally only be enabled for testing.",
+            "Turning this off does NOT disable the minimal performance counting needed to detect simulation overload."})
+        public boolean enablePerformanceLogging = false;
         
         public static int machineKeepAlivePlusLatency;
         
