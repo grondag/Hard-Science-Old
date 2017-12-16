@@ -13,7 +13,6 @@ import grondag.hard_science.library.concurrency.SimpleCountedJobBacker;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.ISimulationTickable;
-import grondag.hard_science.simulator.device.impl.TestDevice;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.transport.L1.IConnector;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -90,6 +89,45 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         return device;
     }
     
+    public static IDevice getDevice(int deviceId)
+    {
+        return INSTANCE.devices.get(deviceId);
+    }
+    
+    public static void addDevice(IDevice device)
+    {
+        INSTANCE.addDeviceInconveniently(device);
+    }
+    
+    public static void addOrUpdateConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
+    {
+        INSTANCE.addOrUpdateConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
+    }
+    
+    @Nullable
+    public static IConnector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
+    {
+        return INSTANCE.getConnectorInconveniently(dimensionID, packedBlockPos, face);
+    }
+    
+    @Nullable
+    public static IConnector getConnector(World world, BlockPos pos, @Nonnull EnumFacing face)
+    {
+        return INSTANCE.getConnectorInconveniently(world, pos, face);
+    }
+    
+    /**
+     * See {@link #removeConnectorInconveniently(int, long, EnumFacing, IConnector)}
+     */
+    public static void removeConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
+    {
+        INSTANCE.removeConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
+    }
+    
+    public static void removeDevice(IDevice device)
+    {
+        INSTANCE.removeDeviceInconveniently(device);
+    }
     
     ///////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
@@ -164,7 +202,7 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         }
     }
     
-    public void addDevice(IDevice device)
+    public void addDeviceInconveniently(IDevice device)
     {
         assert this.devices.put(device.getId(), device) == null
                 : "Duplicate device registration.";
@@ -174,9 +212,10 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         device.onConnect();
     }
     
-    public void removeDevice(IDevice device)
+    public void removeDeviceInconveniently(IDevice device)
     {
         IDevice oldDevice = this.devices.remove(device.getId());
+        device.onDisconnect();
         assert oldDevice == device
                 : oldDevice == null 
                     ? "Removal request for missing device." 
@@ -187,13 +226,13 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     }
     
     @Nullable
-    public IConnector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
+    public IConnector getConnectorInconveniently(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
     {
         return this.deviceBlocks.getConnector(dimensionID, packedBlockPos, face);
     }
     
     @Nullable
-    public IConnector getConnector(World world, BlockPos pos, @Nonnull EnumFacing face)
+    public IConnector getConnectorInconveniently(World world, BlockPos pos, @Nonnull EnumFacing face)
     {
         return this.deviceBlocks.getConnector(
                 world.provider.getDimension(), 
@@ -205,7 +244,7 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
      * Should be called by devices during {@link IDevice#onConnect()}
      * or whenever a connected device adds or changes a connection. 
      */
-    public void addOrUpdateConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
+    public void addOrUpdateConnectorInconveniently(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
     {
         this.deviceBlocks.addOrUpdateConnector(dimensionID, packedBlockPos, face, connector);
         this.isDirty = true;
@@ -216,7 +255,7 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
      * or whenever a connected device removes a connection. 
      * Prior connection information is for assertion checking in test/dev env.
      */
-    public void removeConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
+    public void removeConnectorInconveniently(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
     {
         this.deviceBlocks.removeConnector(dimensionID, packedBlockPos, face, connector);
         this.isDirty = true;
@@ -312,11 +351,6 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     {
         // TODO Auto-generated method stub
         
-    }
-
-    public IDevice getDevice(int deviceId)
-    {
-        return this.devices.get(deviceId);
     }
 
 }

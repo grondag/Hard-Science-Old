@@ -44,7 +44,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     Domain (DomainManager domainManager)
     {
         this.domainManager = domainManager;    
-        this.itemStorage = StorageManager.itemStorage(this);
+        this.itemStorage = new StorageManager<StorageTypeStack>(StorageType.ITEM, this);
         this.jobManager = new JobManager(this);
         this.buildManager = new BuildManager(this);
         this.brokerManager = new BrokerManager(this);
@@ -188,7 +188,6 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         }
         tag.setTag(ModNBTTag.DOMAIN_USERS, nbtUsers);
         
-        tag.setTag(ModNBTTag.DOMAIN_ITEM_STORAGE, this.itemStorage.serializeNBT());
         tag.setTag(ModNBTTag.DOMAIN_JOB_MANAGER, this.jobManager.serializeNBT());
         tag.setTag(ModNBTTag.DOMAIN_BUILD_MANAGER, this.buildManager.serializeNBT());
     }
@@ -210,7 +209,6 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
             }   
         }
         
-        this.itemStorage.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_ITEM_STORAGE));
         this.jobManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
         this.buildManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_BUILD_MANAGER));
     }

@@ -17,8 +17,8 @@ public class StorageResourceManagerTest
     {
         ItemResource res = ItemResource.fromStack(Items.COOKED_CHICKEN.getDefaultInstance());
         
-        ItemStorage store1 = new ItemStorage(null);
-        ItemStorage store2 = new ItemStorage(null);
+        ItemStorage store1 = new ItemStorage();
+        ItemStorage store2 = new ItemStorage();
         
 //        BlockProcurementTask task = new BlockProcurementTask();
         

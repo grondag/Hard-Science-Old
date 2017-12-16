@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.base;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -25,8 +26,6 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
-    /** -1 signifies not loaded */
-    private int storageID = -1; 
     
     private IStorage<StorageType.StorageTypeStack> storage;
     
@@ -41,7 +40,6 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     private void setStorage(IStorage<StorageType.StorageTypeStack> storage)
     {
         this.storage = storage;
-        this.storageID = storage == null ? -1 : storage.getId();
         this.markDirty();
     }
 
@@ -70,16 +68,17 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     {
         IStorage<StorageTypeStack> result = null;
         
-        if(this.storageID > 0)
+        if(this.getId() > 0)
         {
-            result = (IStorage<StorageTypeStack>) DomainManager.storageFromId(this.storageID);
+            result = (IStorage<StorageTypeStack>) DeviceManager.getDevice(this.getId());
         }
         
         if(result == null)
         {
             if(this.loadedStorageNBT != null && !this.loadedStorageNBT.hasNoTags())
             {
-                result = new ItemStorage(this.loadedStorageNBT);
+                result = new ItemStorage();
+                result.deserializeID(this.loadedStorageNBT);
                 result.setLocation(this.pos, this.world);
             }
         }
@@ -88,7 +87,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         
         if(result == null)
         {
-            result = new ItemStorage(null);
+            result = new ItemStorage();
             result.setLocation(pos, world);
             DomainManager.INSTANCE.defaultDomain().itemStorage.addStore(result);
         }
@@ -113,7 +112,6 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         if(!this.isRemote())
         {
             NBTTagCompound serverTag = getServerTag(compound);
-            this.storageID = serverTag.getInteger(ModNBTTag.STORAGE_ID);
             this.loadedStorageNBT = serverTag.getCompoundTag(ModNBTTag.STORAGE_CONTENTS).copy();
         }
     }
@@ -126,7 +124,6 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         if(!this.world.isRemote)
         {
             NBTTagCompound serverTag = getServerTag(compound);
-            serverTag.setInteger(ModNBTTag.STORAGE_ID, this.storageID);
             // save stored items
             IStorage<StorageTypeStack> store = this.getStorage();
             if(store != null)

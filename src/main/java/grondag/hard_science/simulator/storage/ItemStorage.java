@@ -7,7 +7,6 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;
 
 /**
@@ -18,11 +17,6 @@ import net.minecraftforge.items.IItemHandler;
  */
 public class ItemStorage extends AbstractStorage<StorageTypeStack> implements IItemHandler
 {
-    public ItemStorage(NBTTagCompound nbt) 
-    {
-        super(nbt);
-    }
-
     @Override
     public StorageTypeStack storageType()
     {

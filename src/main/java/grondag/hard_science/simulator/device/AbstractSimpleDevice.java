@@ -58,12 +58,7 @@ public abstract class AbstractSimpleDevice implements IDevice
     {
         this.domainID = domain == null ? IIdentified.UNASSIGNED_ID : domain.getId();
         this.domain = domain;
-        this.markDirty();
-    }
-
-    public void markDirty()
-    {
-        DeviceManager.INSTANCE.setDirty();
+        this.setDirty();
     }
     
     @Override

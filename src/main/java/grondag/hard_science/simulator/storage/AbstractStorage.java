@@ -16,9 +16,8 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.device.AbstractSimpleDevice;
 import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
@@ -26,7 +25,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class AbstractStorage<T extends StorageType<T>> implements IStorage<T>, IDirtListener
+public abstract class AbstractStorage<T extends StorageType<T>> extends AbstractSimpleDevice implements IStorage<T>
 {
 
     protected final static IFunction<AbstractResourceWithQuantity<?>, Integer> handleMapper
@@ -50,6 +49,9 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     protected long used = 0;
     protected Location location;
     protected int id;
+    /** 
+     * Currently connected storage manage. Null if not connected.
+     */
     protected StorageManager<T> owner = null;
     protected SimpleUnorderedArrayList<IStorageListener<T>> listeners = new SimpleUnorderedArrayList<IStorageListener<T>>();
     
@@ -60,24 +62,25 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
      */
     protected boolean hasEmptySlots = false;
     
-    public AbstractStorage(@Nullable NBTTagCompound tag)
-    {
-        if(tag != null)
-        {
-            this.deserializeNBT(tag);
-        }
-    }
     
     @Override
-    public Domain getDomain()
+    public void setDomain(Domain domain)
     {
-        return this.owner == null ? null : this.owner.getDomain();
-    }
-
-    @Override
-    public void setOwner(StorageManager<T> owner)
-    {
-        this.owner = owner;
+        // if already connected, switch to new domain
+       if(this.owner != null)
+       {
+           this.owner.removeStore(this);
+           if(domain == null)
+           {
+               this.owner = null;
+           }
+           else
+           {
+               this.owner = domain.getStorageManager(this.storageType());
+               this.owner.addStore(this);
+           }
+       }
+       super.setDomain(domain);
     }
     
     @Override
@@ -228,8 +231,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
-        this.serializeID(nbt);
-        this.serializeLocation(nbt);
+        super.serializeNBT(nbt);
         nbt.setLong(ModNBTTag.STORAGE_CAPACITY, this.capacity);
         
         if(!this.slots.isEmpty())
@@ -247,8 +249,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
-        this.deserializeID(nbt);
-        this.deserializeLocation(nbt);
+        super.deserializeNBT(nbt);
         this.setCapacity(nbt.getLong(ModNBTTag.STORAGE_CAPACITY));
         
         this.slots.clear();
@@ -292,51 +293,11 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         return this.used;
     }
-
-    @Override
-    public void setLocation(Location location)
-    {
-        this.location = location;
-        // no bookkeeping change, but force world save
-        this.setDirty();
-    }
-    
-    @Override
-    public Location getLocation()
-    {
-        return this.location;
-    }
-  
-    @Override
-    public void setId(int id)
-    {
-        this.id = id;
-        // no bookkeeping change, but force world save
-        this.setDirty();
-    }
-    
-    @Override
-    public int getIdRaw()
-    {
-        return this.id;
-    }
-
-    @Override
-    public AssignedNumber idType()
-    {
-        return AssignedNumber.STORAGE;
-    }
     
     @Override
     public SimpleUnorderedArrayList<IStorageListener<T>> listeners()
     {
         return this.listeners;
-    }
-    
-    @Override
-    public void setDirty()
-    {
-        if(this.owner != null) this.owner.setDirty();
     }
     
     @Override
@@ -351,5 +312,24 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         AbstractResourceWithQuantity<T> rwq = this.slots.getByKey2(handle);
         return rwq == null ? null : rwq.resource();
+    }
+    
+    @Override
+    public void onConnect()
+    {
+        assert this.owner == null
+                : "Storage connect request when already connected.";
+        
+        this.owner = this.getDomain().getStorageManager(this.storageType());
+        this.owner.addStore(this);
+    }
+
+    @Override
+    public void onDisconnect()
+    {
+        assert this.owner != null
+                : "Storage disconnect request when not connected";
+        this.owner.removeStore(this);
+        this.owner = null;
     }
 }

@@ -37,7 +37,7 @@ public class Drone implements IMachine, IReadWriteNBT
     @Override
     public AssignedNumber idType()
     {
-        return AssignedNumber.MACHINE;
+        return AssignedNumber.DEVICE;
     }
 
     @Override
@@ -63,12 +63,6 @@ public class Drone implements IMachine, IReadWriteNBT
         this.setDirty();
     }
 
-
-    private void setDirty()
-    {
-        // TODO Auto-generated method stub
-        
-    }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)

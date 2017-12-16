@@ -3,8 +3,7 @@ package grondag.hard_science.simulator.persistence;
 public enum AssignedNumber
 {
     DOMAIN,
-    STORAGE,
-    MACHINE,
+    DEVICE,
     JOB,
     TASK, 
     BUILD,

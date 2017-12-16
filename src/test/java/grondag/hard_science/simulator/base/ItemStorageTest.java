@@ -5,6 +5,8 @@ import java.util.function.Predicate;
 
 import org.junit.Test;
 
+import grondag.hard_science.library.world.Location;
+import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -27,19 +29,13 @@ public class ItemStorageTest
         
         Domain d = dm.createDomain();
         
-        StorageManager<StorageTypeStack> ism = StorageManager.itemStorage(d);
+        StorageManager<StorageTypeStack> ism = d.itemStorage;
         
-        ItemStorage store1 = new ItemStorage(null);
+        ItemStorage store1 = new ItemStorage();
         store1.setCapacity(100);
-        
-        ItemStorage store2 = new ItemStorage(null);
-        store2.setCapacity(200);
-        
-        ItemStorage store3 = new ItemStorage(null);
-        store3.setCapacity(300);
-        
-        ItemStorage store4 = new ItemStorage(null);
-        store4.setCapacity(400);
+        store1.setDomain(d);
+        store1.setLocation(new Location(1, 1, 1, 1));
+        DeviceManager.addDevice(store1);
         
         ItemResource res1 = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
         ItemResource res2 = ItemResource.fromStack(Items.BAKED_POTATO.getDefaultInstance());
@@ -52,36 +48,38 @@ public class ItemStorageTest
         store1.add(res1, 10, false, null);
         assert store1.add(res1, 1000, true, null) == 80;
         
-        // TODO: should fail
         assert store1.getQuantityStored(res1) == 20;
         assert store1.availableCapacity() == 80;
         
         store1.add(res2, 22, false, null);
         store1.add(res3, 33, false, null);
         
-        store2.deserializeNBT(store1.serializeNBT());
+        assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1);
+        assert ism.getCapacity() == store1.getCapacity();
+        assert ism.availableCapacity() == store1.availableCapacity();
         
-        assert store1.availableCapacity() == store2.availableCapacity();
-        assert store1.getQuantityStored(res1) == store2.getQuantityStored(res1);
-        assert store1.getQuantityStored(res2) == store2.getQuantityStored(res2);
-        assert store1.getQuantityStored(res3) == store2.getQuantityStored(res3);
-
-        store2 = new ItemStorage(null);
+        ItemStorage store2 = new ItemStorage();
         store2.setCapacity(200);
+        store2.setDomain(d);
+        store2.setLocation(new Location(2, 1, 1, 1));
+        DeviceManager.addDevice(store2);
+        
+        ItemStorage store3 = new ItemStorage();
+        store3.setCapacity(300);
+        store3.setDomain(d);
+        store3.setLocation(new Location(3, 1, 1, 1));
+        DeviceManager.addDevice(store3);
+        
+        ItemStorage store4 = new ItemStorage();
+        store4.setCapacity(400);
+        store4.setDomain(d);
+        store4.setLocation(new Location(4, 1, 1, 1));
+        DeviceManager.addDevice(store4);
         
         store2.add(res2, 100, false, null);
         store3.add(res1, 100, false, null);
         store3.add(res2, 100, false, null);
         store3.add(res3, 100, false, null);
-        
-        ism.addStore(store1);
-        assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1);
-        assert ism.getCapacity() == store1.getCapacity();
-        assert ism.availableCapacity() == store1.availableCapacity();
-        
-        ism.addStore(store2);
-        ism.addStore(store3);
-        ism.addStore(store4);
         
         assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1) + store2.getQuantityStored(res1) + store3.getQuantityStored(res1);
         assert ism.getQuantityStored(res2) == store1.getQuantityStored(res2) + store2.getQuantityStored(res2) + store3.getQuantityStored(res2);
@@ -125,36 +123,38 @@ public class ItemStorageTest
         assert findList.get(2).resource.equals(res1);
         assert findList.get(0).quantity + findList.get(1).quantity + findList.get(2).quantity == ism.getQuantityStored(res1);
         
-        dm.setSaveDirty(false);
+        DeviceManager.INSTANCE.setSaveDirty(false);
         assert store3.takeUpTo(res1, 1, false, null) == 1;
-        assert dm.isSaveDirty();
+        assert DeviceManager.INSTANCE.isSaveDirty();
 
-        dm.setSaveDirty(false);
+        DeviceManager.INSTANCE.setSaveDirty(false);
         long oldCapacity = ism.getCapacity();
         long oldAvailable = ism.availableCapacity();
-        ism.removeStore(store1);
+        DeviceManager.removeDevice(store1);
         
-        assert dm.isSaveDirty();
+        assert DeviceManager.INSTANCE.isSaveDirty();
         assert ism.getCapacity() == oldCapacity - store1.getCapacity();
         assert ism.availableCapacity() == oldAvailable - store1.availableCapacity();
         assert ism.getQuantityStored(res1) == store2.getQuantityStored(res1) + store3.getQuantityStored(res1);
 
-        ism.addStore(store1);
+        DeviceManager.addDevice(store1);
         assert ism.getCapacity() == oldCapacity ;
         assert ism.availableCapacity() == oldAvailable;
         assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1) + store2.getQuantityStored(res1) + store3.getQuantityStored(res1);
         
         dm.loadNew();
-        StorageManager<StorageTypeStack> ism2 = StorageManager.itemStorage(dm.defaultDomain());
-        ism2.deserializeNBT(ism.serializeNBT());
-        assert ism2.availableCapacity() == ism.availableCapacity();
-        assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2);
-        store4.add(res2, 7, false, null);
-        assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2) - 7;
+
+        // serialization moved to device manager because storage is now a device
+//        StorageManager<StorageTypeStack> ism2 = new StorageManager<StorageTypeStack>(StorageType.ITEM, dm.defaultDomain());
+//        ism2.deserializeNBT(ism.serializeNBT());
+//        assert ism2.availableCapacity() == ism.availableCapacity();
+//        assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2);
+//        store4.add(res2, 7, false, null);
+//        assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2) - 7;
         
         
         // IItemHandler tests
-        ItemStorage ihStore = new ItemStorage(null);
+        ItemStorage ihStore = new ItemStorage();
         ihStore.setCapacity(64);
         assert ihStore.getSlots() == 1;
         assert ihStore.getSlotLimit(0) == 64;

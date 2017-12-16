@@ -72,7 +72,6 @@ public class DomainUser implements IReadWriteNBT
             }
             nbt.setIntArray(ModNBTTag.BUILD_ID, buildData);
         }
-        this.domain.itemStorage.serializeNBT(nbt);
     }
 
     @Override
@@ -93,8 +92,6 @@ public class DomainUser implements IReadWriteNBT
                 }
             }
         }
-                
-        this.domain.itemStorage.deserializeNBT(nbt);
     }
     
     /**

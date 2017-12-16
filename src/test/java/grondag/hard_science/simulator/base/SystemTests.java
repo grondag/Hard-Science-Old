@@ -56,11 +56,13 @@ public class SystemTests
         
         domain = DomainManager.INSTANCE.createDomain();
         
-        store1 = new ItemStorage(null);
-        domain.itemStorage.addStore(store1);
+        store1 = new ItemStorage();
+        store1.setDomain(domain);
+        DeviceManager.addDevice(store1);
         
-        store2 = new ItemStorage(null);
-        domain.itemStorage.addStore(store2);
+        store2 = new ItemStorage();
+        store2.setDomain(domain);
+        DeviceManager.addDevice(store2);
         
         beef = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
         ironIngot = ItemResource.fromStack(Items.IRON_INGOT.getDefaultInstance());
@@ -108,7 +110,7 @@ public class SystemTests
         td.setLocation(new Location(1, 2, 3, -1));
         td.setDomain(domain);
         
-        DeviceManager.INSTANCE.addDevice(td);
+        DeviceManager.addDevice(td);
         
         int tdId = td.getId();
         int storeId1 = this.store1.getId();
@@ -121,15 +123,20 @@ public class SystemTests
         DeviceManager.INSTANCE.unload();
         DomainManager.INSTANCE.unload();
         
+        assert DeviceManager.getDevice(storeId1) == null;
+        assert DeviceManager.getDevice(tdId) == null;
+
         DomainManager.INSTANCE.deserializeNBT(domTag);
         DeviceManager.INSTANCE.deserializeNBT(devTag);
+        // normally called by simulator
+        DomainManager.INSTANCE.afterDeserialization();
+        DeviceManager.INSTANCE.afterDeserialization();
         
-        assert DomainManager.storageFromId(storeId1) == null;
-        assert DeviceManager.INSTANCE.getDevice(tdId) == null;
+        domain = DomainManager.domainFromId(domId);
         
-        this.store1 = (ItemStorage) DomainManager.storageFromId(storeId1);
-        this.store2 = (ItemStorage) DomainManager.storageFromId(storeId2);
-        td = (TestDevice) DeviceManager.INSTANCE.getDevice(tdId);
+        this.store1 = (ItemStorage) DeviceManager.getDevice(storeId1);
+        this.store2 = (ItemStorage) DeviceManager.getDevice(storeId2);
+        td = (TestDevice) DeviceManager.getDevice(tdId);
         
         assert store1.getQuantityStored(beef) == 10;
         assert store2.getQuantityStored(ironBlock) == 20;
@@ -138,7 +145,14 @@ public class SystemTests
         assert td.getLocation().getX() == 1;
         assert td.getLocation().getY() == 2;
         assert td.getLocation().getZ() == 3;
-    }
+        
+        assert domain.itemStorage.availableCapacity() 
+            == store1.availableCapacity() + store2.availableCapacity();
+        
+        assert domain.itemStorage.getQuantityStored(beef) == 10;
+        assert domain.itemStorage.getQuantityStored(ironBlock) == 20;
+        
+    } 
     
     /**
      * Test user extraction scenarios

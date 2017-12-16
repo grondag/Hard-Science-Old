@@ -54,8 +54,6 @@ public class ModNBTTag
     public final static String SIMULATOR = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String STORAGE_CAPACITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String STORAGE_CONTENTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String STORAGE_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String STORAGE_MANAGER_STORES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SUPER_MODEL_SUBSTANCE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String VOLCANO_BUILD_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String VOLCANO_CLEARING_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

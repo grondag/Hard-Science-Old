@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
-import grondag.hard_science.machines.base.IMachine;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
@@ -20,7 +19,6 @@ import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.Job;
 import grondag.hard_science.simulator.transport.L2.ITransportNode;
@@ -336,16 +334,6 @@ public class DomainManager implements IPersistenceNode
     public static Domain domainFromId(int id)
     {
         return (Domain) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.DOMAIN);
-    }
-    
-    public static IStorage<?> storageFromId(int id)
-    {
-        return (IStorage<?>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.STORAGE);
-    }
-    
-    public static IMachine machineFromId(int id)
-    {
-        return (IMachine) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.MACHINE);
     }
     
     public static Job jobFromId(int id)

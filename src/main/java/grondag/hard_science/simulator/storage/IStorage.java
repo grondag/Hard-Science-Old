@@ -5,23 +5,17 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 
 public interface IStorage<T extends StorageType<T>>
-    extends IReadWriteNBT, ILocated, IDomainMember, 
-        ISizedContainer, ITypedStorage<T>, IIdentified, IListenableStorage<T>
+    extends IDevice, ISizedContainer, ITypedStorage<T>, IListenableStorage<T>
 {
     long getQuantityStored(IResource<T> resource);
-    
-    void setOwner(StorageManager<T> owner);
     
     default boolean isResourceAllowed(IResource<T> resource) { return true; }
     

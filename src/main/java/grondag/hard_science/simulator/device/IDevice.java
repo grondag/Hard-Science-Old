@@ -10,7 +10,8 @@ import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 
-public interface IDevice extends IIdentified, ILocated, IDomainMember, ISimulationTickable, IReadWriteNBT
+public interface IDevice extends 
+    IIdentified, ILocated, IDomainMember, ISimulationTickable, IReadWriteNBT
 {
     public default boolean doesPersist() { return true; }
     
@@ -40,7 +41,7 @@ public interface IDevice extends IIdentified, ILocated, IDomainMember, ISimulati
     @Override
     public default AssignedNumber idType()
     {
-        return AssignedNumber.MACHINE;
+        return AssignedNumber.DEVICE;
     }
     
     /**
@@ -50,5 +51,10 @@ public interface IDevice extends IIdentified, ILocated, IDomainMember, ISimulati
     {
         long l = Useful.longHash(this.getLocation().world().getSeed() ^ this.getId());
         return Base32Namer.makeName(l, Configurator.MACHINES.filterOffensiveMachineNames);
+    }
+    
+    public default void setDirty()
+    {
+        DeviceManager.INSTANCE.setDirty();
     }
 }
