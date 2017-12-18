@@ -13,6 +13,7 @@ import grondag.hard_science.library.concurrency.SimpleCountedJobBacker;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.ISimulationTickable;
+import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.transport.L1.IConnector;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -30,12 +31,18 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     //  STATIC MEMBERS
     ///////////////////////////////////////////////////////////
 
-    public static final DeviceManager INSTANCE = new DeviceManager();
+    public static final DeviceManager RAW_INSTANCE_DO_NOT_USE = new DeviceManager();
  
     private static final int BATCH_SIZE = 100;
     
     private static final RegistryNamespaced < ResourceLocation, Class <? extends IDevice >> REGISTRY = new RegistryNamespaced < ResourceLocation, Class <? extends IDevice >> ();
 
+    public static DeviceManager instance()
+    {
+        Simulator.loadSimulatorIfNotLoaded();
+        return RAW_INSTANCE_DO_NOT_USE;
+    }
+    
     public static void register(String id, Class <? extends IDevice > clazz)
     {
         REGISTRY.putObject(new ResourceLocation(id), clazz);
@@ -91,29 +98,29 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     
     public static IDevice getDevice(int deviceId)
     {
-        return INSTANCE.devices.get(deviceId);
+        return instance().devices.get(deviceId);
     }
     
     public static void addDevice(IDevice device)
     {
-        INSTANCE.addDeviceInconveniently(device);
+        instance().addDeviceInconveniently(device);
     }
     
     public static void addOrUpdateConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
     {
-        INSTANCE.addOrUpdateConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
+        instance().addOrUpdateConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
     }
     
     @Nullable
     public static IConnector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
     {
-        return INSTANCE.getConnectorInconveniently(dimensionID, packedBlockPos, face);
+        return instance().getConnectorInconveniently(dimensionID, packedBlockPos, face);
     }
     
     @Nullable
     public static IConnector getConnector(World world, BlockPos pos, @Nonnull EnumFacing face)
     {
-        return INSTANCE.getConnectorInconveniently(world, pos, face);
+        return instance().getConnectorInconveniently(world, pos, face);
     }
     
     /**
@@ -121,16 +128,16 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
      */
     public static void removeConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
     {
-        INSTANCE.removeConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
+        instance().removeConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
     }
     
     public static void removeDevice(IDevice device)
     {
-        INSTANCE.removeDeviceInconveniently(device);
+        instance().removeDeviceInconveniently(device);
     }
     
     ///////////////////////////////////////////////////////////
-    //  INSTANCE MEMBERS
+    //  RAW_INSTANCE_DO_NOT_USE MEMBERS
     ///////////////////////////////////////////////////////////
     
     private final Int2ObjectOpenHashMap<IDevice> devices =

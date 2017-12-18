@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.AbstractMachine;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class PowerReceiver extends AbstractPowerComponent
@@ -68,7 +68,7 @@ public class PowerReceiver extends AbstractPowerComponent
     }
 
     @Override
-    protected long provideEnergyImplementation(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate)
+    protected long provideEnergyImplementation(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate)
     {
         // TODO: once power networks exist, need to actually draw power from them...
         return maxOutput;

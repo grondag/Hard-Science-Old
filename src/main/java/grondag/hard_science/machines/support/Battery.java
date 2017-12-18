@@ -2,7 +2,7 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.AbstractMachine;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 
@@ -125,7 +125,7 @@ public class Battery extends AbstractPowerComponent
     }
 
     @Override
-    protected long provideEnergyImplementation(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate)
+    protected long provideEnergyImplementation(AbstractMachine mte, long maxOutput, boolean allowPartial, boolean simulate)
     {
         // note that update tracking, and check against per-tick max has already been done by caller
         

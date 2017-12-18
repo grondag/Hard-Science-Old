@@ -55,6 +55,6 @@ public interface IDevice extends
     
     public default void setDirty()
     {
-        DeviceManager.INSTANCE.setDirty();
+        DeviceManager.instance().setDirty();
     }
 }

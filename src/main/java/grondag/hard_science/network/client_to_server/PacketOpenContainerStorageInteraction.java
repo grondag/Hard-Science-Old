@@ -3,8 +3,7 @@ package grondag.hard_science.network.client_to_server;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.machines.base.MachineContainer;
-import grondag.hard_science.machines.base.MachineContainerTileEntity;
-import grondag.hard_science.machines.base.MachineStorageTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.EnumStorageType;
@@ -93,10 +92,10 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     @Override
     protected void handle(PacketOpenContainerStorageInteraction message, EntityPlayerMP player)
     {
-        MachineContainerTileEntity te = MachineContainer.getOpenContainerTileEntity(player);
-        if(te == null || !(te instanceof MachineStorageTileEntity)) return;
+        MachineTileEntity te = MachineContainer.getOpenContainerTileEntity(player);
+        if(te == null || !(te instanceof MachineTileEntity)) return;
         
-        IStorage<StorageTypeStack> storage =  ((MachineStorageTileEntity)te).getStorage();
+        IStorage<StorageTypeStack> storage =  ((MachineTileEntity)te).storageMachine();
         if(storage == null) return;
 
         if(storage.storageType() != StorageType.ITEM) return;

@@ -10,7 +10,6 @@ import net.minecraft.util.text.translation.I18n;
 
 public class MachinePowerUsage extends AbstractMachineControl<MachinePowerUsage, RadialRenderBounds>
 {
-    
     public MachinePowerUsage(MachineTileEntity tileEntity, RadialRenderBounds bounds)
     {
         super(tileEntity, bounds);
@@ -20,14 +19,16 @@ public class MachinePowerUsage extends AbstractMachineControl<MachinePowerUsage,
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         ArrayList<String> list = new ArrayList<String>(3);
-        list.add(I18n.translateToLocalFormatted("machine.power_out", this.tileEntity.getPowerSupply().powerOutputWatts()));
+        list.add(I18n.translateToLocalFormatted("machine.power_out", 
+                this.tileEntity.clientState().powerSupply.powerOutputWatts()));
         renderContext.drawToolTip(list, mouseX, mouseY);
     }
 
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderPower(this.renderBounds, this.tileEntity.getPowerSupply(), this.tileEntity, 0xFF);
+        MachineControlRenderer.renderPower(this.renderBounds, 
+                this.tileEntity.clientState().powerSupply, this.tileEntity, 0xFF);
     }
 
     @Override

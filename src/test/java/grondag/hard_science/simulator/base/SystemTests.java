@@ -50,11 +50,11 @@ public class SystemTests
 
     private void setup()
     {
-        DomainManager.INSTANCE.unload();
-        DeviceManager.INSTANCE.unload();
-        DomainManager.INSTANCE.loadNew();
+        DomainManager.instance().unload();
+        DeviceManager.instance().unload();
+        DomainManager.instance().loadNew();
         
-        domain = DomainManager.INSTANCE.createDomain();
+        domain = DomainManager.instance().createDomain();
         
         store1 = new ItemStorage();
         store1.setDomain(domain);
@@ -95,8 +95,8 @@ public class SystemTests
         // concurrency/load tests
         
         // clean up
-        DomainManager.INSTANCE.unload();
-        DeviceManager.INSTANCE.unload();
+        DomainManager.instance().unload();
+        DeviceManager.instance().unload();
         
     }
 
@@ -117,20 +117,20 @@ public class SystemTests
         int storeId2 = this.store2.getId();
         int domId = domain.getId();
         
-        NBTTagCompound domTag = DomainManager.INSTANCE.serializeNBT();
-        NBTTagCompound devTag = DeviceManager.INSTANCE.serializeNBT();
+        NBTTagCompound domTag = DomainManager.instance().serializeNBT();
+        NBTTagCompound devTag = DeviceManager.instance().serializeNBT();
         
-        DeviceManager.INSTANCE.unload();
-        DomainManager.INSTANCE.unload();
+        DeviceManager.instance().unload();
+        DomainManager.instance().unload();
         
         assert DeviceManager.getDevice(storeId1) == null;
         assert DeviceManager.getDevice(tdId) == null;
 
-        DomainManager.INSTANCE.deserializeNBT(domTag);
-        DeviceManager.INSTANCE.deserializeNBT(devTag);
+        DomainManager.instance().deserializeNBT(domTag);
+        DeviceManager.instance().deserializeNBT(devTag);
         // normally called by simulator
-        DomainManager.INSTANCE.afterDeserialization();
-        DeviceManager.INSTANCE.afterDeserialization();
+        DomainManager.instance().afterDeserialization();
+        DeviceManager.instance().afterDeserialization();
         
         domain = DomainManager.domainFromId(domId);
         

@@ -18,7 +18,7 @@ public class MachineCMYGauge extends AbstractMachineControl<MachineCMYGauge, Rad
     public MachineCMYGauge(MachineTileEntity tileEntity, int cyanIndex, int magentaIndex, int yellowIndex, RadialRenderBounds spec)
     {
         super(tileEntity, spec);
-        MaterialBufferManager mbm = tileEntity.getBufferManager();
+        MaterialBufferManager mbm = tileEntity.clientState().bufferManager;
         if(mbm == null || cyanIndex >= mbm.bufferCount() || magentaIndex >= mbm.bufferCount() || yellowIndex >= mbm.bufferCount()) 
         {
             Log.warn("Machine CMY gauge GUI could not be initialized.  Bad buffer of buffer index.");

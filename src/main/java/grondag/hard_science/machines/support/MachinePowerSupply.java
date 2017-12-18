@@ -2,7 +2,7 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.AbstractMachine;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 /**
@@ -61,12 +61,12 @@ public class MachinePowerSupply implements IMachinePowerProvider
     public Battery battery() { return this.battery; };
     public PowerReceiver powerReceiver() { return this.powerReceiver; }; 
  
-
-    public boolean canProvideEnergy(MachineTileEntity mte)
+    @Override
+    public boolean canProvideEnergy(AbstractMachine machine)
     {
-        return      (this.powerReceiver != null && this.powerReceiver.canProvideEnergy(mte)) 
-                ||  (this.fuelCell != null && this.fuelCell.canProvideEnergy(mte))
-                ||  (this.battery != null && this.battery.canProvideEnergy(mte));
+        return      (this.powerReceiver != null && this.powerReceiver.canProvideEnergy(machine)) 
+                ||  (this.fuelCell != null && this.fuelCell.canProvideEnergy(machine))
+                ||  (this.battery != null && this.battery.canProvideEnergy(machine));
     }
     
     @Override
@@ -104,7 +104,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
      * Will combine output from multiple sources if necessary.
      */
     @Override
-    public long provideEnergy(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate)
+    public long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate)
     {
         // prevent shenannigans/derpage
         if(maxOutput <= 0) return 0; 
@@ -114,13 +114,13 @@ public class MachinePowerSupply implements IMachinePowerProvider
         // if not accepting partial fulfillment, have to simulate all results first
         if(!allowPartial)
         {
-            result = provideEnergyInner(mte, maxOutput, true);
+            result = provideEnergyInner(machine, maxOutput, true);
             if(result != maxOutput) return 0;
-            if(!simulate) result = provideEnergyInner(mte, maxOutput, false);
+            if(!simulate) result = provideEnergyInner(machine, maxOutput, false);
         }
         else
         {
-            result = provideEnergyInner(mte, maxOutput, simulate);
+            result = provideEnergyInner(machine, maxOutput, simulate);
         }
         
         // forgive self for prior failures if managed to do something this time
@@ -129,17 +129,17 @@ public class MachinePowerSupply implements IMachinePowerProvider
         return result;
     }
     
-    private long provideEnergyInner(MachineTileEntity mte, long maxOutput, boolean simulate)
+    private long provideEnergyInner(AbstractMachine machine, long maxOutput, boolean simulate)
     {
-        long result = this.powerReceiver == null ? 0 : this.powerReceiver.provideEnergy(mte, maxOutput, true, simulate);
+        long result = this.powerReceiver == null ? 0 : this.powerReceiver.provideEnergy(machine, maxOutput, true, simulate);
         
         if(result < maxOutput)
         {
-            result += this.fuelCell == null ? 0 : this.fuelCell.provideEnergy(mte, maxOutput - result, true, simulate);
+            result += this.fuelCell == null ? 0 : this.fuelCell.provideEnergy(machine, maxOutput - result, true, simulate);
             
             if(result < maxOutput && this.battery != null)
             {
-                result += this.battery.provideEnergy(mte, maxOutput - result, true, simulate);
+                result += this.battery.provideEnergy(machine, maxOutput - result, true, simulate);
             }
         }
         
@@ -238,13 +238,13 @@ public class MachinePowerSupply implements IMachinePowerProvider
     }
 
     @Override
-    public boolean tick(MachineTileEntity mte, long tick)
+    public boolean tick(AbstractMachine machine, long tick)
     {
         boolean didChange = false;
         boolean canBatteryCharge = this.battery != null && this.battery.canAcceptEnergy();
         
         // if machine is off, nothing to do unless we are going to recharge the battery
-        if(canBatteryCharge || mte.isOn())
+        if(canBatteryCharge || machine.isOn())
         {
             // Generate power to recharge battery if needed.
             // Do this before we clear per-tick limits so we don't 
@@ -257,7 +257,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
                 {
                     if(this.powerReceiver != null)
                     {
-                        long joulesAvailable = this.powerReceiver.provideEnergy(mte, joulesNeeded, true, false);
+                        long joulesAvailable = this.powerReceiver.provideEnergy(machine, joulesNeeded, true, false);
                         if(joulesAvailable > 0)
                         {
                             didChange = true;
@@ -271,7 +271,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
                     
                     if(joulesNeeded > 0 && this.fuelCell != null)
                     {
-                        long joulesAvailable = this.fuelCell.provideEnergy(mte, joulesNeeded, true, false);
+                        long joulesAvailable = this.fuelCell.provideEnergy(machine, joulesNeeded, true, false);
                         if(joulesAvailable > 0)
                         {
                             didChange = true;

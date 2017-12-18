@@ -19,6 +19,7 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     public long[] materialBufferData;
     public MachineStatusState statusState;
     public ByteBuf powerProviderData;
+    public String machineName;
     
     public PacketMachineStatusUpdateListener() {}
    
@@ -26,17 +27,19 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     public PacketMachineStatusUpdateListener(MachineTileEntity te)
     {
         this.pos = te.getPos();
-        this.controlState = te.getControlState();
-        this.statusState = te.getStatusState();
+        this.controlState = te.machine().getControlState();
+        this.statusState = te.machine().getStatusState();
         
         if(this.controlState.hasMaterialBuffer()) 
-            this.materialBufferData = te.getBufferManager().serializeToArray();
+            this.materialBufferData = te.machine().getBufferManager().serializeToArray();
         
         if(this.controlState.hasPowerSupply())
         {
             this.powerProviderData = Unpooled.buffer();
-            te.getPowerSupply().toBytes(this.powerProviderData);
+            te.machine().getPowerSupply().toBytes(this.powerProviderData);
         }
+        
+        this.machineName = te.machine().machineName();
     }
 
     @Override
@@ -66,7 +69,7 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
                 pBuff.readBytes(this.powerProviderData, byteCount);
             }
         }
-        
+        this.machineName = pBuff.readString(8);
     }
 
     @Override
@@ -91,6 +94,8 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
             pBuff.writeVarInt(this.powerProviderData.readableBytes());
             pBuff.writeBytes(this.powerProviderData);
         }
+        
+        pBuff.writeString(this.machineName);
     }
 
     @Override

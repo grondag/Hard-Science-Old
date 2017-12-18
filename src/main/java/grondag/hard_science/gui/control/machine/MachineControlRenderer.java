@@ -20,9 +20,11 @@ import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.Battery;
 import grondag.hard_science.machines.support.FuelCell;
+import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.materials.MatterColors;
@@ -44,7 +46,10 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class MachineControlRenderer
 {
     
@@ -711,18 +716,19 @@ public class MachineControlRenderer
     {
         renderProgress(bounds, te, alpha);
         
-        if(te.getMachineState() == MachineState.FABRICATING)
+        if(te.clientState().controlState.getMachineState() == MachineState.FABRICATING)
         {
-            MachineControlRenderer.renderItem(tessellator, buffer, bounds.innerBounds(), te.getStatusStack(), alpha);
+            MachineControlRenderer.renderItem(tessellator, buffer, bounds.innerBounds(), te.clientState().getStatusStack(), alpha);
         }
-        else if(!te.isOn()) 
+        else if(!te.clientState().isOn()) 
             return;
         else 
         {
             MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, (int)(CommonProxy.currentTimeMillis() & 2047) * 360 / 2048, 30, 
                     Textures.MACHINE_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
 
-            if(te.getMachineState() == MachineState.THINKING && te.getBufferManager().hasFailureCauseClientSideOnly() && MachineControlRenderer.warningLightBlinkOn())
+            if(te.clientState().controlState.getMachineState() == MachineState.THINKING 
+                    && te.clientState().bufferManager.hasFailureCauseClientSideOnly() && MachineControlRenderer.warningLightBlinkOn())
             {
                 MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), 
                         Textures.DECAL_MATERIAL_SHORTAGE.getSampleSprite(), alpha << 24 | 0xFFFF40, Rotation.ROTATE_NONE);
@@ -756,7 +762,7 @@ public class MachineControlRenderer
             MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
             // render level
-            int arcLength = (int)(mps.powerOutputWatts() * 270 / mte.maxPowerConsumptionWatts());
+            int arcLength = (int)(mps.powerOutputWatts() * 270 / mte.clientState().maxPowerConsumptionWatts);
             renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | 0xFFFFBF);
 
             if(mps.isFailureCause() && warningLightBlinkOn())
@@ -881,23 +887,24 @@ public class MachineControlRenderer
     public static void renderProgress(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds.RadialRenderBounds bounds, MachineTileEntity te, int alpha)
     {
         int duration, remaining, arcLength;
-
-        if(te.hasBacklog())
+        
+        MachineStatusState statusState = te.clientState().statusState;
+        if(statusState.hasBacklog())
         {    
-            duration = te.getMaxBacklog();
-            remaining = te.getCurrentBacklog();
+            duration = statusState.getMaxBacklog();
+            remaining = statusState.getCurrentBacklog();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
             MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, Textures.MACHINE_GAUGE_MAIN, alpha << 24 | 0x40FF40);
         }
 
-        if(te.hasJobTicks())
+        MachineControlState controlState = te.clientState().controlState;
+        if(controlState.hasJobTicks())
         {    
-            duration = te.getJobDurationTicks();
-            remaining = te.getJobRemainingTicks();
+            duration = controlState.getJobDurationTicks();
+            remaining = controlState.getJobRemainingTicks();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
             MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, Textures.MACHINE_GAUGE_INNER, alpha << 24 | 0x40FFFF);
         }
-
     }
 
     public static boolean warningLightBlinkOn()
@@ -929,7 +936,7 @@ public class MachineControlRenderer
         }
         
         /** Can look away from a machine for five seconds before flow tracking turns off to save CPU */
-        if(CommonProxy.currentTimeMillis() - te.lastInViewMillis < 5000)
+        if(CommonProxy.currentTimeMillis() - te.lastInViewMillis() < 5000)
         {
             // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
             final float deltaIn = materialBuffer.getDeltaIn();
@@ -1196,10 +1203,10 @@ public class MachineControlRenderer
             int displayAlpha)
     {
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, boundsRedstone, 
-                mte.hasRedstonePowerSignal() ? ModModels.SPRITE_REDSTONE_TORCH_LIT : ModModels.SPRITE_REDSTONE_TORCH_UNLIT, 
+                mte.clientState().statusState.hasRedstonePower() ? ModModels.SPRITE_REDSTONE_TORCH_LIT : ModModels.SPRITE_REDSTONE_TORCH_UNLIT, 
                 (displayAlpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
-        if(!mte.isRedstoneControlEnabled()) 
+        if(!mte.clientState().isRedstoneControlEnabled()) 
         {
             MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, boundsRedstone, 
                     Textures.DECAL_NO.getSampleSprite(), (displayAlpha << 24) | ModModels.COLOR_NO, Rotation.ROTATE_NONE);

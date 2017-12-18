@@ -2,7 +2,7 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.AbstractMachine;
 
 //FIXME: remove cruft
 
@@ -34,7 +34,7 @@ public interface IMachinePowerProvider extends IReadWriteNBT, IMessagePlus
      * True if provider is actually able to provide power right now.
      * If false, any attempt to extract power will receive a zero result.
      */
-    public boolean canProvideEnergy(MachineTileEntity mte);
+    public boolean canProvideEnergy(AbstractMachine machine);
     
     /**
      * Consumes energy from this provider. 
@@ -54,7 +54,7 @@ public interface IMachinePowerProvider extends IReadWriteNBT, IMessagePlus
      *            
      * @return Energy extracted (or that would have been have been extracted, if simulated) in joules.
      */
-    long provideEnergy(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate);
+    long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate);
 
     /**
      * True if this provider's (low) level has recently caused a 
@@ -176,5 +176,5 @@ public interface IMachinePowerProvider extends IReadWriteNBT, IMessagePlus
       * On server, regenerates power from PE and handles other housekeeping.
       * Returns true if internal state was modified and should be sent to client and/or persisted.
       */
-     boolean tick(MachineTileEntity machineTileEntity, long tick);
+     boolean tick(AbstractMachine machine, long tick);
 }

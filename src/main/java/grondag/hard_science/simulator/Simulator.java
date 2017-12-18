@@ -22,9 +22,10 @@ import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.volcano.lava.simulator.VolcanoManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.world.storage.MapStorage;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 
@@ -52,8 +53,11 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
  */
 public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLoadingCallback
 {
-    public static final Simulator INSTANCE = new Simulator();
-
+    /**
+     * Only use if need a reference before it starts.
+     */
+    public static final Simulator RAW_INSTANCE_DO_NOT_USE = new Simulator();
+    
     private VolcanoManager volcanoManager;
 
     private LavaSimulator lavaSimulator;
@@ -63,7 +67,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
      * so long as it doesn't have specific timing or sequencing requirements.
      */
     public static final ExecutorService SIMULATION_POOL 
-    = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+        = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
             new ThreadFactory()
     {
         private AtomicInteger count = new AtomicInteger(1);
@@ -122,88 +126,93 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
      * Updated on server post tick, *after* all world tick events should be submitted.
      */
     private volatile long worldTickOffset = 0; 
-
-    // Main control
-    public void start()  
+    
+    private void start()  
     {
-        Log.info("starting sim");
         synchronized(this)
         {
-            this.tickables.clear();
-
+            Log.info("Simulator initialization started.");
+    
             // we're going to assume for now that all the dimensions we care about are using the overworld clock
-            this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
+            this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worlds[0];
+        
+            this.tickables.clear();
+            
+            MapStorage mapStore = this.world.getMapStorage();
+            DeviceManager devMgr = DeviceManager.RAW_INSTANCE_DO_NOT_USE;
+            DomainManager dm = DomainManager.RAW_INSTANCE_DO_NOT_USE;
 
-            if(PersistenceManager.loadNode(world, this))
+            if(Configurator.VOLCANO.enableVolcano)
             {
-                DomainManager dm = DomainManager.INSTANCE;
-                if(!PersistenceManager.loadNode(world, dm))
+                this.volcanoManager = new VolcanoManager();
+                this.lavaSimulator = new LavaSimulator(this.world);
+            }
+            
+            if(PersistenceManager.loadNode(mapStore, this))
+            {
+                if(!PersistenceManager.loadNode(mapStore, dm))
                 {
                     Log.warn("Domain manager data not found.  Some world state may be lost.");
                     dm.loadNew();
-                    PersistenceManager.registerNode(world, dm);                   
+                    PersistenceManager.registerNode(mapStore, dm);                   
                 }
 
-                DeviceManager devMgr = DeviceManager.INSTANCE;
                 devMgr.clear();
-                if(!PersistenceManager.loadNode(world, devMgr))
+                if(!PersistenceManager.loadNode(mapStore, devMgr))
                 {
                     Log.warn("Device manager data not found.  Some world state may be lost.");
-                    PersistenceManager.registerNode(world, devMgr);                   
+                    PersistenceManager.registerNode(mapStore, devMgr);                   
                 }
 
                 if(Configurator.VOLCANO.enableVolcano)
                 {
-                    this.volcanoManager = new VolcanoManager();
-                    this.lavaSimulator = new LavaSimulator(this.world);
-                    if(!PersistenceManager.loadNode(world, this.volcanoManager))
+                    if(!PersistenceManager.loadNode(mapStore, this.volcanoManager))
                     {
-                        Log.warn("Volcano manager data not checked - recreating.  Some world state may be lost.");
-                        PersistenceManager.registerNode(world, this.volcanoManager);
+                        Log.warn("Volcano manager data not found - recreating.  Some world state may be lost.");
+                        PersistenceManager.registerNode(mapStore, this.volcanoManager);
                     }
-
-                    if(!PersistenceManager.loadNode(world, this.lavaSimulator))
+        
+                    if(!PersistenceManager.loadNode(mapStore, this.lavaSimulator))
                     {
-                        Log.warn("Lava simulator data not checked - recreating.  Some world state may be lost.");
-                        PersistenceManager.registerNode(world, this.lavaSimulator);
+                        Log.warn("Lava simulator data not found - recreating.  Some world state may be lost.");
+                        PersistenceManager.registerNode(mapStore, this.lavaSimulator);
                     }
                 }
-                DomainManager.INSTANCE.afterDeserialization();
-                DeviceManager.INSTANCE.afterDeserialization();
                 
+                dm.afterDeserialization();
+                devMgr.afterDeserialization();
             }
             else
             {
                 Log.info("Creating new simulation.");
-                // Not checked, assume new game and new simulation
-                this.worldTickOffset = -world.getWorldTime();
-                this.lastSimTick = 0;
+                
+                // Assume new game and new simulation
+                this.lastSimTick = 0; 
+                this.worldTickOffset = -this.world.getWorldTime();
 
                 this.setSaveDirty(true);
-                PersistenceManager.registerNode(world, this);
+                PersistenceManager.registerNode(mapStore, this);
 
-                DomainManager.INSTANCE.loadNew();
-                DeviceManager.INSTANCE.clear();
-                PersistenceManager.registerNode(world, DomainManager.INSTANCE);
-
+                dm.loadNew();
+                devMgr.clear();
+                PersistenceManager.registerNode(mapStore, dm);
+                PersistenceManager.registerNode(mapStore, devMgr);
+                
                 if(Configurator.VOLCANO.enableVolcano)
                 {
-                    this.volcanoManager = new VolcanoManager();
-                    this.lavaSimulator = new LavaSimulator(this.world);
-                    PersistenceManager.registerNode(world, this.volcanoManager);
-                    PersistenceManager.registerNode(world, this.lavaSimulator);
+                    PersistenceManager.registerNode(mapStore, this.volcanoManager);
+                    PersistenceManager.registerNode(mapStore, this.lavaSimulator);
                 }
             }
-
+ 
+            this.tickables.add(devMgr);
             if(Configurator.VOLCANO.enableVolcano)
             {
                 this.tickables.add(this.volcanoManager);
                 this.tickables.add(this.lavaSimulator);
             }
-            this.tickables.add(DeviceManager.INSTANCE);
             
-            this.isRunning = true;
-            Log.info("starting first simulation frame");
+            Log.info("Simulator initialization complete. Simulator running.");
         }
     }
 
@@ -233,8 +242,8 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
 
         this.volcanoManager = null;
         this.lavaSimulator = null;
-        DomainManager.INSTANCE.unload();
-        DeviceManager.INSTANCE.unload();
+        DomainManager.RAW_INSTANCE_DO_NOT_USE.unload();
+        DeviceManager.RAW_INSTANCE_DO_NOT_USE.unload();
         this.world = null;
         this.lastTickFuture = null;
     }
@@ -243,6 +252,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     {
         if(this.isRunning)
         {
+           
             if(lastTickFuture == null || lastTickFuture.isDone())
             {
 
@@ -367,5 +377,32 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         return ModNBTTag.SIMULATOR;
     }
 
+    public static Simulator instance()
+    {
+        loadSimulatorIfNotLoaded();
+        return RAW_INSTANCE_DO_NOT_USE;
+        
+    }
 
+    /**
+     * Simulator is lazily loaded because needs world to be loaded
+     * but is also referenced by tile entities during chunk load.
+     * No forge event that lets us load after worlds loaded but
+     * before chunk loading, so using first reference as the trigger.
+     */
+    public static void loadSimulatorIfNotLoaded()
+    {
+        // If called from world thread before loaded,
+        // want to block and complete loading before return.
+        // However, if the load process (running on the calling
+        // thread) makes a re-entrant call we want to return the 
+        // instance so that loading can progress.
+        
+        if(RAW_INSTANCE_DO_NOT_USE.isRunning) return;
+        synchronized(RAW_INSTANCE_DO_NOT_USE)
+        {
+            RAW_INSTANCE_DO_NOT_USE.isRunning = true;
+            RAW_INSTANCE_DO_NOT_USE.start();
+        }
+    }
 }

@@ -16,8 +16,6 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
-import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -32,7 +30,6 @@ import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
-import grondag.hard_science.superblock.virtual.VirtualItemBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
@@ -45,7 +42,6 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -846,42 +842,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         //which is then cached, leading to strange render problems for blocks just placed up updated.
         IBlockState goodState = world.getBlockState(pos);
 
-        ItemStack picked = getStackFromBlock(goodState, world, pos);
-        
-        // logic for TE blocks has to be in parent so that virtual blocks can take advantage of it
-        if(this.hasTileEntity(state))
-        {
-            TileEntity myTE = world.getTileEntity(pos);
-            if(myTE != null && myTE instanceof SuperModelTileEntity)
-            {
-                
-                PlacementItem.setStackLightValue(picked, ((SuperModelTileEntity)myTE).getLightValue());
-                PlacementItem.setStackSubstance(picked, ((SuperModelTileEntity)myTE).getSubstance());
-            }
-        }
-   
-        // for virtual blocks only, take appearance of picked virtual block
-        if(!player.capabilities.isCreativeMode && world.isRemote 
-                && Minecraft.getMinecraft().gameSettings.keyBindPickBlock.isKeyDown()) 
-        {
-            if(!picked.isEmpty())
-            {
-                ItemStack heldStack = player.getHeldItemMainhand();
-                
-                if(heldStack.getItem() instanceof VirtualItemBlock)
-                {
-                    PlacementItem.setStackModelState(heldStack, PlacementItem.getStackModelState(picked));
-                    PlacementItem.setStackLightValue(heldStack, PlacementItem.getStackLightValue(picked));
-                    PlacementItem.setStackSubstance(heldStack, PlacementItem.getStackSubstance(picked));
-                    ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(heldStack));
-                }
-            }
-            return ItemStack.EMPTY;
-        }
-        else
-        {
-            return picked;
-        }
+        return getStackFromBlock(goodState, world, pos);
     }
    
     /**

@@ -191,7 +191,9 @@ public class SuperTileEntity extends TileEntity
     }
     
     /**
-     * Restores all state previously serialized by {@link #writeModNBT(NBTTagCompound)}
+     * Restores all state previously serialized by {@link #writeModNBT(NBTTagCompound)}<p>
+     * 
+     * Note: important that tags used here match those used PlacementItem helper methods.
      */
     public void readModNBT(NBTTagCompound compound)
     {
@@ -201,7 +203,9 @@ public class SuperTileEntity extends TileEntity
     
     /**
      * Stores all state for this mod to the given tag.
-     * Used internally for serialization but can also be used to restore state from ItemStack
+     * Used internally for serialization but can also be used to restore state from ItemStack<p>
+     * 
+     * Note: important that tags used here match those used PlacementItem helper methods
      */
     public void writeModNBT(NBTTagCompound compound)
     {

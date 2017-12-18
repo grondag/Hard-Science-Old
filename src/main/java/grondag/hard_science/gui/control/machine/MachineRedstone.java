@@ -44,8 +44,8 @@ public class MachineRedstone extends AbstractMachineControl<MachineRedstone, Rad
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         renderContext.drawLocalizedToolTip(mouseX, mouseY,
-                this.tileEntity.isRedstoneControlEnabled() ? "machine.redstone_enabled" : "machine.redstone_disabled",
-                this.tileEntity.hasRedstonePowerSignal() ? "machine.redstone_live" : "machine.redstone_dead" );
+                this.tileEntity.clientState().isRedstoneControlEnabled() ? "machine.redstone_enabled" : "machine.redstone_disabled",
+                this.tileEntity.clientState().statusState.hasRedstonePower() ? "machine.redstone_live" : "machine.redstone_dead" );
     }
     
 }

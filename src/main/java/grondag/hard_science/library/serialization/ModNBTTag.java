@@ -169,4 +169,8 @@ public class ModNBTTag
 
     public static final String DEVICE_MANAGER_DEVICES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
+    public static final String MACHINE_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String MACHINE_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
 }

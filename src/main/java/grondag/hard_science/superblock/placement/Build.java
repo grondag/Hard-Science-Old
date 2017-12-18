@@ -269,7 +269,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
-        DomainManager.INSTANCE.assignedNumbersAuthority().register(this);
+        DomainManager.instance().assignedNumbersAuthority().register(this);
         this.jobID = tag.getInteger(ModNBTTag.BUILD_JOB_ID);
         this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
         if(tag.hasKey(ModNBTTag.BUILD_POSITIONS))

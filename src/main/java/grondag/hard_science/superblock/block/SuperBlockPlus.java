@@ -114,7 +114,6 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
                 blockTE.writeToNBT(stack.getTagCompound());
             }
         }
-
         return stack;
     }
     

@@ -36,14 +36,14 @@ public class MachineStorageBlock extends MachineContainerBlock
         if(result != null)
         {
             TileEntity blockTE = world.getTileEntity(pos);
-            if (blockTE != null && blockTE instanceof MachineStorageTileEntity) 
+            if (blockTE != null && blockTE instanceof MachineTileEntity) 
             {
-                MachineStorageTileEntity mste = (MachineStorageTileEntity)blockTE;
+                MachineTileEntity mste = (MachineTileEntity)blockTE;
                 
                 // client won't have the storage instance needed to do this
                 if(mste.getWorld().isRemote) return result;
                 
-                IStorage<StorageTypeStack> store = mste.getStorage();
+                IStorage<StorageTypeStack> store = mste.storageMachine();
                 
                 if(store.usedCapacity() == 0) return result;
                 

@@ -10,7 +10,7 @@ import net.minecraft.inventory.IInventory;
  */
 public class EmptyContainer extends MachineContainer
 {
-    public EmptyContainer(IInventory playerInventory, MachineContainerTileEntity te, ContainerLayout layout) 
+    public EmptyContainer(IInventory playerInventory, MachineTileEntity te, ContainerLayout layout) 
     {
         super(null, te, layout);
 
@@ -36,7 +36,7 @@ public class EmptyContainer extends MachineContainer
         return te.canInteractWith(playerIn);
     }
 
-    public MachineContainerTileEntity tileEntity()
+    public MachineTileEntity tileEntity()
     {
         return this.te;
     }

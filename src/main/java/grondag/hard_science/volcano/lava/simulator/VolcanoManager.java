@@ -272,7 +272,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
                 this.stage = newStage;
                 isDirty = true;
             }
-            this.keepAlive = Simulator.INSTANCE.getWorld().getTotalWorldTime();
+            this.keepAlive = Simulator.instance().getWorld().getTotalWorldTime();
             
             if(isDirty) this.setDirty();
 //            HardScience.log.info("keepAlive=" + this.keepAlive);
@@ -282,7 +282,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         /** called periodically on server tick thread by volcano manager when this is the active node */
         public void update()
         {
-            if(this.isActive && this.keepAlive + 2048L < Simulator.INSTANCE.getWorld().getTotalWorldTime())
+            if(this.isActive && this.keepAlive + 2048L < Simulator.instance().getWorld().getTotalWorldTime())
             {
                 Log.warn("Active volcano tile entity at " + this.location.toString()
                 + " has not reported in. Deactivating volcano simulation node.");
@@ -336,7 +336,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         {
             if(this.isActive || this.height >= Configurator.VOLCANO.maxYLevel) return false;
             
-            int dormantTime = Simulator.INSTANCE.getTick() - this.lastActivationTick;
+            int dormantTime = Simulator.instance().getTick() - this.lastActivationTick;
             
             if(dormantTime < Configurator.VOLCANO.minDormantTicks) return false;
             
@@ -364,11 +364,11 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
                 if(!this.isActive)
                 {
                     this.isActive = true;
-                    this.lastActivationTick = Simulator.INSTANCE.getTick();
+                    this.lastActivationTick = Simulator.instance().getTick();
                     this.setSaveDirty(true);
                     VolcanoManager.this.activeNode = this;
                     VolcanoManager.this.isChunkloadingDirty = true;
-                    this.keepAlive = Simulator.INSTANCE.getWorld().getTotalWorldTime();
+                    this.keepAlive = Simulator.instance().getWorld().getTotalWorldTime();
                 }
             }
         }

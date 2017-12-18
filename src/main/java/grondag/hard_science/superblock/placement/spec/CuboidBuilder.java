@@ -311,7 +311,7 @@ public class CuboidBuilder extends VolumetricBuilder
             {
 //                private CuboidPlacementSpec spec = (CuboidPlacementSpec) buildSpec();
                 private Job job = new Job(RequestPriority.MEDIUM, player);
-                Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
+                Domain domain = DomainManager.instance().getActiveDomain(player);
 
                 /**
                  * Block positions to be checked. Will initially contain

@@ -8,16 +8,18 @@ import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class BlockFabricatorTESR extends MachineTESR
 {
-
     public static final BlockFabricatorTESR INSTANCE = new BlockFabricatorTESR();
     
     @Override
     protected void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha)
     {
-        MaterialBufferManager mbm = te.getBufferManager();
+        MaterialBufferManager mbm = te.clientState().bufferManager;
         
         for(RadialGaugeSpec spec : BlockFabricatorTileEntity.BASIC_BUILDER_GAUGE_SPECS)
         {
@@ -27,9 +29,9 @@ public class BlockFabricatorTESR extends MachineTESR
         MachineControlRenderer.renderFabricationProgress(RenderBounds.BOUNDS_PROGRESS, te, alpha);
         
         MachineControlRenderer.renderCMY(tessellator, buffer, RenderBounds.BOUNDS_BOTTOM_0, 
-                mbm.getBuffer(BlockFabricatorTileEntity.BUFFER_INDEX_CYAN),
-                mbm.getBuffer(BlockFabricatorTileEntity.BUFFER_INDEX_MAGENTA), 
-                mbm.getBuffer(BlockFabricatorTileEntity.BUFFER_INDEX_YELLOW), 
+                mbm.getBuffer(BlockFabricatorMachine.BUFFER_INDEX_CYAN),
+                mbm.getBuffer(BlockFabricatorMachine.BUFFER_INDEX_MAGENTA), 
+                mbm.getBuffer(BlockFabricatorMachine.BUFFER_INDEX_YELLOW), 
                 alpha);
         
         

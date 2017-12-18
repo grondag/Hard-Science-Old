@@ -34,7 +34,7 @@ public interface IIdentified
         int result = this.getIdRaw();
         if(result == UNASSIGNED_ID)
         {
-            result = DomainManager.INSTANCE.assignedNumbersAuthority().newNumber(this.idType());
+            result = DomainManager.instance().assignedNumbersAuthority().newNumber(this.idType());
             this.setId(result);
         }
         return result;

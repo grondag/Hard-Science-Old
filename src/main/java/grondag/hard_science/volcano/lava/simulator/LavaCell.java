@@ -750,7 +750,7 @@ public class LavaCell extends AbstractLavaCell
     {
         if(fluidUnits == 0) return;
         this.changeFluidUnits(fluidUnits);
-        this.updateTickIndex(Simulator.INSTANCE.getTick());
+        this.updateTickIndex(Simulator.instance().getTick());
     }
     
 //    private void doFallingParticles(int y, World world)
@@ -1035,7 +1035,7 @@ public class LavaCell extends AbstractLavaCell
         {
             int surfaceUnits = this.worldSurfaceUnits();
             newCell.changeFluidUnits(surfaceUnits - floorForNewCell * LavaSimulator.FLUID_UNITS_PER_LEVEL);
-            newCell.updateTickIndex(Simulator.INSTANCE.getTick());
+            newCell.updateTickIndex(Simulator.instance().getTick());
         }
         
         if(this.worldSurfaceLevel() > newCeilingForThisCell)
@@ -1091,13 +1091,13 @@ public class LavaCell extends AbstractLavaCell
                     if(flowHeight > 0)
                     {
                         this.changeFluidUnits(-Math.min(this.fluidUnits(), flowHeight * LavaSimulator.FLUID_UNITS_PER_LEVEL));
-                        this.updateTickIndex(Simulator.INSTANCE.getTick());
+                        this.updateTickIndex(Simulator.instance().getTick());
                     }
                 }
                 else if( y < surfaceY)
                 {
                     this.changeFluidUnits(-LavaSimulator.FLUID_UNITS_PER_BLOCK);
-                    this.updateTickIndex(Simulator.INSTANCE.getTick());
+                    this.updateTickIndex(Simulator.instance().getTick());
                 }
             }
             

@@ -11,6 +11,8 @@ import grondag.hard_science.network.client_to_server.PacketConfigurePlacementIte
 import grondag.hard_science.network.client_to_server.PacketSimpleAction;
 import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.player.ModPlayerCaps;
+import grondag.hard_science.superblock.block.SuperModelBlock;
+import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
@@ -18,10 +20,13 @@ import grondag.hard_science.superblock.placement.PlacementResult;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
 import grondag.hard_science.superblock.virtual.ExcavationRenderManager;
+import grondag.hard_science.superblock.virtual.VirtualItemBlock;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiOptions;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -155,11 +160,35 @@ public class ClientEventHandler
     @SubscribeEvent
     public static void onKeyInput(InputEvent.KeyInputEvent event)
     {
-        ItemStack stack = PlacementItem.getHeldPlacementItem(Minecraft.getMinecraft().player);
+        Minecraft mc = Minecraft.getMinecraft();
+        ItemStack stack = PlacementItem.getHeldPlacementItem(mc.player);
         
         if(stack != null)
         {
             PlacementItem item = (PlacementItem)stack.getItem();
+            
+            // If holding a virtual block and click pick block, 
+            // change appearance of held block to match picked block
+            if(item instanceof VirtualItemBlock && mc.gameSettings.keyBindPickBlock.isPressed())
+            {
+                
+                if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+                {
+                    IBlockState blockState = mc.player.world.getBlockState(mc.objectMouseOver.getBlockPos());
+                    if(blockState.getBlock() instanceof SuperModelBlock)
+                    {
+                        SuperModelTileEntity smte = (SuperModelTileEntity)mc.player.world.getTileEntity(mc.objectMouseOver.getBlockPos());
+                        PlacementItem.setStackModelState(stack, smte.getModelState());
+                        PlacementItem.setStackLightValue(stack, smte.getLightValue());
+                        PlacementItem.setStackSubstance(stack, smte.getSubstance());
+                        ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                        
+                        // prevent vanilla pick block 
+                        KeyBinding.unPressAllKeys();
+                    }
+                }
+            }
+
             
             if(ModKeys.PLACEMENT_CYCLE_SELECTION_TARGET.isPressed() && item.cycleSelectionTargetRange(stack, false))
             {

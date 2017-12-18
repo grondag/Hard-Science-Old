@@ -313,7 +313,7 @@ public class LavaConnection
         this.doStepWork();
         if(this.flowedLastStep)
         {
-            int tick = Simulator.INSTANCE.getTick();
+            int tick = Simulator.instance().getTick();
             this.firstCell.updateTickIndex(tick);
             this.secondCell.updateTickIndex(tick);
         }

@@ -236,7 +236,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
      */
     protected synchronized void onLoaded()
     {
-        DomainManager.INSTANCE.assignedNumbersAuthority().register(this);
+        DomainManager.instance().assignedNumbersAuthority().register(this);
     }
     
     protected synchronized void notifyConsequentsTerminated()

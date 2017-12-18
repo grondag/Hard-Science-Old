@@ -2,7 +2,7 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.AbstractMachine;
 
 public interface IPowerComponent extends IReadWriteNBT, IMessagePlus
 {
@@ -94,14 +94,14 @@ public interface IPowerComponent extends IReadWriteNBT, IMessagePlus
      * If false, any attempt to extract energy will receive a zero result.
      * @param mte TODO
      */
-    public boolean canProvideEnergy(MachineTileEntity mte);
+    public boolean canProvideEnergy(AbstractMachine machine);
     
     /**
      * Consumes energy from this component. 
      * 
      * While conceptually this is power, is handled as energy due to the
      * quantized nature of time in Minecraft. Intended to be called each tick.<br><br>
-     * @param mte TODO
+     * @param machine TODO
      * @param maxOutput
      *            Maximum amount of energy to be extracted, in joules.<br>
     *            Limited by {@link #maxEnergyOutputPerTick()}.
@@ -112,7 +112,7 @@ public interface IPowerComponent extends IReadWriteNBT, IMessagePlus
      *
      * @return Energy extracted (or that would have been have been extracted, if simulated) in joules.
      */
-    public long provideEnergy(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate);
+    public long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate);
     
     
     /**

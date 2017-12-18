@@ -2,7 +2,7 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.materials.CubeSize;
 import net.minecraft.nbt.NBTTagCompound;
@@ -58,7 +58,7 @@ public class PolyethyleneFuelCell extends FuelCell
     }
 
     @Override
-    protected long provideEnergyImplementation(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate)
+    protected long provideEnergyImplementation(AbstractMachine mte, long maxOutput, boolean allowPartial, boolean simulate)
     {
         MaterialBufferDelegate fuelBuffer = mte.bufferHDPE();
         

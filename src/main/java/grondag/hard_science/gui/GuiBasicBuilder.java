@@ -9,8 +9,10 @@ import grondag.hard_science.gui.control.machine.MachineFuelCell;
 import grondag.hard_science.gui.control.machine.MachinePowerUsage;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
+import grondag.hard_science.machines.BlockFabricatorMachine;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.support.MachinePowerSupply;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -35,23 +37,25 @@ public class GuiBasicBuilder extends AbstractSimpleGui<BlockFabricatorTileEntity
         }
         
         mainPanel.add(sizeControl(mainPanel, new MachineCMYGauge(te,
-                BlockFabricatorTileEntity.BUFFER_INDEX_CYAN, 
-                BlockFabricatorTileEntity.BUFFER_INDEX_MAGENTA, 
-                BlockFabricatorTileEntity.BUFFER_INDEX_YELLOW, 
+                BlockFabricatorMachine.BUFFER_INDEX_CYAN, 
+                BlockFabricatorMachine.BUFFER_INDEX_MAGENTA, 
+                BlockFabricatorMachine.BUFFER_INDEX_YELLOW, 
                 RenderBounds.BOUNDS_BOTTOM_0), RenderBounds.BOUNDS_BOTTOM_0));
 
         mainPanel.add(sizeControl(mainPanel, new MachineFabricationProgressGauge(te, RenderBounds.BOUNDS_PROGRESS), RenderBounds.BOUNDS_PROGRESS));
         
-        if(te.getPowerSupply() != null)
+        MachinePowerSupply ps = te.clientState().powerSupply;
+        
+        if(ps != null)
         {
             mainPanel.add(sizeControl(mainPanel, new MachinePowerUsage(te, RenderBounds.BOUNDS_POWER_0), RenderBounds.BOUNDS_POWER_0));
             
-            if(te.getPowerSupply().battery() != null)
+            if(ps.battery() != null)
             {
                 mainPanel.add(sizeControl(mainPanel, new MachineBattery(te, RenderBounds.BOUNDS_POWER_1), RenderBounds.BOUNDS_POWER_1));
             }
             
-            if(te.getPowerSupply().fuelCell() != null)
+            if(ps.fuelCell() != null)
             {
                 mainPanel.add(sizeControl(mainPanel, new MachineFuelCell(te, RenderBounds.BOUNDS_POWER_2), RenderBounds.BOUNDS_POWER_2));
             }

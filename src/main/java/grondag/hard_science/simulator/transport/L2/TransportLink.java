@@ -126,7 +126,7 @@ public abstract class TransportLink<T extends StorageType<T>> implements ITypedS
      */
     protected void refreshUtilization()
     {
-        long currentTick = Simulator.INSTANCE.getTick();
+        long currentTick = Simulator.instance().getTick();
         
         if(currentTick > this.lastTickSeen)
         {

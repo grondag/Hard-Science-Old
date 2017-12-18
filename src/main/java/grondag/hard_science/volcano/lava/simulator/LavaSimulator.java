@@ -93,7 +93,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
                     {
                         case PARTIAL:
                             // will be ready to cool again after delay
-                            operand.setTick(Simulator.INSTANCE.getTick());
+                            operand.setTick(Simulator.instance().getTick());
                             break;
                             
                         case UNREADY:
@@ -147,7 +147,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
                 if(target != null)
                 {
                     target.changeFluidUnits(event.amount * FLUID_UNITS_PER_LEVEL);
-                    target.updateTickIndex(Simulator.INSTANCE.getTick());
+                    target.updateTickIndex(Simulator.instance().getTick());
                     target.setRefreshRange(event.y, event.y);
                 }
                 return true;
@@ -335,7 +335,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     {
         if(this.basaltBlocks.isEmpty()) return;
         
-        this.lastEligibleBasaltCoolingTick = Simulator.INSTANCE.getTick() - BLOCK_COOLING_DELAY_TICKS;
+        this.lastEligibleBasaltCoolingTick = Simulator.instance().getTick() - BLOCK_COOLING_DELAY_TICKS;
 
         this.basaltCoolingJob.runOn(Simulator.SIMULATION_POOL);
         this.basaltBlocks.removeSomeDeletedItems(AgedBlockPos.REMOVAL_PREDICATE);
@@ -345,7 +345,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     /** used by world update to notify when fillers are placed */
     public void trackCoolingBlock(BlockPos pos)
     {
-        this.basaltBlocks.add(new AgedBlockPos(pos, Simulator.INSTANCE.getTick()));
+        this.basaltBlocks.add(new AgedBlockPos(pos, Simulator.instance().getTick()));
         this.setDirty();
     }
     
@@ -418,7 +418,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
 //            this.itMe = true;
             this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(SuperBlock.META, priorState.getValue(SuperBlock.META)), priorState);
 //            this.itMe = false;
-            this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.INSTANCE.getTick()));
+            this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.instance().getTick()));
         }
     }
     
@@ -551,9 +551,9 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         this.cells.validateOrBufferChunks(Simulator.SIMULATION_POOL);
         
         // do these on alternate ticks to help avoid ticks that are too long
-        if(Simulator.INSTANCE.getTick() >= this.nextCoolTick)
+        if(Simulator.instance().getTick() >= this.nextCoolTick)
         {
-            this.nextCoolTick = Simulator.INSTANCE.getTick() + 10;
+            this.nextCoolTick = Simulator.instance().getTick() + 10;
             if(this.nextCoolTickIsLava)
             {
                 this.nextCoolTickIsLava = false;

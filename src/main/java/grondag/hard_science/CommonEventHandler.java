@@ -108,7 +108,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
+            LavaSimulator sim = Simulator.instance().lavaSimulator();
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -138,7 +138,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
+            LavaSimulator sim = Simulator.instance().lavaSimulator();
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -148,7 +148,7 @@ public class CommonEventHandler
     {
         if(event.getWorld().isRemote) return;
         
-        LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
+        LavaSimulator sim = Simulator.instance().lavaSimulator();
         if(sim != null)
         {
             for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
@@ -173,11 +173,11 @@ public class CommonEventHandler
             WorldTaskManager.doServerTick();
             
             // thought it might be more determinism if simulator runs after block/entity ticks
-            Simulator.INSTANCE.onServerTick(event);
+            Simulator.instance().onServerTick(event);
             
             // TODO: remove
             // Temporary drone service
-            for(Domain domain : DomainManager.INSTANCE.getAllDomains())
+            for(Domain domain : DomainManager.instance().getAllDomains())
             {
                 try
                 {

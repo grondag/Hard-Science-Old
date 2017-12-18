@@ -14,7 +14,7 @@ public class DomainManagerTest
     @Test
     public void test()
     {
-        DomainManager dm = DomainManager.INSTANCE;
+        DomainManager dm = DomainManager.instance();
         dm.loadNew();
         
         Domain d1 = dm.createDomain();

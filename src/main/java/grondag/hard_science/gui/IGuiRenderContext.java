@@ -97,12 +97,12 @@ public interface IGuiRenderContext
         mainPanel.add(sizeControl(mainPanel,  new MachineSymbol(tileEntity, RenderBounds.BOUNDS_SYMBOL), RenderBounds.BOUNDS_SYMBOL));
 
         
-        if(tileEntity.hasOnOff()) 
+        if(tileEntity.clientState().hasOnOff) 
         {
             mainPanel.add(sizeControl(mainPanel, new MachineOnOff(tileEntity, RenderBounds.BOUNDS_ON_OFF), RenderBounds.BOUNDS_ON_OFF));
         }
 
-        if(tileEntity.hasRedstoneControl())
+        if(tileEntity.clientState().hasRedstoneControl)
         {
             mainPanel.add(sizeControl(mainPanel, new MachineRedstone(tileEntity, RenderBounds.BOUNDS_REDSTONE), RenderBounds.BOUNDS_REDSTONE));
         }

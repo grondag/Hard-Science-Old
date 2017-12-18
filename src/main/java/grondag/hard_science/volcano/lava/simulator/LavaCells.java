@@ -68,7 +68,7 @@ public class LavaCells
         @Override
         public void doJobTask(LavaCell operand)
         {
-            if(operand.canCool(Simulator.INSTANCE.getTick()))
+            if(operand.canCool(Simulator.instance().getTick()))
             {
                 sim.coolCell(operand);
                 if(operand.isDeleted())

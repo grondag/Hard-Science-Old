@@ -216,9 +216,9 @@ public class JobManager implements IReadWriteNBT, IDomainMember
                 // clean up id registry
                 for(AbstractTask task : job)
                 {
-                    DomainManager.INSTANCE.assignedNumbersAuthority().unregister(task);
+                    DomainManager.instance().assignedNumbersAuthority().unregister(task);
                 }
-                DomainManager.INSTANCE.assignedNumbersAuthority().unregister(job);
+                DomainManager.instance().assignedNumbersAuthority().unregister(job);
             }
         });
     }

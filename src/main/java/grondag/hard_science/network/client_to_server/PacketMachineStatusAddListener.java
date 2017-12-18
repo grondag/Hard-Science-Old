@@ -7,6 +7,12 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 
+/**
+ * When sent for a non-tickage tile entity, is signal to
+ * send a single immediate update.  This is used for non-tickable
+ * machines that have infrequent updates to their displays.
+ *
+ */
 public class PacketMachineStatusAddListener extends AbstractPlayerToServerPacket<PacketMachineStatusAddListener> 
 {
     public BlockPos pos;

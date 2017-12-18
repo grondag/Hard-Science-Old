@@ -3,6 +3,7 @@ package grondag.hard_science.machines;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.library.world.Rotation;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.texture.Textures;
@@ -31,6 +32,7 @@ public class SolarAggregatorTileEntity extends MachineTileEntity
                 Textures.DECAL_LARGE_DOT.getSampleSprite(), MatterColors.HDPE, Rotation.ROTATE_NONE,
                 "C2H4", 0xFF000000);
     }
+    
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
@@ -38,16 +40,8 @@ public class SolarAggregatorTileEntity extends MachineTileEntity
     }
 
     @Override
-    public void disconnect()
+    protected AbstractMachine createNewMachine()
     {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void reconnect()
-    {
-        // TODO Auto-generated method stub
-        
+        return new SolarAggregatorMachine();
     }
 }

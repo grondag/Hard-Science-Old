@@ -15,8 +15,8 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.device.AbstractSimpleDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -25,7 +25,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class AbstractStorage<T extends StorageType<T>> extends AbstractSimpleDevice implements IStorage<T>
+public abstract class AbstractStorage<T extends StorageType<T>> extends AbstractMachine implements IStorage<T>
 {
 
     protected final static IFunction<AbstractResourceWithQuantity<?>, Integer> handleMapper
@@ -317,6 +317,9 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
     @Override
     public void onConnect()
     {
+        // not possible without domain
+        if(this.getDomain() == null) return;
+        
         assert this.owner == null
                 : "Storage connect request when already connected.";
         
@@ -327,6 +330,9 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
     @Override
     public void onDisconnect()
     {
+        // won't be needed if no domain
+        if(this.getDomain() == null) return;
+        
         assert this.owner != null
                 : "Storage disconnect request when not connected";
         this.owner.removeStore(this);

@@ -20,14 +20,14 @@ public class MachineBattery extends AbstractMachineControl<MachineBattery, Radia
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         ArrayList<String> list = new ArrayList<String>(3);
-        list.add(I18n.translateToLocalFormatted("machine.power_stored", this.tileEntity.getPowerSupply().battery().storedEnergyJoules()));
+        list.add(I18n.translateToLocalFormatted("machine.power_stored", this.tileEntity.clientState().powerSupply.battery().storedEnergyJoules()));
         renderContext.drawToolTip(list, mouseX, mouseY);
     }
 
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderBattery(this.renderBounds, this.tileEntity.getPowerSupply().battery(), 0xFF);
+        MachineControlRenderer.renderBattery(this.renderBounds, this.tileEntity.clientState().powerSupply.battery(), 0xFF);
     }
 
     @Override

@@ -153,11 +153,11 @@ public class WorldStateBuffer implements IBlockAccess
                     chunk = this.usedBuffers.poll();
                     if(chunk == null)
                     {
-                        chunk = new ChunkBuffer(packedChunkPos, Simulator.INSTANCE.getTick());
+                        chunk = new ChunkBuffer(packedChunkPos, Simulator.instance().getTick());
                     }
                     else
                     {
-                        chunk.renew(packedChunkPos, Simulator.INSTANCE.getTick());
+                        chunk.renew(packedChunkPos, Simulator.instance().getTick());
                     }
                     chunks.put(packedChunkPos, chunk);
                 }
@@ -181,7 +181,7 @@ public class WorldStateBuffer implements IBlockAccess
     {
         this.perfStateApplication.startRun();
         
-        final int currentTick = Simulator.INSTANCE.getTick();
+        final int currentTick = Simulator.instance().getTick();
         final int minTickDiff = Configurator.VOLCANO.minBlockUpdateBufferTicks;
         final int maxTickDiff = Configurator.VOLCANO.maxBlockUpdateBufferTicks;
         final int maxChunkUpdates = Configurator.VOLCANO.maxChunkUpdatesPerTick;
@@ -792,6 +792,4 @@ public class WorldStateBuffer implements IBlockAccess
             return this.packedChunkpos;
         }
     }
-    
- 
 }

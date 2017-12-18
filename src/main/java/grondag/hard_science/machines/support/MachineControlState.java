@@ -22,10 +22,17 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
 {
     public static enum ControlMode
     {
-        ON,
-        OFF,
-        ON_WITH_REDSTONE,
-        OFF_WITH_REDSTONE;
+        ON(false),
+        OFF(false),
+        ON_WITH_REDSTONE(true),
+        OFF_WITH_REDSTONE(true);
+        
+        public final boolean isRedstoneControlEnabled;
+        
+        private ControlMode(boolean isRedstoneControlEnabled)
+        {
+            this.isRedstoneControlEnabled = isRedstoneControlEnabled;
+        }
     }
     
     public static enum RenderLevel

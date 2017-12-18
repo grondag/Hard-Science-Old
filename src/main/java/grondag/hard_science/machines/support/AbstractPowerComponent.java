@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.AbstractMachine;
 import net.minecraft.network.PacketBuffer;
 
 public abstract class AbstractPowerComponent implements IPowerComponent
@@ -61,13 +61,13 @@ public abstract class AbstractPowerComponent implements IPowerComponent
     }
 
     @Override
-    public boolean canProvideEnergy(MachineTileEntity mte)
+    public boolean canProvideEnergy(AbstractMachine machine)
     {
         return this.outputThisTick < this.maxEnergyOutputPerTick;
     }
     
     @Override
-    public final long provideEnergy(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate)
+    public final long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate)
     {
         // prevent shenannigans/derpage
         if(maxOutput <= 0) return 0;
@@ -76,7 +76,7 @@ public abstract class AbstractPowerComponent implements IPowerComponent
 
         if(!(allowPartial || result == maxOutput)) return 0;
 
-        result = this.provideEnergyImplementation(mte, result, allowPartial, simulate);
+        result = this.provideEnergyImplementation(machine, result, allowPartial, simulate);
         
         if(!(result == 0 || simulate)) 
         {
@@ -89,7 +89,7 @@ public abstract class AbstractPowerComponent implements IPowerComponent
     /**
      * Implementation can assume maxOutput has already been tested/adjusted against per-tick max.
      */
-    protected abstract long provideEnergyImplementation(MachineTileEntity mte, long maxOutput, boolean allowPartial, boolean simulate);
+    protected abstract long provideEnergyImplementation(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate);
    
     @Override
     public void advanceIOTracking()

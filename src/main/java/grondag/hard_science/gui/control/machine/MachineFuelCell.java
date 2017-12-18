@@ -20,14 +20,14 @@ public class MachineFuelCell extends AbstractMachineControl<MachineFuelCell, Rad
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         ArrayList<String> list = new ArrayList<String>(3);
-        list.add(I18n.translateToLocalFormatted("machine.power_in", this.tileEntity.getPowerSupply().fuelCell().powerOutputWatts()));
+        list.add(I18n.translateToLocalFormatted("machine.power_in", this.tileEntity.clientState().powerSupply.fuelCell().powerOutputWatts()));
         renderContext.drawToolTip(list, mouseX, mouseY);
     }
 
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderFuelCell(this.renderBounds, this.tileEntity.getPowerSupply().fuelCell(), 0xFF);
+        MachineControlRenderer.renderFuelCell(this.renderBounds, this.tileEntity.clientState().powerSupply.fuelCell(), 0xFF);
     }
 
     @Override

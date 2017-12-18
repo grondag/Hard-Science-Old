@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
+import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
@@ -30,7 +31,7 @@ import net.minecraft.nbt.NBTTagList;
 
 public class DomainManager implements IPersistenceNode
 {  
-    public static final DomainManager INSTANCE = new DomainManager();
+    public static final DomainManager RAW_INSTANCE_DO_NOT_USE = new DomainManager();
     
     private boolean isDeserializationInProgress = false;
     
@@ -62,6 +63,11 @@ public class DomainManager implements IPersistenceNode
         this.assignedNumbersAuthority.setDirtKeeper(this);
     }
    
+    public static DomainManager instance()
+    {
+        Simulator.loadSimulatorIfNotLoaded();
+        return RAW_INSTANCE_DO_NOT_USE;
+    }
     
     /**
      * Called at shutdown
@@ -333,40 +339,40 @@ public class DomainManager implements IPersistenceNode
     // convenience object lookup methods
     public static Domain domainFromId(int id)
     {
-        return (Domain) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.DOMAIN);
+        return (Domain) instance().assignedNumbersAuthority().get(id, AssignedNumber.DOMAIN);
     }
     
     public static Job jobFromId(int id)
     {
-        return (Job) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.JOB);
+        return (Job) instance().assignedNumbersAuthority().get(id, AssignedNumber.JOB);
     }
     
     public static AbstractTask taskFromId(int id)
     {
-        return (AbstractTask) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TASK);
+        return (AbstractTask) instance().assignedNumbersAuthority().get(id, AssignedNumber.TASK);
     }
     
     public static Build buildFromId(int id)
     {
-        return (Build) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.BUILD);
+        return (Build) instance().assignedNumbersAuthority().get(id, AssignedNumber.BUILD);
     }
     
     @SuppressWarnings("unchecked")
     public static ITransportNode<StorageTypeStack> itemNodeFromId(int id)
     {
-        return (ITransportNode<StorageTypeStack>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_ITEM);
+        return (ITransportNode<StorageTypeStack>) instance().assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_ITEM);
     }
     
     @SuppressWarnings("unchecked")
     public static ITransportNode<StorageTypeFluid> fluidNodeFromId(int id)
     {
-        return (ITransportNode<StorageTypeFluid>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_FLUID);
+        return (ITransportNode<StorageTypeFluid>) instance().assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_FLUID);
     }
     
     @SuppressWarnings("unchecked")
     public static ITransportNode<StorageTypePower> powerNodeFromId(int id)
     {
-        return (ITransportNode<StorageTypePower>) INSTANCE.assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_POWER);
+        return (ITransportNode<StorageTypePower>) instance().assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_POWER);
     }
 
     /**
@@ -384,4 +390,5 @@ public class DomainManager implements IPersistenceNode
             }
         }
     }
+
 }

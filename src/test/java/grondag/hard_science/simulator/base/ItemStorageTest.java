@@ -24,7 +24,7 @@ public class ItemStorageTest
     @Test
     public void test()
     {
-        DomainManager dm = DomainManager.INSTANCE;
+        DomainManager dm = DomainManager.instance();
         dm.loadNew();
         
         Domain d = dm.createDomain();
@@ -123,16 +123,16 @@ public class ItemStorageTest
         assert findList.get(2).resource.equals(res1);
         assert findList.get(0).quantity + findList.get(1).quantity + findList.get(2).quantity == ism.getQuantityStored(res1);
         
-        DeviceManager.INSTANCE.setSaveDirty(false);
+        DeviceManager.instance().setSaveDirty(false);
         assert store3.takeUpTo(res1, 1, false, null) == 1;
-        assert DeviceManager.INSTANCE.isSaveDirty();
+        assert DeviceManager.instance().isSaveDirty();
 
-        DeviceManager.INSTANCE.setSaveDirty(false);
+        DeviceManager.instance().setSaveDirty(false);
         long oldCapacity = ism.getCapacity();
         long oldAvailable = ism.availableCapacity();
         DeviceManager.removeDevice(store1);
         
-        assert DeviceManager.INSTANCE.isSaveDirty();
+        assert DeviceManager.instance().isSaveDirty();
         assert ism.getCapacity() == oldCapacity - store1.getCapacity();
         assert ism.availableCapacity() == oldAvailable - store1.availableCapacity();
         assert ism.getQuantityStored(res1) == store2.getQuantityStored(res1) + store3.getQuantityStored(res1);

@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 public class CommonProxy 
@@ -52,7 +52,7 @@ public class CommonProxy
 		ModEntities.preInit(event);
 	    ModDevices.preInit(event);
 		
-        ForgeChunkManager.setForcedChunkLoadingCallback(HardScience.INSTANCE, Simulator.INSTANCE);
+        ForgeChunkManager.setForcedChunkLoadingCallback(HardScience.INSTANCE, Simulator.RAW_INSTANCE_DO_NOT_USE);
 	}
 
 	public void init(FMLInitializationEvent event) 
@@ -65,26 +65,26 @@ public class CommonProxy
 
 	public void postInit(FMLPostInitializationEvent event) 
 	{
-    	    new ItemStorageTest().test();
-    	    new ItemResourceTest().test();
-    	    new SystemTests().test();
-        Log.info("In-Game System Tests Complete");
+//    	    new ItemStorageTest().test();
+//    	    new ItemResourceTest().test();
+//    	    new SystemTests().test();
+//        Log.info("In-Game System Tests Complete");
 	}
 
-    public void serverStarted(FMLServerStartedEvent event)
+    public void serverStarting(FMLServerStartingEvent event)
     {
         ExcavationRenderTracker.INSTANCE.clear();
-        Simulator.INSTANCE.start();
+        Simulator.loadSimulatorIfNotLoaded();
     }
 
     public void serverStopping(FMLServerStoppingEvent event)
     {
-        Simulator.INSTANCE.stop();
+        Simulator.instance().stop();
     }
     
     public void serverAboutToStart(FMLServerAboutToStartEvent event)
     {
-        
+      
     }
 
     /**

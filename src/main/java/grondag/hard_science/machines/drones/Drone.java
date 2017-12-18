@@ -45,7 +45,7 @@ public class Drone implements IMachine, IReadWriteNBT
     {
         if(this.domain == null && this.domainID != IIdentified.UNASSIGNED_ID)
         {
-            this.domain = DomainManager.INSTANCE.getDomain(this.domainID);
+            this.domain = DomainManager.instance().getDomain(this.domainID);
         }
         return this.domain;
     }

@@ -111,12 +111,14 @@ public interface PlacementItem
     
     public static void setStackLightValue(ItemStack stack, int lightValue)
     {
+        // important that the tag used here matches that used in tile entity
         Useful.getOrCreateTagCompound(stack).setByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE, (byte)lightValue);
     }
     
     public static byte getStackLightValue(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
+        // important that the tag used here matches that used in tile entity
         return tag == null ? 0 : tag.getByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE);
     }
 

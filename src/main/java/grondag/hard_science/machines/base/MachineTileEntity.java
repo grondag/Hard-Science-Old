@@ -5,162 +5,122 @@ import javax.annotation.Nullable;
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.Base32Namer;
-import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
-import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.Location;
-import grondag.hard_science.machines.support.MachineControlState;
-import grondag.hard_science.machines.support.MachineControlState.ControlMode;
-import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
-import grondag.hard_science.machines.support.MachinePowerSupply;
-import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.machines.support.MaterialBufferManager;
-import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
+import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
-import grondag.hard_science.superblock.block.SuperModelBlock;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.varia.KeyedTuple;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public abstract class MachineTileEntity extends SuperTileEntity implements IMachine, ITickable
+public abstract class MachineTileEntity extends SuperTileEntity
 {
-    ////////////////////////////////////////////////////////////////////////
-    //  STATIC MEMBERS
-    ////////////////////////////////////////////////////////////////////////
-   
-    
-    ////////////////////////////////////////////////////////////////////////
-    //  INSTANCE MEMBERS
-    ////////////////////////////////////////////////////////////////////////
-
-    private MachineControlState controlState = new MachineControlState();
-    protected MachineStatusState statusState = new MachineStatusState();
-    
-    /** Levels of materials stored in this machine.  Is persisted to NBT. 
-     * Pass null to constructor to disable. 
-     */
-    @Nullable
-    private MaterialBufferManager bufferManager;
-    
-    
-    /**
-     * Power provider for this machine, if it has one.
-     */
-    @Nullable
-    private MachinePowerSupply powerSupply;
     
     /**
      * Machine unique ID.  Is persisted if machine is picked and put back by player.
-     * Most logic is in IIdentified.
+     * Most logic is in IIdentified.<p>
+     * 
+     * Initialized to signal value that means hasn't been initialized yet.
+     * {@link #machine()} will return null until has been set to something else.
      */
-    private int machineID = IIdentified.UNASSIGNED_ID;
+    private int machineID = IIdentified.SIGNAL_ID;
     
-    private int domainID = IIdentified.UNASSIGNED_ID;
-    
-    /** do not access directly - lazy lookup after deserialization */
-    private Domain domain = null;
-    
-    /**
-     * Note this isn't serialized - it's always derived from machine ID.
-     */
-    private String machineName = null;
+    private AbstractMachine machine = null;
     
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
     private double lastDistanceSquared;
  
-    /** players who are looking at this machine and need updates sent to client */
-    private SimpleUnorderedArraySet<PlayerListener> listeningPlayers;
-      
+    protected MachineClientState clientState = null;
     
     /**
      * On server, next time update should be sent to players.
      * On client, next time keepalive request should be sent to server.
      */
-    private long nextPlayerUpdateMilliseconds = 0;
+    protected long nextPlayerUpdateMilliseconds = 0;
     
-    /**
-     * True if information has changed and players should receive an update.
-     * Difference from {@link #playerUpdateTicks} is that {@link #playerUpdateTicks} controls
-     * <i>when</i> update occurs. {@link #isPlayerUpdateNeeded} contols <i>if</i> update occurs.
-     */
-    private boolean isPlayerUpdateNeeded = false;
-
+    protected abstract AbstractMachine createNewMachine();
     
-    /**
-     * For use by TESR - cached items stack based on status info.
-     */
-    protected ItemStack statusStack;
-    
-    /**
-     * For use by TESR - last time player looked at this machine within the machine rendering distance
-     */
     @SideOnly(Side.CLIENT)
-    public long lastInViewMillis;
+    public MachineClientState clientState()
+    {
+        return this.clientState;
+    }
     
     /**
-     * Set to PolyEthylene buffer in subclass constructor if this machine uses PE.  
-     * Sent to power provider during update if this machine has one.
+     * Used for tear down when block is broken.
      */
-    protected MaterialBufferDelegate bufferHDPE;
-    
-    private class PlayerListener extends KeyedTuple<EntityPlayerMP>
+    public void clearMachine()
     {
-        /** Listener is valid until this time*/
-        private long goodUntilMillis;
-        
-        private PlayerListener(EntityPlayerMP key)
+        if(this.machine != null)
         {
-            super(key);
-            this.goodUntilMillis = CommonProxy.currentTimeMillis() + Configurator.Machines.machineKeepAlivePlusLatency;
-        }
-        
-        /**
-         * Returns true if this listener should be removed because it has timed out or player has disconnected.
-         */
-        private boolean checkForRemoval(long currentTime)
-        {
-            return this.key.hasDisconnected()
-                    || (currentTime > this.goodUntilMillis && !isOpenContainerForPlayer(this.key));
+            DeviceManager.removeDevice(this.machine);
+            this.machine.machineTE = null;
+            this.machine = null;
         }
     }
+    
+    /**
+     * Will return null if machine not yet initialized by placement.
+     */
+    @Nullable
+    public AbstractMachine machine()
+    {
+        assert !this.world.isRemote : "Attempt to access Machine on client.";
+    
+        if(this.world.isRemote) return null;
+        
+        if(this.machineID == IIdentified.SIGNAL_ID) return null;
+        
+        if(this.machine == null)
+        {
+            if(this.machineID == IIdentified.UNASSIGNED_ID)
+            {
+                Log.warn("TileEntity @ %s not initialized on placement. New device created.", this.pos.toString());
+                this.machine = createNewMachine();
+                this.machine.setLocation(this.pos, this.world);
+                DeviceManager.addDevice(this.machine);
+                this.machineID = this.machine.getId();
+            }
+            else
+            {
+                this.machine = (AbstractMachine) DeviceManager.getDevice(this.machineID);
+                if(this.machine == null)
+                {
+                    Log.warn("TileEntity @ %s missing device. New device created. Contents may be lost.", this.pos.toString());
+                    this.machine = createNewMachine();
+                    this.machine.setLocation(this.pos, this.world);
+                    DeviceManager.addDevice(this.machine);
+                    this.machineID = this.machine.getId();
+                }
+            }
+            this.machine.machineTE = this;
+        }
+        return this.machine;
+    }
 
-    /**
-     * Make false to disable on/off switch.
-     */
-    public boolean hasOnOff() { return true;}
-    
-    /**
-     * Make false to disable redstone control.
-     */
-    public boolean hasRedstoneControl() { return true; }
-    
     /**
      * True if container currently open by player references this tile entity.
      */
@@ -172,66 +132,53 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
                 && ((MachineContainer)openContainer).tileEntity() == this;
     }
     
-
-    /** 
-     * If this tile has a material buffer, gives access.  Null if not.
-     * Used to serialize/deserialize on client.
-     */
-    public final @Nullable MaterialBufferManager getBufferManager()
-    {
-        return this.bufferManager;
-    }
-    
-    protected final void setBufferManager(@Nullable MaterialBufferManager bufferManager)
-    {
-        this.bufferManager = bufferManager;
-        this.controlState.hasMaterialBuffer(bufferManager != null);
-    }
-    
-    /** 
-     * If this tile has a power provider, gives access.  Null if not.
-     * Used to serialize/deserialize on client.
-     */
-    public final @Nullable MachinePowerSupply getPowerSupply()
-    {
-        return this.powerSupply;
-    }
-    
-    
-    /**
-     * Used for visual display.
-     * Defaults to max of power supply, or 1 (to help prevent /0) if there isn't one.
-     */
-    public float maxPowerConsumptionWatts()
-    {
-        return this.powerSupply == null ? 1 : this.powerSupply.maxPowerOutputWatts(); 
-    }
-    
-    protected final void setPowerProvider(@Nullable MachinePowerSupply powerSupply)
-    {
-        this.powerSupply = powerSupply;
-        this.controlState.hasPowerSupply(powerSupply != null);
-    }
-    
     /**
      * Used by GUI and TESR to draw machine's symbol.
      */
     @SideOnly(Side.CLIENT)
     public abstract TextureAtlasSprite getSymbolSprite();
     
-    /**
-     * Disconnects TE from simulation.<br>
-     * Called when block is broken.<br>
-     * Should only be called server side.
-     */
-    public abstract void disconnect();
-    
-    /**
-     * Called after TE state has been restored.  Server-side only.<br>
-     * Use this to reconnect to simulation, or to reinitialize transient state. <br>
-     */
-    public abstract void reconnect();
 
+    /**
+     * Called server-side after machine block has been placed to
+     * restore machine state from stack (if present) or 
+     * create new machine state and register with simulation.<p>
+     * 
+     * Relies on machine state to be saved by {@link #writeModNBT(NBTTagCompound)}
+     * for harvested machines.<p>
+     * 
+     * New machines are added to the given domain. Machines with an 
+     * existing domain are not changed.<p>
+     * 
+     * Location of the machine is always changed to what is provided.
+     */
+    public void restoreMachineFromStack(ItemStack stack, Domain defaultDomain)
+    {
+        AbstractMachine machine = createNewMachine();
+        
+        if(stack.hasTagCompound())
+        {
+            NBTTagCompound serverTag = SuperTileEntity.getServerTag(stack.getTagCompound());
+            
+            if(serverTag.hasKey(ModNBTTag.MACHINE_STATE))
+            {
+                machine.deserializeNBT(serverTag.getCompoundTag(ModNBTTag.MACHINE_STATE));
+            }
+        }
+        
+        if(machine.getDomain() == null)
+        {
+            machine.setDomain(defaultDomain);
+        }
+        
+        machine.setLocation(this.pos, this.world);
+        machine.machineTE = this;
+        DeviceManager.addDevice(machine);
+        this.machineID = machine.getId();
+        this.machine = machine;
+        this.updateRedstonePower();
+        this.markPlayerUpdateDirty(true);
+    }
 
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate)
@@ -243,7 +190,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
     public boolean shouldRenderInPass(int pass)
     {
         // machines always render in translucent pass
-        return pass == 1 && this.getControlState().getRenderLevel() != RenderLevel.NONE;
+        return pass == 1 && this.clientState().controlState.getRenderLevel() != RenderLevel.NONE;
     }
     
     @SideOnly(Side.CLIENT)
@@ -279,147 +226,35 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
         return lastDistanceSquared;
     }
     
-    public boolean isOn()
-    {
-        if(!this.hasOnOff()) return false;
-        
-            switch(this.getControlState().getControlMode())
-            {
-            case ON:
-                return true;
-                
-            case OFF_WITH_REDSTONE:
-                return !this.hasRedstonePowerSignal();
-                
-            case ON_WITH_REDSTONE:
-                return this.hasRedstonePowerSignal();
-                
-            case OFF:
-            default:
-                return false;
-            
-            }
-    }
-    
-    public boolean isRedstoneControlEnabled()
-    {
-        if(!this.hasRedstoneControl()) return false;
-        
-        switch(this.getControlState().getControlMode())
-        {
-        case OFF_WITH_REDSTONE:
-        case ON_WITH_REDSTONE:
-            return true;
-            
-        case ON:
-        case OFF:
-        default:
-            return false;
-        }
-        
-    }
-
-    public boolean hasBacklog()
-    {
-        return this.statusState.hasBacklog();
-    }
-    
-    /**
-     * Max backlog depth since machine was last idle or power cycled.
-     * Automatically maintained y {@link #setCurrentBacklog(int)}
-     */
-    public int getMaxBacklog()
-    {
-        return this.hasBacklog() ? this.statusState.getMaxBacklog() : 0;
-    }
-    
-    public int getCurrentBacklog()
-    {
-        return this.hasBacklog() ? this.statusState.getCurrentBacklog() : 0;
-    }
-    
-    public void setCurrentBacklog(int value)
-    {
-        if(!this.hasBacklog()) return;
-        
-        if(value != this.statusState.getCurrentBacklog())
-        {
-            this.statusState.setCurrentBacklog(value);
-            this.markPlayerUpdateDirty(false);
-        }
-        
-        int maxVal = Math.max(value, this.getMaxBacklog());
-        if(value == 0) maxVal = 0;
-        
-        if(maxVal != this.getMaxBacklog())
-        {
-            this.statusState.setMaxBacklog(maxVal);
-            this.markPlayerUpdateDirty(false);
-        }        
-    }
-    
-    public boolean hasJobTicks()
-    {
-        return this.getControlState().hasJobTicks();
-    }
-    
-    public int getJobDurationTicks()
-    {
-        return this.getControlState().getJobDurationTicks();
-    }
-    
-    public int getJobRemainingTicks()
-    {
-        return this.getControlState().getJobRemainingTicks();
-    }
-    
-    public MachineState getMachineState()
-    {
-        return this.getControlState().getMachineState();
-    }
-        
-    /**
-     * For use by TESR - cached items stack based on status info.
-     * Assumes that the target block is a superModel block.
-     */
-    public ItemStack getStatusStack()
-    {
-        ItemStack result = this.statusStack;
-        if(result == null && this.getControlState().hasModelState())
-        {
-            ModelState modelState = this.getControlState().getModelState();
-            if(modelState == null) return null;
-            
-            SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(this.getControlState().getSubstance(), this.getControlState().getModelState());
-            result = newBlock.getSubItems().get(0);
-            PlacementItem.setStackLightValue(result, this.getControlState().getLightValue());
-            PlacementItem.setStackSubstance(result, this.getControlState().getSubstance());
-            PlacementItem.setStackModelState(result, this.getControlState().getModelState());
-            this.statusStack = result;
-        }
-        return result;
-    }
-    
     @Override
     public void onLoad()
     {
         super.onLoad();
-        this.updateRedstonePower();
+        if(this.world.isRemote)
+        {
+            this.clientState = new MachineClientState(this);
+        }
+        else
+        {
+            this.updateRedstonePower();
+        }
     }
 
-
-    public boolean hasRedstonePowerSignal()
+    @Override
+    public void invalidate()
     {
-        return this.statusState.hasRedstonePower();
+        super.invalidate();
     }
 
     public void updateRedstonePower()
     {
         if(this.isRemote()) return;
+        if(this.machine() == null) return;
+        
         boolean shouldBePowered = this.world.isBlockPowered(this.pos);
-        if(shouldBePowered != this.statusState.hasRedstonePower())
+        if(shouldBePowered != this.machine().statusState.hasRedstonePower())
         {
-            this.statusState.setHasRestonePower(shouldBePowered);
+            this.machine().statusState.setHasRestonePower(shouldBePowered);
             this.markPlayerUpdateDirty(true);
         }
     }
@@ -432,76 +267,54 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
                 : this.world.isRemote;
     }
     
+    /**
+     * Recovers machine ID so we can find the machine for which this
+     * TE is a delegate.  Did not blockPos and world because
+     * some machines could be multiblocks.
+     * 
+     * Note this does NOT attempt to restore the actual machine state.
+     * Machine state for machines within the simulation
+     * is persisted by the device manager.  The NBT saved
+     * in {@link #writeModNBT(NBTTagCompound)} is used by 
+     * {@link #restoreMachineFromStack(ItemStack, Domain)}. <p>
+     * 
+     * {@inheritDoc}
+     */
     @Override
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        this.deserializeID(compound);
-        this.domainID = compound.getInteger(ModNBTTag.DOMAIN_ID);
-        this.getControlState().deserializeNBT(compound);
-        if(this.powerSupply != null) this.powerSupply.deserializeNBT(compound);
-        if(this.bufferManager != null) this.bufferManager.deserializeNBT(compound);
+        
+        // check for key to avoid enabling ID creation when reading blank tag
+        this.machineID = compound.hasKey(ModNBTTag.MACHINE_ID)
+                ? compound.getInteger(ModNBTTag.MACHINE_ID)
+                : IIdentified.SIGNAL_ID;
     }
     
+    /**
+     * Saves association with device in simulation.<p>
+     * 
+     * Also writes the machine state for use in {@link #restoreMachineFromStack(ItemStack, Domain)}.
+     * Stores it in server-side tag so that large states don't get sent to client.<p>
+     * 
+     * Machine state stored here is <em>not</em> used in {@link #readModNBT(NBTTagCompound)}.<p>
+     * 
+     * {@inheritDoc}
+     */
     @Override
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
-        this.serializeID(compound);
-        compound.setInteger(ModNBTTag.DOMAIN_ID, this.domainID);
-        this.getControlState().serializeNBT(compound);
-        if(this.powerSupply != null) this.powerSupply.serializeNBT(compound);
-        if(this.bufferManager != null) this.bufferManager.serializeNBT(compound);
-    }
-    
-    /**
-     * If isRequired == true, will send client updates more frequently.
-     * Does not downgrade player to non-focused if previously added as focused.
-     * Will cause an immediate player refresh if the listener is new or
-     * if existing listener goes from non-urgent to urgent.
-     */
-    public void addPlayerListener(EntityPlayerMP player)
-    {
-        if(world.isRemote) return;
-        
-        if(Configurator.logMachineNetwork) Log.info("got keepalive packet");
-        PlayerListener listener = new PlayerListener(player);
-        
-        if(this.listeningPlayers == null)
+        if(!this.world.isRemote)
         {
-            this.listeningPlayers = new SimpleUnorderedArraySet<PlayerListener>();
-            this.listeningPlayers.put(listener);
-            
-            if(Configurator.logMachineNetwork) Log.info("added new listener");
-            
-            // send immediate refresh for any new listener
-            ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
-            
-        }
-        else
-        {
-            PlayerListener previous = this.listeningPlayers.put(listener);
-            
-            if(previous == null)
+            compound.setInteger(ModNBTTag.MACHINE_ID, this.machineID);
+            if(this.machine() != null)
             {
-                // send immediate refresh for any new listener
-                ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
-
-                if(Configurator.logMachineNetwork) Log.info("added new listener");
-
+                SuperTileEntity.getServerTag(compound)
+                    .setTag(ModNBTTag.MACHINE_STATE, this.machine().serializeNBT());
             }
-
         }
     }
-    
-    // not used - just waits for them to time out
-//    public void removePlayerListener(EntityPlayerMP player)
-//    {
-//        if(world.isRemote || this.listeningPlayers == null) return;
-//
-//        PlayerListener removed = this.listeningPlayers.removeIfPresent(new PlayerListener(player, false));
-//        if( removed != null && removed.isRequired) this.requiredListenerCount--;
-//    }
     
     /**
      * Called to notify observing players of an update to machine status.
@@ -512,26 +325,22 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
      * no effect unless isUrgent == true. <br><br>
      * 
      * Seldom called directly except with required updates because is 
-     * called automatically by {@link #markDirty()}
+     * called automatically by {@link #markDirty()}<p>
+     * 
+     * Has no effect unless this TE is tickable.
      */
     public void markPlayerUpdateDirty(boolean isUrgent)
     {
-        if(this.listeningPlayers == null || this.listeningPlayers.isEmpty()) return;
-        
-        this.isPlayerUpdateNeeded = true;
-        if(isUrgent)
-        {
-            this.nextPlayerUpdateMilliseconds = 0;
-        }
+        //NOOP
+        //Only implemented in tickable version
     }
-    
     
     @SideOnly(Side.CLIENT)
     public void notifyServerPlayerWatching()
     {
         long time = CommonProxy.currentTimeMillis();
         
-        // don't send more frequently than needed, but send immediately if upgrading to urgent
+        // don't send more frequently than needed
         if(time >= this.nextPlayerUpdateMilliseconds)
         {
             if(Configurator.logMachineNetwork) Log.info("sending keepalive packet");
@@ -541,97 +350,44 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
         }
     }
     
+    /**
+     * If isRequired == true, will send client updates more frequently.
+     * Does not downgrade player to non-focused if previously added as focused.
+     * Will cause an immediate player refresh if the listener is new or
+     * if existing listener goes from non-urgent to urgent.<p>
+     * 
+     * If this TE is not tickable, will simply send an immediate update
+     * of current state. Non-tickable machine TEs are assumed to have
+     * infrequent display changes.
+     */
+    public void addPlayerListener(EntityPlayerMP player)
+    {
+        if(world.isRemote) return;
+        
+        if(Configurator.logMachineNetwork) Log.info("got keepalive packet");
+        
+        if(this.machine() == null) return;
+        
+        // send immediate refresh
+        ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
+    }
+    
     @Override
     public void markDirty()
     {
+        assert !this.world.isRemote : "Machine TE mark dirty on client";
         super.markDirty();
         this.markPlayerUpdateDirty(false);
     }
     
-    @Override
-    public final void update()
-    {
-        if(world.isRemote) 
-        {
-            // estimate progress for any jobs in flight
-            // provides smoother user feedback on client
-            if(this.controlState != null && this.controlState.hasJobTicks() && this.controlState.getJobRemainingTicks() > 0)
-                this.controlState.progressJob((short) 1);
-            return;
-        }
-        
-        long tick = this.world.getTotalWorldTime();
-        
-        if(this.powerSupply != null && this.powerSupply.tick(this, tick)) this.markDirty();
-        
-        if((tick & 0xF) == 0 && this.isOn()) this.restock();
-        
-        this.updateMachine(tick);
-        
-        if(this.isPlayerUpdateNeeded && this.listeningPlayers != null && !this.listeningPlayers.isEmpty())
-        {
-            long time = CommonProxy.currentTimeMillis();
-        
-            if(time >= this.nextPlayerUpdateMilliseconds)
-            {
-                PacketMachineStatusUpdateListener packet = this.createMachineStatusUpdate();
-                
-                int i = 0;
-                while(i < listeningPlayers.size())
-                {
-                    PlayerListener listener = listeningPlayers.get(i);
-                    
-                    if(listener.checkForRemoval(time))
-                    {
-                        this.listeningPlayers.remove(i);
-                        if(Configurator.logMachineNetwork) Log.info("Removed timed out listener");
-                    }
-                    else
-                    {
-                        if(Configurator.logMachineNetwork) Log.info("Sending update packet due to change");
-                        ModMessages.INSTANCE.sendTo(packet, listener.key);
-                        i++;
-                    }
-                }
-                
-                this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineUpdateIntervalMilliseconds;
-                this.isPlayerUpdateNeeded = false;
-            }
-        }
-    }
-    
-    /**
-     * Will be called after machine power and material buffers are updated (if applies).
-     * Will be called irrespective of power or on/off, so check those if needed.
-     * @param tick  current world tick, in case needed
-     */
-    protected void updateMachine(long tick){};
 
-    protected void restock()
-    {
-        MaterialBufferManager bufferManager = this.getBufferManager();
-        
-        if(!bufferManager.canRestockAny()) return;
-        
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            TileEntity tileentity = this.world.getTileEntity(this.pos.offset(face));
-            if (tileentity != null)
-            {
-                // Currently no power cost for pulling in items - would complicate fuel loading for fuel cells.
-                // If want to add this will require special handling or machines must get 
-                // power some other way to load fuel - seems tedious.
-                // Assuming this is covered by the "emergency" power supply that uses ambient energy harvesters.
-                IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-                if(bufferManager.restock(capability)) this.markDirty();
-            }
-        }
-    }
+ 
     
     public PacketMachineStatusUpdateListener createMachineStatusUpdate()
     {
         return new PacketMachineStatusUpdateListener(this);
     }
+  
     
     /**
      * Handles client status updates received from server.
@@ -640,48 +396,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
     {
         // should never be called on server
         if(!this.world.isRemote) return;
-        
-        this.setControlState(packet.controlState);
-        this.statusState = packet.statusState;
-        this.statusStack = null;
-
-        if(this.controlState.hasMaterialBuffer())
-            this.getBufferManager().deserializeFromArray(packet.materialBufferData);
-
-        if(this.controlState.hasPowerSupply())
-            this.getPowerSupply().fromBytes(packet.powerProviderData);
-    }
-
-    @Override
-    public void setId(int id)
-    {
-        this.machineID = id;
-        // force regeneration of name
-        this.machineName = null;
-        this.markDirty();
-    }
-
-    @Override
-    public int getIdRaw()
-    {
-        return this.machineID;
-    }
-
-    @Override
-    public int getId()
-    {
-        //disable ID generation on client
-        return (this.world == null || this.world.isRemote ? this.getIdRaw() : IMachine.super.getId());
-    }
-    
-    public String machineName()
-    {
-        if(this.machineName == null)
-        {
-            long l = Useful.longHash(this.world.getSeed() ^ this.getId());
-            this.machineName = Base32Namer.makeName(l, Configurator.MACHINES.filterOffensiveMachineNames);
-        }
-        return this.machineName;
+        this.clientState.handleMachineStatusUpdate(packet);
     }
     
     /**
@@ -690,7 +405,8 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
      */
     public boolean togglePower(EntityPlayerMP player)
     {
-        if(!this.hasWorld() || this.isInvalid() || !this.hasOnOff()) return false;
+        if(!this.hasWorld() || this.isInvalid() 
+                || this.machine() == null || !this.machine().hasOnOff()) return false;
         
         if(this.world.isRemote)
         {
@@ -700,35 +416,8 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
         }
         else
         {
-            // clear backlog on power cycle if we have one
-            this.setCurrentBacklog(0);
-            
-            //FIXME: check user permissions
-            
             // called by packet handler on server side
-            switch(this.getControlState().getControlMode())
-            {
-            case OFF:
-                this.getControlState().setControlMode(ControlMode.ON);
-                break;
-                
-            case OFF_WITH_REDSTONE:
-                this.getControlState().setControlMode(ControlMode.ON_WITH_REDSTONE);
-                break;
-                
-            case ON:
-                this.getControlState().setControlMode(ControlMode.OFF);
-                break;
-                
-            case ON_WITH_REDSTONE:
-                this.getControlState().setControlMode(ControlMode.OFF_WITH_REDSTONE);
-                break;
-                
-            default:
-                break;
-                
-            }
-            this.markDirty();
+            this.machine().togglePower(player);
             this.markPlayerUpdateDirty(true);
             return true;
         }
@@ -740,42 +429,24 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
      */
     public boolean toggleRedstoneControl(EntityPlayerMP player)
     {
-        if(!this.hasWorld() || this.isInvalid() || !this.hasRedstoneControl()) return false;
+        if(!this.hasWorld() || this.isInvalid()) return false;
         
         if(this.world.isRemote)
         {
             // send to server
-            ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_REDSTONE_CONTROL, this.pos));
-            return true;
+            if(this.clientState.hasRedstoneControl)
+            {
+                ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_REDSTONE_CONTROL, this.pos));
+                return true;
+            }
+            return false;
         }
         else
         {
-            //FIXME: check user permissions
-            
             // called by packet handler on server side
-            switch(this.getControlState().getControlMode())
-            {
-            case OFF:
-                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF_WITH_REDSTONE : ControlMode.ON_WITH_REDSTONE);
-                break;
-                
-            case OFF_WITH_REDSTONE:
-                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF : ControlMode.ON);
-                break;
-                
-            case ON:
-                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON_WITH_REDSTONE : ControlMode.OFF_WITH_REDSTONE);
-                break;
-                
-            case ON_WITH_REDSTONE:
-                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON : ControlMode.OFF);
-                break;
-                
-            default:
-                break;
-                
-            }
-            this.markDirty();
+            if(this.machine() == null && !this.machine().hasRedstoneControl()) return false;
+            
+            this.machine().toggleRedstoneControl(player);
             this.markPlayerUpdateDirty(true);
             return true;
         }
@@ -787,81 +458,60 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IMach
     @SideOnly(Side.CLIENT)
     public void notifyInView()
     {
-        this.lastInViewMillis = CommonProxy.currentTimeMillis();
+        this.clientState.lastInViewMillis = CommonProxy.currentTimeMillis();
     }
 
-    public MachineControlState getControlState()
+    public long lastInViewMillis()
     {
-        return this.controlState;
-    }
-    
-    private void setControlState(MachineControlState controlState)
-    {
-        this.controlState = controlState;
-    }
-    
-    public MachineStatusState getStatusState()
-    {
-        return this.statusState;
+        return this.clientState.lastInViewMillis;
     }
 
-    /**
-     * Call when power stops production.
-     * Power supply will forgive itself when it successfully provides power.
-     */
-    protected void blamePowerSupply()
+    public IItemHandler getItemHandler()
     {
-        if(!this.getPowerSupply().isFailureCause())
+        if(this.machine() != null && this.machine() instanceof ItemStorage)
         {
-            this.getPowerSupply().setFailureCause(true);
-            this.markPlayerUpdateDirty(false);
+            return (IItemHandler)this.machine();
         }
+        return null;
+    }
+    
+    public boolean canInteractWith(EntityPlayer playerIn)
+    {
+         return !this.isInvalid() && playerIn.getDistanceSq(pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
     }
 
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
+                && this.machine() != null
+                && this.machine() instanceof ItemStorage)
+        {
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast((IItemHandler) this.machine());
+        }
+        return super.getCapability(capability, facing);
+    }
+    
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && this.machine() != null)
+        {
+            return this.machine() instanceof ItemStorage;
+        }
+        return super.hasCapability(capability, facing);
+    }
+    
     /**
-     * Returns HDPE material buffer if this machine has one.
+     * Convenience method for casting machine reference to storage type.
+     * Will be null if this machine is not an Item Storage
      */
     @Nullable
-    public MaterialBufferDelegate bufferHDPE()
+    @SuppressWarnings("unchecked")
+    public IStorage<StorageTypeStack> storageMachine()
     {
-        return this.bufferHDPE;
+        return this.machine() != null && this.machine() instanceof ItemStorage 
+                ? (IStorage<StorageTypeStack>) this.machine()
+                : null;
     }
-    
-    @Nullable
-    @Override
-    public Domain getDomain()
-    {
-        if(this.domain == null)
-        {
-            this.domain = DomainManager.INSTANCE.getDomain(this.domainID);
-        }
-        return this.domain;
-    }
-    
-    public void setDomain(@Nullable Domain domain)
-    {
-        this.domainID = domain == null ? IIdentified.UNASSIGNED_ID : domain.getId();
-        this.domain = domain;
-        this.markDirty();
-    }
-
-    @Override
-    public Location getLocation()
-    {
-        return new Location(this.pos, this.world);
-    }
-
-    @Override
-    public void setLocation(Location loc)
-    {
-        Log.warn("Unsupported setLocation call on MachineTileEntity. This is a bug.");
-    }
-
-    @Override
-    public void setLocation(BlockPos pos, World world)
-    {
-        Log.warn("Unsupported setLocation call on MachineTileEntity. This is a bug.");
-    }
-    
-    
 }

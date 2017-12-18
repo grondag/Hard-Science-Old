@@ -10,10 +10,10 @@ import net.minecraft.inventory.Slot;
 public abstract class MachineContainer extends Container
 {
 
-    protected MachineContainerTileEntity te;
+    protected MachineTileEntity te;
     public final ContainerLayout layout;
 
-    public MachineContainer(IInventory playerInventory, MachineContainerTileEntity te, ContainerLayout layout) 
+    public MachineContainer(IInventory playerInventory, MachineTileEntity te, ContainerLayout layout) 
     {
         this.te = te;
         this.layout = layout;
@@ -70,12 +70,12 @@ public abstract class MachineContainer extends Container
         return te.canInteractWith(playerIn);
     }
 
-    public MachineContainerTileEntity tileEntity()
+    public MachineTileEntity tileEntity()
     {
         return this.te;
     }
     
-    public static MachineContainerTileEntity getOpenContainerTileEntity(EntityPlayerMP player)
+    public static MachineTileEntity getOpenContainerTileEntity(EntityPlayerMP player)
     {
         Container container = player.openContainer;
 

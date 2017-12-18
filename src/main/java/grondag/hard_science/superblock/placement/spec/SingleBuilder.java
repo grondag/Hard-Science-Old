@@ -141,7 +141,7 @@ public class SingleBuilder extends SingleStackBuilder
                         Job job = new Job(RequestPriority.MEDIUM, player);
                         job.setDimensionID(world.provider.getDimension());
                         job.addTask(new ExcavationTask(pos));
-                        Domain domain = DomainManager.INSTANCE.getActiveDomain(player);
+                        Domain domain = DomainManager.instance().getActiveDomain(player);
                         if(domain != null)
                         {
                             domain.jobManager.addJob(job);

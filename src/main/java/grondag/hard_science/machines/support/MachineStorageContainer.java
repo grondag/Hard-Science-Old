@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.machines.base.MachineContainer;
-import grondag.hard_science.machines.base.MachineStorageTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.IStorage;
@@ -19,7 +19,7 @@ import net.minecraft.item.ItemStack;
 public class MachineStorageContainer extends MachineContainer
 {
 
-    public MachineStorageContainer(IInventory playerInventory, MachineStorageTileEntity te, ContainerLayout layout)
+    public MachineStorageContainer(IInventory playerInventory, MachineTileEntity te, ContainerLayout layout)
     {
         super(playerInventory, te, layout);
     }
@@ -35,7 +35,7 @@ public class MachineStorageContainer extends MachineContainer
         
             if(playerIn instanceof EntityPlayerMP)
             {
-                IStorage<StorageType.StorageTypeStack> storage = ((MachineStorageTileEntity)this.te).getStorage();
+                IStorage<StorageType.StorageTypeStack> storage = ((MachineTileEntity)this.te).storageMachine();
                 if(storage == null) return ItemStack.EMPTY;
                 
                 int consumed = (int) storage.add(ItemResourceWithQuantity.fromStack(slotStack), false, null);
@@ -68,9 +68,9 @@ public class MachineStorageContainer extends MachineContainer
     public void addListener(IContainerListener listener)
     {
         super.addListener(listener);
-        if(listener instanceof EntityPlayerMP && this.te != null && ((MachineStorageTileEntity)this.te).getStorage() != null)
+        if(listener instanceof EntityPlayerMP && this.te != null && ((MachineTileEntity)this.te).storageMachine() != null)
         {
-            ((MachineStorageTileEntity)this.te).getStorage().addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
+            ((MachineTileEntity)this.te).storageMachine().addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
         }
     }
 }

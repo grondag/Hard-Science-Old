@@ -5,6 +5,7 @@ import java.util.List;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.Privilege;
@@ -98,20 +99,6 @@ public abstract class MachineBlock extends SuperBlockPlus
     }
     
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if(!worldIn.isRemote)
-        {
-            TileEntity myTE = worldIn.getTileEntity(pos);
-            if(myTE != null && myTE instanceof MachineTileEntity)
-            {
-                ((MachineTileEntity)myTE).disconnect();
-            }
-        }
-        super.breakBlock(worldIn, pos, state);
-    }
- 
-    @Override
     public int damageDropped(IBlockState state)
     {
         // don't want species to "stick" with machines - is purely cosmetic
@@ -148,6 +135,19 @@ public abstract class MachineBlock extends SuperBlockPlus
         return true;
     }
 
+    @Override
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if(!(worldIn == null || worldIn.isRemote))
+        {
+            MachineTileEntity mte = (MachineTileEntity) worldIn.getTileEntity(pos);
+            if(mte != null) mte.clearMachine();
+        }
+
+        // NB: anything we do with TE must come BEFORE we call this
+        super.breakBlock(worldIn, pos, state);
+    }
+
     protected float hitX (EnumFacing side, float hitX, float hitZ)
     {
         switch (side) 
@@ -176,7 +176,9 @@ public abstract class MachineBlock extends SuperBlockPlus
 
         MachineTileEntity machineTE = (MachineTileEntity) getTileEntityReliably(worldIn, pos);
         
-        if(!machineTE.hasOnOff() && !machineTE.hasRedstoneControl()) return;
+        if(machineTE.machine() == null) return;
+        
+        if(!machineTE.machine().hasOnOff() && !machineTE.machine().hasRedstoneControl()) return;
 
         RayTraceResult rayResult = net.minecraftforge.common.ForgeHooks.rayTraceEyes(playerIn, 
                 ((EntityPlayerMP) playerIn).interactionManager.getBlockReachDistance() + 1);
@@ -197,14 +199,14 @@ public abstract class MachineBlock extends SuperBlockPlus
         float faceX = this.hitX(side, hitX, hitZ);
         float faceY = 1f - hitY;
 
-        if(machineTE.hasOnOff() && RenderBounds.BOUNDS_ON_OFF.contains(faceX, faceY))
+        if(machineTE.clientState().hasOnOff && RenderBounds.BOUNDS_ON_OFF.contains(faceX, faceY))
         {
             if(machineTE.togglePower((EntityPlayerMP) playerIn))
             {
                 worldIn.playSound(null, pos.getX() + .5f, pos.getY() + .5f, pos.getZ() + .5f, SoundEvents.UI_BUTTON_CLICK, SoundCategory.PLAYERS, .2f, ((worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * .7f + 1) * 2);
             }
         }
-        else if(machineTE.hasRedstoneControl() && RenderBounds.BOUNDS_REDSTONE.contains(faceX, faceY))
+        else if(machineTE.clientState().hasRedstoneControl && RenderBounds.BOUNDS_REDSTONE.contains(faceX, faceY))
         {
             if(machineTE.toggleRedstoneControl((EntityPlayerMP) playerIn))
             {
@@ -239,22 +241,18 @@ public abstract class MachineBlock extends SuperBlockPlus
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
         
-        // notify re-placed machines to reconnect to simulation or initialize transient state
+        // restore placed machines or initialize them with simulation
         if(worldIn.isRemote) return;
         TileEntity blockTE = worldIn.getTileEntity(pos);
         if (blockTE != null && blockTE instanceof MachineTileEntity) 
         {
-            MachineTileEntity mte = (MachineTileEntity)blockTE;
-            // assign domain for placed blocks
-            if(mte.getDomain() == null && placer instanceof EntityPlayerMP)
+            Domain domain = DomainManager.instance().getActiveDomain((EntityPlayerMP) placer);
+            if(domain == null || !domain.hasPrivilege((EntityPlayer) placer, Privilege.ADD_NODE))
             {
-                Domain domain = DomainManager.INSTANCE.getActiveDomain((EntityPlayerMP) placer);
-                if(domain != null && domain.hasPrivilege((EntityPlayer) placer, Privilege.ADD_NODE))
-                {
-                    mte.setDomain(domain);
-                }
+                domain = DomainManager.instance().defaultDomain();
             }
-            mte.reconnect();
+
+            ((MachineTileEntity)blockTE).restoreMachineFromStack(stack, domain);
         }
     }
     
@@ -332,8 +330,10 @@ public abstract class MachineBlock extends SuperBlockPlus
     {
         MachineTileEntity mte = (MachineTileEntity) this.getTileEntityReliably(world, data.getPos());
         
+        if(mte.machine() == null) return;
+        
         probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 
-                mte.getDomain() == null ? I18n.translateToLocal("misc.unassigned") : mte.getDomain().getName()));
+                mte.machine().getDomain() == null ? I18n.translateToLocal("misc.unassigned") : mte.machine().getDomain().getName()));
     }
     
     

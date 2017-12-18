@@ -9,7 +9,7 @@ import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import net.minecraft.nbt.NBTTagCompound;
 
-public abstract class AbstractSimpleDevice implements IDevice
+public abstract class AbstractDevice implements IDevice
 {
     private int id;
     private Location location;
@@ -47,9 +47,9 @@ public abstract class AbstractSimpleDevice implements IDevice
     @Override
     public Domain getDomain()
     {
-        if(this.domain == null)
+        if(this.domain == null && this.domainID != IIdentified.UNASSIGNED_ID)
         {
-            this.domain = DomainManager.INSTANCE.getDomain(this.domainID);
+            this.domain = DomainManager.instance().getDomain(this.domainID);
         }
         return this.domain;
     }

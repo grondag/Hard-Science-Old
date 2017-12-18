@@ -61,7 +61,7 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     @Nullable
     public static Build getActiveBuildForPlayer(EntityPlayerMP player)
     {
-        DomainUser user = DomainManager.INSTANCE.getActiveDomain(player).findPlayer(player);
+        DomainUser user = DomainManager.instance().getActiveDomain(player).findPlayer(player);
         return user == null || !user.hasPrivilege(Privilege.CONSTRUCTION_EDIT) ? null : user.getActiveBuild(player.world.provider.getDimension());
     }
     

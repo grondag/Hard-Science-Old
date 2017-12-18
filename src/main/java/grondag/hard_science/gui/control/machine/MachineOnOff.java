@@ -25,7 +25,7 @@ public class MachineOnOff extends AbstractMachineControl<MachineOnOff, RadialRen
         {
             GuiUtil.drawBoxRightBottom(this.getLeft(), this.getTop(), this.getRight(), this.getBottom(), 1, BUTTON_COLOR_FOCUS);
         }
-        MachineControlRenderer.renderBinarySprite(this.renderBounds, ModModels.TEX_MACHINE_ON_OFF, this.tileEntity.isOn(), 0xFFFFFFFF);
+        MachineControlRenderer.renderBinarySprite(this.renderBounds, ModModels.TEX_MACHINE_ON_OFF, this.tileEntity.clientState().isOn(), 0xFFFFFFFF);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class MachineOnOff extends AbstractMachineControl<MachineOnOff, RadialRen
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        renderContext.drawLocalizedToolTipBoolean(this.tileEntity.isOn(), "machine.is_on", "machine.is_off", mouseX, mouseY);
+        renderContext.drawLocalizedToolTipBoolean(this.tileEntity.clientState().isOn(), "machine.is_on", "machine.is_off", mouseX, mouseY);
     }
     
 }

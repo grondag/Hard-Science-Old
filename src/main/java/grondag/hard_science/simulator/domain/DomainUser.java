@@ -102,7 +102,7 @@ public class DomainUser implements IReadWriteNBT
     public Build getActiveBuild(int dimensionID)
     {
         int buildID = this.activeBuilds.get(dimensionID);
-        Build result = (Build) DomainManager.INSTANCE.assignedNumbersAuthority().get(buildID, AssignedNumber.BUILD);
+        Build result = (Build) DomainManager.instance().assignedNumbersAuthority().get(buildID, AssignedNumber.BUILD);
         if(result == null || !result.isOpen())
         {
             result = this.domain.buildManager.newBuild(dimensionID);

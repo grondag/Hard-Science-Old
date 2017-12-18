@@ -1,8 +1,8 @@
 package grondag.hard_science.simulator.device.impl;
 
-import grondag.hard_science.simulator.device.AbstractSimpleDevice;
+import grondag.hard_science.simulator.device.AbstractDevice;
 
-public class TestDevice extends AbstractSimpleDevice
+public class TestDevice extends AbstractDevice
 {
     @Override
     public void onConnect()

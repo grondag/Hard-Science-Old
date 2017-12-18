@@ -183,7 +183,7 @@ public class SimpleProcurementTask<V extends StorageType<V>> extends Procurement
             // Don't register with broker if deserializing because it
             // may try to re-allocate inventory to us that we already
             // have allocated.  That case is handled in afterDeserialization();
-            if(!DomainManager.INSTANCE.isDeserializationInProgress())
+            if(!DomainManager.instance().isDeserializationInProgress())
             {
                 // have to call directly here because not using setStatus()
                 this.broker().registerRequest(this);

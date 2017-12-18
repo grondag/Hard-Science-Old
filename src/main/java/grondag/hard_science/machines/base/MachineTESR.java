@@ -79,19 +79,21 @@ public abstract class MachineTESR extends SuperBlockTESR
         BufferBuilder buffer = tessellator.getBuffer();
   
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolSprite(), (displayAlpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
-        MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, white);
+        MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.clientState().machineName, HorizontalAlignment.CENTER, white);
 
-        if(mte.hasOnOff())
+        if(mte.clientState().hasOnOff)
         {
-            MachineControlRenderer.renderBinarySprite(tessellator, buffer, RenderBounds.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, mte.isOn(), white);
+            MachineControlRenderer.renderBinarySprite(tessellator, buffer, 
+                RenderBounds.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, 
+                mte.clientState().isOn(), white);
         }
         
-        if(mte.hasRedstoneControl())
+        if(mte.clientState().hasRedstoneControl)
         {
             MachineControlRenderer.renderRedstoneControl(mte, tessellator, buffer, RenderBounds.BOUNDS_REDSTONE, displayAlpha);
         }
         
-        MachinePowerSupply mps = mte.getPowerSupply();
+        MachinePowerSupply mps = mte.clientState.powerSupply;
         if(mps != null)
         {
             MachineControlRenderer.renderPower(tessellator, buffer, RenderBounds.BOUNDS_POWER_0, mps, mte, displayAlpha);

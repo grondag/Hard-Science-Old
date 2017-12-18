@@ -5,7 +5,7 @@ package grondag.hard_science.machines;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.machines.base.MachineContainer;
-import grondag.hard_science.machines.base.MachineContainerTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.ContainerLayout;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -18,7 +18,7 @@ import net.minecraftforge.items.IItemHandler;
 public class BlockFabricatorContainer extends MachineContainer
 {
  
-    public BlockFabricatorContainer(IInventory playerInventory, MachineContainerTileEntity te, ContainerLayout layout) 
+    public BlockFabricatorContainer(IInventory playerInventory, MachineTileEntity te, ContainerLayout layout) 
     {
         super(playerInventory, te, layout);
     }
@@ -37,7 +37,7 @@ public class BlockFabricatorContainer extends MachineContainer
             if(playerIn instanceof EntityPlayerMP)
             {
                 
-                IItemHandler itemHandler = ((MachineContainerTileEntity)this.te).getItemHandler();
+                IItemHandler itemHandler = ((MachineTileEntity)this.te).getItemHandler();
                 if(itemHandler == null) return ItemStack.EMPTY;
                 
                 ItemStack remainderStack = itemHandler.insertItem(0, slotStack, false);
