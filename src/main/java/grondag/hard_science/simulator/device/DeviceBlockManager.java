@@ -1,20 +1,24 @@
 package grondag.hard_science.simulator.device;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.transport.L1.IConnector;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class DeviceBlockManager
 {
-    private Int2ObjectOpenHashMap<Long2ObjectOpenHashMap<DeviceBlock>> worldBlocks
-     = new Int2ObjectOpenHashMap<Long2ObjectOpenHashMap<DeviceBlock>>();
+    private Int2ObjectOpenHashMap<Long2ObjectOpenHashMap<IDeviceBlock>> worldBlocks
+     = new Int2ObjectOpenHashMap<Long2ObjectOpenHashMap<IDeviceBlock>>();
 
-    private Long2ObjectOpenHashMap<DeviceBlock> getBlocksForDimension(int dimensionID)
+    private Long2ObjectOpenHashMap<IDeviceBlock> getBlocksForDimension(int dimensionID)
     {
-        Long2ObjectOpenHashMap<DeviceBlock> blocks = worldBlocks.get(dimensionID);
+        Long2ObjectOpenHashMap<IDeviceBlock> blocks = worldBlocks.get(dimensionID);
         if(blocks == null)
         {
             synchronized(worldBlocks)
@@ -22,7 +26,7 @@ public class DeviceBlockManager
                 blocks = worldBlocks.get(dimensionID);
                 if(blocks == null)
                 {
-                    blocks = new Long2ObjectOpenHashMap<DeviceBlock>();
+                    blocks = new Long2ObjectOpenHashMap<IDeviceBlock>();
                     worldBlocks.put(dimensionID, blocks);
                 }
             }
@@ -31,67 +35,70 @@ public class DeviceBlockManager
     }
     
     @Nullable
-    public IConnector getConnector(int dimensionID, long packedBlockPos, EnumFacing face)
+    public IConnector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
     {
-        Long2ObjectOpenHashMap<DeviceBlock> blocks = this.getBlocksForDimension(dimensionID);
-        if(blocks == null) return null;
-        
-        DeviceBlock block = blocks.get(packedBlockPos);
+        IDeviceBlock block = this.getBlockDelegate(dimensionID, packedBlockPos);
         if(block == null) return null;
-        
         return block.getConnector(face);
     }
     
-    public void addOrUpdateConnector(int dimensionID, long packedBlockPos, EnumFacing face, IConnector connector)
+    @Nullable
+    public IConnector getConnector(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
-        Long2ObjectOpenHashMap<DeviceBlock> blocks = this.getBlocksForDimension(dimensionID);
-        DeviceBlock block = blocks.get(packedBlockPos);
-        if(block == null)
+        return this.getConnector(world.provider.getDimension(), PackedBlockPos.pack(pos), face);
+    }
+    
+    @Nullable
+    public IDeviceBlock getBlockDelegate(int dimensionID, long packedBlockPos)
+    {
+        Long2ObjectOpenHashMap<IDeviceBlock> blocks = this.getBlocksForDimension(dimensionID);
+        return blocks == null ? null : blocks.get(packedBlockPos);
+    }
+    
+    @Nullable
+    public IDeviceBlock getBlockDelegate(@Nonnull World world, @Nonnull BlockPos pos)
+    {
+        return this.getBlockDelegate(world.provider.getDimension(), PackedBlockPos.pack(pos));
+    }
+    
+    /**
+     * Should be called by devices during {@link IDevice#onConnect()}
+     * or whenever a connected device adds or changes a connection. 
+     */
+    public void addOrUpdateDelegate(@Nonnull IDeviceBlock block)
+    {
+        Long2ObjectOpenHashMap<IDeviceBlock> blocks = this.getBlocksForDimension(block.dimensionID());
+        synchronized(blocks)
         {
-            synchronized(blocks)
-            {
-                block = blocks.get(packedBlockPos);
-                if(block == null)
-                {
-                    block = new DeviceBlock(packedBlockPos);
-                    blocks.put(packedBlockPos, block);
-                }
-            }
-        }
-        synchronized(block)
-        {
-            block.setConnector(face, connector);
+            IDeviceBlock oldBlock = blocks.put(block.packedBlockPos(), block);
+            if(oldBlock != null) disconnect(oldBlock, blocks);
+            connect(block, blocks);
         }
     }
-
-    public void removeConnector(int dimensionID, long packedBlockPos, EnumFacing face, IConnector connector)
+    
+    private void connect(IDeviceBlock block, Long2ObjectOpenHashMap<IDeviceBlock> blocks)
     {
-        Long2ObjectOpenHashMap<DeviceBlock> blocks = this.getBlocksForDimension(dimensionID);
-        DeviceBlock block = blocks.get(packedBlockPos);
-        assert block != null : "Request to remove connection for missing device block";
         
-        synchronized(block)
+    }
+    
+    /**
+     * Should be called by devices during {@link IDevice#onDisconnect()()}
+     * or whenever a connected device removes a connection. 
+     * Prior connection information is for assertion checking in test/dev env.
+     */
+    public void removeDelegate(@Nonnull IDeviceBlock block)
+    {
+        Long2ObjectOpenHashMap<IDeviceBlock> blocks = this.getBlocksForDimension(block.dimensionID());
+        synchronized(blocks)
         {
-            assert block.getConnector(face) == connector
-                    : "Mismatched request to remove device connection";
-            
-            block.setConnector(face, null);
+            assert blocks.remove(block.packedBlockPos()) == block
+                    : "Mismatched request to remove device block";
+            disconnect(block, blocks);
         }
+    }
+    
+    private void disconnect(IDeviceBlock block, Long2ObjectOpenHashMap<IDeviceBlock> blocks)
+    {
         
-        // maintain synchronization order to avoid deadlocks
-        if(block.isEmpty())
-        {
-            synchronized(blocks)
-            {
-                synchronized(block)
-                {      
-                    // confirm
-                    if(block.isEmpty())
-                    {
-                        blocks.remove(packedBlockPos);
-                    }
-                }
-            }
-        }
     }
 }

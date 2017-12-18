@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.device;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.Configurator;
@@ -11,19 +10,14 @@ import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCollector;
 import grondag.hard_science.library.concurrency.SimpleCountedJobBacker;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
-import grondag.hard_science.simulator.transport.L1.IConnector;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryNamespaced;
-import net.minecraft.world.World;
 
 public class DeviceManager implements IPersistenceNode, ISimulationTickable
 {
@@ -106,34 +100,14 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         instance().addDeviceInconveniently(device);
     }
     
-    public static void addOrUpdateConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
-    {
-        instance().addOrUpdateConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
-    }
-    
-    @Nullable
-    public static IConnector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
-    {
-        return instance().getConnectorInconveniently(dimensionID, packedBlockPos, face);
-    }
-    
-    @Nullable
-    public static IConnector getConnector(World world, BlockPos pos, @Nonnull EnumFacing face)
-    {
-        return instance().getConnectorInconveniently(world, pos, face);
-    }
-    
-    /**
-     * See {@link #removeConnectorInconveniently(int, long, EnumFacing, IConnector)}
-     */
-    public static void removeConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
-    {
-        instance().removeConnectorInconveniently(dimensionID, packedBlockPos, face, connector);
-    }
-    
     public static void removeDevice(IDevice device)
     {
         instance().removeDeviceInconveniently(device);
+    }
+    
+    public static DeviceBlockManager blockManager()
+    {
+        return instance().deviceBlocks;
     }
     
     ///////////////////////////////////////////////////////////
@@ -230,42 +204,6 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         this.isDirty = true;
         this.onTickJobBacker.setDirty();
         this.offTickJobBacker.setDirty();
-    }
-    
-    @Nullable
-    public IConnector getConnectorInconveniently(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
-    {
-        return this.deviceBlocks.getConnector(dimensionID, packedBlockPos, face);
-    }
-    
-    @Nullable
-    public IConnector getConnectorInconveniently(World world, BlockPos pos, @Nonnull EnumFacing face)
-    {
-        return this.deviceBlocks.getConnector(
-                world.provider.getDimension(), 
-                PackedBlockPos.pack(pos), 
-                face);
-    }
-    
-    /**
-     * Should be called by devices during {@link IDevice#onConnect()}
-     * or whenever a connected device adds or changes a connection. 
-     */
-    public void addOrUpdateConnectorInconveniently(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
-    {
-        this.deviceBlocks.addOrUpdateConnector(dimensionID, packedBlockPos, face, connector);
-        this.isDirty = true;
-    }
-    
-    /**
-     * Should be called by devices during {@link IDevice#onDisconnect()()}
-     * or whenever a connected device removes a connection. 
-     * Prior connection information is for assertion checking in test/dev env.
-     */
-    public void removeConnectorInconveniently(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face, @Nonnull IConnector connector)
-    {
-        this.deviceBlocks.removeConnector(dimensionID, packedBlockPos, face, connector);
-        this.isDirty = true;
     }
     
     @Override

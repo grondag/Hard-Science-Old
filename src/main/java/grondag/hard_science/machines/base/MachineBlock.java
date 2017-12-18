@@ -5,7 +5,6 @@ import java.util.List;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.support.MachinePowerSupply;
-import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.Privilege;
