@@ -45,7 +45,7 @@ public interface IProcurementRequest <V extends StorageType<V>> extends ITask
      * Called by a producer when starting to produce a resource for this request.
      * Will cause openDemands to refresh (no longer includes the WIP.)
      * Retains a reference to producer so can notify producer is request is cancelled.
-     * Returns a positive, non-zero quantity of WIP successfully claimed.
+     * Returns a positive, non-zero quantityIn of WIP successfully claimed.
      * Returns zero if no WIP could be claimed.
      */
     public long startWIP(IResource<V> resource, long startedQuantity, IProducer<V> producer);

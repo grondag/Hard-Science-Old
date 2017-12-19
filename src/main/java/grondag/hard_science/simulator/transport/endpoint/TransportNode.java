@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.transport.L2;
+package grondag.hard_science.simulator.transport.endpoint;
 
 import grondag.hard_science.simulator.resource.StorageType;
 import net.minecraft.nbt.NBTTagCompound;

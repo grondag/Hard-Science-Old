@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.transport;
 
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.L2.ITransportNode;
+import grondag.hard_science.simulator.transport.endpoint.ITransportNode;
 
 public class TransportHelper
 {

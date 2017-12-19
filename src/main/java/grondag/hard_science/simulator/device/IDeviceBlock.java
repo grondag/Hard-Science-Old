@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.device;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.transport.L1.IConnector;
+import grondag.hard_science.simulator.transport.endpoint.Connector;
 import net.minecraft.util.EnumFacing;
 
 /**
@@ -22,6 +22,6 @@ public interface IDeviceBlock extends IDomainMember
      * Get connector on the given face.  Returns null if none.
      */
     @Nullable
-    public IConnector getConnector(EnumFacing face);
+    public Connector getConnector(EnumFacing face);
     
 }

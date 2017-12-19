@@ -1,11 +1,12 @@
-package grondag.hard_science.simulator.transport.L2;
+package grondag.hard_science.simulator.transport.carrier;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.L3.Packet;
+import grondag.hard_science.simulator.transport.StoragePacket;
+import grondag.hard_science.simulator.transport.endpoint.ITransportNode;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 /**
@@ -14,7 +15,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
  * for function. All non-abstract implementing classes should 
  * map to a physical, in-game device.
  */
-public abstract class TransportLink<T extends StorageType<T>> implements ITypedStorage<T>
+public abstract class TransportCarrier<T extends StorageType<T>> implements ITypedStorage<T>
 {
     private static final AtomicInteger nextAddress = new AtomicInteger(1);
     
@@ -29,7 +30,7 @@ public abstract class TransportLink<T extends StorageType<T>> implements ITypedS
     
     protected long utilization = 0;
     
-    protected TransportLink(long capacityPerTick)
+    protected TransportCarrier(long capacityPerTick)
     {
         this.capacityPerTick = capacityPerTick;
     }
@@ -98,7 +99,7 @@ public abstract class TransportLink<T extends StorageType<T>> implements ITypedS
      * carried over into subsequent ticks until no-longer
      * saturated.
      */
-    public synchronized boolean transport(Packet<T> packet, ITransportNode<T> fromNode, ITransportNode<T> toNode, boolean force)
+    public synchronized boolean transport(StoragePacket<T> packet, ITransportNode<T> fromNode, ITransportNode<T> toNode, boolean force)
     {
         this.refreshUtilization();
         long cost = this.costForPacket(packet, fromNode, toNode);
@@ -114,7 +115,7 @@ public abstract class TransportLink<T extends StorageType<T>> implements ITypedS
     /**
      * Override if needs to be something other than the packet unit cost.
      */
-    protected long costForPacket(Packet<T> packet, ITransportNode<T> fromNode, ITransportNode<T> toNode)
+    protected long costForPacket(StoragePacket<T> packet, ITransportNode<T> fromNode, ITransportNode<T> toNode)
     {
         return packet.basePacketCost();
     }
@@ -136,7 +137,7 @@ public abstract class TransportLink<T extends StorageType<T>> implements ITypedS
     }
 
     /**
-     * Called by packet to refunds the cost of earlier {@link #transport(Packet, ITransportNode, ITransportNode)}
+     * Called by packet to refunds the cost of earlier {@link #transport(StoragePacket, ITransportNode, ITransportNode)}
      * if packet cannot be delivered.<p>
      * 
      * MUST be called during same simulation tick or will be shifting capacity

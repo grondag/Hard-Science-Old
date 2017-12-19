@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.device;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.hard_science.simulator.transport.L1.IConnector;
+import grondag.hard_science.simulator.transport.endpoint.Connector;
 import net.minecraft.util.EnumFacing;
 
 /**
@@ -17,7 +17,7 @@ public class DeviceBlock
 {
     public final long packedBlockPos;
     
-    private final IConnector[] connectors = new IConnector[6];
+    private final Connector[] connectors = new Connector[6];
     private int connectionCount = 0;
     
     public DeviceBlock(long packedBlockPos)
@@ -29,12 +29,12 @@ public class DeviceBlock
      * Get connector on the given face.  Returns null if none.
      */
     @Nullable
-    public IConnector getConnector(EnumFacing face)
+    public Connector getConnector(EnumFacing face)
     {
         return this.connectors[face.ordinal()];
     }
     
-    public synchronized void setConnector(@Nonnull EnumFacing face, @Nullable IConnector connector)
+    public synchronized void setConnector(@Nonnull EnumFacing face, @Nullable Connector connector)
     {
         if(this.connectors[face.ordinal()] == null)
         {

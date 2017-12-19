@@ -22,7 +22,7 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.simulator.transport.L2.ITransportNode;
+import grondag.hard_science.simulator.transport.endpoint.ITransportNode;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayerMP;

@@ -141,7 +141,7 @@ public class BaseStorageManager<T extends StorageType<T>>
     }
     
     /**
-     * Returns a list of stores that have the given resource with quantity included.
+     * Returns a list of stores that have the given resource with quantityIn included.
      */
     public List<StorageWithResourceAndQuantity<T>> findStorageWithQuantity(Predicate<Object> predicate)
     {
@@ -254,9 +254,9 @@ public class BaseStorageManager<T extends StorageType<T>>
     
     /**
      * Adds delta to the allocation of this resource for the given request.
-     * Return value is the quantity removed or added, which could be different than
+     * Return value is the quantityIn removed or added, which could be different than
      * amount requested if not enough is available or would reduce allocation below 0.
-     * Total quantity allocated can be different from return value if request already had an allocation.
+     * Total quantityIn allocated can be different from return value if request already had an allocation.
      * Provides no notification to the request.
      */
     public long changeAllocation(

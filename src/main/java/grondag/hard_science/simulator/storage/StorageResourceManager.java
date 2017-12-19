@@ -60,7 +60,7 @@ public class StorageResourceManager<T extends StorageType<T>>
     private Object allocations = null;
     
     /**
-     * If request is non-null, initial quantity will be allocated to that request.
+     * If request is non-null, initial quantityIn will be allocated to that request.
      * Quantity is NOT used to track overall storage amount - that is retrieved from
      * the storage, if non-null.
      * Useful when fabrication is storing items made for procurement requests.
@@ -82,9 +82,9 @@ public class StorageResourceManager<T extends StorageType<T>>
     
     /**
      * Adds delta to the allocation of this resource for the given request.
-     * Return value is the quantity removed or added, which could be different than
+     * Return value is the quantityIn removed or added, which could be different than
      * amount requested if not enough is available or would reduce allocation below 0.
-     * Total quantity allocated can be different from return value if request already had an allocation.
+     * Total quantityIn allocated can be different from return value if request already had an allocation.
      * Provides no notification to the request.
      */
     public synchronized long changeAllocation(@Nonnull IProcurementRequest<T> request, long quantityRequested)
@@ -337,7 +337,7 @@ public class StorageResourceManager<T extends StorageType<T>>
             if(storage.getQuantityStored(resource) != added)
             {
                 Log.warn("Storage Resource Manager encountered request to add a quanity in a new storage"
-                        + " that did not match the quantity in the storage. This is a bug.");
+                        + " that did not match the quantityIn in the storage. This is a bug.");
             }
         }
         
@@ -486,7 +486,7 @@ public class StorageResourceManager<T extends StorageType<T>>
                     // and then the order could change and we'd skip a listener.
                     for(Object listener : ((SimpleUnorderedArrayList<IStorageResourceListener<T>>)listeners).toArray())
                     {
-                        // Note that we query available quantity each time
+                        // Note that we query available quantityIn each time
                         // because some listeners might take action that would 
                         // change the availability.
                         ((IStorageResourceListener<T>)listener).onAvailabilityChange(resource, quantityAvailable());

@@ -11,7 +11,7 @@ import net.minecraft.network.PacketBuffer;
  * Used for client representation of resources. Test match
  * with server-side resources using the handle.
  * 
- * Includes a quantity directly instead of in a sub class
+ * Includes a quantityIn directly instead of in a sub class
  * because uses cases for resource delegates typically require it.
  */
 public abstract class AbstractResourceDelegate<V extends StorageType<V>> implements IMessagePlus, ITypedStorage<V>
@@ -34,7 +34,7 @@ public abstract class AbstractResourceDelegate<V extends StorageType<V>> impleme
     
     /**
      * Delegate equality test is by handle instead of by instance and
-     * does include quantity.
+     * does include quantityIn.
      */
     @SuppressWarnings("rawtypes")
     @Override

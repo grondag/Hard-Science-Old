@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.library.world.PackedBlockPos;
-import grondag.hard_science.simulator.transport.L1.IConnector;
+import grondag.hard_science.simulator.transport.endpoint.Connector;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.EnumFacing;
@@ -35,7 +35,7 @@ public class DeviceBlockManager
     }
     
     @Nullable
-    public IConnector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
+    public Connector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
     {
         IDeviceBlock block = this.getBlockDelegate(dimensionID, packedBlockPos);
         if(block == null) return null;
@@ -43,7 +43,7 @@ public class DeviceBlockManager
     }
     
     @Nullable
-    public IConnector getConnector(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
+    public Connector getConnector(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
         return this.getConnector(world.provider.getDimension(), PackedBlockPos.pack(pos), face);
     }

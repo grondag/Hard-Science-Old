@@ -72,7 +72,7 @@ public abstract class ProcurementTask<V extends StorageType<V>> extends Abstract
         }
     }
     /**
-     * Tracks WIP quantity for a producer. 
+     * Tracks WIP quantityIn for a producer. 
      * Does NOT update total WIP count, because not all implementation have that concept.
      */
     private synchronized void setProducerWIP(IProducer<V> producer, long wip)

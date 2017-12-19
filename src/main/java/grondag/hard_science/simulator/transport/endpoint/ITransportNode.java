@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.transport.L2;
+package grondag.hard_science.simulator.transport.endpoint;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.device.IDevice;
@@ -49,8 +49,8 @@ public interface ITransportNode<T extends StorageType<T>>
      * Implementations should be thread-safe. <p>
      * 
      * @param resource  Identifies resource to be extracted
-     * @param quantity  Limits how many of the resource are extracted
-     * @param allowPartial  If false, will extract nothing unless full quantity can be extracted
+     * @param quantityIn  Limits how many of the resource are extracted
+     * @param allowPartial  If false, will extract nothing unless full quantityIn can be extracted
      * @param simulate  If true, will return forecasted result without making changes.
      * @return the number of resources actually extracted
      */
@@ -58,7 +58,7 @@ public interface ITransportNode<T extends StorageType<T>>
 
     /**
      * Convenience version of {@link #produce(IResource, long, boolean, boolean)} that 
-     * assumes allowPartial = false.  Returns true if exactly the given quantity
+     * assumes allowPartial = false.  Returns true if exactly the given quantityIn
      * are produced.  Otherwise returns false and no resources are produced.
      */
     public default boolean produce(IResource<T> resource, long quantity, boolean simulate)
@@ -85,8 +85,8 @@ public interface ITransportNode<T extends StorageType<T>>
      * Implementations should be thread-safe. <p>
      * 
      * @param resource  Identifies resource to be stored/consumed
-     * @param quantity  Limits how many of the resource are to be accepted
-     * @param allowPartial  If false, will accept nothing unless full quantity can be accepted
+     * @param quantityIn  Limits how many of the resource are to be accepted
+     * @param allowPartial  If false, will accept nothing unless full quantityIn can be accepted
      * @param simulate  If true, will return forecasted result without making changes.
      * @return the number of resources actually accepted
      */
@@ -94,7 +94,7 @@ public interface ITransportNode<T extends StorageType<T>>
     
     /**
      * Convenience version of {@link #consume(IResource, long, boolean, boolean)} that 
-     * assumes allowPartial = false.  Returns true if exactly the given quantity
+     * assumes allowPartial = false.  Returns true if exactly the given quantityIn
      * are consumed.  Otherwise returns false and no resources are consumed.
      */
     public default boolean consume(IResource<T> resource, long quantity, boolean simulate)
