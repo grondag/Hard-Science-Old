@@ -2,6 +2,8 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachinePowerSupply;
@@ -244,6 +246,7 @@ public abstract class AbstractMachine extends AbstractDevice
         this.getControlState().deserializeNBT(tag);
         if(this.powerSupply != null) this.powerSupply.deserializeNBT(tag);
         if(this.bufferManager != null) this.bufferManager.deserializeNBT(tag);
+        if(this.hasFront() && tag.hasKey(ModNBTTag.MACHINE_FRONT)) this.setFront(Useful.safeEnumFromTag(tag, ModNBTTag.MACHINE_FRONT, EnumFacing.NORTH));
     }
 
     @Override
@@ -253,6 +256,7 @@ public abstract class AbstractMachine extends AbstractDevice
         this.getControlState().serializeNBT(tag);
         if(this.powerSupply != null) this.powerSupply.serializeNBT(tag);
         if(this.bufferManager != null) this.bufferManager.serializeNBT(tag);
+        if(this.hasFront() && this.getFront() != null) Useful.saveEnumToTag(tag, ModNBTTag.MACHINE_FRONT, this.getFront());
     }
     
     /**
@@ -261,20 +265,6 @@ public abstract class AbstractMachine extends AbstractDevice
      * @param tick  current world tick, in case needed
      */
     protected void updateMachine(long tick){}
-
-    @Override
-    public void onConnect()
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void onDisconnect()
-    {
-        // TODO Auto-generated method stub
-        
-    }
 
     @Override
     public void doOnTick()
@@ -380,4 +370,22 @@ public abstract class AbstractMachine extends AbstractDevice
     {
         return this.bufferHDPE;
     }
+    
+    /**
+     * Override to true if this machine has an orientation.
+     * If true, then placement logic will call {@link #setFront(EnumFacing)}
+     * right after the machine is created and before it is added 
+     * to the device manager.  Will also cause front to be serialized.
+     */
+    public boolean hasFront() { return false; }
+    
+    /**
+     * See {@link #hasFront()}
+     */
+    public void setFront(EnumFacing frontFace) {}
+    
+    /**
+     * See {@link #hasFront()}
+     */
+    public EnumFacing getFront() { return null; }
 }

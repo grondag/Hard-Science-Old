@@ -3,14 +3,14 @@ package grondag.hard_science.machines.drones;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
-import grondag.hard_science.machines.base.IMachine;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class Drone implements IMachine, IReadWriteNBT
+public class Drone implements IDevice, IReadWriteNBT
 {
     private int id = IIdentified.UNASSIGNED_ID;
     
@@ -79,4 +79,12 @@ public class Drone implements IMachine, IReadWriteNBT
         this.serializeLocation(tag);
         tag.setInteger(ModNBTTag.DOMAIN_ID, this.domainID);
     }
+
+    @Override
+    public boolean isConnected()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

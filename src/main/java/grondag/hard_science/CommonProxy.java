@@ -1,6 +1,7 @@
 package grondag.hard_science;
 
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModConnections;
 import grondag.hard_science.init.ModDevices;
 import grondag.hard_science.init.ModEntities;
 import grondag.hard_science.init.ModRecipes;
@@ -56,6 +57,7 @@ public class CommonProxy
 	{
 		ModRecipes.init(event);
         ModBlocks.init(event);
+        ModConnections.registerConnectionPairs();
         
         Base32Namer.loadBadNames(I18n.translateToLocal("misc.offensive"));
 	}

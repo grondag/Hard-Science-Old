@@ -5,7 +5,7 @@ import java.util.concurrent.Future;
 
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MachinePowerSupply;
@@ -35,7 +35,7 @@ import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 
-public class BlockFabricatorMachine extends AbstractMachine
+public class BlockFabricatorMachine extends AbstractSimpleMachine
 {
     ////////////////////////////////////////////////////////////////////////
     //  STATIC MEMBERS

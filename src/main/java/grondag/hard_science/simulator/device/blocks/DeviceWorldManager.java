@@ -1,17 +1,22 @@
-package grondag.hard_science.simulator.device;
+package grondag.hard_science.simulator.device.blocks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.library.world.PackedBlockPos;
-import grondag.hard_science.simulator.transport.endpoint.Connector;
+import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.transport.endpoint.ConnectorInstance;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class DeviceBlockManager
+/**
+ * Tracks all extant device blocks and facilitates
+ * block-related events and communications between devices.
+ */
+public class DeviceWorldManager
 {
     private Int2ObjectOpenHashMap<Long2ObjectOpenHashMap<IDeviceBlock>> worldBlocks
      = new Int2ObjectOpenHashMap<Long2ObjectOpenHashMap<IDeviceBlock>>();
@@ -35,7 +40,7 @@ public class DeviceBlockManager
     }
     
     @Nullable
-    public Connector getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
+    public ConnectorInstance getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
     {
         IDeviceBlock block = this.getBlockDelegate(dimensionID, packedBlockPos);
         if(block == null) return null;
@@ -43,7 +48,7 @@ public class DeviceBlockManager
     }
     
     @Nullable
-    public Connector getConnector(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
+    public ConnectorInstance getConnector(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
         return this.getConnector(world.provider.getDimension(), PackedBlockPos.pack(pos), face);
     }
@@ -63,7 +68,19 @@ public class DeviceBlockManager
     
     /**
      * Should be called by devices during {@link IDevice#onConnect()}
-     * or whenever a connected device adds or changes a connection. 
+     * or whenever a connected device adds or changes a block. 
+     * Tracks the device block so that it is discoverable.<p>
+     * 
+     * Does NOT form connections or notify neighbors of the new block. 
+     * The caller is responsible for doing so.  Done this way
+     * because some device blocks are inherently unable to 
+     * form connections or are entirely contained within other
+     * blocks owned by the same device.<p>
+     * 
+     * DOES notify old block of removal if a block was already present.
+     * In this case, the old block is responsible for handling
+     * tear down of existing connections, notifying neighbors, etc.
+     * 
      */
     public void addOrUpdateDelegate(@Nonnull IDeviceBlock block)
     {
@@ -71,20 +88,18 @@ public class DeviceBlockManager
         synchronized(blocks)
         {
             IDeviceBlock oldBlock = blocks.put(block.packedBlockPos(), block);
-            if(oldBlock != null) disconnect(oldBlock, blocks);
-            connect(block, blocks);
+            if(oldBlock != null) oldBlock.onRemoval();
         }
     }
-    
-    private void connect(IDeviceBlock block, Long2ObjectOpenHashMap<IDeviceBlock> blocks)
-    {
-        
-    }
-    
+
     /**
-     * Should be called by devices during {@link IDevice#onDisconnect()()}
+     * Should be called by devices during {@link IDevice#onDisconnect()}
      * or whenever a connected device removes a connection. 
-     * Prior connection information is for assertion checking in test/dev env.
+     * Prior connection information is for assertion checking in test/dev env.<p>
+     * 
+     * DOES notify the block of removal via {@link IDeviceBlock#onRemoval()}
+     * This is the signal for the old block to handle
+     * tear down of existing connections, notifying neighbors, etc.
      */
     public void removeDelegate(@Nonnull IDeviceBlock block)
     {
@@ -93,12 +108,9 @@ public class DeviceBlockManager
         {
             assert blocks.remove(block.packedBlockPos()) == block
                     : "Mismatched request to remove device block";
-            disconnect(block, blocks);
+            block.onRemoval();
         }
     }
     
-    private void disconnect(IDeviceBlock block, Long2ObjectOpenHashMap<IDeviceBlock> blocks)
-    {
-        
-    }
+   
 }

@@ -12,6 +12,7 @@ import grondag.hard_science.library.concurrency.SimpleCountedJobBacker;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.device.blocks.DeviceWorldManager;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
@@ -105,7 +106,7 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         instance().removeDeviceInconveniently(device);
     }
     
-    public static DeviceBlockManager blockManager()
+    public static DeviceWorldManager blockManager()
     {
         return instance().deviceBlocks;
     }
@@ -117,7 +118,7 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     private final Int2ObjectOpenHashMap<IDevice> devices =
             new Int2ObjectOpenHashMap<IDevice>();
     
-    private final DeviceBlockManager deviceBlocks = new DeviceBlockManager();
+    private final DeviceWorldManager deviceBlocks = new DeviceWorldManager();
     
     private SimpleCountedJobBacker onTickJobBacker = new SimpleCountedJobBacker()
     {

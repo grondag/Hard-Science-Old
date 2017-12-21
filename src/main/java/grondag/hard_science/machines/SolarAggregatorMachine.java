@@ -1,8 +1,8 @@
 package grondag.hard_science.machines;
 
-import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.machines.base.AbstractSimpleMachine;
 
-public class SolarAggregatorMachine extends AbstractMachine
+public class SolarAggregatorMachine extends AbstractSimpleMachine
 {
 
 }

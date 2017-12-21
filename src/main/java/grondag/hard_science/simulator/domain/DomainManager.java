@@ -17,12 +17,8 @@ import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.simulator.transport.endpoint.ITransportNode;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -357,24 +353,6 @@ public class DomainManager implements IPersistenceNode
         return (Build) instance().assignedNumbersAuthority().get(id, AssignedNumber.BUILD);
     }
     
-    @SuppressWarnings("unchecked")
-    public static ITransportNode<StorageTypeStack> itemNodeFromId(int id)
-    {
-        return (ITransportNode<StorageTypeStack>) instance().assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_ITEM);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static ITransportNode<StorageTypeFluid> fluidNodeFromId(int id)
-    {
-        return (ITransportNode<StorageTypeFluid>) instance().assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_FLUID);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static ITransportNode<StorageTypePower> powerNodeFromId(int id)
-    {
-        return (ITransportNode<StorageTypePower>) instance().assignedNumbersAuthority().get(id, AssignedNumber.TRANSPORT_NODE_POWER);
-    }
-
     /**
      * Called after all deserialization is complete during simulation reload.
      */

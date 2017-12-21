@@ -173,4 +173,6 @@ public class ModNBTTag
 
     public static final String MACHINE_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
+    public static final String MACHINE_FRONT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
 }

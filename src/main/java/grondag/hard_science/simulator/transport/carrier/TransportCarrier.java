@@ -6,7 +6,7 @@ import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.StoragePacket;
-import grondag.hard_science.simulator.transport.endpoint.ITransportNode;
+import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 /**
@@ -21,8 +21,8 @@ public abstract class TransportCarrier<T extends StorageType<T>> implements ITyp
     
     private final int mediaAddress = nextAddress.getAndIncrement();
     
-    private final Int2ObjectOpenHashMap<ITransportNode<T>> nodes
-        = new Int2ObjectOpenHashMap<ITransportNode<T>>();
+    private final Int2ObjectOpenHashMap<TransportNode> nodes
+        = new Int2ObjectOpenHashMap<TransportNode>();
     
     protected final long capacityPerTick;
     
@@ -35,7 +35,7 @@ public abstract class TransportCarrier<T extends StorageType<T>> implements ITyp
         this.capacityPerTick = capacityPerTick;
     }
     
-//    private Collection<ITransportNode<T>> nodesReadOnly;
+//    private Collection<TransportNode<T>> nodesReadOnly;
     
     /**
      * Transient unique identifier for network links/buses/gateways. 
@@ -61,7 +61,7 @@ public abstract class TransportCarrier<T extends StorageType<T>> implements ITyp
 //     * only a single attached node will include a single node in the list
 //     * that is only reachable from itself.
 //     */
-//    public Collection<ITransportNode<T>> nodes()
+//    public Collection<TransportNode<T>> nodes()
 //    {
 //        if(this.nodesReadOnly == null)
 //        {
@@ -70,23 +70,23 @@ public abstract class TransportCarrier<T extends StorageType<T>> implements ITyp
 //        return this.nodesReadOnly;
 //    }
     
-    public synchronized void attach(ITransportNode<T> node)
+    public synchronized void attach(TransportNode node)
     {
-        this.nodes.put(node.getId(), node);
+        this.nodes.put(node.nodeAddress(), node);
     }
 
-    public synchronized void dettach(ITransportNode<T> node)
+    public synchronized void dettach(TransportNode node)
     {
-        this.nodes.remove(node.getId());
+        this.nodes.remove(node.nodeAddress());
     }
     
     /**
      * Alternative to searching result of {@link #nodes()}.
      * Some implementations may be faster than that approach.
      */
-    public boolean isAttached(ITransportNode<T> node)
+    public boolean isAttached(TransportNode node)
     {
-        return this.nodes.containsKey(node.getId());
+        return this.nodes.containsKey(node.nodeAddress());
     }
     
     /**
@@ -99,7 +99,7 @@ public abstract class TransportCarrier<T extends StorageType<T>> implements ITyp
      * carried over into subsequent ticks until no-longer
      * saturated.
      */
-    public synchronized boolean transport(StoragePacket<T> packet, ITransportNode<T> fromNode, ITransportNode<T> toNode, boolean force)
+    public synchronized boolean transport(StoragePacket<T> packet, TransportNode fromNode, TransportNode toNode, boolean force)
     {
         this.refreshUtilization();
         long cost = this.costForPacket(packet, fromNode, toNode);
@@ -115,7 +115,7 @@ public abstract class TransportCarrier<T extends StorageType<T>> implements ITyp
     /**
      * Override if needs to be something other than the packet unit cost.
      */
-    protected long costForPacket(StoragePacket<T> packet, ITransportNode<T> fromNode, ITransportNode<T> toNode)
+    protected long costForPacket(StoragePacket<T> packet, TransportNode fromNode, TransportNode toNode)
     {
         return packet.basePacketCost();
     }
@@ -137,7 +137,7 @@ public abstract class TransportCarrier<T extends StorageType<T>> implements ITyp
     }
 
     /**
-     * Called by packet to refunds the cost of earlier {@link #transport(StoragePacket, ITransportNode, ITransportNode)}
+     * Called by packet to refunds the cost of earlier {@link #transport(StoragePacket, TransportNode, TransportNode)}
      * if packet cannot be delivered.<p>
      * 
      * MUST be called during same simulation tick or will be shifting capacity

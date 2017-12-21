@@ -1,5 +1,6 @@
 package grondag.hard_science.library.world;
 
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
@@ -186,5 +187,28 @@ public class PackedBlockPos
     public static int getChunkZStart(long packedChunkPos)
     {
         return getChunkZPos(packedChunkPos) << 4;
+    }
+
+    public static long offset(long packedBlockPos, EnumFacing face)
+    {
+        switch(face)
+        {
+        case DOWN:
+            return down(packedBlockPos);
+        case EAST:
+            return east(packedBlockPos);
+        case NORTH:
+            return north(packedBlockPos);
+        case SOUTH:
+            return south(packedBlockPos);
+        case UP:
+            return up(packedBlockPos);
+        case WEST:
+            return west(packedBlockPos);
+        }
+        
+        assert false : "PackedBlockPos offset strangeness.";
+        
+        return 0;
     }
 }

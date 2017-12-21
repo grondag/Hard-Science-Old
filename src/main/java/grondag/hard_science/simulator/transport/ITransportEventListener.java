@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.transport;
 
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.endpoint.ITransportNode;
+import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 
 /**
  * Implement and override the events of interest
@@ -17,7 +17,7 @@ public interface ITransportEventListener<T extends StorageType<T>>
      * {@link DomainManager#isDeserializationInProgress()}
      * if you need to filter out additions during reload.
      */
-    public default void onNodeAdded(ITransportNode<T> node) {};
+    public default void onNodeAdded(TransportNode node) {};
     
     /**
      * Called just before a node is removed from the domain.
@@ -26,5 +26,5 @@ public interface ITransportEventListener<T extends StorageType<T>>
      * Is NOT called when a connection is broken, because the
      * node is still a domain member. 
      */
-    public default void onNodeRemoved(ITransportNode<T> node) {};
+    public default void onNodeRemoved(TransportNode node) {};
 }

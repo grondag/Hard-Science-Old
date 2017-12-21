@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -38,18 +37,10 @@ public abstract class StorageType<T extends StorageType<T>>
     public final IResource<T> emptyResource;
     public final int ordinal;
     public final Predicate<IResource<T>> MATCH_ANY;
-    /**
-     * Assigned Number type for transport nodes that handle
-     * resources of this storage type. Allows serialization
-     * of these IDs without conflicts and having separate ID pools
-     * allows for more efficient look ups by ID.
-     */
-    public final AssignedNumber nodeIdType;
     
     @SuppressWarnings("unchecked")
-    private StorageType(EnumStorageType enumType, AssignedNumber nodeIdType)
+    private StorageType(EnumStorageType enumType)
     {
-        this.nodeIdType = nodeIdType;
         this.enumType = enumType;
         this.ordinal = enumType.ordinal();
         this.emptyResource = (IResource<T>) new ItemResource(ItemStack.EMPTY.getItem(), ItemStack.EMPTY.getMetadata(), null, null);
@@ -93,7 +84,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeNone NONE = new StorageTypeNone();
     public static class StorageTypeNone extends StorageType<StorageTypeNone> 
     { 
-        private StorageTypeNone() {super(EnumStorageType.NONE, null);}
+        private StorageTypeNone() {super(EnumStorageType.NONE);}
         
         @Override
         public IResource<StorageTypeNone> fromNBT(NBTTagCompound nbt)
@@ -127,7 +118,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeStack ITEM = new StorageTypeStack();
     public static class StorageTypeStack extends StorageType<StorageTypeStack> 
     { 
-        private StorageTypeStack() {super(EnumStorageType.ITEM, AssignedNumber.TRANSPORT_NODE_ITEM);}
+        private StorageTypeStack() {super(EnumStorageType.ITEM);}
         
         /**
          * Note that this expects to get an ItemStack NBT, which
@@ -168,7 +159,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeFluid FLUID = new StorageTypeFluid();
     public static class StorageTypeFluid extends StorageType<StorageTypeFluid>
     {
-        private StorageTypeFluid() {super(EnumStorageType.FLUID, AssignedNumber.TRANSPORT_NODE_FLUID);}
+        private StorageTypeFluid() {super(EnumStorageType.FLUID);}
 
         @Override
         public IResource<StorageTypeFluid> fromNBT(NBTTagCompound nbt)
@@ -207,8 +198,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypePower POWER = new StorageTypePower();
     public static class StorageTypePower extends StorageType<StorageTypePower>
     {
-        private StorageTypePower() {super(EnumStorageType.POWER, AssignedNumber.TRANSPORT_NODE_POWER);}
-       
+        private StorageTypePower() {super(EnumStorageType.POWER);}
 
         @Override
         public IResource<StorageTypePower> fromNBT(NBTTagCompound nbt)

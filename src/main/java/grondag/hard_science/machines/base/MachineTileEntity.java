@@ -172,6 +172,12 @@ public abstract class MachineTileEntity extends SuperTileEntity
         }
         
         machine.setLocation(this.pos, this.world);
+        
+        if(machine.hasFront())
+        {
+            machine.setFront(this.getModelState().getAxisRotation().horizontalFace);
+        }
+        
         machine.machineTE = this;
         DeviceManager.addDevice(machine);
         this.machineID = machine.getId();

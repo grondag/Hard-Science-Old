@@ -6,14 +6,13 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.endpoint.ITransportNode;
+import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 import grondag.hard_science.simulator.transport.routing.IItinerary;
-import net.minecraft.nbt.NBTTagCompound;
 
 /**
  *  Contains and manages the transport components of a device. 
  */
-public interface IMachineTransportManager extends IReadWriteNBT
+public interface ITransportManager extends IReadWriteNBT
 {
     /**
      * Called when device connects to the network, either when placed
@@ -31,7 +30,7 @@ public interface IMachineTransportManager extends IReadWriteNBT
      * Nodes on this device for the given transport type. If more than one,
      * should be sorted so that preferred nodes are first.
      */
-    public <T extends StorageType<T>> Collection<ITransportNode<T>> getNodes(T storageType);
+    public <T extends StorageType<T>> Collection<TransportNode> getNodes(T storageType);
     
     /**
      * Attempts to send the given resource and quantityIn from the device that owns

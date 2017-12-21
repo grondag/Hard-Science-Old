@@ -6,10 +6,7 @@ public enum AssignedNumber
     DEVICE,
     JOB,
     TASK, 
-    BUILD,
-    TRANSPORT_NODE_ITEM,
-    TRANSPORT_NODE_FLUID,
-    TRANSPORT_NODE_POWER;
+    BUILD;
     
     public final String tagName;
     
