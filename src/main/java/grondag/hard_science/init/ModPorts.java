@@ -1,7 +1,12 @@
 package grondag.hard_science.init;
 
+import javax.annotation.Nonnull;
+
+import grondag.hard_science.simulator.resource.EnumStorageType;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.Port;
+import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -9,32 +14,54 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber
 public class ModPorts
 {
-    public static final Port power_low = new Port("power_low", StorageType.POWER);
-    public static final Port power_medium = new Port("power_medium", StorageType.POWER);
-    public static final Port power_high = new Port("power_high", StorageType.POWER);
+    private static final Port[][][]lookup 
+        = new Port[EnumStorageType.values().length][CarrierLevel.values().length][PortType.values().length];
     
-    public static final Port item_low = new Port("item_low", StorageType.ITEM);
-    public static final Port item_medium = new Port("item_medium", StorageType.ITEM);
-    public static final Port item_high = new Port("item_high", StorageType.ITEM);
+    public static Port find(@Nonnull StorageType<?> storageType, @Nonnull CarrierLevel level, @Nonnull PortType portType)
+    {
+        return lookup[storageType.enumType.ordinal()][level.ordinal()][portType.ordinal()];
+    }
     
-    public static final Port fluid_low = new Port("fluid_low", StorageType.FLUID);
-    public static final Port fluid_medium = new Port("fluid_medium", StorageType.FLUID);
-    public static final Port fluid_high = new Port("fluid_high", StorageType.FLUID);
+    public static final Port power_base_carrier = new Port("power_base_carrier", PortType.CARRIER, CarrierLevel.BASE, StorageType.POWER);
+    public static final Port power_inter_carrier = new Port("power_inter_carrier", PortType.CARRIER, CarrierLevel.INTERMEDIATE, StorageType.POWER);
+    public static final Port power_inter_bridge = new Port("power_inter_bridge", PortType.BRIDGE, CarrierLevel.INTERMEDIATE, StorageType.POWER);
+    public static final Port power_inter_direct = new Port("power_inter_direct", PortType.DIRECT, CarrierLevel.INTERMEDIATE, StorageType.POWER);
+    public static final Port power_top_carrier = new Port("power_top_carrier", PortType.CARRIER, CarrierLevel.TOP, StorageType.POWER);
+    public static final Port power_top_bridge = new Port("power_top_bridge", PortType.BRIDGE, CarrierLevel.TOP, StorageType.POWER);
+    public static final Port power_top_direct = new Port("power_top_direct", PortType.DIRECT, CarrierLevel.TOP, StorageType.POWER);
+    
+    public static final Port item_base_carrier = new Port("item_base_carrier", PortType.CARRIER, CarrierLevel.BASE, StorageType.ITEM);
+    public static final Port item_inter_carrier = new Port("item_inter_carrier", PortType.CARRIER, CarrierLevel.INTERMEDIATE, StorageType.ITEM);
+    public static final Port item_inter_bridge = new Port("item_inter_bridge", PortType.BRIDGE, CarrierLevel.INTERMEDIATE, StorageType.ITEM);
+    public static final Port item_inter_direct = new Port("item_inter_direct", PortType.DIRECT, CarrierLevel.INTERMEDIATE, StorageType.ITEM);
+    public static final Port item_top_carrier = new Port("item_top_carrier", PortType.CARRIER, CarrierLevel.TOP, StorageType.ITEM);
+    public static final Port item_top_bridge = new Port("item_top_bridge", PortType.BRIDGE, CarrierLevel.TOP, StorageType.ITEM);
+    public static final Port item_top_direct = new Port("item_top_direct", PortType.DIRECT, CarrierLevel.TOP, StorageType.ITEM);
+    
     
     @SubscribeEvent
     public static void registerPorts(RegistryEvent.Register<Port> event) 
     {
-        event.getRegistry().register(power_low);
-        event.getRegistry().register(power_medium);
-        event.getRegistry().register(power_high);
+        registerPort(event, power_base_carrier);
+        registerPort(event, power_inter_carrier);
+        registerPort(event, power_inter_bridge);
+        registerPort(event, power_inter_direct);
+        registerPort(event, power_top_carrier);
+        registerPort(event, power_top_bridge);
+        registerPort(event, power_top_direct);
         
-        event.getRegistry().register(item_low);
-        event.getRegistry().register(item_medium);
-        event.getRegistry().register(item_high);
-        
-        event.getRegistry().register(fluid_low);
-        event.getRegistry().register(fluid_medium);
-        event.getRegistry().register(fluid_high);
+        registerPort(event, item_base_carrier);
+        registerPort(event, item_inter_carrier);
+        registerPort(event, item_inter_bridge);
+        registerPort(event, item_inter_direct);
+        registerPort(event, item_top_carrier);
+        registerPort(event, item_top_bridge);
+        registerPort(event, item_top_direct);
     }
-
+    
+    public static void registerPort(RegistryEvent.Register<Port> event, Port port)
+    {
+        event.getRegistry().register(port);
+        lookup[port.storageType.enumType.ordinal()][port.level.ordinal()][port.portType.ordinal()] = port;
+    }
 }

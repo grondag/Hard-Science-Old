@@ -8,6 +8,7 @@ import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.IResource;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class Drone implements IDevice, IReadWriteNBT
@@ -85,6 +86,20 @@ public class Drone implements IDevice, IReadWriteNBT
     {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+    {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

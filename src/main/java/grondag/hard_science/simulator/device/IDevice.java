@@ -12,6 +12,9 @@ import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 
 public interface IDevice extends 
@@ -40,9 +43,9 @@ public interface IDevice extends
      * Null if this device has no transport facilities.
      */
     @Nullable 
-    public default ITransportManager tranportManager() { return null; }
+    public default ITransportManager<?> tranportManager(StorageType<?> storageType) { return null; }
 
-    public default boolean hasTransportManager() { return this.tranportManager() != null; }
+    public default  boolean hasTransportManager(StorageType<?> storageType) { return this.tranportManager(storageType) != null; }
     
     /**
      * Signal that device should perform internal
@@ -57,12 +60,10 @@ public interface IDevice extends
     public default void onConnect()
     {
         if(this.hasBlockManager()) this.blockManager().connect();
-        if(this.hasTransportManager()) this.tranportManager().connect();
     }
     
     public default void onDisconnect()
     {
-        if(this.hasTransportManager()) this.tranportManager().disconnect();
         if(this.hasBlockManager()) this.blockManager().disconnect();
     }
     
@@ -91,4 +92,39 @@ public interface IDevice extends
     {
         DeviceManager.instance().setDirty();
     }
+    
+    /**
+     * Called by transport nodes for this device to handle outbound transport requests.
+     */
+    public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate);
+
+    /**
+     * Called by transport nodes for this device to handle inbound transport requests
+     */
+    public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate);
+
+    /**
+     * Called by transport circuits after ports for this device are detached from
+     * a circuit and a previously added node has become disconnected as a result.
+     */
+    public default void removeTransportNode(TransportNode node)
+    {
+        if(this.hasTransportManager(node.storageType()))
+        {
+            this.tranportManager(node.storageType()).removeTransportNode(node);
+        }
+    }
+    
+    /**
+     * Called by transport circuits after ports for this device have attached to
+     * a circuit and a new transport node has formed as a result.
+     */
+    public default void addTransportNode(TransportNode node)
+    {
+        if(this.hasTransportManager(node.storageType()))
+        {
+            this.tranportManager(node.storageType()).addTransportNode(node);
+        }
+    }
+
 }

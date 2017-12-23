@@ -35,6 +35,12 @@ public class MachinePower
      * This number is pure hand-waving because the technology doesn't exist yet.
      */
     public static final int POLYETHYLENE_MAX_CONVERSION_RATE_MICROMETERS = 27;
+    
+    /**
+     * Max rate of power transfer for standard local power bus
+     */
+    public static final long POWER_BUS_JOULES_PER_TICK = (long) wattsToJoulesPerTick(4096);
+    
    
 //    public static enum FuelCellSpec
 //    {

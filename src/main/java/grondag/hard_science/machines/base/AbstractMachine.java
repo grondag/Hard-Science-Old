@@ -371,6 +371,9 @@ public abstract class AbstractMachine extends AbstractDevice
         return this.bufferHDPE;
     }
     
+    // TODO: machine facing still needed?
+    // Assuming displays are AR, so not a necessity for realism
+    
     /**
      * Override to true if this machine has an orientation.
      * If true, then placement logic will call {@link #setFront(EnumFacing)}

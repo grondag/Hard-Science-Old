@@ -1,8 +1,6 @@
 package grondag.hard_science.init;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.simulator.transport.endpoint.Connection;
-import grondag.hard_science.simulator.transport.endpoint.Connector;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -16,24 +14,24 @@ import net.minecraftforge.registries.RegistryBuilder;
 @ObjectHolder(HardScience.MODID)
 public class ModRegistries
 {
-    public static ForgeRegistry<Connection> connectionRegistry;
-    public static ForgeRegistry<Connector> connectorRegistry;
+//    public static ForgeRegistry<Connection> connectionRegistry;
+//    public static ForgeRegistry<Connector> connectorRegistry;
     public static ForgeRegistry<Port> portRegistry;
     
     @SubscribeEvent
     public static void newRegistries(RegistryEvent.NewRegistry event) 
     {
-        connectionRegistry = (ForgeRegistry<Connection>) new RegistryBuilder<Connection>()
-                .setName(new ResourceLocation(HardScience.MODID, "connections"))
-                .setIDRange(0, Short.MAX_VALUE)
-                .setType(Connection.class)
-                .create();
+//        connectionRegistry = (ForgeRegistry<Connection>) new RegistryBuilder<Connection>()
+//                .setName(new ResourceLocation(HardScience.MODID, "connections"))
+//                .setIDRange(0, Short.MAX_VALUE)
+//                .setType(Connection.class)
+//                .create();
         
-        connectorRegistry = (ForgeRegistry<Connector>) new RegistryBuilder<Connector>()
-                .setName(new ResourceLocation(HardScience.MODID, "connectors"))
-                .setIDRange(0, Short.MAX_VALUE)
-                .setType(Connector.class)
-                .create();
+//        connectorRegistry = (ForgeRegistry<Connector>) new RegistryBuilder<Connector>()
+//                .setName(new ResourceLocation(HardScience.MODID, "connectors"))
+//                .setIDRange(0, Short.MAX_VALUE)
+//                .setType(Connector.class)
+//                .create();
         
         portRegistry = (ForgeRegistry<Port>) new RegistryBuilder<Port>()
                 .setName(new ResourceLocation(HardScience.MODID, "ports"))

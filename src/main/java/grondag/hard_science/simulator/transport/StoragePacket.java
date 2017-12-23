@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.transport;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.carrier.TransportCarrier;
+import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
@@ -37,8 +37,8 @@ public class StoragePacket<T extends StorageType<T>>
      * {@link #fromNode} and {@link #toNode}.  Will be
      * empty if there is a direct route.
      */
-    private final Object2LongOpenHashMap<TransportCarrier<T>> links
-        = new Object2LongOpenHashMap<TransportCarrier<T>>();
+    private final Object2LongOpenHashMap<CarrierCircuit> links
+        = new Object2LongOpenHashMap<CarrierCircuit>();
     
     /**
      * Total accumulated transport cost for this packet.
@@ -69,7 +69,7 @@ public class StoragePacket<T extends StorageType<T>>
      * can refund costs incurred at each link if the transport cannot
      * be completed. 
      */
-    public synchronized void updateLinkCost(TransportCarrier<T> link, long costDelta)
+    public synchronized void updateLinkCost(CarrierCircuit link, long costDelta)
     {
         this.links.addTo(link, costDelta);
     }
@@ -78,10 +78,10 @@ public class StoragePacket<T extends StorageType<T>>
      * Refunds cost from given link, (does actually update the link)
      * and removes link from link cost list.
      */
-    public synchronized void refundLink(TransportCarrier<T> link)
+    public synchronized void refundLink(CarrierCircuit link)
     {
         long cost = this.links.removeLong(link);
-        if(cost != 0) link.refund(cost);
+        if(cost != 0) link.refundCapacity(cost);
     }
     
     /**
@@ -93,9 +93,9 @@ public class StoragePacket<T extends StorageType<T>>
     {
         if(!this.links.isEmpty())
         {
-            for(Object2LongMap.Entry<TransportCarrier<T>> entry : this.links.object2LongEntrySet())
+            for(Object2LongMap.Entry<CarrierCircuit> entry : this.links.object2LongEntrySet())
             {
-                entry.getKey().refund(entry.getLongValue());
+                entry.getKey().refundCapacity(entry.getLongValue());
             }
             this.links.clear();
         }

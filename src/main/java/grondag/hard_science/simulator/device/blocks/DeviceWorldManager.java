@@ -5,10 +5,8 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.transport.endpoint.ConnectorInstance;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -37,20 +35,6 @@ public class DeviceWorldManager
             }
         }
         return blocks;
-    }
-    
-    @Nullable
-    public ConnectorInstance getConnector(int dimensionID, long packedBlockPos, @Nonnull EnumFacing face)
-    {
-        IDeviceBlock block = this.getBlockDelegate(dimensionID, packedBlockPos);
-        if(block == null) return null;
-        return block.getConnector(face);
-    }
-    
-    @Nullable
-    public ConnectorInstance getConnector(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
-    {
-        return this.getConnector(world.provider.getDimension(), PackedBlockPos.pack(pos), face);
     }
     
     @Nullable

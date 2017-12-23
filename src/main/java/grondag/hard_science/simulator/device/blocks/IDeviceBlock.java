@@ -2,8 +2,11 @@ package grondag.hard_science.simulator.device.blocks;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.transport.endpoint.ConnectorInstance;
+import grondag.hard_science.simulator.transport.endpoint.Port;
+import grondag.hard_science.simulator.transport.endpoint.PortState;
 import net.minecraft.util.EnumFacing;
 
 /**
@@ -20,15 +23,29 @@ public interface IDeviceBlock
     public IDevice device();
     
     /**
-     * Get connector on the given face.  Returns null if none.
+     * Get ports on the given face.  Returns null if none.
      */
     @Nullable
-    public ConnectorInstance getConnector(EnumFacing face);
+    public Iterable<PortState> getPorts(EnumFacing face);
+    
+    /**
+     * Get specific port instance on the given face.  Returns null if not present.
+     */
+    @Nullable
+    public PortState getPort(Port port, EnumFacing face);
     
     /**
      * Called by device block manager immediately after this block is removed from the world.
      * Use this to tear down connections, notify neighbors as needed, etc.
      */
     public void onRemoval();
+    
+    @Nullable
+    public default IDeviceBlock getNeighbor(EnumFacing face)
+    {
+        return DeviceManager.blockManager().getBlockDelegate(
+                this.dimensionID(), 
+                PackedBlockPos.offset(this.packedBlockPos(), face));
+    }
     
 }

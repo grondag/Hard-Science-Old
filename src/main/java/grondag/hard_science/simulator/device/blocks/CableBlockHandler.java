@@ -5,7 +5,8 @@ import java.util.Collection;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
-import grondag.hard_science.simulator.transport.endpoint.ConnectorInstance;
+import grondag.hard_science.simulator.transport.endpoint.Port;
+import grondag.hard_science.simulator.transport.endpoint.PortState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 
@@ -52,6 +53,7 @@ public class CableBlockHandler implements IDeviceBlockManager, IDeviceComponent,
         
     }
 
+    @SuppressWarnings("unused")
     private class BlockImpl implements IDeviceBlock
     {
 
@@ -76,18 +78,27 @@ public class CableBlockHandler implements IDeviceBlockManager, IDeviceComponent,
             return null;
         }
 
-        @Override
-        public ConnectorInstance getConnector(EnumFacing face)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
+      
 
         @Override
         public void onRemoval()
         {
             // TODO Auto-generated method stub
             
+        }
+
+        @Override
+        public Iterable<PortState> getPorts(EnumFacing face)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public PortState getPort(Port port, EnumFacing face)
+        {
+            // TODO Auto-generated method stub
+            return null;
         }
         
     }

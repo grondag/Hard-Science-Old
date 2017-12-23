@@ -133,4 +133,18 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         ItemResource itemRes = (ItemResource)resource;
         return !(itemRes.getItem() == ModItems.smart_chest && itemRes.hasTagCompound());
     }
+
+    @Override
+    public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }

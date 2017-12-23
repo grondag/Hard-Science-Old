@@ -1,9 +1,7 @@
 package grondag.hard_science.simulator.transport.management;
 
-import java.util.Collection;
-
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.TransportNode;
@@ -12,26 +10,9 @@ import grondag.hard_science.simulator.transport.routing.IItinerary;
 /**
  *  Contains and manages the transport components of a device. 
  */
-public interface ITransportManager extends IReadWriteNBT
+public interface ITransportManager<T extends StorageType<T>> extends IDeviceComponent
 {
-    /**
-     * Called when device connects to the network, either when placed
-     * or after deserialization.  Must be called only 1X.
-     */
-    public void connect();
-    
-    /**
-     * Called when device disconnects from the network, either when placed
-     * or after deserialization.  Must be called only 1X.
-     */
-    public void disconnect();
 
-    /**
-     * Nodes on this device for the given transport type. If more than one,
-     * should be sorted so that preferred nodes are first.
-     */
-    public <T extends StorageType<T>> Collection<TransportNode> getNodes(T storageType);
-    
     /**
      * Attempts to send the given resource and quantityIn from the device that owns
      * this transport manager to the given destination device. <p>
@@ -45,10 +26,27 @@ public interface ITransportManager extends IReadWriteNBT
      * @param simulate
      * @return
      */
-    public <T extends StorageType<T>> IItinerary<T> send(
+    public IItinerary<T> send(
             IResource<T> resource, 
             long quantity, 
             IDevice recipient, 
             boolean connectedOnly, 
             boolean simulate);
+
+    /**
+     * Called by transport circuits after ports for this device are detached from
+     * a circuit and a previously added node has become disconnected as a result.
+     */
+    public void removeTransportNode(TransportNode node);
+    
+    /**
+     * Called by transport circuits after ports for this device have attached to
+     * a circuit and a new transport node has formed as a result.
+     */
+    public void addTransportNode(TransportNode node);
+
+    /**
+     * True if has at least one node.
+     */
+    boolean hasNodes();
 }
