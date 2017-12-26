@@ -75,10 +75,8 @@ public class SuperTileEntity extends TileEntity
      */
     public static void updateRenderDistance()
     {
-        //FIXME: remove
         int configuredDist = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16;
         maxSuperBlockRenderDistanceSq = configuredDist * configuredDist;
-        Log.info("VB render distance sq change to " + maxSuperBlockRenderDistanceSq);
     }
     
     @Override
