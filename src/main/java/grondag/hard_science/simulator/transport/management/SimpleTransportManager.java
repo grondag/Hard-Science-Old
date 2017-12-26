@@ -2,6 +2,7 @@ package grondag.hard_science.simulator.transport.management;
 
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -32,7 +33,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     
     public IItinerary<T> send(IResource<T> resource, long quantity, IDevice recipient, boolean connectedOnly, boolean simulate)
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         //TODO: implement
         return null;
@@ -47,9 +48,14 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     @Override
     public void refreshTransport()
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         this.circuits.clear();
-        for(PortState port : this.device().blockManager().getPorts(this.storageType, true))
+        
+        // on disconnect we'll get a null block manager
+        IDeviceBlockManager blockMgr = this.device().blockManager();
+        if(blockMgr == null) return;
+        
+        for(PortState port : blockMgr.getPorts(this.storageType, true))
         {
             switch(port.port().portType)
             {

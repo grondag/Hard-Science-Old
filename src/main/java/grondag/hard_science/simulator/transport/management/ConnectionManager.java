@@ -25,15 +25,12 @@ public class ConnectionManager
     public static final PrivilegedExecutor EXECUTOR = new PrivilegedExecutor("Hard Science Network Topology Thread");
     
     /**
-     * Call from logic that should only run on {@link #EXECUTOR}
+     * Check in logic that should only run on {@link #EXECUTOR}
      * for network topology.
      */
-    public static void confirmNetworkThread()
+    public static boolean confirmNetworkThread()
     {
-        if(Thread.currentThread() != EXECUTOR.thread())
-        {
-            throw new UnsupportedOperationException("Attempt to run network logic outside network topology thread.");
-        }
+        return Thread.currentThread().getName().startsWith(EXECUTOR.threadName);
     }
     
     /**

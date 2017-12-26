@@ -170,7 +170,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public boolean attach(@Nonnull CarrierCircuit externalCircuit, PortState mate)
         {
-            ConnectionManager.confirmNetworkThread();
+            assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
             
             assert this.externalCircuit == null
                     : "PortState attach request when already attached.";
@@ -248,7 +248,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public void detach()
         {
-            ConnectionManager.confirmNetworkThread();
+            assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
 
             if(this.port().portType == PortType.CARRIER)
             {
@@ -277,7 +277,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
         {
-            ConnectionManager.confirmNetworkThread();
+            assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
 
             super.swapCircuit(oldCircuit, newCircuit);
 

@@ -114,7 +114,7 @@ public abstract class PortState implements IDeviceComponent
      */
     public boolean attach(@Nonnull CarrierCircuit externalCircuit, @Nonnull PortState mate)
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         assert this.externalCircuit == null
                 : "PortState attach request when already attached.";
@@ -153,7 +153,7 @@ public abstract class PortState implements IDeviceComponent
      */
     public void detach()
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         assert this.externalCircuit != null
                 : "PortState dettach request when not attached.";
@@ -198,7 +198,7 @@ public abstract class PortState implements IDeviceComponent
      */
     public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         if(this.externalCircuit == oldCircuit)
         {
             this.externalCircuit = newCircuit;

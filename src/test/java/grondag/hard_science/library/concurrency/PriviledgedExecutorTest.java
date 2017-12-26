@@ -16,7 +16,7 @@ public class PriviledgedExecutorTest
         // should be generally true: priviledged tasks run before unpriv
         // should always be true: tasks run in the executors's thread
 
-        assert executor.thread().getName() == "blort!";
+        assert executor.threadName == "blort!";
         plain.clear();
         privileged.clear();
         
@@ -27,7 +27,7 @@ public class PriviledgedExecutorTest
                 @Override
                 public void run()
                 {
-                    assert Thread.currentThread() == executor.thread();
+                    assert Thread.currentThread().getName().startsWith(executor.threadName);
                             
                     try { Thread.sleep(10);} catch (InterruptedException e) { }
                     
@@ -46,7 +46,7 @@ public class PriviledgedExecutorTest
                 @Override
                 public void run()
                 {
-                    assert Thread.currentThread() == executor.thread();
+                    assert Thread.currentThread().getName().startsWith(executor.threadName);
                             
                     try { Thread.sleep(10);} catch (InterruptedException e) { }
                     

@@ -11,6 +11,7 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Single-thread executor service with ability to submit privileged tasks
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class PrivilegedExecutor extends ThreadPoolExecutor
 {
-    protected Thread thread;
+    public final String threadName;
     
     public PrivilegedExecutor(String threadName)
     {
@@ -42,23 +43,17 @@ public class PrivilegedExecutor extends ThreadPoolExecutor
             }),
             new ThreadFactory()
             {
+                private AtomicInteger count = new AtomicInteger(1);
                 @Override
                 public Thread newThread(Runnable r)
                 {
-                    Thread result = new Thread(r, threadName);
-                    result.setDaemon(true);
-                    return result;
+                    Thread thread = new Thread(r, threadName + " - " + count.getAndIncrement());
+                    thread.setDaemon(true);
+                    return thread;
                 }
             }
         );
-        // capture execution thread
-        super.execute(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                thread = Thread.currentThread();
-            }});
+       this.threadName = threadName;
     }
     
     @Override
@@ -123,11 +118,6 @@ public class PrivilegedExecutor extends ThreadPoolExecutor
         {
             return this.isPrivileged;
         }
-    }
-    
-    public Thread thread()
-    {
-        return this.thread;
     }
 
     public void execute(Runnable command, boolean isPrivileged)

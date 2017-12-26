@@ -92,7 +92,7 @@ public class CarrierCircuit
      */
     public boolean attach(PortState portInstance, boolean isInternal)
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         if(Configurator.logTransportNetwork) 
             Log.info("CarrierCircuit.attach: Attaching port %s (%s) to circuit %d.",
@@ -178,7 +178,7 @@ public class CarrierCircuit
      */
     public void detach(PortState portInstance)
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         if(Configurator.logTransportNetwork) 
             Log.info("CarrierCircuit.detach: Removing port %s from circuit %d.",
@@ -298,7 +298,7 @@ public class CarrierCircuit
      */
     public void mergeInto(CarrierCircuit into)
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         for(PortState port : this.ports)
         {
@@ -322,7 +322,7 @@ public class CarrierCircuit
      */
     public void movePorts(CarrierCircuit into, Predicate<PortState> predicate)
     {
-        ConnectionManager.confirmNetworkThread();
+        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         Iterator<PortState> it = this.ports.iterator();
         while(it.hasNext())
