@@ -4,7 +4,6 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
-import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
@@ -27,10 +26,6 @@ public class StoragePacket<T extends StorageType<T>>
      * Destination device for this packet. 
      */
     public final IDevice recipient;
-    
-    private TransportNode fromNode;
-
-    private TransportNode toNode;
     
     /**
      * Contains intermediate node-to-node vectors between
@@ -109,33 +104,6 @@ public class StoragePacket<T extends StorageType<T>>
     public long totalCost()
     {
         return this.totalCost;
-    }
-
-    /**
-     * Node on the sender used to send the packet. Start of the route.
-     */
-    public TransportNode fromNode()
-    {
-        return fromNode;
-    }
-
-    public void setFromNode(TransportNode fromNode)
-    {
-        this.fromNode = fromNode;
-    }
-
-    /**
-     * Node on the receiving device to which the packet will
-     * be delivered.  End of the route.
-     */
-    public TransportNode toNode()
-    {
-        return toNode;
-    }
-
-    public void setToNode(TransportNode toNode)
-    {
-        this.toNode = toNode;
     }
   
 }

@@ -35,6 +35,9 @@ label.full_block=Full Block
 
 #THE ONE PROBE
 probe.machine.domain=Domain: %s
+probe.machine.item_transport=Item Transport Circuit: %d
+probe.machine.power_transport=Power Transport Circuit: %d
+
 
 #JEI
 hard_science.jei.builder=Hard Science Builder

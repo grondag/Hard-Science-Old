@@ -4,6 +4,9 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+
 
 public class DirectPortState extends PortState
 {
@@ -12,9 +15,9 @@ public class DirectPortState extends PortState
      */
     private final IDevice device;
     
-    public DirectPortState(Port port, IDevice device)
+    public DirectPortState(Port port, IDevice device, BlockPos pos, EnumFacing face)
     {
-        super(port);
+        super(port, pos, face);
         this.device = device;
         assert port.portType == PortType.DIRECT
                 : "Mismatched port type for port state.";

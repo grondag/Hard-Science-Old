@@ -340,7 +340,7 @@ public abstract class AbstractMachine extends AbstractDevice
             if (tileentity != null)
             {
                 // Currently no power cost for pulling in items - would complicate fuel loading for fuel cells.
-                // If want to add this will require special handling or machines must get 
+                // If want to add this will require privileged handling or machines must get 
                 // power some other way to load fuel - seems tedious.
                 // Assuming this is covered by the "emergency" power supply that uses ambient energy harvesters.
                 IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());

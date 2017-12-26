@@ -43,7 +43,7 @@ public class WideSimpleLoadingCache<V> implements ISimpleLoadingCache
         WideCacheState<V> localState = activeState;
         
         // Zero value normally indicates an unused spot in key array
-        // so requires special handling to prevent search weirdness.
+        // so requires privileged handling to prevent search weirdness.
         if(key1 == 0 && key2 == 0)
         {
             V value = localState.zeroValue.get();
@@ -100,7 +100,7 @@ public class WideSimpleLoadingCache<V> implements ISimpleLoadingCache
     
     protected V load(WideCacheState<V> localState, long key1, long key2, int position)
     {        
-        // no need to handle zero key here - is handled as special case in get();
+        // no need to handle zero key here - is handled as privileged case in get();
         
         WideCacheState<V> backupState = this.backupState.get();
         

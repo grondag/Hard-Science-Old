@@ -8,6 +8,10 @@ import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.transport.management.ITransportManager;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractDevice implements IDevice
@@ -26,6 +30,31 @@ public abstract class AbstractDevice implements IDevice
      */
     protected IDeviceBlockManager blockManager = null; 
     
+    protected final ITransportManager<StorageTypeStack> itemTransportManager;
+    protected final ITransportManager<StorageTypePower> powerTransportManager;
+    
+    protected AbstractDevice()
+    {
+        this.itemTransportManager = this.createItemTransportManager();
+        this.powerTransportManager = this.createPowerTransportManager();
+    }
+    
+    /**
+     * Override to enable item transport
+     */
+    protected ITransportManager<StorageTypeStack> createItemTransportManager()
+    {
+        return null;
+    }
+
+    /**
+     * Override to enable power transport
+     */
+    protected ITransportManager<StorageTypePower> createPowerTransportManager()
+    {
+        return null;
+    }
+    
     /**
      * Override to implement block manager functionality
      */
@@ -40,6 +69,22 @@ public abstract class AbstractDevice implements IDevice
         return this.blockManager;
     }
     
+    @Override
+    public ITransportManager<?> tranportManager(StorageType<?> storageType)
+    {
+        switch(storageType.enumType)
+        {
+        case ITEM:
+            return this.itemTransportManager;
+            
+        case POWER:
+            return this.powerTransportManager;
+            
+        default:
+            return null;
+        }
+    }
+
     @Override
     public final boolean isConnected()
     {

@@ -30,7 +30,7 @@ public class Alternator implements IAlternator  {
 	protected final byte[][][] mix = new byte[32][32][32];
 	private final int alternateCount;
 
-	/** lightweight, special-case handler for 0 alternates */
+	/** lightweight, privileged-case handler for 0 alternates */
 	private static final UnAlternator noAlternative = new UnAlternator();
 
 	/**
@@ -115,7 +115,7 @@ public class Alternator implements IAlternator  {
 	}
 
 	/**
-	 * Handles special case of no alternates
+	 * Handles privileged case of no alternates
 	 */
 	private static class UnAlternator implements IAlternator {
 		@Override

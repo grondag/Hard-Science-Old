@@ -25,12 +25,12 @@ public abstract class AbstractMachineControl<T extends AbstractMachineControl<T,
     @Override
     protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        //nothing special for most
+        //nothing privileged for most
     }
 
     @Override
     protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
-        //nothing special for most
+        //nothing privileged for most
     }
 }

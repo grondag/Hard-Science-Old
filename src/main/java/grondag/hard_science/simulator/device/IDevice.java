@@ -14,7 +14,6 @@ import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 
 public interface IDevice extends 
@@ -41,6 +40,7 @@ public interface IDevice extends
     
     /**
      * Null if this device has no transport facilities.
+     * If null, implies device has no transport nodes.
      */
     @Nullable 
     public default ITransportManager<?> tranportManager(StorageType<?> storageType) { return null; }
@@ -103,27 +103,55 @@ public interface IDevice extends
      */
     public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate);
 
-    /**
-     * Called by transport circuits after ports for this device are detached from
-     * a circuit and a previously added node has become disconnected as a result.
-     */
-    public default void removeTransportNode(TransportNode node)
-    {
-        if(this.hasTransportManager(node.storageType()))
-        {
-            this.tranportManager(node.storageType()).removeTransportNode(node);
-        }
-    }
+    //FIXME: remove
+//    /**
+//     * Called by transport circuits after ports for this device are detached from
+//     * a circuit and a previously added node has become disconnected as a result.
+//     * 
+//     * Should not be used if this device lacks the appropriate transport manager.
+//     */
+//    public default void removeTransportNode(@Nonnull TransportNode node)
+//    {
+//        assert this.hasTransportManager(node.storageType())
+//            : "Attempt to remove transport node with no transport manager";
+//        
+//        if(this.hasTransportManager(node.storageType()))
+//        {
+//            this.tranportManager(node.storageType()).removeTransportNode(node);
+//        }
+//    }
     
+    //FIXME: remove
+//    /**
+//     * Called by transport circuits after ports for this device have attached to
+//     * a circuit and a new transport node has formed as a result.<p>
+//     * 
+//     * Should not be used if this device lacks the appropriate transport manager.
+//     */
+//    public default void addTransportNode(TransportNode node)
+//    {
+//        assert this.hasTransportManager(node.storageType())
+//            : "Attempt to add transport node with no transport manager";
+//        
+//        if(this.hasTransportManager(node.storageType()))
+//        {
+//            this.tranportManager(node.storageType()).addTransportNode(node);
+//        }
+//    }
+
     /**
-     * Called by transport circuits after ports for this device have attached to
-     * a circuit and a new transport node has formed as a result.
+     * Called after ports on this device are attached
+     * or detached to notify transport manager to update transport
+     * addressability for this device.  Has no effect if this device
+     * lacks transport facilities for the given storage type.
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public default void addTransportNode(TransportNode node)
+    public default void refreshTransport(StorageType<?> storageType)
     {
-        if(this.hasTransportManager(node.storageType()))
+        if(this.hasTransportManager(storageType))
         {
-            this.tranportManager(node.storageType()).addTransportNode(node);
+            this.tranportManager(storageType).refreshTransport();
         }
     }
 

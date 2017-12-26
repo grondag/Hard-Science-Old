@@ -34,12 +34,15 @@ public class Port extends IForgeRegistryEntry.Impl<Port>
     @Nonnull
     public final Carrier externalCarrier;
     
+    private final String label;
+    
     public Port(String name, PortType portType, CarrierLevel level, StorageType<?> storageType)
     {
         this.setRegistryName(name);
         this.portType = portType;
         this.level = level;
         this.storageType = storageType;
+        this.label = storageType.enumType.toString() + "/" + portType.toString() + "-" + level.toString();
         switch(portType)
         {
         case BRIDGE:
@@ -60,5 +63,11 @@ public class Port extends IForgeRegistryEntry.Impl<Port>
             this.externalCarrier = internalCarrier;
             break;
         }
+    }
+    
+    @Override
+    public String toString()
+    {
+        return this.label;
     }
 }

@@ -2,6 +2,11 @@ package grondag.hard_science.machines.base;
 
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.device.blocks.SimpleBlockHandler;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.transport.management.ITransportManager;
+import grondag.hard_science.simulator.transport.management.SimpleTransportManager;
 
 /**
  * Base class for single-block machines.
@@ -16,6 +21,18 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
 //     */
 //    @Nullable
 //    protected EnumFacing frontFace;
+    
+    @Override
+    protected ITransportManager<StorageTypeStack> createItemTransportManager()
+    {
+        return new SimpleTransportManager<StorageTypeStack>(this, StorageType.ITEM);
+    }
+
+    @Override
+    protected ITransportManager<StorageTypePower> createPowerTransportManager()
+    {
+        return new SimpleTransportManager<StorageTypePower>(this, StorageType.POWER);
+    }
     
     @Override
     protected IDeviceBlockManager createBlockManager()
@@ -53,4 +70,6 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
 //    {
 //        return this.frontFace;
 //    }    
+    
+    
 }

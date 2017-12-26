@@ -49,7 +49,8 @@ public abstract class MachineTileEntityTickable extends MachineTileEntity implem
     {
         if(world.isRemote) return;
         
-        if(Configurator.logMachineNetwork) Log.info("got keepalive packet");
+        if(Configurator.logMachineActivity) 
+            Log.info("MachineTileEntityTickable.addPlayerListener: %s got keepalive packet", this.machine().machineName());
         PlayerListener listener = new PlayerListener(player);
         
         if(this.listeningPlayers == null)
@@ -57,7 +58,8 @@ public abstract class MachineTileEntityTickable extends MachineTileEntity implem
             this.listeningPlayers = new SimpleUnorderedArraySet<PlayerListener>();
             this.listeningPlayers.put(listener);
             
-            if(Configurator.logMachineNetwork) Log.info("added new listener");
+            if(Configurator.logMachineActivity) 
+                Log.info("MachineTileEntityTickable.addPlayerListener: %s added new listener", this.machine().machineName());
             
             // send immediate refresh for any new listener
             if(this.machine() == null) return;
@@ -71,7 +73,8 @@ public abstract class MachineTileEntityTickable extends MachineTileEntity implem
             
             if(previous == null)
             {
-                if(Configurator.logMachineNetwork) Log.info("added new listener");
+                if(Configurator.logMachineActivity) 
+                    Log.info("MachineTileEntityTickable.addPlayerListener: %s added new listener", this.machine().machineName());
 
                 if(this.machine() == null) return;
                 
@@ -134,11 +137,13 @@ public abstract class MachineTileEntityTickable extends MachineTileEntity implem
                     if(listener.checkForRemoval(time))
                     {
                         this.listeningPlayers.remove(i);
-                        if(Configurator.logMachineNetwork) Log.info("Removed timed out listener");
+                        if(Configurator.logMachineActivity) 
+                            Log.info("MachineTileEntityTickable.update: %s Removed timed out listener", this.machine().machineName());
                     }
                     else
                     {
-                        if(Configurator.logMachineNetwork) Log.info("Sending update packet due to change");
+                        if(Configurator.logMachineActivity) 
+                            Log.info("MachineTileEntityTickable.update: %s Sending update packet due to change", this.machine().machineName());
                         if(packet != null) ModMessages.INSTANCE.sendTo(packet, listener.key);
                         i++;
                     }

@@ -1,18 +1,17 @@
 package grondag.hard_science.simulator.transport.carrier;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.transport.StoragePacket;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
-import grondag.hard_science.simulator.transport.endpoint.TransportNode;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import grondag.hard_science.simulator.transport.management.ConnectionManager;
 
 /**
  * Represents physically (perhaps wirelessly) connected 
@@ -27,7 +26,12 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
  * with a compatible carrier, the port obtains a shared 
  * reference to the carrier circuit formed by connecting 
  * with other ports. (Or a new, isolated circuit if 
- * there are only two ports so far.)
+ * there are only two ports so far.)<p>
+ * 
+ * Methods related to network topology should ONLY be
+ * called from the connection manager thread and will 
+ * throw an exception if called otherwise.  This avoids
+ * the need for synchronization of these methods.
  *
  */
 public class CarrierCircuit
@@ -35,8 +39,8 @@ public class CarrierCircuit
     public final Carrier carrier;
     
     public final int channel;
-    
-    private HashSet<PortState> ports;
+
+    private final HashSet<PortState> ports = new HashSet<PortState>();
     
     private static final AtomicInteger nextAddress = new AtomicInteger(1);
     
@@ -46,14 +50,14 @@ public class CarrierCircuit
     
     protected long utilization = 0;
     
-    /**
-     * Collection of nodes on this carrier keyed by device ID.
-     * Relies on the fact that all ports for a given device
-     * on the same carrier have the same node.  The extra ports
-     * are only used for fault tolerance.
-     */
-    private final Int2ObjectOpenHashMap<TransportNode> nodesByDeviceID
-        = new Int2ObjectOpenHashMap<TransportNode>();
+//    /**
+//     * Collection of nodes on this carrier keyed by device ID.
+//     * Relies on the fact that all ports for a given device
+//     * on the same carrier have the same node.  The extra ports
+//     * are only used for fault tolerance.
+//     */
+//    private final Int2ObjectOpenHashMap<TransportNode> nodesByDeviceID
+//        = new Int2ObjectOpenHashMap<TransportNode>();
     
     public CarrierCircuit(Carrier carrier, int channel)
     {
@@ -82,17 +86,32 @@ public class CarrierCircuit
      * @param portInstance port to add
      * @param isInternal if true, will check for compatibility with internal side
      * of port. If false, will check external side.
-     * @return True if successfully attached.
+     * @return True if successfully attached.<p>
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public synchronized boolean attach(PortState portInstance, boolean isInternal)
+    public boolean attach(PortState portInstance, boolean isInternal)
     {
+        ConnectionManager.confirmNetworkThread();
+        
+        if(Configurator.logTransportNetwork) 
+            Log.info("CarrierCircuit.attach: Attaching port %s (%s) to circuit %d.",
+                    portInstance.portName(),
+                    isInternal ? "internal" : "external",
+                    this.carrierAddress());
+        
         assert !this.ports.contains(portInstance)
             : "Carrier attach request from existing port on carrier.";
         
         Carrier portCarrier = isInternal ? portInstance.port().internalCarrier
                 : portInstance.port().externalCarrier;
         
-        if(portCarrier != this.carrier) return false;
+        if(portCarrier != this.carrier)
+        {
+            if(Configurator.logTransportNetwork) 
+                Log.info("CarrierCircuit.attach: abandoning attempt due to mismatched carriers.");
+            return false;
+        }
         
         if(!this.carrier.level.isTop())
         {
@@ -101,63 +120,113 @@ public class CarrierCircuit
             {
                 // channel must match for non-top carrier ports 
                 // and the internal side of bridge ports
-                if(portInstance.getConfiguredChannel() != this.channel) return false;
+                if(portInstance.getConfiguredChannel() != this.channel)
+                {
+                    if(Configurator.logTransportNetwork) 
+                        Log.info("CarrierCircuit.attach: abandoning attempt due to mismatched channels.");
+                    return false;
+                }
             }
             
         }
         
         this.ports.add(portInstance);
         
-        IDevice device = portInstance.device();
+//        this.addPortToNode(portInstance);
         
-        TransportNode node = this.nodesByDeviceID.get(device.getId());
-        if(node == null)
-        {
-            node = new TransportNode(portInstance);
-            this.nodesByDeviceID.put(device.getId(), node);
-            device.addTransportNode(node);
-        }
-        else
-        {
-            node.addPort(portInstance);
-        }
         
         return true;
     }
 
+//    /**
+//     * If already a transport node on this carrier for the port's device,
+//     * adds the port to that node. Otherwise, creates a new node for
+//     * the port's device with given port as the first port.<p>
+//     * 
+//     * Does nothing if the port's device has no transport manager.
+//     */
+//    private void addPortToNode(PortState portInstance)
+//    {
+//      IDevice device = portInstance.device();
+//        
+//        if(device.hasTransportManager(portInstance.port().storageType))
+//        {
+//            TransportNode node = this.nodesByDeviceID.get(device.getId());
+//            if(node == null)
+//            {
+//                node = new TransportNode(portInstance);
+//                if(Configurator.logTransportNetwork) 
+//                    Log.info("CarrierCircuit.addPortToNode: created new transport node %d.", node.nodeAddress());
+//                this.nodesByDeviceID.put(device.getId(), node);
+//                device.addTransportNode(node);
+//            }
+//            else
+//            {
+//                if(Configurator.logTransportNetwork) 
+//                    Log.info("CarrierCircuit.addPortToNode: adding port to transport node %d.", node.nodeAddress());
+//                node.addPort(portInstance);
+//            }
+//        }    
+//    }
+
     /**
      * Removes reference to portInstance from this circuit but does NOT
      * update port to remove reference to this circuit. Is expected to 
-     * be called from {@link PortState#detach()} which handles that.
+     * be called from {@link PortState#detach()} which handles that. <p>
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public synchronized void detach(PortState portInstance)
+    public void detach(PortState portInstance)
     {
+        ConnectionManager.confirmNetworkThread();
+        
+        if(Configurator.logTransportNetwork) 
+            Log.info("CarrierCircuit.detach: Removing port %s from circuit %d.",
+                    portInstance.portName(),
+                    this.carrierAddress());
+        
         assert this.ports.contains(portInstance)
             : "Carrier dettach request from port not on carrier.";
         
         this.ports.remove(portInstance);
         
-        IDevice device = portInstance.device();
-        
-        TransportNode node = this.nodesByDeviceID.get(device.getId());
-        node.removePort(portInstance);
-        
-        if(!node.isConnected())
-        {
-            device.removeTransportNode(node);
-            this.nodesByDeviceID.remove(device.getId());
-        }
+//        IDevice device = portInstance.device();
+//        
+//        if(device.hasTransportManager(portInstance.port().storageType))
+//        {
+//            TransportNode node = this.getNodeForDevice(device);
+//            if(node != null)
+//            {
+//                if(Configurator.logTransportNetwork) 
+//                    Log.info("CarrierCircuit.detach: Removing port from node %d.", node.nodeAddress());
+//                
+//                node.removePort(portInstance);
+//                if(!node.isConnected())
+//                {
+//                    if(Configurator.logTransportNetwork) 
+//                        Log.info("CarrierCircuit.detach: Removing empty node %d.", node.nodeAddress());
+//
+//                    device.removeTransportNode(node);
+//                    this.nodesByDeviceID.remove(device.getId());
+//                }
+//            }
+//            else
+//            {
+//                if(Configurator.logTransportNetwork) 
+//                    Log.info("CarrierCircuit.detach: unable to find transport node.");
+//            }
+//        }
     }
     
-    /**
-     * Returns transport node for the given device if it
-     * is attached to this circuit.
-     */
-    @Nullable
-    public TransportNode getNodeForDevice(@Nonnull IDevice device)
-    {
-        return this.nodesByDeviceID.get(device.getId());
-    }
+//    /**
+//     * Returns transport node for the given device if it
+//     * is attached to this circuit.
+//     */
+//    @Nullable
+//    public TransportNode getNodeForDevice(@Nonnull IDevice device)
+//    {
+//        return this.nodesByDeviceID.get(device.getId());
+//    }
     
     /**
      * Incurs cost of transporting the packet and 
@@ -169,10 +238,10 @@ public class CarrierCircuit
      * carried over into subsequent ticks until no-longer
      * saturated.
      */
-    public synchronized boolean consumeCapacity(StoragePacket<?> packet, TransportNode fromNode, TransportNode toNode, boolean force)
+    public synchronized boolean consumeCapacity(StoragePacket<?> packet, boolean force)
     {
         this.refreshUtilization();
-        long cost = this.costForPacket(packet, fromNode, toNode);
+        long cost = this.costForPacket(packet);
         if(force || (cost + this.utilization) <= this.carrier.capacityPerTick)
         {
             this.utilization += cost;
@@ -185,7 +254,7 @@ public class CarrierCircuit
     /**
      * Override if needs to be something other than the packet unit cost.
      */
-    protected long costForPacket(StoragePacket<?> packet, TransportNode fromNode, TransportNode toNode)
+    protected long costForPacket(StoragePacket<?> packet)
     {
         return packet.basePacketCost();
     }
@@ -216,5 +285,55 @@ public class CarrierCircuit
     public synchronized void refundCapacity(long cost)
     {
         this.utilization = Math.max(0, this.utilization - cost);
+    }
+    
+    /**
+     * All ports that were on this circuit are transferred
+     * to the new circuit. There are no checks or notifications
+     * to devices or transport nodes, because the ports/nodes/circuit
+     * was already assumed to be valid.<p>
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
+     * 
+     */
+    public void mergeInto(CarrierCircuit into)
+    {
+        ConnectionManager.confirmNetworkThread();
+        
+        for(PortState port : this.ports)
+        {
+            port.swapCircuit(this, into);
+            
+        }
+        into.ports.addAll(this.ports);
+        this.ports.clear();
+    }
+
+    public int portCount()
+    {
+        return this.ports.size();
+    }
+
+    /**
+     * Moves ports in this circuit matching the provided predicate
+     * to the new circuit.<p>
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
+     */
+    public void movePorts(CarrierCircuit into, Predicate<PortState> predicate)
+    {
+        ConnectionManager.confirmNetworkThread();
+        
+        Iterator<PortState> it = this.ports.iterator();
+        while(it.hasNext())
+        {
+            PortState port = it.next();
+            if(predicate.test(port))
+            {
+                port.swapCircuit(this, into);
+                into.ports.add(port);
+                it.remove();
+            }
+        }
     }
 }

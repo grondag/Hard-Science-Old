@@ -108,7 +108,7 @@ public class Vertex extends Vec3d
      */
     public double distanceToFacePlane(EnumFacing face)
     {
-        // could use dot product, but exploiting special case for less math
+        // could use dot product, but exploiting privileged case for less math
         switch(face)
         {
         case UP:

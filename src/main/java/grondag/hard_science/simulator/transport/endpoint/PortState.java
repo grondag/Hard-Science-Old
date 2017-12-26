@@ -1,18 +1,36 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
+import java.util.Collections;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * Represents a physical port on a device.
- * Subclassed for the various port types.
+ * Subclassed for the various port types.<p>
+ * 
+ * Methods related to network topology should ONLY be
+ * called from the connection manager thread and will 
+ * throw an exception if called otherwise.  This avoids
+ * the need for synchronization of these methods.
+ *
  */
 public abstract class PortState implements IDeviceComponent
 {
     private final Port port;
+    
+    private final BlockPos pos;
+    
+    private final EnumFacing face;
     
     /**
      * If port has mated, should contain a reference 
@@ -25,9 +43,11 @@ public abstract class PortState implements IDeviceComponent
      */
     protected CarrierCircuit externalCircuit;
     
-    public PortState(Port port)
+    public PortState(Port port, @Nullable BlockPos pos, @Nullable EnumFacing face)
     {
         this.port = port;
+        this.pos = pos;
+        this.face = face;
     }
 
     /**
@@ -84,43 +104,67 @@ public abstract class PortState implements IDeviceComponent
      * Attaches to the provided circuit and handles internal record keeping.
      * Returns false if attachment is not possible.<p>
      * 
+     * Calls {@link IDevice#refreshTransport(grondag.hard_science.simulator.resource.StorageType)} 
+     * if attachment is successful.<p>
+     * 
      * Does NOT call attach on mated port. Caller must do so.
-     * But does save reference to mate for notification and inspection.
+     * But does save reference to mate for notification and inspection.<p>
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
     public boolean attach(@Nonnull CarrierCircuit externalCircuit, @Nonnull PortState mate)
     {
+        ConnectionManager.confirmNetworkThread();
+        
         assert this.externalCircuit == null
                 : "PortState attach request when already attached.";
         
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortState.attach: port attach for %s to circuit %d with mate %s",
+                    this.portName(),
+                    externalCircuit.carrierAddress(),
+                    mate.portName());
+        
+        // circuit / node will expect this before attachment
+        this.externalCircuit = externalCircuit;
         if(externalCircuit.attach(this, false))
         {
             this.mate = mate;
-            this.externalCircuit = externalCircuit;
+            this.device().refreshTransport(this.port.storageType);
             return true;
         }
         else
         {
+            this.externalCircuit = null;
             return false;
         }
     }
     
     /**
      * Detaches from externalCircuit and removes reference to it.
-     * Also calls detach on mate if has mate and mate not already detached.
+     * Also sets mate reference to null.<p>
+     * 
+     * Calls {@link IDevice#refreshTransport(grondag.hard_science.simulator.resource.StorageType)}<p>
+     * 
+     * Does NOT call mate detach  Is expected caller will get mate
+     * reference before calling and ensure mate is also detached.<p>
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
     public void detach()
     {
+        ConnectionManager.confirmNetworkThread();
+        
         assert this.externalCircuit != null
                 : "PortState dettach request when not attached.";
+        
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortState.detach: port detach for %s", this.portName());
+        
         this.externalCircuit.detach(this);
         this.externalCircuit = null;
-        
-        if(this.mate != null)
-        {
-            // check necessary to avoid stack overflow
-            if(this.mate.externalCircuit != null) this.mate.detach();
-            this.mate = null;
-        }
+        this.mate = null;
+        this.device().refreshTransport(this.port.storageType);
     }
 
     /**
@@ -134,5 +178,86 @@ public abstract class PortState implements IDeviceComponent
     public boolean isAttached()
     {
         return this.externalCircuit != null;
+    }
+    
+    /**
+     * For use by merge/split operations.<p>
+     * 
+     * Swaps *any* non-null reference to the old circuit held by this port
+     * to use the new non-null reference.  If does not holds a reference to a 
+     * to the old circuit, does nothing.<p>
+     * 
+     * Calls {@link IDevice#refreshTransport(grondag.hard_science.simulator.resource.StorageType)} 
+     * if any swap occurs.<p>
+     * 
+     * Does NOT otherwise perform any notifications or cause any side effects.
+     * For example, does not add itself as a port on the new circuit.
+     * Caller is expected to handle any such necessary accounting.<p>
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
+     */
+    public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
+    {
+        ConnectionManager.confirmNetworkThread();
+        if(this.externalCircuit == oldCircuit)
+        {
+            this.externalCircuit = newCircuit;
+            this.device().refreshTransport(this.port.storageType);
+        }
+    }
+    
+    /**
+     * If this port is a carrier port on a device with an internal carrier, 
+     * iterates all other ports on the device attached to the same carrier.<p>
+     * 
+     * Always empty for direct ports<p>
+     * 
+     * With {@link #mate()}, enables search within a connected topology.
+     */
+    @Nonnull
+    public Iterable<PortState> carrierMates()
+    {
+        return Collections.emptyList();
+    }
+
+    /**
+     * For TOP and debug display.
+     * Null for wireless.
+     */
+    @Nullable
+    public BlockPos pos()
+    {
+        return this.pos;
+    }
+    
+    /**
+     * For TOP and debug display.
+     * Null for wireless.
+     */
+    @Nullable
+    public EnumFacing face()
+    {
+        return this.face;
+    }
+    
+    /**
+     * For TOP and debug display
+     */
+    public String portName()
+    {
+        return String.format(
+            "%s %d/%d on %s @ %s", 
+            this.port.toString(),
+            this.internalCircuit() == null ? 0 : this.internalCircuit().carrierAddress(),
+            this.externalCircuit() == null ? 0 : this.externalCircuit().carrierAddress(),
+            this.device().machineName(),
+            this.pos() == null || this.face() == null
+                ? "N/A"
+                : String.format("%d.%d.%d:%s", 
+                        this.pos().getX(), 
+                        this.pos().getY(), 
+                        this.pos().getZ(), 
+                        this.face().toString())
+        );
     }
 }

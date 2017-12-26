@@ -799,7 +799,7 @@ public class ModelStateFactory
         }
 
         /**
-         * For machines and other blocks with a special horizontal face, North is considered the zero rotation.
+         * For machines and other blocks with a privileged horizontal face, North is considered the zero rotation.
          */
         public Rotation getAxisRotation()
         {
@@ -813,7 +813,7 @@ public class ModelStateFactory
         }
 
         /**
-         * For machines and other blocks with a special horizontal face, North is considered the zero rotation.
+         * For machines and other blocks with a privileged horizontal face, North is considered the zero rotation.
          */
         public void setAxisRotation(Rotation rotation)
         {

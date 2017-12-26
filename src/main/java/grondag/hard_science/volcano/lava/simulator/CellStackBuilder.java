@@ -128,7 +128,7 @@ public class CellStackBuilder
 //        
 //        // if get to this point, y is within the cell
 //        
-//        // detect special case of flow floor within the cell
+//        // detect privileged case of flow floor within the cell
 //        if(y == cell.bottomY() && cell.isBottomFlow() && cell.getFluidUnits() == 0 && cell.floorFlowHeight() < LavaSimulator.LEVELS_PER_BLOCK )
 //        {
 //            return BlockType.SOLID_FLOW_STATES[cell.floorFlowHeight()];

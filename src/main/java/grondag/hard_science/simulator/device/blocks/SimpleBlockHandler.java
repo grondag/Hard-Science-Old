@@ -9,10 +9,15 @@ import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.endpoint.CarrierPortGroup;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
-import grondag.hard_science.simulator.transport.management.ConnectionHelper;
+import grondag.hard_science.simulator.transport.management.ConnectionManager;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * Block/block manager implementation for single-block machines.
@@ -27,6 +32,9 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     @SuppressWarnings("unchecked")
     private final SimpleUnorderedArrayList<PortState>[] ports = new SimpleUnorderedArrayList[6];
 
+    private final CarrierPortGroup itemGroup;
+    private final CarrierPortGroup powerGroup; 
+    
     /**
      * Should not be called until device has a location.
      */
@@ -35,26 +43,20 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
         this.owner = owner;
         this.collection = ImmutableList.of(this);
         this.packedBlockPos = PackedBlockPos.pack(owner.getLocation());
+        this.itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, CarrierLevel.BASE);
+        this.powerGroup = new CarrierPortGroup(owner, StorageType.POWER, CarrierLevel.BASE);
+        
+        BlockPos pos = PackedBlockPos.unpack(this.packedBlockPos);
+        
+        for(EnumFacing face : EnumFacing.VALUES)
+        {
+            SimpleUnorderedArrayList<PortState> list = new SimpleUnorderedArrayList<PortState>();
+            this.ports[face.ordinal()] = list;
+            list.add(itemGroup.createPort(false, pos, face));
+            //FIXME: put back
+//            list.add(powerGroup.createPort(false, pos, face));
+        }
     }
-
-    //FIXME: remove or repair
-    /**
-     * IMPORTANT: device should disconnect before calling and reconnect after.
-     */
-//    public void addPort(EnumFacing face, Port port, int channel)
-//    {
-//        assert !owner.isConnected() : "Device connector changed while connected.";
-//        
-//        PortState portInstance = new PortState(this.owner, port);
-//        portInstance.setChannel(channel);
-//        
-//        SimpleUnorderedArrayList<PortState> list = this.ports[face.ordinal()];
-//        if(list == null)
-//        {
-//            list = new SimpleUnorderedArrayList<PortState>();
-//        }
-//        list.add(portInstance);
-//    }
 
     @Override
     public Iterable<PortState> getPorts(EnumFacing face)
@@ -115,11 +117,15 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
             IDeviceBlock neighbor = this.getNeighbor(face);
             if(neighbor == null) continue;
             
-            for(PortState pi : this.ports[face.ordinal()])
+            for(PortState myPort : this.ports[face.ordinal()])
             {
-                PortState mate = neighbor.getPort(pi.port(), face.getOpposite());
+                assert !myPort.isAttached() : "Connection attempt on attached port";
                 
-                if(mate != null) ConnectionHelper.connect(pi, mate);
+                for(PortState mate : neighbor.getPorts(face.getOpposite()))
+                {
+                    if(ConnectionManager.isConnectionPossible(myPort, mate))
+                        ConnectionManager.connect(myPort, mate);
+                }
             }
         }
     }
@@ -144,8 +150,20 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
             
             for(PortState pi : this.ports[face.ordinal()])
             {
-                if(pi.isAttached()) pi.detach();
+                if(pi.isAttached()) ConnectionManager.disconnect(pi);
             }
         }
+    }
+    
+    @Override
+    public CarrierCircuit itemCircuit()
+    { 
+        return this.itemGroup.internalCircuit(); 
+    }
+    
+    @Override
+    public CarrierCircuit powerCircuit()
+    { 
+        return this.powerGroup.internalCircuit(); 
     }
 }

@@ -37,7 +37,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
  * Simulation ticks are generated as the world clock advances
  * at the rate of one simulation tick per world tick.
  * 
- * Simulation ticks are added to the queue by a special task 
+ * Simulation ticks are added to the queue by a privileged task 
  * that is added at the end of simulation tick.  No new 
  * simulation ticks are added until all tasks in the last tick are complete.
  * 

@@ -331,8 +331,23 @@ public abstract class MachineBlock extends SuperBlockPlus
         
         if(mte.machine() == null) return;
         
+        AbstractMachine machine = mte.machine();
+
         probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 
-                mte.machine().getDomain() == null ? I18n.translateToLocal("misc.unassigned") : mte.machine().getDomain().getName()));
+                machine.getDomain() == null ? I18n.translateToLocal("misc.unassigned") : machine.getDomain().getName()));
+        
+        if(machine.blockManager().itemCircuit() != null)
+        {
+            probeInfo.text(I18n.translateToLocalFormatted("probe.machine.item_transport", 
+                    machine.blockManager().itemCircuit().carrierAddress()));
+        }
+        
+        if(machine.blockManager().powerCircuit() != null)
+        {
+            probeInfo.text(I18n.translateToLocalFormatted("probe.machine.power_transport", 
+                    machine.blockManager().powerCircuit().carrierAddress()));
+        }
+
     }
     
     

@@ -4,7 +4,6 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.endpoint.TransportNode;
 import grondag.hard_science.simulator.transport.routing.IItinerary;
 
 /**
@@ -34,19 +33,12 @@ public interface ITransportManager<T extends StorageType<T>> extends IDeviceComp
             boolean simulate);
 
     /**
-     * Called by transport circuits after ports for this device are detached from
-     * a circuit and a previously added node has become disconnected as a result.
+     * Called after transport ports on this device are attached
+     * or detached to notify transport manager to update transport
+     * addressability for this device. Call happens via
+     * {@link IDevice#refreshTransport(StorageType)}.
+     * 
+     * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public void removeTransportNode(TransportNode node);
-    
-    /**
-     * Called by transport circuits after ports for this device have attached to
-     * a circuit and a new transport node has formed as a result.
-     */
-    public void addTransportNode(TransportNode node);
-
-    /**
-     * True if has at least one node.
-     */
-    boolean hasNodes();
+    public void refreshTransport();
 }

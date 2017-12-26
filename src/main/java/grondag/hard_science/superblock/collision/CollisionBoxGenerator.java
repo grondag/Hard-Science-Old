@@ -70,7 +70,7 @@ public class CollisionBoxGenerator
             }
         }
 
-        // Handle special case of thin horizontal layer at bottom.
+        // Handle privileged case of thin horizontal layer at bottom.
         // Would be better to use Separating Axis Theorem tests to cover more edge cases,
         // but not willing to take time to implement that right now.
 

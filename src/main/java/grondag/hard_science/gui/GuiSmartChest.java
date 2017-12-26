@@ -192,7 +192,7 @@ public class GuiSmartChest extends AbstractContainerGui<SmartChestTileEntity>
     @Override
     public void addControls(Panel mainPanel, MachineTileEntity tileEntity)
     {
-        // nothing special
+        // nothing privileged
         
     }
 }

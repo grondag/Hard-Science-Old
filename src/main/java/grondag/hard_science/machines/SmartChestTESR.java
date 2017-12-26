@@ -12,7 +12,7 @@ public class SmartChestTESR extends MachineTESR
     @Override
     protected void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha)
     {
-        // nothing special yet
+        // nothing privileged yet
     }
 
 }

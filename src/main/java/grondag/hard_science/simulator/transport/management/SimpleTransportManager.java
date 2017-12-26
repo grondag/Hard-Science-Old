@@ -1,32 +1,40 @@
 package grondag.hard_science.simulator.transport.management;
 
-import java.util.Iterator;
-
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.endpoint.TransportNode;
+import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.transport.endpoint.PortState;
 import grondag.hard_science.simulator.transport.routing.IItinerary;
 
 /**
  * Transport manager for single carrier
  */
-public class SimpleTransportManager<T extends StorageType<T>> implements ITransportManager<T>, Iterable<TransportNode>
+public class SimpleTransportManager<T extends StorageType<T>> implements ITransportManager<T>, ITypedStorage<T>
 {
     private final IDevice owner;
+    private final T storageType;
     
-    private SimpleUnorderedArrayList<TransportNode> nodes
-        = new SimpleUnorderedArrayList<TransportNode>();
+    /**
+     * Carriers that can be used for transport in/out of this device.
+     * SHOULD ONLY BE CHANGED FROM CONNECTION MANAGER THREAD
+     */
+    private SimpleUnorderedArrayList<CarrierCircuit> circuits = 
+            new SimpleUnorderedArrayList<CarrierCircuit>();
     
-    public SimpleTransportManager(IDevice owner)
+    public SimpleTransportManager(IDevice owner, T storageType)
     {
         this.owner = owner;
+        this.storageType = storageType;
     }
     
     public IItinerary<T> send(IResource<T> resource, long quantity, IDevice recipient, boolean connectedOnly, boolean simulate)
     {
-        if(this.nodes.isEmpty()) return null;
+        ConnectionManager.confirmNetworkThread();
+        
+        //TODO: implement
         return null;
     }
 
@@ -37,26 +45,36 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     }
 
     @Override
-    public void removeTransportNode(TransportNode node)
+    public void refreshTransport()
     {
-        this.nodes.removeIfPresent(node);
+        ConnectionManager.confirmNetworkThread();
+        this.circuits.clear();
+        for(PortState port : this.device().blockManager().getPorts(this.storageType, true))
+        {
+            switch(port.port().portType)
+            {
+            case CARRIER:
+            case DIRECT:
+                // device is navigable via the external circuit for direct ports 
+                // and for carrier ports external/internal always the same
+                // so can always use external circuit
+                this.circuits.addIfNotPresent(port.externalCircuit());
+                
+            case BRIDGE:
+                // bridge devices never enable transport
+                break;
+                
+            default:
+                assert false : "missing enum mapping";
+                break;
+            
+            }
+        }
     }
 
     @Override
-    public void addTransportNode(TransportNode node)
+    public T storageType()
     {
-        this.nodes.addIfNotPresent(node);
-    }
-
-    @Override
-    public Iterator<TransportNode> iterator()
-    {
-        return this.nodes.iterator();
-    }
-
-    @Override
-    public boolean hasNodes()
-    {
-        return !this.nodes.isEmpty();
+        return this.storageType;
     }
 }

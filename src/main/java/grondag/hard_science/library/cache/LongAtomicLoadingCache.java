@@ -46,7 +46,7 @@ public class LongAtomicLoadingCache<V> implements ISimpleLoadingCache
         LongCacheState<V> localState = activeState;
         
         // Zero value normally indicates an unused spot in key array
-        // so requires special handling to prevent search weirdness.
+        // so requires privileged handling to prevent search weirdness.
         if(key == 0)
         {
             V value = localState.zeroValue.get();
@@ -106,7 +106,7 @@ public class LongAtomicLoadingCache<V> implements ISimpleLoadingCache
     
     protected V load(LongCacheState<V> localState, long key, int position)
     {        
-        // no need to handle zero key here - is handled as special case in get();
+        // no need to handle zero key here - is handled as privileged case in get();
         
         LongCacheState<V> backupState = this.backupState.get();
         

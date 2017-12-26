@@ -349,7 +349,8 @@ public abstract class MachineTileEntity extends SuperTileEntity
         // don't send more frequently than needed
         if(time >= this.nextPlayerUpdateMilliseconds)
         {
-            if(Configurator.logMachineNetwork) Log.info("sending keepalive packet");
+            if(Configurator.logMachineActivity) 
+                Log.info("MachineTileEntity.notifyServerPlayerWatching: %s sending keepalive packet", this.machine().machineName());
 
             ModMessages.INSTANCE.sendToServer(new PacketMachineStatusAddListener(this.pos));
             this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;
@@ -370,7 +371,8 @@ public abstract class MachineTileEntity extends SuperTileEntity
     {
         if(world.isRemote) return;
         
-        if(Configurator.logMachineNetwork) Log.info("got keepalive packet");
+        if(Configurator.logMachineActivity) 
+            Log.info("MachineTileEntity.addPlayerListener %s got keepalive packet", this.machine().machineName());
         
         if(this.machine() == null) return;
         

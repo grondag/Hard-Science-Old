@@ -15,8 +15,11 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class Configurator
 {
     
-    @Comment("Enable tracing for machine packets and processing. Highly verbose. Intended for dev environment and troubleshooeting.")
-    public static boolean logMachineNetwork = false;
+    @Comment("Enable tracing for machine jobs and processing. Highly verbose. Intended for dev environment and troubleshooeting.")
+    public static boolean logMachineActivity = false;
+    
+    @Comment("Enable tracing for transport network activity. Highly verbose. Intended for dev environment and troubleshooeting.")
+    public static boolean logTransportNetwork = false;
     
     @Comment("Enable tracing for excavation render tracking. Highly verbose. Intended for dev environment and troubleshooeting.")
     public static boolean logExcavationRenderTracking = false;
@@ -217,7 +220,7 @@ public class Configurator
             " Try smaller values if placing large multi-block regions is causing FPS problems.",
             " With smaller values, species (connected textures) may not be selected properly ",
             " for large multi-block placements."})
-        @RangeDouble(min = 16, max = 4096)
+        @RangeInt(min = 16, max = 4096)
         public int maxPlacementCheckCount = 512;
     }
     

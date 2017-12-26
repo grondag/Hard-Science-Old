@@ -4,29 +4,39 @@ import java.util.Iterator;
 
 import javax.annotation.Nonnull;
 
+import com.google.common.collect.AbstractIterator;
+
 import grondag.hard_science.init.ModPorts;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 /**
- * Collection of ports all on same device sharing same internal carrier.
+ * Collection of ports all on same device sharing same internal carrier.<p>
+ * 
+ * Methods related to network topology should ONLY be
+ * called from the connection manager thread and will 
+ * throw an exception if called otherwise.  This avoids
+ * the need for synchronization of these methods.
  */
 public class CarrierPortGroup implements Iterable<PortState>
 {
     private final StorageType<?> storageType;
-    
+
     private final CarrierLevel carrierLevel;
-    
+
     /**
      * Physical device on which this port is present.
      */
     private final IDevice device;
 
     private CarrierCircuit internalCircuit;
-    
+
     private SimpleUnorderedArrayList<PortState> ports
         = new SimpleUnorderedArrayList<PortState>();
 
@@ -36,8 +46,11 @@ public class CarrierPortGroup implements Iterable<PortState>
     private byte channel = 0;
 
     private int carrierPortCount = 0;
-    
-    public CarrierPortGroup(IDevice device, StorageType<?> storageType, CarrierLevel carrierLevel)
+
+    public CarrierPortGroup(
+            @Nonnull IDevice device, 
+            @Nonnull StorageType<?> storageType, 
+            @Nonnull CarrierLevel carrierLevel)
     {
         this.device = device;
         this.storageType = storageType;
@@ -51,33 +64,37 @@ public class CarrierPortGroup implements Iterable<PortState>
      */
     public void setConfiguredChannel(int channel)
     {
-        assert this.internalCircuit == null
-                : "Attempt to configure channel with live transport circuit";
+        if(this.internalCircuit != null)
+            throw new UnsupportedOperationException("Attempt to configure channel with live transport circuit");
 
         assert !this.carrierLevel.isTop()
         : "Attempt to configure channel on top-level transport device";
 
         this.channel = (byte) (channel & 0xF);
     }
-    
+
     /**
-     * @param isDirect  Returns a bridge-type port if true, carrier type otherwise.
+     * Creates a new port and adds it to this carrier port group.
+     * @param isBridge  Returns a bridge-type port if true, carrier type otherwise.
      */
-    public PortState createPort(boolean isBridge)
+    public PortState createPort(boolean isBridge, BlockPos pos, EnumFacing face)
     {
         synchronized(this)
         {
+            if(this.internalCircuit != null)
+                throw new UnsupportedOperationException("Attempt to add port with live transport circuit");
+            
             Port port = ModPorts.find(
                     this.storageType, 
                     this.carrierLevel, 
                     isBridge ? PortType.BRIDGE : PortType.CARRIER);
-            
-            CarrierPortState result = new CarrierPortState(port);
+
+            CarrierPortState result = new CarrierPortState(port, pos, face);
             this.ports.add(result);
             return result;
         }
     }
-    
+
     /**
      * The number of carrier ports that are attached.
      * If zero, then {@link #internalCircuit} will be null.
@@ -86,33 +103,40 @@ public class CarrierPortGroup implements Iterable<PortState>
     {
         return this.carrierPortCount();
     }
-
+    
     /**
-     * Will call detach if connected.
+     * Device must not be connected.
      */
     public void removePort(PortState port)
     {
         synchronized(this)
         {
-            assert this.ports.contains(port)
-                : "Removal request for non-existant port";
+            if(this.internalCircuit != null)
+                throw new UnsupportedOperationException("Attempt to remove port with live transport circuit");
             
-            if(port.isAttached()) port.detach();
+            assert this.ports.contains(port)
+            : "Removal request for non-existant port";
+
             this.ports.removeIfPresent(port);
         }
     }
-    
+
     @Override
     public Iterator<PortState> iterator()
     {
         return this.ports.iterator();
     }
+
+    public CarrierCircuit internalCircuit()
+    {
+        return this.internalCircuit;
+    }
     
     private class CarrierPortState extends PortState
     {
-        private CarrierPortState(Port port)
+        private CarrierPortState(Port port, BlockPos pos, EnumFacing face)
         {
-            super(port);
+            super(port, pos, face);
         }
 
         @Override
@@ -134,12 +158,11 @@ public class CarrierPortGroup implements Iterable<PortState>
         }
 
         /**
-         * 
          * For carrier ports, externalCircuit must match existing internal
          * circuit if internal circuit is non-null.
          * 
          * For bridge ports, behaves same as direct port and also creates or joins
-         * and internal carrier. (But no conflict with internal is possible because
+         * an internal carrier. (But no conflict with internal is possible because
          * external does not have to match.) <p>
          * 
          * {@inheritDoc}
@@ -147,103 +170,150 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public boolean attach(@Nonnull CarrierCircuit externalCircuit, PortState mate)
         {
-            synchronized(CarrierPortGroup.this)
+            ConnectionManager.confirmNetworkThread();
+            
+            assert this.externalCircuit == null
+                    : "PortState attach request when already attached.";
+
+            switch(this.port().portType)
             {
-                assert this.externalCircuit == null
-                        : "PortState attach request when already attached.";
-                
-                switch(this.port().portType)
+            case BRIDGE:
+
+                // bridge ports require a carrier port as mate
+                if(mate.port().portType != PortType.CARRIER) return false;
+
+                // bridge ports shouldn't be connected until
+                // after internal circuit set up
+                if(internalCircuit == null)
                 {
-                case BRIDGE:
-                    
-                    // bridge ports require a carrier port as mate
-                    if(mate.port().portType != PortType.CARRIER) return false;
-                    
-                    // bridge ports shouldn't be connected until
-                    // after internal circuit set up
-                    if(internalCircuit == null)
-                    {
-                        assert false : "Bridge port group missing internal circuit during attach";
-                        return false;
-                    }
-                    
-                    if(super.attach(externalCircuit, mate))
-                    {
-                        
-                        if(!internalCircuit.attach(this, true))
-                            assert false : "Bridge port unable to attach to internal circuit";
-                        
-                        carrierPortCount++;
-                        return true;
-                    }
-                    break;
-                
-                case CARRIER:
-                    
-                    if(internalCircuit == null)
-                    {
-                        // we are joining the external circuit so just need to 
-                        // confirm compatible channels
-                        if(externalCircuit.channel != this.getConfiguredChannel()) return false;
-                    }
-                    else
-                    {
-                        // already have an internal circuit so any new carrier ports
-                        // must be on the same circuit
-                        if(externalCircuit != internalCircuit) return false;
-                    }
-                    
-                    if(super.attach(externalCircuit, mate))
-                    {
-                        // note there is no need to attach to internal carrier 
-                        // for carrier ports because internal and external circuits are same
-                        if(internalCircuit == null)
-                        {
-                            internalCircuit = externalCircuit;
-                            
-                            assert carrierPortCount == 0
-                                    : "Inconsitent carrier count on carrier port attach";
-                        }
-                        carrierPortCount++;
-                        return true;
-                    }
-                    break;
-    
-                default:
-                    assert false : "Unsupported Port Type in Carrier Port Group";
-                
-                }
+                    assert false : "Bridge port group missing internal circuit during attach";
                 return false;
+                }
+
+                if(super.attach(externalCircuit, mate))
+                {
+
+                    if(!internalCircuit.attach(this, true))
+                        assert false : "Bridge port unable to attach to internal circuit";
+
+                    carrierPortCount++;
+                    return true;
+                }
+                break;
+
+            case CARRIER:
+
+                if(internalCircuit == null)
+                {
+                    // we are joining the external circuit so just need to 
+                    // confirm compatible channels
+                    if(externalCircuit.channel != this.getConfiguredChannel()) return false;
+                }
+                else
+                {
+                    // already have an internal circuit so any new carrier ports
+                    // must be on the same circuit
+                    if(externalCircuit != internalCircuit) return false;
+                }
+
+                if(super.attach(externalCircuit, mate))
+                {
+                    // note there is no need to attach to internal carrier 
+                    // for carrier ports because internal and external circuits are same
+                    if(internalCircuit == null)
+                    {
+                        internalCircuit = externalCircuit;
+
+                        assert carrierPortCount == 0
+                                : "Inconsitent carrier count on carrier port attach";
+                    }
+                    carrierPortCount++;
+                    return true;
+                }
+                break;
+
+            default:
+                assert false : "Unsupported Port Type in Carrier Port Group";
+
             }
+            return false;
         }
 
         /**
          * For carrier ports, will drop reference to internal circuit
-         * whan last carrier port is detached.<p>
+         * when last carrier port is detached.<p>
          * 
          * {@inheritDoc}
          */
         @Override
         public void detach()
         {
-            synchronized(CarrierPortGroup.this)
+            ConnectionManager.confirmNetworkThread();
+
+            if(this.port().portType == PortType.CARRIER)
             {
-                if(this.port().portType == PortType.CARRIER)
+                assert internalCircuit != null
+                        : "Missing internal carrier on carrier port detach.";
+
+                assert carrierPortCount > 0
+                : "Inconsistent carrier count on carrier port detach.";
+
+                if(--carrierPortCount == 0)
                 {
-                    assert internalCircuit != null
-                            : "Missing internal carrier on carrier port detach.";
-                    
-                    assert carrierPortCount > 0
-                            : "Inconsistent carrier count on carrier port detach.";
-    
-                    if(--carrierPortCount == 0)
-                    {
-                        internalCircuit = null;
-                    }
+                    internalCircuit = null;
                 }
-                super.detach();
             }
+            super.detach();
+        }
+
+        /**
+         * This will be called multiple times for the same port group
+         * if multiple ports are attached to the same carrier.  This is
+         * fine.  Will simply update internal carrier on first call and
+         * ignore subsequent calls. <p>
+         * 
+         * {@inheritDoc}
+         */
+        @Override
+        public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
+        {
+            ConnectionManager.confirmNetworkThread();
+
+            super.swapCircuit(oldCircuit, newCircuit);
+
+            if(internalCircuit == oldCircuit) internalCircuit = newCircuit;
+        }
+
+        @Override
+        @Nonnull
+        public Iterable<PortState> carrierMates()
+        {
+            return new Iterable<PortState>() 
+            {
+
+                @Override
+                public Iterator<PortState> iterator()
+                {
+                    return new AbstractIterator<PortState>() 
+                    {
+                        private Iterator<PortState> unfiltered = ports.iterator();
+
+                        @Override
+                        protected PortState computeNext()
+                        {
+                            while (unfiltered.hasNext()) 
+                            {
+                                PortState element = unfiltered.next();
+                                if (element != CarrierPortState.this) 
+                                {
+                                    return element;
+                                }
+                            }
+                            return endOfData();
+                        }
+                    };
+                }
+            };
         }
     }
 }
-
