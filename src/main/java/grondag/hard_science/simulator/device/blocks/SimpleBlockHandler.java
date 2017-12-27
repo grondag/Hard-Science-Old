@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.device.blocks;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.google.common.collect.ImmutableList;
 
@@ -61,6 +62,8 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     @Override
     public Iterable<PortState> getPorts(EnumFacing face)
     {
+        if(face == null) return Collections.emptyList();
+        
         return this.ports[face.ordinal()];
     }
 
