@@ -3,7 +3,6 @@ package grondag.hard_science.machines;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.texture.Textures;
@@ -37,11 +36,5 @@ public class SolarAggregatorTileEntity extends MachineTileEntity
     public TextureAtlasSprite getSymbolSprite()
     {
         return Textures.DECAL_STAR_12.getSampleSprite();
-    }
-
-    @Override
-    protected AbstractMachine createNewMachine()
-    {
-        return new SolarAggregatorMachine();
     }
 }

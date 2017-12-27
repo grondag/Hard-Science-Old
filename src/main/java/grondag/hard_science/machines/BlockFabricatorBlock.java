@@ -1,6 +1,7 @@
 package grondag.hard_science.machines;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.Battery;
 import grondag.hard_science.machines.support.BatteryChemistry;
@@ -18,6 +19,12 @@ public class BlockFabricatorBlock extends MachineBlock
         super(name, ModGui.BLOCK_FABRICATOR.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_FILMSTRIP));
     }
 
+    @Override
+    protected AbstractMachine createNewMachine()
+    {
+        return new BlockFabricatorMachine();
+    }
+    
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta)
     {

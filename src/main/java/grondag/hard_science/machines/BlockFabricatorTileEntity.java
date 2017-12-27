@@ -3,7 +3,6 @@ package grondag.hard_science.machines;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.texture.Textures;
@@ -15,13 +14,6 @@ import net.minecraftforge.items.IItemHandler;
 
 public class BlockFabricatorTileEntity extends MachineTileEntityTickable
 {
-
-    @Override
-    protected AbstractMachine createNewMachine()
-    {
-        return new BlockFabricatorMachine();
-    }
-    
     @SideOnly(value = Side.CLIENT)
     public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[6];
 

@@ -70,15 +70,15 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
        if(this.owner != null)
        {
            this.owner.removeStore(this);
-           if(domain == null)
-           {
-               this.owner = null;
-           }
-           else
-           {
-               this.owner = domain.getStorageManager(this.storageType());
-               this.owner.addStore(this);
-           }
+       }
+       if(domain == null)
+       {
+           this.owner = null;
+       }
+       else
+       {
+           this.owner = domain.getStorageManager(this.storageType());
+           this.owner.addStore(this);
        }
        super.setDomain(domain);
     }

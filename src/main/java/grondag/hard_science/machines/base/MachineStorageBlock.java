@@ -3,6 +3,7 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import grondag.hard_science.machines.SmartChestMachine;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
@@ -27,6 +28,12 @@ public class MachineStorageBlock extends MachineContainerBlock
         // TODO Auto-generated constructor stub
     }
 
+    @Override
+    protected AbstractMachine createNewMachine()
+    {
+        return new SmartChestMachine();
+    }
+    
     @Override
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {

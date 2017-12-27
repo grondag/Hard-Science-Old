@@ -24,6 +24,10 @@ public class Configurator
     @Comment("Enable tracing for excavation render tracking. Highly verbose. Intended for dev environment and troubleshooeting.")
     public static boolean logExcavationRenderTracking = false;
     
+    @Comment("Enable tracing for structural device & device block changes. Highly verbose. Intended for dev environment and troubleshooeting.")
+    public static boolean logDeviceChanges = false;
+
+
     public static void recalcDerived()
     {
         Render.recalcDerived();

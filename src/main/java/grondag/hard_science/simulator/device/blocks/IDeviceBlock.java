@@ -48,4 +48,13 @@ public interface IDeviceBlock
                 PackedBlockPos.offset(this.packedBlockPos(), face));
     }
     
+    public default String description()
+    {
+        return String.format("Device Block for device %d @ %d.%d.%d in dim %d", 
+                this.device().getId(),
+                PackedBlockPos.getX(this.packedBlockPos()),
+                PackedBlockPos.getY(this.packedBlockPos()),
+                PackedBlockPos.getZ(this.packedBlockPos()),
+                this.dimensionID());
+    }
 }

@@ -3,6 +3,8 @@ package grondag.hard_science.simulator.device.blocks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.device.IDevice;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -68,6 +70,9 @@ public class DeviceWorldManager
      */
     public void addOrUpdateDelegate(@Nonnull IDeviceBlock block)
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("DeviceWorldManager.addOrUpdateDelegate: " + block.description());
+        
         Long2ObjectOpenHashMap<IDeviceBlock> blocks = this.getBlocksForDimension(block.dimensionID());
         synchronized(blocks)
         {
@@ -87,6 +92,9 @@ public class DeviceWorldManager
      */
     public void removeDelegate(@Nonnull IDeviceBlock block)
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("DeviceWorldManager.removeDelegate: " + block.description());
+        
         Long2ObjectOpenHashMap<IDeviceBlock> blocks = this.getBlocksForDimension(block.dimensionID());
         synchronized(blocks)
         {

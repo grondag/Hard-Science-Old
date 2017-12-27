@@ -27,19 +27,26 @@ import net.minecraft.world.World;
  * Square machines use lamp surface as the control face
  * and main surface as the casing sides.
  */
-public class SolarCableMeshFactory extends AbstractMachineMeshGenerator implements ICollisionHandler
+public class CableMeshFactory extends AbstractMachineMeshGenerator implements ICollisionHandler
 {
-    private static final double CABLE_RADIUS = 1.0/16.0;
-    private static final double CABLE_Y_CENTER = 0.25;
-    private static final double yLow = CABLE_Y_CENTER - CABLE_RADIUS;
-    private static final double yHigh = CABLE_Y_CENTER + CABLE_RADIUS;
-    private static final double xzMin = 0.5 - CABLE_RADIUS;
-    private static final double xzMax = 0.5 + CABLE_RADIUS;
+    private final double CABLE_RADIUS;
+    private final double CABLE_Y_CENTER;
+    private final double yLow;
+    private final double yHigh;
+    private final double xzMin;
+    private final double xzMax;
     
-    public SolarCableMeshFactory()
+    public CableMeshFactory(double cableRadius)
     {
         super(ModelState.STATE_FLAG_NEEDS_SIMPLE_JOIN | ModelState.STATE_FLAG_NEEDS_SPECIES, 
                 MachineMeshFactory.SURFACE_MAIN); 
+        
+        this.CABLE_RADIUS = cableRadius;
+        this.CABLE_Y_CENTER = 0.25;
+        this.yLow = CABLE_Y_CENTER - CABLE_RADIUS;
+        this.yHigh = CABLE_Y_CENTER + CABLE_RADIUS;
+        this.xzMin = 0.5 - CABLE_RADIUS;
+        this.xzMax = 0.5 + CABLE_RADIUS;
     }
     
     /**
@@ -92,7 +99,7 @@ public class SolarCableMeshFactory extends AbstractMachineMeshGenerator implemen
         return builder.build();
     }
    
-    private static CSGShape makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull RawQuad template)
+    private CSGShape makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull RawQuad template)
     {
         if(join.isJoined(face))
         {
@@ -107,7 +114,8 @@ public class SolarCableMeshFactory extends AbstractMachineMeshGenerator implemen
             return null;
         }
     }
-    private static List<RawQuad> makeBox(@Nonnull EnumFacing face, @Nonnull RawQuad template, boolean isBothEnds)
+    
+    private List<RawQuad> makeBox(@Nonnull EnumFacing face, @Nonnull RawQuad template, boolean isBothEnds)
     {
         AxisAlignedBB aabb;
         

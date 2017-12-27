@@ -2,13 +2,21 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.Log;
 import grondag.hard_science.gui.control.machine.RenderBounds;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.simulator.device.DeviceManager;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.Privilege;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
+import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -69,6 +77,50 @@ public abstract class MachineBlock extends SuperBlockPlus
         this.guiID = guiID;
         this.setHarvestLevel(null, 0);
         this.setHardness(1);
+    }
+    
+    /**
+     * Used in tile entity or during placement (for non-TE) blocks to create new
+     * machine instances that are registered with device manager.
+     */
+    protected abstract AbstractMachine createNewMachine();
+
+    /**
+     * Returns machine instance associated with block at this position.
+     * Will create a new machine if the world has this block at the given position.
+     * Server-side only.
+     */
+    @Nullable
+    public AbstractMachine machine(World world, BlockPos pos)
+    {
+        assert !world.isRemote : "Attempt to access Machine on client.";
+    
+        if(world.isRemote) return null;
+        
+        IDevice result = DeviceManager.getDevice(world, pos);
+        
+        IBlockState blockState = world.getBlockState(pos);
+        
+        if(blockState.getBlock() == this)
+        {
+            // should have a device - so create one if not found
+            if(result == null)
+            {
+                if(Configurator.logDeviceChanges)
+                    Log.info("MachineBlock.machine creating new machine: @ %d.%d.%d in dim %d", 
+                            pos.getX(), pos.getY(), pos.getZ(), world.provider.getDimension());
+
+                result = this.createNewMachine();
+                result.setLocation(pos, world);
+                DeviceManager.addDevice(result);
+            }
+        }
+        else
+        {
+            assert result == null : "Device found at location without matching block";
+        }
+                
+        return (AbstractMachine) result;
     }
     
     protected static ModelState creatBasicMachineModelState(TexturePallette decalTex, TexturePallette borderTex)
@@ -134,16 +186,25 @@ public abstract class MachineBlock extends SuperBlockPlus
         return true;
     }
 
+    /**
+     * Default machine implementation only handles single-block machines.<p>
+     * 
+     * {@inheritDoc}
+     */
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         if(!(worldIn == null || worldIn.isRemote))
         {
-            MachineTileEntity mte = (MachineTileEntity) worldIn.getTileEntity(pos);
-            if(mte != null) mte.clearMachine();
+            if(Configurator.logDeviceChanges)
+                Log.info("MachineBlock.breakBlock: @ %d.%d.%d in dim %d", 
+                        pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
+            
+            IDevice device = DeviceManager.getDevice(worldIn, pos);
+            DeviceManager.removeDevice(device);
         }
 
-        // NB: anything we do with TE must come BEFORE we call this
+        // NB: device removal and any tile entity updates should come BEFORE this call
         super.breakBlock(worldIn, pos, state);
     }
 
@@ -235,24 +296,71 @@ public abstract class MachineBlock extends SuperBlockPlus
         return true;
     }
 
+    /**
+     * On server-side after machine block has been placed will
+     * restore machine state from stack (if present) or 
+     * create new machine state and register with simulation.<p>
+     * 
+     * Relies on machine state to be saved by {@link #writeModNBT(NBTTagCompound)}
+     * for harvested machines.<p>
+     * 
+     * New machines are added to the placer's domain. Machines with an 
+     * existing domain are not changed.<p>
+     * 
+     * Location of the machine is always changed to event parameters.
+     * 
+     * {@inheritDoc}
+     */
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-        
-        // restore placed machines or initialize them with simulation
         if(worldIn.isRemote) return;
-        TileEntity blockTE = worldIn.getTileEntity(pos);
-        if (blockTE != null && blockTE instanceof MachineTileEntity) 
+        
+        if(Configurator.logDeviceChanges)
+            Log.info("MachineBlock.onBlockPlacedBy: @ %d.%d.%d in dim %d", 
+                    pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
+
+        // restore placed machines or initialize them with simulation
+       
+        AbstractMachine machine = this.machine(worldIn, pos);
+        
+        if(stack.hasTagCompound())
+        {
+            NBTTagCompound serverTag = SuperTileEntity.getServerTag(stack.getTagCompound());
+            
+            if(serverTag.hasKey(ModNBTTag.MACHINE_STATE))
+            {
+                machine.deserializeNBT(serverTag.getCompoundTag(ModNBTTag.MACHINE_STATE));
+            }
+        }
+        
+        if(machine.getDomain() == null)
         {
             Domain domain = DomainManager.instance().getActiveDomain((EntityPlayerMP) placer);
             if(domain == null || !domain.hasPrivilege((EntityPlayer) placer, Privilege.ADD_NODE))
             {
                 domain = DomainManager.instance().defaultDomain();
             }
-
-            ((MachineTileEntity)blockTE).restoreMachineFromStack(stack, domain);
+            machine.setDomain(domain);
         }
+        
+
+        // NB: important super goes after machine is initialized so that
+        // machine instance is updated before tile entity tries to access it
+
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+
+        if(machine.hasFront())
+        {
+            machine.setFront(this.getModelState(worldIn, pos, true).getAxisRotation().horizontalFace);
+        }
+        
+        TileEntity blockTE = worldIn.getTileEntity(pos);
+        if (blockTE != null && blockTE instanceof MachineTileEntity) 
+        {
+            ((MachineTileEntity)blockTE).onMachinePlaced(machine);
+        }
+
     }
     
     @Override
@@ -326,12 +434,10 @@ public abstract class MachineBlock extends SuperBlockPlus
 
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
-    {
-        MachineTileEntity mte = (MachineTileEntity) this.getTileEntityReliably(world, data.getPos());
+    { 
+        if(world.isRemote) return;
         
-        if(mte.machine() == null) return;
-        
-        AbstractMachine machine = mte.machine();
+        AbstractMachine machine = this.machine(world, data.getPos());
 
         probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 
                 machine.getDomain() == null ? I18n.translateToLocal("misc.unassigned") : machine.getDomain().getName()));

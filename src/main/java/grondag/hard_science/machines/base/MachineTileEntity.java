@@ -12,9 +12,7 @@ import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
-import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.ItemStorage;
@@ -39,15 +37,6 @@ import net.minecraftforge.items.IItemHandler;
 public abstract class MachineTileEntity extends SuperTileEntity
 {
     
-    /**
-     * Machine unique ID.  Is persisted if machine is picked and put back by player.
-     * Most logic is in IIdentified.<p>
-     * 
-     * Initialized to signal value that means hasn't been initialized yet.
-     * {@link #machine()} will return null until has been set to something else.
-     */
-    private int machineID = IIdentified.SIGNAL_ID;
-    
     private AbstractMachine machine = null;
     
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
@@ -61,7 +50,13 @@ public abstract class MachineTileEntity extends SuperTileEntity
      */
     protected long nextPlayerUpdateMilliseconds = 0;
     
-    protected abstract AbstractMachine createNewMachine();
+    /**
+     * Convenience for {@link MachineBlock#createNewMachine()}
+     */
+    protected final AbstractMachine createNewMachine()
+    {
+        return ((MachineBlock)this.getBlockType()).createNewMachine();
+    }
     
     @SideOnly(Side.CLIENT)
     public MachineClientState clientState()
@@ -70,20 +65,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
     }
     
     /**
-     * Used for tear down when block is broken.
-     */
-    public void clearMachine()
-    {
-        if(this.machine != null)
-        {
-            DeviceManager.removeDevice(this.machine);
-            this.machine.machineTE = null;
-            this.machine = null;
-        }
-    }
-    
-    /**
-     * Will return null if machine not yet initialized by placement.
+     * Caches machine instance, and notifies it of loaded tile entity.
      */
     @Nullable
     public AbstractMachine machine()
@@ -92,30 +74,9 @@ public abstract class MachineTileEntity extends SuperTileEntity
     
         if(this.world.isRemote) return null;
         
-        if(this.machineID == IIdentified.SIGNAL_ID) return null;
-        
-        if(this.machine == null)
+        if(this.machine == null && this.world != null && this.pos != null)
         {
-            if(this.machineID == IIdentified.UNASSIGNED_ID)
-            {
-                Log.warn("TileEntity @ %s not initialized on placement. New device created.", this.pos.toString());
-                this.machine = createNewMachine();
-                this.machine.setLocation(this.pos, this.world);
-                DeviceManager.addDevice(this.machine);
-                this.machineID = this.machine.getId();
-            }
-            else
-            {
-                this.machine = (AbstractMachine) DeviceManager.getDevice(this.machineID);
-                if(this.machine == null)
-                {
-                    Log.warn("TileEntity @ %s missing device. New device created. Contents may be lost.", this.pos.toString());
-                    this.machine = createNewMachine();
-                    this.machine.setLocation(this.pos, this.world);
-                    DeviceManager.addDevice(this.machine);
-                    this.machineID = this.machine.getId();
-                }
-            }
+            this.machine = ((MachineBlock)this.getBlockType()).machine(this.world, this.pos);
             this.machine.machineTE = this;
         }
         return this.machine;
@@ -141,47 +102,13 @@ public abstract class MachineTileEntity extends SuperTileEntity
 
     /**
      * Called server-side after machine block has been placed to
-     * restore machine state from stack (if present) or 
-     * create new machine state and register with simulation.<p>
-     * 
-     * Relies on machine state to be saved by {@link #writeModNBT(NBTTagCompound)}
-     * for harvested machines.<p>
-     * 
-     * New machines are added to the given domain. Machines with an 
-     * existing domain are not changed.<p>
-     * 
-     * Location of the machine is always changed to what is provided.
+     * avoid need for a machine look up and to immediately notify
+     * machine of loaded tile entity.
      */
-    public void restoreMachineFromStack(ItemStack stack, Domain defaultDomain)
+    public void onMachinePlaced(AbstractMachine machine)
     {
-        AbstractMachine machine = createNewMachine();
-        
-        if(stack.hasTagCompound())
-        {
-            NBTTagCompound serverTag = SuperTileEntity.getServerTag(stack.getTagCompound());
-            
-            if(serverTag.hasKey(ModNBTTag.MACHINE_STATE))
-            {
-                machine.deserializeNBT(serverTag.getCompoundTag(ModNBTTag.MACHINE_STATE));
-            }
-        }
-        
-        if(machine.getDomain() == null)
-        {
-            machine.setDomain(defaultDomain);
-        }
-        
-        machine.setLocation(this.pos, this.world);
-        
-        if(machine.hasFront())
-        {
-            machine.setFront(this.getModelState().getAxisRotation().horizontalFace);
-        }
-        
-        machine.machineTE = this;
-        DeviceManager.addDevice(machine);
-        this.machineID = machine.getId();
         this.machine = machine;
+        this.machine.machineTE = this;
         this.updateRedstonePower();
         this.markPlayerUpdateDirty(true);
     }
@@ -250,6 +177,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
     public void invalidate()
     {
         super.invalidate();
+        if(this.machine != null) this.machine.machineTE = null;
     }
 
     public void updateRedstonePower()
@@ -273,34 +201,9 @@ public abstract class MachineTileEntity extends SuperTileEntity
                 : this.world.isRemote;
     }
     
-    /**
-     * Recovers machine ID so we can find the machine for which this
-     * TE is a delegate.  Did not blockPos and world because
-     * some machines could be multiblocks.
-     * 
-     * Note this does NOT attempt to restore the actual machine state.
-     * Machine state for machines within the simulation
-     * is persisted by the device manager.  The NBT saved
-     * in {@link #writeModNBT(NBTTagCompound)} is used by 
-     * {@link #restoreMachineFromStack(ItemStack, Domain)}. <p>
-     * 
-     * {@inheritDoc}
-     */
-    @Override
-    public void readModNBT(NBTTagCompound compound)
-    {
-        super.readModNBT(compound);
-        
-        // check for key to avoid enabling ID creation when reading blank tag
-        this.machineID = compound.hasKey(ModNBTTag.MACHINE_ID)
-                ? compound.getInteger(ModNBTTag.MACHINE_ID)
-                : IIdentified.SIGNAL_ID;
-    }
     
     /**
-     * Saves association with device in simulation.<p>
-     * 
-     * Also writes the machine state for use in {@link #restoreMachineFromStack(ItemStack, Domain)}.
+     * Writes the machine state for use in {@link #restoreMachineFromStack(ItemStack, Domain)}.
      * Stores it in server-side tag so that large states don't get sent to client.<p>
      * 
      * Machine state stored here is <em>not</em> used in {@link #readModNBT(NBTTagCompound)}.<p>
@@ -313,7 +216,6 @@ public abstract class MachineTileEntity extends SuperTileEntity
         super.writeModNBT(compound);
         if(!this.world.isRemote)
         {
-            compound.setInteger(ModNBTTag.MACHINE_ID, this.machineID);
             if(this.machine() != null)
             {
                 SuperTileEntity.getServerTag(compound)

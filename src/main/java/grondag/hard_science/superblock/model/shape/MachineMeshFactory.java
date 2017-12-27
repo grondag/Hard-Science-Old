@@ -8,7 +8,7 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
-import grondag.hard_science.superblock.model.shape.machine.SolarCableMeshFactory;
+import grondag.hard_science.superblock.model.shape.machine.CableMeshFactory;
 import grondag.hard_science.superblock.model.shape.machine.SolarCellMeshFactory;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
@@ -32,7 +32,9 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     {
         BASIC_BOX,
         SOLAR_CELL,
-        SOLAR_CABLE
+        SOLAR_CABLE,
+        EXTENSION_BUS,
+        INTERMEDIATE_BUS
     }
     
     private static final ShapeMeshGenerator[] HANDLERS;
@@ -53,7 +55,9 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
         
         HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory();
         HANDLERS[MachineShape.SOLAR_CELL.ordinal()] = new SolarCellMeshFactory();
-        HANDLERS[MachineShape.SOLAR_CABLE.ordinal()] = new SolarCableMeshFactory();
+        HANDLERS[MachineShape.SOLAR_CABLE.ordinal()] = new CableMeshFactory(1.0/16.0);
+        HANDLERS[MachineShape.EXTENSION_BUS.ordinal()] = new CableMeshFactory(1.0/4.0);
+        HANDLERS[MachineShape.INTERMEDIATE_BUS.ordinal()] = new CableMeshFactory(14.0/16.0);
     }
     
     public static ShapeMeshGenerator getShapeMeshFactory()

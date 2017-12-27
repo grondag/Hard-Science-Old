@@ -13,12 +13,15 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.blocks.DeviceWorldManager;
+import grondag.hard_science.simulator.device.blocks.IDeviceBlock;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryNamespaced;
+import net.minecraft.world.World;
 
 public class DeviceManager implements IPersistenceNode, ISimulationTickable
 {
@@ -94,6 +97,12 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     public static IDevice getDevice(int deviceId)
     {
         return instance().devices.get(deviceId);
+    }
+    
+    public static IDevice getDevice(World world, BlockPos pos)
+    {
+        IDeviceBlock block =  blockManager().getBlockDelegate(world, pos);
+        return block == null ? null : block.device();
     }
     
     public static void addDevice(IDevice device)
@@ -186,16 +195,26 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     
     public void addDeviceInconveniently(IDevice device)
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("DeviceManager.addDevice: " + device.getId());
+        
         assert this.devices.put(device.getId(), device) == null
                 : "Duplicate device registration.";
         this.onTickJobBacker.setDirty();
         this.offTickJobBacker.setDirty();
         this.isDirty = true;
         device.onConnect();
+        
+        if(Configurator.logDeviceChanges)
+            Log.info("DeviceManager device count = " + this.devices.size());
+
     }
     
     public void removeDeviceInconveniently(IDevice device)
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("DeviceManager.removeDevice: " + device.getId());
+
         IDevice oldDevice = this.devices.remove(device.getId());
         device.onDisconnect();
         assert oldDevice == device
@@ -205,6 +224,9 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         this.isDirty = true;
         this.onTickJobBacker.setDirty();
         this.offTickJobBacker.setDirty();
+        
+        if(Configurator.logDeviceChanges)
+            Log.info("DeviceManager device count = " + this.devices.size());
     }
     
     @Override

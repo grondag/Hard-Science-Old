@@ -5,6 +5,8 @@ import java.util.Collections;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.device.DeviceManager;
@@ -107,12 +109,18 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     @Override
     public void connect()
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("SimpleBlockHandler.connect: " + this.description());
+
         DeviceManager.blockManager().addOrUpdateDelegate(this);
         this.connectToNeighbors();
     }
 
     protected void connectToNeighbors()
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("SimpleBlockHandler.connectToNeighbors: " + this.description());
+        
         for(EnumFacing face : EnumFacing.VALUES)
         {
             if(this.ports[face.ordinal()] == null) continue;
@@ -136,6 +144,9 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     @Override
     public void disconnect()
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("SimpleBlockHandler.disconnect: " + this.description());
+        
         // NB: will call back to onRemoval(), which contains logic 
         // for breaking connections
         DeviceManager.blockManager().removeDelegate(this);
@@ -144,6 +155,9 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     @Override
     public void onRemoval()
     {
+        if(Configurator.logDeviceChanges)
+            Log.info("SimpleBlockHandler.onRemoval: " + this.description());
+
         for(EnumFacing face : EnumFacing.VALUES)
         {
             if(this.ports[face.ordinal()] == null) continue;
