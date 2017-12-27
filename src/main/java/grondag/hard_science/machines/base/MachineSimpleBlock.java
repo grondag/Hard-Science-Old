@@ -20,7 +20,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public abstract class MachineSimpleBlock extends SuperSimpleBlock
+public abstract class MachineSimpleBlock extends SuperSimpleBlock implements IMachineBlock
 {
     protected MachineSimpleBlock(String blockName, ModelState defaultModelState)
     {
@@ -76,7 +76,21 @@ public abstract class MachineSimpleBlock extends SuperSimpleBlock
 
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
+    { 
+        this.addMachineProbeInfo(mode, probeInfo, player, world, blockState, data);
+    }
+    
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        //NOOP for now on machines - don't want all the stuff we get for normal superblocks
+        this.handleOnBlockPlacedBy(worldIn, pos, state, placer, stack);
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+    }
+    
+    @Override
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        this.handleBreakBlock(worldIn, pos, state);
+        super.breakBlock(worldIn, pos, state);
     }
 }

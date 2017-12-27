@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import grondag.hard_science.machines.SmartChestMachine;
 import grondag.hard_science.machines.support.MachineItemBlock;
-import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IStorage;
@@ -29,7 +28,7 @@ public class MachineStorageBlock extends MachineContainerBlock
     }
 
     @Override
-    protected AbstractMachine createNewMachine()
+    public AbstractMachine createNewMachine()
     {
         return new SmartChestMachine();
     }
@@ -87,12 +86,4 @@ public class MachineStorageBlock extends MachineContainerBlock
         }
         return result;
     }
-
-    @Override
-    public MachinePowerSupply createDefaultPowerSupply()
-    {
-        return null;
-    }
-
-    
 }

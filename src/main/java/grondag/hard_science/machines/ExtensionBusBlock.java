@@ -1,6 +1,9 @@
 package grondag.hard_science.machines;
 
-import grondag.hard_science.machines.base.MachineSimpleDeviceBlock;
+import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.machines.base.AbstractSimpleMachine;
+import grondag.hard_science.machines.base.MachineSimpleBlock;
+import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -12,7 +15,7 @@ import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.Textures;
 
-public class ExtensionBusBlock extends MachineSimpleDeviceBlock
+public class ExtensionBusBlock extends MachineSimpleBlock
 {
     public ExtensionBusBlock(String blockName)
     {
@@ -36,5 +39,27 @@ public class ExtensionBusBlock extends MachineSimpleDeviceBlock
 
 //        result.setStatic(true);
         return result;
+    }
+
+    @Override
+    public AbstractMachine createNewMachine()
+    {
+        return new AbstractSimpleMachine()
+        {
+
+            @Override
+            public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+            {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            @Override
+            public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+            {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+        };
     }
 }

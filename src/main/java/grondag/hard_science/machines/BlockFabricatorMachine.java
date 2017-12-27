@@ -3,20 +3,21 @@ package grondag.hard_science.machines;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
-import grondag.hard_science.machines.base.MachineBlock;
+import grondag.hard_science.machines.support.Battery;
+import grondag.hard_science.machines.support.BatteryChemistry;
+import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.machines.support.MaterialBufferManager;
-import grondag.hard_science.machines.support.MatterUnits;
-import grondag.hard_science.machines.support.VolumeUnits;
-import grondag.hard_science.machines.support.VolumetricIngredientList;
-import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MaterialBufferManager.DemandManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.machines.support.MaterialBufferManager.VolumetricBufferSpec;
+import grondag.hard_science.machines.support.MatterUnits;
+import grondag.hard_science.machines.support.PolyethyleneFuelCell;
+import grondag.hard_science.machines.support.VolumeUnits;
+import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
 import grondag.hard_science.materials.Matter;
 import grondag.hard_science.simulator.Simulator;
@@ -150,7 +151,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     @Override
     protected MachinePowerSupply createPowerSuppy()
     {
-        return ((MachineBlock)ModBlocks.block_fabricator).createDefaultPowerSupply();
+        return new MachinePowerSupply(PolyethyleneFuelCell.BASIC_1KW, new Battery(MachinePower.JOULES_PER_KWH, BatteryChemistry.LITHIUM), null);
     }
     
     public BlockFabricationTask task()

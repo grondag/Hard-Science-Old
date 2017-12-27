@@ -2,21 +2,9 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
-import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.Log;
 import grondag.hard_science.gui.control.machine.RenderBounds;
-import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.support.MachinePowerSupply;
-import grondag.hard_science.simulator.device.DeviceManager;
-import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.domain.Privilege;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
-import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -53,12 +41,11 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public abstract class MachineBlock extends SuperBlockPlus
+public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlock
 {
     public static final Material MACHINE_MATERIAL = new Material(MapColor.SILVER_STAINED_HARDENED_CLAY) 
     {
@@ -77,50 +64,6 @@ public abstract class MachineBlock extends SuperBlockPlus
         this.guiID = guiID;
         this.setHarvestLevel(null, 0);
         this.setHardness(1);
-    }
-    
-    /**
-     * Used in tile entity or during placement (for non-TE) blocks to create new
-     * machine instances that are registered with device manager.
-     */
-    protected abstract AbstractMachine createNewMachine();
-
-    /**
-     * Returns machine instance associated with block at this position.
-     * Will create a new machine if the world has this block at the given position.
-     * Server-side only.
-     */
-    @Nullable
-    public AbstractMachine machine(World world, BlockPos pos)
-    {
-        assert !world.isRemote : "Attempt to access Machine on client.";
-    
-        if(world.isRemote) return null;
-        
-        IDevice result = DeviceManager.getDevice(world, pos);
-        
-        IBlockState blockState = world.getBlockState(pos);
-        
-        if(blockState.getBlock() == this)
-        {
-            // should have a device - so create one if not found
-            if(result == null)
-            {
-                if(Configurator.logDeviceChanges)
-                    Log.info("MachineBlock.machine creating new machine: @ %d.%d.%d in dim %d", 
-                            pos.getX(), pos.getY(), pos.getZ(), world.provider.getDimension());
-
-                result = this.createNewMachine();
-                result.setLocation(pos, world);
-                DeviceManager.addDevice(result);
-            }
-        }
-        else
-        {
-            assert result == null : "Device found at location without matching block";
-        }
-                
-        return (AbstractMachine) result;
     }
     
     protected static ModelState creatBasicMachineModelState(TexturePallette decalTex, TexturePallette borderTex)
@@ -194,17 +137,7 @@ public abstract class MachineBlock extends SuperBlockPlus
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
-        if(!(worldIn == null || worldIn.isRemote))
-        {
-            if(Configurator.logDeviceChanges)
-                Log.info("MachineBlock.breakBlock: @ %d.%d.%d in dim %d", 
-                        pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
-            
-            IDevice device = DeviceManager.getDevice(worldIn, pos);
-            DeviceManager.removeDevice(device);
-        }
-
-        // NB: device removal and any tile entity updates should come BEFORE this call
+        this.handleBreakBlock(worldIn, pos, state);
         super.breakBlock(worldIn, pos, state);
     }
 
@@ -314,53 +247,8 @@ public abstract class MachineBlock extends SuperBlockPlus
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        if(worldIn.isRemote) return;
-        
-        if(Configurator.logDeviceChanges)
-            Log.info("MachineBlock.onBlockPlacedBy: @ %d.%d.%d in dim %d", 
-                    pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
-
-        // restore placed machines or initialize them with simulation
-       
-        AbstractMachine machine = this.machine(worldIn, pos);
-        
-        if(stack.hasTagCompound())
-        {
-            NBTTagCompound serverTag = SuperTileEntity.getServerTag(stack.getTagCompound());
-            
-            if(serverTag.hasKey(ModNBTTag.MACHINE_STATE))
-            {
-                machine.deserializeNBT(serverTag.getCompoundTag(ModNBTTag.MACHINE_STATE));
-            }
-        }
-        
-        if(machine.getDomain() == null)
-        {
-            Domain domain = DomainManager.instance().getActiveDomain((EntityPlayerMP) placer);
-            if(domain == null || !domain.hasPrivilege((EntityPlayer) placer, Privilege.ADD_NODE))
-            {
-                domain = DomainManager.instance().defaultDomain();
-            }
-            machine.setDomain(domain);
-        }
-        
-
-        // NB: important super goes after machine is initialized so that
-        // machine instance is updated before tile entity tries to access it
-
+        this.handleOnBlockPlacedBy(worldIn, pos, state, placer, stack);
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-
-        if(machine.hasFront())
-        {
-            machine.setFront(this.getModelState(worldIn, pos, true).getAxisRotation().horizontalFace);
-        }
-        
-        TileEntity blockTE = worldIn.getTileEntity(pos);
-        if (blockTE != null && blockTE instanceof MachineTileEntity) 
-        {
-            ((MachineTileEntity)blockTE).onMachinePlaced(machine);
-        }
-
     }
     
     @Override
@@ -371,30 +259,6 @@ public abstract class MachineBlock extends SuperBlockPlus
         // No functional difference.
         list.add(this.getSubItems().get(0));
     }
-
-    @Override
-    protected List<ItemStack> createSubItems()
-    {
-        List<ItemStack> items = super.createSubItems();
-        
-        MachinePowerSupply defaultPower = createDefaultPowerSupply();
-        if(defaultPower != null)
-        {
-            for(ItemStack stack : items)
-            {
-                NBTTagCompound tag = stack.getTagCompound();
-                if(tag == null)
-                {
-                    tag = new NBTTagCompound();
-                }
-                defaultPower.serializeNBT(tag);
-                stack.setTagCompound(tag);
-            }
-        }
-        return items;
-    }
-    
-    public abstract MachinePowerSupply createDefaultPowerSupply();
     
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -435,27 +299,6 @@ public abstract class MachineBlock extends SuperBlockPlus
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     { 
-        if(world.isRemote) return;
-        
-        AbstractMachine machine = this.machine(world, data.getPos());
-
-        probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 
-                machine.getDomain() == null ? I18n.translateToLocal("misc.unassigned") : machine.getDomain().getName()));
-        
-        if(machine.blockManager().itemCircuit() != null)
-        {
-            probeInfo.text(I18n.translateToLocalFormatted("probe.machine.item_transport", 
-                    machine.blockManager().itemCircuit().carrierAddress()));
-        }
-        
-        if(machine.blockManager().powerCircuit() != null)
-        {
-            probeInfo.text(I18n.translateToLocalFormatted("probe.machine.power_transport", 
-                    machine.blockManager().powerCircuit().carrierAddress()));
-        }
-
+        this.addMachineProbeInfo(mode, probeInfo, player, world, blockState, data);
     }
-    
-    
-    
 }

@@ -3,6 +3,7 @@ package grondag.hard_science.init;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorBlock;
+import grondag.hard_science.machines.ExtensionBusBlock;
 import grondag.hard_science.machines.SmartChestBlock;
 import grondag.hard_science.machines.SolarCableBlock;
 import grondag.hard_science.machines.SolarCellBlock;
@@ -58,6 +59,8 @@ public class ModBlocks
     public static final Block smart_chest = null;
     public static final Block block_fabricator = null;
     public static final Block solar_cell = null;
+    public static final Block extension_bus = null;
+    
 //    public static final Block solar_aggregator = null;
     
     
@@ -170,11 +173,12 @@ public class ModBlocks
             
         }
         
-        // VIRTUAL BLOCKS
+        // MACHINE BLOCKS
         event.getRegistry().register(new SmartChestBlock("smart_chest"));
         event.getRegistry().register(new BlockFabricatorBlock("block_fabricator"));
         event.getRegistry().register(new SolarCellBlock("solar_cell"));
         event.getRegistry().register(new SolarCableBlock("solar_cable"));
+        event.getRegistry().register(new ExtensionBusBlock("extension_bus"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
