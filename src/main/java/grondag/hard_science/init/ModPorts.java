@@ -22,38 +22,42 @@ public class ModPorts
         return lookup[storageType.enumType.ordinal()][level.ordinal()][portType.ordinal()];
     }
     
-    public static final Port power_base_carrier = new Port("power_base_carrier", PortType.CARRIER, CarrierLevel.BOTTOM, StorageType.POWER);
-    public static final Port power_inter_carrier = new Port("power_inter_carrier", PortType.CARRIER, CarrierLevel.MIDDLE, StorageType.POWER);
-    public static final Port power_inter_bridge = new Port("power_inter_bridge", PortType.BRIDGE, CarrierLevel.MIDDLE, StorageType.POWER);
-    public static final Port power_inter_direct = new Port("power_inter_direct", PortType.DIRECT, CarrierLevel.MIDDLE, StorageType.POWER);
-    public static final Port power_top_carrier = new Port("power_top_carrier", PortType.CARRIER, CarrierLevel.TOP, StorageType.POWER);
-    public static final Port power_top_bridge = new Port("power_top_bridge", PortType.BRIDGE, CarrierLevel.TOP, StorageType.POWER);
-    public static final Port power_top_direct = new Port("power_top_direct", PortType.DIRECT, CarrierLevel.TOP, StorageType.POWER);
+    private static final Port power_bottom_carrier = new Port("power_bottom_carrier", PortType.CARRIER, CarrierLevel.BOTTOM, StorageType.POWER);
+    private static final Port power_bottom_direct = new Port("power_bottom_direct", PortType.DIRECT, CarrierLevel.BOTTOM, StorageType.POWER);
+    private static final Port power_middle_carrier = new Port("power_middle_carrier", PortType.CARRIER, CarrierLevel.MIDDLE, StorageType.POWER);
+    private static final Port power_middle_bridge = new Port("power_middle_bridge", PortType.BRIDGE, CarrierLevel.MIDDLE, StorageType.POWER);
+    private static final Port power_middle_direct = new Port("power_middle_direct", PortType.DIRECT, CarrierLevel.MIDDLE, StorageType.POWER);
+    private static final Port power_top_carrier = new Port("power_top_carrier", PortType.CARRIER, CarrierLevel.TOP, StorageType.POWER);
+    private static final Port power_top_bridge = new Port("power_top_bridge", PortType.BRIDGE, CarrierLevel.TOP, StorageType.POWER);
+    private static final Port power_top_direct = new Port("power_top_direct", PortType.DIRECT, CarrierLevel.TOP, StorageType.POWER);
     
-    public static final Port item_base_carrier = new Port("item_base_carrier", PortType.CARRIER, CarrierLevel.BOTTOM, StorageType.ITEM);
-    public static final Port item_inter_carrier = new Port("item_inter_carrier", PortType.CARRIER, CarrierLevel.MIDDLE, StorageType.ITEM);
-    public static final Port item_inter_bridge = new Port("item_inter_bridge", PortType.BRIDGE, CarrierLevel.MIDDLE, StorageType.ITEM);
-    public static final Port item_inter_direct = new Port("item_inter_direct", PortType.DIRECT, CarrierLevel.MIDDLE, StorageType.ITEM);
-    public static final Port item_top_carrier = new Port("item_top_carrier", PortType.CARRIER, CarrierLevel.TOP, StorageType.ITEM);
-    public static final Port item_top_bridge = new Port("item_top_bridge", PortType.BRIDGE, CarrierLevel.TOP, StorageType.ITEM);
-    public static final Port item_top_direct = new Port("item_top_direct", PortType.DIRECT, CarrierLevel.TOP, StorageType.ITEM);
+    private static final Port item_bottom_carrier = new Port("item_bottom_carrier", PortType.CARRIER, CarrierLevel.BOTTOM, StorageType.ITEM);
+    private static final Port item_bottom_direct = new Port("item_bottom_direct", PortType.DIRECT, CarrierLevel.BOTTOM, StorageType.ITEM);
+    private static final Port item_middle_carrier = new Port("item_middle_carrier", PortType.CARRIER, CarrierLevel.MIDDLE, StorageType.ITEM);
+    private static final Port item_middle_bridge = new Port("item_middle_bridge", PortType.BRIDGE, CarrierLevel.MIDDLE, StorageType.ITEM);
+    private static final Port item_middle_direct = new Port("item_middle_direct", PortType.DIRECT, CarrierLevel.MIDDLE, StorageType.ITEM);
+    private static final Port item_top_carrier = new Port("item_top_carrier", PortType.CARRIER, CarrierLevel.TOP, StorageType.ITEM);
+    private static final Port item_top_bridge = new Port("item_top_bridge", PortType.BRIDGE, CarrierLevel.TOP, StorageType.ITEM);
+    private static final Port item_top_direct = new Port("item_top_direct", PortType.DIRECT, CarrierLevel.TOP, StorageType.ITEM);
     
     
     @SubscribeEvent
     public static void registerPorts(RegistryEvent.Register<Port> event) 
     {
-        registerPort(event, power_base_carrier);
-        registerPort(event, power_inter_carrier);
-        registerPort(event, power_inter_bridge);
-        registerPort(event, power_inter_direct);
+        registerPort(event, power_bottom_carrier);
+        registerPort(event, power_bottom_direct);
+        registerPort(event, power_middle_carrier);
+        registerPort(event, power_middle_bridge);
+        registerPort(event, power_middle_direct);
         registerPort(event, power_top_carrier);
         registerPort(event, power_top_bridge);
         registerPort(event, power_top_direct);
         
-        registerPort(event, item_base_carrier);
-        registerPort(event, item_inter_carrier);
-        registerPort(event, item_inter_bridge);
-        registerPort(event, item_inter_direct);
+        registerPort(event, item_bottom_carrier);
+        registerPort(event, item_bottom_direct);
+        registerPort(event, item_middle_carrier);
+        registerPort(event, item_middle_bridge);
+        registerPort(event, item_middle_direct);
         registerPort(event, item_top_carrier);
         registerPort(event, item_top_bridge);
         registerPort(event, item_top_direct);

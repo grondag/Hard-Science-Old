@@ -93,10 +93,10 @@ private final CarrierPortGroup powerGroup;
             // create individual direct ports - no common internal circuit
             
             Port itemPort = hasItemPorts
-                ? ModPorts.find( StorageType.ITEM,level, PortType.DIRECT) : null;
+                ? ModPorts.find( StorageType.ITEM, level, PortType.DIRECT) : null;
              
             Port powerPort = hasPowerPorts
-                ? ModPorts.find( StorageType.POWER,level, PortType.DIRECT) : null;
+                ? ModPorts.find( StorageType.POWER, level, PortType.DIRECT) : null;
             
             for(EnumFacing face : EnumFacing.VALUES)
             {
@@ -117,12 +117,12 @@ private final CarrierPortGroup powerGroup;
             CarrierPortGroup powerGroup = null;
             if(hasItemPorts)
             {
-                itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, CarrierLevel.BOTTOM);
+                itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, level);
                 itemGroup.setConfiguredChannel(channel);
             }
             if(hasPowerPorts)
             {
-                powerGroup = new CarrierPortGroup(owner, StorageType.POWER, CarrierLevel.BOTTOM);
+                powerGroup = new CarrierPortGroup(owner, StorageType.POWER, level);
                 powerGroup.setConfiguredChannel(channel);
             }
             
@@ -153,16 +153,25 @@ private final CarrierPortGroup powerGroup;
         switch(storageType.enumType)
         {
         case ITEM:
-            return this.itemPorts == null ? null : ImmutableList.of(this.itemPorts[face.ordinal()]);
-
+            return portListForFaceFromArray(face, itemPorts);
+        
         case POWER:
-            return this.powerPorts == null ? null : ImmutableList.of(this.powerPorts[face.ordinal()]);
+            return portListForFaceFromArray(face, powerPorts);
 
         case NONE:
         case FLUID:
         default:
-            return null;
+            return Collections.emptyList();
         }
+    }
+    
+    private Iterable<PortState> portListForFaceFromArray(EnumFacing face, PortState[] ports)
+    {
+        if(ports == null) return Collections.emptyList();
+        PortState result = ports[face.ordinal()];
+        return result == null 
+                ? Collections.emptyList() 
+                : ImmutableList.of(result);
     }
     
     @Override
@@ -219,6 +228,8 @@ private final CarrierPortGroup powerGroup;
             if(hasItems)
             {
                 PortState myPort = this.itemPorts[face.ordinal()];
+                if(myPort == null) break;
+                
                 assert !myPort.isAttached() : "Connection attempt on attached port";
                 for(PortState mate : neighbor.getPorts(StorageType.ITEM, oppositeFace))
                 {
@@ -229,6 +240,8 @@ private final CarrierPortGroup powerGroup;
             if(hasPower)
             {
                 PortState myPort = this.powerPorts[face.ordinal()];
+                if(myPort == null) break;
+
                 assert !myPort.isAttached() : "Connection attempt on attached port";
                 for(PortState mate : neighbor.getPorts(StorageType.POWER, oppositeFace))
                 {

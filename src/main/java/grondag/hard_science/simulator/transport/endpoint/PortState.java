@@ -45,7 +45,7 @@ public abstract class PortState implements IDeviceComponent
      */
     protected CarrierCircuit externalCircuit;
     
-    public PortState(Port port, @Nullable BlockPos pos, @Nullable EnumFacing face)
+    public PortState(@Nonnull Port port, @Nullable BlockPos pos, @Nullable EnumFacing face)
     {
         this.port = port;
         this.pos = pos;

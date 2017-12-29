@@ -10,7 +10,7 @@ public class TransportTestMachine extends ItemStorage
 {
     public TransportTestMachine()
     {
-        super(CarrierLevel.BOTTOM, PortType.CARRIER);
+        super(CarrierLevel.BOTTOM, PortType.DIRECT);
         this.setCapacity(Integer.MAX_VALUE);
         this.add(ItemResource.fromStack(Items.BEEF.getDefaultInstance()), Integer.MAX_VALUE, false, null);
     }

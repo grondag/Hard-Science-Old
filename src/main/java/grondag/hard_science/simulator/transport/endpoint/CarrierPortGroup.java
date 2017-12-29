@@ -91,6 +91,10 @@ public class CarrierPortGroup implements Iterable<PortState>
                     this.carrierLevel, 
                     isBridge ? PortType.BRIDGE : PortType.CARRIER);
 
+            assert port != null : "CarrierPortGroup.createPort: Unable to find configured port type.";
+            
+            if(port == null) return null;
+            
             CarrierPortState result = new CarrierPortState(port, pos, face);
             this.ports.add(result);
             return result;
@@ -136,7 +140,7 @@ public class CarrierPortGroup implements Iterable<PortState>
     
     private class CarrierPortState extends PortState
     {
-        private CarrierPortState(Port port, BlockPos pos, EnumFacing face)
+        private CarrierPortState(@Nonnull Port port, BlockPos pos, EnumFacing face)
         {
             super(port, pos, face);
         }
