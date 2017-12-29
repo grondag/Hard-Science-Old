@@ -119,4 +119,18 @@ public interface IDevice extends
         }
     }
 
+    /**
+     * True if supports channels for transport circuit segregation.
+     */
+    public default boolean hasChannel() { return this.getChannel() != CHANNEL_UNSUPPORTED; }
+    
+    public static final int CHANNEL_UNSUPPORTED = -1;
+    
+    /**
+     * Configured transport channel for connection segregation.
+     * Will return {@link #CHANNEL_UNSUPPORTED} if not supported.  
+     * Is generally the block meta/species.
+     * Default implementation is no channel support.
+     */
+    public default int getChannel() { return CHANNEL_UNSUPPORTED; }
 }

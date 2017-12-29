@@ -3,10 +3,13 @@ package grondag.hard_science.init;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorBlock;
-import grondag.hard_science.machines.ExtensionBusBlock;
+import grondag.hard_science.machines.BottomBusBlock;
+import grondag.hard_science.machines.MiddleBusBlock;
 import grondag.hard_science.machines.SmartChestBlock;
 import grondag.hard_science.machines.SolarCableBlock;
 import grondag.hard_science.machines.SolarCellBlock;
+import grondag.hard_science.machines.TopBusBlock;
+import grondag.hard_science.machines.TransportTestBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -60,6 +63,7 @@ public class ModBlocks
     public static final Block block_fabricator = null;
     public static final Block solar_cell = null;
     public static final Block extension_bus = null;
+    public static final Block intermediate_bus = null;
     
 //    public static final Block solar_aggregator = null;
     
@@ -178,7 +182,11 @@ public class ModBlocks
         event.getRegistry().register(new BlockFabricatorBlock("block_fabricator"));
         event.getRegistry().register(new SolarCellBlock("solar_cell"));
         event.getRegistry().register(new SolarCableBlock("solar_cable"));
-        event.getRegistry().register(new ExtensionBusBlock("extension_bus"));
+        event.getRegistry().register(new BottomBusBlock("bottom_bus"));
+        event.getRegistry().register(new MiddleBusBlock("middle_bus"));
+        event.getRegistry().register(new TopBusBlock("top_bus"));
+        event.getRegistry().register(new TransportTestBlock("transport_test"));
+        
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 

@@ -5,6 +5,8 @@ import grondag.hard_science.simulator.device.blocks.SimpleBlockHandler;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 import grondag.hard_science.simulator.transport.management.SimpleTransportManager;
 
@@ -14,13 +16,21 @@ import grondag.hard_science.simulator.transport.management.SimpleTransportManage
  */
 public abstract class AbstractSimpleMachine extends AbstractMachine
 {
+    /**
+     * Ports on a simple machine are all of the same level.
+     */
+    protected final CarrierLevel carrierLevel;
     
-//    /**
-//     * Front (display) face of machine, if non-null.
-//     * Used to determine placement of connectors.
-//     */
-//    @Nullable
-//    protected EnumFacing frontFace;
+    /**
+     * Ports on a simple machine are all of the same type.
+     */
+    protected final PortType portType;
+
+    protected AbstractSimpleMachine(CarrierLevel carrierLevel, PortType portType)
+    {
+        this.carrierLevel = carrierLevel;
+        this.portType = portType;
+    }
     
     @Override
     protected ITransportManager<StorageTypeStack> createItemTransportManager()
@@ -37,16 +47,11 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
     @Override
     protected IDeviceBlockManager createBlockManager()
     {
-        SimpleBlockHandler result = new SimpleBlockHandler(this);
-        
-//        assert this.frontFace != null
-//                : "Simple machine missing front face during block manager initializaiton";
-        
-//        for(EnumFacing face : EnumFacing.VALUES)
-//        {
-//            result.addPort(face, ModPorts.item_low, ItemBus.ITEM_BUS_LOCAL, 0);
-//            result.addPort(face, ModPorts.power_low, PowerBus.POWER_BUS_LOCAL, 0);
-//        }
+        SimpleBlockHandler result = new SimpleBlockHandler(
+                this, 
+                this.hasChannel() ? this.getChannel() : 0, 
+                this.carrierLevel, 
+                this.portType);
         
         return result;
     }

@@ -75,7 +75,7 @@ public enum PaintLayer
     }
     
     /** 
-     * There are five layers, but BASE and CUT share the same color, lighting etc.
+     * There are five layers, but BOTTOM and CUT share the same color, lighting etc.
      * So when enumerating those attributes we only have four.
      * Use this to index which of those four apply to this value.
      */

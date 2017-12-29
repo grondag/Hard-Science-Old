@@ -22,11 +22,18 @@ import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
 public abstract class AbstractStorage<T extends StorageType<T>> extends AbstractSimpleMachine implements IStorage<T>
 {
+
+    protected AbstractStorage(CarrierLevel carrierLevel, PortType portType)
+    {
+        super(carrierLevel, portType);
+    }
 
     protected final static IFunction<AbstractResourceWithQuantity<?>, Integer> handleMapper
          = new IFunction<AbstractResourceWithQuantity<?>, Integer>() {

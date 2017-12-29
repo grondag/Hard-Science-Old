@@ -6,6 +6,8 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
@@ -17,6 +19,11 @@ import net.minecraftforge.items.IItemHandler;
  */
 public class ItemStorage extends AbstractStorage<StorageTypeStack> implements IItemHandler
 {
+    public ItemStorage(CarrierLevel carrierLevel, PortType portType)
+    {
+        super(carrierLevel, portType);
+    }
+
     @Override
     public StorageTypeStack storageType()
     {

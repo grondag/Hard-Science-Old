@@ -36,13 +36,13 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     private final double xzMin;
     private final double xzMax;
     
-    public CableMeshFactory(double cableRadius)
+    public CableMeshFactory(double cableRadius, boolean onGround)
     {
         super(ModelState.STATE_FLAG_NEEDS_SIMPLE_JOIN | ModelState.STATE_FLAG_NEEDS_SPECIES, 
                 MachineMeshFactory.SURFACE_MAIN); 
         
         this.CABLE_RADIUS = cableRadius;
-        this.CABLE_Y_CENTER = 0.25;
+        this.CABLE_Y_CENTER = onGround ? cableRadius : 0.5;
         this.yLow = CABLE_Y_CENTER - CABLE_RADIUS;
         this.yHigh = CABLE_Y_CENTER + CABLE_RADIUS;
         this.xzMin = 0.5 - CABLE_RADIUS;
@@ -91,8 +91,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
         else
         {
-            //FIXME: remove
-            shape.recolor();
+            //shape.recolor();
             builder.addAll(shape);
         }
         

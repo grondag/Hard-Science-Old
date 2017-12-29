@@ -1,9 +1,7 @@
 package grondag.hard_science.machines;
 
 import grondag.hard_science.machines.base.AbstractMachine;
-import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
-import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -44,22 +42,6 @@ public class SolarCableBlock extends MachineSimpleBlock
     @Override
     public AbstractMachine createNewMachine()
     {
-        return new AbstractSimpleMachine()
-        {
-
-            @Override
-            public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
-            {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-
-            @Override
-            public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
-            {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-        };
+        return new SolarCableMachine();
     }
 }

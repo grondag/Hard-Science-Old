@@ -71,19 +71,17 @@ public interface IDeviceBlockManager
         {
             for(EnumFacing face : EnumFacing.VALUES)
             {
-                for(PortState port : block.getPorts(face))
+                for(PortState port : block.getPorts(storageType, face))
                 {
-                    if(port.port().storageType == storageType 
-                            && (!attachedOnly || port.isAttached()))
+                    if(!attachedOnly || port.isAttached())
                     {
                         builder.add(port);
                     }
                 }
             }
-            for(PortState port : block.getPorts(null))
+            for(PortState port : block.getPorts(storageType, null))
             {
-                if(port.port().storageType == storageType 
-                        && (!attachedOnly || port.isAttached()))
+                if(!attachedOnly || port.isAttached())
                 {
                     builder.add(port);
                 }

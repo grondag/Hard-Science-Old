@@ -32,6 +32,8 @@ public abstract class PortState implements IDeviceComponent
     
     private final EnumFacing face;
     
+    protected PortMode mode = PortMode.DISCONNECTED;
+    
     /**
      * If port has mated, should contain a reference 
      * to a port on an adjacent (or wirelessly connected) device.
@@ -102,6 +104,10 @@ public abstract class PortState implements IDeviceComponent
     
     /**
      * Attaches to the provided circuit and handles internal record keeping.
+     * Assumes that {@link Port#connectionResult(PortState, PortState)} has
+     * already been called and result for this port passed in via the mode
+     * parameter.<p>
+     * 
      * Returns false if attachment is not possible.<p>
      * 
      * Calls {@link IDevice#refreshTransport(grondag.hard_science.simulator.resource.StorageType)} 
@@ -112,29 +118,49 @@ public abstract class PortState implements IDeviceComponent
      * 
      * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public boolean attach(@Nonnull CarrierCircuit externalCircuit, @Nonnull PortState mate)
+    public boolean attach(
+            @Nonnull CarrierCircuit externalCircuit,
+            @Nonnull PortMode mode,
+            @Nonnull PortState mate)
     {
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
         assert this.externalCircuit == null
                 : "PortState attach request when already attached.";
         
+        assert mode.isConnected : "Request to attach port with disconnected mode";
+        
+        
         if(Configurator.logTransportNetwork) 
             Log.info("PortState.attach: port attach for %s to circuit %d with mate %s",
                     this.portName(),
                     externalCircuit.carrierAddress(),
                     mate.portName());
+
+        this.mode = mode;
+        if(!this.mode.isConnected) return false;
         
-        // circuit / node will expect this before attachment
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortState.attach: port mode = %s", this.mode);
+        
+        // circuit will expect this before attachment
         this.externalCircuit = externalCircuit;
         if(externalCircuit.attach(this, false))
         {
             this.mate = mate;
-            this.device().refreshTransport(this.port.storageType);
+            if(this.mode.isBridge())
+            {
+                ConnectionManager.addCircuitBridge(this, this.internalCircuit(), this.externalCircuit);
+            }
+            else
+            {
+                this.device().refreshTransport(this.port.storageType);
+            }
             return true;
         }
         else
         {
+            this.mode = PortMode.DISCONNECTED;
             this.externalCircuit = null;
             return false;
         }
@@ -164,7 +190,16 @@ public abstract class PortState implements IDeviceComponent
         this.externalCircuit.detach(this);
         this.externalCircuit = null;
         this.mate = null;
-        this.device().refreshTransport(this.port.storageType);
+        if(this.mode.isBridge())
+        {
+            ConnectionManager.removeCircuitBridge(this);
+        }
+        else
+        {
+            this.device().refreshTransport(this.port.storageType);
+        }
+        this.mode = PortMode.DISCONNECTED;
+        
     }
 
     /**
@@ -201,6 +236,11 @@ public abstract class PortState implements IDeviceComponent
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         if(this.externalCircuit == oldCircuit)
         {
+            if(Configurator.logTransportNetwork) 
+                Log.info("PortState.swapCircuit: replacing external circuit %d with new circuit %d",
+                        oldCircuit.carrierAddress(),
+                        newCircuit.carrierAddress());
+
             this.externalCircuit = newCircuit;
             this.device().refreshTransport(this.port.storageType);
         }
@@ -246,7 +286,7 @@ public abstract class PortState implements IDeviceComponent
     public String portName()
     {
         return String.format(
-            "%s %d/%d on %s @ %s", 
+            "%s %d/%d on %s @ %s, mode=%s", 
             this.port.toString(),
             this.internalCircuit() == null ? 0 : this.internalCircuit().carrierAddress(),
             this.externalCircuit() == null ? 0 : this.externalCircuit().carrierAddress(),
@@ -257,7 +297,13 @@ public abstract class PortState implements IDeviceComponent
                         this.pos().getX(), 
                         this.pos().getY(), 
                         this.pos().getZ(), 
-                        this.face().toString())
+                        this.face().toString()),
+           this.mode.toString()
         );
+    }
+    
+    public PortMode portMode()
+    {
+        return this.portMode();
     }
 }

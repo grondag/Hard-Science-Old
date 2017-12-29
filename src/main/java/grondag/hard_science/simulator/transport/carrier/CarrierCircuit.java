@@ -103,6 +103,8 @@ public class CarrierCircuit
         assert !this.ports.contains(portInstance)
             : "Carrier attach request from existing port on carrier.";
         
+        // note this check covers both storage type and level
+        
         Carrier portCarrier = isInternal ? portInstance.port().internalCarrier
                 : portInstance.port().externalCarrier;
         

@@ -405,7 +405,7 @@ public class ModelStateFactory
                 else if ((STATE_FLAG_NEEDS_SIMPLE_JOIN & stateFlags) == STATE_FLAG_NEEDS_SIMPLE_JOIN)
                 {
                     neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this, true));
+                    NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(this));
                     b3 = P3B_BLOCK_JOIN.setValue(SimpleJoin.getIndex(tests), b3);
                 }
 

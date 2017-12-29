@@ -4,6 +4,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.machines.TransportTestTileEntity;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.virtual.VirtualTileEntity;
@@ -28,6 +29,7 @@ public class ModTileEntities
         
         GameRegistry.registerTileEntity(SmartChestTileEntity.class, HardScience.MODID + ":smart_chest_tile");
         GameRegistry.registerTileEntity(BlockFabricatorTileEntity.class, HardScience.MODID + ":block_fabricator_tile");
+        GameRegistry.registerTileEntity(TransportTestTileEntity.class, HardScience.MODID + ":transport_test_tile");
         
         if(event.getSide() == Side.CLIENT)
         {

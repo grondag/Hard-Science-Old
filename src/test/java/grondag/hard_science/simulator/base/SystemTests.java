@@ -5,8 +5,8 @@ import org.junit.Test;
 
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.machines.TransportTestMachine;
 import grondag.hard_science.simulator.device.DeviceManager;
-import grondag.hard_science.simulator.device.impl.TestDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -17,6 +17,8 @@ import grondag.hard_science.simulator.storage.jobs.Job;
 import grondag.hard_science.simulator.storage.jobs.RequestStatus;
 import grondag.hard_science.simulator.storage.jobs.tasks.DeliveryTask;
 import grondag.hard_science.simulator.storage.jobs.tasks.SimpleProcurementTask;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
@@ -56,11 +58,11 @@ public class SystemTests
         
         domain = DomainManager.instance().createDomain();
         
-        store1 = new ItemStorage();
+        store1 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
         store1.setDomain(domain);
         DeviceManager.addDevice(store1);
         
-        store2 = new ItemStorage();
+        store2 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
         store2.setDomain(domain);
         DeviceManager.addDevice(store2);
         
@@ -106,7 +108,7 @@ public class SystemTests
         store1.add(this.beef.withQuantity(10), false, null);
         store2.add(this.ironBlock.withQuantity(20), false, null);
         
-        TestDevice td = new TestDevice();
+        TransportTestMachine td = new TransportTestMachine();
         td.setLocation(new Location(1, 2, 3, -1));
         td.setDomain(domain);
         
@@ -136,7 +138,7 @@ public class SystemTests
         
         this.store1 = (ItemStorage) DeviceManager.getDevice(storeId1);
         this.store2 = (ItemStorage) DeviceManager.getDevice(storeId2);
-        td = (TestDevice) DeviceManager.getDevice(tdId);
+        td = (TransportTestMachine) DeviceManager.getDevice(tdId);
         
         assert store1.getQuantityStored(beef) == 10;
         assert store2.getQuantityStored(ironBlock) == 20;

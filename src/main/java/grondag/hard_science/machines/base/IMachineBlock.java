@@ -160,6 +160,5 @@ public interface IMachineBlock
             probeInfo.text(I18n.translateToLocalFormatted("probe.machine.power_transport", 
                     machine.blockManager().powerCircuit().carrierAddress()));
         }
-
     }
 }

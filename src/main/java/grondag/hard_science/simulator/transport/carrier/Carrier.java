@@ -15,12 +15,12 @@ public class Carrier
         return lookup[storageType.enumType.ordinal()][level.ordinal()];
     }
 
-    public static final Carrier POWER_BASE = new Carrier(StorageType.POWER, CarrierLevel.BASE, MachinePower.POWER_BUS_JOULES_PER_TICK);
-    public static final Carrier POWER_INTER = new Carrier(StorageType.POWER, CarrierLevel.INTERMEDIATE, MachinePower.POWER_BUS_JOULES_PER_TICK * 1000);
+    public static final Carrier POWER_BASE = new Carrier(StorageType.POWER, CarrierLevel.BOTTOM, MachinePower.POWER_BUS_JOULES_PER_TICK);
+    public static final Carrier POWER_INTER = new Carrier(StorageType.POWER, CarrierLevel.MIDDLE, MachinePower.POWER_BUS_JOULES_PER_TICK * 1000);
     public static final Carrier POWER_TOP = new Carrier(StorageType.POWER, CarrierLevel.TOP, MachinePower.POWER_BUS_JOULES_PER_TICK * 1000000);
     
-    public static final Carrier ITEM_BASE = new Carrier(StorageType.ITEM, CarrierLevel.BASE, 64);
-    public static final Carrier ITEM_INTER = new Carrier(StorageType.ITEM, CarrierLevel.INTERMEDIATE, 64 * 8);
+    public static final Carrier ITEM_BASE = new Carrier(StorageType.ITEM, CarrierLevel.BOTTOM, 64);
+    public static final Carrier ITEM_INTER = new Carrier(StorageType.ITEM, CarrierLevel.MIDDLE, 64 * 8);
     public static final Carrier ITEM_TOP = new Carrier(StorageType.ITEM, CarrierLevel.TOP, 64 * 10000);
 
     public final StorageType<?> storageType;

@@ -16,6 +16,7 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
+import grondag.hard_science.library.world.IBlockTest;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -29,6 +30,7 @@ import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.superblock.varia.BlockTests;
 import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -146,6 +148,15 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
                 : blockRenderMode;
     }   
 
+    /**
+     * Factory for block test that should be used for border/shape joins
+     * for this block.  Used in model state refresh from world.
+     */
+    public IBlockTest blockJoinTest(ModelState modelState)
+    {
+        return new BlockTests.SuperBlockBorderMatch(this, modelState, true);
+    }
+    
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)

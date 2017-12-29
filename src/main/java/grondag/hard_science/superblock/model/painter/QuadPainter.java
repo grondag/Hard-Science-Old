@@ -25,13 +25,13 @@ public abstract class QuadPainter
     
     /** 
      * Color map for lamp surface - used to render lamp gradients
-     * Only populated for BASE/CUT surfaces
+     * Only populated for BOTTOM/CUT surfaces
      */
     protected final ColorMap lampColorMap;
 
     /**
     * Render layer for lamp surface - used to render lamp gradients
-    * Only populated for BASE/CUT surfaces
+    * Only populated for BOTTOM/CUT surfaces
     */
     protected final RenderPass lampRenderPass;
     

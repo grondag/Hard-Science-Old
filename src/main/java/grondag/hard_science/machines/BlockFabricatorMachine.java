@@ -31,6 +31,8 @@ import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.RequestStatus;
 import grondag.hard_science.simulator.storage.jobs.TaskType;
 import grondag.hard_science.simulator.storage.jobs.tasks.BlockFabricationTask;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
@@ -126,7 +128,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     
     public BlockFabricatorMachine()
     {
-        super();
+        super(CarrierLevel.BOTTOM, PortType.CARRIER);
         
         // note that order has to match array declaration
         MaterialBufferManager bufferManager = this.getBufferManager();

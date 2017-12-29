@@ -6,6 +6,8 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.AbstractIterator;
 
+import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import grondag.hard_science.init.ModPorts;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
@@ -168,29 +170,39 @@ public class CarrierPortGroup implements Iterable<PortState>
          * {@inheritDoc}
          */
         @Override
-        public boolean attach(@Nonnull CarrierCircuit externalCircuit, PortState mate)
+        public boolean attach(
+                @Nonnull CarrierCircuit externalCircuit, 
+                @Nonnull PortMode mode,
+                @Nonnull PortState mate)
         {
             assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
             
             assert this.externalCircuit == null
                     : "PortState attach request when already attached.";
 
-            switch(this.port().portType)
+            switch(mode)
             {
-            case BRIDGE:
-
-                // bridge ports require a carrier port as mate
-                if(mate.port().portType != PortType.CARRIER) return false;
-
-                // bridge ports shouldn't be connected until
-                // after internal circuit set up
+            case BRIDGE_ACTIVE:
+            case BRIDGE_PASSIVE:
+                
+                if(Configurator.logTransportNetwork) 
+                    Log.info("CarrierPortGroup.attach: using bridge mode logic");
+                
+                // If internal carrier not already set up then 
+                // need to create it and attach.  Will happen only
+                // if the first port to connect connects in bridge mode.
+                // Any previous carrier-mode attachments will have
+                // established a carrier shared with another device.
                 if(internalCircuit == null)
                 {
-                    assert false : "Bridge port group missing internal circuit during attach";
-                return false;
+                    internalCircuit = new CarrierCircuit(this.port().internalCarrier, this.getConfiguredChannel());
+                    
+                    if(Configurator.logTransportNetwork) 
+                        Log.info("CarrierPortGroup.attach: created new internal circuit %d",
+                                internalCircuit.carrierAddress());
                 }
 
-                if(super.attach(externalCircuit, mate))
+                if(super.attach(externalCircuit, mode, mate))
                 {
 
                     if(!internalCircuit.attach(this, true))
@@ -200,23 +212,33 @@ public class CarrierPortGroup implements Iterable<PortState>
                     return true;
                 }
                 break;
-
+                
             case CARRIER:
-
+                
+                if(Configurator.logTransportNetwork) 
+                    Log.info("CarrierPortGroup.attach: using carrier mode logic");
+                
+                // These checks should have been done already but doesn't hurt to check again
                 if(internalCircuit == null)
                 {
-                    // we are joining the external circuit so just need to 
-                    // confirm compatible channels
-                    if(externalCircuit.channel != this.getConfiguredChannel()) return false;
+                    if(externalCircuit.channel != this.getConfiguredChannel()) 
+                    {
+                        assert false : "CarrierPortGroup request for mismatched channel attach";
+                        return false;
+                    }
                 }
                 else
                 {
                     // already have an internal circuit so any new carrier ports
                     // must be on the same circuit
-                    if(externalCircuit != internalCircuit) return false;
+                    if(externalCircuit != internalCircuit)
+                    {
+                        assert false : "CarrierPortGroup request for mismatched circuit attach";
+                        return false;
+                    }
                 }
 
-                if(super.attach(externalCircuit, mate))
+                if(super.attach(externalCircuit, mode, mate))
                 {
                     // note there is no need to attach to internal carrier 
                     // for carrier ports because internal and external circuits are same
@@ -225,16 +247,16 @@ public class CarrierPortGroup implements Iterable<PortState>
                         internalCircuit = externalCircuit;
 
                         assert carrierPortCount == 0
-                                : "Inconsitent carrier count on carrier port attach";
+                                : "Inconsistent carrier count on carrier port attach";
                     }
                     carrierPortCount++;
                     return true;
                 }
                 break;
-
+          
             default:
                 assert false : "Unsupported Port Type in Carrier Port Group";
-
+                break;
             }
             return false;
         }
@@ -281,7 +303,15 @@ public class CarrierPortGroup implements Iterable<PortState>
 
             super.swapCircuit(oldCircuit, newCircuit);
 
-            if(internalCircuit == oldCircuit) internalCircuit = newCircuit;
+            if(internalCircuit == oldCircuit)
+            {
+                if(Configurator.logTransportNetwork) 
+                    Log.info("CarrierPortGroup.swapCircuit: replacing internal circuit %d with new circuit %d",
+                            oldCircuit.carrierAddress(),
+                            newCircuit.carrierAddress());
+                
+                internalCircuit = newCircuit;
+            }
         }
 
         @Override

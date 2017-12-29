@@ -31,16 +31,30 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     private final List<RawQuad> cubeQuads180;
     private final List<RawQuad> cubeQuads270;
     
+    private final boolean hasFront;
     
-    public MachineCubeMeshFactory()
+    /**
+     * @param hasFront If true, model will have an orientation and front display face
+     */
+    public MachineCubeMeshFactory(boolean hasFront)
     {
-        super(ModelState.STATE_FLAG_HAS_AXIS_ROTATION, 
+        super(hasFront ? ModelState.STATE_FLAG_HAS_AXIS_ROTATION : ModelState.STATE_FLAG_NONE, 
                 MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
         
+        this.hasFront = hasFront;
         this.cubeQuads0 = getCubeQuads(Rotation.ROTATE_NONE);
-        this.cubeQuads90 = getCubeQuads(Rotation.ROTATE_90);
-        this.cubeQuads180 = getCubeQuads(Rotation.ROTATE_180);
-        this.cubeQuads270 = getCubeQuads(Rotation.ROTATE_270);
+        if(hasFront)
+        {
+            this.cubeQuads90 = getCubeQuads(Rotation.ROTATE_90);
+            this.cubeQuads180 = getCubeQuads(Rotation.ROTATE_180);
+            this.cubeQuads270 = getCubeQuads(Rotation.ROTATE_270);
+        }
+        else
+        {
+            this.cubeQuads90 = null;
+            this.cubeQuads180 = null;
+            this.cubeQuads270 = null;
+        }
     }
     
     /**
@@ -50,19 +64,23 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     @Override
     public List<RawQuad> getShapeQuads(ModelState modelState)
     {
-        switch(modelState.getAxisRotation())
+        if(this.hasFront)
         {
-        case ROTATE_NONE:
-            return this.cubeQuads0;
-        case ROTATE_90:
-            return this.cubeQuads90;
-        case ROTATE_180:
-            return this.cubeQuads180;
-        case ROTATE_270:
-            return this.cubeQuads270;
-        default:
-            return Collections.emptyList();
+            switch(modelState.getAxisRotation())
+            {
+            case ROTATE_NONE:
+                return this.cubeQuads0;
+            case ROTATE_90:
+                return this.cubeQuads90;
+            case ROTATE_180:
+                return this.cubeQuads180;
+            case ROTATE_270:
+                return this.cubeQuads270;
+            default:
+                return Collections.emptyList();
+            }
         }
+        else return this.cubeQuads0;
     }
    
     private List<RawQuad> getCubeQuads(Rotation rotation)
@@ -90,7 +108,11 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
        
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            result.surfaceInstance = face == rotation.horizontalFace  ? MachineMeshFactory.INSTANCE_LAMP : MachineMeshFactory.INSTANCE_MAIN;
+            
+            result.surfaceInstance = this.hasFront && face == rotation.horizontalFace  
+                    ? MachineMeshFactory.INSTANCE_LAMP 
+                    : MachineMeshFactory.INSTANCE_MAIN;
+            
             builder.add(result.makeRawFace(face));
         }
         return builder.build();

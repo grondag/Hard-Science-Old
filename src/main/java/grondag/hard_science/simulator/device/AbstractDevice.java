@@ -19,6 +19,7 @@ public abstract class AbstractDevice implements IDevice
     private int id;
     private Location location;
     private boolean isConnected = false;
+    private int channel = 0;
     
     private int domainID = IIdentified.UNASSIGNED_ID;
     
@@ -139,6 +140,7 @@ public abstract class AbstractDevice implements IDevice
         this.deserializeID(tag);
         this.location = Location.fromNBT(tag);
         this.domainID = tag.getInteger(ModNBTTag.DOMAIN_ID);
+        this.channel = tag.getInteger(ModNBTTag.DEVICE_CHANNEL);
     }
 
     @Override
@@ -147,6 +149,7 @@ public abstract class AbstractDevice implements IDevice
         this.serializeID(tag);
         Location.saveToNBT(location, tag);
         tag.setInteger(ModNBTTag.DOMAIN_ID, this.domainID);
+        tag.setInteger(ModNBTTag.DEVICE_CHANNEL, this.channel);
     }
     
     @Override
@@ -163,5 +166,15 @@ public abstract class AbstractDevice implements IDevice
         IDevice.super.onDisconnect();
         this.blockManager = null;
         this.isConnected = false;
+    }
+
+    public int getChannel()
+    {
+        return channel;
+    }
+
+    public void setChannel(int channel)
+    {
+        this.channel = channel;
     }
 }

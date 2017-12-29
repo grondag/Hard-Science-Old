@@ -1,6 +1,7 @@
 package grondag.hard_science.superblock.varia;
 
 import grondag.hard_science.library.world.IBlockTest;
+import grondag.hard_science.machines.base.IMachineBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
@@ -101,5 +102,45 @@ public class BlockTests
                     || pos.getY() == origin.getY() - 1
                     || pos.getZ() == origin.getZ() + 1);
         }       
+    }
+    
+    public static class SuperBlockCableMatch implements IBlockTest
+    {
+        private final ModelState matchModelState;
+        
+        /** pass in the info for the block you want to match */
+        public SuperBlockCableMatch(ModelState modelState)
+        {
+            this.matchModelState = modelState;
+        }
+        
+        /** assumes you want to match block at given position */
+        public SuperBlockCableMatch(IBlockAccess world, IBlockState ibs, BlockPos pos, boolean isSpeciesPartOfMatch)
+        {
+            SuperBlock block = ((SuperBlock)ibs.getBlock());
+            //last param = false prevents recursion - we don't need the full model state (which depends on this logic)
+            this.matchModelState = block.getModelStateAssumeStateIsCurrent(ibs, world, pos, false);
+        }
+        
+        @Override 
+        public boolean wantsModelState() { return true; }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            if(ibs.getBlock() instanceof IMachineBlock)
+            {
+                return ((SuperBlock)ibs.getBlock()).getModelStateAssumeStateIsCurrent(ibs, world, pos, false).getSpecies()
+                        == this.matchModelState.getSpecies();
+            }
+            return false;
+        }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState)
+        {
+            return ibs.getBlock() instanceof IMachineBlock 
+                    && modelState.getSpecies() == this.matchModelState.getSpecies();
+        }
     }
 }

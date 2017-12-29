@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
+import grondag.hard_science.init.ModPorts;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
@@ -16,14 +16,16 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.CarrierPortGroup;
+import grondag.hard_science.simulator.transport.endpoint.DirectPortState;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
+import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.ConnectionManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * Block/block manager implementation for single-block machines.
+ * Basic combined device block & block manager implementation for single-block machines.
  */
 public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, IDeviceComponent
 {
@@ -32,54 +34,135 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
 
     private final Collection<IDeviceBlock> collection;
 
-    @SuppressWarnings("unchecked")
-    private final SimpleUnorderedArrayList<PortState>[] ports = new SimpleUnorderedArrayList[6];
-
-    private final CarrierPortGroup itemGroup;
-    private final CarrierPortGroup powerGroup; 
+    /**
+     * Item ports by face. This implementation assumes/allows
+     * only one port per face.
+     */
+    private final PortState[] itemPorts;
     
     /**
-     * Should not be called until device has a location.
+     * Power ports by face. This implementation assumes/allows
+     * only one port per face.
      */
-    public SimpleBlockHandler(IDevice owner)
+    private final PortState[] powerPorts;
+
+    /**
+     * Manages shared circuit for item ports.  Not face-aware
+     * because is general-purpose class that can handle wireless
+     * and/or multiblock.
+     */
+    private final CarrierPortGroup itemGroup;
+
+    /**
+     * Manages shared circuit for power ports.  Not face-aware
+     * because is general-purpose class that can handle wireless
+     * and/or multiblock.
+     */
+private final CarrierPortGroup powerGroup; 
+    
+    /**
+     * Sets up ports and carriers.
+     * Should not be called until device has a location.<p>
+     * 
+     * @param owner     Device associated with this device block
+     * @param channel   Channel for circuit segregation. Ignored for top-level devices.
+     * @param level     Transport level of the internal carrier for bridge/carrier port types.
+     * Level of port itself for direct ports. 
+     * @param portType  Type of port offered for each support storage type.  
+     * Assumes all faces offer same ports. 
+     */
+    public SimpleBlockHandler(
+            IDevice owner, 
+            int channel, 
+            CarrierLevel level, 
+            PortType portType)
     {
         this.owner = owner;
         this.collection = ImmutableList.of(this);
         this.packedBlockPos = PackedBlockPos.pack(owner.getLocation());
-        this.itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, CarrierLevel.BASE);
-        this.powerGroup = new CarrierPortGroup(owner, StorageType.POWER, CarrierLevel.BASE);
+
+        boolean hasItemPorts = owner.hasTransportManager(StorageType.ITEM);
+        boolean hasPowerPorts = owner.hasTransportManager(StorageType.POWER);
+        this.itemPorts = hasItemPorts ?  new PortState[6] : null;
+        this.powerPorts = hasPowerPorts ?  new PortState[6] : null;
         
         BlockPos pos = PackedBlockPos.unpack(this.packedBlockPos);
         
-        for(EnumFacing face : EnumFacing.VALUES)
+        if(portType == PortType.DIRECT)
         {
-            SimpleUnorderedArrayList<PortState> list = new SimpleUnorderedArrayList<PortState>();
-            this.ports[face.ordinal()] = list;
-            list.add(itemGroup.createPort(false, pos, face));
-            //FIXME: put back
-//            list.add(powerGroup.createPort(false, pos, face));
+            // create individual direct ports - no common internal circuit
+            
+            Port itemPort = hasItemPorts
+                ? ModPorts.find( StorageType.ITEM,level, PortType.DIRECT) : null;
+             
+            Port powerPort = hasPowerPorts
+                ? ModPorts.find( StorageType.POWER,level, PortType.DIRECT) : null;
+            
+            for(EnumFacing face : EnumFacing.VALUES)
+            {
+                if(hasItemPorts)
+                    this.itemPorts[face.ordinal()]= new DirectPortState(itemPort, owner, pos, face);
+                
+                if(hasPowerPorts)
+                    this.itemPorts[face.ordinal()]= new DirectPortState(powerPort, owner, pos, face);
+            }
+            this.itemGroup = null;
+            this.powerGroup = null;
         }
+        else
+        {
+            // bridge or carrier ports - all share common internal circuit
+            
+            CarrierPortGroup itemGroup = null;
+            CarrierPortGroup powerGroup = null;
+            if(hasItemPorts)
+            {
+                itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, CarrierLevel.BOTTOM);
+                itemGroup.setConfiguredChannel(channel);
+            }
+            if(hasPowerPorts)
+            {
+                powerGroup = new CarrierPortGroup(owner, StorageType.POWER, CarrierLevel.BOTTOM);
+                powerGroup.setConfiguredChannel(channel);
+            }
+            
+            for(EnumFacing face : EnumFacing.VALUES)
+            {
+                if(itemGroup != null)
+                    this.itemPorts[face.ordinal()] = itemGroup.createPort(portType == PortType.BRIDGE, pos, face);
+
+                if(powerGroup != null)
+                    this.powerPorts[face.ordinal()] = powerGroup.createPort(portType == PortType.BRIDGE, pos, face);
+            }
+            
+            this.itemGroup = itemGroup;
+            this.powerGroup = powerGroup;
+        }
+        
+        
+      
+        
+
     }
 
     @Override
-    public Iterable<PortState> getPorts(EnumFacing face)
+    public Iterable<PortState> getPorts(StorageType<?> storageType, EnumFacing face)
     {
         if(face == null) return Collections.emptyList();
         
-        return this.ports[face.ordinal()];
-    }
-
-    @Override
-    public PortState getPort(Port port, EnumFacing face)
-    {
-        if(this.ports[face.ordinal()] == null) return null;
-        
-        for(PortState pi : this.ports[face.ordinal()])
+        switch(storageType.enumType)
         {
-            if(pi.port() == port) return pi;
+        case ITEM:
+            return this.itemPorts == null ? null : ImmutableList.of(this.itemPorts[face.ordinal()]);
+
+        case POWER:
+            return this.powerPorts == null ? null : ImmutableList.of(this.powerPorts[face.ordinal()]);
+
+        case NONE:
+        case FLUID:
+        default:
+            return null;
         }
-        
-        return null;
     }
     
     @Override
@@ -120,22 +203,36 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     {
         if(Configurator.logDeviceChanges)
             Log.info("SimpleBlockHandler.connectToNeighbors: " + this.description());
+
+        boolean hasItems = this.itemPorts != null;
+        boolean hasPower = this.powerPorts != null;
+        
+        if(!(hasItems || hasPower)) return;
         
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            if(this.ports[face.ordinal()] == null) continue;
-
             IDeviceBlock neighbor = this.getNeighbor(face);
             if(neighbor == null) continue;
+
+            EnumFacing oppositeFace = face.getOpposite();
             
-            for(PortState myPort : this.ports[face.ordinal()])
+            if(hasItems)
             {
+                PortState myPort = this.itemPorts[face.ordinal()];
                 assert !myPort.isAttached() : "Connection attempt on attached port";
-                
-                for(PortState mate : neighbor.getPorts(face.getOpposite()))
+                for(PortState mate : neighbor.getPorts(StorageType.ITEM, oppositeFace))
                 {
-                    if(ConnectionManager.isConnectionPossible(myPort, mate))
-                        ConnectionManager.connect(myPort, mate);
+                    ConnectionManager.connect(myPort, mate);
+                }
+            }
+            
+            if(hasPower)
+            {
+                PortState myPort = this.powerPorts[face.ordinal()];
+                assert !myPort.isAttached() : "Connection attempt on attached port";
+                for(PortState mate : neighbor.getPorts(StorageType.POWER, oppositeFace))
+                {
+                    ConnectionManager.connect(myPort, mate);
                 }
             }
         }
@@ -158,16 +255,26 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
         if(Configurator.logDeviceChanges)
             Log.info("SimpleBlockHandler.onRemoval: " + this.description());
 
+        boolean hasItems = this.itemPorts != null;
+        boolean hasPower = this.powerPorts != null;
+        
+        if(!(hasItems || hasPower)) return;
+        
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            if(this.ports[face.ordinal()] == null) continue;
-
             IDeviceBlock neighbor = this.getNeighbor(face);
             if(neighbor == null) continue;
             
-            for(PortState pi : this.ports[face.ordinal()])
+            if(hasItems)
             {
-                if(pi.isAttached()) ConnectionManager.disconnect(pi);
+                PortState ps = this.itemPorts[face.ordinal()];
+                if(ps.isAttached()) ConnectionManager.disconnect(ps);
+            }
+            
+            if(hasPower)
+            {
+                PortState ps = this.powerPorts[face.ordinal()];
+                if(ps.isAttached()) ConnectionManager.disconnect(ps);
             }
         }
     }

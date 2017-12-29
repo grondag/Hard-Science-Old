@@ -7,12 +7,12 @@ public enum CarrierLevel
     /**
      * Sub-sonic bus, moderate volume/power.
      */
-    BASE,
+    BOTTOM,
     
     /**
      * Sub-sonic, high capacity, multi-path bus.
      */
-    INTERMEDIATE,
+    MIDDLE,
     
     /**
      * Supersonic/superconducting switches and interconnects.
@@ -21,7 +21,7 @@ public enum CarrierLevel
     
     public boolean isBottom()
     {
-        return this == BASE;
+        return this == BOTTOM;
     }
     
     public boolean isTop()
@@ -34,10 +34,10 @@ public enum CarrierLevel
     {
         switch(this)
         {
-        case BASE:
-            return INTERMEDIATE;
+        case BOTTOM:
+            return MIDDLE;
             
-        case INTERMEDIATE:
+        case MIDDLE:
             return TOP;
             
         case TOP:
@@ -52,12 +52,12 @@ public enum CarrierLevel
         switch(this)
         {
         case TOP:
-            return INTERMEDIATE;
+            return MIDDLE;
             
-        case INTERMEDIATE:
-            return BASE;
+        case MIDDLE:
+            return BOTTOM;
             
-        case BASE:
+        case BOTTOM:
         default:
             return null;
         }

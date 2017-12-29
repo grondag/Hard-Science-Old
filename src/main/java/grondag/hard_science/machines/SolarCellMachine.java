@@ -5,26 +5,22 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 
-public class SolarAggregatorMachine extends AbstractSimpleMachine
+public class SolarCellMachine extends AbstractSimpleMachine
 {
-
-    protected SolarAggregatorMachine()
+    public SolarCellMachine()
     {
         super(CarrierLevel.BOTTOM, PortType.CARRIER);
     }
-
+        
     @Override
     public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
     {
-        // TODO Auto-generated method stub
         return 0;
     }
-
+    
     @Override
     public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
     {
-        // TODO Auto-generated method stub
         return 0;
     }
-
 }

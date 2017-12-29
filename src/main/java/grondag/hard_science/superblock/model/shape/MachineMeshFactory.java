@@ -33,8 +33,8 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
         BASIC_BOX,
         SOLAR_CELL,
         SOLAR_CABLE,
-        EXTENSION_BUS,
-        INTERMEDIATE_BUS
+        BOTTOM_BUS,
+        MIDDLE_BUS
     }
     
     private static final ShapeMeshGenerator[] HANDLERS;
@@ -53,11 +53,11 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
         
         HANDLERS = new ShapeMeshGenerator[MachineShape.values().length];
         
-        HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory();
+        HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory(true);
         HANDLERS[MachineShape.SOLAR_CELL.ordinal()] = new SolarCellMeshFactory();
-        HANDLERS[MachineShape.SOLAR_CABLE.ordinal()] = new CableMeshFactory(1.0/16.0);
-        HANDLERS[MachineShape.EXTENSION_BUS.ordinal()] = new CableMeshFactory(1.0/4.0);
-        HANDLERS[MachineShape.INTERMEDIATE_BUS.ordinal()] = new CableMeshFactory(14.0/16.0);
+        HANDLERS[MachineShape.SOLAR_CABLE.ordinal()] = new CableMeshFactory(1.0/16.0, true);
+        HANDLERS[MachineShape.BOTTOM_BUS.ordinal()] = new CableMeshFactory(1.0 / 5.0, false);
+        HANDLERS[MachineShape.MIDDLE_BUS.ordinal()] = new MachineCubeMeshFactory(false);
     }
     
     public static ShapeMeshGenerator getShapeMeshFactory()

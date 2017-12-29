@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.transport.endpoint.Port;
+import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
 import net.minecraft.util.EnumFacing;
 
@@ -26,13 +26,7 @@ public interface IDeviceBlock
      * Get ports on the given face.  Returns null if none.
      */
     @Nullable
-    public Iterable<PortState> getPorts(EnumFacing face);
-    
-    /**
-     * Get specific port instance on the given face.  Returns null if not present.
-     */
-    @Nullable
-    public PortState getPort(Port port, EnumFacing face);
+    public Iterable<PortState> getPorts(StorageType<?> storageType, EnumFacing face);
     
     /**
      * Called by device block manager immediately after this block is removed from the world.

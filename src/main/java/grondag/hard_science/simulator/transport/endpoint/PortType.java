@@ -3,29 +3,22 @@ package grondag.hard_science.simulator.transport.endpoint;
 public enum PortType
 {
     /**
-     * AKA "Passthough" port.<p>
-     * 
-     * Port is attached to an internal carrier within the device.
+     * Carrier port are attached to an internal carrier within the device.
      * Device might have other ports also attached to the same carrier.
-     * Carrier signal can pass through the device through mated, non-switched
-     * ports.<p>
+     * Carrier packets can pass through the device through other mated
+     * carrier ports of the same level.<p>
      * 
      * This is the base port type for most simple machines.
      * Allows machines to be placed adjacent and form a simple bus with
-     * a common carrier. <p>
-     * 
-     * This port type is also used for interconnects between bus/switch devices
-     * (including cables) of the same capacity. Such devices will typically not
-     * register transport nodes on the carrier because they aren't producer or
-     * consumer end points for transport services.<p>
+     * a common carrier circuit. <p>
      * 
      * All rules for carrier ports apply to the ports within the device
      * and to ports attached to the same carrier outside the device: 
      * Must be same carrier type, same channel, limited number of 
      * device blocks per carrier. (Except at top level.)<p>
      * 
-     * Can only mate with other carrier ports (of same level) or
-     * with an uplink port of the next highest level.
+     * Can mate with carrier ports and direct ports of same level or
+     * with a bridge port of the next highest level. 
      * 
      * When used to cross-connect top-level switches, these ports have no
      * channel (because top-level switches have no channels) and can only
@@ -37,31 +30,53 @@ public enum PortType
     CARRIER,
     
     /**
-     * AKA "Isolated" port.<p>
-     * 
-     * A direct port has no internal carrier and must mate with a carrier port
+     * A direct port has no internal carrier and must mate with a carrier port.
      * Direct ports are isolated from other ports on the same
-     * device and represents a "direct" attachment to that device. This port
-     * type is the only option for higher capacity ports on non-switch/non-bus devices.
-     * There would be no benefit to a base-capacity version of a direct port,
-     * and they cannot be used to form or extend a bus, so they are only used
-     * for machines that require high volume transport and thus need to be attached
-     * directly to higher volume carriers.<p>
+     * device and represents a "direct" attachment to that device.<p>
+     * 
+     * This port type is only used for machines that need high capacity I/O.<p>
+     * 
+     * Direct ports can only mate with carrier ports of the same level 
+     * (including same-level bridge ports in carrier mode) or with
+     * bridge ports of the next level up in active bridge mode. 
+     * They always rely on an external carrier, and cannot be used 
+     * to form a bus or circuit on their own.<p>
      */
     DIRECT,
     
     /**
-     * Bridge ports connect switches and intermediate busses 
-     * to a higher capacity switch or bus.
-     * These ports have two carriers: internal and external. 
-     * Bridge ports can only mate with carrier ports because
-     * bridge ports do not provide an external carrier.
-     * <p>
+     * Bridge ports are carrier ports that can also "bridge" to 
+     * carrier or direct ports of the next-lower capacity level. 
+     * The most flexible ports, they only occur on intermediate
+     * and top-tier connectivity devices.<p>
      * 
-     * The internal carrier is that of the owning device and
-     * is shared with other ports on the same switch/bus device. 
-     * The external carrier is that that of the mated port
-     * which must be a carrier port.
+     * When connected to Carrier ports of the same level,
+     * they behave identically to a Carrier port.
+     * 
+     * When connected to a Carrier port of the next level down, 
+     * bridge ports will join the circuit of the mated carrier
+     * port as its external circuit and can pass traffic to/from its
+     * device's internal circuit. <p>
+     * 
+     * When two bridge ports of the same level connect, they both
+     * behave like carrier ports.<p>
+     * 
+     * When two bridge ports with a one-level difference connect,
+     * the upper-level port acts as a bridge, and the lower-level
+     * port acts as a carrier port.<p>
+     * 
+     * When connected to a direct port of the same level, acts 
+     * like a carrier port.  If connected to a direct port one
+     * level lower, then provides a dedicated external circuit
+     * (at lower level) for the direct port.  This external 
+     * circuit is isolated from all other circuits and
+     * cannot have any channel conflict.<p>
+     * 
+     * Channel rules apply to bridge ports only when they are
+     * acting as carrier ports.  When acting as bridge ports, the 
+     * internal and external circuits are separate so no channel
+     * conflict is possible. 
      */
     BRIDGE;
+    
 }
