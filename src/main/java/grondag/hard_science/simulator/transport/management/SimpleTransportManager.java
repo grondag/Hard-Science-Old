@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.transport.management;
 
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
@@ -9,6 +11,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
 import grondag.hard_science.simulator.transport.routing.IItinerary;
+import grondag.hard_science.simulator.transport.routing.Leg;
 
 /**
  * Transport manager for single carrier
@@ -57,7 +60,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
         
         for(PortState port : blockMgr.getPorts(this.storageType, true))
         {
-            switch(port.port().portType)
+            switch(port.portMode())
             {
             case CARRIER:
             case DIRECT:
@@ -66,10 +69,16 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
                 // so can always use external circuit
                 this.circuits.addIfNotPresent(port.externalCircuit());
                 
-            case BRIDGE:
-                // bridge devices never enable transport
+            // bridge devices never enable transport
+            case BRIDGE_ACTIVE:
+            case BRIDGE_PASSIVE:
+            case DISCONNECTED:
+            case NO_CONNECTION_CHANNEL_MISMATCH:
+            case NO_CONNECTION_INCOMPATIBLE:
+            case NO_CONNECTION_LEVEL_GAP:
+            case NO_CONNECTION_STORAGE_TYPE:
                 break;
-                
+
             default:
                 assert false : "missing enum mapping";
                 break;
@@ -82,5 +91,20 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     public T storageType()
     {
         return this.storageType;
+    }
+
+    @Override
+    public ImmutableList<Leg> legs()
+    {
+        if(this.circuits.isEmpty()) return ImmutableList.of();
+        
+        if(this.circuits.size() == 1) return ConnectionManager.legs(this.circuits.get(0));
+        
+        ImmutableList.Builder<Leg> builder = ImmutableList.builder();
+        
+        this.circuits.forEach(c -> builder.addAll(ConnectionManager.legs(c)));
+        
+        return builder.build();
+        
     }
 }

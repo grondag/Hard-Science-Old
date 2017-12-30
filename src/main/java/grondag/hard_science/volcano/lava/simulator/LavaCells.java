@@ -474,7 +474,7 @@ public class LavaCells
                 i += LavaCell.LAVA_CELL_NBT_WIDTH - 2;
             }
          
-            // Prevent massive retention update from occurring during first world tick
+            // Prevent massive retention update from occurring during start world tick
             
             // Raw retention should be mostly current, but compute for any cells
             // that were awaiting computation at last world save.

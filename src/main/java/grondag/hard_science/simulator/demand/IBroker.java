@@ -49,8 +49,8 @@ public interface IBroker<V extends StorageType<V>>
     
     /**
      * Returns a collection of all requests registered with this broker
-     * that have open demands, ordered by priority (highest first)
-     * and seniority (earliest first).
+     * that have open demands, ordered by priority (highest start)
+     * and seniority (earliest start).
      */
     public Collection<IProcurementRequest<V>> openRequests();
     

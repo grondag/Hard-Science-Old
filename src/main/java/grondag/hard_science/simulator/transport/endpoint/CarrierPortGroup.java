@@ -194,7 +194,7 @@ public class CarrierPortGroup implements Iterable<PortState>
                 
                 // If internal carrier not already set up then 
                 // need to create it and attach.  Will happen only
-                // if the first port to connect connects in bridge mode.
+                // if the start port to connect connects in bridge mode.
                 // Any previous carrier-mode attachments will have
                 // established a carrier shared with another device.
                 if(internalCircuit == null)
@@ -276,7 +276,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         {
             assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
 
-            if(this.port().portType == PortType.CARRIER)
+            if(this.portMode() == PortMode.CARRIER)
             {
                 assert internalCircuit != null
                         : "Missing internal carrier on carrier port detach.";
@@ -295,7 +295,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         /**
          * This will be called multiple times for the same port group
          * if multiple ports are attached to the same carrier.  This is
-         * fine.  Will simply update internal carrier on first call and
+         * fine.  Will simply update internal carrier on start call and
          * ignore subsequent calls. <p>
          * 
          * {@inheritDoc}

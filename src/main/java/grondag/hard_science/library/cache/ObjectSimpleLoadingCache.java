@@ -97,7 +97,7 @@ public class ObjectSimpleLoadingCache<K, V> implements ISimpleLoadingCache
                 currentKey = localState.kv[position];
                 if(currentKey == null)
                 {
-                    //write value first in case another thread tries to read it based on key before we can write it
+                    //write value start in case another thread tries to read it based on key before we can write it
                     localState.kv[position + 1] = result;
                     localState.kv[position] = key;
                     break;

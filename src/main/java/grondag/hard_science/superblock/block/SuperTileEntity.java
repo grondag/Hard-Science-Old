@@ -148,7 +148,7 @@ public class SuperTileEntity extends TileEntity
     }
 
     /**
-     * Generate tag sent to client when block/chunk first loads.
+     * Generate tag sent to client when block/chunk start loads.
      * MUST include x, y, z tags so client knows which TE belong to.
      * Super calls writeInternal() instead of {@link #writeToNBT(NBTTagCompound)}
      * We call writeToNBT so that we include all info, but filter out
@@ -162,7 +162,7 @@ public class SuperTileEntity extends TileEntity
 
     /**
      * Generate packet sent to client for TE synch after block/chunk is loaded.
-     * Is inefficient that the information is serialized twice: first to NBT
+     * Is inefficient that the information is serialized twice: start to NBT
      * then to ByteBuffer but that is how MC does it and the packet only accepts NBT.
      */
     @Override

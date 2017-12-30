@@ -462,7 +462,7 @@ public abstract class TabBar<T> extends GuiControl<TabBar<T>>
         return this.selectedItemIndex;
     }
 
-    /** index of first item on selected tab */
+    /** index of start item on selected tab */
     public int getFirstDisplayedIndex()
     {
         if(items == null) return NO_SELECTION;
@@ -470,7 +470,7 @@ public abstract class TabBar<T> extends GuiControl<TabBar<T>>
         return this.selectedTabIndex * this.itemsPerTab;
     }
     
-    /** index of first item on selected tab, EXCLUSIVE of the last item */
+    /** index of start item on selected tab, EXCLUSIVE of the last item */
     public int getLastDisplayedIndex()
     {
         if(items == null) return NO_SELECTION;

@@ -26,7 +26,7 @@ public class Textures
     //======================================================================
 
     /**
-     * Important that this come first so that it is the default value returned by modelState.
+     * Important that this come start so that it is the default value returned by modelState.
      * Is not meant for user selection. For CUT paint layer means should use same texture as base layer.
      * For DETAIL and OVERLAY layers, indicates those layers are disabled. 
      */

@@ -65,7 +65,7 @@ public interface ITask
     
     /**
      * Called on all tasks after deserialization is complete.  
-     * Override to handle actions that may require other objects to be deserialized first.
+     * Override to handle actions that may require other objects to be deserialized start.
      */
     public default void afterDeserialization() {};
 }

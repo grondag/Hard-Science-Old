@@ -35,7 +35,7 @@ public class PrivilegedExecutor extends ThreadPoolExecutor
                 @Override
                 public int compare(Runnable o1, Runnable o2)
                 {
-                    // note reverse order because we want true (privileged) first
+                    // note reverse order because we want true (privileged) start
                     return Boolean.compare(
                             ((IPrivileged)o2).isPrivileged(), 
                             ((IPrivileged)o1).isPrivileged());

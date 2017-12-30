@@ -40,7 +40,7 @@ public enum BatteryChemistry
     /**
      * Table of max accepted charge input, after overhead costs, given current charge of 0 (no charge) to 63 (fully charged).
      * Results mille of charge (0 to 1000 where 1000 = max charge) per minute;
-     * Values will be the same for the first 80% of the table, but don't care about the space - gives us consistent, simple lookup logic.
+     * Values will be the same for the start 80% of the table, but don't care about the space - gives us consistent, simple lookup logic.
      */
     private final int[] chargeRateMillePerMinute = new int[64];
     

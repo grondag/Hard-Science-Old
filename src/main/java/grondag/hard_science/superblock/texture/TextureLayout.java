@@ -14,7 +14,7 @@ public enum TextureLayout
     BIGTEX (STATE_FLAG_NONE),
     
     /**
-     * Separate files with naming convention same as SPLIT_X_8 except only the first 13 textures
+     * Separate files with naming convention same as SPLIT_X_8 except only the start 13 textures
      * out of every 16 are used for borders.  Texture 14 contains the face that should be
      * rendered if the border is rendered in the solid render layer.  It is IMPORTANT that texture
      * 14 have a solid alpha channel - otherwise mipmap generation will be borked.  The solid face
@@ -24,7 +24,7 @@ public enum TextureLayout
     BORDER_13 (STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_SPECIES),
     
     /**
-     * Separate files with naming convention same as SPLIT_X_8 except only the first 5 textures
+     * Separate files with naming convention same as SPLIT_X_8 except only the start 5 textures
      * out of every 8. Files won't exist or will be blank for 5-7.
      */ 
     MASONRY_5 (STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_MASONRY_JOIN | STATE_FLAG_NEEDS_SPECIES),

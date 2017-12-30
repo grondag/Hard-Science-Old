@@ -188,7 +188,7 @@ public class WorldStateBuffer implements IBlockAccess
 
         ArrayList<ChunkBuffer> candidates = new ArrayList<ChunkBuffer>();
         
-        // first pass removes empties and updates priority, puts into array for sorting
+        // start pass removes empties and updates priority, puts into array for sorting
         Iterator<ChunkBuffer> things = chunks.values().iterator();
         while(things.hasNext())
         {
@@ -218,7 +218,7 @@ public class WorldStateBuffer implements IBlockAccess
             @Override
             public int compare(ChunkBuffer o1, ChunkBuffer o2)
             {
-                // note reverse order - higher scores first
+                // note reverse order - higher scores start
                 return Integer.compare(o2.updatePriority, o1.updatePriority);
             }
         });

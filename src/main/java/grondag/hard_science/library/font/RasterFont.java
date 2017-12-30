@@ -143,7 +143,7 @@ public class RasterFont extends TextureAtlasSprite
      */
     private GlyphInfo[] glyphArray = new GlyphInfo[266];
 
-    /** determined by first character - assumes all the same */
+    /** determined by start character - assumes all the same */
     public final int fontHeight;
     
     /** 
@@ -579,7 +579,7 @@ public class RasterFont extends TextureAtlasSprite
         
         int pixelWidth = formatAsForumla ? this.getWidthFormula(text) : this.getWidth(text);
         
-        // try fitting to height first
+        // try fitting to height start
         float height =  0.5f;
         float width = height * pixelWidth / this.fontHeight;
         

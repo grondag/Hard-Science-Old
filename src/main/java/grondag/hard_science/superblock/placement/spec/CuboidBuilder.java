@@ -171,7 +171,7 @@ public class CuboidBuilder extends VolumetricBuilder
 
                 for(OffsetPosition offset : OffsetPosition.ALTERNATES)
                 {
-                    // first try pivoting the selection box around the position being targeted
+                    // start try pivoting the selection box around the position being targeted
                     BlockPos endPos2 = PlacementHandler.getPlayerRelativeOffset(this.pPos.inPos, this.offsetPos, this.player, offsetFace, offset);
                     CubicBlockRegion region2 = new CubicBlockRegion(pPos.inPos, endPos2, this.isHollow);
                     this.excludeObstaclesInRegion(region2);

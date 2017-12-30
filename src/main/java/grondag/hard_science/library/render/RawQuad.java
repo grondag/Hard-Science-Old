@@ -405,7 +405,7 @@ public class RawQuad
 
     /**
      * Same as {@link #setupFaceQuad(FaceVertex, FaceVertex, FaceVertex, FaceVertex, EnumFacing)}
-     * except also sets nominal face to the given face in the first parameter. 
+     * except also sets nominal face to the given face in the start parameter. 
      * Returns self for convenience.
      */
     public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
@@ -440,7 +440,7 @@ public class RawQuad
 
     /**
      * Same as {@link #setupFaceQuad(double, double, double, double, double, EnumFacing)}
-     * but also sets nominal face with given face in first parameter.  
+     * but also sets nominal face with given face in start parameter.  
      * Returns self as convenience.
      */
     public RawQuad setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
@@ -713,7 +713,7 @@ public class RawQuad
      * 
      * For each side, find a vector in the plane of the 
      * polygon orthogonal to the line formed by the two vertices of the edge.
-     * Then take the dot product with vector formed by the first vertex and the point.
+     * Then take the dot product with vector formed by the start vertex and the point.
      * If the point is inside the polygon, the sign should be the same for all
      * edges, or the dot product should be very small, meaning the point is on the edge.
      */

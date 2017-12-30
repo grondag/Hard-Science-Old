@@ -82,7 +82,7 @@ public abstract class ProcurementTask<V extends StorageType<V>> extends Abstract
         
         if(this.producers == null)
         {
-            // first producer, use a single entry object
+            // start producer, use a single entry object
             if(wip > 0)
             {
                 this.producers = new AbstractObject2LongMap.BasicEntry<IProducer<V>>(producer, wip);

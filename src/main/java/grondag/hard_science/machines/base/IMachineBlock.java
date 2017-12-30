@@ -10,6 +10,7 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.Privilege;
+import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -149,16 +150,25 @@ public interface IMachineBlock
         probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 
                 machine.getDomain() == null ? I18n.translateToLocal("misc.unassigned") : machine.getDomain().getName()));
         
-        if(machine.blockManager().itemCircuit() != null)
+        
+        if(machine.hasTransportManager(StorageType.ITEM))
         {
-            probeInfo.text(I18n.translateToLocalFormatted("probe.machine.item_transport", 
-                    machine.blockManager().itemCircuit().carrierAddress()));
+            if(machine.blockManager().itemCircuit() != null)
+            {
+                probeInfo.text(I18n.translateToLocalFormatted("probe.machine.item_transport", 
+                        machine.blockManager().itemCircuit().carrierAddress()));
+            }
+            probeInfo.text("Item Legs: " + machine.tranportManager(StorageType.ITEM).legs().toString()); 
         }
         
-        if(machine.blockManager().powerCircuit() != null)
+        if(machine.hasTransportManager(StorageType.POWER))
         {
-            probeInfo.text(I18n.translateToLocalFormatted("probe.machine.power_transport", 
-                    machine.blockManager().powerCircuit().carrierAddress()));
+            if(machine.blockManager().powerCircuit() != null)
+            {
+                probeInfo.text(I18n.translateToLocalFormatted("probe.machine.power_transport", 
+                        machine.blockManager().powerCircuit().carrierAddress()));
+            }
+            probeInfo.text("Power Legs: " + machine.tranportManager(StorageType.POWER).legs().toString());
         }
     }
 }

@@ -1,10 +1,13 @@
 package grondag.hard_science.simulator.transport.management;
 
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.routing.IItinerary;
+import grondag.hard_science.simulator.transport.routing.Leg;
 
 /**
  *  Contains and manages the transport components of a device. 
@@ -41,4 +44,11 @@ public interface ITransportManager<T extends StorageType<T>> extends IDeviceComp
      * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
     public void refreshTransport();
+    
+    /**
+     * All legs accessible from circuits on which this device is connected.
+     * @return
+     */
+    public ImmutableList<Leg> legs();
+    
 }

@@ -77,7 +77,7 @@ public class Panel extends GuiControl<Panel>
         double variableSpace = (this.isVertical ? this.height : this.width) - this.outerMarginWidth * 2;
         double fixedSpace = (this.isVertical ? this.width : this.height) - this.outerMarginWidth * 2;
         
-        // on first pass, gather the size/weights for the expanding dimension
+        // on start pass, gather the size/weights for the expanding dimension
         for(GuiControl<?> control : this.children)
         {
             if(this.isVertical)

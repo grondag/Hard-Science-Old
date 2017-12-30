@@ -388,7 +388,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
      * Simulator is lazily loaded because needs world to be loaded
      * but is also referenced by tile entities during chunk load.
      * No forge event that lets us load after worlds loaded but
-     * before chunk loading, so using first reference as the trigger.
+     * before chunk loading, so using start reference as the trigger.
      */
     public static void loadSimulatorIfNotLoaded()
     {

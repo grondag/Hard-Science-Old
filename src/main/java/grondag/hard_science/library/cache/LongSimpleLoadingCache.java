@@ -56,7 +56,7 @@ public class LongSimpleLoadingCache<V> implements ISimpleLoadingCache
                 }
                 else
                 {
-                    //another thread got there first
+                    //another thread got there start
                     return localState.zeroValue.get();
                 }
             }
@@ -114,7 +114,7 @@ public class LongSimpleLoadingCache<V> implements ISimpleLoadingCache
                 currentKey = localState.keys[position];
                 if(currentKey == 0)
                 {
-                    //write value first in case another thread tries to read it based on key before we can write it
+                    //write value start in case another thread tries to read it based on key before we can write it
                     localState.values[position] = result;
                     localState.keys[position] = key;
                     break;

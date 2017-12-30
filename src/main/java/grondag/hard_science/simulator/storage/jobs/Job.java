@@ -387,7 +387,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
 
     /**
      * Called after all domain deserialization is complete.  
-     * Hook for tasks to handle actions that may require other objects to be deserialized first.
+     * Hook for tasks to handle actions that may require other objects to be deserialized start.
      */
     public void afterDeserialization()
     {
@@ -428,7 +428,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
 
     /**
      * Called by contained tasks when they have a status change.
-     * Should NOT be called when task is first initialized.
+     * Should NOT be called when task is start initialized.
      */
     public void notifyTaskStatusChange(AbstractTask abstractTask, RequestStatus priorStatus)
     {

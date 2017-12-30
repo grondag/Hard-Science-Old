@@ -22,7 +22,7 @@ public class LavaConnection
     
     protected static int nextConnectionID = 0;
     
-    /** by convention, first cell will have the lower-valued id */
+    /** by convention, start cell will have the lower-valued id */
     public final LavaCell firstCell;
     
     /** by convention, second cell will have the higher-valued id */
@@ -55,8 +55,8 @@ public class LavaConnection
     /**
      * True if flow occurred during the last step.
      * Maintained by {@link #doStepWork()}.
-     * Connection will skip processing after first step if false.
-     * Ignored during first step.
+     * Connection will skip processing after start step if false.
+     * Ignored during start step.
      */
     private boolean flowedLastStep = false;
     
@@ -159,7 +159,7 @@ public class LavaConnection
     
     /**
      * Determine if connection can flow, and if so, in which direction.
-     * If flowed last tick, then direction cannot reverse - must first go to none and then to opposite direction.
+     * If flowed last tick, then direction cannot reverse - must start go to none and then to opposite direction.
      */
     public void setupTick()
     {
@@ -563,7 +563,7 @@ public class LavaConnection
                     }
                     else
                     {
-                        //undo first change if second isn't successful
+                        //undo start change if second isn't successful
                         cellFrom.changeFluidUnits(flow);
                         return false;
                     }

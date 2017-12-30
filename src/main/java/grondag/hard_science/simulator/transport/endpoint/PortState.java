@@ -75,8 +75,8 @@ public abstract class PortState implements IDeviceComponent
      * Direct ports and the external part of bridge ports always 
      * use the carrier channel of the external carrier attached.<p> 
      * 
-     * Same is true for top-level carriers/ports (channel is zero/ignored)
-     * because top-level carriers do not have channels<p>
+     * Same is true for top-level parents/ports (channel is zero/ignored)
+     * because top-level parents do not have channels<p>
      */
     public int getConfiguredChannel() { return 0; }
 
@@ -148,11 +148,7 @@ public abstract class PortState implements IDeviceComponent
         if(externalCircuit.attach(this, false))
         {
             this.mate = mate;
-            if(this.mode.isBridge())
-            {
-                ConnectionManager.addCircuitBridge(this, this.internalCircuit(), this.externalCircuit);
-            }
-            else
+            if(!this.mode.isBridge())
             {
                 this.device().refreshTransport(this.port.storageType);
             }
@@ -190,11 +186,7 @@ public abstract class PortState implements IDeviceComponent
         this.externalCircuit.detach(this);
         this.externalCircuit = null;
         this.mate = null;
-        if(this.mode.isBridge())
-        {
-            ConnectionManager.removeCircuitBridge(this);
-        }
-        else
+        if(!this.mode.isBridge())
         {
             this.device().refreshTransport(this.port.storageType);
         }
@@ -304,6 +296,6 @@ public abstract class PortState implements IDeviceComponent
     
     public PortMode portMode()
     {
-        return this.portMode();
+        return this.mode;
     }
 }

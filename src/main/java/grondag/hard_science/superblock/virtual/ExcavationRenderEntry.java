@@ -279,7 +279,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         
         IntegerAABB newBox = new IntegerAABB(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
         
-        // always send first time computed
+        // always send start time computed
         boolean needsListenerUpdate = !this.isFirstComputeDone;
         this.isFirstComputeDone = true;
         

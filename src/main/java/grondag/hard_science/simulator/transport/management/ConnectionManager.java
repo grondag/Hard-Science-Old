@@ -14,19 +14,23 @@ import static grondag.hard_science.simulator.transport.management.ConnectionResu
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.concurrency.PrivilegedExecutor;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.endpoint.Port;
+import grondag.hard_science.simulator.transport.endpoint.PortMode;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
+import grondag.hard_science.simulator.transport.routing.Leg;
 
 public class ConnectionManager
 {
@@ -112,26 +116,30 @@ public class ConnectionManager
     private static void connectPorts(PortState first, PortState second, ConnectionResult result)
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("ConnectionManager.connectCarrierPorts: start (using carrier port connection logic)");
+            Log.info("ConnectionManager.connectPorts: start");
 
         // now have to decide which circuit to use, or create a new circuit
         // if neither port already has one
-        CarrierCircuit firstCircuit = first.internalCircuit();
-        CarrierCircuit secondCircuit = second.internalCircuit();
+        // We reference the internal circuit for ports in carrier mode because
+        // external must be the same as internal for carrier ports, but external
+        // carrier value may not yet be set. For all port modes, the external
+        // carrier is separate from internal, and is what the port will connect with.
+        CarrierCircuit firstCircuit = result.left == PortMode.CARRIER ? first.internalCircuit() : first.externalCircuit();
+        CarrierCircuit secondCircuit = result.right == PortMode.CARRIER ? second.internalCircuit() : second.externalCircuit();
         if(firstCircuit == null)
         {
             CarrierCircuit newCircuit;
             if(secondCircuit == null)
             {
                 if(Configurator.logTransportNetwork) 
-                    Log.info("ConnectionManager.connectCarrierPorts: Neither port has circuit - creating new circuit");
+                    Log.info("ConnectionManager.connectPorts: Neither port has circuit - creating new circuit");
 
-                newCircuit = new CarrierCircuit(first.port().internalCarrier, first.getConfiguredChannel());
+                newCircuit = new CarrierCircuit(first.port().externalCarrier(result.left), first.getConfiguredChannel());
             }
             else
             {
                 if(Configurator.logTransportNetwork) 
-                    Log.info("ConnectionManager.connectCarrierPorts: First port has null circuit - using circuit from second port");
+                    Log.info("ConnectionManager.connectPorts: First port has null circuit - using circuit from second port");
 
                 newCircuit = secondCircuit;
             }
@@ -141,7 +149,7 @@ public class ConnectionManager
         else if(secondCircuit == null || secondCircuit == firstCircuit)
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("ConnectionManager.connectCarrierPorts: Second port has null circuit - using circuit from first port");
+                Log.info("ConnectionManager.connectCarrierPorts: Second port has null circuit - using circuit from start port");
 
             attachBothPorts(first, second, firstCircuit, result);
         }
@@ -152,7 +160,7 @@ public class ConnectionManager
                 if(result.allowMerge)
                 {
                     if(Configurator.logTransportNetwork) 
-                        Log.info("ConnectionManager.connectCarrierPorts: Ports have different circuits. Keeping first port circuit & merging second port circuit into first");
+                        Log.info("ConnectionManager.connectCarrierPorts: Ports have different circuits. Keeping start port circuit & merging second port circuit into start");
     
                     secondCircuit.mergeInto(firstCircuit);
                     if(!attachBothPorts(first, second, firstCircuit, result))
@@ -169,7 +177,7 @@ public class ConnectionManager
                 if(result.allowMerge)
                 {
                     if(Configurator.logTransportNetwork) 
-                        Log.info("ConnectionManager.connectCarrierPorts: Ports have different circuits. Keeping second port circuit & merging first port circuit into second");
+                        Log.info("ConnectionManager.connectCarrierPorts: Ports have different circuits. Keeping second port circuit & merging start port circuit into second");
                     
                     firstCircuit.mergeInto(secondCircuit);
                     if(!attachBothPorts(first, second, secondCircuit, result))
@@ -232,7 +240,7 @@ public class ConnectionManager
 
 
                 // split isn't possible unless both ports are carrier ports
-                if(leaving.port().portType == PortType.CARRIER && mate.port().portType == PortType.CARRIER)
+                if(leaving.portMode() == PortMode.CARRIER && mate.portMode() == PortMode.CARRIER)
                 {
                     if(Configurator.logTransportNetwork) 
                         Log.info("ConnectionManager.disconnect: Checking for possible split");
@@ -309,7 +317,7 @@ public class ConnectionManager
      */
     private static HashSet<PortState> findNavigableCarrierPorts(PortState startingFrom, @Nullable PortState stopAt)
     {
-        assert startingFrom.port().portType == PortType.CARRIER
+        assert startingFrom.portMode() == PortMode.CARRIER
                 : "transport topology search with non-carrier starting port";
 
         CarrierCircuit onCircuit = startingFrom.internalCircuit();
@@ -367,18 +375,6 @@ public class ConnectionManager
         return results;
     }
 
-    public static void addCircuitBridge(PortState port, CarrierCircuit circuit1, CarrierCircuit circuit2)
-    {
-        //TODO
-    }
-
-    public static void removeCircuitBridge(PortState port)
-    {
-        //TODO
-    }
-
-
-
     /**
      * Convenient version of {@link #connectionResult(Port, int, Port, int)}
      */
@@ -431,9 +427,9 @@ public class ConnectionManager
             {
                 if(port1.level == port2.level)
                 {
-                    // Two carriers of same level and storage type, so just 
+                    // Two parents of same level and storage type, so just 
                     // need to check for channel match.  Top level
-                    // carriers ignore channel.
+                    // parents ignore channel.
                     return port1.level.isTop() || channelMatch
                             ? CARRIER_CARRIER
                                     : FAIL_CHANNEL_MISMATCH;
@@ -446,7 +442,7 @@ public class ConnectionManager
             {
                 if(port1.level == port2.level)
                 {
-                    // direct ports can only join with carriers at same level
+                    // direct ports can only join with parents at same level
                     return swapOrder ? DIRECT_CARRIER : CARRIER_DIRECT; 
                 }
                 else
@@ -562,5 +558,35 @@ public class ConnectionManager
             assert false : "Port.connectionResult(): Unhandled PortType enum";
         return FAIL_INCOMPATIBLE;
         }
+    }
+    
+    public static ImmutableList<Leg> legs(CarrierCircuit startingWith)
+    {
+        ImmutableList.Builder<Leg> builder = ImmutableList.builder();
+        Leg firstLeg = Leg.create(startingWith);
+        builder.add(firstLeg);
+        if(!firstLeg.end().parents().isEmpty())
+        {
+            LinkedList<Leg> workList = new LinkedList<Leg>();
+            workList.add(firstLeg);
+            while(!workList.isEmpty())
+            {
+                Leg workLeg = workList.poll();
+                for(CarrierCircuit c : workLeg.end().parents())
+                {
+                    // don't extend legs with circuits we can directly access
+                    // but can't appy this check to the starting node
+                    // because then we wouldn't get the first tier of legs
+                    if(workLeg != firstLeg && startingWith.parents().contains(c)) continue;
+                    
+                    Leg newLeg = workLeg.append(c);
+                    builder.add(newLeg);
+                    if(!newLeg.end().parents().isEmpty()) workList.add(newLeg);
+                }
+            }
+            
+        }
+        
+        return builder.build();
     }
 }

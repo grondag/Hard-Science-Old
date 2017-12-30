@@ -59,7 +59,7 @@ public class LongAtomicLoadingCache<V> implements ISimpleLoadingCache
                 }
                 else
                 {
-                    //another thread got there first
+                    //another thread got there start
                     return localState.zeroValue.get();
                 }
             }

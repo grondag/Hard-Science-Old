@@ -162,7 +162,7 @@ public class Useful
 
     /** 
      * Returns a list of packed block position x & z OFFSETS within the given radius.
-     * Origin will be the first position.
+     * Origin will be the start position.
      */
     public static TLongList fill2dCircleInPlaneXZ(int radius) 
     {
@@ -261,7 +261,7 @@ public class Useful
 
     /** 
      * Returns a list of points on the line between the two given points, inclusive.
-     * Points start at first position given.
+     * Points start at start position given.
      * Hat tip to https://github.com/fragkakis/bresenham.
      */
     public static TLongList line2dInPlaneXZ(long packedPos1, long packedPos2) 
@@ -475,7 +475,7 @@ public class Useful
     }
 
     /**
-     * Returns first given default value if given ordinal is out of range.
+     * Returns start given default value if given ordinal is out of range.
      */
     @SuppressWarnings("unchecked")
     public static <T extends Enum<?>> T safeEnumFromOrdinal(int ord, T defaultValue)
@@ -488,7 +488,7 @@ public class Useful
     }
 
     /**
-     * Returns first given default value if ordinal is out of range or not present.
+     * Returns start given default value if ordinal is out of range or not present.
      */
     public static <T extends Enum<?>> T safeEnumFromTag(NBTTagCompound tag, String tagName, T defaultValue)
     {

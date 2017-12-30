@@ -80,7 +80,7 @@ public abstract class AbstractLavaCell
     /** floor as units instead of block levels */
     public int floorUnits() { return this.floorUnits; }
 
-    /** Y of first (lowest) block that could contain lava */
+    /** Y of start (lowest) block that could contain lava */
     public int floorY() { return this.floorY; }
 
     /** Flow height of solid portion of block at {@link #floorY()}
@@ -163,7 +163,7 @@ public abstract class AbstractLavaCell
     {
         // examples of input -> output
         // 24 -> 1  top level of block at Y = 1
-        // 25 -> 2  first level of block at Y = 2
+        // 25 -> 2  start level of block at Y = 2
         return (ceilingLevelIn - 1) / LavaSimulator.LEVELS_PER_BLOCK;
     }
     

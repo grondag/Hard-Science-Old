@@ -262,6 +262,7 @@ public abstract class AbstractMachine extends AbstractDevice
     /**
      * Will be called after machine power and material buffers are updated (if applies).
      * Will be called irrespective of power or on/off, so check those if needed.
+     * Always called from server thread.
      * @param tick  current world tick, in case needed
      */
     protected void updateMachine(long tick){}

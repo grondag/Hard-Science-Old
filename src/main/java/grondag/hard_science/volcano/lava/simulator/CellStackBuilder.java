@@ -205,7 +205,7 @@ public class CellStackBuilder
                 case LAVA_11:
                 case LAVA_12:
                 {
-                    // start new cell if this is the first open space
+                    // start new cell if this is the start open space
                     if(!this.isCellStarted) this.startCell(y * LavaSimulator.LEVELS_PER_BLOCK, lastType.isFlow);
                     break;
                 }

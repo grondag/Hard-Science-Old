@@ -155,7 +155,7 @@ public class CompressedAnimatedSprite extends EnhancedSprite
             {
                 ResourceLocation frameLoc = new ResourceLocation(location.getResourceDomain(), baseName.concat("_" + frameIndex + ".jpg"));
 
-                // confirm first frame loads
+                // confirm start frame loads
                 if(frameIndex == 0)
                 {
                     ImageReader reader = jpeg.createReaderInstance();
@@ -176,7 +176,7 @@ public class CompressedAnimatedSprite extends EnhancedSprite
                 IResource frameResouce = manager.getResource(frameLoc);
                 runner.submit(new FrameReader(frameResouce, frameIndex++));
                 
-                // only load the first texture if animation is disabled
+                // only load the start texture if animation is disabled
                 if(frameIndex == 1 && !Configurator.RENDER.enableAnimatedTextures)
                 {
                     keepGoing = false;
@@ -407,7 +407,7 @@ public class CompressedAnimatedSprite extends EnhancedSprite
     
     public static void reportMemoryUsage()
     {
-        //don't output on first pass when we are empty
+        //don't output on start pass when we are empty
         if(Configurator.RENDER.enableAnimatedTextures)
         {
             if(vanillaBytes != 0)

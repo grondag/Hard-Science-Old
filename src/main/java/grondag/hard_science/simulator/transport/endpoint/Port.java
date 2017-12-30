@@ -29,10 +29,11 @@ public class Port extends IForgeRegistryEntry.Impl<Port>
     
     /**
      * The carrier type offers to or expected of potential mate ports.
-     * Will be same as internalCarrier for Carrier ports.
+     * Will be same as internalCarrier for Carrier ports. For bridge
+     * ports will be one level lower than internal.
      */
     @Nonnull
-    public final Carrier externalCarrier;
+    private final Carrier externalCarrier;
     
     private final String label;
     
@@ -71,4 +72,17 @@ public class Port extends IForgeRegistryEntry.Impl<Port>
         return this.label;
     }
     
+    /**
+     * The carrier type offers to or expected of potential mate ports.
+     * For bridge ports in bridge mode will be one level lower than internal.
+     * Will be same as internalCarrier for Carrier ports and for bridge
+     * ports operating in carrier mode.
+     */
+    @Nonnull
+    public Carrier externalCarrier(PortMode mode)
+    {
+        return mode == PortMode.CARRIER
+                ? this.internalCarrier
+                : this.externalCarrier;
+    }
 }

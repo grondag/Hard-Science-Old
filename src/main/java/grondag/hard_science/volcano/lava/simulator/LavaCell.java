@@ -39,9 +39,9 @@ public class LavaCell extends AbstractLavaCell
     
     /** 
      * Object held in common by all cells at our x, z coordinate.
-     * Used to locate the first cell in the list as a synchronization object
+     * Used to locate the start cell in the list as a synchronization object
      * for all operations potentially affecting more than one cell at x, z.
-     * The first cell in this x, z column will create this instance. 
+     * The start cell in this x, z column will create this instance. 
      * All subsequent additions to the column must obtain the same instance.
      */
     volatile CellLocator locator;
@@ -103,7 +103,7 @@ public class LavaCell extends AbstractLavaCell
     /** 
      * Depth of fluid will not drop below this - to emulate surface tension/viscosity.
      * Initialized to -1 to indicate has not yet been set or if needs to be recalculated.
-     * Computed during first update after cell is first created.  Does not change until cell solidifies or bottom drops out.
+     * Computed during start update after cell is start created.  Does not change until cell solidifies or bottom drops out.
      * The raw value is persisted because it should not change as neighbors change.
      */
     private int rawRetainedUnits = RETENTION_NEEDS_UPDATE;
@@ -416,7 +416,7 @@ public class LavaCell extends AbstractLavaCell
     protected void readNBTArray(int[] saveData, int i)
     {
         // see writeNBT to understand how data are persisted
-        // assumes first two positions (x and z) have already been read.
+        // assumes start two positions (x and z) have already been read.
         
         int word = saveData[i++];
         int fluidUnits = word & FLUID_UNITS_MASK;
@@ -861,7 +861,7 @@ public class LavaCell extends AbstractLavaCell
         }
         
         // If space is not related to this cell, try again with the cell that is closest
-        // We don't check this first because validation routine will try to position us
+        // We don't check this start because validation routine will try to position us
         // to the closest cell most of the time before calling, and thus will usually not be necessary.
         LavaCell closest = this.findCellNearestY(y);
         if(closest != this) return closest.addOrConfirmSpace(y, floorHeight, isFlowFloor);
@@ -1349,7 +1349,7 @@ public class LavaCell extends AbstractLavaCell
                 public int compare(LavaConnection o1, LavaConnection o2)
                 {
                     return ComparisonChain.start()
-                            // larger drops first
+                            // larger drops start
                             .compare(o2.getSortDrop(), o1.getSortDrop())
                             // random breaks ties
                             .compare(o1.rand, o2.rand)
@@ -1360,7 +1360,7 @@ public class LavaCell extends AbstractLavaCell
             for(int i = 0; i < sort.size(); i++)
             {
                 // Don't think it is even possible for a cell to have more than four neighbors with a lower or same floor, but in case I'm wrong...
-                // For cells with more than four outbound connections, all connections beyond the first four get dropped in the last bucket.
+                // For cells with more than four outbound connections, all connections beyond the start four get dropped in the last bucket.
                 sort.get(i).setSortBucket(connections, i < 4 ? SortBucket.values()[i] : SortBucket.D);
             }
         }
@@ -1986,7 +1986,7 @@ public class LavaCell extends AbstractLavaCell
 
         public void setValidationNeeded(boolean isNeeded)
         {
-            // when first marked for validation, increment validation request count with cell chunk
+            // when start marked for validation, increment validation request count with cell chunk
             if(isNeeded & !this.isValidationNeeded) this.cellChunk.incrementValidationCount();
             
             this.isValidationNeeded = isNeeded;

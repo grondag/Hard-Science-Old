@@ -236,7 +236,7 @@ public abstract class ShapeMeshGenerator
      *
      * 
      * With a model in the default state, the rotation occurs
-     * first - around the Y-orthogonalAxis, followed by the transformation
+     * start - around the Y-orthogonalAxis, followed by the transformation
      * from the Y orthogonalAxis/orientation to whatever new orthogonalAxis/orientation is 
      * given. <br><br>
      * 

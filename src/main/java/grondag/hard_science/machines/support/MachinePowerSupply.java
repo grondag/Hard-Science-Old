@@ -100,7 +100,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
     }
    
     /**
-     * Tries to draw power from grid first (if available), then from fuel cell, then from battery.
+     * Tries to draw power from grid start (if available), then from fuel cell, then from battery.
      * Will combine output from multiple sources if necessary.
      */
     @Override
@@ -111,7 +111,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
         
         long result = 0;
         
-        // if not accepting partial fulfillment, have to simulate all results first
+        // if not accepting partial fulfillment, have to simulate all results start
         if(!allowPartial)
         {
             result = provideEnergyInner(machine, maxOutput, true);
@@ -187,7 +187,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
 //            return;
 //        }
 //  
-//        // sign on first long word is used to store failure indicator
+//        // sign on start long word is used to store failure indicator
 //        this.isFailureCause = (Useful.INT_SIGN_BIT & bits[0]) == Useful.INT_SIGN_BIT;
 //
 //        this.storedEnergyJoules = ((long)(Useful.INT_SIGN_BIT_INVERSE & bits[0])) << 32 | (bits[1] & 0xffffffffL);
@@ -208,7 +208,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
 //    {
 //        int[] result = new int[6];
 //
-//        // sign on first long word is used to store failure indicator
+//        // sign on start long word is used to store failure indicator
 //        result[0] = (int) (this.isFailureCause ? this.storedEnergyJoules >> 32 | Useful.INT_SIGN_BIT : this.storedEnergyJoules >> 32);
 //        result[1] = (int) (this.storedEnergyJoules);
 //

@@ -150,7 +150,7 @@ public class StorageResourceManager<T extends StorageType<T>>
         
         if(this.allocations == null)
         {
-            // first allocation is stored as a Pair
+            // start allocation is stored as a Pair
             if(requestedAllocation > 0)
             {
                 this.allocations = Pair.of(request, requestedAllocation);

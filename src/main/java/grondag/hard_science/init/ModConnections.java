@@ -118,20 +118,20 @@
 //
 //    }
 //
-//    public static void registerConnectionPairing(@Nonnull Connector first, @Nonnull Connector second, @Nonnull Connection result)
+//    public static void registerConnectionPairing(@Nonnull Connector start, @Nonnull Connector second, @Nonnull Connection result)
 //    {
-//        connectionMap.put(getKeyForPairing(first, second), result);
+//        connectionMap.put(getKeyForPairing(start, second), result);
 //    }
 //    
 //    @Nullable
-//    public static Connection getConnectionPairing(@Nonnull Connector first, @Nonnull Connector second)
+//    public static Connection getConnectionPairing(@Nonnull Connector start, @Nonnull Connector second)
 //    {
-//        return connectionMap.get(getKeyForPairing(first, second));
+//        return connectionMap.get(getKeyForPairing(start, second));
 //    }
 //    
-//    private static int getKeyForPairing(@Nonnull Connector first, @Nonnull Connector second)
+//    private static int getKeyForPairing(@Nonnull Connector start, @Nonnull Connector second)
 //    {
-//        int id1 = ModRegistries.connectorRegistry.getID(first);
+//        int id1 = ModRegistries.connectorRegistry.getID(start);
 //        int id2 = ModRegistries.connectorRegistry.getID(second);
 //        return id1 < id2 ? id2 << 16 | id1 : id1 << 16 | id2;
 //    }

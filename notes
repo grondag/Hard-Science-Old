@@ -1,3 +1,8 @@
+TRANSPORT NOTES
+	Handle circuit bridge tracking in attach/detach and merge/split/move operations
+	Also consider tracking bridge ports in a separate list. 
+	Assert this list is always empty for top level carriers.
+
 Virtual Blocks
 
 PlacementSpec - list of placements to be applied to the world,

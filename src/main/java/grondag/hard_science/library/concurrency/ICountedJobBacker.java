@@ -4,7 +4,7 @@ public interface ICountedJobBacker
 {
     /** 
      * Returns an array where the contiguous non-null elements 
-     * from 0 until the first null elements should be processed
+     * from 0 until the start null elements should be processed
      * by the job.
      */
     public abstract Object[] getOperands();

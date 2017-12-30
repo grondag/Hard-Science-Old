@@ -1,16 +1,17 @@
 package grondag.hard_science.simulator.transport.carrier;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+
+import com.google.common.collect.ImmutableSet;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.transport.StoragePacket;
+import grondag.hard_science.simulator.transport.endpoint.PortMode;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.ConnectionManager;
 
 /**
@@ -40,7 +41,7 @@ public class CarrierCircuit
     
     public final int channel;
 
-    private final HashSet<PortState> ports = new HashSet<PortState>();
+    private final PortTracker ports;
     
     private static final AtomicInteger nextAddress = new AtomicInteger(1);
     
@@ -63,6 +64,7 @@ public class CarrierCircuit
     {
         this.carrier = carrier;
         this.channel = channel;
+        this.ports = new PortTracker(this);
     }
     
     /**
@@ -82,6 +84,9 @@ public class CarrierCircuit
      * Note this does NOT set the carrier circuit on the port. 
      * Simply registers the port with this carrier if
      * it is compatible and returns true if so.<p>
+     * 
+     * Mode should be set on port before this is called so
+     * can detect bridges or handle other mode-specific behavior<p>
      * 
      * @param portInstance port to add
      * @param isInternal if true, will check for compatibility with internal side
@@ -104,21 +109,24 @@ public class CarrierCircuit
             : "Carrier attach request from existing port on carrier.";
         
         // note this check covers both storage type and level
-        
-        Carrier portCarrier = isInternal ? portInstance.port().internalCarrier
-                : portInstance.port().externalCarrier;
+        // check for mode is because bridge ports have a lower-tier
+        // external carrier but they use their internal carrier as the
+        // when operating in bridge mode
+        Carrier portCarrier = isInternal 
+                ? portInstance.port().internalCarrier
+                : portInstance.port().externalCarrier(portInstance.portMode());
         
         if(portCarrier != this.carrier)
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("CarrierCircuit.attach: abandoning attempt due to mismatched carriers.");
+                Log.info("CarrierCircuit.attach: abandoning attempt due to mismatched parents.");
             return false;
         }
         
         if(!this.carrier.level.isTop())
         {
-            if(portInstance.port().portType == PortType.CARRIER
-                    || (isInternal && portInstance.port().portType == PortType.BRIDGE))
+            if(portInstance.portMode() == PortMode.CARRIER
+                    || (isInternal && portInstance.portMode().isBridge()))
             {
                 // channel must match for non-top carrier ports 
                 // and the internal side of bridge ports
@@ -134,42 +142,8 @@ public class CarrierCircuit
         
         this.ports.add(portInstance);
         
-//        this.addPortToNode(portInstance);
-        
-        
         return true;
     }
-
-//    /**
-//     * If already a transport node on this carrier for the port's device,
-//     * adds the port to that node. Otherwise, creates a new node for
-//     * the port's device with given port as the first port.<p>
-//     * 
-//     * Does nothing if the port's device has no transport manager.
-//     */
-//    private void addPortToNode(PortState portInstance)
-//    {
-//      IDevice device = portInstance.device();
-//        
-//        if(device.hasTransportManager(portInstance.port().storageType))
-//        {
-//            TransportNode node = this.nodesByDeviceID.get(device.getId());
-//            if(node == null)
-//            {
-//                node = new TransportNode(portInstance);
-//                if(Configurator.logTransportNetwork) 
-//                    Log.info("CarrierCircuit.addPortToNode: created new transport node %d.", node.nodeAddress());
-//                this.nodesByDeviceID.put(device.getId(), node);
-//                device.addTransportNode(node);
-//            }
-//            else
-//            {
-//                if(Configurator.logTransportNetwork) 
-//                    Log.info("CarrierCircuit.addPortToNode: adding port to transport node %d.", node.nodeAddress());
-//                node.addPort(portInstance);
-//            }
-//        }    
-//    }
 
     /**
      * Removes reference to portInstance from this circuit but does NOT
@@ -191,44 +165,7 @@ public class CarrierCircuit
             : "Carrier dettach request from port not on carrier.";
         
         this.ports.remove(portInstance);
-        
-//        IDevice device = portInstance.device();
-//        
-//        if(device.hasTransportManager(portInstance.port().storageType))
-//        {
-//            TransportNode node = this.getNodeForDevice(device);
-//            if(node != null)
-//            {
-//                if(Configurator.logTransportNetwork) 
-//                    Log.info("CarrierCircuit.detach: Removing port from node %d.", node.nodeAddress());
-//                
-//                node.removePort(portInstance);
-//                if(!node.isConnected())
-//                {
-//                    if(Configurator.logTransportNetwork) 
-//                        Log.info("CarrierCircuit.detach: Removing empty node %d.", node.nodeAddress());
-//
-//                    device.removeTransportNode(node);
-//                    this.nodesByDeviceID.remove(device.getId());
-//                }
-//            }
-//            else
-//            {
-//                if(Configurator.logTransportNetwork) 
-//                    Log.info("CarrierCircuit.detach: unable to find transport node.");
-//            }
-//        }
     }
-    
-//    /**
-//     * Returns transport node for the given device if it
-//     * is attached to this circuit.
-//     */
-//    @Nullable
-//    public TransportNode getNodeForDevice(@Nonnull IDevice device)
-//    {
-//        return this.nodesByDeviceID.get(device.getId());
-//    }
     
     /**
      * Incurs cost of transporting the packet and 
@@ -337,5 +274,21 @@ public class CarrierCircuit
                 it.remove();
             }
         }
+    }
+    
+    /**
+     * All upward carrier circuits accessible from this circuit via bridge ports.
+     */
+    public ImmutableSet<CarrierCircuit> parents()
+    {
+        return this.ports.parents();
+    }
+    
+    /**
+     * For use by PortTracker to inform peer instances of bridge circuit changes.
+     */
+    protected PortTracker portTracker()
+    {
+        return this.ports;
     }
 }

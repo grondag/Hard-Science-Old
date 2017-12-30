@@ -21,7 +21,7 @@ public enum PlacementEvent
     /*
      * Start a new placement region selection operation.
      * Cancel any previous operations in progress. 
-     * BlockPos is the first position that should be part of the region.
+     * BlockPos is the start position that should be part of the region.
      * Eat the event. 
      */
     START_PLACEMENT_REGION(false, false, false),

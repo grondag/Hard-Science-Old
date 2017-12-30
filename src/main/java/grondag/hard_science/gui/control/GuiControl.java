@@ -71,7 +71,7 @@ public abstract class GuiControl<T extends GuiControl<T>> extends Gui
         this.refreshContentCoordinatesIfNeeded();
         if(this.isVisible) 
         {
-            // set hover first, so that controls further down the stack can overwrite
+            // set hover start, so that controls further down the stack can overwrite
             if(this.isMouseOver(mouseX, mouseY)) renderContext.setHoverControl(this);;
             this.drawContent(renderContext, mouseX, mouseY, partialTicks);
         }

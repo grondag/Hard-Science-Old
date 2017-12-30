@@ -18,7 +18,7 @@ public class DomainManagerTest
         dm.loadNew();
         
         Domain d1 = dm.createDomain();
-        d1.setName("first");
+        d1.setName("start");
         d1.setSecurityEnabled(true);
         
         DomainUser bob = d1.addUser("Bob");
@@ -44,7 +44,7 @@ public class DomainManagerTest
         dm.deserializeNBT(tag);
         
         d1 = dm.getDomain(1000);
-        assert(d1.getName() == "first");
+        assert(d1.getName() == "start");
         assert(d1.isSecurityEnabled());
         
         bob = d1.findUser("Bob");

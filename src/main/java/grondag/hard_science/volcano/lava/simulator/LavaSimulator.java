@@ -762,7 +762,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         int startingCount = 0;
         if(Configurator.VOLCANO.enableFlowTracking)
         {  
-            // all bucket jobs share the same perf counter, so simply use the first reference
+            // all bucket jobs share the same perf counter, so simply use the start reference
             startingCount = this.connections.firstStepJob[0].perfCounter.runCount();
         }
         
@@ -786,7 +786,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         int startingCount = 0;
         if(Configurator.VOLCANO.enableFlowTracking)
         {    
-            // all bucket jobs share the same perf counter, so simply use the first reference
+            // all bucket jobs share the same perf counter, so simply use the start reference
             startingCount = this.connections.stepJob[0].perfCounter.runCount();
         }
         

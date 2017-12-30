@@ -287,7 +287,7 @@ public class JobManager implements IReadWriteNBT, IDomainMember
 
     /**
      * Called after all domain deserialization is complete.  
-     * Hook for tasks to handle actions that may require other objects to be deserialized first.
+     * Hook for tasks to handle actions that may require other objects to be deserialized start.
      */
     public void afterDeserialization()
     {

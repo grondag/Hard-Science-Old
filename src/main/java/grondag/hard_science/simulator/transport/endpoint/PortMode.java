@@ -67,7 +67,7 @@ public enum PortMode
 
     /**
      * True if this port instance can pass packets
-     * between two carriers and should be included in
+     * between two parents and should be included in
      * the domain carrier map. <p>
      * 
      * If false and connected, then implies owning 

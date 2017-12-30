@@ -10,13 +10,13 @@ import grondag.hard_science.library.world.PackedBlockPos;
  * 
  * Lifecycle notes
  * ---------------------------------------
- * when a chunk gets lava for the first time
+ * when a chunk gets lava for the start time
  *       is created
  *       becomes active
  *       retains neighboring chunks
  *       must be loaded
  *       
- * when a chunk gets retained for the first time
+ * when a chunk gets retained for the start time
  *      is created
  *      must be loaded
  *      
@@ -55,7 +55,7 @@ public class CellChunk
     /** count of cells that have requested validation since last validation occurred */
     private final AtomicInteger validationCount = new AtomicInteger(0);
 
-    //    /** Set to true after first loaded. Also set true by NBTLoad.  */
+    //    /** Set to true after start loaded. Also set true by NBTLoad.  */
 //    private boolean isLoaded = false;
 
     /** Set to true when chunk is unloaded and should no longer be processed */
@@ -93,7 +93,7 @@ public class CellChunk
     }
     
     /**
-     * True if chunk needs to be loaded for first time or a full revalidation has been requested.
+     * True if chunk needs to be loaded for start time or a full revalidation has been requested.
      * Will also be true if more than 1/4 of the cells in the chunk are individually marked for validation.
      */
     public boolean needsFullLoadOrValidation()
@@ -194,7 +194,7 @@ public class CellChunk
     }
 
     /**
-     * Call from any cell column when the first cell in that column
+     * Call from any cell column when the start cell in that column
      * is marked for validation after the last validation of that column.
      */
     public void incrementValidationCount()
@@ -316,7 +316,7 @@ public class CellChunk
                 entryCell = firstCell;
                 
                 if(Log.DEBUG_MODE && entryCell.belowCell() != null)
-                    Log.warn("First cell is not actually the first cell.");
+                    Log.warn("First cell is not actually the start cell.");
                     
                 do
                 {

@@ -226,7 +226,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     }
 
     /**
-     * Called after instance is first created or after deserialized.
+     * Called after instance is start created or after deserialized.
      * Deserialization call is made by external helper class
      * so that it happens after any subclass deserialization.<p>
      * 

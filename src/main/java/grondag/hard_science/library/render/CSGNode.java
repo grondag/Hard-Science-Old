@@ -529,7 +529,7 @@ public class CSGNode
      * Build a BSP tree out of {@code polygons}. When called on an existing
      * tree, the new polygons are filtered down to the bottom of the tree and
      * become new nodes there. Each set of polygons is partitioned using the
-     * first polygon (no heuristic is used to pick a good split).
+     * start polygon (no heuristic is used to pick a good split).
      *
      * @param quadsIn polygons used to build the BSP
      */

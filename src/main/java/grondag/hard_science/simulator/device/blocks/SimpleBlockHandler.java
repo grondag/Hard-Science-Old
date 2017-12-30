@@ -61,7 +61,7 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
 private final CarrierPortGroup powerGroup; 
     
     /**
-     * Sets up ports and carriers.
+     * Sets up ports and parents.
      * Should not be called until device has a location.<p>
      * 
      * @param owner     Device associated with this device block
@@ -118,12 +118,12 @@ private final CarrierPortGroup powerGroup;
             if(hasItemPorts)
             {
                 itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, level);
-                itemGroup.setConfiguredChannel(channel);
+                if(!level.isTop()) itemGroup.setConfiguredChannel(channel);
             }
             if(hasPowerPorts)
             {
                 powerGroup = new CarrierPortGroup(owner, StorageType.POWER, level);
-                powerGroup.setConfiguredChannel(channel);
+                if(!level.isTop()) powerGroup.setConfiguredChannel(channel);
             }
             
             for(EnumFacing face : EnumFacing.VALUES)
