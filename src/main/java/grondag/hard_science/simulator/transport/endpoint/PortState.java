@@ -148,10 +148,7 @@ public abstract class PortState implements IDeviceComponent
         if(externalCircuit.attach(this, false))
         {
             this.mate = mate;
-            if(!this.mode.isBridge())
-            {
-                this.device().refreshTransport(this.port.storageType);
-            }
+            this.device().refreshTransport(this.port.storageType);
             return true;
         }
         else
@@ -240,11 +237,17 @@ public abstract class PortState implements IDeviceComponent
     
     /**
      * If this port is a carrier port on a device with an internal carrier, 
-     * iterates all other ports on the device attached to the same carrier.<p>
+     * iterates all <em>other</em> ports on the device attached to the same carrier.
+     * Equivalently, all ports on the device that share the carrier that
+     * is externally visible on this port.<p>
      * 
-     * Always empty for direct ports<p>
+     * Always empty for direct ports and for bridge ports in bridge mode.
+     * Bridge ports are handled this way because the internal carrier is not
+     * directly accessible via the bridge port. (That's what makes it a bridge.)<p>
      * 
-     * With {@link #mate()}, enables search within a connected topology.
+     * Bridge ports in carrier mode will behave just like carrier ports.<p>
+     * 
+     * With {@link #mate()}, enables search within a circuit topology.
      */
     @Nonnull
     public Iterable<PortState> carrierMates()

@@ -1,7 +1,5 @@
 package grondag.hard_science.simulator.transport.management;
 
-import com.google.common.collect.ImmutableList;
-
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
@@ -11,7 +9,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
 import grondag.hard_science.simulator.transport.routing.IItinerary;
-import grondag.hard_science.simulator.transport.routing.Leg;
+import grondag.hard_science.simulator.transport.routing.Legs;
 
 /**
  * Transport manager for single carrier
@@ -20,6 +18,13 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
 {
     private final IDevice owner;
     private final T storageType;
+    
+    /** 
+     * Used to cache legs information if this device is
+     * attached to more than one circuit.  Otherwise will
+     * rely on cache in the single circuit and will always be null.
+     */
+    private Legs legs = null;
     
     /**
      * Carriers that can be used for transport in/out of this device.
@@ -53,6 +58,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     {
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         this.circuits.clear();
+        this.legs = null;
         
         // on disconnect we'll get a null block manager
         IDeviceBlockManager blockMgr = this.device().blockManager();
@@ -68,10 +74,16 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
                 // and for carrier ports external/internal always the same
                 // so can always use external circuit
                 this.circuits.addIfNotPresent(port.externalCircuit());
+                break;
                 
-            // bridge devices never enable transport
+            // bridge devices never enable transport for this device
+            // (purpose is to enable transport for device on other side of bridge)
+            // but we want to track them for debug/display purposes
             case BRIDGE_ACTIVE:
             case BRIDGE_PASSIVE:
+                this.circuits.addIfNotPresent(port.internalCircuit());
+                break;
+                
             case DISCONNECTED:
             case NO_CONNECTION_CHANNEL_MISMATCH:
             case NO_CONNECTION_INCOMPATIBLE:
@@ -94,17 +106,17 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     }
 
     @Override
-    public ImmutableList<Leg> legs()
+    public Legs legs()
     {
-        if(this.circuits.isEmpty()) return ImmutableList.of();
+        if(this.circuits.isEmpty()) return Legs.EMPTY_LEGS;
         
-        if(this.circuits.size() == 1) return ConnectionManager.legs(this.circuits.get(0));
+        if(this.circuits.size() == 1) return this.circuits.get(0).legs();
         
-        ImmutableList.Builder<Leg> builder = ImmutableList.builder();
-        
-        this.circuits.forEach(c -> builder.addAll(ConnectionManager.legs(c)));
-        
-        return builder.build();
-        
+        // more than one circuit, so check cache
+        if(this.legs == null || !this.legs.isCurrent())
+        {
+            this.legs = new Legs(this.circuits);
+        }
+        return this.legs;
     }
 }

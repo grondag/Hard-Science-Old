@@ -14,7 +14,6 @@ import static grondag.hard_science.simulator.transport.management.ConnectionResu
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -26,11 +25,14 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.concurrency.PrivilegedExecutor;
+import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 import grondag.hard_science.simulator.transport.endpoint.PortMode;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
-import grondag.hard_science.simulator.transport.routing.Leg;
+import grondag.hard_science.simulator.transport.routing.Legs;
+import grondag.hard_science.simulator.transport.routing.Route;
 
 public class ConnectionManager
 {
@@ -324,6 +326,8 @@ public class ConnectionManager
 
         /**
          * Ports known to reference the internal carrier of the starting port.
+         * These are the ports that may need to be moved to a new circuit
+         * if the current circuit must be split
          */
         HashSet<PortState> results = new HashSet<PortState>();
         results.add(startingFrom);
@@ -560,33 +564,30 @@ public class ConnectionManager
         }
     }
     
-    public static ImmutableList<Leg> legs(CarrierCircuit startingWith)
+    public static ImmutableList<Route> findRoutes(StorageType<?> storageType, IDevice fromDevice, IDevice toDevice)
     {
-        ImmutableList.Builder<Leg> builder = ImmutableList.builder();
-        Leg firstLeg = Leg.create(startingWith);
-        builder.add(firstLeg);
-        if(!firstLeg.end().parents().isEmpty())
+        ITransportManager<?> tm1 = fromDevice.tranportManager(storageType);
+        if(tm1 == null) return ImmutableList.of();
+        
+        ITransportManager<?> tm2 = toDevice.tranportManager(storageType);
+        if(tm2 == null) return ImmutableList.of();
+
+        Legs legs1 = tm1.legs();
+        Legs legs2 = tm2.legs();
+        
+        boolean canConnect = false;
+        for(CarrierCircuit c : legs1.islands)
         {
-            LinkedList<Leg> workList = new LinkedList<Leg>();
-            workList.add(firstLeg);
-            while(!workList.isEmpty())
+            if(legs2.islands.contains(c))
             {
-                Leg workLeg = workList.poll();
-                for(CarrierCircuit c : workLeg.end().parents())
-                {
-                    // don't extend legs with circuits we can directly access
-                    // but can't appy this check to the starting node
-                    // because then we wouldn't get the first tier of legs
-                    if(workLeg != firstLeg && startingWith.parents().contains(c)) continue;
-                    
-                    Leg newLeg = workLeg.append(c);
-                    builder.add(newLeg);
-                    if(!newLeg.end().parents().isEmpty()) workList.add(newLeg);
-                }
+                canConnect = true;
+                break;
             }
-            
         }
         
-        return builder.build();
+        if(!canConnect) return ImmutableList.of();
+        
+        
+        return ImmutableList.of();
     }
 }

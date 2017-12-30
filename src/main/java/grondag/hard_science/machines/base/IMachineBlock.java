@@ -155,8 +155,9 @@ public interface IMachineBlock
         {
             if(machine.blockManager().itemCircuit() != null)
             {
-                probeInfo.text(I18n.translateToLocalFormatted("probe.machine.item_transport", 
-                        machine.blockManager().itemCircuit().carrierAddress()));
+                probeInfo.text(I18n.translateToLocalFormatted("Item circuit: %d  version: %d", 
+                        machine.blockManager().itemCircuit().carrierAddress(),
+                        machine.blockManager().itemCircuit().bridgeVersion()));
             }
             probeInfo.text("Item Legs: " + machine.tranportManager(StorageType.ITEM).legs().toString()); 
         }
@@ -165,8 +166,9 @@ public interface IMachineBlock
         {
             if(machine.blockManager().powerCircuit() != null)
             {
-                probeInfo.text(I18n.translateToLocalFormatted("probe.machine.power_transport", 
-                        machine.blockManager().powerCircuit().carrierAddress()));
+                probeInfo.text(I18n.translateToLocalFormatted("Power circuit: %d  version: %d", 
+                        machine.blockManager().powerCircuit().carrierAddress(),
+                        machine.blockManager().powerCircuit().bridgeVersion()));
             }
             probeInfo.text("Power Legs: " + machine.tranportManager(StorageType.POWER).legs().toString());
         }

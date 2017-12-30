@@ -13,6 +13,7 @@ import grondag.hard_science.simulator.transport.StoragePacket;
 import grondag.hard_science.simulator.transport.endpoint.PortMode;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
 import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import grondag.hard_science.simulator.transport.routing.Legs;
 
 /**
  * Represents physically (perhaps wirelessly) connected 
@@ -42,6 +43,8 @@ public class CarrierCircuit
     public final int channel;
 
     private final PortTracker ports;
+    
+    private Legs legs = null;
     
     private static final AtomicInteger nextAddress = new AtomicInteger(1);
     
@@ -290,5 +293,36 @@ public class CarrierCircuit
     protected PortTracker portTracker()
     {
         return this.ports;
+    }
+
+    /**
+     * Use to track currency of information in routing data.
+     * All circuits share a globally unique, monotonically increasing
+     * bridge version sequence. This means that any given set of circuits, 
+     * will have a max version value at the time the set is created, 
+     * and if any circuit in the set changes, the new max must be
+     * greater than the old max. <p>
+     * 
+     * Bridge version is incremented to the next global value
+     * any time a bridge is added or removed from this circuit.
+     * Actual implementation is in PortTracker, which handles all
+     * the bridge tracking.
+     */
+    public int bridgeVersion()
+    {
+        return this.ports.bridgeVersion();
+    }
+    
+    /**
+     * Retrieves upward routing information for this circuit.
+     * If information is not current, will be automatically refreshed.
+     */
+    public Legs legs()
+    {
+        if(this.legs == null || !this.legs.isCurrent())
+        {
+            this.legs = new Legs(this);
+        }
+        return this.legs;
     }
 }

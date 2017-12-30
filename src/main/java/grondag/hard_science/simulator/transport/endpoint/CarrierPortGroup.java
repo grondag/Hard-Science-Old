@@ -1,5 +1,6 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 import javax.annotation.Nonnull;
@@ -322,6 +323,8 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Nonnull
         public Iterable<PortState> carrierMates()
         {
+            if(this.mode != PortMode.CARRIER) return Collections.emptyList();
+            
             return new Iterable<PortState>() 
             {
 

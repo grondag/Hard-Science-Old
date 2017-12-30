@@ -2,6 +2,7 @@ package grondag.hard_science.simulator.transport.carrier;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -16,6 +17,17 @@ import grondag.hard_science.simulator.transport.endpoint.PortState;
  */
 public class PortTracker implements Iterable<PortState>
 {
+    /**
+     * See {@link CarrierCircuit#bridgeVersion()}
+     * Don't access directly, use {@link #updateBridgeVersion()}.
+     */
+    private static final AtomicInteger BRIDGE_VERSION_COUNTER = new AtomicInteger(0);
+
+    /**
+     * See {@link CarrierCircuit#bridgeVersion()}
+     */
+    private int bridgeVersion;
+    
     private final HashSet<PortState> ports = new HashSet<PortState>();
     
     /**
@@ -41,6 +53,12 @@ public class PortTracker implements Iterable<PortState>
     public PortTracker(CarrierCircuit owner)
     {
         this.owner = owner;
+        this.updateBridgeVersion();
+    }
+    
+    private void updateBridgeVersion()
+    {
+        this.bridgeVersion = BRIDGE_VERSION_COUNTER.incrementAndGet();
     }
     
     public boolean contains(PortState portInstance)
@@ -52,7 +70,8 @@ public class PortTracker implements Iterable<PortState>
     {
         assert p.internalCircuit().carrier.level == this.owner.carrier.level.above()
                 : "Invalid bridge port levels";
-        this.bridges.addIfNotPresent(p);        
+        this.bridges.addIfNotPresent(p);
+        this.updateBridgeVersion();
         this.refreshParents();
     }
     
@@ -62,6 +81,7 @@ public class PortTracker implements Iterable<PortState>
                 : "Invalid bridge port levels";
         
         this.bridges.removeIfPresent(p);
+        this.updateBridgeVersion();
         this.refreshParents();
     }
     
@@ -80,6 +100,10 @@ public class PortTracker implements Iterable<PortState>
             if(p.portMode().isBridge() && p.internalCircuit() == this.owner)
             {
                 p.externalCircuit().portTracker().addBridge(p);
+                
+                // don't need to track the bridge on the internal circuit
+                // but we do need to mark it dirty for route tracking
+                p.internalCircuit().portTracker().updateBridgeVersion();
             }
         }
     }
@@ -89,9 +113,18 @@ public class PortTracker implements Iterable<PortState>
         if(this.ports.remove(p))
         {
             // see notes in add
-            if(p.portMode().isBridge() && p.internalCircuit() == this.owner)
+            // can't rely on internalCircuit here to be the same as owner 
+            // as it was during add, so we try to remove all bridge ports
+            // even if we aren't sure.  (Not sure how we can't be, but
+            // I barely understand how most of this code works even though
+            // I wrote it... networks are hard.)
+            if(p.portMode().isBridge())
             {
                 p.externalCircuit().portTracker().removeBridge(p);
+                
+                // don't need to track the bridge on the internal circuit
+                // but we do need to mark it dirty for route tracking
+                p.internalCircuit().portTracker().updateBridgeVersion();
             }
         }
     }
@@ -147,6 +180,14 @@ public class PortTracker implements Iterable<PortState>
             }
         }
         return this.parents;
+    }
+
+    /**
+     * See {@link CarrierCircuit#bridgeVersion()}
+     */
+    public int bridgeVersion()
+    {
+        return this.bridgeVersion;
     }
     
 }
