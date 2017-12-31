@@ -20,18 +20,12 @@ public enum PortMode
     CARRIER(true),
     
     /**
-     * Port is acting as a bridge port and joining an existing circuit
-     * at level-1 on its external side. Internal circuit is at listed level.
+     * Port is acting as a bridge port and external circuit is isolated from
+     * internal circuit.  External circuit should be one level lower than internal.
      * Happens when bridge port mates with downlevel carrier or bridge ports.
      */
-    BRIDGE_PASSIVE(true),
+    BRIDGE(true),
     
-    /**
-     * Port is acting as a bridge port and providing a dedicated circuit
-     * at level-1 on its external side. Internal circuit is at listed level.
-     * Happens when bridge port mates with downlevel direct port.
-     */
-    BRIDGE_ACTIVE(true),
     
     /**
      * Port is a direct port. This is the only result possible
@@ -75,7 +69,7 @@ public enum PortMode
      */
     public boolean isBridge()
     {
-        return this == BRIDGE_PASSIVE || this == BRIDGE_ACTIVE;
+        return this == BRIDGE;
     }
     
     private PortMode(boolean isConnected)

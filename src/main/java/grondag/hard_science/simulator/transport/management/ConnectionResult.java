@@ -46,15 +46,15 @@ public enum ConnectionResult
      * 2, 3) One side needs a circuit created.
      * 4) both sides need a circuit created
      */
-    CARRIER_BRIDGE(PortMode.CARRIER, PortMode.BRIDGE_PASSIVE),
+    CARRIER_BRIDGE(PortMode.CARRIER, PortMode.BRIDGE),
 
     /**
      * Same as {@link #CONNECT_CARRIER_BRIDGE} but reverse port order.
      */
-    BRIDGE_CARRIER(PortMode.BRIDGE_PASSIVE, PortMode.CARRIER),
+    BRIDGE_CARRIER(PortMode.BRIDGE, PortMode.CARRIER),
 
     /**
-     * Bridge external circuit will be a new dedicated circuit.
+     * Bridge external circuit will be a separate circuit.
      * Bridge needs to have an internal circuit.
      * Merging is not a possibility.
      * This give two (trivial) scenarios:
@@ -63,12 +63,12 @@ public enum ConnectionResult
      * In both cases, a new external circuit is created and 
      * shared by both ports.
      */
-    DIRECT_BRIDGE(PortMode.DIRECT, PortMode.BRIDGE_ACTIVE),
+    DIRECT_BRIDGE(PortMode.DIRECT, PortMode.BRIDGE),
 
     /**
      * Same as {@link #CONNECT_DIRECT_BRIDGE} but reverse port order.
      */
-    BRIDGE_DIRECT(PortMode.BRIDGE_ACTIVE, PortMode.DIRECT);
+    BRIDGE_DIRECT(PortMode.BRIDGE, PortMode.DIRECT);
     
     public final PortMode left;
     public final PortMode right;

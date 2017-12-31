@@ -35,13 +35,27 @@ public abstract class PortState implements IDeviceComponent
     protected PortMode mode = PortMode.DISCONNECTED;
     
     /**
+     * True if port has been successfully attached.
+     * False if not. <p>
+     * 
+     * Generally synonymous with mate != null and
+     * externalCircuit != null but could be some edge
+     * cases or time windows when those do not hold and
+     * wanted to have an indicator that wasn't overloaded.
+     */
+    protected boolean isAttached = false;
+    
+    /**
      * If port has mated, should contain a reference 
      * to a port on an adjacent (or wirelessly connected) device.
      */
-    protected PortState mate;
+    private PortState mate;
     
     /**
-     * See {@link #externalCircuit()}
+     * See {@link #externalCircuit()}<p>
+     * 
+     * Be careful about accessing directly depending on intent.
+     * Is overridden by carrier ports.
      */
     protected CarrierCircuit externalCircuit;
     
@@ -84,11 +98,14 @@ public abstract class PortState implements IDeviceComponent
      * If port is mated and carrier circuit has formed, reference to the 
      * external carrier circuit. Null otherwise. <p>
      * 
-     * Is always the same as {@link #internalCircuit()} for carrier ports.
+     * Is always the same as {@link #internalCircuit()} for ports in carrier mode.
      */
     @Nullable
     public CarrierCircuit externalCircuit()
     {
+        assert this.mode.isConnected || this.isAttached || externalCircuit == null
+                : "Non-null external circuit for disconnected port";
+        
         return externalCircuit;
     }
     
@@ -118,50 +135,48 @@ public abstract class PortState implements IDeviceComponent
      * 
      * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public boolean attach(
+    public void attach(
             @Nonnull CarrierCircuit externalCircuit,
-            @Nonnull PortMode mode,
             @Nonnull PortState mate)
     {
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
-        assert this.externalCircuit == null
+        assert !this.isAttached()
                 : "PortState attach request when already attached.";
         
-        assert mode.isConnected : "Request to attach port with disconnected mode";
+        assert this.mode.isConnected : "Request to attach port with disconnected mode";
         
+        // NB: important to check private value here because carrier ports
+        // will override and give a non-null value (internal carrier) pre-attach
+        assert this.externalCircuit == null
+                : "PortState attach request with non-null external circuit.";
         
         if(Configurator.logTransportNetwork) 
-            Log.info("PortState.attach: port attach for %s to circuit %d with mate %s",
+            Log.info("PortState.attach %s: port attach for %s to circuit %d with mate %s",
+                    this.device().machineName(),
                     this.portName(),
                     externalCircuit.carrierAddress(),
                     mate.portName());
 
-        this.mode = mode;
-        if(!this.mode.isConnected) return false;
         
         if(Configurator.logTransportNetwork) 
-            Log.info("PortState.attach: port mode = %s", this.mode);
+            Log.info("PortState.attach %s: port mode = %s", 
+                    this.device().machineName(),
+                    this.mode);
         
         // circuit will expect this before attachment
         this.externalCircuit = externalCircuit;
-        if(externalCircuit.attach(this, false))
-        {
-            this.mate = mate;
-            this.device().refreshTransport(this.port.storageType);
-            return true;
-        }
-        else
-        {
-            this.mode = PortMode.DISCONNECTED;
-            this.externalCircuit = null;
-            return false;
-        }
+        externalCircuit.attach(this, false);
+        this.mate = mate;
+        this.isAttached =true;
+        
+        this.device().refreshTransport(this.port.storageType);
     }
     
     /**
      * Detaches from externalCircuit and removes reference to it.
-     * Also sets mate reference to null.<p>
+     * Also sets mate reference to null and changes port mode to
+     * DISCONNNECTED.<p>
      * 
      * Calls {@link IDevice#refreshTransport(grondag.hard_science.simulator.resource.StorageType)}<p>
      * 
@@ -174,20 +189,23 @@ public abstract class PortState implements IDeviceComponent
     {
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
-        assert this.externalCircuit != null
+        assert this.isAttached()
                 : "PortState dettach request when not attached.";
         
         if(Configurator.logTransportNetwork) 
-            Log.info("PortState.detach: port detach for %s", this.portName());
+            Log.info("PortState.detach %s: port detach for %s",
+                    this.device().machineName(),
+                    this.portName());
         
-        this.externalCircuit.detach(this);
-        this.externalCircuit = null;
-        this.mate = null;
-        if(!this.mode.isBridge())
+        if(this.externalCircuit != null)
         {
-            this.device().refreshTransport(this.port.storageType);
+            this.externalCircuit.detach(this);
+            this.externalCircuit = null;
         }
+        this.mate = null;
+        this.isAttached =false;
         this.mode = PortMode.DISCONNECTED;
+        this.device().refreshTransport(this.port.storageType);
         
     }
 
@@ -201,7 +219,7 @@ public abstract class PortState implements IDeviceComponent
     
     public boolean isAttached()
     {
-        return this.externalCircuit != null;
+        return this.isAttached;
     }
     
     /**
@@ -226,7 +244,8 @@ public abstract class PortState implements IDeviceComponent
         if(this.externalCircuit == oldCircuit)
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("PortState.swapCircuit: replacing external circuit %d with new circuit %d",
+                Log.info("PortState.swapCircuit %s: replacing external circuit %d with new circuit %d",
+                        this.device().machineName(),
                         oldCircuit.carrierAddress(),
                         newCircuit.carrierAddress());
 
@@ -297,8 +316,25 @@ public abstract class PortState implements IDeviceComponent
         );
     }
     
-    public PortMode portMode()
+    public PortMode getMode()
     {
         return this.mode;
+    }
+    
+    /**
+     * Sets mode that will be used when port is 
+     * connected.  Should not be called while port is connected.
+     */
+    public void setMode(PortMode mode)
+    {
+        assert !this.isAttached() && this.mate == null && this.externalCircuit == null
+            : "PortState.setMode: Attempt to set port mode while port connected.";
+        
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortState.setMode %s: mode = %s", 
+                    this.device().machineName(),
+                    mode.toString());
+                    
+        this.mode = mode;
     }
 }

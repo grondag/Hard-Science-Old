@@ -1,11 +1,16 @@
 package grondag.hard_science.simulator.transport.carrier;
 
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
 
@@ -15,7 +20,7 @@ import grondag.hard_science.simulator.transport.endpoint.PortState;
  * functionality is maintaining a list of all
  * upward-connected bridge ports.
  */
-public class PortTracker implements Iterable<PortState>
+public class PortTracker
 {
     /**
      * See {@link CarrierCircuit#bridgeVersion()}
@@ -66,65 +71,80 @@ public class PortTracker implements Iterable<PortState>
         return this.ports.contains(portInstance);
     }
 
-    private void addBridge(PortState p)
-    {
-        assert p.internalCircuit().carrier.level == this.owner.carrier.level.above()
-                : "Invalid bridge port levels";
-        this.bridges.addIfNotPresent(p);
-        this.updateBridgeVersion();
-        this.refreshParents();
-    }
-    
-    private void removeBridge(PortState p)
-    {
-        assert p.internalCircuit().carrier.level == this.owner.carrier.level.above()
-                : "Invalid bridge port levels";
-        
-        this.bridges.removeIfPresent(p);
-        this.updateBridgeVersion();
-        this.refreshParents();
-    }
-    
    
     public void add(PortState p)
     {
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortTracker.add: circuit = %d, portState = %s",
+                    this.owner.carrierAddress(),
+                    p.portName());
+        
+        assert p.internalCircuit() == this.owner 
+                || p.externalCircuit() == this.owner
+                : "PortTracker.add: port state circuits are bothh null or do not match this circuit.";
+                    
         if(this.ports.add(p))
         {
-            // Might be preferable to detect this from the downward side of the 
-            // bridge so that don't have to call into other port tracker
-            // but the downward port will be in carrier mode and if it attached
-            // first then the bridge port won't necessarily have its mode set yet 
-            // so we can't reliably check it.  So instead having the bridge
-            // port notify the external carrier directly, which is most easily
-            // accomplished by making the port tracker for it accessible. 
-            if(p.portMode().isBridge() && p.internalCircuit() == this.owner)
+            if(p.getMode().isBridge())
             {
-                p.externalCircuit().portTracker().addBridge(p);
-                
-                // don't need to track the bridge on the internal circuit
-                // but we do need to mark it dirty for route tracking
-                p.internalCircuit().portTracker().updateBridgeVersion();
+                if(p.externalCircuit() == this.owner)
+                {
+                    Log.info("PortTracker.add: circuit = %d, downward side - updating bridges and version",
+                            this.owner.carrierAddress());
+                    
+                    this.bridges.addIfNotPresent(p);
+                    this.updateBridgeVersion();
+                    this.refreshParents();
+                }
+                else
+                {
+                    Log.info("PortTracker.add: circuit = %d, upward side - updating version only",
+                            this.owner.carrierAddress());
+                    
+                    // opening assertion implies internalCircuit is our owner
+                    // don't need to track the bridge on the internal circuit
+                    // but we do need to mark it dirty for route tracking
+                    this.updateBridgeVersion();
+                }
             }
         }
     }
 
     public void remove(PortState p)
     {
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortTracker.remove: circuit = %d, portState = %s",
+                    this.owner.carrierAddress(),
+                    p.portName());
+        
+        assert p.internalCircuit() == this.owner 
+                || p.externalCircuit() == this.owner
+                : "PortTracker.add: port state circuits are both null or do not match this circuit.";
+        
         if(this.ports.remove(p))
         {
-            // see notes in add
-            // can't rely on internalCircuit here to be the same as owner 
-            // as it was during add, so we try to remove all bridge ports
-            // even if we aren't sure.  (Not sure how we can't be, but
-            // I barely understand how most of this code works even though
-            // I wrote it... networks are hard.)
-            if(p.portMode().isBridge())
+            
+            if(p.getMode().isBridge())
             {
-                p.externalCircuit().portTracker().removeBridge(p);
-                
-                // don't need to track the bridge on the internal circuit
-                // but we do need to mark it dirty for route tracking
-                p.internalCircuit().portTracker().updateBridgeVersion();
+                if(p.externalCircuit() == this.owner)
+                {
+                    Log.info("PortTracker.remove: circuit = %d, downward side - updating bridges and version",
+                            this.owner.carrierAddress());
+                    
+                    this.bridges.removeIfPresent(p);
+                    this.updateBridgeVersion();
+                    this.refreshParents();
+                }
+                else 
+                {
+                    Log.info("PortTracker.remove: circuit = %d, upward side - updating version only",
+                            this.owner.carrierAddress());
+                    
+                    // opening assertion implies internalCircuit is our owner
+                    // don't need to track the bridge on the internal circuit
+                    // but we do need to mark it dirty for route tracking
+                    this.updateBridgeVersion();
+                }
             }
         }
     }
@@ -134,14 +154,23 @@ public class PortTracker implements Iterable<PortState>
         other.forEach(p -> this.add(p));
     }
 
-    @Override
-    public Iterator<PortState> iterator()
+    /**
+     * Returns immutable list of current ports.
+     * Allows for iteration while ensuring all updates occur via
+     * {@link #add(PortState)} and {@link #remove(PortState)} adhering
+     * to all logic and preventing concurrent modification exception. <p>
+     */
+    public ImmutableList<PortState> snapshot()
     {
-        return this.ports.iterator();
+        return ImmutableList.copyOf(this.ports);
     }
 
     public void clear()
     {
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortTracker.clear: circuit = %d",
+                    this.owner.carrierAddress());
+        
         this.ports.clear();
         this.bridges.clear();
         this.refreshParents();
@@ -181,7 +210,8 @@ public class PortTracker implements Iterable<PortState>
         }
         return this.parents;
     }
-
+    
+    
     /**
      * See {@link CarrierCircuit#bridgeVersion()}
      */
@@ -190,4 +220,44 @@ public class PortTracker implements Iterable<PortState>
         return this.bridgeVersion;
     }
     
+    /**
+     * Handles implementation of {@link CarrierCircuit#mergeInto(CarrierCircuit)}
+     */
+    protected void mergeInto(PortTracker into)
+    {
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortTracker.mergeInto: from = %d, to = %d",
+                    this.owner.carrierAddress(),
+                    into.owner.carrierAddress());
+        
+        this.movePorts(ImmutableList.copyOf(this.ports), into);
+    }
+    
+    /**
+     * Moves ports in the given list from this tracker into the other,
+     * Remove all the ports before swapping, and does all swaps before adding. 
+     * If we did ports individuals then carrier group ports would no longer 
+     * be associated with this circuit during removal and would fail assertion checks
+     */
+    private void movePorts(List<PortState> targets, PortTracker into)
+    {
+        targets.forEach(p -> this.remove(p));
+        
+        targets.forEach(p -> p.swapCircuit(this.owner, into.owner));
+        
+        into.addAll(targets);
+    }
+    
+    /**
+     * Handles implementation of {@link CarrierCircuit#movePorts(CarrierCircuit, Predicate)}
+     */
+    public void movePorts(PortTracker into, Predicate<PortState> predicate)
+    {
+        if(Configurator.logTransportNetwork) 
+            Log.info("PortTracker.movePorts: from = %d, to = %d",
+                    this.owner.carrierAddress(),
+                    into.owner.carrierAddress());
+        
+        this.movePorts(this.ports.stream().filter(predicate).collect(Collectors.toList()), into);
+    }
 }

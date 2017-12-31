@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.transport.carrier;
 
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
@@ -86,7 +85,7 @@ public class CarrierCircuit
     /**
      * Note this does NOT set the carrier circuit on the port. 
      * Simply registers the port with this carrier if
-     * it is compatible and returns true if so.<p>
+     * it is compatible and throws an exception if not.<p>
      * 
      * Mode should be set on port before this is called so
      * can detect bridges or handle other mode-specific behavior<p>
@@ -94,11 +93,10 @@ public class CarrierCircuit
      * @param portInstance port to add
      * @param isInternal if true, will check for compatibility with internal side
      * of port. If false, will check external side.
-     * @return True if successfully attached.<p>
      * 
      * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public boolean attach(PortState portInstance, boolean isInternal)
+    public void attach(PortState portInstance, boolean isInternal)
     {
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
@@ -117,35 +115,29 @@ public class CarrierCircuit
         // when operating in bridge mode
         Carrier portCarrier = isInternal 
                 ? portInstance.port().internalCarrier
-                : portInstance.port().externalCarrier(portInstance.portMode());
+                : portInstance.port().externalCarrier(portInstance.getMode());
         
         if(portCarrier != this.carrier)
         {
-            if(Configurator.logTransportNetwork) 
-                Log.info("CarrierCircuit.attach: abandoning attempt due to mismatched parents.");
-            return false;
+            throw new UnsupportedOperationException("CarrierCircuit.attach: mismatched parents");
         }
         
         if(!this.carrier.level.isTop())
         {
-            if(portInstance.portMode() == PortMode.CARRIER
-                    || (isInternal && portInstance.portMode().isBridge()))
+            if(portInstance.getMode() == PortMode.CARRIER
+                    || (isInternal && portInstance.getMode().isBridge()))
             {
                 // channel must match for non-top carrier ports 
                 // and the internal side of bridge ports
                 if(portInstance.getConfiguredChannel() != this.channel)
                 {
-                    if(Configurator.logTransportNetwork) 
-                        Log.info("CarrierCircuit.attach: abandoning attempt due to mismatched channels.");
-                    return false;
+                    throw new UnsupportedOperationException("CarrierCircuit.attach: mismatched channels.");
                 }
             }
             
         }
         
         this.ports.add(portInstance);
-        
-        return true;
     }
 
     /**
@@ -242,13 +234,7 @@ public class CarrierCircuit
     {
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
-        for(PortState port : this.ports)
-        {
-            port.swapCircuit(this, into);
-            
-        }
-        into.ports.addAll(this.ports);
-        this.ports.clear();
+       this.ports.mergeInto(into.ports);
     }
 
     public int portCount()
@@ -266,17 +252,7 @@ public class CarrierCircuit
     {
         assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
         
-        Iterator<PortState> it = this.ports.iterator();
-        while(it.hasNext())
-        {
-            PortState port = it.next();
-            if(predicate.test(port))
-            {
-                port.swapCircuit(this, into);
-                into.ports.add(port);
-                it.remove();
-            }
-        }
+        this.ports.movePorts(into.ports, predicate);
     }
     
     /**

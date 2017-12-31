@@ -44,8 +44,8 @@ public interface IDeviceBlock
     
     public default String description()
     {
-        return String.format("Device Block for device %d @ %d.%d.%d in dim %d", 
-                this.device().getId(),
+        return String.format("Device Block for %s @ %d,%d,%d in dim %d", 
+                this.device().machineName(),
                 PackedBlockPos.getX(this.packedBlockPos()),
                 PackedBlockPos.getY(this.packedBlockPos()),
                 PackedBlockPos.getZ(this.packedBlockPos()),

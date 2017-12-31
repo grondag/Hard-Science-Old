@@ -66,7 +66,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
         
         for(PortState port : blockMgr.getPorts(this.storageType, true))
         {
-            switch(port.portMode())
+            switch(port.getMode())
             {
             case CARRIER:
             case DIRECT:
@@ -79,8 +79,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
             // bridge devices never enable transport for this device
             // (purpose is to enable transport for device on other side of bridge)
             // but we want to track them for debug/display purposes
-            case BRIDGE_ACTIVE:
-            case BRIDGE_PASSIVE:
+            case BRIDGE:
                 this.circuits.addIfNotPresent(port.internalCircuit());
                 break;
                 

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.google.common.collect.AbstractIterator;
 
@@ -48,6 +49,12 @@ public class CarrierPortGroup implements Iterable<PortState>
      */
     private byte channel = 0;
 
+    /**
+     * Counts how many ports in this group are attached to the internal
+     * carrier.  If drops to zero, then void our reference to the
+     * internal carrier so that it doesn't get used/retained improperly.
+     * Will include both bridge and carrier ports.
+     */
     private int carrierPortCount = 0;
 
     public CarrierPortGroup(
@@ -147,11 +154,58 @@ public class CarrierPortGroup implements Iterable<PortState>
         }
 
         @Override
+        @Nullable
         public CarrierCircuit internalCircuit()
         {
             return internalCircuit;
         }
 
+        /**
+         * For carrier ports and bridge ports in carrier mode, 
+         * will *always* return internal carrier if it exists,
+         * even if this specific port is not attached.<p>
+         * 
+         * {@inheritDoc}
+         */
+        @Override
+        @Nullable
+        public CarrierCircuit externalCircuit()
+        {
+            switch(this.getMode())
+            {
+            case BRIDGE:
+                // note we are checking raw value for external here due to override logic
+                assert (externalCircuit == null && internalCircuit == null)
+                || externalCircuit != internalCircuit
+                    : "External circuit matches internal circuit on bridge port";
+                return externalCircuit;
+                
+            case CARRIER:
+             // note we are checking raw value for external here due to override logic
+                assert externalCircuit == null 
+                    || externalCircuit == internalCircuit
+                        : "Mismatched external circuit on carrier port";
+                return internalCircuit;
+                
+            case DIRECT:
+                assert false : "Unsupported port mode for carrier group port";
+                return null;
+                
+            case DISCONNECTED:
+            case NO_CONNECTION_CHANNEL_MISMATCH:
+            case NO_CONNECTION_INCOMPATIBLE:
+            case NO_CONNECTION_LEVEL_GAP:
+            case NO_CONNECTION_STORAGE_TYPE:
+                assert externalCircuit == null
+                    : "Non-null external circuit on disconnected port";
+                return null;
+                
+            default:
+                assert false: "Missing enum mappig";
+                return null;
+            }
+        }
+        
         @Override
         public IDevice device()
         {
@@ -175,23 +229,23 @@ public class CarrierPortGroup implements Iterable<PortState>
          * {@inheritDoc}
          */
         @Override
-        public boolean attach(
+        public void attach(
                 @Nonnull CarrierCircuit externalCircuit, 
-                @Nonnull PortMode mode,
                 @Nonnull PortState mate)
         {
-            assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+            assert ConnectionManager.confirmNetworkThread() 
+                : "Transport logic running outside transport thread";
             
-            assert this.externalCircuit == null
-                    : "PortState attach request when already attached.";
-
-            switch(mode)
+            assert internalCircuit == null ? carrierPortCount == 0 : carrierPortCount > 0
+                    : "Inconsistent carrier count on carrier port pre-attach";
+            
+            switch(this.mode)
             {
-            case BRIDGE_ACTIVE:
-            case BRIDGE_PASSIVE:
+            case BRIDGE:
                 
                 if(Configurator.logTransportNetwork) 
-                    Log.info("CarrierPortGroup.attach: using bridge mode logic");
+                    Log.info("CarrierPortGroup.attach %s: using bridge mode logic",
+                            this.device().machineName());
                 
                 // If internal carrier not already set up then 
                 // need to create it and attach.  Will happen only
@@ -203,67 +257,55 @@ public class CarrierPortGroup implements Iterable<PortState>
                     internalCircuit = new CarrierCircuit(this.port().internalCarrier, this.getConfiguredChannel());
                     
                     if(Configurator.logTransportNetwork) 
-                        Log.info("CarrierPortGroup.attach: created new internal circuit %d",
+                        Log.info("CarrierPortGroup.attach %s: created new internal circuit %d",
+                                this.device().machineName(),
                                 internalCircuit.carrierAddress());
                 }
 
-                if(super.attach(externalCircuit, mode, mate))
-                {
-
-                    if(!internalCircuit.attach(this, true))
-                        assert false : "Bridge port unable to attach to internal circuit";
-
-                    carrierPortCount++;
-                    return true;
-                }
+                // need to explicitly attach to internal carrier for bridge
+                // ports because super.attach will handle external circuit
+                internalCircuit.attach(this, true);
                 break;
                 
             case CARRIER:
                 
                 if(Configurator.logTransportNetwork) 
-                    Log.info("CarrierPortGroup.attach: using carrier mode logic");
+                    Log.info("CarrierPortGroup.attach %s: using carrier mode logic",
+                            this.device().machineName());
                 
                 // These checks should have been done already but doesn't hurt to check again
                 if(internalCircuit == null)
                 {
                     if(externalCircuit.channel != this.getConfiguredChannel()) 
                     {
-                        assert false : "CarrierPortGroup request for mismatched channel attach";
-                        return false;
+                        throw new UnsupportedOperationException("CarrierPortGroup request for mismatched channel attach");
                     }
+                    
+                    // note there is no need to attach to internal carrier 
+                    // for carrier ports because internal and external circuits are same
+                    internalCircuit = externalCircuit;
+                 
                 }
-                else
+                else if(externalCircuit != internalCircuit)
                 {
                     // already have an internal circuit so any new carrier ports
                     // must be on the same circuit
-                    if(externalCircuit != internalCircuit)
-                    {
-                        assert false : "CarrierPortGroup request for mismatched circuit attach";
-                        return false;
-                    }
-                }
-
-                if(super.attach(externalCircuit, mode, mate))
-                {
-                    // note there is no need to attach to internal carrier 
-                    // for carrier ports because internal and external circuits are same
-                    if(internalCircuit == null)
-                    {
-                        internalCircuit = externalCircuit;
-
-                        assert carrierPortCount == 0
-                                : "Inconsistent carrier count on carrier port attach";
-                    }
-                    carrierPortCount++;
-                    return true;
+                    throw new UnsupportedOperationException("CarrierPortGroup request for mismatched circuit attach");
                 }
                 break;
           
             default:
-                assert false : "Unsupported Port Type in Carrier Port Group";
-                break;
+                throw new UnsupportedOperationException("Incorrect/Unsupported Port Mode");
             }
-            return false;
+            
+            super.attach(externalCircuit, mate);
+            carrierPortCount++;
+
+            assert internalCircuit != null
+                    : "Missing internal carrier on carrier group post-attach.";
+            
+            assert carrierPortCount > 0
+                : "Inconsistent carrier count (zero) on carrier group post-attach";
         }
 
         /**
@@ -277,27 +319,44 @@ public class CarrierPortGroup implements Iterable<PortState>
         {
             assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
 
-            if(this.portMode() == PortMode.CARRIER)
-            {
-                assert internalCircuit != null
-                        : "Missing internal carrier on carrier port detach.";
+            assert internalCircuit != null
+                : "Missing internal carrier on carrier port pre-detach.";
+            
+            assert carrierPortCount > 0
+                : "Inconsistent carrier count on carrier port pre-detach.";
 
-                assert carrierPortCount > 0
-                : "Inconsistent carrier count on carrier port detach.";
-
-                if(--carrierPortCount == 0)
-                {
-                    internalCircuit = null;
-                }
-            }
             super.detach();
+            
+            if(--carrierPortCount == 0) internalCircuit = null;
         }
 
         /**
          * This will be called multiple times for the same port group
-         * if multiple ports are attached to the same carrier.  This is
-         * fine.  Will simply update internal carrier on start call and
-         * ignore subsequent calls. <p>
+         * if multiple ports are attached to the same carrier.  However
+         * because all the ports are (in concept) attached to the same
+         * physical carrier this can create a temporary situation
+         * where carrier ports external carrier are different from the 
+         * internal carrier.<p>
+         * 
+         * Normally this is prevented by only allowing carrier ports to 
+         * connect, one-at-a-time, if and only of the external carrier 
+         * matches the internal carrier. <p>
+         * 
+         * We could have prevented this by forcing ports to disconnect
+         * when there is a merge or split event, but such events are 
+         * frequent, especially on world load, and it could be a performance
+         * risk for large, complex networks. And it wouldn't necessarily be simple,
+         * because we'd have to disconnect and reconnect all involved
+         * <em>device blocks</em> (not ports) in a specific sequence that
+         * would resolve the merge/split event that is currently handled by a swap.<p>
+         * 
+         * So to prevent inconsistency within this device, we update the internal carrier 
+         * and <em>all ports</em> on the device.  If method is called multiple times
+         * because there are multiple ports, subsequent calls will be ignored because
+         * the swapped circuit will no longer be present in the device. <p>
+         * 
+         * This does not prevent temporary inconsistency of carrier circuits
+         * with port <em>mates</em> but there is nothing we can do about that here.<p>
          * 
          * {@inheritDoc}
          */
@@ -305,17 +364,41 @@ public class CarrierPortGroup implements Iterable<PortState>
         public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
         {
             assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
-
-            super.swapCircuit(oldCircuit, newCircuit);
-
+            
+            // see notes in header
             if(internalCircuit == oldCircuit)
             {
                 if(Configurator.logTransportNetwork) 
-                    Log.info("CarrierPortGroup.swapCircuit: replacing internal circuit %d with new circuit %d",
+                    Log.info("CarrierPortGroup.swapCircuit %s: replacing internal circuit %d with new circuit %d",
+                            this.device().machineName(),
                             oldCircuit.carrierAddress(),
                             newCircuit.carrierAddress());
                 
                 internalCircuit = newCircuit;
+                
+                for(PortState port : CarrierPortGroup.this.ports)
+                {
+                    // reproducing per-port logic here because
+                    // super method would call device refresh before
+                    // all ports have been updated
+                    if(port.externalCircuit == oldCircuit)
+                    {
+                        if(Configurator.logTransportNetwork) 
+                            Log.info("CarrierPortGroup.swapCircuit %s: replacing external circuit %d with new circuit %d",
+                                    this.device().machineName(),
+                                    oldCircuit.carrierAddress(),
+                                    newCircuit.carrierAddress());
+
+                        port.externalCircuit = newCircuit;
+                    }
+                }
+                
+                this.device().refreshTransport(storageType);
+            }
+            // if internal carrier not involved, then normal logic applies
+            else
+            {
+                super.swapCircuit(oldCircuit, newCircuit);
             }
         }
 

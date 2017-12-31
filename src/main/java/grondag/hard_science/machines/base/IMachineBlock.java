@@ -147,6 +147,7 @@ public interface IMachineBlock
         
         AbstractMachine machine = this.machine(world, data.getPos());
 
+        probeInfo.text(machine.machineName().toUpperCase());
         probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 
                 machine.getDomain() == null ? I18n.translateToLocal("misc.unassigned") : machine.getDomain().getName()));
         

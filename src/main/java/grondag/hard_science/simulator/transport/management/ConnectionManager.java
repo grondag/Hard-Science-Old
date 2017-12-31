@@ -165,10 +165,7 @@ public class ConnectionManager
                         Log.info("ConnectionManager.connectCarrierPorts: Ports have different circuits. Keeping start port circuit & merging second port circuit into start");
     
                     secondCircuit.mergeInto(firstCircuit);
-                    if(!attachBothPorts(first, second, firstCircuit, result))
-                    {
-                        Log.warn("Unable to connect transport ports after circuit merge. This is a bug, and strange (probably bad) things may happen now.");
-                    }
+                    attachBothPorts(first, second, firstCircuit, result);
                 }
                 else
                     Log.warn("Mismatched circuits for port connect but merge not allowed. This is a bug, and strange (probably bad) things may happen now.");
@@ -182,10 +179,7 @@ public class ConnectionManager
                         Log.info("ConnectionManager.connectCarrierPorts: Ports have different circuits. Keeping second port circuit & merging start port circuit into second");
                     
                     firstCircuit.mergeInto(secondCircuit);
-                    if(!attachBothPorts(first, second, secondCircuit, result))
-                    {
-                        Log.warn("Unable to connect transport ports after circuit merge. This is a bug, and strange (probably bad) things may happen now.");
-                    }
+                    attachBothPorts(first, second, secondCircuit, result);
                 }
                 else
                     Log.warn("Mismatched circuits for port connect but merge not allowed. This is a bug, and strange (probably bad) things may happen now.");
@@ -194,20 +188,12 @@ public class ConnectionManager
         }
     }
 
-    private static boolean attachBothPorts(PortState first, PortState second, CarrierCircuit toCircuit, ConnectionResult result)
+    private static void attachBothPorts(PortState first, PortState second, CarrierCircuit toCircuit, ConnectionResult result)
     {
-        if(first.attach(toCircuit, result.left, second))
-        {
-            if(second.attach(toCircuit, result.right, first))
-            {
-                return true;
-            }
-            else
-            {
-                first.detach();
-            }
-        }
-        return false;
+        first.setMode(result.left);
+        second.setMode(result.right);
+        first.attach(toCircuit, second);
+        second.attach(toCircuit, first);
     }
 
     /**
@@ -242,7 +228,7 @@ public class ConnectionManager
 
 
                 // split isn't possible unless both ports are carrier ports
-                if(leaving.portMode() == PortMode.CARRIER && mate.portMode() == PortMode.CARRIER)
+                if(leaving.getMode() == PortMode.CARRIER && mate.getMode() == PortMode.CARRIER)
                 {
                     if(Configurator.logTransportNetwork) 
                         Log.info("ConnectionManager.disconnect: Checking for possible split");
@@ -319,7 +305,7 @@ public class ConnectionManager
      */
     private static HashSet<PortState> findNavigableCarrierPorts(PortState startingFrom, @Nullable PortState stopAt)
     {
-        assert startingFrom.portMode() == PortMode.CARRIER
+        assert startingFrom.getMode() == PortMode.CARRIER
                 : "transport topology search with non-carrier starting port";
 
         CarrierCircuit onCircuit = startingFrom.internalCircuit();

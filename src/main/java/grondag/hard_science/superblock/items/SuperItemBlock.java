@@ -144,18 +144,30 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
    @Override
    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
    {
-       IBlockState currentState = worldIn.getBlockState(pos);
-       Block block = currentState.getBlock();
-
-       if (!block.isReplaceable(worldIn, pos))
-       {
-           pos = pos.offset(facing);
-       }
-
        ItemStack stackIn = playerIn.getHeldItem(hand);
 
-       if (stackIn.isEmpty() || !playerIn.canPlayerEdit(pos, facing, stackIn)) 
-           return EnumActionResult.FAIL;
+       // NB: block is to limit scope of vars
+       {
+           IBlockState currentState = worldIn.getBlockState(pos);
+           Block block = currentState.getBlock();
+    
+           if (!block.isReplaceable(worldIn, pos))
+           {
+               pos = pos.offset(facing);
+           }
+    
+           currentState = worldIn.getBlockState(pos);
+           block = currentState.getBlock();
+    
+           // this check will probably need to be adjusted for additive blocks
+           // but not having this for normal blocks means we replace cables or
+           // other block that don't fully occlude the targeted face.
+           if(!block.isReplaceable(worldIn, pos)) return EnumActionResult.FAIL;
+           
+           if (stackIn.isEmpty() || !playerIn.canPlayerEdit(pos, facing, stackIn)) 
+               return EnumActionResult.FAIL;
+           
+       }
        
    
        ModelState modelState = PlacementItem.getStackModelState(stackIn);
