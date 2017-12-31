@@ -130,8 +130,8 @@ public class BlockTests
         {
             if(ibs.getBlock() instanceof IMachineBlock)
             {
-                return ((SuperBlock)ibs.getBlock()).getModelStateAssumeStateIsCurrent(ibs, world, pos, false).getSpecies()
-                        == this.matchModelState.getSpecies();
+                int species = ((SuperBlock)ibs.getBlock()).getModelStateAssumeStateIsCurrent(ibs, world, pos, false).getSpecies();
+                return species == this.matchModelState.getSpecies();
             }
             return false;
         }
