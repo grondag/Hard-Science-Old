@@ -349,4 +349,18 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
         
         super.onDisconnect();
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public long onProduceImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    {
+        return this.takeUpTo((IResource<T>)resource, quantity, simulate, (IProcurementRequest<T>)request);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    {
+        return this.add((IResource<T>)resource, quantity, simulate, (IProcurementRequest<T>)request);
+    }
 }

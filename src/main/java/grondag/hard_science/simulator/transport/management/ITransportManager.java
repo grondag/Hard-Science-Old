@@ -2,9 +2,8 @@ package grondag.hard_science.simulator.transport.management;
 
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
-import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.routing.IItinerary;
+import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.routing.Legs;
 
 /**
@@ -12,26 +11,6 @@ import grondag.hard_science.simulator.transport.routing.Legs;
  */
 public interface ITransportManager<T extends StorageType<T>> extends IDeviceComponent
 {
-
-    /**
-     * Attempts to send the given resource and quantityIn from the device that owns
-     * this transport manager to the given destination device. <p>
-     * 
-     * If route will require a packaged resource at the start, then will fail if
-     * resource is not already packaged.
-     * @param resource
-     * @param quantityIn
-     * @param recipient
-     * @param connectedOnly
-     * @param simulate
-     * @return
-     */
-    public IItinerary<T> send(
-            IResource<T> resource, 
-            long quantity, 
-            IDevice recipient, 
-            boolean connectedOnly, 
-            boolean simulate);
 
     /**
      * Called after transport ports on this device are attached
@@ -49,4 +28,9 @@ public interface ITransportManager<T extends StorageType<T>> extends IDeviceComp
      */
     public Legs legs();
     
+    /**
+     * True if can send/receive on the given circuit. Used to validate
+     * transport routes.
+     */
+    public boolean isConnectedTo(CarrierCircuit circuit);
 }

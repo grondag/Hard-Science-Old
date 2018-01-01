@@ -4,14 +4,17 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractDevice implements IDevice
@@ -182,4 +185,43 @@ public abstract class AbstractDevice implements IDevice
     {
         this.channel = channel;
     }
+    
+    /**
+     * Override if your device handles transport requests. 
+     * Base implementation handles service check.<p>
+     * 
+     * See {@link #onProduce(IResource, long, boolean, boolean)}
+     */
+    protected long onProduceImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    { 
+        return 0;
+    }
+    
+    @Override
+    public final long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    {
+        assert LogisticsService.serviceFor(resource.storageType()).confirmServiceThread() 
+            : "Transport logic running outside logistics service"; 
+        return this.onProduceImpl(resource, quantity, simulate, request);
+    }
+
+    /**
+     * Override if your device handles transport requests. 
+     * Base implementation handles service check.<p>
+     * 
+     * See {@link #onConsume(IResource, long, boolean, boolean)}
+     */
+    protected long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    {
+        return 0;
+    }
+    
+    @Override
+    public final long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    {
+        assert LogisticsService.serviceFor(resource.storageType()).confirmServiceThread() 
+            : "Transport logic running outside logistics service"; 
+        return this.onConsumeImpl(resource, quantity, simulate, request);
+    }
+
 }

@@ -10,7 +10,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
-import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -139,7 +139,7 @@ public abstract class PortState implements IDeviceComponent
             @Nonnull CarrierCircuit externalCircuit,
             @Nonnull PortState mate)
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert LogisticsService.serviceFor(port.storageType).confirmServiceThread() : "Transport logic running outside transport thread";
         
         assert !this.isAttached()
                 : "PortState attach request when already attached.";
@@ -187,7 +187,7 @@ public abstract class PortState implements IDeviceComponent
      */
     public void detach()
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert LogisticsService.serviceFor(port.storageType).confirmServiceThread() : "Transport logic running outside transport thread";
         
         assert this.isAttached()
                 : "PortState dettach request when not attached.";
@@ -240,7 +240,7 @@ public abstract class PortState implements IDeviceComponent
      */
     public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert LogisticsService.serviceFor(port.storageType).confirmServiceThread() : "Transport logic running outside transport thread";
         if(this.externalCircuit == oldCircuit)
         {
             if(Configurator.logTransportNetwork) 

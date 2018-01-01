@@ -11,7 +11,7 @@ import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.transport.StoragePacket;
 import grondag.hard_science.simulator.transport.endpoint.PortMode;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
-import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import grondag.hard_science.simulator.transport.routing.Legs;
 
 /**
@@ -53,6 +53,25 @@ public class CarrierCircuit
     
     protected long utilization = 0;
     
+    /**
+     * Set to false when a circuit is discarded as network
+     * structure changes.  Circuit will no longer transmit
+     * once it is made invalid.  Allows {@link #consumeCapacity(StoragePacket, boolean)}
+     * to run on any thread and/or with stale routes and 
+     * still remain relatively consistent with network topology.<p>
+     * 
+     * Worst case, the route won't actually be valid because the 
+     * device moved but all the circuits would still be live
+     * and will probably happen so soon after change that player
+     * won't notice any discrepancy.
+     */
+    private boolean isValid = true;
+    
+    /**
+     * Convenience reference.
+     */
+    private final LogisticsService<?> service;
+    
 //    /**
 //     * Collection of nodes on this carrier keyed by device ID.
 //     * Relies on the fact that all ports for a given device
@@ -67,6 +86,7 @@ public class CarrierCircuit
         this.carrier = carrier;
         this.channel = channel;
         this.ports = new PortTracker(this);
+        this.service = LogisticsService.serviceFor(carrier.storageType);
     }
     
     /**
@@ -98,7 +118,7 @@ public class CarrierCircuit
      */
     public void attach(PortState portInstance, boolean isInternal)
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert service.confirmServiceThread() : "Transport logic running outside transport thread";
         
         if(Configurator.logTransportNetwork) 
             Log.info("CarrierCircuit.attach: Attaching port %s (%s) to circuit %d.",
@@ -149,7 +169,7 @@ public class CarrierCircuit
      */
     public void detach(PortState portInstance)
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert service.confirmServiceThread() : "Transport logic running outside transport thread";
         
         if(Configurator.logTransportNetwork) 
             Log.info("CarrierCircuit.detach: Removing port %s from circuit %d.",
@@ -163,40 +183,35 @@ public class CarrierCircuit
     }
     
     /**
-     * Incurs cost of transporting the packet and 
-     * updates packet with link cost if successful. 
-     * Thread-safe<p>
+     * Incurs cost of transporting resources and 
+     * returns the number of resources that could be 
+     * successfully transported.<p>
      * 
-     * If force == true, will incur cost and return true
-     * even if link is already saturated.  Overage will be
-     * carried over into subsequent ticks until no-longer
-     * saturated.
+     * Should only execute within the logistics service
+     * so that we can honor simulated results if they are
+     * later requested for execution.
+     * 
+     * If force == true, will incur cost and transport
+     * full amount even the circuit is already saturated.  
+     * Overage will be carried over into subsequent ticks 
+     * until the circuit is no longer saturated.<p>
      */
-    public synchronized boolean consumeCapacity(StoragePacket<?> packet, boolean force)
+    public synchronized long transmit(long quantity, boolean force, boolean simulate)
     {
+        assert service.confirmServiceThread() : "Transport logic running outside transport thread";
+        assert quantity >= 0 : "negative quantity in transmit request";
+        
+        if(quantity <= 0 || !this.isValid) return 0;
+        
         this.refreshUtilization();
-        long cost = this.costForPacket(packet);
-        if(force || (cost + this.utilization) <= this.carrier.capacityPerTick)
-        {
-            this.utilization += cost;
-            packet.updateLinkCost(this, cost);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Override if needs to be something other than the packet unit cost.
-     */
-    protected long costForPacket(StoragePacket<?> packet)
-    {
-        return packet.basePacketCost();
+        long result = force ? quantity : Math.min(quantity, this.carrier.capacityPerTick - this.utilization);
+        if(!simulate && result > 0) this.utilization += result;
+        return result;
     }
     
     /**
      * Decays utilization based on current simulation tick.
      * Call before any capacity-dependent operation.
-     * Should only be called from synchronized state.
      */
     protected void refreshUtilization()
     {
@@ -206,19 +221,8 @@ public class CarrierCircuit
         {
             this.utilization = Math.max(0, this.utilization 
                     - this.carrier.capacityPerTick * (currentTick - this.lastTickSeen));
+            this.lastTickSeen = currentTick;
         }
-    }
-
-    /**
-     * Called by packet to refunds the cost of earlier {@link #transport(StoragePacket, TransportNode, TransportNode)}
-     * if packet cannot be delivered.<p>
-     * 
-     * MUST be called during same simulation tick or will be shifting capacity
-     * across ticks.
-     */
-    public synchronized void refundCapacity(long cost)
-    {
-        this.utilization = Math.max(0, this.utilization - cost);
     }
     
     /**
@@ -227,14 +231,16 @@ public class CarrierCircuit
      * to devices or transport nodes, because the ports/nodes/circuit
      * was already assumed to be valid.<p>
      * 
+     * MAKES THIS CIRCUIT INVALID<p>
+     * 
      * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      * 
      */
     public void mergeInto(CarrierCircuit into)
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
-        
-       this.ports.mergeInto(into.ports);
+        assert service.confirmServiceThread() : "Transport logic running outside transport thread";
+        this.makeInvalid();
+        this.ports.mergeInto(into.ports);
     }
 
     public int portCount()
@@ -250,7 +256,7 @@ public class CarrierCircuit
      */
     public void movePorts(CarrierCircuit into, Predicate<PortState> predicate)
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert service.confirmServiceThread() : "Transport logic running outside transport thread";
         
         this.ports.movePorts(into.ports, predicate);
     }
@@ -300,5 +306,19 @@ public class CarrierCircuit
             this.legs = new Legs(this);
         }
         return this.legs;
+    }
+    
+    /**
+     * Call when this circuit is discarded due to
+     * all ports disconnecting or merge, etc. <p>
+     * 
+     * Will prevent any more use of the circuit.<p>
+     * 
+     * See {@link #isValid}
+     */
+    public void makeInvalid()
+    {
+        assert service.confirmServiceThread() : "Transport logic running outside transport thread";
+        this.isValid = false;
     }
 }

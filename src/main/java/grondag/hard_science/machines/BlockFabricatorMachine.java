@@ -22,7 +22,6 @@ import grondag.hard_science.machines.support.VolumetricIngredientList.Volumetric
 import grondag.hard_science.materials.Matter;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
-import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.StorageWithQuantity;
@@ -423,20 +422,4 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
             
         }
     }
-
-    @Override
-    public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-    
-    
 }

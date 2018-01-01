@@ -7,7 +7,6 @@ import grondag.hard_science.machines.base.MachineStorageBlock;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -15,12 +14,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TransportTestBlock extends MachineStorageBlock
 {
-    private final ItemStack stack;
     
-    public TransportTestBlock(String name, ItemStack stack) 
+    public TransportTestBlock(String name) 
     {
         super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(Textures.DECAL_FAT_DIAGONAL_BARS, Textures.BORDER_GRITTY_FAT_LINE));
-        this.stack = stack;
     }
 
     @Override
@@ -32,7 +29,7 @@ public class TransportTestBlock extends MachineStorageBlock
     @Override
     public AbstractMachine createNewMachine()
     {
-        return new TransportTestMachine(stack);
+        return new TransportTestMachine();
     }
     
     @SideOnly(Side.CLIENT)

@@ -16,7 +16,7 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -233,7 +233,7 @@ public class CarrierPortGroup implements Iterable<PortState>
                 @Nonnull CarrierCircuit externalCircuit, 
                 @Nonnull PortState mate)
         {
-            assert ConnectionManager.confirmNetworkThread() 
+            assert LogisticsService.serviceFor(storageType).confirmServiceThread() 
                 : "Transport logic running outside transport thread";
             
             assert internalCircuit == null ? carrierPortCount == 0 : carrierPortCount > 0
@@ -317,7 +317,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public void detach()
         {
-            assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+            assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
 
             assert internalCircuit != null
                 : "Missing internal carrier on carrier port pre-detach.";
@@ -363,7 +363,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
         {
-            assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+            assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
             
             // see notes in header
             if(internalCircuit == oldCircuit)

@@ -19,9 +19,10 @@ public class Carrier
     public static final Carrier POWER_INTER = new Carrier(StorageType.POWER, CarrierLevel.MIDDLE, MachinePower.POWER_BUS_JOULES_PER_TICK * 1000);
     public static final Carrier POWER_TOP = new Carrier(StorageType.POWER, CarrierLevel.TOP, MachinePower.POWER_BUS_JOULES_PER_TICK * 1000000);
     
-    public static final Carrier ITEM_BASE = new Carrier(StorageType.ITEM, CarrierLevel.BOTTOM, 64);
-    public static final Carrier ITEM_INTER = new Carrier(StorageType.ITEM, CarrierLevel.MIDDLE, 64 * 8);
-    public static final Carrier ITEM_TOP = new Carrier(StorageType.ITEM, CarrierLevel.TOP, 64 * 10000);
+    //FIXME: increase limits, or make configurable
+    public static final Carrier ITEM_BASE = new Carrier(StorageType.ITEM, CarrierLevel.BOTTOM, 1);
+    public static final Carrier ITEM_INTER = new Carrier(StorageType.ITEM, CarrierLevel.MIDDLE, 4);
+    public static final Carrier ITEM_TOP = new Carrier(StorageType.ITEM, CarrierLevel.TOP, 16);
 
     public final StorageType<?> storageType;
     public final CarrierLevel level;

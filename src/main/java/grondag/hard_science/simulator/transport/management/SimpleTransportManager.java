@@ -41,7 +41,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     
     public IItinerary<T> send(IResource<T> resource, long quantity, IDevice recipient, boolean connectedOnly, boolean simulate)
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
         
         //TODO: implement
         return null;
@@ -56,7 +56,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     @Override
     public void refreshTransport()
     {
-        assert ConnectionManager.confirmNetworkThread() : "Transport logic running outside transport thread";
+        assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
         this.circuits.clear();
         this.legs = null;
         
@@ -117,5 +117,11 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
             this.legs = new Legs(this.circuits);
         }
         return this.legs;
+    }
+
+    @Override
+    public boolean isConnectedTo(CarrierCircuit circuit)
+    {
+        return this.circuits.contains(circuit);
     }
 }

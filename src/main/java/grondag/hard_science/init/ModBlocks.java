@@ -30,7 +30,6 @@ import grondag.hard_science.volcano.VolcanoBlock;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.volcano.lava.LavaBlock;
 import net.minecraft.block.Block;
-import net.minecraft.init.Items;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -186,7 +185,7 @@ public class ModBlocks
         event.getRegistry().register(new BottomBusBlock("bottom_bus"));
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
-        event.getRegistry().register(new TransportTestBlock("transport_test", Items.BEEF.getDefaultInstance()));
+        event.getRegistry().register(new TransportTestBlock("transport_test"));
         
     }
     

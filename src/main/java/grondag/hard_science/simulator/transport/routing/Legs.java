@@ -33,13 +33,7 @@ public class Legs
     public final ImmutableSet<CarrierCircuit> circuits;
     
     /**
-     * All legs originating from a circuit or device (for compounded Legs).
-     * This is a list of lists. The top level list has en entry for 
-     * every unique end circuit for which there is a leg, and is sorted by
-     * carrier level (lowest first) and then by the address of the end circuit.
-     * 
-     * This structure allows for fast pair-wise iterations through two
-     * leg lists during route formation.
+     * See {@link #legs()}
      */
     private final ImmutableList<ImmutableList<Leg>> legs;
     
@@ -177,6 +171,18 @@ public class Legs
         return true;
     }
     
+    /**
+     * All legs originating from a circuit or device (for compounded Legs).
+     * This is a list of lists. The top level list has an entry for 
+     * every unique end circuit for which there is a leg, and is sorted by
+     * carrier level (lowest first) and then by the address of the end circuit.<p>
+     * 
+     * The top-level list may be empty, but any lists within the list
+     * are guaranteed to have at least one entry.<p>
+     * 
+     * This structure allows for fast pair-wise iterations through two
+     * leg lists during route formation.
+     */
     public ImmutableList<ImmutableList<Leg>> legs()
     {
         return this.legs;

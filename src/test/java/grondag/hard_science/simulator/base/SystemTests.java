@@ -108,7 +108,7 @@ public class SystemTests
         store1.add(this.beef.withQuantity(10), false, null);
         store2.add(this.ironBlock.withQuantity(20), false, null);
         
-        TransportTestMachine td = new TransportTestMachine(Items.BEEF.getDefaultInstance());
+        TransportTestMachine td = new TransportTestMachine();
         td.setLocation(new Location(1, 2, 3, -1));
         td.setDomain(domain);
         

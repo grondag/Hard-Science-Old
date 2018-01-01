@@ -4,27 +4,26 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.Log;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
-import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import grondag.hard_science.simulator.transport.routing.Route;
-import net.minecraft.item.ItemStack;
+import net.minecraft.init.Items;
 
 public class TransportTestMachine extends ItemStorage
 {
-    private final ItemResource resource;
-    public TransportTestMachine(ItemStack stack)
+    private final static ItemResource resource = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
+    public TransportTestMachine()
     {
         super(CarrierLevel.BOTTOM, PortType.DIRECT);
-        this.setCapacity(Integer.MAX_VALUE);
-        this.resource = ItemResource.fromStack(stack);
-        this.add(resource, Integer.MAX_VALUE, false, null);
+        super.setCapacity(Integer.MAX_VALUE);
+        super.add(resource, Integer.MAX_VALUE, false, null);
     }
 
     @Override
@@ -48,23 +47,37 @@ public class TransportTestMachine extends ItemStorage
         super.doOffTick();
         if(this.isOn())
         {
-            long avail = this.getQuantityStored(this.resource);
+            long avail = this.getQuantityStored(resource);
             if(avail > 0)
             {
                 List<StorageWithQuantity<StorageTypeStack>> list 
-                    = this.getDomain().itemStorage.findSpaceFor(this.resource, avail, null);
+                    = this.getDomain().itemStorage.findSpaceFor(resource, avail, null);
                 if(list.isEmpty()) return;
                 
-                for(StorageWithQuantity<StorageTypeStack> store : list)
+                for(StorageWithQuantity<StorageTypeStack> rwq : list)
                 {
                     ImmutableList<Route> routes = 
-                            ConnectionManager.findRoutes(StorageType.ITEM, this, store.storage);
+                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, rwq.storage);
                     
                     if(routes.isEmpty()) continue;
                     
-                    Log.info(routes.get(0).toString());
+                    avail -= LogisticsService.ITEM_SERVICE
+                            .sendResourceNow(routes.get(0), resource, avail, this, rwq.storage, false, false, null);
+                    
+                    if(avail <= 0) break;
                 }
             }
         }
     }
+
+    @Override
+    public synchronized long add(IResource<StorageTypeStack> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypeStack> request)
+    {
+        // can't put stuff in it
+        return 0;
+    }
+    
+    
+    
+    
 }

@@ -4,7 +4,7 @@ import grondag.hard_science.simulator.transport.endpoint.PortMode;
 
 /**
  * Captures expected result of attempt to mate two ports.
- * Is result type for {@link ConnectionManager#connect(grondag.hard_science.simulator.transport.endpoint.PortState, grondag.hard_science.simulator.transport.endpoint.PortState)}
+ * Is result type for {@link LogisticsService#connect(grondag.hard_science.simulator.transport.endpoint.PortState, grondag.hard_science.simulator.transport.endpoint.PortState)}
  */
 public enum ConnectionResult
 {

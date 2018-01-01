@@ -20,7 +20,7 @@ import grondag.hard_science.simulator.transport.endpoint.DirectPortState;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
-import grondag.hard_science.simulator.transport.management.ConnectionManager;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -104,7 +104,7 @@ private final CarrierPortGroup powerGroup;
                     this.itemPorts[face.ordinal()]= new DirectPortState(itemPort, owner, pos, face);
                 
                 if(hasPowerPorts)
-                    this.itemPorts[face.ordinal()]= new DirectPortState(powerPort, owner, pos, face);
+                    this.powerPorts[face.ordinal()]= new DirectPortState(powerPort, owner, pos, face);
             }
             this.itemGroup = null;
             this.powerGroup = null;
@@ -208,6 +208,7 @@ private final CarrierPortGroup powerGroup;
         this.connectToNeighbors();
     }
 
+    @SuppressWarnings("null")
     protected void connectToNeighbors()
     {
         if(Configurator.logDeviceChanges)
@@ -218,6 +219,14 @@ private final CarrierPortGroup powerGroup;
         
         if(!(hasItems || hasPower)) return;
         
+        LogisticsService<?> itemService = hasItems 
+                ? LogisticsService.serviceFor(StorageType.ITEM)
+                : null;
+        
+        LogisticsService<?> powerService = hasPower 
+                ? LogisticsService.serviceFor(StorageType.POWER)
+                : null;
+                        
         for(EnumFacing face : EnumFacing.VALUES)
         {
             IDeviceBlock neighbor = this.getNeighbor(face);
@@ -233,7 +242,7 @@ private final CarrierPortGroup powerGroup;
                 assert !myPort.isAttached() : "Connection attempt on attached port";
                 for(PortState mate : neighbor.getPorts(StorageType.ITEM, oppositeFace))
                 {
-                    ConnectionManager.connect(myPort, mate);
+                    itemService.connect(myPort, mate);
                 }
             }
             
@@ -241,11 +250,11 @@ private final CarrierPortGroup powerGroup;
             {
                 PortState myPort = this.powerPorts[face.ordinal()];
                 if(myPort == null) break;
-
+                
                 assert !myPort.isAttached() : "Connection attempt on attached port";
                 for(PortState mate : neighbor.getPorts(StorageType.POWER, oppositeFace))
                 {
-                    ConnectionManager.connect(myPort, mate);
+                    powerService.connect(myPort, mate);
                 }
             }
         }
@@ -262,6 +271,7 @@ private final CarrierPortGroup powerGroup;
         DeviceManager.blockManager().removeDelegate(this);
     }
 
+    @SuppressWarnings("null")
     @Override
     public void onRemoval()
     {
@@ -273,6 +283,14 @@ private final CarrierPortGroup powerGroup;
         
         if(!(hasItems || hasPower)) return;
         
+        LogisticsService<?> itemService = hasItems 
+                ? LogisticsService.serviceFor(StorageType.ITEM)
+                : null;
+        
+        LogisticsService<?> powerService = hasPower 
+                ? LogisticsService.serviceFor(StorageType.POWER)
+                : null;
+                
         for(EnumFacing face : EnumFacing.VALUES)
         {
             IDeviceBlock neighbor = this.getNeighbor(face);
@@ -281,13 +299,13 @@ private final CarrierPortGroup powerGroup;
             if(hasItems)
             {
                 PortState ps = this.itemPorts[face.ordinal()];
-                if(ps.isAttached()) ConnectionManager.disconnect(ps);
+                if(ps.isAttached()) itemService.disconnect(ps);
             }
             
             if(hasPower)
             {
                 PortState ps = this.powerPorts[face.ordinal()];
-                if(ps.isAttached()) ConnectionManager.disconnect(ps);
+                if(ps.isAttached()) powerService.disconnect(ps);
             }
         }
     }

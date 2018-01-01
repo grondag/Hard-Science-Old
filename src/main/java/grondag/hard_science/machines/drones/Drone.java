@@ -3,6 +3,7 @@ package grondag.hard_science.machines.drones;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
@@ -89,17 +90,16 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+    public long onProduce(IResource<?> resource, long quantity, boolean simulate, IProcurementRequest<?> request)
     {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate)
+    public long onConsume(IResource<?> resource, long quantity, boolean simulate, IProcurementRequest<?> request)
     {
         // TODO Auto-generated method stub
         return 0;
     }
-
 }

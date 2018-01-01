@@ -4,11 +4,10 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 /**
- * Describes a resource in transit within a connected, wireless or drone network.
+ * Describes resource transmission within a connected, wireless or drone network.
  * If resources must cross over network boundaries will require multiple packets.
  * @see IItinerary.
  */
@@ -69,32 +68,32 @@ public class StoragePacket<T extends StorageType<T>>
         this.links.addTo(link, costDelta);
     }
     
-    /**
-     * Refunds cost from given link, (does actually update the link)
-     * and removes link from link cost list.
-     */
-    public synchronized void refundLink(CarrierCircuit link)
-    {
-        long cost = this.links.removeLong(link);
-        if(cost != 0) link.refundCapacity(cost);
-    }
+//    /**
+//     * Refunds cost from given link, (does actually update the link)
+//     * and removes link from link cost list.
+//     */
+//    public synchronized void refundLink(CarrierCircuit link)
+//    {
+//        long cost = this.links.removeLong(link);
+//        if(cost != 0) link.refundCapacity(cost);
+//    }
     
-    /**
-     * Refunds all costs charged by links for this packet. 
-     * Updates each link and then clears links in this packet.  
-     * Call when packet transport must be aborted for any reason.
-     */
-    public synchronized void refundAllLinks()
-    {
-        if(!this.links.isEmpty())
-        {
-            for(Object2LongMap.Entry<CarrierCircuit> entry : this.links.object2LongEntrySet())
-            {
-                entry.getKey().refundCapacity(entry.getLongValue());
-            }
-            this.links.clear();
-        }
-    }
+//    /**
+//     * Refunds all costs charged by links for this packet. 
+//     * Updates each link and then clears links in this packet.  
+//     * Call when packet transport must be aborted for any reason.
+//     */
+//    public synchronized void refundAllLinks()
+//    {
+//        if(!this.links.isEmpty())
+//        {
+//            for(Object2LongMap.Entry<CarrierCircuit> entry : this.links.object2LongEntrySet())
+//            {
+//                entry.getKey().refundCapacity(entry.getLongValue());
+//            }
+//            this.links.clear();
+//        }
+//    }
     
     /**
      * Accumulated cost of transporting this packet. Will not be final

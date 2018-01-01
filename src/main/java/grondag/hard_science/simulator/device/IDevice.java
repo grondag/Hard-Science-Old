@@ -7,6 +7,7 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Location.ILocated;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
@@ -110,14 +111,16 @@ public interface IDevice extends
     }
     
     /**
-     * Called by transport nodes for this device to handle outbound transport requests.
+     * Called by transport system for this device to handle outbound transport requests.
+     * SHOULD ONLY BE CALLED FROM LOGISTICS SERVICE to ensure consistency of results.
      */
-    public long onProduce(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate);
+    public long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request);
 
     /**
-     * Called by transport nodes for this device to handle inbound transport requests
+     * Called by transport system for this device to handle inbound transport requests
+     * SHOULD ONLY BE CALLED FROM LOGISTICS SERVICE to ensure consistency of results.
      */
-    public long onConsume(IResource<?> resource, long quantity, boolean allowPartial, boolean simulate);
+    public long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request);
 
     /**
      * Called after ports on this device are attached
@@ -150,3 +153,4 @@ public interface IDevice extends
      */
     public default int getChannel() { return CHANNEL_UNSUPPORTED; }
 }
+
