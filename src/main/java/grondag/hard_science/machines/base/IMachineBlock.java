@@ -11,12 +11,14 @@ import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.Privilege;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
+import grondag.hard_science.superblock.texture.Textures;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import grondag.hard_science.superblock.block.SuperBlock;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -26,6 +28,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public interface IMachineBlock
 {
@@ -154,24 +158,33 @@ public interface IMachineBlock
         
         if(machine.hasTransportManager(StorageType.ITEM))
         {
-            if(machine.blockManager().itemCircuit() != null)
-            {
-                probeInfo.text(I18n.translateToLocalFormatted("Item circuit: %d  version: %d", 
-                        machine.blockManager().itemCircuit().carrierAddress(),
-                        machine.blockManager().itemCircuit().bridgeVersion()));
-            }
+//            if(machine.blockManager().itemCircuit() != null)
+//            {
+//                probeInfo.text(I18n.translateToLocalFormatted("Item circuit: %d  version: %d", 
+//                        machine.blockManager().itemCircuit().carrierAddress(),
+//                        machine.blockManager().itemCircuit().bridgeVersion()));
+//            }
             probeInfo.text("Item Legs: " + machine.tranportManager(StorageType.ITEM).legs().toString()); 
         }
         
         if(machine.hasTransportManager(StorageType.POWER))
         {
-            if(machine.blockManager().powerCircuit() != null)
-            {
-                probeInfo.text(I18n.translateToLocalFormatted("Power circuit: %d  version: %d", 
-                        machine.blockManager().powerCircuit().carrierAddress(),
-                        machine.blockManager().powerCircuit().bridgeVersion()));
-            }
+//            if(machine.blockManager().powerCircuit() != null)
+//            {
+//                probeInfo.text(I18n.translateToLocalFormatted("Power circuit: %d  version: %d", 
+//                        machine.blockManager().powerCircuit().carrierAddress(),
+//                        machine.blockManager().powerCircuit().bridgeVersion()));
+//            }
             probeInfo.text("Power Legs: " + machine.tranportManager(StorageType.POWER).legs().toString());
         }
+    }
+    
+    /**
+     * Controls icon rendered on machine face / sides
+     */
+    @SideOnly(Side.CLIENT)
+    public default TextureAtlasSprite getSymbolSprite()
+    {
+        return Textures.DECAL_LARGE_SQUARE.getSampleSprite();
     }
 }

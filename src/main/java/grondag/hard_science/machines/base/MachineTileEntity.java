@@ -34,7 +34,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public abstract class MachineTileEntity extends SuperTileEntity
+public class MachineTileEntity extends SuperTileEntity
 {
     
     private AbstractMachine machine = null;
@@ -49,6 +49,12 @@ public abstract class MachineTileEntity extends SuperTileEntity
      * On client, next time keepalive request should be sent to server.
      */
     protected long nextPlayerUpdateMilliseconds = 0;
+    
+    /**
+     * See {@link #getSymbolSprite()}
+     */
+    @SideOnly(Side.CLIENT)
+    private TextureAtlasSprite symbolSprite;
     
     /**
      * Convenience for {@link MachineBlock#createNewMachine()}
@@ -95,9 +101,22 @@ public abstract class MachineTileEntity extends SuperTileEntity
     
     /**
      * Used by GUI and TESR to draw machine's symbol.
+     * Actual implementation is in block, but this provides
+     * convenient access.
      */
     @SideOnly(Side.CLIENT)
-    public abstract TextureAtlasSprite getSymbolSprite();
+    public final TextureAtlasSprite getSymbolSprite()
+    {
+        if(this.symbolSprite == null)
+        {
+            if(this.hasWorld())
+            {
+                this.symbolSprite = ((IMachineBlock)this.getBlockType()).getSymbolSprite();
+            }
+        }
+        return this.symbolSprite;
+    }
+    
     
 
     /**
@@ -252,7 +271,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
         if(time >= this.nextPlayerUpdateMilliseconds)
         {
             if(Configurator.logMachineActivity) 
-                Log.info("MachineTileEntity.notifyServerPlayerWatching: %s sending keepalive packet", this.machine().machineName());
+                Log.info("MachineTileEntity.notifyServerPlayerWatching: %s sending keepalive packet", this.clientState == null ? "null" : this.clientState.machineName);
 
             ModMessages.INSTANCE.sendToServer(new PacketMachineStatusAddListener(this.pos));
             this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;

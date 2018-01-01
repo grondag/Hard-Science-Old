@@ -7,7 +7,6 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Location.ILocated;
-import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
@@ -17,12 +16,9 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 
 public interface IDevice extends 
-    IIdentified, ILocated, IDomainMember, ISimulationTickable, IReadWriteNBT
+    IIdentified, ILocated, IDomainMember, IReadWriteNBT
 {
     public default boolean doesPersist() { return true; }
-    
-    public default boolean doesUpdateOnTick() { return false; }
-    public default boolean doesUpdateOffTick() { return false; }
     
     /**
      * Set to true at the end of {@link #onConnect()} and 
@@ -67,11 +63,31 @@ public interface IDevice extends
         if(this.hasBlockManager()) this.blockManager().disconnect();
     }
     
-    @Override
+    /**
+     * If true, then {@link #doOnTick()} will be called during 
+     * world tick from server thread. Is checked only when devices
+     * are added or removed from device manager so result should not be dynamic.
+     */
+    public default boolean doesUpdateOnTick() { return false; }
+    
+    /**
+     * See {@link #doesUpdateOnTick()}
+     */
     public default void doOnTick() {}
-
-    @Override
+    
+    /**
+     * If true, then {@link #doOffTick()} will be called once per server tick 
+     * from simulation thread pool. Is checked only when devices
+     * are added or removed from device manager so result should not be dynamic.
+     */
+    public default boolean doesUpdateOffTick() { return false; }
+    
+    /**
+     * See {@link #doesUpdateOffTick()}
+     */
     public default void doOffTick() {}
+    
+    
     
     @Override
     public default AssignedNumber idType()

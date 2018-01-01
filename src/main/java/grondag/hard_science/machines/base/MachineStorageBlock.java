@@ -18,7 +18,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class MachineStorageBlock extends MachineContainerBlock
+public abstract class MachineStorageBlock extends MachineContainerBlock
 {
 
     public MachineStorageBlock(String name, int guiID, ModelState modelState)

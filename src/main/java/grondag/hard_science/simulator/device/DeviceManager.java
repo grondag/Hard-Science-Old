@@ -310,15 +310,13 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     @Override
     public void doOnTick()
     {
-        
-        
+        this.onTickJob.run();
     }
 
     @Override
     public void doOffTick()
     {
-        // TODO Auto-generated method stub
-        
+        this.offTickJob.runOn(Simulator.SIMULATION_POOL);        
     }
 
 }

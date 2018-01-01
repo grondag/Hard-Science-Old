@@ -192,14 +192,14 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
         float faceX = this.hitX(side, hitX, hitZ);
         float faceY = 1f - hitY;
 
-        if(machineTE.clientState().hasOnOff && RenderBounds.BOUNDS_ON_OFF.contains(faceX, faceY))
+        if(machineTE.machine().hasOnOff() && RenderBounds.BOUNDS_ON_OFF.contains(faceX, faceY))
         {
             if(machineTE.togglePower((EntityPlayerMP) playerIn))
             {
                 worldIn.playSound(null, pos.getX() + .5f, pos.getY() + .5f, pos.getZ() + .5f, SoundEvents.UI_BUTTON_CLICK, SoundCategory.PLAYERS, .2f, ((worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * .7f + 1) * 2);
             }
         }
-        else if(machineTE.clientState().hasRedstoneControl && RenderBounds.BOUNDS_REDSTONE.contains(faceX, faceY))
+        else if(machineTE.machine().hasRedstoneControl() && RenderBounds.BOUNDS_REDSTONE.contains(faceX, faceY))
         {
             if(machineTE.toggleRedstoneControl((EntityPlayerMP) playerIn))
             {

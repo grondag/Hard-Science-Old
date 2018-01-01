@@ -5,13 +5,12 @@ import java.io.IOException;
 
 import org.lwjgl.input.Mouse;
 
-import grondag.hard_science.gui.control.IClickHandler.StorageClickHandlerStack;
 import grondag.hard_science.gui.control.Button;
 import grondag.hard_science.gui.control.GuiControl;
+import grondag.hard_science.gui.control.IClickHandler.StorageClickHandlerStack;
 import grondag.hard_science.gui.control.ItemStackPicker;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.TabBar;
-import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.ContainerLayout;
 import grondag.hard_science.machines.support.MachineItemBlock;
@@ -25,7 +24,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class GuiSmartChest extends AbstractContainerGui<SmartChestTileEntity>
+public class GuiSmartChest extends AbstractContainerGui<MachineTileEntity>
 {
     protected final ContainerLayout layout;
     
@@ -64,7 +63,7 @@ public class GuiSmartChest extends AbstractContainerGui<SmartChestTileEntity>
         LAYOUT.playerInventoryTop = LAYOUT.dialogHeight - LAYOUT.externalMargin - LAYOUT.slotSpacing * 4;
     }
 
-    public GuiSmartChest(SmartChestTileEntity tileEntity, MachineStorageContainer container) 
+    public GuiSmartChest(MachineTileEntity tileEntity, MachineStorageContainer container) 
     {
         super(tileEntity, container);
         this.layout = container.layout;

@@ -6,7 +6,6 @@ import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.texture.Textures;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -30,11 +29,5 @@ public class SolarAggregatorTileEntity extends MachineTileEntity
                 RenderBounds.BOUNDS_DUAL_MEDIUM_RIGHT, 1.4, 
                 Textures.DECAL_LARGE_DOT.getSampleSprite(), MatterColors.HDPE, Rotation.ROTATE_NONE,
                 "C2H4", 0xFF000000);
-    }
-    
-    @Override
-    public TextureAtlasSprite getSymbolSprite()
-    {
-        return Textures.DECAL_STAR_12.getSampleSprite();
     }
 }

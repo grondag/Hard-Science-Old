@@ -120,9 +120,14 @@ public abstract class AbstractDevice implements IDevice
     @Override
     public Domain getDomain()
     {
-        if(this.domain == null && this.domainID != IIdentified.UNASSIGNED_ID)
+        if(this.domain == null)
         {
-            this.domain = DomainManager.instance().getDomain(this.domainID);
+            if(this.domainID == IIdentified.UNASSIGNED_ID)
+                this.domain = DomainManager.instance().getDomain(this.domainID);
+            
+            // use default domain if really nothing configured or
+            // referenced domain is somehow gone
+            if(this.domain == null) this.domain = DomainManager.instance().defaultDomain();
         }
         return this.domain;
     }

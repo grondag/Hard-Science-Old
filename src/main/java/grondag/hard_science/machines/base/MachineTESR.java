@@ -17,8 +17,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public abstract class MachineTESR extends SuperBlockTESR
+public class MachineTESR extends SuperBlockTESR
 {
+    public static MachineTESR INSTANCE = new MachineTESR();
+    
     @Override
     public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
@@ -108,7 +110,14 @@ public abstract class MachineTESR extends SuperBlockTESR
         
     }
     
-    protected abstract void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha);
+    /**
+     * Override if device needs to render anything special.
+     * Default is NOOP.
+     */
+    protected void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha)
+    {
+        
+    }
    
   
 }

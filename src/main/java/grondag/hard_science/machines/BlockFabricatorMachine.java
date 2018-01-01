@@ -20,7 +20,6 @@ import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
 import grondag.hard_science.materials.Matter;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
@@ -395,15 +394,15 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     }
 
     @Override
-    public void doOnTick()
+    public void updateMachine(long tick)
     {
-        super.doOnTick();
+        super.updateMachine(tick);
         
         if(!this.isOn()) return;
         
         if(this.getDomain() == null) return;
         
-        if((Simulator.instance().getTick() & 0x1F) == 0x1F)
+        if((tick & 0x1F) == 0x1F)
         {
             this.setCurrentBacklog(this.getDomain().jobManager.getQueueDepth(TaskType.BLOCK_FABRICATION));
         }

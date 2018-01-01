@@ -11,7 +11,7 @@ import grondag.hard_science.superblock.varia.KeyedTuple;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ITickable;
 
-public abstract class MachineTileEntityTickable extends MachineTileEntity implements ITickable
+public class MachineTileEntityTickable extends MachineTileEntity implements ITickable
 {
     /** players who are looking at this machine and need updates sent to client */
     private SimpleUnorderedArraySet<PlayerListener> listeningPlayers;
@@ -71,17 +71,16 @@ public abstract class MachineTileEntityTickable extends MachineTileEntity implem
         {
             PlayerListener previous = this.listeningPlayers.put(listener);
             
-            if(previous == null)
+            if(previous == null || previous.goodUntilMillis < CommonProxy.currentTimeMillis())
             {
                 if(Configurator.logMachineActivity) 
-                    Log.info("MachineTileEntityTickable.addPlayerListener: %s added new listener", this.machine().machineName());
-
+                    Log.info("MachineTileEntityTickable.addPlayerListener: %s added or reinstated listener", this.machine().machineName());
+                
                 if(this.machine() == null) return;
                 
-                // send immediate refresh for any new listener
+                // send immediate refresh for any new / reinstated listener
                 ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
             }
-
         }
     }
     

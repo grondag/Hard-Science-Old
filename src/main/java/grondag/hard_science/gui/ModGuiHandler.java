@@ -1,8 +1,8 @@
 package grondag.hard_science.gui;
 
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
-import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.SolarAggregatorTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -30,9 +30,9 @@ public class ModGuiHandler implements IGuiHandler
         {
             BlockPos pos = new BlockPos(x, y, z);
             TileEntity te = world.getTileEntity(pos);
-            if (te instanceof SmartChestTileEntity) 
+            if (te instanceof MachineTileEntity) 
             {
-                return new MachineStorageContainer(player.inventory, (SmartChestTileEntity) te, GuiSmartChest.LAYOUT);
+                return new MachineStorageContainer(player.inventory, (MachineTileEntity) te, GuiSmartChest.LAYOUT);
             }
         }
 //        else if(id == ModGui.BLOCK_FABRICATOR.ordinal())
@@ -61,9 +61,9 @@ public class ModGuiHandler implements IGuiHandler
                 {
                     BlockPos pos = new BlockPos(x, y, z);
                     TileEntity te = world.getTileEntity(pos);
-                    if (te instanceof SmartChestTileEntity) 
+                    if (te instanceof MachineTileEntity) 
                     {
-                        SmartChestTileEntity containerTileEntity = (SmartChestTileEntity) te;
+                        MachineTileEntity containerTileEntity = (MachineTileEntity) te;
                         return new GuiSmartChest(containerTileEntity, new MachineStorageContainer(player.inventory, containerTileEntity, GuiSmartChest.LAYOUT));
                     }
                     return null;

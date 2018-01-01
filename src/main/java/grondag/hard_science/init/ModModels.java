@@ -9,8 +9,9 @@ import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.library.font.RasterFont;
 import grondag.hard_science.machines.BlockFabricatorTESR;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
-import grondag.hard_science.machines.SmartChestTESR;
-import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.machines.base.MachineTESR;
+import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.materials.MatterCube;
 import grondag.hard_science.materials.MatterCubeItemModel;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -25,10 +26,10 @@ import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePa
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
-import grondag.hard_science.superblock.virtual.VirtualTESR;
-import grondag.hard_science.superblock.virtual.VirtualTileEntityTESR;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
+import grondag.hard_science.superblock.virtual.VirtualTESR;
+import grondag.hard_science.superblock.virtual.VirtualTileEntityTESR;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;
@@ -330,7 +331,8 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntityTESR.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(VirtualTileEntityTESR.class, VirtualTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(BlockFabricatorTileEntity.class, BlockFabricatorTESR.INSTANCE);
-        ClientRegistry.bindTileEntitySpecialRenderer(SmartChestTileEntity.class, SmartChestTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntity.class, MachineTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntityTickable.class, MachineTESR.INSTANCE);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

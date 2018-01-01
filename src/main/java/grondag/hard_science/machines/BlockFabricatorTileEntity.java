@@ -6,7 +6,6 @@ import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.texture.Textures;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.IItemHandler;
@@ -39,10 +38,4 @@ public class BlockFabricatorTileEntity extends MachineTileEntityTickable
         return this.machine().getBufferManager();
     }
    
-    @SideOnly(Side.CLIENT)
-    @Override
-    public TextureAtlasSprite getSymbolSprite()
-    {
-        return Textures.DECAL_BUILDER.getSampleSprite();
-    }
 }

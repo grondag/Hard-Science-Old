@@ -268,7 +268,7 @@ public abstract class AbstractMachine extends AbstractDevice
     protected void updateMachine(long tick){}
 
     @Override
-    public void doOnTick()
+    public final void doOnTick()
     {
         super.doOnTick();
         long tick = Simulator.instance().getTick();
