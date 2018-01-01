@@ -684,6 +684,11 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         
         ImmutableList.Builder<Route> routeBuilder = ImmutableList.builder();
         
+        /**
+         * prevent unterminated loop due to logic error.
+         */
+        int safetyCheck = 0;
+        
         // see header for explanation
         do
         {
@@ -742,8 +747,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                     }
                 }
             }
-        } while(true);
+            
+            
+        } while(++safetyCheck < 1000);
         
+        assert safetyCheck < 1000 : 
+            "probable loop logic error in route building";
+            
         return routeBuilder.build();
     }
     

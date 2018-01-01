@@ -325,6 +325,12 @@ public class CarrierPortGroup implements Iterable<PortState>
             assert carrierPortCount > 0
                 : "Inconsistent carrier count on carrier port pre-detach.";
 
+            // need to explicitly detach to internal carrier for bridge
+            // ports because super.detach will only handle external circuit.
+            // NB: must do comparison on mode before super method, which
+            // will set mode to disconnected.
+            if(this.mode.isBridge()) internalCircuit.detach(this);
+
             super.detach();
             
             if(--carrierPortCount == 0) internalCircuit = null;
