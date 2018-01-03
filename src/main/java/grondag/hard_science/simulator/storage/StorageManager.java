@@ -23,7 +23,6 @@ import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 
 /**
 * Responsibilities:
@@ -121,8 +120,7 @@ public class StorageManager<T extends StorageType<T>>
         return this.domain;
     }
 
-    @SuppressWarnings("unchecked")
-    public synchronized void addStore(IStorage<T> store)
+    public synchronized void addStore(AbstractStorage<T> store)
     {
         assert !stores.contains(store)
             : "Storage manager received request to add store it already has.";
@@ -130,19 +128,13 @@ public class StorageManager<T extends StorageType<T>>
         this.stores.add(store);
         this.capacity += store.getCapacity();
         
-        if(store.storageType() == StorageType.ITEM)
-        {
-            this.domain.eventBus.post(new StorageEvent.AfterItemStorageConnect((AbstractStorage<StorageTypeStack>) store));
-        }
-        
         for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
             this.notifyAdded(store, stack.resource(), stack.getQuantity(), null);
         }
     }
     
-    @SuppressWarnings("unchecked")
-    public synchronized void removeStore(IStorage<T> store)
+    public synchronized void removeStore(AbstractStorage<T> store)
     {
         assert stores.contains(store)
          : "Storage manager received request to remove store it doesn't have.";
@@ -150,11 +142,6 @@ public class StorageManager<T extends StorageType<T>>
         for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
             this.notifyTaken(store, stack.resource(), stack.getQuantity(), null);
-        }
-        
-        if(store.storageType() == StorageType.ITEM)
-        {
-            this.domain.eventBus.post(new StorageEvent.BeforeItemStorageDisconnect((AbstractStorage<StorageTypeStack>) store));
         }
         
         this.stores.remove(store);

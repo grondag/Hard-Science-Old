@@ -34,9 +34,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public interface IMachineBlock
 {
     /**
-     * Returns machine instance associated with block at this position.
-     * Will create a new machine if the world has this block at the given position.
-     * Server-side only.
+     * Returns machine instance associated with block at this position, if any.
      */
     @Nullable
     public default AbstractMachine machine(World world, BlockPos pos)
@@ -45,30 +43,13 @@ public interface IMachineBlock
     
         if(world.isRemote) return null;
         
-        IDevice result = DeviceManager.getDevice(world, pos);
-        
-        IBlockState blockState = world.getBlockState(pos);
-        
-        if(blockState.getBlock() == this)
+        if(world.getBlockState(pos).getBlock() != this)
         {
-            // should have a device - so create one if not found
-            if(result == null)
-            {
-                if(Configurator.logDeviceChanges)
-                    Log.info("MachineBlock.machine creating new machine: @ %d.%d.%d in dim %d", 
-                            pos.getX(), pos.getY(), pos.getZ(), world.provider.getDimension());
-
-                result = this.createNewMachine();
-                result.setLocation(pos, world);
-                DeviceManager.addDevice(result);
-            }
+            assert false : "Block mismatch on device lookup request.";
+            return null;
         }
-        else
-        {
-            assert result == null : "Device found at location without matching block";
-        }
-                
-        return (AbstractMachine) result;
+        
+        return (AbstractMachine)DeviceManager.getDevice(world, pos);
     }
     
     /**
@@ -88,19 +69,22 @@ public interface IMachineBlock
             Log.info("MachineBlock.onBlockPlacedBy: @ %d.%d.%d in dim %d", 
                     pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
 
+        assert this.machine(worldIn, pos) == null
+                : "Found existing machine on block placement.";
+        
         // restore placed machines or initialize them with simulation
-       
-        AbstractMachine machine = this.machine(worldIn, pos);
+        AbstractMachine machine = this.createNewMachine();
         
         if(stack.hasTagCompound())
         {
             NBTTagCompound serverTag = SuperTileEntity.getServerTag(stack.getTagCompound());
-            
             if(serverTag.hasKey(ModNBTTag.MACHINE_STATE))
             {
                 machine.deserializeNBT(serverTag.getCompoundTag(ModNBTTag.MACHINE_STATE));
             }
         }
+        
+        machine.setLocation(pos, worldIn);
         
         // new machines will default to public domain
         // change to player's active domain on placement
@@ -120,6 +104,10 @@ public interface IMachineBlock
         {
             machine.setFront(((SuperBlock)this).getModelState(worldIn, pos, true).getAxisRotation().horizontalFace);
         }
+      
+        // machine fully ready to be connected to domain now
+        DeviceManager.addDevice(machine);
+        machine.onConnect();
         
         TileEntity blockTE = worldIn.getTileEntity(pos);
         if (blockTE != null && blockTE instanceof MachineTileEntity) 
@@ -154,6 +142,8 @@ public interface IMachineBlock
         if(world.isRemote) return;
         
         AbstractMachine machine = this.machine(world, data.getPos());
+        
+        if(machine == null) return;
 
         probeInfo.text(machine.machineName().toUpperCase());
         probeInfo.text(I18n.translateToLocalFormatted("probe.machine.domain", 

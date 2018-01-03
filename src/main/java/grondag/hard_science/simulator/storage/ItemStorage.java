@@ -1,7 +1,9 @@
 package grondag.hard_science.simulator.storage;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -143,22 +145,62 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     }
 
     @Override
+    public void onConnect()
+    {
+        super.onConnect();
+        
+        //FIXME: put back
+//        assert this.getDomain() != null : "Null domain on storage connect";
+        
+        if(this.getDomain() == null)
+            Log.warn("Null domain on item storage connect");
+        else
+            StorageEvent.postItemStorageConnect(this);
+    }
+
+    @Override
+    public void onDisconnect()
+    {
+        //FIXME: put back
+//        assert this.getDomain() != null : "Null domain on storage disconnect";
+        
+        if(this.getDomain() == null)
+            Log.warn("Null domain on item storage connect");
+        else
+            StorageEvent.postBeforeStorageDisconnect(this);
+        super.onDisconnect();
+    }
+
+    @Override
+    public void setDomain(Domain domain)
+    {
+        if(this.isConnected() && this.getDomain() != null)
+        {
+            StorageEvent.postBeforeStorageDisconnect(this);
+        }
+        super.setDomain(domain);
+        if(domain != null)
+        {
+            StorageEvent.postItemStorageConnect(this);
+        }
+    }
+
+    @Override
     public synchronized long takeUpTo(IResource<StorageTypeStack> resource, long limit, boolean simulate, IProcurementRequest<StorageTypeStack> request)
     {
         long result = super.takeUpTo(resource, limit, simulate, request);
-        if(!simulate && result != 0)
-            this.getDomain().eventBus.post(new StorageEvent.ItemResourceUpdate(this, resource, -result));
-        return -result;
+        if(!simulate && result != 0) StorageEvent.postItemStoredUpdate(this, resource, -result);
+        return result;
     }
 
     @Override
     public synchronized long add(IResource<StorageTypeStack> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypeStack> request)
     {
         long result = super.add(resource, howMany, simulate, request);
-        if(!simulate && result != 0)
-            this.getDomain().eventBus.post(new StorageEvent.ItemResourceUpdate(this, resource, result));
+        if(!simulate && result != 0) StorageEvent.postItemStoredUpdate(this, resource, result);
         return result;
     }
+    
     
     
 }

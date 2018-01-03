@@ -72,6 +72,7 @@ public class MachineTileEntity extends SuperTileEntity
     
     /**
      * Caches machine instance, and notifies it of loaded tile entity.
+     * Will be null during early stages of block placement.
      */
     @Nullable
     public AbstractMachine machine()
@@ -83,7 +84,7 @@ public class MachineTileEntity extends SuperTileEntity
         if(this.machine == null && this.world != null && this.pos != null)
         {
             this.machine = ((MachineBlock)this.getBlockType()).machine(this.world, this.pos);
-            this.machine.machineTE = this;
+            if(this.machine != null) this.machine.machineTE = this;
         }
         return this.machine;
     }
@@ -292,10 +293,10 @@ public class MachineTileEntity extends SuperTileEntity
     {
         if(world.isRemote) return;
         
+        if(this.machine() == null) return;
+        
         if(Configurator.logMachineActivity) 
             Log.info("MachineTileEntity.addPlayerListener %s got keepalive packet", this.machine().machineName());
-        
-        if(this.machine() == null) return;
         
         // send immediate refresh
         ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);

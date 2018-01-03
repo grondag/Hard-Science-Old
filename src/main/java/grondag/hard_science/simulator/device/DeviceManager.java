@@ -105,6 +105,12 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         return block == null ? null : block.device();
     }
     
+    /**
+     * Records device for access and persistence.</p>
+     * Note that adding a device does NOT connect it.
+     * That is done either after deserialization (for existing devices)
+     * or after block placement (for new devices)
+     */
     public static void addDevice(IDevice device)
     {
         instance().addDeviceInconveniently(device);
@@ -203,7 +209,6 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
         this.onTickJobBacker.setDirty();
         this.offTickJobBacker.setDirty();
         this.isDirty = true;
-        device.onConnect();
         
         if(Configurator.logDeviceChanges)
             Log.info("DeviceManager device count = " + this.devices.size());
@@ -216,11 +221,19 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
             Log.info("DeviceManager.removeDevice: " + device.getId());
 
         IDevice oldDevice = this.devices.remove(device.getId());
-        device.onDisconnect();
-        assert oldDevice == device
-                : oldDevice == null 
-                    ? "Removal request for missing device." 
-                    : "Removal request device mismatch";
+        if(oldDevice == device)
+        {
+            device.onDisconnect();
+        }
+        else if(oldDevice == null)
+        {
+            device.onDisconnect();
+            assert false : "Removal request device mismatch";
+        }
+        else
+        {
+            assert false : "Removal request for missing device.";
+        }        
         this.isDirty = true;
         this.onTickJobBacker.setDirty();
         this.offTickJobBacker.setDirty();
@@ -259,12 +272,12 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     {
         if(tag == null) return;
         
-        NBTTagList nbtDomains = tag.getTagList(ModNBTTag.DEVICE_MANAGER_DEVICES, 10);
-        if( nbtDomains != null && !nbtDomains.hasNoTags())
+        NBTTagList nbtDevices = tag.getTagList(ModNBTTag.DEVICE_MANAGER_DEVICES, 10);
+        if( nbtDevices != null && !nbtDevices.hasNoTags())
         {
-            for (int i = 0; i < nbtDomains.tagCount(); ++i)
+            for (int i = 0; i < nbtDevices.tagCount(); ++i)
             {
-                IDevice device = create(nbtDomains.getCompoundTagAt(i));
+                IDevice device = create(nbtDevices.getCompoundTagAt(i));
                 if(device != null) this.devices.put(device.getId(), device);
             }   
         }

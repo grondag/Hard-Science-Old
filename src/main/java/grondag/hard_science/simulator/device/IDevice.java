@@ -47,12 +47,15 @@ public interface IDevice extends
     /**
      * Signal that device should perform internal
      * initialization and register device blocks
-     * via {@link DeviceManager#addDeviceBlock}
+     * via {@link DeviceManager#addDeviceBlock}.
+     * Device should already be added to device 
+     * manager when this is called.
      * 
-     * Called exactly once after a device is added to the device manager
-     * via {@link DeviceManager#addDevice(IDevice)} and
-     * after deserialization, after all simulation 
-     * components are deserialized.<p>
+     * Called exactly once either by ...<br>
+     * 1) Device Manager after all simulation components are deserialized.<br>
+     * ...or...<br>
+     * 2) Block placement logic after domain /location are set and 
+     * and deserialization from stack (if applies) is complete.
      */
     public default void onConnect()
     {

@@ -74,20 +74,23 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
     public void setDomain(Domain domain)
     {
         // if already connected, switch to new domain
-       if(this.owner != null)
+       if(this.isConnected() && this.owner != null)
        {
            this.owner.removeStore(this);
        }
-       if(domain == null)
-       {
-           this.owner = null;
-       }
-       else
-       {
-           this.owner = domain.getStorageManager(this.storageType());
-           this.owner.addStore(this);
-       }
        super.setDomain(domain);
+       if(this.isConnected())
+       {
+           if(domain == null)
+           {
+               this.owner = null;
+           }
+           else
+           {
+               this.owner = domain.getStorageManager(this.storageType());
+               this.owner.addStore(this);
+           }
+       }
     }
     
     @Override

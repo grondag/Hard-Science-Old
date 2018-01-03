@@ -5,12 +5,12 @@ import com.google.common.eventbus.Subscribe;
 import grondag.hard_science.Log;
 import grondag.hard_science.simulator.storage.StorageEvent.AfterItemStorageConnect;
 import grondag.hard_science.simulator.storage.StorageEvent.BeforeItemStorageDisconnect;
-import grondag.hard_science.simulator.storage.StorageEvent.ItemResourceUpdate;
+import grondag.hard_science.simulator.storage.StorageEvent.ItemStoredUpdate;
 
 public class DomainEventTester
 {
     @Subscribe
-    public void onItemUpdate(ItemResourceUpdate event)
+    public void onItemUpdate(ItemStoredUpdate event)
     {
         Log.info("onItemUpdate %s  %s  %d", 
                 event.storage.machineName(),

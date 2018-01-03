@@ -46,7 +46,7 @@ public class TransportTestMachine extends ItemStorage
     public void doOffTick()
     {
         super.doOffTick();
-        if(this.isOn())
+        if(this.isOn() && this.getDomain() != null)
         {
             long avail = this.getQuantityStored(resource);
             if(avail > 0)

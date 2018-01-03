@@ -21,7 +21,12 @@ public abstract class AbstractDevice implements IDevice
 {
     private int id;
     private Location location;
+    
+    /**
+     * True if {@link #onConnect()} has run and {@link #onDisconnect()} has not.
+     */
     private boolean isConnected = false;
+    
     private int channel = 0;
     
     private int domainID = IIdentified.UNASSIGNED_ID;
@@ -125,12 +130,8 @@ public abstract class AbstractDevice implements IDevice
     {
         if(this.domain == null)
         {
-            if(this.domainID == IIdentified.UNASSIGNED_ID)
+            if(this.domainID != IIdentified.UNASSIGNED_ID)
                 this.domain = DomainManager.instance().getDomain(this.domainID);
-            
-            // use default domain if really nothing configured or
-            // referenced domain is somehow gone
-            if(this.domain == null) this.domain = DomainManager.instance().defaultDomain();
         }
         return this.domain;
     }
@@ -147,6 +148,11 @@ public abstract class AbstractDevice implements IDevice
     {
         this.deserializeID(tag);
         this.location = Location.fromNBT(tag);
+        
+        // would cause problems with devices that have already posted events to a domain
+        assert this.domain == null
+                : "Non-null domain during device deserialization.";
+        
         this.domainID = tag.getInteger(ModNBTTag.DOMAIN_ID);
         this.channel = tag.getInteger(ModNBTTag.DEVICE_CHANNEL);
     }
