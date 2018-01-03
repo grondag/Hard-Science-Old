@@ -4,6 +4,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorBlock;
 import grondag.hard_science.machines.BottomBusBlock;
+import grondag.hard_science.machines.ItemAccessBlock;
 import grondag.hard_science.machines.MiddleBusBlock;
 import grondag.hard_science.machines.SmartChestBlock;
 import grondag.hard_science.machines.SolarCableBlock;
@@ -186,6 +187,7 @@ public class ModBlocks
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
         event.getRegistry().register(new TransportTestBlock("transport_test"));
+        event.getRegistry().register(new ItemAccessBlock("item_access"));
         
     }
     

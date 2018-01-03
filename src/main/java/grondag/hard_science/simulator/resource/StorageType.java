@@ -57,6 +57,8 @@ public abstract class StorageType<T extends StorageType<T>>
     @Nullable
     public abstract NBTTagCompound toNBT(IResource<T> resource);
     
+    public abstract AbstractResourceDelegate<T> createDelegate(IResource<T> resource, int handle, long quantity);
+    
     @Nullable
     public abstract AbstractResourceDelegate<T> fromPacket(PacketBuffer pBuff);
     
@@ -109,6 +111,12 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             return null;
         }
+
+        @Override
+        public AbstractResourceDelegate<StorageTypeNone> createDelegate(IResource<StorageTypeNone> resource, int handle, long quantity)
+        {
+            return null;
+        }
     }
     
     /**
@@ -151,6 +159,12 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             return new ItemResourceWithQuantity(nbt);
         }
+
+        @Override
+        public AbstractResourceDelegate<StorageTypeStack> createDelegate(IResource<StorageTypeStack> resource, int handle, long quantity)
+        {
+            return new ItemResourceDelegate(handle, (ItemResource) resource, quantity);
+        }
     }
             
     /**
@@ -184,6 +198,13 @@ public abstract class StorageType<T extends StorageType<T>>
 
         @Override
         public AbstractResourceWithQuantity<StorageTypeFluid> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public AbstractResourceDelegate<StorageTypeFluid> createDelegate(IResource<StorageTypeFluid> resource, int handle, long quantity)
         {
             // TODO Auto-generated method stub
             return null;
@@ -225,6 +246,13 @@ public abstract class StorageType<T extends StorageType<T>>
 
         @Override
         public AbstractResourceWithQuantity<StorageTypePower> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public AbstractResourceDelegate<StorageTypePower> createDelegate(IResource<StorageTypePower> resource, int handle, long quantity)
         {
             // TODO Auto-generated method stub
             return null;

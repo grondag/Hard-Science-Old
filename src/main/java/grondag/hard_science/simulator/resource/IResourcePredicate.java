@@ -18,7 +18,7 @@ import net.minecraft.nbt.NBTTagCompound;
  * type of resource. Attributes that don't apply always
  * return 0 or null. <p>
  */
-public interface IResourcePredicate<V extends StorageType<V>> extends Predicate<Object>
+public interface IResourcePredicate<V extends StorageType<V>> extends Predicate<IResource<V>>
 {
     /**
      * True if this predicate is the resource instance itself and

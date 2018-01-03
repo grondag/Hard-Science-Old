@@ -50,7 +50,7 @@ public interface IResource<V extends StorageType<V>> extends IResourcePredicate<
     public int handle();
     
     @Override
-    public default boolean test(Object t)
+    public default boolean test(IResource<V> t)
     {
         return t.equals(this);
     }

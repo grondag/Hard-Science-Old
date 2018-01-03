@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.EventBus;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
@@ -33,6 +34,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     String name;
     boolean isSecurityEnabled;
     
+    public final EventBus eventBus = new EventBus();
     public final StorageManager<StorageTypeStack> itemStorage;
     public final JobManager jobManager;
     public final BuildManager buildManager;
@@ -48,6 +50,9 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         this.jobManager = new JobManager(this);
         this.buildManager = new BuildManager(this);
         this.brokerManager = new BrokerManager(this);
+        
+        //FIXME remove
+        this.eventBus.register(new DomainEventTester());
     }
     
     Domain (DomainManager domainManager, NBTTagCompound tag)

@@ -102,7 +102,11 @@ public interface IMachineBlock
             }
         }
         
-        if(machine.getDomain() == null)
+        // new machines will default to public domain
+        // change to player's active domain on placement
+        // machines that are restored from stack may have
+        // a specific existing domain, which should not be replaced.
+        if(machine.getDomain() == null || machine.getDomain() == DomainManager.instance().defaultDomain())
         {
             Domain domain = DomainManager.instance().getActiveDomain((EntityPlayerMP) placer);
             if(domain == null || !domain.hasPrivilege((EntityPlayer) placer, Privilege.ADD_NODE))

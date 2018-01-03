@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
 import grondag.hard_science.init.ModItems;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -140,4 +141,24 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         ItemResource itemRes = (ItemResource)resource;
         return !(itemRes.getItem() == ModItems.smart_chest && itemRes.hasTagCompound());
     }
+
+    @Override
+    public synchronized long takeUpTo(IResource<StorageTypeStack> resource, long limit, boolean simulate, IProcurementRequest<StorageTypeStack> request)
+    {
+        long result = super.takeUpTo(resource, limit, simulate, request);
+        if(!simulate && result != 0)
+            this.getDomain().eventBus.post(new StorageEvent.ItemResourceUpdate(this, resource, -result));
+        return -result;
+    }
+
+    @Override
+    public synchronized long add(IResource<StorageTypeStack> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypeStack> request)
+    {
+        long result = super.add(resource, howMany, simulate, request);
+        if(!simulate && result != 0)
+            this.getDomain().eventBus.post(new StorageEvent.ItemResourceUpdate(this, resource, result));
+        return result;
+    }
+    
+    
 }

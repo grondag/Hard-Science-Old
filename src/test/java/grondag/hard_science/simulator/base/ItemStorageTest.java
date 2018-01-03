@@ -9,6 +9,7 @@ import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorage;
@@ -102,19 +103,19 @@ public class ItemStorageTest
         assert confirmStoreAndQuantity(list, store2, store2.availableCapacity());
         assert confirmStoreAndQuantity(list, store4, store4.availableCapacity());
         
-        assert ism.findQuantityAvailable(new Predicate<Object>() 
+        assert ism.findQuantityAvailable(new Predicate<IResource<StorageTypeStack>>() 
         {
             @Override
-            public boolean test(Object t)
+            public boolean test(IResource<StorageTypeStack> t)
             {
                 return t.equals(res2);
             }
         }).get(0).getQuantity() == ism.getQuantityStored(res2);
         
-        List<StorageWithResourceAndQuantity<StorageTypeStack>> findList = ism.findStorageWithQuantity(new Predicate<Object>() 
+        List<StorageWithResourceAndQuantity<StorageTypeStack>> findList = ism.findStorageWithQuantity(new Predicate<IResource<StorageTypeStack>>() 
         {
             @Override
-            public boolean test(Object t)
+            public boolean test(IResource<StorageTypeStack> t)
             {
                 return t.equals(res1);
             }

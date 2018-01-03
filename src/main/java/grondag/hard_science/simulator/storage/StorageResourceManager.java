@@ -523,4 +523,9 @@ public class StorageResourceManager<T extends StorageType<T>>
         }
         return false;
     }
+    
+    public IResource<T> resource()
+    {
+        return this.resource;
+    }
 }

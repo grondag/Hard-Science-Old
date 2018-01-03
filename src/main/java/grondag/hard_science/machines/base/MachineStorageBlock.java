@@ -24,7 +24,6 @@ public abstract class MachineStorageBlock extends MachineContainerBlock
     public MachineStorageBlock(String name, int guiID, ModelState modelState)
     {
         super(name, guiID, modelState);
-        // TODO Auto-generated constructor stub
     }
 
     @Override

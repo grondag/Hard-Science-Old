@@ -35,7 +35,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
         super(carrierLevel, portType);
     }
 
-    protected final static IFunction<AbstractResourceWithQuantity<?>, Integer> handleMapper
+    protected final static IFunction<AbstractResourceWithQuantity<?>, Integer> RESOURCE_HANDLE_MAPPER
          = new IFunction<AbstractResourceWithQuantity<?>, Integer>() {
             @Override
             public Integer apply(AbstractResourceWithQuantity<?> elem)
@@ -49,7 +49,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
     protected Key2List<AbstractResourceWithQuantity<T>, IResource<T>, Integer> slots 
         = new Key2List.Builder<AbstractResourceWithQuantity<T>, IResource<T>, Integer>().
               withPrimaryKey1Map(AbstractResourceWithQuantity::resource).
-              withUniqueKey2Map(handleMapper).
+              withUniqueKey2Map(RESOURCE_HANDLE_MAPPER).
               build();
       
     protected long capacity = 2000;

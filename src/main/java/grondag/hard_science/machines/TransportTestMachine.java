@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -21,7 +22,7 @@ public class TransportTestMachine extends ItemStorage
     private final static ItemResource resource = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
     public TransportTestMachine()
     {
-        super(CarrierLevel.BOTTOM, PortType.DIRECT);
+        super(CarrierLevel.MIDDLE, PortType.DIRECT);
         super.setCapacity(Integer.MAX_VALUE);
         super.add(resource, Integer.MAX_VALUE, false, null);
     }
@@ -57,12 +58,12 @@ public class TransportTestMachine extends ItemStorage
                 for(StorageWithQuantity<StorageTypeStack> rwq : list)
                 {
                     ImmutableList<Route> routes = 
-                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, rwq.storage);
+                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, (IDevice)rwq.storage);
                     
                     if(routes.isEmpty()) continue;
                     
                     avail -= LogisticsService.ITEM_SERVICE
-                            .sendResourceNow(routes.get(0), resource, avail, this, rwq.storage, false, false, null);
+                            .sendResourceNow(routes.get(0), resource, avail, this, (IDevice)rwq.storage, false, false, null);
                     
                     if(avail <= 0) break;
                 }
@@ -71,13 +72,9 @@ public class TransportTestMachine extends ItemStorage
     }
 
     @Override
-    public synchronized long add(IResource<StorageTypeStack> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypeStack> request)
+    public long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, IProcurementRequest<?> request)
     {
         // can't put stuff in it
         return 0;
     }
-    
-    
-    
-    
 }
