@@ -360,7 +360,7 @@ public class StorageResourceManager<T extends StorageType<T>>
      * Returns all locations where the resource is stored,
      * irrespective of allocation.
      */
-    public synchronized List<StorageWithQuantity<T>> getLocations(IResource<T> resource)
+    public synchronized ImmutableList<StorageWithQuantity<T>> getLocations(IResource<T> resource)
     {
         ImmutableList.Builder<StorageWithQuantity<T>> builder = ImmutableList.builder();
         for(IStorage<T> store : this.stores)

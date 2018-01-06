@@ -85,16 +85,11 @@ public class MachineStorageContainer extends MachineContainer
         super.addListener(listener);
         if(listener instanceof EntityPlayerMP && this.te != null && ((MachineTileEntity)this.te).storageMachine() != null)
         {
-//            ItemStorageListener newItemListener =
-//                    new ItemStorageListener(
-//                            (ItemStorage) ((MachineTileEntity)this.te).storageMachine(), 
-//                            false, 
-//                            (EntityPlayerMP)listener);
-            
             ItemStorageListener newItemListener =
                     new ItemStorageListener(
-                            ((ItemStorage) ((MachineTileEntity)this.te).storageMachine()).getDomain(), 
+                            (ItemStorage) ((MachineTileEntity)this.te).storageMachine(), 
                             (EntityPlayerMP)listener);
+            
             
             assert this.storageListeners.put((EntityPlayerMP)listener, newItemListener) == null
                     : "Found existing storage listener for player on container";

@@ -9,8 +9,8 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.ItemStorage;
-import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
@@ -51,19 +51,19 @@ public class TransportTestMachine extends ItemStorage
             long avail = this.getQuantityStored(resource);
             if(avail > 0)
             {
-                List<StorageWithQuantity<StorageTypeStack>> list 
-                    = this.getDomain().itemStorage.findSpaceFor(resource, avail, null);
+                List<IStorage<StorageTypeStack>> list 
+                    = this.getDomain().itemStorage.findSpaceFor(resource, avail);
                 if(list.isEmpty()) return;
                 
-                for(StorageWithQuantity<StorageTypeStack> rwq : list)
+                for(IStorage<StorageTypeStack> store : list)
                 {
                     ImmutableList<Route> routes = 
-                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, (IDevice)rwq.storage);
+                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, (IDevice)store);
                     
                     if(routes.isEmpty()) continue;
                     
                     avail -= LogisticsService.ITEM_SERVICE
-                            .sendResourceNow(routes.get(0), resource, avail, this, (IDevice)rwq.storage, false, false, null);
+                            .sendResourceNow(routes.get(0), resource, avail, this, (IDevice)store, false, false, null);
                     
                     if(avail <= 0) break;
                 }

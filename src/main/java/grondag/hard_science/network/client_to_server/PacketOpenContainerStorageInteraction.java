@@ -9,9 +9,7 @@ import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
-import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.ItemStorageListener;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -87,65 +85,64 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         MachineTileEntity te = MachineContainer.getOpenContainerTileEntity(player);
         if(te == null || !(te instanceof MachineTileEntity)) return;
         
-        IStorage<StorageTypeStack> storage =  ((MachineTileEntity)te).storageMachine();
-        if(storage == null) return;
-
-        if(storage.storageType() != StorageType.ITEM) return;
-        
         if(!(player.openContainer instanceof MachineStorageContainer)) return;
         
         MachineStorageContainer container = (MachineStorageContainer)player.openContainer;
+                
+        ItemStorageListener listener = container.getItemListener(player);
         
-        ItemResource targetResource = (ItemResource) container.getItemListener(player).getResourceForHandle(message.resourceHandle);
+        if(listener == null || listener.isDead()) return;
+        
+        ItemResource targetResource = (ItemResource) listener.getResourceForHandle(message.resourceHandle);
         
         switch(message.action)
         {
             case PUT_ALL_HELD:
-                this.doPut(false, player, storage);
+                this.doPut(false, player, listener);
                 return;
             
             case PUT_ONE_HELD:
-                this.doPut(true, player, storage);
+                this.doPut(true, player, listener);
                 return;
             
             case QUICK_MOVE_HALF:
             {
                 if(targetResource == null) return;
-                int toMove = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource) / 2));
-                this.doQuickMove(toMove, player, targetResource, storage);
+                int toMove = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, listener.getQuantityStored(targetResource) / 2));
+                this.doQuickMove(toMove, player, targetResource, listener);
                 return;
             }
                 
             case QUICK_MOVE_ONE:
                 if(targetResource == null) return;
-                this.doQuickMove(1, player, targetResource, storage);
+                this.doQuickMove(1, player, targetResource, listener);
                 return;
 
             case QUICK_MOVE_STACK:
             {
                 if(targetResource == null) return;
-                int toMove = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize(), storage.getQuantityStored(targetResource));
-                this.doQuickMove(toMove, player, targetResource, storage);
+                int toMove = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize(), listener.getQuantityStored(targetResource));
+                this.doQuickMove(toMove, player, targetResource, listener);
                 return;
             }
 
             case TAKE_ONE:
-                this.doTake(1, player, targetResource, storage);
+                this.doTake(1, player, targetResource, listener);
                 return;
            
             case TAKE_HALF:
             {
                 if(targetResource == null) return;
-                int toTake = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource) / 2));
-                this.doTake(toTake, player, targetResource, storage);
+                int toTake = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, listener.getQuantityStored(targetResource) / 2));
+                this.doTake(toTake, player, targetResource, listener);
                 return;
             }
 
             case TAKE_STACK:
             {
                 if(targetResource == null) return;
-                int toTake = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize(), storage.getQuantityStored(targetResource));
-                this.doTake(toTake, player, targetResource, storage);
+                int toTake = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize(), listener.getQuantityStored(targetResource));
+                this.doTake(toTake, player, targetResource, listener);
                 return;
             }
             
@@ -155,24 +152,24 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         }
     }
     
-    private void doPut(boolean single, EntityPlayerMP player, IStorage<StorageTypeStack> storage)
+    private void doPut(boolean single, EntityPlayerMP player, ItemStorageListener listener)
     {
         ItemStack heldStack = player.inventory.getItemStack();
         
         if(heldStack != null && !heldStack.isEmpty())
         {
             ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(heldStack);
-            int added = (int) storage.add(heldResource.resource(), single ? 1 : heldStack.getCount(), false, null);
+            int added = (int) listener.add(heldResource.resource(), single ? 1 : heldStack.getCount(), false, null);
             if(added > 0) heldStack.shrink(added);
             player.updateHeldItem();
         }
-        return;
+        return;        
     }
-    
-    private void doQuickMove(int howMany, EntityPlayerMP player, ItemResource targetResource, IStorage<StorageTypeStack> storage)
+
+    private void doQuickMove(int howMany, EntityPlayerMP player, ItemResource targetResource, ItemStorageListener listener)
     {
         if(howMany == 0) return;
-        int toMove = (int) storage.takeUpTo(targetResource, howMany, false, null);
+        int toMove = (int) listener.takeUpTo(targetResource, howMany, false, null);
         if(toMove == 0) return;
         ItemStack newStack = targetResource.sampleItemStack();
         newStack.setCount(toMove);
@@ -186,7 +183,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     /**
      * Note: assumes player held item is empty and does not check for this.
      */
-    private void doTake(int howMany, EntityPlayerMP player, ItemResource targetResource, IStorage<StorageTypeStack> storage)
+    private void doTake(int howMany, EntityPlayerMP player, ItemResource targetResource, ItemStorageListener listener)
     {
         if(howMany == 0) return;
 
@@ -197,14 +194,14 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
             boolean heldStackMatchesTarget = targetResource.isStackEqual(heldStack);
             if(!heldStackMatchesTarget) return;
             if(heldStack.getCount() >= heldStack.getMaxStackSize()) return;
-            int toAdd = (int) storage.takeUpTo(targetResource, howMany, false, null);
+            int toAdd = (int) listener.takeUpTo(targetResource, howMany, false, null);
             if(toAdd == 0) return;
             heldStack.grow(toAdd);
             player.updateHeldItem();
         }
         else
         {
-            int toAdd = (int) storage.takeUpTo(targetResource, howMany, false, null);
+            int toAdd = (int) listener.takeUpTo(targetResource, howMany, false, null);
             if(toAdd == 0) return;
             ItemStack newStack = targetResource.sampleItemStack();
             newStack.setCount(toAdd);

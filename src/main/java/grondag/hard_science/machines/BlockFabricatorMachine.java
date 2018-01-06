@@ -24,7 +24,7 @@ import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.StorageWithQuantity;
+import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.RequestStatus;
 import grondag.hard_science.simulator.storage.jobs.TaskType;
@@ -252,7 +252,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         ItemResource res = ItemResource.fromStack(stack);
         
         //TODO: pass in procurement request
-        List<StorageWithQuantity<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, 1, null);
+        List<IStorage<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, 1);
         
         if(locations.isEmpty()) return;
         

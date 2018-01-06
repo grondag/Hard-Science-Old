@@ -913,4 +913,35 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             itemStorageListener.initialize();;
         }, false);
     }
+    
+    /**
+     * Returns true if any transport route exists between the two devices.
+     * By convention, returns true if both devices are the same device.<p>
+     * 
+     * Must be called from service thread.
+     */
+    public boolean areDevicesConnected(IDevice fromDevice, IDevice toDevice)
+    {
+        assert confirmServiceThread() : "Transport logic running outside logistics service";
+        
+        if(fromDevice == toDevice) return true;
+                
+        ITransportManager<?> tm1 = fromDevice.tranportManager(storageType);
+        if(tm1 == null) return false;
+        
+        ITransportManager<?> tm2 = toDevice.tranportManager(storageType);
+        if(tm2 == null) return false;
+
+        Legs legs1 = tm1.legs();
+        Legs legs2 = tm2.legs();
+        
+        for(CarrierCircuit c : legs1.islands)
+        {
+            if(legs2.islands.contains(c))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

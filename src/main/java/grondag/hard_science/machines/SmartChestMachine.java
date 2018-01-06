@@ -14,7 +14,7 @@ public class SmartChestMachine extends ItemStorage
     @Override
     public boolean hasOnOff()
     {
-        return false;
+        return true;
     }
 
     @Override

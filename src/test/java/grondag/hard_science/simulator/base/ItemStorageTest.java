@@ -5,6 +5,8 @@ import java.util.function.Predicate;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.Domain;
@@ -91,13 +93,16 @@ public class ItemStorageTest
         
         store2.add(res1,  5, false, null);
         
-        List<StorageWithQuantity<StorageTypeStack>> list = ism.getLocations(res1);
+        List<StorageWithQuantity<StorageTypeStack>> list = ism.getLocations(res1)
+                .stream().map(p -> p.withQuantity(p.availableCapacity()))
+                .collect(ImmutableList.toImmutableList());
         assert list.size() == 3;
         assert confirmStoreAndQuantity(list, store1, store1.getQuantityStored(res1));
         assert confirmStoreAndQuantity(list, store2, store2.getQuantityStored(res1));
         assert confirmStoreAndQuantity(list, store3, store3.getQuantityStored(res1));
         
-        list = ism.findSpaceFor(res3, 2000, null);
+        list = ism.findSpaceFor(res3, 2000).stream().map(p -> p.withQuantity(p.availableCapacity()))
+                .collect(ImmutableList.toImmutableList());
         assert list.size() == 3;
         assert confirmStoreAndQuantity(list, store1, store1.availableCapacity());
         assert confirmStoreAndQuantity(list, store2, store2.availableCapacity());

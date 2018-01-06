@@ -1,11 +1,15 @@
 package grondag.hard_science.simulator.storage;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 
 import org.magicwerk.brownies.collections.Key2List;
 import org.magicwerk.brownies.collections.function.IFunction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.eventbus.Subscribe;
 
 import grondag.hard_science.network.ModMessages;
@@ -21,10 +25,14 @@ import grondag.hard_science.simulator.storage.StorageEvent.AfterItemStorageConne
 import grondag.hard_science.simulator.storage.StorageEvent.BeforeItemStorageDisconnect;
 import grondag.hard_science.simulator.storage.StorageEvent.ItemCapacityChange;
 import grondag.hard_science.simulator.storage.StorageEvent.ItemStoredUpdate;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 
-public class ItemStorageListener
+// TODO: add and handle events for connectivity changes in connected mode
+// TODO: add and handle events for machine on/off changes in connected mode
+
+public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
 {
     private static enum Mode
     {
@@ -61,6 +69,13 @@ public class ItemStorageListener
     protected final EntityPlayerMP player;
     
     protected long totalCapacity;
+    
+    /**
+     * Used in connected mode to track which stores are currently
+     * connected to the store in {@link #storage}. Includes 
+     * the primary store.  Null in domain mode.
+     */
+    protected final Set<IStorage<StorageTypeStack>> stores;
     
     /**
      * Set true once disconnected and deregistered.
@@ -104,6 +119,7 @@ public class ItemStorageListener
         this.mode = Mode.DOMAIN;
         this.domain = domain;
         this.storage = null;
+        this.stores = null;
     }
     
    /**
@@ -117,11 +133,14 @@ public class ItemStorageListener
     * all physically connected storage machines.
     */
             
-    public ItemStorageListener(@Nonnull ItemStorage storage, boolean connectedMode, @Nonnull EntityPlayerMP player)
+    public ItemStorageListener(@Nonnull ItemStorage storage, @Nonnull EntityPlayerMP player)
     {
         this.player = player;
         this.container = player.openContainer;
-        this.mode = connectedMode ? Mode.CONNECTED : Mode.STORE;
+        this.mode = storage.isOn() ? Mode.CONNECTED : Mode.STORE;
+        this.stores = storage.isOn() 
+                ? new HashSet<IStorage<StorageTypeStack>>()
+                : ImmutableSet.of(storage);
         this.storage = storage;
         this.domain = storage.getDomain();
     }
@@ -135,7 +154,20 @@ public class ItemStorageListener
         ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
         switch(this.mode)
         {
+        case STORE:
+            this.addStore(this.storage, builder);
+            break;
+            
         case CONNECTED:
+            for(IStorage<StorageTypeStack> store : this.domain.itemStorage.stores())
+            {
+                ItemStorage itemStore = (ItemStorage)store;
+                if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage, itemStore))
+                {
+                    this.stores.add(store);
+                    this.addStore(itemStore, builder);
+                }
+            }
             break;
             
         case DOMAIN:
@@ -144,10 +176,6 @@ public class ItemStorageListener
             {
                 builder.add(this.changeQuantity(rwq.resource(), rwq.getQuantity()));
             }
-            break;
-            
-        case STORE:
-            this.addStore(storage, builder);
             break;
             
         default:
@@ -228,26 +256,21 @@ public class ItemStorageListener
         switch(this.mode)
         {
         case CONNECTED:
+        case STORE:
+            if(this.stores.contains(event.storage))
+            {
+                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                        ImmutableList.of(this.changeQuantity(event.resource, event.delta)),
+                        this.totalCapacity, 
+                        false), player);
+            }
             break;
             
         case DOMAIN:
-            if(event.storage.getDomain() == this.domain)
-            {
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
-                        ImmutableList.of(this.changeQuantity(event.resource, event.delta)),
-                        this.totalCapacity, 
-                        false), player);
-            }
-            break;
-            
-        case STORE:
-            if(event.storage == this.storage)
-            {
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
-                        ImmutableList.of(this.changeQuantity(event.resource, event.delta)),
-                        this.totalCapacity, 
-                        false), player);
-            }
+            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                    ImmutableList.of(this.changeQuantity(event.resource, event.delta)),
+                    this.totalCapacity, 
+                    false), player);
             break;
             
         default:
@@ -264,17 +287,29 @@ public class ItemStorageListener
         switch(this.mode)
         {
         case CONNECTED:
-            break;
-        case DOMAIN:
-            if(event.storage.getDomain() == this.domain)
+        {
+            assert event.storage != this.storage : "Attempt to reconnect primary storage to listener.";
+            
+            if(event.storage.isOn() && !this.stores.contains(event.storage) 
+                    && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage, event.storage))
             {
-                ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-                this.addStore(event.storage, builder);
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
-                        builder.build(), this.totalCapacity, false), player);
+                    ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
+                    this.addStore(event.storage, builder);
+                    this.stores.add((ItemStorage) event.storage);
+                    ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                            builder.build(), this.totalCapacity, false), player);
             }
             break;
-            
+        }
+        
+        case DOMAIN:
+        {
+            ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
+            this.addStore(event.storage, builder);
+            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                    builder.build(), this.totalCapacity, false), player);
+            break;
+        }
         case STORE:
             assert false : "Attempt to add single item storage to listener outside initialization";
             break;
@@ -293,23 +328,43 @@ public class ItemStorageListener
         switch(this.mode)
         {
         case CONNECTED:
-            break;
-        case DOMAIN:
-            if(event.storage.getDomain() == this.domain)
+        {
+            if(event.storage == this.storage)
             {
-                ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-                this.removeStore(event.storage, builder);
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
-                        builder.build(), this.totalCapacity, false), player);
+                this.slots.clear();
+                this.totalCapacity = 0;
+                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, true), player);
+                this.die();
+            }
+            else if(this.stores.contains(event.storage) 
+                    && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage, event.storage))
+            {
+                    ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
+                    this.removeStore(event.storage, builder);
+                    this.stores.remove((ItemStorage) event.storage);
+                    ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                            builder.build(), this.totalCapacity, false), player);
+                
             }
             break;
-            
+        }
+        
+        case DOMAIN:
+        {
+            ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
+            this.removeStore(event.storage, builder);
+            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                    builder.build(), this.totalCapacity, false), player);
+            break;
+        }
+        
         case STORE:
             if(event.storage == this.storage)
             {
                 this.slots.clear();
                 this.totalCapacity = 0;
                 ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, true), player);
+                this.die();
             }
             break;
             
@@ -322,19 +377,21 @@ public class ItemStorageListener
     @Subscribe
     public void onCapacityChange(ItemCapacityChange event)
     {
-        
         if(this.isDead()) return;
         
         switch(this.mode)
         {
         case CONNECTED:
-            break;
-        case DOMAIN:
-            if(event.storage.getDomain() == this.domain)
+            if(this.stores.contains(event.storage))
             {
                 this.totalCapacity += event.delta;
                 ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
             }
+            break;
+            
+        case DOMAIN:
+            this.totalCapacity += event.delta;
+            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
             break;
             
         case STORE:
@@ -369,5 +426,33 @@ public class ItemStorageListener
     {
         ItemResourceDelegate d = this.slots.getByKey2(resourceHandle);
         return d == null ? null : d.resource();
+    }
+
+    @Override
+    public ImmutableList<IStorage<StorageTypeStack>> stores()
+    {
+        return ImmutableList.copyOf(this.stores);
+    }
+
+    @Override
+    public ImmutableList<IStorage<StorageTypeStack>> findSpaceFor(IResource<StorageTypeStack> resource, long quantity)
+    {
+        return this.mode == Mode.DOMAIN
+                ? this.domain.itemStorage.findSpaceFor(resource, quantity)
+                : IStorageAccess.super.findSpaceFor(resource, quantity);
+    }
+
+    @Override
+    public ImmutableList<IStorage<StorageTypeStack>> getLocations(IResource<StorageTypeStack> resource)
+    {
+        return this.mode == Mode.DOMAIN
+                ? this.domain.itemStorage.getLocations(resource)
+                : IStorageAccess.super.getLocations(resource);
+    }
+
+    public long getQuantityStored(ItemResource targetResource)
+    {
+        ItemResourceDelegate d = this.slots.getByKey1(targetResource);
+        return d == null ? 0 : d.getQuantity();
     }
 }

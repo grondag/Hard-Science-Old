@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.storage;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
@@ -31,9 +30,10 @@ import grondag.hard_science.simulator.resource.StorageType;
 * Not responsible for optimizing storage.
 */
 public class StorageManager<T extends StorageType<T>> 
-    implements ITypedStorage<T>, IDomainMember, ISizedContainer
+    implements ITypedStorage<T>, IDomainMember, ISizedContainer, IStorageAccess<T>
 {
     protected final HashSet<IStorage<T>> stores = new HashSet<IStorage<T>>();
+    
     protected Domain domain;
     protected final T storageType;
        
@@ -67,35 +67,24 @@ public class StorageManager<T extends StorageType<T>>
         return this.storageType;
     }
 
-    public List<StorageWithQuantity<T>> findSpaceFor(IResource<T> resource, long quantity, @Nullable IProcurementRequest<T> request)
-    {
-        ImmutableList.Builder<StorageWithQuantity<T>> builder = ImmutableList.builder();
-        
-        for(IStorage<T> store : this.stores)
-        {
-            long space = store.add(resource, quantity, true, request);
-            if(space > 0)
-            {
-                builder.add(store.withQuantity(space));
-            }
-        }
-        
-        return builder.build();
-    }
-
     /**
-     * Returns all locations where the resource is stored.
-     * Note that the resource may be allocated so the stored
-     * quantities may not be available for use, but allocations
-     * are not stored by location.
+     * {@inheritDoc}
+     * <p>
+     * Implementation in storage manager exploits the StorageResourceManager objects
+     * to provide better performance in large storage networks. 
      */
-    public List<StorageWithQuantity<T>> getLocations(IResource<T> resource)
+    @Override
+    public ImmutableList<IStorage<T>> getLocations(IResource<T> resource)
     {
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
         
-        if(summary == null || summary.quantityStored() == 0) return Collections.emptyList();
+        if(summary == null || summary.quantityStored() == 0) return ImmutableList.of();
     
-        return summary.getLocations(resource);
+        return summary.getLocations(resource).stream()
+                .sorted((StorageWithQuantity<T> a, StorageWithQuantity<T>b) 
+                        -> Long.compare(a.quantity, b.quantity))
+                .map(p -> p.storage)
+                .collect(ImmutableList.toImmutableList());
     }
 
     @Override
@@ -182,8 +171,9 @@ public class StorageManager<T extends StorageType<T>>
     
     /**
      * Returns a list of stores that have the given resource with quantityIn included.
+     * Currently used only for testing.
      */
-    public List<StorageWithResourceAndQuantity<T>> findStorageWithQuantity(Predicate<IResource<T>> predicate)
+    public ImmutableList<StorageWithResourceAndQuantity<T>> findStorageWithQuantity(Predicate<IResource<T>> predicate)
     {
         ImmutableList.Builder<StorageWithResourceAndQuantity<T>> builder = ImmutableList.builder();
         
@@ -196,6 +186,15 @@ public class StorageManager<T extends StorageType<T>>
         }
         
         return builder.build();
+    }
+    
+    /**
+     * Read-only snapshot of all stores in the domain.
+     */
+    @Override
+    public ImmutableList<IStorage<T>> stores()
+    {
+        return ImmutableList.copyOf(this.stores);
     }
     
     @Override

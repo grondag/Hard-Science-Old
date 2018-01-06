@@ -5,8 +5,8 @@ import javax.annotation.Nonnull;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.StorageManager;
-import grondag.hard_science.simulator.storage.StorageWithQuantity;
 import grondag.hard_science.simulator.storage.jobs.AbstractTask;
 import grondag.hard_science.simulator.storage.jobs.TaskType;
 
@@ -89,9 +89,9 @@ public class DeliveryTask<V extends StorageType<V>> extends AbstractTask
         {
             long allocation = rwq.getQuantity();
             
-            for(StorageWithQuantity<V> swq : sm.getLocations(rwq.resource()))
+            for(IStorage<V> store : sm.getLocations(rwq.resource()))
             {
-                allocation -= swq.storage.takeUpTo(rwq.resource(), allocation, false, this.procurementTask);
+                allocation -= store.takeUpTo(rwq.resource(), allocation, false, this.procurementTask);
                 if(allocation == 0) break;
             }
         }
