@@ -247,8 +247,8 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        this.handleOnBlockPlacedBy(worldIn, pos, state, placer, stack);
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        this.handleOnBlockPlacedBy(worldIn, pos, state, placer, stack);
     }
     
     @Override

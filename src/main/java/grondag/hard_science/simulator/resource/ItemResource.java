@@ -151,12 +151,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         return h;
     }
 
-    @Override
-    public AbstractResourceDelegate<StorageTypeStack> getDelegate()
-    {
-        return null;
-    }
-    
+  
     @Override
     public boolean isResourceEqual(IResource<StorageTypeStack> other)
     {

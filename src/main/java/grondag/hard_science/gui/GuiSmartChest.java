@@ -16,7 +16,7 @@ import grondag.hard_science.machines.support.ContainerLayout;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachineStorageContainer;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
-import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
+import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.inventory.Slot;
 import net.minecraftforge.fml.common.Loader;
@@ -103,7 +103,7 @@ public class GuiSmartChest extends AbstractContainerGui<MachineTileEntity>
         Button butt = new Button(BUTTON_ID_SORT, 
                 this.guiLeft + this.xSize - 40 - this.layout.externalMargin, this.guiTop + this.layout.externalMargin - 2, 
                 40, this.fontRenderer.FONT_HEIGHT + 2,
-                AbstractResourceDelegate.SORT_LABELS[OpenContainerStorageProxy.ITEM_PROXY.getSortIndex()]);
+                ItemResourceDelegate.SORT_LABELS[OpenContainerStorageProxy.ITEM_PROXY.getSortIndex()]);
         butt.textColor = 0xFF444444;
         this.addButton(butt);
         
@@ -136,10 +136,6 @@ public class GuiSmartChest extends AbstractContainerGui<MachineTileEntity>
         // and our controls are designed to render in frame of the screen.
         // And can't draw after super.drawScreen() because would potentially render on top of things.
         this.stackPanel.drawControl(this, mouseX, mouseY, partialTicks);
-        
-        //FIXME: localize
-//        this.fontRenderer.drawString("Smart Chest", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.externalMargin, 0xFF444444);
-//        this.fontRenderer.drawString("Inventory", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.playerInventoryTop - this.layout.expectedTextHeight, 0xFF444444);
     }
 
      @Override
@@ -181,8 +177,8 @@ public class GuiSmartChest extends AbstractContainerGui<MachineTileEntity>
         if(button.id == BUTTON_ID_SORT)
         {
             int nextSortIndex = OpenContainerStorageProxy.ITEM_PROXY.getSortIndex() + 1;
-            if(nextSortIndex >= AbstractResourceDelegate.SORT_COUNT) nextSortIndex = 0;
-            button.displayString = AbstractResourceDelegate.SORT_LABELS[nextSortIndex];
+            if(nextSortIndex >= ItemResourceDelegate.SORT_COUNT) nextSortIndex = 0;
+            button.displayString = ItemResourceDelegate.SORT_LABELS[nextSortIndex];
             OpenContainerStorageProxy.ITEM_PROXY.setSortIndex(nextSortIndex);
             OpenContainerStorageProxy.ITEM_PROXY.refreshListIfNeeded();
         }

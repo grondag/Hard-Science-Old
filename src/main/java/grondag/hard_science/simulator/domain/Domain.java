@@ -17,6 +17,7 @@ import grondag.hard_science.simulator.persistence.IDirtListenerProvider;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.ItemStorageManager;
 import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.storage.jobs.JobManager;
 import grondag.hard_science.superblock.placement.BuildManager;
@@ -46,13 +47,10 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     Domain (DomainManager domainManager)
     {
         this.domainManager = domainManager;    
-        this.itemStorage = new StorageManager<StorageTypeStack>(StorageType.ITEM, this);
+        this.itemStorage = new ItemStorageManager(this);
         this.jobManager = new JobManager(this);
         this.buildManager = new BuildManager(this);
         this.brokerManager = new BrokerManager(this);
-        
-        //FIXME remove
-        this.eventBus.register(new DomainEventTester());
     }
     
     Domain (DomainManager domainManager, NBTTagCompound tag)

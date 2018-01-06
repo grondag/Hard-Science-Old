@@ -327,13 +327,22 @@ public abstract class PortState implements IDeviceComponent
      */
     public void setMode(PortMode mode)
     {
-        assert !this.isAttached() && this.mate == null && this.externalCircuit == null
-            : "PortState.setMode: Attempt to set port mode while port connected.";
-        
         if(Configurator.logTransportNetwork) 
             Log.info("PortState.setMode %s: mode = %s", 
                     this.device().machineName(),
                     mode.toString());
+
+        if(this.mode == mode)
+        {
+            if(Configurator.logTransportNetwork) 
+                Log.info("PortState.setMode %s: no effect - target mode was already set", 
+                        this.device().machineName());
+            return;
+        }
+        
+        assert !this.isAttached() && this.mate == null && this.externalCircuit == null
+            : "PortState.setMode: Attempt to change port mode while port connected.";
+        
                     
         this.mode = mode;
     }

@@ -149,8 +149,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     {
         super.onConnect();
         
-        //FIXME: put back
-//        assert this.getDomain() != null : "Null domain on storage connect";
+        assert this.getDomain() != null : "Null domain on storage connect";
         
         if(this.getDomain() == null)
             Log.warn("Null domain on item storage connect");
@@ -161,8 +160,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     @Override
     public void onDisconnect()
     {
-        //FIXME: put back
-//        assert this.getDomain() != null : "Null domain on storage disconnect";
+        assert this.getDomain() != null : "Null domain on storage disconnect";
         
         if(this.getDomain() == null)
             Log.warn("Null domain on item storage connect");
@@ -179,7 +177,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
             StorageEvent.postBeforeStorageDisconnect(this);
         }
         super.setDomain(domain);
-        if(domain != null)
+        if(this.isConnected() && domain != null)
         {
             StorageEvent.postItemStorageConnect(this);
         }
@@ -189,7 +187,10 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     public synchronized long takeUpTo(IResource<StorageTypeStack> resource, long limit, boolean simulate, IProcurementRequest<StorageTypeStack> request)
     {
         long result = super.takeUpTo(resource, limit, simulate, request);
-        if(!simulate && result != 0) StorageEvent.postItemStoredUpdate(this, resource, -result);
+        if(!simulate && result != 0 && this.isConnected() && this.getDomain() != null)
+        {
+            StorageEvent.postItemStoredUpdate(this, resource, -result, request);
+        }
         return result;
     }
 
@@ -197,10 +198,23 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     public synchronized long add(IResource<StorageTypeStack> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypeStack> request)
     {
         long result = super.add(resource, howMany, simulate, request);
-        if(!simulate && result != 0) StorageEvent.postItemStoredUpdate(this, resource, result);
+        if(!simulate && result != 0 && this.isConnected() && this.getDomain() != null)
+        {
+            StorageEvent.postItemStoredUpdate(this, resource, result, request);
+        }
         return result;
     }
-    
+
+    @Override
+    public AbstractStorage<StorageTypeStack> setCapacity(long capacity)
+    {
+        long delta = capacity - this.capacity;
+        if(delta != 0 && this.isConnected() && this.getDomain() != null)
+        {
+            StorageEvent.postItemCapacityChange(this, delta);
+        }
+        return super.setCapacity(capacity);
+    }
     
     
 }

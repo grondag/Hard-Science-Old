@@ -35,6 +35,7 @@ import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.ItemStorageListener;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 import grondag.hard_science.simulator.transport.endpoint.PortMode;
@@ -899,5 +900,17 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         }
         
         return limit;
+    }
+
+    /**
+     * Schedules listener for initialization on service thread so that
+     * event subscriptions can all be time-consistent.
+     */
+    public void initializeListener(ItemStorageListener itemStorageListener)
+    {
+        EXECUTOR.execute( () ->
+        {
+            itemStorageListener.initialize();;
+        }, false);
     }
 }

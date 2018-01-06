@@ -1,3 +1,11 @@
+Storage Network
+
+In PacketOpenContainerStorageInteraction.handle, use listener instead of storage
+for resource handle cross reference.  TileEntity will need to save a reference
+for listeners other than the domain-level listener.
+
+Remove resource handle from resource.
+
 Virtual Blocks
 
 PlacementSpec - list of placements to be applied to the world,

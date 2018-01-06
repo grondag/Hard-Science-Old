@@ -12,7 +12,7 @@ import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 
 public interface IStorage<T extends StorageType<T>>
-    extends ISizedContainer, ITypedStorage<T>, IListenableStorage<T>
+    extends ISizedContainer, ITypedStorage<T>
 {
     long getQuantityStored(IResource<T> resource);
     

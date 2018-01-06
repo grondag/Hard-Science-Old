@@ -8,11 +8,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.concurrency.ConcurrentForwardingList;
-import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
-import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IListenableStorage;
-import grondag.hard_science.simulator.storage.IStorageListener;
+import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -21,15 +17,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Maintains a view of an IStorage on client for currently open container.
  */
 @SideOnly(Side.CLIENT)
-public class OpenContainerStorageProxy<T extends StorageType<T>> implements IStorageListener<T>
+public class OpenContainerStorageProxy
 {    
-    public static OpenContainerStorageProxy<StorageTypeStack> ITEM_PROXY = new OpenContainerStorageProxy<StorageTypeStack>();
+    public static OpenContainerStorageProxy ITEM_PROXY = new OpenContainerStorageProxy();
     
     private OpenContainerStorageProxy() {};
 
-    private Int2ObjectOpenHashMap<AbstractResourceDelegate<T>> MAP = new Int2ObjectOpenHashMap<AbstractResourceDelegate<T>>();
+    private Int2ObjectOpenHashMap<ItemResourceDelegate> MAP = new Int2ObjectOpenHashMap<ItemResourceDelegate>();
     
-    public final ConcurrentForwardingList<AbstractResourceDelegate<T>> LIST = new ConcurrentForwardingList<AbstractResourceDelegate<T>>(Collections.emptyList());
+    public final ConcurrentForwardingList<ItemResourceDelegate> LIST = new ConcurrentForwardingList<ItemResourceDelegate>(Collections.emptyList());
     
     private boolean isDirty = false;
     
@@ -48,7 +44,7 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
         if(!this.isDirty) return false;
         
         @SuppressWarnings("unchecked")
-        Comparator<AbstractResourceDelegate<?>> sort = AbstractResourceDelegate.SORT[this.sortIndex];
+        Comparator<ItemResourceDelegate> sort = ItemResourceDelegate.SORT[this.sortIndex];
         
         LIST.setDelegate(ImmutableList.copyOf(MAP.values().stream().sorted(sort).collect(Collectors.toList())));
         
@@ -57,52 +53,62 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
         return true;
     }
     
-    @Override
-    public void handleStorageRefresh(IListenableStorage<T> sender, List<AbstractResourceDelegate<T>> update, long capacity)
+    public void handleStorageRefresh(List<ItemResourceDelegate> update, long capacity, boolean isFullRefresh)
     {
-        this.MAP.clear();
         this.capacity = capacity;
-        this.usedCapacity = 0;
-        for(AbstractResourceDelegate<T> item : update )
+        if(isFullRefresh)
         {
-            this.MAP.put(item.handle(), item);
-            this.usedCapacity += item.quantity();
+            this.handleFullRefresh(update);
+        }
+        else if(!update.isEmpty())
+        {
+            for(ItemResourceDelegate d : update)
+            {
+                this.handleDelegateUpdate(d);
+            }
         }
         this.isDirty = true;
-        this.refreshListIfNeeded();
+        
     }
 
-    @Override
-    public void handleStorageUpdate(IListenableStorage<T> sender, AbstractResourceDelegate<T> update)
+    private void handleFullRefresh(List<ItemResourceDelegate> update)
     {
-        AbstractResourceDelegate<T> prior = this.MAP.get(update.handle());
-        if(prior != null) this.usedCapacity -= prior.quantity();
+        this.MAP.clear();
+        this.usedCapacity = 0;
+        for(ItemResourceDelegate item : update )
+        {
+            this.MAP.put(item.handle(), item);
+            this.usedCapacity += item.getQuantity();
+        }
+    }
+    
+    private void handleDelegateUpdate(ItemResourceDelegate update)
+    {
+        ItemResourceDelegate prior = this.MAP.get(update.handle());
+        if(prior != null) this.usedCapacity -= prior.getQuantity();
 
-        if(update.quantity() == 0)
+        if(update.getQuantity() == 0)
         {
             this.MAP.remove(update.handle());
         }
         else
         {
             this.MAP.put(update.handle(), update);
-            this.usedCapacity += update.quantity();
+            this.usedCapacity += update.getQuantity();
         }
-        this.isDirty = true;
     }
 
-    @Override
-    public void handleStorageDisconnect(IListenableStorage<T> storage)
+    public void handleStorageDisconnect()
     {
         this.MAP.clear();
         this.LIST.setDelegate(Collections.emptyList());
         this.isDirty = false;
     }
 
-    @Override
-    public boolean isClosed()
-    {
-        return false;
-    }
+//    public boolean isClosed()
+//    {
+//        return false;
+//    }
 
     public int getSortIndex()
     {

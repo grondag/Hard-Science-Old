@@ -1,10 +1,17 @@
 package grondag.hard_science.machines.support;
 
+import java.util.HashMap;
+
+import javax.annotation.Nullable;
+
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.ItemStorage;
+import grondag.hard_science.simulator.storage.ItemStorageListener;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IContainerListener;
@@ -18,10 +25,18 @@ import net.minecraft.item.ItemStack;
  */
 public class MachineStorageContainer extends MachineContainer
 {
-
+    private HashMap<EntityPlayerMP, ItemStorageListener> storageListeners
+        = new HashMap<EntityPlayerMP, ItemStorageListener>();
+    
     public MachineStorageContainer(IInventory playerInventory, MachineTileEntity te, ContainerLayout layout)
     {
         super(playerInventory, te, layout);
+    }
+    
+    @Nullable
+    public ItemStorageListener getItemListener(EntityPlayerMP player)
+    {
+        return this.storageListeners.get(player);
     }
     
     @Override
@@ -70,7 +85,32 @@ public class MachineStorageContainer extends MachineContainer
         super.addListener(listener);
         if(listener instanceof EntityPlayerMP && this.te != null && ((MachineTileEntity)this.te).storageMachine() != null)
         {
-            ((MachineTileEntity)this.te).storageMachine().addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
+//            ItemStorageListener newItemListener =
+//                    new ItemStorageListener(
+//                            (ItemStorage) ((MachineTileEntity)this.te).storageMachine(), 
+//                            false, 
+//                            (EntityPlayerMP)listener);
+            
+            ItemStorageListener newItemListener =
+                    new ItemStorageListener(
+                            ((ItemStorage) ((MachineTileEntity)this.te).storageMachine()).getDomain(), 
+                            (EntityPlayerMP)listener);
+            
+            assert this.storageListeners.put((EntityPlayerMP)listener, newItemListener) == null
+                    : "Found existing storage listener for player on container";
+            
+            LogisticsService.ITEM_SERVICE.initializeListener(newItemListener);
+            
         }
     }
+
+    @Override
+    public void onContainerClosed(EntityPlayer playerIn)
+    {
+        ItemStorageListener oldListener = this.storageListeners.remove(playerIn);
+        if(oldListener != null) oldListener.die();
+        super.onContainerClosed(playerIn);
+    }
+    
+    
 }

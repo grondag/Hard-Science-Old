@@ -1,19 +1,17 @@
 package grondag.hard_science.network;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketSimpleAction;
-import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
-import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
-import grondag.hard_science.simulator.resource.ItemResourceDelegate;
-import grondag.hard_science.simulator.storage.OpenContainerPacketHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -40,7 +38,6 @@ public class ModMessages
         
         // Packets handled on Client side, sent from Server        
         INSTANCE.registerMessage(PacketOpenContainerItemStorageRefresh.class, PacketOpenContainerItemStorageRefresh.class, packetID++, Side.CLIENT);
-        INSTANCE.registerMessage(OpenContainerPacketHandler.class, ItemResourceDelegate.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(PacketMachineStatusUpdateListener.class, PacketMachineStatusUpdateListener.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(PacketExcavationRenderUpdate.class, PacketExcavationRenderUpdate.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(PacketExcavationRenderRefresh.class, PacketExcavationRenderRefresh.class, packetID++, Side.CLIENT);

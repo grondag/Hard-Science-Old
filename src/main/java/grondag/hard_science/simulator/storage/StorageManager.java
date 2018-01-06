@@ -2,23 +2,19 @@ package grondag.hard_science.simulator.storage;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.magicwerk.brownies.collections.Key2List;
-import org.magicwerk.brownies.collections.function.IFunction;
+import org.magicwerk.brownies.collections.Key1List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
@@ -35,30 +31,18 @@ import grondag.hard_science.simulator.resource.StorageType;
 * Not responsible for optimizing storage.
 */
 public class StorageManager<T extends StorageType<T>> 
-    implements ITypedStorage<T>, IDomainMember, ISizedContainer, IListenableStorage<T>
+    implements ITypedStorage<T>, IDomainMember, ISizedContainer
 {
     protected final HashSet<IStorage<T>> stores = new HashSet<IStorage<T>>();
     protected Domain domain;
     protected final T storageType;
-    
-    protected SimpleUnorderedArrayList<IStorageListener<T>> listeners 
-        = new SimpleUnorderedArrayList<IStorageListener<T>>();
-    
-    protected final static IFunction<StorageResourceManager<?>, Integer> RESOURCE_HANDLE_MAPPER
-    = new IFunction<StorageResourceManager<?>, Integer>() {
-       @Override
-       public Integer apply(StorageResourceManager<?> elem)
-       {
-           return elem.resource().handle();
-       }};
        
     /**
      * All unique resources contained in this domain
      */
-    protected Key2List<StorageResourceManager<T>, IResource<T>, Integer> slots 
-        = new Key2List.Builder<StorageResourceManager<T>, IResource<T>, Integer>().
+    protected Key1List<StorageResourceManager<T>, IResource<T>> slots 
+        = new Key1List.Builder<StorageResourceManager<T>, IResource<T>>().
               withPrimaryKey1Map(StorageResourceManager::resource).
-              withUniqueKey2Map(RESOURCE_HANDLE_MAPPER).
               build();
     
     protected long capacity = 0;
@@ -120,7 +104,7 @@ public class StorageManager<T extends StorageType<T>>
         return this.domain;
     }
 
-    public synchronized void addStore(AbstractStorage<T> store)
+    protected synchronized void addStore(AbstractStorage<T> store)
     {
         assert !stores.contains(store)
             : "Storage manager received request to add store it already has.";
@@ -181,6 +165,21 @@ public class StorageManager<T extends StorageType<T>>
         return builder.build();
     }
     
+    public List<AbstractResourceWithQuantity<T>> findQuantityStored(Predicate<IResource<T>> predicate)
+    {
+        ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
+        
+        for(StorageResourceManager<T> entry : this.slots)
+        {
+            if(predicate.test(entry.resource))
+            {
+                builder.add(entry.resource.withQuantity(entry.quantityStored()));
+            }
+        }
+        
+        return builder.build();
+    }
+    
     /**
      * Returns a list of stores that have the given resource with quantityIn included.
      */
@@ -215,6 +214,7 @@ public class StorageManager<T extends StorageType<T>>
      * Called by storage instances, or by self when a storage is removed.
      * If request is non-null, then the amount taken reduces any allocation to that request.
      */
+    //FIXME
     public synchronized void notifyTaken(IStorage<T> storage, IResource<T> resource, long taken, @Nullable IProcurementRequest<T> request)
     {
         if(taken == 0) return;
@@ -239,7 +239,6 @@ public class StorageManager<T extends StorageType<T>>
         if(summary.isEmpty()) 
         {
             this.hasEmptySlots = true;
-            this.cleanupEmptySlots();
         }
     }
 
@@ -311,7 +310,7 @@ public class StorageManager<T extends StorageType<T>>
         StorageResourceManager<T> stored = this.slots.getByKey1(resource);
         return stored == null ? 0 : stored.changeAllocation(request, quantityRequested);    
     }
-
+    
     public synchronized void registerResourceListener(IResource<T> resource, IStorageResourceListener<T> listener)
     {
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
@@ -329,73 +328,7 @@ public class StorageManager<T extends StorageType<T>>
         if(summary != null)
         {
             summary.unregisterResourceListener(listener);
-            this.cleanupEmptySlots();
-        }
-    }
-    
-    /**
-     * Removes all empty slots if there are no active listeners
-     * and {@link #hasEmptySlots} is true.  We do not want to
-     * remove empty slots while there are active listeners
-     * because resource handles are instance-specific and 
-     * we would lose resource handles that may be held by listeners.
-     */
-    protected synchronized void cleanupEmptySlots()
-    {
-        if(this.hasEmptySlots && this.listeners.isEmpty())
-        {
-            this.hasEmptySlots = false;
-            
-            Iterator<StorageResourceManager<T>> iterator 
-                 = this.slots.iterator();
-            while(iterator.hasNext())
-            {
-                if(iterator.next().isEmpty())
-                {
-                    iterator.remove();
-                }
-            }
         }
     }
 
-    @Override
-    public SimpleUnorderedArrayList<IStorageListener<T>> listeners()
-    {
-        return this.listeners;
-    }
-    
-    @Override
-    public synchronized void removeListener(IStorageListener<T> listener)
-    {
-        IListenableStorage.super.removeListener(listener);
-        this.cleanupEmptySlots();
-    }
-    
-    public int getHandleForResource(IResource<T> resource)
-    {
-        StorageResourceManager<T> summary = this.slots.getByKey1(resource);
-        return summary == null ? -1 : summary.resource().handle();
-    }
-
-    public IResource<T> getResourceForHandle(int handle)
-    {
-        StorageResourceManager<T> summary = this.slots.getByKey2(handle);
-        return summary == null ? null : summary.resource();
-    }
-    
-    public List<AbstractResourceDelegate<T>> findDelegates(Predicate<IResource<T>> predicate)
-    {
-        ImmutableList.Builder<AbstractResourceDelegate<T>> builder = ImmutableList.builder();
-        
-        for(StorageResourceManager<T> summary : this.slots)
-        {
-            if(predicate.test(summary.resource()))
-            {
-                builder.add(this.storageType.createDelegate(summary.resource(), 
-                        summary.resource().handle(), summary.quantityStored()));                                        
-            }
-        }
-        
-        return builder.build();
-    }
 }

@@ -4,10 +4,10 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.support.MachineStorageContainer;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
-import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
-import grondag.hard_science.simulator.resource.EnumStorageType;
 import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -51,14 +51,12 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     }
     
     private Action action;
-    private StorageType<?> storageType;
     private int resourceHandle;
     
-    public PacketOpenContainerStorageInteraction(@Nonnull Action action, @Nonnull AbstractResourceDelegate<?> target)
+    public PacketOpenContainerStorageInteraction(@Nonnull Action action, @Nonnull ItemResourceDelegate target)
     {
         this.action = action;
         this.resourceHandle = target.handle();
-        this.storageType = target.storageType();
     }
     
     public PacketOpenContainerStorageInteraction() {}
@@ -67,7 +65,6 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     public void fromBytes(PacketBuffer pBuff)
     {
         this.action = pBuff.readEnumValue(Action.class);
-        this.storageType = StorageType.fromEnum(EnumStorageType.values()[pBuff.readByte()]);
         this.resourceHandle = pBuff.readInt();
     }
 
@@ -75,7 +72,6 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     public void toBytes(PacketBuffer pBuff)
     {
         pBuff.writeEnumValue(this.action);
-        pBuff.writeByte(this.storageType.ordinal);
         pBuff.writeInt(this.resourceHandle);
     }
 
@@ -84,10 +80,6 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         return action;
     }
 
-    public StorageType<?> getStorageType()
-    {
-        return this.storageType;
-    }
 
     @Override
     protected void handle(PacketOpenContainerStorageInteraction message, EntityPlayerMP player)
@@ -100,7 +92,11 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
 
         if(storage.storageType() != StorageType.ITEM) return;
         
-        ItemResource targetResource = (ItemResource) storage.getResourceForHandle(message.resourceHandle);
+        if(!(player.openContainer instanceof MachineStorageContainer)) return;
+        
+        MachineStorageContainer container = (MachineStorageContainer)player.openContainer;
+        
+        ItemResource targetResource = (ItemResource) container.getItemListener(player).getResourceForHandle(message.resourceHandle);
         
         switch(message.action)
         {
@@ -114,17 +110,20 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
             
             case QUICK_MOVE_HALF:
             {
+                if(targetResource == null) return;
                 int toMove = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource) / 2));
                 this.doQuickMove(toMove, player, targetResource, storage);
                 return;
             }
                 
             case QUICK_MOVE_ONE:
+                if(targetResource == null) return;
                 this.doQuickMove(1, player, targetResource, storage);
                 return;
 
             case QUICK_MOVE_STACK:
             {
+                if(targetResource == null) return;
                 int toMove = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize(), storage.getQuantityStored(targetResource));
                 this.doQuickMove(toMove, player, targetResource, storage);
                 return;
@@ -136,6 +135,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
            
             case TAKE_HALF:
             {
+                if(targetResource == null) return;
                 int toTake = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource) / 2));
                 this.doTake(toTake, player, targetResource, storage);
                 return;
@@ -143,6 +143,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
 
             case TAKE_STACK:
             {
+                if(targetResource == null) return;
                 int toTake = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize(), storage.getQuantityStored(targetResource));
                 this.doTake(toTake, player, targetResource, storage);
                 return;

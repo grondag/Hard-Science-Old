@@ -37,9 +37,9 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
         this.resource = this.storageType().fromNBT(tag.getCompoundTag(ModNBTTag.RESOURCE_IDENTITY));
     }
     
-    public final AbstractResourceDelegate<V> toDelegate(int handle)
+    public final ItemResourceDelegate toDelegate(int handle)
     {
-        return this.storageType().createDelegate(this.resource(), handle, this.quantity);
+        return new ItemResourceDelegate(handle, (ItemResource) this.resource(), this.quantity);
     }
     
     public NBTTagCompound toNBT()
@@ -128,5 +128,4 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     {
         return this.resource.withQuantity(quantity);
     }
-    
 }

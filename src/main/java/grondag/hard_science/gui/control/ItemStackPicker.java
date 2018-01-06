@@ -6,9 +6,7 @@ import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
-import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,14 +18,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ItemStackPicker extends TabBar<AbstractResourceDelegate<StorageTypeStack>>
+public class ItemStackPicker extends TabBar<ItemResourceDelegate>
 {
     protected final FontRenderer fontRenderer;
     
-    protected final IClickHandler<AbstractResourceDelegate<StorageTypeStack>> clickHandler;
+    protected final IClickHandler<ItemResourceDelegate> clickHandler;
     
-    public ItemStackPicker(List<AbstractResourceDelegate<StorageTypeStack>> items, FontRenderer fontRenderer,  
-                IClickHandler<AbstractResourceDelegate<StorageTypeStack>> clickHandler)
+    public ItemStackPicker(List<ItemResourceDelegate> items, FontRenderer fontRenderer,  
+                IClickHandler<ItemResourceDelegate> clickHandler)
     {
         super(items);
         this.fontRenderer = fontRenderer;
@@ -67,9 +65,8 @@ public class ItemStackPicker extends TabBar<AbstractResourceDelegate<StorageType
         }
     }
 
-
     @Override
-    protected void drawItem(AbstractResourceDelegate<StorageTypeStack> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
+    protected void drawItem(ItemResourceDelegate item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
         int x = (int)left;
         int y = (int)top;
@@ -80,7 +77,7 @@ public class ItemStackPicker extends TabBar<AbstractResourceDelegate<StorageType
         itemRender.renderItemOverlayIntoGUI(mc.fontRenderer, stack, x, y, "");
         
         // itemRender doesn't clean this up, messes up highlight boxes
-        this.drawQuantity(item.quantity(), x, y);
+        this.drawQuantity(item.getQuantity(), x, y);
      }
     
     protected void drawQuantity(long qty, int left, int top)
@@ -146,14 +143,14 @@ public class ItemStackPicker extends TabBar<AbstractResourceDelegate<StorageType
         }
     }
     
-    private AbstractResourceDelegate<StorageTypeStack> resourceForClickHandler()
+    private ItemResourceDelegate resourceForClickHandler()
     {
-        AbstractResourceDelegate<StorageTypeStack> res = this.get(currentMouseIndex);
+        ItemResourceDelegate res = this.get(currentMouseIndex);
         return res == null ? ItemResourceDelegate.EMPTY : res;
     }
 
     @Override
-    protected void drawToolTip(AbstractResourceDelegate<StorageTypeStack> item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    protected void drawToolTip(ItemResourceDelegate item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         renderContext.drawToolTip(item.displayStack(), mouseX, mouseY);
         

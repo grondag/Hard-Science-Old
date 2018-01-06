@@ -7,8 +7,7 @@ import grondag.hard_science.library.varia.ItemHelper;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction.Action;
-import grondag.hard_science.simulator.resource.AbstractResourceDelegate;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
@@ -24,14 +23,14 @@ public interface IClickHandler<T>
     public void handleMouseClick(Minecraft mc, int mouseButton, @Nonnull T target);
     public void handleMouseDrag(Minecraft mc, int mouseButton, @Nonnull T target);
     
-    public static class StorageClickHandlerStack implements IClickHandler<AbstractResourceDelegate<StorageTypeStack>>
+    public static class StorageClickHandlerStack implements IClickHandler<ItemResourceDelegate>
     {
         public static final StorageClickHandlerStack INSTANCE = new StorageClickHandlerStack();
         
         private StorageClickHandlerStack() {}
         
         @Override
-        public void handleMouseClick(Minecraft mc, int mouseButton, @Nonnull AbstractResourceDelegate<StorageTypeStack> target)
+        public void handleMouseClick(Minecraft mc, int mouseButton, @Nonnull ItemResourceDelegate target)
         {
             Action action = null;
             
@@ -73,7 +72,7 @@ public interface IClickHandler<T>
         }
 
         @Override
-        public void handleMouseDrag(Minecraft mc, int mouseButton, @Nonnull AbstractResourceDelegate<StorageTypeStack> target)
+        public void handleMouseDrag(Minecraft mc, int mouseButton, @Nonnull ItemResourceDelegate target)
         {
             // doesn't seem like a useful interaction
         }
