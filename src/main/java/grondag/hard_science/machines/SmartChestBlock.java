@@ -3,7 +3,7 @@ package grondag.hard_science.machines;
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineStorageBlock;
-import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
@@ -21,7 +21,7 @@ public class SmartChestBlock extends MachineStorageBlock
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) 
     {
-        return new MachineTileEntity();
+        return new MachineTileEntityTickable();
     }
     
     @SideOnly(Side.CLIENT)

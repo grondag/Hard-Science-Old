@@ -23,6 +23,9 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+
+// TODO: need to make power and other controls visible somehow
+
 @SideOnly(Side.CLIENT)
 public class GuiSmartChest extends AbstractContainerGui<MachineTileEntity>
 {
