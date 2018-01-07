@@ -4,8 +4,6 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorBlock;
 import grondag.hard_science.machines.BottomBusBlock;
-import grondag.hard_science.machines.WaterPumpBlock;
-import grondag.hard_science.machines.ItemAccessBlock;
 import grondag.hard_science.machines.MiddleBusBlock;
 import grondag.hard_science.machines.ModularTankBlock;
 import grondag.hard_science.machines.SmartChestBlock;
@@ -13,6 +11,7 @@ import grondag.hard_science.machines.SolarCableBlock;
 import grondag.hard_science.machines.SolarCellBlock;
 import grondag.hard_science.machines.TopBusBlock;
 import grondag.hard_science.machines.TransportTestBlock;
+import grondag.hard_science.machines.WaterPumpBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -194,7 +193,6 @@ public class ModBlocks
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
         event.getRegistry().register(new ModularTankBlock("modular_tank"));
-        event.getRegistry().register(new ItemAccessBlock("item_access"));
         event.getRegistry().register(new WaterPumpBlock("water_pump"));
         event.getRegistry().register(new TransportTestBlock("transport_test"));
     }
