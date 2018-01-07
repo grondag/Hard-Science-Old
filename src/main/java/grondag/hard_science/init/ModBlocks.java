@@ -7,6 +7,7 @@ import grondag.hard_science.machines.BottomBusBlock;
 import grondag.hard_science.machines.ContainerizingPumpBlock;
 import grondag.hard_science.machines.ItemAccessBlock;
 import grondag.hard_science.machines.MiddleBusBlock;
+import grondag.hard_science.machines.ModularTankBlock;
 import grondag.hard_science.machines.SmartChestBlock;
 import grondag.hard_science.machines.SolarCableBlock;
 import grondag.hard_science.machines.SolarCellBlock;
@@ -67,7 +68,6 @@ public class ModBlocks
     public static final Block solar_cell = null;
     public static final Block extension_bus = null;
     public static final Block intermediate_bus = null;
-    
     public static final Block depleted_fluid = null;
     
 //    public static final Block solar_aggregator = null;
@@ -196,7 +196,7 @@ public class ModBlocks
         event.getRegistry().register(new TransportTestBlock("transport_test"));
         event.getRegistry().register(new ItemAccessBlock("item_access"));
         event.getRegistry().register(new ContainerizingPumpBlock("containerizing_pump"));
-//        event.getRegistry().register(new ModularTankBlock("modular_tank"));
+        event.getRegistry().register(new ModularTankBlock("modular_tank"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 

@@ -81,6 +81,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
     public FluidStorage(CarrierLevel carrierLevel, PortType portType)
     {
         super(carrierLevel, portType);
+        this.capacity = VolumeUnits.liters2nL(32000);
     }
 
     @Override
@@ -217,6 +218,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         return new IFluidTankProperties[] {this.myProps};
     }
 
+    //TODO: move this to service thread
     @Override
     public int fill(FluidStack stack, boolean doFill)
     {
@@ -230,6 +232,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         if(this.fluidResource == null)
         {
             resource = FluidResource.fromStack(stack);
+            this.fluidResource = resource;
         }
         else
         {
@@ -245,17 +248,31 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         return (int) VolumeUnits.nL2Liters(filled);
     }
 
+    //TODO: move this to service thread
     @Override
     public FluidStack drain(FluidStack resource, boolean doDrain)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if(resource == null) return null;
+        
+        if(this.fluidResource == null || !this.fluidResource.isStackEqual(resource))
+        {
+            FluidStack result = resource.copy();
+            result.amount = 0;
+            return result;
+        }
+        return this.drain(resource.amount, doDrain);
     }
 
+    //TODO: move this to service thread
     @Override
     public FluidStack drain(int maxDrain, boolean doDrain)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if(this.fluidResource == null) return null;
+        // need to save a reference here because may become null on drain
+        FluidResource resource = this.fluidResource;
+        
+        long drained = VolumeUnits.liters2nL(maxDrain);
+        drained = this.takeUpTo(resource, drained, !doDrain, null);
+        return resource.newStackWithLiters((int) VolumeUnits.nL2Liters(drained));
     }
 }

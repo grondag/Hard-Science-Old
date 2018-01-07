@@ -142,6 +142,9 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         
         return added;
     }
+    
+    // TODO: move to service thread
+
      /**
      * <i>If we have available capacity, then effectively one more slot available to add another items not already here.</i><br><br>
      * 
@@ -152,6 +155,8 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     {
         return this.availableCapacity() == 0 ? this.slots.size() : this.slots.size() + 1;
     }
+
+    // TODO: move to service thread
 
     @Override
     public ItemStack getStackInSlot(int slot)
@@ -167,6 +172,8 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         }
         return result;
     }
+
+    // TODO: move to service thread
 
     /**
      * <i>Our storage doesn't care about stacking  but need to honor slot that is sent otherwise tend to get strangeness. </i><br><br>
@@ -206,6 +213,8 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         }
     }
 
+    // TODO: move to service thread
+
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate)
     {
@@ -231,7 +240,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         
     }
 
-
+    // TODO: move to service thread
     @Override
     public int getSlotLimit(int slot)
     {

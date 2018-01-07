@@ -52,6 +52,14 @@ public class FluidResource extends AbstractResource<StorageType.StorageTypeFluid
         return stack.copy();
     }
     
+    public FluidStack newStackWithLiters(int liters)
+    {
+        FluidStack result = new FluidStack(this.fluid, Fluid.BUCKET_VOLUME);
+        result.tag = this.tag;
+        result.amount = liters;
+        return result;
+    }
+    
     public Fluid getFluid()
     {
         return this.fluid;

@@ -114,19 +114,16 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) 
     {
         // for simple blocks without a container, activation is client-only
-        if (!world.isRemote || this.guiID < 0) 
+        if (world.isRemote && this.guiID >= 0) 
         {
-            return true;
+            TileEntity te = world.getTileEntity(pos);
+            if (te != null && te instanceof MachineTileEntity)
+            {
+                player.openGui(HardScience.INSTANCE, this.guiID, world, pos.getX(), pos.getY(), pos.getZ());
+                return true;
+            }
         }
-        
-        TileEntity te = world.getTileEntity(pos);
-        if (!(te instanceof MachineTileEntity)) 
-        {
-            return false;
-        }
-        
-        player.openGui(HardScience.INSTANCE, this.guiID, world, pos.getX(), pos.getY(), pos.getZ());
-        return true;
+        return super.onBlockActivated(world, pos, state, player, hand, side, hitX, hitY, hitZ);
     }
 
     /**
@@ -205,6 +202,10 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
             {
                 worldIn.playSound(null, pos.getX() + .5f, pos.getY() + .5f, pos.getZ() + .5f, SoundEvents.UI_BUTTON_CLICK, SoundCategory.PLAYERS, .2f, ((worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * .7f + 1) * 2);
             }
+        }
+        else
+        {
+            super.onBlockClicked(worldIn, pos, playerIn);
         }
       
 
