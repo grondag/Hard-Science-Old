@@ -109,7 +109,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         if(this.getDomain() == null)
             Log.warn("Null domain on item storage connect");
         else
-            StorageEvent.postAfterStorageConnect(this);
+            FluidStorageEvent.postAfterStorageConnect(this);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         if(this.getDomain() == null)
             Log.warn("Null domain on item storage connect");
         else
-            StorageEvent.postBeforeStorageDisconnect(this);
+            FluidStorageEvent.postBeforeStorageDisconnect(this);
         super.onDisconnect();
     }
 
@@ -129,12 +129,12 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
     {
         if(this.isConnected() && this.getDomain() != null)
         {
-            StorageEvent.postBeforeStorageDisconnect(this);
+            FluidStorageEvent.postBeforeStorageDisconnect(this);
         }
         super.setDomain(domain);
         if(this.isConnected() && domain != null)
         {
-            StorageEvent.postAfterStorageConnect(this);
+            FluidStorageEvent.postAfterStorageConnect(this);
         }
     }
 
@@ -155,7 +155,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
             
             if(this.isConnected() && this.getDomain() != null)
             {
-                StorageEvent.postStoredUpdate(this, resource, -taken, request);
+                FluidStorageEvent.postStoredUpdate(this, resource, -taken, request);
             }
         }
             
@@ -183,7 +183,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
             
             if(this.isConnected() && this.getDomain() != null)
             {
-                StorageEvent.postStoredUpdate(this, resource, added, request);
+                FluidStorageEvent.postStoredUpdate(this, resource, added, request);
             }
         }
         return added;
@@ -195,7 +195,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         long delta = capacity - this.capacity;
         if(delta != 0 && this.isConnected() && this.getDomain() != null)
         {
-            StorageEvent.postCapacityChange(this, delta);
+            FluidStorageEvent.postCapacityChange(this, delta);
         }
         return super.setCapacity(capacity);
     }

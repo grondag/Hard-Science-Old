@@ -32,5 +32,6 @@ public class ModDevices
         DeviceManager.register(HardScience.MODID + ":top_bus", TopBusMachine.class);
         DeviceManager.register(HardScience.MODID + ":water_pump", WaterPumpMachine.class);
         DeviceManager.register(HardScience.MODID + ":modular_tank", ModularTankMachine.class);
+        
     }
 }

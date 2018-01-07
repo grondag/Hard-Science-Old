@@ -16,8 +16,12 @@ import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListenerProvider;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.FluidStorageManager;
 import grondag.hard_science.simulator.storage.ItemStorageManager;
+import grondag.hard_science.simulator.storage.PowerStorageManager;
 import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.storage.jobs.JobManager;
 import grondag.hard_science.superblock.placement.BuildManager;
@@ -37,6 +41,8 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     
     public final EventBus eventBus = new EventBus();
     public final StorageManager<StorageTypeStack> itemStorage;
+    public final StorageManager<StorageTypeFluid> fluidStorage;
+    public final StorageManager<StorageTypePower> powerStorage;
     public final JobManager jobManager;
     public final BuildManager buildManager;
     public final BrokerManager brokerManager;
@@ -48,6 +54,8 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     {
         this.domainManager = domainManager;    
         this.itemStorage = new ItemStorageManager(this);
+        this.fluidStorage = new FluidStorageManager(this);
+        this.powerStorage = new PowerStorageManager(this);
         this.jobManager = new JobManager(this);
         this.buildManager = new BuildManager(this);
         this.brokerManager = new BrokerManager(this);

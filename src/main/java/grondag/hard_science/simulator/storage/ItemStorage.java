@@ -101,7 +101,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
             
             if(this.isConnected() && this.getDomain() != null)
             {
-                StorageEvent.postStoredUpdate(this, resource, -taken, request);
+                ItemStorageEvent.postStoredUpdate(this, resource, -taken, request);
             }
         }
         
@@ -136,7 +136,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
             
             if(this.isConnected() && this.getDomain() != null)
             {
-                StorageEvent.postStoredUpdate(this, resource, added, request);
+                ItemStorageEvent.postStoredUpdate(this, resource, added, request);
             }
         }
         
@@ -272,7 +272,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         if(this.getDomain() == null)
             Log.warn("Null domain on item storage connect");
         else
-            StorageEvent.postAfterStorageConnect(this);
+            ItemStorageEvent.postAfterStorageConnect(this);
     }
 
     @Override
@@ -283,7 +283,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         if(this.getDomain() == null)
             Log.warn("Null domain on item storage connect");
         else
-            StorageEvent.postBeforeStorageDisconnect(this);
+            ItemStorageEvent.postBeforeStorageDisconnect(this);
         super.onDisconnect();
     }
 
@@ -292,12 +292,12 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     {
         if(this.isConnected() && this.getDomain() != null)
         {
-            StorageEvent.postBeforeStorageDisconnect(this);
+            ItemStorageEvent.postBeforeStorageDisconnect(this);
         }
         super.setDomain(domain);
         if(this.isConnected() && domain != null)
         {
-            StorageEvent.postAfterStorageConnect(this);
+            ItemStorageEvent.postAfterStorageConnect(this);
         }
     }
 
@@ -307,7 +307,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         long delta = capacity - this.capacity;
         if(delta != 0 && this.isConnected() && this.getDomain() != null)
         {
-            StorageEvent.postCapacityChange(this, delta);
+            ItemStorageEvent.postCapacityChange(this, delta);
         }
         return super.setCapacity(capacity);
     }

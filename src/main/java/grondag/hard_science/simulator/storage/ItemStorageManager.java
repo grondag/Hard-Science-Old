@@ -5,10 +5,10 @@ import com.google.common.eventbus.Subscribe;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.StorageEvent.AfterItemStorageConnect;
-import grondag.hard_science.simulator.storage.StorageEvent.BeforeItemStorageDisconnect;
-import grondag.hard_science.simulator.storage.StorageEvent.ItemCapacityChange;
-import grondag.hard_science.simulator.storage.StorageEvent.ItemStoredUpdate;
+import grondag.hard_science.simulator.storage.ItemStorageEvent.AfterItemStorageConnect;
+import grondag.hard_science.simulator.storage.ItemStorageEvent.BeforeItemStorageDisconnect;
+import grondag.hard_science.simulator.storage.ItemStorageEvent.ItemCapacityChange;
+import grondag.hard_science.simulator.storage.ItemStorageEvent.ItemStoredUpdate;
 
 /**
  * Main purpose is to hold type-specific event handlers.
