@@ -20,7 +20,8 @@ public class ModGuiHandler implements IGuiHandler
         SUPERMODEL_ITEM,
         SMART_CHEST,
         BLOCK_FABRICATOR,
-        SOLAR_AGGREGATOR;
+        SOLAR_AGGREGATOR, 
+        MODULAR_TANK;
     }
     
     @Override

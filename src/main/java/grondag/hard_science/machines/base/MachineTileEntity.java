@@ -14,6 +14,7 @@ import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListe
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.FluidStorage;
 import grondag.hard_science.simulator.storage.IStorage;
 import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.superblock.block.SuperTileEntity;
@@ -28,6 +29,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -419,6 +422,12 @@ public class MachineTileEntity extends SuperTileEntity
         {
             return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast((IItemHandler) this.machine());
         }
+        else if(capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY 
+                && this.machine() != null
+                && this.machine() instanceof FluidStorage)
+        {
+            return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast((IFluidHandler) this.machine());
+        }
         return super.getCapability(capability, facing);
     }
     
@@ -428,6 +437,10 @@ public class MachineTileEntity extends SuperTileEntity
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && this.machine() != null)
         {
             return this.machine() instanceof ItemStorage;
+        }
+        else if(capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && this.machine() != null)
+        {
+            return this.machine() instanceof FluidStorage;
         }
         return super.hasCapability(capability, facing);
     }

@@ -3,6 +3,7 @@ package grondag.hard_science.init;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorMachine;
 import grondag.hard_science.machines.BottomBusMachine;
+import grondag.hard_science.machines.ContainerizingPumpMachine;
 import grondag.hard_science.machines.ItemAccessMachine;
 import grondag.hard_science.machines.MiddleBusMachine;
 import grondag.hard_science.machines.SmartChestMachine;
@@ -30,5 +31,7 @@ public class ModDevices
         DeviceManager.register(HardScience.MODID + ":middle_bus", MiddleBusMachine.class);
         DeviceManager.register(HardScience.MODID + ":top_bus", TopBusMachine.class);
         DeviceManager.register(HardScience.MODID + ":item_access", ItemAccessMachine.class);
+        DeviceManager.register(HardScience.MODID + ":containerizing_pump", ContainerizingPumpMachine.class);
+//        DeviceManager.register(HardScience.MODID + ":modular_tank", ModularTankMachine.class);
     }
 }

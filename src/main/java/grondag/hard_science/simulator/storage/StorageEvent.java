@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 
 public class StorageEvent
@@ -57,13 +58,13 @@ public class StorageEvent
         storage.getDomain().eventBus.post(new BeforeItemStorageDisconnect(storage));
     }
     
-    public static void postItemStorageConnect(ItemStorage storage)
+    public static void postAfterStorageConnect(ItemStorage storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterItemStorageConnect(storage));
     }
     
-    public static void postItemStoredUpdate(
+    public static void postStoredUpdate(
             ItemStorage storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
@@ -78,7 +79,7 @@ public class StorageEvent
                     request));
     }
     
-    public static void postItemAvailableUpdate(
+    public static void postAvailableUpdate(
             ItemStorage storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
@@ -93,7 +94,7 @@ public class StorageEvent
                     request));
     }
     
-    public static void postItemCapacityChange(ItemStorage storage, long delta)
+    public static void postCapacityChange(ItemStorage storage, long delta)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new ItemCapacityChange(storage, delta));
@@ -151,5 +152,30 @@ public class StorageEvent
         {
             super(storage, resource, delta, request);
         }
+    }
+
+    public static void postAfterStorageConnect(FluidStorage fluidStorage)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public static void postBeforeStorageDisconnect(FluidStorage fluidStorage)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public static void postStoredUpdate(FluidStorage fluidStorage, IResource<StorageTypeFluid> resource, long delta,
+            IProcurementRequest<StorageTypeFluid> request)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public static void postCapacityChange(FluidStorage fluidStorage, long delta)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

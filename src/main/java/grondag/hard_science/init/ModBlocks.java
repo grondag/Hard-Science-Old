@@ -4,6 +4,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorBlock;
 import grondag.hard_science.machines.BottomBusBlock;
+import grondag.hard_science.machines.ContainerizingPumpBlock;
 import grondag.hard_science.machines.ItemAccessBlock;
 import grondag.hard_science.machines.MiddleBusBlock;
 import grondag.hard_science.machines.SmartChestBlock;
@@ -20,6 +21,7 @@ import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
+import grondag.hard_science.superblock.terrain.DepletedFluidBlock;
 import grondag.hard_science.superblock.terrain.TerrainBlockRegistry;
 import grondag.hard_science.superblock.terrain.TerrainCubicBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
@@ -65,6 +67,8 @@ public class ModBlocks
     public static final Block solar_cell = null;
     public static final Block extension_bus = null;
     public static final Block intermediate_bus = null;
+    
+    public static final Block depleted_fluid = null;
     
 //    public static final Block solar_aggregator = null;
     
@@ -175,8 +179,11 @@ public class ModBlocks
             event.getRegistry().register(dynamicVeryHotBasaltHeight);
             event.getRegistry().register(dynamicVeryHotBasaltFiller);
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicVeryHotBasaltHeight, dynamicVeryHotBasaltFiller);
-            
         }
+        
+        event.getRegistry().register(new DepletedFluidBlock()
+                .setRegistryName("depleted_fluid")
+                .setUnlocalizedName("depeleted_fluid"));
         
         // MACHINE BLOCKS
         event.getRegistry().register(new SmartChestBlock("smart_chest"));
@@ -188,7 +195,8 @@ public class ModBlocks
         event.getRegistry().register(new TopBusBlock("top_bus"));
         event.getRegistry().register(new TransportTestBlock("transport_test"));
         event.getRegistry().register(new ItemAccessBlock("item_access"));
-        
+        event.getRegistry().register(new ContainerizingPumpBlock("containerizing_pump"));
+//        event.getRegistry().register(new ModularTankBlock("modular_tank"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 

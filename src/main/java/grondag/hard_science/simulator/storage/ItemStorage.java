@@ -1,7 +1,17 @@
 package grondag.hard_science.simulator.storage;
 
+import java.util.List;
+import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
+
+import org.magicwerk.brownies.collections.Key1List;
+
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModItems;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -12,6 +22,8 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.items.IItemHandler;
 
 /**
@@ -22,6 +34,14 @@ import net.minecraftforge.items.IItemHandler;
  */
 public class ItemStorage extends AbstractStorage<StorageTypeStack> implements IItemHandler
 {
+    /**
+     * All unique resources contained in this storage
+     */
+    protected Key1List<AbstractResourceWithQuantity<StorageTypeStack>, IResource<StorageTypeStack>> slots 
+        = new Key1List.Builder<AbstractResourceWithQuantity<StorageTypeStack>, IResource<StorageTypeStack>>().
+              withPrimaryKey1Map(AbstractResourceWithQuantity::resource).
+              build();
+    
     public ItemStorage(CarrierLevel carrierLevel, PortType portType)
     {
         super(carrierLevel, portType);
@@ -33,6 +53,95 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         return StorageType.ITEM;
     }
     
+    @Override
+    public long getQuantityStored(IResource<StorageTypeStack> resource)
+    {
+        AbstractResourceWithQuantity<StorageTypeStack> rwq = this.slots.getByKey1(resource);
+        return rwq == null ? 0 : rwq.getQuantity();
+    }
+    
+    @Override
+    public List<AbstractResourceWithQuantity<StorageTypeStack>> find(Predicate<IResource<StorageTypeStack>> predicate)
+    {
+        ImmutableList.Builder<AbstractResourceWithQuantity<StorageTypeStack>> builder = ImmutableList.builder();
+        
+        for(AbstractResourceWithQuantity<StorageTypeStack> rwq : this.slots)
+        {
+            if(predicate.test(rwq.resource()))
+            {
+                builder.add(rwq.clone());
+            }
+        }
+        
+        return builder.build();
+    }
+    
+    @Override
+    public synchronized long takeUpTo(IResource<StorageTypeStack> resource, long limit, boolean simulate, @Nullable IProcurementRequest<StorageTypeStack> request)
+    {
+        if(limit < 1) return 0;
+        
+        AbstractResourceWithQuantity<StorageTypeStack> rwq = this.slots.getByKey1(resource);
+
+        if(rwq == null) return 0;
+        
+        long current = rwq.getQuantity();
+        
+        long taken = Math.min(limit, current);
+        
+        if(taken > 0 && !simulate)
+        {
+            if(rwq.changeQuantity(-taken) == 0)
+            {
+                this.slots.removeByKey1(resource);
+            }
+            
+            this.used -= taken;
+            this.setDirty();
+            
+            if(this.isConnected() && this.getDomain() != null)
+            {
+                StorageEvent.postStoredUpdate(this, resource, -taken, request);
+            }
+        }
+        
+        return taken;
+    }
+    
+    @Override
+    public synchronized long add(IResource<StorageTypeStack> resource, long howMany, boolean simulate, @Nullable IProcurementRequest<StorageTypeStack> request)
+    {
+        if(howMany < 1 || !this.isResourceAllowed(resource)) return 0;
+        
+        long added = Math.min(howMany, this.availableCapacity());
+        
+        if(added < 1) return 0;
+        
+        if(!simulate)
+        {
+            AbstractResourceWithQuantity<StorageTypeStack> rwq = this.slots.getByKey1(resource);
+            
+            if(rwq != null)
+            {
+                rwq.changeQuantity(added);
+            }
+            else
+            {
+                rwq = resource.withQuantity(added);
+                this.slots.add(rwq);
+            }
+            
+            this.used += added;
+            this.setDirty();
+            
+            if(this.isConnected() && this.getDomain() != null)
+            {
+                StorageEvent.postStoredUpdate(this, resource, added, request);
+            }
+        }
+        
+        return added;
+    }
      /**
      * <i>If we have available capacity, then effectively one more slot available to add another items not already here.</i><br><br>
      * 
@@ -154,7 +263,7 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         if(this.getDomain() == null)
             Log.warn("Null domain on item storage connect");
         else
-            StorageEvent.postItemStorageConnect(this);
+            StorageEvent.postAfterStorageConnect(this);
     }
 
     @Override
@@ -179,30 +288,8 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         super.setDomain(domain);
         if(this.isConnected() && domain != null)
         {
-            StorageEvent.postItemStorageConnect(this);
+            StorageEvent.postAfterStorageConnect(this);
         }
-    }
-
-    @Override
-    public synchronized long takeUpTo(IResource<StorageTypeStack> resource, long limit, boolean simulate, IProcurementRequest<StorageTypeStack> request)
-    {
-        long result = super.takeUpTo(resource, limit, simulate, request);
-        if(!simulate && result != 0 && this.isConnected() && this.getDomain() != null)
-        {
-            StorageEvent.postItemStoredUpdate(this, resource, -result, request);
-        }
-        return result;
-    }
-
-    @Override
-    public synchronized long add(IResource<StorageTypeStack> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypeStack> request)
-    {
-        long result = super.add(resource, howMany, simulate, request);
-        if(!simulate && result != 0 && this.isConnected() && this.getDomain() != null)
-        {
-            StorageEvent.postItemStoredUpdate(this, resource, result, request);
-        }
-        return result;
     }
 
     @Override
@@ -211,10 +298,48 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         long delta = capacity - this.capacity;
         if(delta != 0 && this.isConnected() && this.getDomain() != null)
         {
-            StorageEvent.postItemCapacityChange(this, delta);
+            StorageEvent.postCapacityChange(this, delta);
         }
         return super.setCapacity(capacity);
     }
     
+    @Override
+    public void serializeNBT(NBTTagCompound nbt)
+    {
+        super.serializeNBT(nbt);
+        
+        if(!this.slots.isEmpty())
+        {
+            NBTTagList nbtContents = new NBTTagList();
+            
+            for(AbstractResourceWithQuantity<StorageTypeStack> rwq : this.slots)
+            {
+                nbtContents.appendTag(rwq.toNBT());
+            }
+            nbt.setTag(ModNBTTag.STORAGE_CONTENTS, nbtContents);
+        }
+    }
     
+    @Override
+    public void deserializeNBT(NBTTagCompound nbt)
+    {
+        super.deserializeNBT(nbt);
+        
+        this.slots.clear();
+        this.used = 0;
+
+        NBTTagList nbtContents = nbt.getTagList(ModNBTTag.STORAGE_CONTENTS, 10);
+        if( nbtContents != null && !nbtContents.hasNoTags())
+        {
+            for (int i = 0; i < nbtContents.tagCount(); ++i)
+            {
+                NBTTagCompound subTag = nbtContents.getCompoundTagAt(i);
+                if(subTag != null)
+                {
+                    AbstractResourceWithQuantity<StorageTypeStack> rwq = StorageType.ITEM.fromNBTWithQty(subTag);
+                    this.add(rwq, false, null);
+                }
+            }   
+        }
+    }
 }

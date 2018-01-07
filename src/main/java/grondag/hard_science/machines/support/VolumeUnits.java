@@ -144,6 +144,16 @@ public enum VolumeUnits
         return value * from.nL / to.nL;
     }
 
+    public static long nL2Liters(long value)
+    {
+        return convertFromTo(value, VolumeUnits.NANOLITER, VolumeUnits.LITER);
+    }
+    
+    public static long liters2nL(long value)
+    {
+        return convertFromTo(value, VolumeUnits.LITER, VolumeUnits.NANOLITER);
+    }
+    
     public class Volume
     {
         

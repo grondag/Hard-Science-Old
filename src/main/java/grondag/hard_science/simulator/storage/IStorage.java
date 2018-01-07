@@ -18,12 +18,9 @@ public interface IStorage<T extends StorageType<T>>
     
     default boolean isResourceAllowed(IResource<T> resource) { return true; }
     
-    /**
-     * Override if this storage can hold only certain resources.
-     */
     default long availableCapacityFor(IResource<T> resource)
     {
-        return this.availableCapacity();
+        return this.isResourceAllowed(resource) ? this.availableCapacity() : 0;
     }
     
      /**
