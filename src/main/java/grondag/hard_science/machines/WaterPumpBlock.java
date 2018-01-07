@@ -10,9 +10,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 /** WIP */
-public class ContainerizingPumpBlock extends MachineBlock
+public class WaterPumpBlock extends MachineBlock
 {
-    public ContainerizingPumpBlock(String name)
+    public WaterPumpBlock(String name)
     {
         super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_CHANNEL_DOTS));
     }
@@ -20,7 +20,7 @@ public class ContainerizingPumpBlock extends MachineBlock
     @Override
     public AbstractMachine createNewMachine()
     {
-        return new ContainerizingPumpMachine();
+        return new WaterPumpMachine();
     }
     
     @Override

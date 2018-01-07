@@ -8,6 +8,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fluids.FluidStack;
 
 
 /**
@@ -27,8 +28,8 @@ public abstract class StorageType<T extends StorageType<T>>
         case POWER:
             return StorageType.POWER;
         default:
-        case NONE:
-            return StorageType.NONE;
+            assert false : "Missing enum mapping for storage type";
+            return null;
         }
     }
     
@@ -37,12 +38,11 @@ public abstract class StorageType<T extends StorageType<T>>
     public final int ordinal;
     public final Predicate<IResource<T>> MATCH_ANY;
     
-    @SuppressWarnings("unchecked")
-    private StorageType(EnumStorageType enumType)
+    private StorageType(EnumStorageType enumType, IResource<T> emptyResource)
     {
         this.enumType = enumType;
         this.ordinal = enumType.ordinal();
-        this.emptyResource = (IResource<T>) new ItemResource(ItemStack.EMPTY.getItem(), ItemStack.EMPTY.getMetadata(), null, null);
+        this.emptyResource = emptyResource;
         this.MATCH_ANY = new Predicate<IResource<T>>()
         {
             @Override
@@ -75,34 +75,6 @@ public abstract class StorageType<T extends StorageType<T>>
         return (IResource<V>) sType.fromNBT(tag);
     }
     
-    /** 
-     * Resources that must be consumed as they are produced - storage is not possible.
-     */    
-    public static final StorageTypeNone NONE = new StorageTypeNone();
-    public static class StorageTypeNone extends StorageType<StorageTypeNone> 
-    { 
-        private StorageTypeNone() {super(EnumStorageType.NONE);}
-        
-        @Override
-        public IResource<StorageTypeNone> fromNBT(NBTTagCompound nbt)
-        {
-            return null;
-        }
-
-        @Override
-        public NBTTagCompound toNBT(IResource<StorageTypeNone> resource)
-        {
-            return null;
-        }
-
-        @Override
-        public AbstractResourceWithQuantity<StorageTypeNone> fromNBTWithQty(NBTTagCompound nbt)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-    }
-    
     /**
      * Materials stored as item stacks. AbstractStorage managers for other storage types that can be encapsulated
      * as item stacks will use the item stack storage manager as a subsystem.
@@ -110,7 +82,11 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeStack ITEM = new StorageTypeStack();
     public static class StorageTypeStack extends StorageType<StorageTypeStack> 
     { 
-        private StorageTypeStack() {super(EnumStorageType.ITEM);}
+        private StorageTypeStack()
+        {
+            super(EnumStorageType.ITEM, 
+            new ItemResource(ItemStack.EMPTY.getItem(), ItemStack.EMPTY.getMetadata(), null, null));
+        }
         
         /**
          * Note that this expects to get an ItemStack NBT, which
@@ -143,27 +119,29 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeFluid FLUID = new StorageTypeFluid();
     public static class StorageTypeFluid extends StorageType<StorageTypeFluid>
     {
-        private StorageTypeFluid() {super(EnumStorageType.FLUID);}
+        private StorageTypeFluid()
+        {
+            super(EnumStorageType.FLUID, new FluidResource(null, null));
+        }
 
         @Override
         public IResource<StorageTypeFluid> fromNBT(NBTTagCompound nbt)
         {
-            // TODO Auto-generated method stub
-            return null;
+            if(nbt == null) return this.emptyResource;
+            return FluidResource.fromStack(FluidStack.loadFluidStackFromNBT(nbt));
         }
 
         @Override
         public NBTTagCompound toNBT(IResource<StorageTypeFluid> resource)
         {
-            // TODO Auto-generated method stub
-            return null;
+            NBTTagCompound tag = new NBTTagCompound();
+            return ((FluidResource)resource).sampleFluidStack().writeToNBT(tag);
         }
 
         @Override
         public AbstractResourceWithQuantity<StorageTypeFluid> fromNBTWithQty(NBTTagCompound nbt)
         {
-            // TODO Auto-generated method stub
-            return null;
+            return new FluidResourceWithQuantity(nbt);
         }
     }
     
@@ -175,28 +153,27 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypePower POWER = new StorageTypePower();
     public static class StorageTypePower extends StorageType<StorageTypePower>
     {
-        private StorageTypePower() {super(EnumStorageType.POWER);}
+        private StorageTypePower()
+        {
+            super(EnumStorageType.POWER, new PowerResource("empty"));
+        }
 
         @Override
         public IResource<StorageTypePower> fromNBT(NBTTagCompound nbt)
         {
-            // TODO Auto-generated method stub
-            return null;
+            return PowerResource.JOULES;
         }
-
 
         @Override
         public NBTTagCompound toNBT(IResource<StorageTypePower> resource)
         {
-            // TODO Auto-generated method stub
-            return null;
+            return new NBTTagCompound();
         }
 
         @Override
         public AbstractResourceWithQuantity<StorageTypePower> fromNBTWithQty(NBTTagCompound nbt)
         {
-            // TODO Auto-generated method stub
-            return null;
+            return new PowerResourceWithQuantity(nbt);
         }
     }
    

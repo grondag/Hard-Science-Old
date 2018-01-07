@@ -24,9 +24,6 @@ public class FluidResource extends AbstractResource<StorageType.StorageTypeFluid
     // lazy instantiate and cache
     private FluidStack stack = null;
     
-    /** 
-     * NEVER USE DIRECTLY EXCEPT FOR UNIT TESTING.
-     */
     public FluidResource(Fluid fluid, NBTTagCompound tag)
     {
         this.fluid = fluid;
@@ -44,6 +41,8 @@ public class FluidResource extends AbstractResource<StorageType.StorageTypeFluid
      * Will always be a new instance/copy.     */
     public FluidStack sampleFluidStack()
     {
+        if(this.fluid == null) return null;
+        
         if(this.stack == null)
         {
             stack = new FluidStack(fluid, Fluid.BUCKET_VOLUME);
@@ -54,6 +53,8 @@ public class FluidResource extends AbstractResource<StorageType.StorageTypeFluid
     
     public FluidStack newStackWithLiters(int liters)
     {
+        if(this.fluid == null) return null;
+        
         FluidStack result = new FluidStack(this.fluid, Fluid.BUCKET_VOLUME);
         result.tag = this.tag;
         result.amount = liters;

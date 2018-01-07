@@ -7,16 +7,19 @@ import java.util.function.Predicate;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
+import grondag.hard_science.simulator.resource.FluidResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
@@ -274,5 +277,28 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         long drained = VolumeUnits.liters2nL(maxDrain);
         drained = this.takeUpTo(resource, drained, !doDrain, null);
         return resource.newStackWithLiters((int) VolumeUnits.nL2Liters(drained));
+    }
+    
+    @Override
+    public void serializeNBT(NBTTagCompound nbt)
+    {
+        super.serializeNBT(nbt);
+        if(this.fluidResource != null)
+        {
+            nbt.setTag(ModNBTTag.STORAGE_CONTENTS, this.fluidResource.withQuantity(this.used).toNBT());
+        }
+    }
+    
+    @Override
+    public void deserializeNBT(NBTTagCompound nbt)
+    {
+        super.deserializeNBT(nbt);
+        if(nbt.hasKey(ModNBTTag.STORAGE_CONTENTS))
+        {
+            FluidResourceWithQuantity rwq 
+                = new FluidResourceWithQuantity(nbt.getCompoundTag(ModNBTTag.STORAGE_CONTENTS));
+            this.fluidResource = (FluidResource) rwq.resource();
+            this.used = rwq.getQuantity();
+        }
     }
 }

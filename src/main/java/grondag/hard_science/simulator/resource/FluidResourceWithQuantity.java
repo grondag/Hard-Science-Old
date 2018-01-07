@@ -76,4 +76,10 @@ public class FluidResourceWithQuantity extends AbstractResourceWithQuantity<Stor
         }
         
     };
+    
+    @Override
+    public String toString()
+    {
+        return String.format("%s x %,dL", this.resource().toString(), VolumeUnits.nL2Liters(this.getQuantity()));
+    }
 }

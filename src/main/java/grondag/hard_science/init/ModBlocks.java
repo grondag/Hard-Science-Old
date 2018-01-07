@@ -4,7 +4,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorBlock;
 import grondag.hard_science.machines.BottomBusBlock;
-import grondag.hard_science.machines.ContainerizingPumpBlock;
+import grondag.hard_science.machines.WaterPumpBlock;
 import grondag.hard_science.machines.ItemAccessBlock;
 import grondag.hard_science.machines.MiddleBusBlock;
 import grondag.hard_science.machines.ModularTankBlock;
@@ -193,10 +193,10 @@ public class ModBlocks
         event.getRegistry().register(new BottomBusBlock("bottom_bus"));
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
-        event.getRegistry().register(new TransportTestBlock("transport_test"));
-        event.getRegistry().register(new ItemAccessBlock("item_access"));
-        event.getRegistry().register(new ContainerizingPumpBlock("containerizing_pump"));
         event.getRegistry().register(new ModularTankBlock("modular_tank"));
+        event.getRegistry().register(new ItemAccessBlock("item_access"));
+        event.getRegistry().register(new WaterPumpBlock("water_pump"));
+        event.getRegistry().register(new TransportTestBlock("transport_test"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
