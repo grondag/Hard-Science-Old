@@ -40,7 +40,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> extends Abstract
     public void deserializeNBT(NBTTagCompound nbt)
     {
         super.deserializeNBT(nbt);
-        this.setCapacity(nbt.getLong(ModNBTTag.STORAGE_CAPACITY));
+        this.capacity = nbt.getLong(ModNBTTag.STORAGE_CAPACITY);
     }
 
     @Override

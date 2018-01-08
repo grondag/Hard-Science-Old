@@ -4,8 +4,10 @@ import java.util.function.Function;
 
 public class MachinePower
 {
-    public static final long JOULES_PER_KWH = 3600000;
-    public static final long JOULES_PER_POLYETHYLENE_LITER = 42600000;
+    public static final long JOULES_PER_KWH =                   3600000;
+    public static final long JOULES_PER_POLYETHYLENE_LITER =   42600000;
+    public static final long JOULES_PER_SILICON_BATTERY_LITER = 4300000;
+    
     public static final float JOULES_PER_POLYETHYLENE_NANOLITER = (float) JOULES_PER_POLYETHYLENE_LITER / VolumeUnits.LITER.nL;
     
     /**

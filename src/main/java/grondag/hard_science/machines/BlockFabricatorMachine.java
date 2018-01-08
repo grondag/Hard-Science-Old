@@ -16,6 +16,7 @@ import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBuffe
 import grondag.hard_science.machines.support.MaterialBufferManager.VolumetricBufferSpec;
 import grondag.hard_science.machines.support.MatterUnits;
 import grondag.hard_science.machines.support.PolyethyleneFuelCell;
+import grondag.hard_science.machines.support.PowerReceiver;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
@@ -151,7 +152,10 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     @Override
     protected MachinePowerSupply createPowerSuppy()
     {
-        return new MachinePowerSupply(PolyethyleneFuelCell.BASIC_1KW, new Battery(MachinePower.JOULES_PER_KWH, BatteryChemistry.LITHIUM), null);
+        return new MachinePowerSupply(
+                PolyethyleneFuelCell.BASIC_1KW, 
+                new Battery(VolumeUnits.LITER.nL, BatteryChemistry.SILICON), 
+                new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
     }
     
     public BlockFabricationTask task()

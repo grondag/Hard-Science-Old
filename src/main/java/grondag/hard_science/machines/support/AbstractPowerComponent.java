@@ -88,6 +88,8 @@ public abstract class AbstractPowerComponent implements IPowerComponent
     
     /**
      * Implementation can assume maxOutput has already been tested/adjusted against per-tick max.
+     * Machine is the machine containing the power component - in case it needs access to 
+     * other machine components.
      */
     protected abstract long provideEnergyImplementation(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate);
    

@@ -101,7 +101,10 @@ public interface IPowerComponent extends IReadWriteNBT, IMessagePlus
      * 
      * While conceptually this is power, is handled as energy due to the
      * quantized nature of time in Minecraft. Intended to be called each tick.<br><br>
-     * @param machine TODO
+     * @param machine 
+                  The machine to which this component belongs. Components
+                  don't save a reference, and some may need to access buffers or
+                  other machine components.
      * @param maxOutput
      *            Maximum amount of energy to be extracted, in joules.<br>
     *            Limited by {@link #maxEnergyOutputPerTick()}.

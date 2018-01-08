@@ -4,8 +4,7 @@ import net.minecraft.util.math.MathHelper;
 
 public enum BatteryChemistry
 {
-    SILICON(MachinePower.JOULES_PER_POLYETHYLENE_LITER / 5, 20, 10, 900),
-    LITHIUM(MachinePower.JOULES_PER_POLYETHYLENE_LITER / 3, 15, 5, 950);
+    SILICON(MachinePower.JOULES_PER_SILICON_BATTERY_LITER, 20, 10, 950);
     
     /**
      * How much energy batter can store in a given volume.  This is after any inefficiency cost has been incurred.  
@@ -100,5 +99,14 @@ public enum BatteryChemistry
     {
         int ticksToDischarge = (int) (this.minutesToDischarge * TimeUnits.TICKS_PER_SIMULATED_MINUTE);
         return ticksToDischarge == 0 ? maxChargeJoules : maxChargeJoules / ticksToDischarge;
+    }
+
+    /**
+     * Capacity of a battery of this chemistry with the given volume. 
+     * In Joules.
+     */
+    public long capacityForNanoliters(long volumeNanoliters)
+    {
+        return volumeNanoliters * this.energyDensityJoulesPerLiter / VolumeUnits.LITER.nL;
     }
 }

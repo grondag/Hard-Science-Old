@@ -4,10 +4,16 @@ package grondag.hard_science.simulator.storage;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.machines.support.Battery;
+import grondag.hard_science.machines.support.BatteryChemistry;
+import grondag.hard_science.machines.support.MachinePower;
+import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.machines.support.PowerReceiver;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -19,16 +25,24 @@ import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 
+//TODO: need to merge this with battery somehow so that capture all the events
 public class PowerStorage extends AbstractStorage<StorageTypePower>
 {
     
     public PowerStorage(CarrierLevel carrierLevel, PortType portType)
     {
         super(carrierLevel, portType);
-        //FIXME
-        this.capacity = 1000000;
     }
 
+    @Override
+    protected @Nullable MachinePowerSupply createPowerSuppy()
+    {
+        return new MachinePowerSupply(
+                null, 
+                new Battery(775193798450L, BatteryChemistry.SILICON), 
+                new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
+    }
+    
     @Override
     public StorageTypePower storageType()
     {
@@ -83,38 +97,27 @@ public class PowerStorage extends AbstractStorage<StorageTypePower>
     @Override
     public synchronized long takeUpTo(IResource<StorageTypePower> resource, long limit, boolean simulate, IProcurementRequest<StorageTypePower> request)
     {
-        if(limit < 1) return 0;
-        
-        long taken = Math.min(limit, this.used);
+        long taken =this.getPowerSupply().battery().provideEnergy(this, limit, true, simulate);
         
         if(taken > 0 && !simulate)
         {
-            this.used -= taken;
-            
             this.setDirty();
-            
             if(this.isConnected() && this.getDomain() != null)
             {
                 PowerStorageEvent.postStoredUpdate(this, resource, -taken, request);
             }
         }
-            
         return taken;
     }
 
     @Override
     public synchronized long add(IResource<StorageTypePower> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypePower> request)
     {
-        if(howMany < 1 || !this.isResourceAllowed(resource)) return 0;
+        long added = this.getPowerSupply().battery().acceptEnergy(howMany, true, simulate);
         
-        long added = Math.min(howMany, this.availableCapacity());
-        if(added < 1) return 0;
-        
-        if(!simulate)
+        if(added > 0 && !simulate)
         {
-            this.used += added;
             this.setDirty();
-            
             if(this.isConnected() && this.getDomain() != null)
             {
                 PowerStorageEvent.postStoredUpdate(this, resource, added, request);
@@ -126,25 +129,32 @@ public class PowerStorage extends AbstractStorage<StorageTypePower>
     @Override
     public AbstractStorage<StorageTypePower> setCapacity(long capacity)
     {
-        long delta = capacity - this.capacity;
-        if(delta != 0 && this.isConnected() && this.getDomain() != null)
-        {
-            PowerStorageEvent.postCapacityChange(this, delta);
-        }
-        return super.setCapacity(capacity);
+        throw new UnsupportedOperationException("Attempt to set power storage capacity. Power capacity is determined by battery subsystem.");
     }
 
     @Override
+    public long getCapacity()
+    {
+        return this.getPowerSupply().battery().maxStoredEnergyJoules();
+    }
+    
+    @Override
     public long getQuantityStored(IResource<StorageTypePower> resource)
     {
-        return this.used;
+        return this.getPowerSupply().battery().storedEnergyJoules();
+    }
+    
+    @Override
+    public long usedCapacity()
+    {
+        return this.getPowerSupply().battery().storedEnergyJoules();
     }
 
     @Override
     public List<AbstractResourceWithQuantity<StorageTypePower>> find(Predicate<IResource<StorageTypePower>> predicate)
     {
-        return this.used > 0 
-                ? ImmutableList.of(PowerResource.JOULES.withQuantity(this.used))
+        return this.usedCapacity() > 0 
+                ? ImmutableList.of(PowerResource.JOULES.withQuantity(this.usedCapacity()))
                 : ImmutableList.of();
     }
     
@@ -152,13 +162,11 @@ public class PowerStorage extends AbstractStorage<StorageTypePower>
     public void serializeNBT(NBTTagCompound nbt)
     {
         super.serializeNBT(nbt);
-        nbt.setLong(ModNBTTag.STORAGE_CONTENTS, this.used);
     }
     
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
         super.deserializeNBT(nbt);
-        this.used = nbt.getLong(ModNBTTag.STORAGE_CONTENTS);
     }
 }

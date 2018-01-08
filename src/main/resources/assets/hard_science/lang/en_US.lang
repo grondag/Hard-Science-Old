@@ -56,6 +56,7 @@ tile.middle_bus.name=Intermediate Transport Bus
 tile.top_bus.name=Supersonic Transport Bus
 tile.water_pump.name=Water Intake Pump
 tile.modular_tank.name=Modular Tank
+tile.glass_battery.name=Glass Battery
 
 machine.redstone_enabled=Redstone control is ENABLED.
 machine.redstone_disabled=Redstone control is DISABLED.

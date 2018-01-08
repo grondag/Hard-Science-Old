@@ -21,7 +21,8 @@ public class ModGuiHandler implements IGuiHandler
         SMART_CHEST,
         BLOCK_FABRICATOR,
         SOLAR_AGGREGATOR, 
-        MODULAR_TANK;
+        MODULAR_TANK, 
+        GLASS_BATTERY;
     }
     
     @Override

@@ -25,9 +25,9 @@ public class Battery extends AbstractPowerComponent
 
     public Battery() {};
     
-    public Battery(long maxEnergyJoules, BatteryChemistry chemistry)
+    public Battery(long volumeNanoliters, BatteryChemistry chemistry)
     {
-        this.setup(maxEnergyJoules, chemistry);
+        this.setup(volumeNanoliters, chemistry);
     }
 
     public Battery(NBTTagCompound tag)
@@ -35,9 +35,9 @@ public class Battery extends AbstractPowerComponent
         this.deserializeNBT(tag);
     }
     
-    private void setup(long maxEnergyJoules, BatteryChemistry chemistry)
+    private void setup(long volumeNanoliters, BatteryChemistry chemistry)
     {
-        this.maxEnergyJoules = maxEnergyJoules;
+        this.maxEnergyJoules = chemistry.capacityForNanoliters(volumeNanoliters);
         this.chemistry = chemistry;
         this.maxEnergyInputPerTick = chemistry.maxChargeJoulesPerTick(maxEnergyJoules);
         this.maxPowerInputWatts = MachinePower.joulesPerTickToWatts(this.maxEnergyInputPerTick);
@@ -146,13 +146,15 @@ public class Battery extends AbstractPowerComponent
     {
         this.setup(
                 tag.getLong(ModNBTTag.MACHINE_BATTERY_MAX_STORED_JOULES),
-                Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.LITHIUM));
+                Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.SILICON));
+        this.storedEnergyJoules = tag.getLong(ModNBTTag.MACHINE_STORED_ENERGY_JOULES);
     }
     
     public void serializeNBT(NBTTagCompound tag)
     {
         tag.setLong(ModNBTTag.MACHINE_BATTERY_MAX_STORED_JOULES, this.maxEnergyJoules);
         tag.setInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY, this.chemistry.ordinal());
+        tag.setLong(ModNBTTag.MACHINE_STORED_ENERGY_JOULES, this.storedEnergyJoules);
     }
     
     @Override

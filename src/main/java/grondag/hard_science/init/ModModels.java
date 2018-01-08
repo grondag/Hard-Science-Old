@@ -9,6 +9,8 @@ import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.library.font.RasterFont;
 import grondag.hard_science.machines.BlockFabricatorTESR;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
+import grondag.hard_science.machines.ChemicalBatteryTESR;
+import grondag.hard_science.machines.ChemicalBatteryTileEntity;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
@@ -333,6 +335,8 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(BlockFabricatorTileEntity.class, BlockFabricatorTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntity.class, MachineTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntityTickable.class, MachineTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(ChemicalBatteryTileEntity.class, ChemicalBatteryTESR.INSTANCE);
+
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

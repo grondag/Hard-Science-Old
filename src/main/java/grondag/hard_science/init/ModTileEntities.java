@@ -3,6 +3,7 @@ package grondag.hard_science.init;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
+import grondag.hard_science.machines.ChemicalBatteryTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
@@ -30,6 +31,7 @@ public class ModTileEntities
         GameRegistry.registerTileEntity(MachineTileEntity.class, HardScience.MODID + ":machine_tile");
         GameRegistry.registerTileEntity(MachineTileEntityTickable.class, HardScience.MODID + ":machine_tickable_tile");
         GameRegistry.registerTileEntity(BlockFabricatorTileEntity.class, HardScience.MODID + ":block_fabricator_tile");
+        GameRegistry.registerTileEntity(ChemicalBatteryTileEntity.class, HardScience.MODID + ":chemical_battery_tile");
         
         if(event.getSide() == Side.CLIENT)
         {
