@@ -64,5 +64,16 @@ public interface IStorage<T extends StorageType<T>>
     {
         return new StorageWithResourceAndQuantity<T>(this, resource, quantity);
     }
+    
+    /**
+     * Call from device connect.
+     */
+    public void onConnect();
+
+    /**
+     * Call from device disconnect.
+     */
+
+    public void onDisconnect();
  
 }

@@ -80,7 +80,6 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         default:
             assert false : "Unhandled enum mapping";
         case FLUID:
-        case NONE:
             return null;
         }
     }

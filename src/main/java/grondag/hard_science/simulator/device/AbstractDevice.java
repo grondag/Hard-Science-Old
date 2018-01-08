@@ -136,8 +136,17 @@ public abstract class AbstractDevice implements IDevice
         return this.domain;
     }
     
+    /**
+     * MUST NOT BE CALLED WHILE CONNECTED.
+     * Storages, connections, etc. all rely on domain remaining
+     * static while connected to transport network. If domain
+     * is to be changed, disconnect, make the change, and reconnect.
+     */
     public void setDomain(@Nullable Domain domain)
     {
+        if(this.isConnected) 
+            throw new UnsupportedOperationException("Attempt to change device domain while connected.");
+        
         this.domainID = domain == null ? IIdentified.UNASSIGNED_ID : domain.getId();
         this.domain = domain;
         this.setDirty();
@@ -200,6 +209,23 @@ public abstract class AbstractDevice implements IDevice
      */
     protected long onProduceImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
     { 
+        switch(resource.storageType().enumType)
+        {
+        case FLUID:
+            if(this.hasFluidStorage()) 
+                return this.fluidStorage().onProduceImpl(resource, quantity, simulate, request);
+        
+        case ITEM:
+            if(this.hasItemStorage()) 
+                return this.itemStorage().onProduceImpl(resource, quantity, simulate, request);
+
+        case POWER:
+            if(this.hasPowerStorage()) 
+                return this.powerStorage().onProduceImpl(resource, quantity, simulate, request);
+
+        default:
+            assert false : "Unhandled enum mapping";
+        }
         return 0;
     }
     
@@ -219,6 +245,23 @@ public abstract class AbstractDevice implements IDevice
      */
     protected long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
     {
+        switch(resource.storageType().enumType)
+        {
+        case FLUID:
+            if(this.hasFluidStorage()) 
+                return this.fluidStorage().onConsumeImpl(resource, quantity, simulate, request);
+        
+        case ITEM:
+            if(this.hasItemStorage()) 
+                return this.itemStorage().onConsumeImpl(resource, quantity, simulate, request);
+
+        case POWER:
+            if(this.hasPowerStorage()) 
+                return this.powerStorage().onConsumeImpl(resource, quantity, simulate, request);
+
+        default:
+            assert false : "Unhandled enum mapping";
+        }
         return 0;
     }
     

@@ -4,45 +4,26 @@ package grondag.hard_science.simulator.storage;
 import java.util.List;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.machines.support.Battery;
-import grondag.hard_science.machines.support.BatteryChemistry;
-import grondag.hard_science.machines.support.MachinePower;
-import grondag.hard_science.machines.support.MachinePowerSupply;
-import grondag.hard_science.machines.support.PowerReceiver;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 
 //TODO: need to merge this with battery somehow so that capture all the events
 public class PowerStorage extends AbstractStorage<StorageTypePower>
 {
-    
-    public PowerStorage(CarrierLevel carrierLevel, PortType portType)
+    public PowerStorage(AbstractMachine owner)
     {
-        super(carrierLevel, portType);
+        super(owner);
     }
 
-    @Override
-    protected @Nullable MachinePowerSupply createPowerSuppy()
-    {
-        return new MachinePowerSupply(
-                null, 
-                new Battery(775193798450L, BatteryChemistry.SILICON), 
-                new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
-    }
-    
     @Override
     public StorageTypePower storageType()
     {
@@ -58,8 +39,6 @@ public class PowerStorage extends AbstractStorage<StorageTypePower>
     @Override
     public void onConnect()
     {
-        super.onConnect();
-        
         assert this.getDomain() != null : "Null domain on storage connect";
         
         if(this.getDomain() == null)
@@ -77,27 +56,13 @@ public class PowerStorage extends AbstractStorage<StorageTypePower>
             Log.warn("Null domain on storage connect");
         else
             PowerStorageEvent.postBeforeStorageDisconnect(this);
-        super.onDisconnect();
-    }
-
-    @Override
-    public void setDomain(Domain domain)
-    {
-        if(this.isConnected() && this.getDomain() != null)
-        {
-            PowerStorageEvent.postBeforeStorageDisconnect(this);
-        }
-        super.setDomain(domain);
-        if(this.isConnected() && domain != null)
-        {
-            PowerStorageEvent.postAfterStorageConnect(this);
-        }
     }
 
     @Override
     public synchronized long takeUpTo(IResource<StorageTypePower> resource, long limit, boolean simulate, IProcurementRequest<StorageTypePower> request)
     {
-        long taken =this.getPowerSupply().battery().provideEnergy(this, limit, true, simulate);
+        long taken = this.machine().getPowerSupply().battery()
+                .provideEnergy(this.machine(), limit, true, simulate);
         
         if(taken > 0 && !simulate)
         {
@@ -113,7 +78,7 @@ public class PowerStorage extends AbstractStorage<StorageTypePower>
     @Override
     public synchronized long add(IResource<StorageTypePower> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypePower> request)
     {
-        long added = this.getPowerSupply().battery().acceptEnergy(howMany, true, simulate);
+        long added = this.machine().getPowerSupply().battery().acceptEnergy(howMany, true, simulate);
         
         if(added > 0 && !simulate)
         {
@@ -135,19 +100,19 @@ public class PowerStorage extends AbstractStorage<StorageTypePower>
     @Override
     public long getCapacity()
     {
-        return this.getPowerSupply().battery().maxStoredEnergyJoules();
+        return this.machine().getPowerSupply().battery().maxStoredEnergyJoules();
     }
     
     @Override
     public long getQuantityStored(IResource<StorageTypePower> resource)
     {
-        return this.getPowerSupply().battery().storedEnergyJoules();
+        return this.machine().getPowerSupply().battery().storedEnergyJoules();
     }
     
     @Override
     public long usedCapacity()
     {
-        return this.getPowerSupply().battery().storedEnergyJoules();
+        return this.machine().getPowerSupply().battery().storedEnergyJoules();
     }
 
     @Override

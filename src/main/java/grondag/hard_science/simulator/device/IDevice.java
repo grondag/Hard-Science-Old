@@ -14,6 +14,9 @@ import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.storage.FluidStorage;
+import grondag.hard_science.simulator.storage.ItemStorage;
+import grondag.hard_science.simulator.storage.PowerStorage;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 
 public interface IDevice extends 
@@ -155,5 +158,35 @@ public interface IDevice extends
      * Default implementation is no channel support.
      */
     public default int getChannel() { return CHANNEL_UNSUPPORTED; }
+    
+    /**
+     * Implement if device has fluid storage.  Will be null if not.
+     */
+    public default FluidStorage fluidStorage() {return null;}
+    
+    /**
+     * Convenience for <code>{@link #powerStorage()} != null</code>
+     */
+    public default boolean hasFluidStorage() { return this.fluidStorage() != null; }
+
+    /**
+     * Implement if device has item storage. Will be null if not.
+     */
+    public default ItemStorage itemStorage() {return null;}
+
+    /**
+     * Convenience for <code>{@link #powerStorage()} != null</code>
+     */
+    public default boolean hasItemStorage() { return this.itemStorage() != null; }
+    
+    /**
+     * Implement if device has power storage. Will be null if not.
+     */
+    public default PowerStorage powerStorage() {return null;}
+
+    /**
+     * Convenience for <code>{@link #powerStorage()} != null</code>
+     */
+    public default boolean hasPowerStorage() { return this.powerStorage() != null; }
 }
 

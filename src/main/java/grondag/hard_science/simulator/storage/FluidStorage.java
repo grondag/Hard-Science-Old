@@ -8,17 +8,15 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.FluidResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -81,9 +79,9 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
         }
     };
     
-    public FluidStorage(CarrierLevel carrierLevel, PortType portType)
+    public FluidStorage(AbstractMachine owner)
     {
-        super(carrierLevel, portType);
+        super(owner);
         this.capacity = VolumeUnits.liters2nL(32000);
     }
 
@@ -102,8 +100,6 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
     @Override
     public void onConnect()
     {
-        super.onConnect();
-        
         assert this.getDomain() != null : "Null domain on storage connect";
         
         if(this.getDomain() == null)
@@ -121,21 +117,6 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
             Log.warn("Null domain on item storage connect");
         else
             FluidStorageEvent.postBeforeStorageDisconnect(this);
-        super.onDisconnect();
-    }
-
-    @Override
-    public void setDomain(Domain domain)
-    {
-        if(this.isConnected() && this.getDomain() != null)
-        {
-            FluidStorageEvent.postBeforeStorageDisconnect(this);
-        }
-        super.setDomain(domain);
-        if(this.isConnected() && domain != null)
-        {
-            FluidStorageEvent.postAfterStorageConnect(this);
-        }
     }
 
     @Override
@@ -210,6 +191,8 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid> implements I
     @Override
     public List<AbstractResourceWithQuantity<StorageTypeFluid>> find(Predicate<IResource<StorageTypeFluid>> predicate)
     {
+        if(this.fluidResource == null) return ImmutableList.of();
+        
         return predicate.test(this.fluidResource)
                 ? ImmutableList.of(this.fluidResource.withQuantity(this.used))
                 : ImmutableList.of();

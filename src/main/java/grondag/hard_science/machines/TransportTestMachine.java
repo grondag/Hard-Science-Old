@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
@@ -16,15 +17,20 @@ import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import grondag.hard_science.simulator.transport.routing.Route;
 import net.minecraft.init.Items;
+import net.minecraft.nbt.NBTTagCompound;
 
-public class TransportTestMachine extends ItemStorage
+public class TransportTestMachine extends AbstractSimpleMachine
 {
     private final static ItemResource resource = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
+    
+    protected final ItemStorage itemStorage;
+    
     public TransportTestMachine()
     {
         super(CarrierLevel.MIDDLE, PortType.DIRECT);
-        super.setCapacity(Integer.MAX_VALUE);
-        super.add(resource, Integer.MAX_VALUE, false, null);
+        this.itemStorage = new ItemStorage(this);
+        this.itemStorage.setCapacity(Integer.MAX_VALUE);
+        this.itemStorage.add(resource, Integer.MAX_VALUE, false, null);
     }
 
     @Override
@@ -48,7 +54,7 @@ public class TransportTestMachine extends ItemStorage
         super.doOffTick();
         if(this.isOn() && this.getDomain() != null)
         {
-            long avail = this.getQuantityStored(resource);
+            long avail = this.itemStorage.getQuantityStored(resource);
             if(avail > 0)
             {
                 List<IStorage<StorageTypeStack>> list 
@@ -76,5 +82,39 @@ public class TransportTestMachine extends ItemStorage
     {
         // can't put stuff in it
         return 0;
+    }
+    
+    @Override
+    public void deserializeNBT(NBTTagCompound tag)
+    {
+        super.deserializeNBT(tag);
+        this.itemStorage.deserializeNBT(tag);
+    }
+
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        super.serializeNBT(tag);
+        this.itemStorage.serializeNBT(tag);
+    }
+
+    @Override
+    public void onConnect()
+    {
+        super.onConnect();
+        this.itemStorage.onConnect();
+    }
+
+    @Override
+    public void onDisconnect()
+    {
+        this.itemStorage.onDisconnect();
+        super.onDisconnect();
+    }
+    
+    @Override
+    public ItemStorage itemStorage()
+    {
+        return this.itemStorage;
     }
 }

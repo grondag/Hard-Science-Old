@@ -87,7 +87,7 @@ public class ModularTankBlock extends MachineBlock
                 // client won't have the storage instance needed to do this
                 if(mste.getWorld().isRemote) return result;
                 
-                FluidStorage store = (FluidStorage)mste.machine();
+                FluidStorage store = mste.machine().fluidStorage();
                 
                 if(store.usedCapacity() == 0) return result;
 

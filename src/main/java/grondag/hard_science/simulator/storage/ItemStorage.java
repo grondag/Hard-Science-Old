@@ -12,15 +12,13 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -41,10 +39,10 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         = new Key1List.Builder<AbstractResourceWithQuantity<StorageTypeStack>, IResource<StorageTypeStack>>().
               withPrimaryKey1Map(AbstractResourceWithQuantity::resource).
               build();
-    
-    public ItemStorage(CarrierLevel carrierLevel, PortType portType)
+
+    public ItemStorage(AbstractMachine owner)
     {
-        super(carrierLevel, portType);
+        super(owner);
     }
 
     @Override
@@ -265,8 +263,6 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
     @Override
     public void onConnect()
     {
-        super.onConnect();
-        
         assert this.getDomain() != null : "Null domain on storage connect";
         
         if(this.getDomain() == null)
@@ -284,21 +280,6 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
             Log.warn("Null domain on item storage connect");
         else
             ItemStorageEvent.postBeforeStorageDisconnect(this);
-        super.onDisconnect();
-    }
-
-    @Override
-    public void setDomain(Domain domain)
-    {
-        if(this.isConnected() && this.getDomain() != null)
-        {
-            ItemStorageEvent.postBeforeStorageDisconnect(this);
-        }
-        super.setDomain(domain);
-        if(this.isConnected() && domain != null)
-        {
-            ItemStorageEvent.postAfterStorageConnect(this);
-        }
     }
 
     @Override

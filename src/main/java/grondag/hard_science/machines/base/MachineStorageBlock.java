@@ -49,7 +49,7 @@ public abstract class MachineStorageBlock extends MachineContainerBlock
                 // client won't have the storage instance needed to do this
                 if(mste.getWorld().isRemote) return result;
                 
-                IStorage<StorageTypeStack> store = mste.storageMachine();
+                IStorage<StorageTypeStack> store = mste.machine().itemStorage();
                 
                 if(store.usedCapacity() == 0) return result;
                 

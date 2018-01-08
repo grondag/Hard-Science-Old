@@ -9,7 +9,6 @@ import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.IStorage;
-import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.simulator.storage.ItemStorageListener;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,7 +49,7 @@ public class MachineStorageContainer extends MachineContainer
         
             if(playerIn instanceof EntityPlayerMP)
             {
-                IStorage<StorageType.StorageTypeStack> storage = ((MachineTileEntity)this.te).storageMachine();
+                IStorage<StorageType.StorageTypeStack> storage = ((MachineTileEntity)this.te).machine().itemStorage();
                 if(storage == null) return ItemStack.EMPTY;
                 
                 int consumed = (int) storage.add(ItemResourceWithQuantity.fromStack(slotStack), false, null);
@@ -83,11 +82,11 @@ public class MachineStorageContainer extends MachineContainer
     public void addListener(IContainerListener listener)
     {
         super.addListener(listener);
-        if(listener instanceof EntityPlayerMP && this.te != null && ((MachineTileEntity)this.te).storageMachine() != null)
+        if(listener instanceof EntityPlayerMP && this.te != null && ((MachineTileEntity)this.te).machine().hasItemStorage())
         {
             ItemStorageListener newItemListener =
                     new ItemStorageListener(
-                            (ItemStorage) ((MachineTileEntity)this.te).storageMachine(), 
+                            ((MachineTileEntity)this.te).machine().itemStorage(), 
                             (EntityPlayerMP)listener);
             
             

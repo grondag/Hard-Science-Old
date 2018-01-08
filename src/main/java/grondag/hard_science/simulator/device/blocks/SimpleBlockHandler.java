@@ -158,7 +158,6 @@ private final CarrierPortGroup powerGroup;
         case POWER:
             return portListForFaceFromArray(face, powerPorts);
 
-        case NONE:
         case FLUID:
         default:
             return Collections.emptyList();

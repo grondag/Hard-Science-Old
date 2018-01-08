@@ -13,10 +13,6 @@ import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Ac
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.FluidStorage;
-import grondag.hard_science.simulator.storage.IStorage;
-import grondag.hard_science.simulator.storage.ItemStorage;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -401,9 +397,9 @@ public class MachineTileEntity extends SuperTileEntity
 
     public IItemHandler getItemHandler()
     {
-        if(this.machine() != null && this.machine() instanceof ItemStorage)
+        if(this.machine() != null && this.machine().hasItemStorage())
         {
-            return (IItemHandler)this.machine();
+            return (IItemHandler)this.machine().itemStorage();
         }
         return null;
     }
@@ -417,16 +413,14 @@ public class MachineTileEntity extends SuperTileEntity
     public <T> T getCapability(Capability<T> capability, EnumFacing facing)
     {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
-                && this.machine() != null
-                && this.machine() instanceof ItemStorage)
+                && this.machine().hasItemStorage())
         {
-            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast((IItemHandler) this.machine());
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast((IItemHandler) this.machine().itemStorage());
         }
         else if(capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY 
-                && this.machine() != null
-                && this.machine() instanceof FluidStorage)
+                && this.machine().hasFluidStorage())
         {
-            return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast((IFluidHandler) this.machine());
+            return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast((IFluidHandler) this.machine().fluidStorage());
         }
         return super.getCapability(capability, facing);
     }
@@ -436,25 +430,12 @@ public class MachineTileEntity extends SuperTileEntity
     {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && this.machine() != null)
         {
-            return this.machine() instanceof ItemStorage;
+            return this.machine().hasItemStorage();
         }
         else if(capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && this.machine() != null)
         {
-            return this.machine() instanceof FluidStorage;
+            return this.machine().hasFluidStorage();
         }
         return super.hasCapability(capability, facing);
-    }
-    
-    /**
-     * Convenience method for casting machine reference to storage type.
-     * Will be null if this machine is not an Item Storage
-     */
-    @Nullable
-    @SuppressWarnings("unchecked")
-    public IStorage<StorageTypeStack> storageMachine()
-    {
-        return this.machine() != null && this.machine() instanceof ItemStorage 
-                ? (IStorage<StorageTypeStack>) this.machine()
-                : null;
     }
 }

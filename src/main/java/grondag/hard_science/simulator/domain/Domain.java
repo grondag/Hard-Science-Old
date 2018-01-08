@@ -89,7 +89,6 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
             
         case POWER:
             return null;
-        case NONE:
         default:
             return null;
         

@@ -162,7 +162,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             for(IStorage<StorageTypeStack> store : this.domain.itemStorage.stores())
             {
                 ItemStorage itemStore = (ItemStorage)store;
-                if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage, itemStore))
+                if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.machine(), itemStore.machine()))
                 {
                     this.stores.add(store);
                     this.addStore(itemStore, builder);
@@ -291,7 +291,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             assert event.storage != this.storage : "Attempt to reconnect primary storage to listener.";
             
             if(event.storage.isOn() && !this.stores.contains(event.storage) 
-                    && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage, event.storage))
+                    && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.machine(), event.storage.machine()))
             {
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
                     this.addStore(event.storage, builder);
@@ -337,7 +337,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                 this.die();
             }
             else if(this.stores.contains(event.storage) 
-                    && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage, event.storage))
+                    && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.machine(), event.storage.machine()))
             {
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
                     this.removeStore(event.storage, builder);
