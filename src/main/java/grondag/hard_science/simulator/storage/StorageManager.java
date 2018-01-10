@@ -213,7 +213,6 @@ public class StorageManager<T extends StorageType<T>>
      * Called by storage instances, or by self when a storage is removed.
      * If request is non-null, then the amount taken reduces any allocation to that request.
      */
-    //FIXME
     public synchronized void notifyTaken(IStorage<T> storage, IResource<T> resource, long taken, @Nullable IProcurementRequest<T> request)
     {
         if(taken == 0) return;

@@ -41,6 +41,10 @@ public class MachineTileEntity extends SuperTileEntity
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
     private double lastDistanceSquared;
  
+    /**
+     * /!\ Lazy instantiation - do not use directly.
+     * Use {@link #clientState()} instead.
+     */
     protected MachineClientState clientState = null;
     
     /**
@@ -66,6 +70,7 @@ public class MachineTileEntity extends SuperTileEntity
     @SideOnly(Side.CLIENT)
     public MachineClientState clientState()
     {
+        if(this.clientState == null) this.clientState = new MachineClientState(this);
         return this.clientState;
     }
     
@@ -182,11 +187,7 @@ public class MachineTileEntity extends SuperTileEntity
     public void onLoad()
     {
         super.onLoad();
-        if(this.world.isRemote)
-        {
-            this.clientState = new MachineClientState(this);
-        }
-        else
+        if(!this.world.isRemote)
         {
             this.updateRedstonePower();
         }
@@ -271,7 +272,7 @@ public class MachineTileEntity extends SuperTileEntity
         if(time >= this.nextPlayerUpdateMilliseconds)
         {
             if(Configurator.logMachineActivity) 
-                Log.info("MachineTileEntity.notifyServerPlayerWatching: %s sending keepalive packet", this.clientState == null ? "null" : this.clientState.machineName);
+                Log.info("MachineTileEntity.notifyServerPlayerWatching: %s sending keepalive packet", this.clientState().machineName);
 
             ModMessages.INSTANCE.sendToServer(new PacketMachineStatusAddListener(this.pos));
             this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;
@@ -325,7 +326,7 @@ public class MachineTileEntity extends SuperTileEntity
     {
         // should never be called on server
         if(!this.world.isRemote) return;
-        this.clientState.handleMachineStatusUpdate(packet);
+        this.clientState().handleMachineStatusUpdate(packet);
     }
     
     /**
@@ -363,7 +364,7 @@ public class MachineTileEntity extends SuperTileEntity
         if(this.world.isRemote)
         {
             // send to server
-            if(this.clientState.hasRedstoneControl)
+            if(this.clientState().hasRedstoneControl)
             {
                 ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_REDSTONE_CONTROL, this.pos));
                 return true;
@@ -387,12 +388,12 @@ public class MachineTileEntity extends SuperTileEntity
     @SideOnly(Side.CLIENT)
     public void notifyInView()
     {
-        this.clientState.lastInViewMillis = CommonProxy.currentTimeMillis();
+        this.clientState().lastInViewMillis = CommonProxy.currentTimeMillis();
     }
 
     public long lastInViewMillis()
     {
-        return this.clientState.lastInViewMillis;
+        return this.clientState().lastInViewMillis;
     }
 
     public IItemHandler getItemHandler()

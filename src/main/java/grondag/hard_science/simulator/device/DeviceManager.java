@@ -217,6 +217,12 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     
     public void removeDeviceInconveniently(IDevice device)
     {
+        if(device == null)
+        {
+            assert false : "Received request to remove null device.";
+            return;
+        }
+        
         if(Configurator.logDeviceChanges)
             Log.info("DeviceManager.removeDevice: " + device.getId());
 

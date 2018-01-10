@@ -130,7 +130,10 @@ public interface IMachineBlock
                         pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
             
             IDevice device = DeviceManager.getDevice(worldIn, pos);
-            DeviceManager.removeDevice(device);
+            
+//            assert device != null : "Null device on machine break block.";
+            
+            if(device != null) DeviceManager.removeDevice(device);
         }
     }
     

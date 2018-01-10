@@ -2,6 +2,7 @@ package grondag.hard_science.network.client_to_server;
 
 import javax.annotation.Nonnull;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
@@ -10,6 +11,7 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.storage.ItemStorageListener;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -159,7 +161,18 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         if(heldStack != null && !heldStack.isEmpty())
         {
             ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(heldStack);
-            int added = (int) listener.add(heldResource.resource(), single ? 1 : heldStack.getCount(), false, null);
+            int added = 0;
+            try
+            {
+                added = LogisticsService.ITEM_SERVICE.executor.submit( () ->
+                {
+                    return (int) listener.add(heldResource.resource(), single ? 1 : heldStack.getCount(), false, null);
+                }, true).get();
+            }
+            catch (Exception e)
+            {
+                Log.error("Error in open container item handling", e);
+            }
             if(added > 0) heldStack.shrink(added);
             player.updateHeldItem();
         }
@@ -169,7 +182,19 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     private void doQuickMove(int howMany, EntityPlayerMP player, ItemResource targetResource, ItemStorageListener listener)
     {
         if(howMany == 0) return;
-        int toMove = (int) listener.takeUpTo(targetResource, howMany, false, null);
+        int toMove = 0;
+        try
+        {
+            toMove = LogisticsService.ITEM_SERVICE.executor.submit( () ->
+            {
+                return (int) listener.takeUpTo(targetResource, howMany, false, null);
+            }, true).get();
+        }
+        catch (Exception e)
+        {
+            Log.error("Error in open container item handling", e);
+        }
+        
         if(toMove == 0) return;
         ItemStack newStack = targetResource.sampleItemStack();
         newStack.setCount(toMove);
@@ -194,19 +219,40 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
             boolean heldStackMatchesTarget = targetResource.isStackEqual(heldStack);
             if(!heldStackMatchesTarget) return;
             if(heldStack.getCount() >= heldStack.getMaxStackSize()) return;
-            int toAdd = (int) listener.takeUpTo(targetResource, howMany, false, null);
-            if(toAdd == 0) return;
-            heldStack.grow(toAdd);
-            player.updateHeldItem();
+            howMany = Math.min(howMany, heldStack.getMaxStackSize() - heldStack.getCount());
         }
         else
         {
-            int toAdd = (int) listener.takeUpTo(targetResource, howMany, false, null);
-            if(toAdd == 0) return;
+            howMany = Math.min(howMany, targetResource.sampleItemStack().getMaxStackSize());
+        }
+        
+        final int finalHowMany = howMany;
+        
+        int toAdd = 0;
+        try
+        {
+            toAdd = LogisticsService.ITEM_SERVICE.executor.submit( () ->
+            {
+                return (int) listener.takeUpTo(targetResource, finalHowMany, false, null);
+            }, true).get();
+        }
+        catch (Exception e)
+        {
+            Log.error("Error in open container item handling", e);
+        }
+            
+        if(toAdd == 0) return;
+        
+        if(heldStack != null && !heldStack.isEmpty())
+        {
+            heldStack.grow(toAdd);
+        }
+        else
+        {
             ItemStack newStack = targetResource.sampleItemStack();
             newStack.setCount(toAdd);
             player.inventory.setItemStack(newStack);
-            player.updateHeldItem();
         }
+        player.updateHeldItem();
     }
 }

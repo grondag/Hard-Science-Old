@@ -54,12 +54,11 @@ public abstract class AbstractResourceStorage<T extends StorageType<T>, V extend
     @Override
     public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
     {
-        assert this.wrappedContainer.confirmServiceThread() : "storage operation outside service thread";
-            
         long taken = this.wrappedContainer.takeUpTo(resource, limit, simulate, allowPartial, request);
         if(this.wrappedContainer.isConnected() && this.wrappedContainer.getDomain() != null)
         {
-            this.wrappedContainer.storageType().eventFactory().postStoredUpdate(this, resource, -taken, request);
+            assert this.wrappedContainer.confirmServiceThread() : "storage operation outside service thread";
+            if(!simulate) this.wrappedContainer.storageType().eventFactory().postStoredUpdate(this, resource, -taken, request);
         }
         return taken;
     }
@@ -67,12 +66,11 @@ public abstract class AbstractResourceStorage<T extends StorageType<T>, V extend
     @Override
     public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
     {
-        assert this.wrappedContainer.confirmServiceThread() : "storage operation outside service thread";
-        
         long added = this.wrappedContainer.add(resource, howMany, simulate, allowPartial, request);
         if(this.wrappedContainer.isConnected() && this.wrappedContainer.getDomain() != null)
         {
-            this.wrappedContainer.storageType().eventFactory().postStoredUpdate(this, resource, added, request);
+            assert this.wrappedContainer.confirmServiceThread() : "storage operation outside service thread";
+            if(!simulate) this.wrappedContainer.storageType().eventFactory().postStoredUpdate(this, resource, added, request);
         }
         return added;
     }
@@ -80,13 +78,12 @@ public abstract class AbstractResourceStorage<T extends StorageType<T>, V extend
     @Override
     public void setCapacity(long capacity)
     {
-        assert this.wrappedContainer.confirmServiceThread() : "storage operation outside service thread";
-        
         long oldCapacity = this.wrappedContainer.getCapacity();
         this.wrappedContainer.setCapacity(capacity);
         long delta = this.wrappedContainer.getCapacity() - oldCapacity;
         if(delta != 0 && this.wrappedContainer.isConnected() && this.wrappedContainer.getDomain() != null)
         {
+            assert this.wrappedContainer.confirmServiceThread() : "storage operation outside service thread";
             this.wrappedContainer.storageType().eventFactory().postCapacityChange(this, delta);
         }
     }

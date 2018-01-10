@@ -113,7 +113,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
             // estimate progress for any jobs in flight
             // provides smoother user feedback on client
             
-            MachineControlState controlState = this.clientState.controlState;
+            MachineControlState controlState = this.clientState().controlState;
             
             if(controlState != null && controlState.hasJobTicks() && controlState.getJobRemainingTicks() > 0)
                 controlState.progressJob((short) 1);

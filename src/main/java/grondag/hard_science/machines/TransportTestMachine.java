@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -27,7 +26,7 @@ public class TransportTestMachine extends AbstractSimpleMachine
     
     public TransportTestMachine()
     {
-        super(CarrierLevel.MIDDLE, PortType.DIRECT);
+        super(CarrierLevel.BOTTOM, PortType.CARRIER);
         this.itemStorage = new ItemStorage(this);
         this.itemStorage.setCapacity(Integer.MAX_VALUE);
         this.itemStorage.add(resource, Integer.MAX_VALUE, false, null);
@@ -64,12 +63,12 @@ public class TransportTestMachine extends AbstractSimpleMachine
                 for(IStorage<StorageTypeStack> store : list)
                 {
                     ImmutableList<Route> routes = 
-                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, (IDevice)store);
+                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, store.device());
                     
                     if(routes.isEmpty()) continue;
                     
                     avail -= LogisticsService.ITEM_SERVICE
-                            .sendResourceNow(routes.get(0), resource, avail, this, (IDevice)store, false, false, null);
+                            .sendResourceNow(routes.get(0), resource, avail, this, store.device(), false, false, null);
                     
                     if(avail <= 0) break;
                 }

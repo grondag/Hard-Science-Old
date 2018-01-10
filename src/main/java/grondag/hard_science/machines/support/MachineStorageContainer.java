@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
@@ -52,7 +53,7 @@ public class MachineStorageContainer extends MachineContainer
                 IStorage<StorageType.StorageTypeStack> storage = ((MachineTileEntity)this.te).machine().itemStorage();
                 if(storage == null) return ItemStack.EMPTY;
                 
-                int consumed = (int) storage.add(ItemResourceWithQuantity.fromStack(slotStack), false, null);
+                int consumed = (int) storage.addInteractively(ItemResourceWithQuantity.fromStack(slotStack), false);
                 if(consumed > 0)
                 {
                     slotStack.shrink(consumed);
@@ -82,19 +83,23 @@ public class MachineStorageContainer extends MachineContainer
     public void addListener(IContainerListener listener)
     {
         super.addListener(listener);
-        if(listener instanceof EntityPlayerMP && this.te != null && ((MachineTileEntity)this.te).machine().hasItemStorage())
+        if(listener instanceof EntityPlayerMP && this.te != null)
         {
-            ItemStorageListener newItemListener =
-                    new ItemStorageListener(
-                            ((MachineTileEntity)this.te).machine().itemStorage(), 
-                            (EntityPlayerMP)listener);
+            AbstractMachine machine = ((MachineTileEntity)this.te).machine();
             
-            
-            assert this.storageListeners.put((EntityPlayerMP)listener, newItemListener) == null
-                    : "Found existing storage listener for player on container";
-            
-            LogisticsService.ITEM_SERVICE.initializeListener(newItemListener);
-            
+            if(machine != null && machine.hasItemStorage())
+            {
+                ItemStorageListener newItemListener =
+                        new ItemStorageListener(
+                                ((MachineTileEntity)this.te).machine().itemStorage(), 
+                                (EntityPlayerMP)listener);
+                
+                
+                assert this.storageListeners.put((EntityPlayerMP)listener, newItemListener) == null
+                        : "Found existing storage listener for player on container";
+                
+                LogisticsService.ITEM_SERVICE.initializeListener(newItemListener);
+            }
         }
     }
 

@@ -60,9 +60,12 @@ public interface IStorageAccess<T extends StorageType<T>>
     
     /**
      * Aggregate version of {@link IStorage#add(IResource, long, boolean, IProcurementRequest)}
+     * Must run on service thread for storage type.
      */
     public default long add(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<T> request)
     {
+        assert resource.confirmServiceThread() : "Storage action outside service thread.";
+        
         if(howMany <= 0) return 0;
         ImmutableList<IStorage<T>> stores = this.findSpaceFor(resource, howMany);
         if(stores.isEmpty()) return 0;
@@ -89,6 +92,8 @@ public interface IStorageAccess<T extends StorageType<T>>
      */
     public default long takeUpTo(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<T> request)
     {
+        assert resource.confirmServiceThread() : "Storage action outside service thread.";
+        
         if(howMany <= 0) return 0;
         ImmutableList<IStorage<T>> stores = this.getLocations(resource);
         if(stores.isEmpty()) return 0;

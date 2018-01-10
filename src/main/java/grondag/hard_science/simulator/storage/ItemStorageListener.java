@@ -284,6 +284,9 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     {
         if(this.isDead()) return;
         
+        assert LogisticsService.ITEM_SERVICE.confirmServiceThread() 
+            : "Storage listener events outside service thread.";
+        
         switch(this.mode)
         {
         case CONNECTED:
@@ -324,6 +327,9 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     public void beforeItemStorageDisconnect(BeforeItemStorageDisconnect event)
     {
         if(this.isDead()) return;
+        
+        assert LogisticsService.ITEM_SERVICE.confirmServiceThread() 
+            : "Storage listener events outside service thread.";
         
         switch(this.mode)
         {
