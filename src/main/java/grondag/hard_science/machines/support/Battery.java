@@ -1,175 +1,120 @@
 package grondag.hard_science.machines.support;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.simulator.resource.PowerResource;
+import grondag.hard_science.simulator.storage.PowerStorage;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
 
+/**
+ * Battery is implemented as a wrapper around the machine's power storage.
+ * This is done so that power storage notification events will be
+ * fired when we use the battery internally.
+ */
 public class Battery extends AbstractPowerComponent
 {
-    private long maxEnergyJoules;
+    /**
+     * Only populated on server. Null on client.
+     */
+    private final PowerStorage powerStorage;
     
+    /**
+     * Only populated on client
+     */
+    private float powerInputWatts;
+    
+    /**
+     * Only populated on client
+     */
+    private long maxStoredEnergyJoules;
+    
+    /**
+     * Only populated on client
+     */
     private long storedEnergyJoules;
     
-    private BatteryChemistry chemistry;
-
-    private float maxPowerInputWatts;
-
-    private long maxEnergyInputPerTick;
-
-    private long inputLastTick;
-    
-    /** total of all energy accepted during the current tick. */
-    private long inputThisTick;
-
-    public Battery() {};
-    
-    public Battery(long volumeNanoliters, BatteryChemistry chemistry)
+    public Battery()
     {
-        this.setup(volumeNanoliters, chemistry);
-    }
-
-    public Battery(NBTTagCompound tag)
-    {
-        this.deserializeNBT(tag);
+        this.powerStorage = null;
     }
     
-    private void setup(long volumeNanoliters, BatteryChemistry chemistry)
+    public Battery(PowerStorage powerStorage)
     {
-        this.maxEnergyJoules = chemistry.capacityForNanoliters(volumeNanoliters);
-        this.chemistry = chemistry;
-        this.maxEnergyInputPerTick = chemistry.maxChargeJoulesPerTick(maxEnergyJoules);
-        this.maxPowerInputWatts = MachinePower.joulesPerTickToWatts(this.maxEnergyInputPerTick);
-        this.setMaxOutputJoulesPerTick(chemistry.maxDischargeJoulesPerTick(maxEnergyJoules));
+        this.powerStorage = powerStorage;
+        this.setMaxOutputJoulesPerTick(this.powerStorage.maxEnergyOutputJoulesPerTick());
     }
 
-    @Override
-    public void advanceIOTracking()
-    {
-        super.advanceIOTracking();
-        this.inputLastTick = this.inputThisTick;
-        this.inputThisTick = 0;
-    }
-    
     @Override
     public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
     {        
-        // prevent shenannigans/derpage
-        if(maxInput <= 0) return 0;
-        
-        long result = Math.min(maxInput, this.maxEnergyInputPerTick - this.inputThisTick);
-
-        result = Useful.clamp(result, 0, this.maxEnergyJoules - this.storedEnergyJoules);
-       
-        if(!(allowPartial || result == maxInput)) return 0;
-        
-        if(!(result == 0 || simulate)) 
-        {
-            this.inputThisTick += result;
-            this.storedEnergyJoules += result;
-        }        
-        return result;
+        return this.powerStorage.add(PowerResource.JOULES, maxInput, simulate, allowPartial, null);
     }
 
-    public BatteryChemistry getChemistry()
-    {
-        return chemistry;
-    }
-    
     @Override
     public long storedEnergyJoules()
     {
-        return this.storedEnergyJoules;
+        // on server comes direct from storage
+        // on client is sent through packet
+        return this.powerStorage == null 
+                ? this.storedEnergyJoules 
+                : this.powerStorage.usedCapacity();
     }
 
     @Override
     public long maxStoredEnergyJoules()
     {
-        return this.maxEnergyJoules;
+        // on server comes direct from storage
+        return this.powerStorage == null
+                ? this.maxStoredEnergyJoules
+                : this.powerStorage.getCapacity();
     }
     
     @Override
     public boolean canAcceptEnergy()
     {
-        return this.storedEnergyJoules < this.maxEnergyJoules;
+        return this.powerStorage.availableCapacity() > 0;
     }
+    
     @Override
-    public PowerComponentType componentType()
+    public EnergyComponentType componentType()
     {
-        return PowerComponentType.STORED;
-    }
-
-    @Override
-    public float maxPowerInputWatts()
-    {
-        return maxPowerInputWatts;
+        return EnergyComponentType.STORAGE;
     }
 
     @Override
     public long maxEnergyInputJoulesPerTick()
     {
-        return maxEnergyInputPerTick;
+        return this.powerStorage.maxEnergyInputJoulesPerTick();
     }
 
     @Override
     public float powerInputWatts()
     {
-        return this.inputLastTick * TimeUnits.TICKS_PER_SIMULATED_SECOND;
-    }
-    
-    @Override
-    public long energyInputCurrentTickJoules()
-    {
-        return this.inputThisTick;
+        // on server comes direct from storage
+        // on client is sent through packet
+        return this.powerStorage == null
+                ? powerInputWatts
+                : this.powerStorage.powerInputWatts();
     }
 
     @Override
     protected long provideEnergyImplementation(AbstractMachine mte, long maxOutput, boolean allowPartial, boolean simulate)
     {
         // note that update tracking, and check against per-tick max has already been done by caller
-        
-        long energy = Math.min(maxOutput, this.storedEnergyJoules);
-        
-        if(energy > 0)
-        {
-            // no energy if partial not allowed and can't meet demand
-            if(!allowPartial && energy < maxOutput) return 0;
-            
-            // consume energy if not simulating
-            if(!simulate) this.storedEnergyJoules -= energy;
-        }
-        return energy;
+        return this.powerStorage.takeUpTo(PowerResource.JOULES, maxOutput, simulate, allowPartial, null);
     }
     
+    @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.setup(
-                tag.getLong(ModNBTTag.MACHINE_BATTERY_MAX_STORED_JOULES),
-                Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.SILICON));
-        this.storedEnergyJoules = tag.getLong(ModNBTTag.MACHINE_STORED_ENERGY_JOULES);
+        //NOOP - handled by power storage serialization
+        
+        // refresh in case it changed during deserialize
+        // implies storage deserialize should come before this
+        this.setMaxOutputJoulesPerTick(this.powerStorage.maxEnergyOutputJoulesPerTick());
     }
     
     public void serializeNBT(NBTTagCompound tag)
     {
-        tag.setLong(ModNBTTag.MACHINE_BATTERY_MAX_STORED_JOULES, this.maxEnergyJoules);
-        tag.setInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY, this.chemistry.ordinal());
-        tag.setLong(ModNBTTag.MACHINE_STORED_ENERGY_JOULES, this.storedEnergyJoules);
-    }
-    
-    @Override
-    public void fromBytes(PacketBuffer pBuff)
-    {
-        super.fromBytes(pBuff);
-        this.storedEnergyJoules = pBuff.readVarLong();
-        this.inputLastTick = pBuff.readVarLong();
-    }
-
-    @Override
-    public void toBytes(PacketBuffer pBuff)
-    {
-        super.toBytes(pBuff);
-        pBuff.writeVarLong(this.storedEnergyJoules);
-        pBuff.writeVarLong(this.inputLastTick);
+        //NOOP - handled by power storage serialization
     }
 }

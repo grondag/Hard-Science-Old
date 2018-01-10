@@ -207,7 +207,6 @@ private final CarrierPortGroup powerGroup;
         this.connectToNeighbors();
     }
 
-    @SuppressWarnings("null")
     protected void connectToNeighbors()
     {
         if(Configurator.logDeviceChanges)
@@ -218,14 +217,6 @@ private final CarrierPortGroup powerGroup;
         
         if(!(hasItems || hasPower)) return;
         
-        LogisticsService<?> itemService = hasItems 
-                ? LogisticsService.serviceFor(StorageType.ITEM)
-                : null;
-        
-        LogisticsService<?> powerService = hasPower 
-                ? LogisticsService.serviceFor(StorageType.POWER)
-                : null;
-                        
         for(EnumFacing face : EnumFacing.VALUES)
         {
             IDeviceBlock neighbor = this.getNeighbor(face);
@@ -241,7 +232,7 @@ private final CarrierPortGroup powerGroup;
                 assert !myPort.isAttached() : "Connection attempt on attached port";
                 for(PortState mate : neighbor.getPorts(StorageType.ITEM, oppositeFace))
                 {
-                    itemService.connect(myPort, mate);
+                    LogisticsService.ITEM_SERVICE.connect(myPort, mate);
                 }
             }
             
@@ -253,7 +244,7 @@ private final CarrierPortGroup powerGroup;
                 assert !myPort.isAttached() : "Connection attempt on attached port";
                 for(PortState mate : neighbor.getPorts(StorageType.POWER, oppositeFace))
                 {
-                    powerService.connect(myPort, mate);
+                    LogisticsService.POWER_SERVICE.connect(myPort, mate);
                 }
             }
         }
@@ -270,7 +261,6 @@ private final CarrierPortGroup powerGroup;
         DeviceManager.blockManager().removeDelegate(this);
     }
 
-    @SuppressWarnings("null")
     @Override
     public void onRemoval()
     {
@@ -282,14 +272,6 @@ private final CarrierPortGroup powerGroup;
         
         if(!(hasItems || hasPower)) return;
         
-        LogisticsService<?> itemService = hasItems 
-                ? LogisticsService.serviceFor(StorageType.ITEM)
-                : null;
-        
-        LogisticsService<?> powerService = hasPower 
-                ? LogisticsService.serviceFor(StorageType.POWER)
-                : null;
-                
         for(EnumFacing face : EnumFacing.VALUES)
         {
             IDeviceBlock neighbor = this.getNeighbor(face);
@@ -298,13 +280,13 @@ private final CarrierPortGroup powerGroup;
             if(hasItems)
             {
                 PortState ps = this.itemPorts[face.ordinal()];
-                if(ps.isAttached()) itemService.disconnect(ps);
+                if(ps.isAttached()) LogisticsService.ITEM_SERVICE.disconnect(ps);
             }
             
             if(hasPower)
             {
                 PortState ps = this.powerPorts[face.ordinal()];
-                if(ps.isAttached()) powerService.disconnect(ps);
+                if(ps.isAttached()) LogisticsService.POWER_SERVICE.disconnect(ps);
             }
         }
     }

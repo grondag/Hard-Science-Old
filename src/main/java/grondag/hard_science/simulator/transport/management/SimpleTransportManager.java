@@ -3,12 +3,10 @@ package grondag.hard_science.simulator.transport.management;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
-import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.endpoint.PortState;
-import grondag.hard_science.simulator.transport.routing.IItinerary;
 import grondag.hard_science.simulator.transport.routing.Legs;
 
 /**
@@ -38,14 +36,6 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
         this.owner = owner;
         this.storageType = storageType;
     }
-    
-    public IItinerary<T> send(IResource<T> resource, long quantity, IDevice recipient, boolean connectedOnly, boolean simulate)
-    {
-        assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
-        
-        //TODO: implement
-        return null;
-    }
 
     @Override
     public IDevice device()
@@ -56,7 +46,7 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     @Override
     public void refreshTransport()
     {
-        assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
+        assert this.confirmServiceThread() : "Transport logic running outside transport thread";
         this.circuits.clear();
         this.legs = null;
         

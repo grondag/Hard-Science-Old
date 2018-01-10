@@ -9,22 +9,27 @@ import grondag.hard_science.simulator.storage.StorageEvent.CapacityChange;
 import grondag.hard_science.simulator.storage.StorageEvent.ResourceUpdate;
 import grondag.hard_science.simulator.storage.StorageEvent.StorageNotification;
 
-public class FluidStorageEvent
+public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
 {
-    public static void postBeforeStorageDisconnect(FluidStorage storage)
+    public static final FluidStorageEvent INSTANCE = new FluidStorageEvent();
+    
+    @Override
+    public void postBeforeStorageDisconnect(IStorage<StorageTypeFluid> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new BeforeFluidStorageDisconnect(storage));
     }
     
-    public static void postAfterStorageConnect(FluidStorage storage)
+    @Override
+    public void postAfterStorageConnect(IStorage<StorageTypeFluid> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterFluidStorageConnect(storage));
     }
     
-    public static void postStoredUpdate(
-            FluidStorage storage, 
+    @Override
+    public void postStoredUpdate(
+            IStorage<StorageTypeFluid> storage, 
             IResource<StorageTypeFluid> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypeFluid> request)
@@ -38,8 +43,9 @@ public class FluidStorageEvent
                     request));
     }
     
-    public static void postAvailableUpdate(
-            FluidStorage storage, 
+    @Override
+    public void postAvailableUpdate(
+            IStorage<StorageTypeFluid> storage, 
             IResource<StorageTypeFluid> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypeFluid> request)
@@ -53,7 +59,8 @@ public class FluidStorageEvent
                     request));
     }
     
-    public static void postCapacityChange(FluidStorage storage, long delta)
+    @Override
+    public void postCapacityChange(IStorage<StorageTypeFluid> storage, long delta)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new FluidCapacityChange(storage, delta));
@@ -61,7 +68,7 @@ public class FluidStorageEvent
     
     public static class BeforeFluidStorageDisconnect extends StorageNotification<StorageTypeFluid>
     {
-        private BeforeFluidStorageDisconnect(AbstractStorage<StorageTypeFluid> storage)
+        private BeforeFluidStorageDisconnect(IStorage<StorageTypeFluid> storage)
         {
             super(storage);
         }
@@ -69,7 +76,7 @@ public class FluidStorageEvent
     
     public static class AfterFluidStorageConnect extends StorageNotification<StorageTypeFluid>
     {
-        private AfterFluidStorageConnect(AbstractStorage<StorageTypeFluid> storage)
+        private AfterFluidStorageConnect(IStorage<StorageTypeFluid> storage)
         {
             super(storage);
         }
@@ -77,7 +84,7 @@ public class FluidStorageEvent
     
     public static class FluidCapacityChange extends CapacityChange<StorageTypeFluid>
     {
-        private FluidCapacityChange(AbstractStorage<StorageTypeFluid> storage, long delta)
+        private FluidCapacityChange(IStorage<StorageTypeFluid> storage, long delta)
         {
             super(storage, delta);
         }
@@ -89,7 +96,7 @@ public class FluidStorageEvent
     public static class FluidStoredUpdate extends ResourceUpdate<StorageTypeFluid>
     {
         private FluidStoredUpdate(
-                AbstractStorage<StorageTypeFluid> storage, 
+                IStorage<StorageTypeFluid> storage, 
                 IResource<StorageTypeFluid> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypeFluid> request)
@@ -104,7 +111,7 @@ public class FluidStorageEvent
     public static class FluidAvailableUpdate extends ResourceUpdate<StorageTypeFluid>
     {
         private FluidAvailableUpdate(
-                AbstractStorage<StorageTypeFluid> storage, 
+                IStorage<StorageTypeFluid> storage, 
                 IResource<StorageTypeFluid> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypeFluid> request)

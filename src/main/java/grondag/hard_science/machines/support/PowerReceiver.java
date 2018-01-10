@@ -26,9 +26,9 @@ public class PowerReceiver extends AbstractPowerComponent
     
 
     @Override
-    public PowerComponentType componentType()
+    public EnergyComponentType componentType()
     {
-        return PowerComponentType.EXTERNAL;
+        return EnergyComponentType.EXTERNAL;
     }
 
     @Override
@@ -37,17 +37,11 @@ public class PowerReceiver extends AbstractPowerComponent
         return this.powerOutputWatts();
     }
 
-    @Override
-    public long energyInputCurrentTickJoules()
-    {
-        return this.energyOutputCurrentTickJoules();
-    }
-    
-    @Override
-    public float maxPowerInputWatts()
-    {
-        return this.maxPowerOutputWatts();
-    }
+//    @Override
+//    public long energyInputCurrentTickJoules()
+//    {
+//        return this.energyOutputCurrentTickJoules();
+//    }
 
     @Override
     public long maxEnergyInputJoulesPerTick()

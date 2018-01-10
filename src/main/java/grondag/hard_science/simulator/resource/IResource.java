@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.resource;
 
+import javax.annotation.Nullable;
+
 /** 
  * A resource is something that can be produced and consumed.
  * Most resources can be stored. (Computation can't.)
@@ -19,13 +21,13 @@ package grondag.hard_science.simulator.resource;
  * Implements Predicate interface as equality test for self.
  * 
  */
-public interface IResource<V extends StorageType<V>> extends IResourcePredicate<V>
+public interface IResource<V extends StorageType<V>> extends IResourcePredicate<V>, ITypedStorage<V>
 {
     public V storageType();
     public String displayName();
     public AbstractResourceWithQuantity<V> withQuantity(long quantity);
     public int computeResourceHashCode();
-    public boolean isResourceEqual(IResource<V> other);
+    public boolean isResourceEqual(@Nullable IResource<V> other);
     
     @Override
     public default boolean test(IResource<V> t)

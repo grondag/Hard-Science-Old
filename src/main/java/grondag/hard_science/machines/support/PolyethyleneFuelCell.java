@@ -95,17 +95,11 @@ public class PolyethyleneFuelCell extends FuelCell
         return 0;
     }
 
-    @Override
-    public long energyInputCurrentTickJoules()
-    {
-        return 0;
-    }
-    
-    @Override
-    public float maxPowerInputWatts()
-    {
-        return 0;
-    }
+//    @Override
+//    public long energyInputCurrentTickJoules()
+//    {
+//        return 0;
+//    }
 
     @Override
     public long maxEnergyInputJoulesPerTick()

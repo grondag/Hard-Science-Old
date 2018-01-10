@@ -2,10 +2,10 @@ package grondag.hard_science.network.server_to_client;
 
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineControlState;
+import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
+import grondag.hard_science.machines.support.MachinePowerSupplyStatus;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
@@ -18,11 +18,11 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     public MachineControlState controlState;
     public long[] materialBufferData;
     public MachineStatusState statusState;
-    public ByteBuf powerProviderData;
+    public MachinePowerSupplyInfo powerSupplyInfo;
+    public MachinePowerSupplyStatus powerSupplyStatus;
     public String machineName;
     
     public PacketMachineStatusUpdateListener() {}
-   
     
     public PacketMachineStatusUpdateListener(MachineTileEntity te)
     {
@@ -35,8 +35,8 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         
         if(this.controlState.hasPowerSupply())
         {
-            this.powerProviderData = Unpooled.buffer();
-            te.machine().getPowerSupply().toBytes(this.powerProviderData);
+            this.powerSupplyInfo = new MachinePowerSupplyInfo(te.machine().getPowerSupply());
+            this.powerSupplyStatus = new MachinePowerSupplyStatus(te.machine().getPowerSupply());
         }
         
         this.machineName = te.machine().machineName();
@@ -62,12 +62,10 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         }
         if(this.controlState.hasPowerSupply()) 
         {
-            this.powerProviderData = Unpooled.buffer();
-            int byteCount = pBuff.readVarInt();
-            if(byteCount > 0)
-            {
-                pBuff.readBytes(this.powerProviderData, byteCount);
-            }
+            this.powerSupplyInfo = new MachinePowerSupplyInfo();
+            this.powerSupplyInfo.fromBytes(pBuff);
+            this.powerSupplyStatus = new MachinePowerSupplyStatus();
+            this.powerSupplyStatus.fromBytes(pBuff);
         }
         this.machineName = pBuff.readString(8);
     }
@@ -89,10 +87,10 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
             }
         }
 
-        if(this.controlState.hasPowerSupply() && this.powerProviderData != null)
+        if(this.controlState.hasPowerSupply())
         {
-            pBuff.writeVarInt(this.powerProviderData.readableBytes());
-            pBuff.writeBytes(this.powerProviderData);
+            this.powerSupplyInfo.toBytes(pBuff);
+            this.powerSupplyStatus.toBytes(pBuff);
         }
         
         pBuff.writeString(this.machineName);

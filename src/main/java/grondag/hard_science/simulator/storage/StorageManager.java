@@ -93,7 +93,7 @@ public class StorageManager<T extends StorageType<T>>
         return this.domain;
     }
 
-    protected synchronized void addStore(AbstractStorage<T> store)
+    protected synchronized void addStore(IStorage<T> store)
     {
         assert !stores.contains(store)
             : "Storage manager received request to add store it already has.";
@@ -107,7 +107,7 @@ public class StorageManager<T extends StorageType<T>>
         }
     }
     
-    public synchronized void removeStore(AbstractStorage<T> store)
+    public synchronized void removeStore(IStorage<T> store)
     {
         assert stores.contains(store)
          : "Storage manager received request to remove store it doesn't have.";

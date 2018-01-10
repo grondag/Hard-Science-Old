@@ -9,22 +9,24 @@ import grondag.hard_science.simulator.storage.StorageEvent.CapacityChange;
 import grondag.hard_science.simulator.storage.StorageEvent.ResourceUpdate;
 import grondag.hard_science.simulator.storage.StorageEvent.StorageNotification;
 
-public class ItemStorageEvent
+public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
 {
-    public static void postBeforeStorageDisconnect(ItemStorage storage)
+    public static final ItemStorageEvent INSTANCE = new ItemStorageEvent();
+    
+    public void postBeforeStorageDisconnect(IStorage<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new BeforeItemStorageDisconnect(storage));
     }
     
-    public static void postAfterStorageConnect(ItemStorage storage)
+    public void postAfterStorageConnect(IStorage<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterItemStorageConnect(storage));
     }
     
-    public static void postStoredUpdate(
-            ItemStorage storage, 
+    public void postStoredUpdate(
+            IStorage<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypeStack> request)
@@ -38,8 +40,8 @@ public class ItemStorageEvent
                     request));
     }
     
-    public static void postAvailableUpdate(
-            ItemStorage storage, 
+    public void postAvailableUpdate(
+            IStorage<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypeStack> request)
@@ -53,7 +55,7 @@ public class ItemStorageEvent
                     request));
     }
     
-    public static void postCapacityChange(ItemStorage storage, long delta)
+    public void postCapacityChange(IStorage<StorageTypeStack> storage, long delta)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new ItemCapacityChange(storage, delta));
@@ -61,7 +63,7 @@ public class ItemStorageEvent
     
     public static class BeforeItemStorageDisconnect extends StorageNotification<StorageTypeStack>
     {
-        private BeforeItemStorageDisconnect(AbstractStorage<StorageTypeStack> storage)
+        private BeforeItemStorageDisconnect(IStorage<StorageTypeStack> storage)
         {
             super(storage);
         }
@@ -69,7 +71,7 @@ public class ItemStorageEvent
     
     public static class AfterItemStorageConnect extends StorageNotification<StorageTypeStack>
     {
-        private AfterItemStorageConnect(AbstractStorage<StorageTypeStack> storage)
+        private AfterItemStorageConnect(IStorage<StorageTypeStack> storage)
         {
             super(storage);
         }
@@ -77,7 +79,7 @@ public class ItemStorageEvent
     
     public static class ItemCapacityChange extends CapacityChange<StorageTypeStack>
     {
-        private ItemCapacityChange(AbstractStorage<StorageTypeStack> storage, long delta)
+        private ItemCapacityChange(IStorage<StorageTypeStack> storage, long delta)
         {
             super(storage, delta);
         }
@@ -89,7 +91,7 @@ public class ItemStorageEvent
     public static class ItemStoredUpdate extends ResourceUpdate<StorageTypeStack>
     {
         private ItemStoredUpdate(
-                AbstractStorage<StorageTypeStack> storage, 
+                IStorage<StorageTypeStack> storage, 
                 IResource<StorageTypeStack> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypeStack> request)
@@ -104,7 +106,7 @@ public class ItemStorageEvent
     public static class ItemAvailableUpdate extends ResourceUpdate<StorageTypeStack>
     {
         private ItemAvailableUpdate(
-                AbstractStorage<StorageTypeStack> storage, 
+                IStorage<StorageTypeStack> storage, 
                 IResource<StorageTypeStack> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypeStack> request)

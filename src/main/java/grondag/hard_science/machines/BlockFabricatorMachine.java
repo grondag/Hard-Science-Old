@@ -6,7 +6,6 @@ import java.util.concurrent.Future;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.support.Battery;
-import grondag.hard_science.machines.support.BatteryChemistry;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MachinePowerSupply;
@@ -154,7 +153,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     {
         return new MachinePowerSupply(
                 PolyethyleneFuelCell.BASIC_1KW, 
-                new Battery(VolumeUnits.LITER.nL, BatteryChemistry.SILICON), 
+                new Battery(this.powerStorage()), 
                 new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
     }
     

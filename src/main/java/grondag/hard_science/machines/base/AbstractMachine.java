@@ -309,6 +309,7 @@ public abstract class AbstractMachine extends AbstractDevice
         
         }
     }
+    
     public boolean isOn()
     {
         if(!this.hasOnOff()) return false;

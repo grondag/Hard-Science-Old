@@ -1,6 +1,5 @@
 package grondag.hard_science.machines.support;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.machines.base.AbstractMachine;
 
@@ -16,7 +15,7 @@ import grondag.hard_science.machines.base.AbstractMachine;
  * 3) Want ability to reject partial input/output
  * 
  */
-public interface IMachinePowerProvider extends IReadWriteNBT, IMessagePlus
+public interface IMachinePowerProvider extends IReadWriteNBT
 {
      /**
      * Highest possible continuous rate of power draw from this provider, 

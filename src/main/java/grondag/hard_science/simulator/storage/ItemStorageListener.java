@@ -162,7 +162,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             for(IStorage<StorageTypeStack> store : this.domain.itemStorage.stores())
             {
                 ItemStorage itemStore = (ItemStorage)store;
-                if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.machine(), itemStore.machine()))
+                if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), itemStore.device()))
                 {
                     this.stores.add(store);
                     this.addStore(itemStore, builder);
@@ -201,18 +201,18 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         return this.isDead;
     }
     
-    private void addStore(AbstractStorage<StorageTypeStack> storage, ImmutableList.Builder<ItemResourceDelegate> builder)
+    private void addStore(ItemStorage storage, ImmutableList.Builder<ItemResourceDelegate> builder)
     {
-        this.totalCapacity += storage.capacity;
+        this.totalCapacity += storage.getCapacity();
         for(AbstractResourceWithQuantity<StorageTypeStack> rwq : storage.find(StorageType.ITEM.MATCH_ANY))
         {
             builder.add(this.changeQuantity(rwq.resource(), rwq.getQuantity()));
         }
     }
     
-    private void removeStore(AbstractStorage<StorageTypeStack> storage, ImmutableList.Builder<ItemResourceDelegate> builder)
+    private void removeStore(ItemStorage storage, ImmutableList.Builder<ItemResourceDelegate> builder)
     {
-        this.totalCapacity -= storage.capacity;
+        this.totalCapacity -= storage.getCapacity();
         for(AbstractResourceWithQuantity<StorageTypeStack> rwq : storage.find(StorageType.ITEM.MATCH_ANY))
         {
             builder.add(this.changeQuantity(rwq.resource(), -rwq.getQuantity()));
@@ -291,10 +291,10 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             assert event.storage != this.storage : "Attempt to reconnect primary storage to listener.";
             
             if(event.storage.isOn() && !this.stores.contains(event.storage) 
-                    && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.machine(), event.storage.machine()))
+                    && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device()))
             {
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-                    this.addStore(event.storage, builder);
+                    this.addStore((ItemStorage) event.storage, builder);
                     this.stores.add((ItemStorage) event.storage);
                     ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                             builder.build(), this.totalCapacity, false), player);
@@ -305,7 +305,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         case DOMAIN:
         {
             ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-            this.addStore(event.storage, builder);
+            this.addStore((ItemStorage) event.storage, builder);
             ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                     builder.build(), this.totalCapacity, false), player);
             break;
@@ -337,10 +337,10 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                 this.die();
             }
             else if(this.stores.contains(event.storage) 
-                    && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.machine(), event.storage.machine()))
+                    && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device()))
             {
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-                    this.removeStore(event.storage, builder);
+                    this.removeStore((ItemStorage) event.storage, builder);
                     this.stores.remove((ItemStorage) event.storage);
                     ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                             builder.build(), this.totalCapacity, false), player);
@@ -352,7 +352,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         case DOMAIN:
         {
             ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-            this.removeStore(event.storage, builder);
+            this.removeStore((ItemStorage) event.storage, builder);
             ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                     builder.build(), this.totalCapacity, false), player);
             break;

@@ -9,22 +9,24 @@ import grondag.hard_science.simulator.storage.StorageEvent.CapacityChange;
 import grondag.hard_science.simulator.storage.StorageEvent.ResourceUpdate;
 import grondag.hard_science.simulator.storage.StorageEvent.StorageNotification;
 
-public class PowerStorageEvent
+public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
 {
-    public static void postBeforeStorageDisconnect(PowerStorage storage)
+    public static final PowerStorageEvent INSTANCE = new PowerStorageEvent();
+    
+    public void postBeforeStorageDisconnect(IStorage<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new BeforePowerStorageDisconnect(storage));
     }
     
-    public static void postAfterStorageConnect(PowerStorage storage)
+    public void postAfterStorageConnect(IStorage<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterPowerStorageConnect(storage));
     }
     
-    public static void postStoredUpdate(
-            PowerStorage storage, 
+    public void postStoredUpdate(
+            IStorage<StorageTypePower> storage, 
             IResource<StorageTypePower> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypePower> request)
@@ -38,8 +40,8 @@ public class PowerStorageEvent
                     request));
     }
     
-    public static void postAvailableUpdate(
-            PowerStorage storage, 
+    public void postAvailableUpdate(
+            IStorage<StorageTypePower> storage, 
             IResource<StorageTypePower> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypePower> request)
@@ -53,7 +55,7 @@ public class PowerStorageEvent
                     request));
     }
     
-    public static void postCapacityChange(PowerStorage storage, long delta)
+    public void postCapacityChange(IStorage<StorageTypePower> storage, long delta)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new PowerCapacityChange(storage, delta));
@@ -61,7 +63,7 @@ public class PowerStorageEvent
     
     public static class BeforePowerStorageDisconnect extends StorageNotification<StorageTypePower>
     {
-        private BeforePowerStorageDisconnect(AbstractStorage<StorageTypePower> storage)
+        private BeforePowerStorageDisconnect(IStorage<StorageTypePower> storage)
         {
             super(storage);
         }
@@ -69,7 +71,7 @@ public class PowerStorageEvent
     
     public static class AfterPowerStorageConnect extends StorageNotification<StorageTypePower>
     {
-        private AfterPowerStorageConnect(AbstractStorage<StorageTypePower> storage)
+        private AfterPowerStorageConnect(IStorage<StorageTypePower> storage)
         {
             super(storage);
         }
@@ -77,7 +79,7 @@ public class PowerStorageEvent
     
     public static class PowerCapacityChange extends CapacityChange<StorageTypePower>
     {
-        private PowerCapacityChange(AbstractStorage<StorageTypePower> storage, long delta)
+        private PowerCapacityChange(IStorage<StorageTypePower> storage, long delta)
         {
             super(storage, delta);
         }
@@ -89,7 +91,7 @@ public class PowerStorageEvent
     public static class PowerStoredUpdate extends ResourceUpdate<StorageTypePower>
     {
         private PowerStoredUpdate(
-                AbstractStorage<StorageTypePower> storage, 
+                IStorage<StorageTypePower> storage, 
                 IResource<StorageTypePower> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypePower> request)
@@ -104,7 +106,7 @@ public class PowerStorageEvent
     public static class PowerAvailableUpdate extends ResourceUpdate<StorageTypePower>
     {
         private PowerAvailableUpdate(
-                AbstractStorage<StorageTypePower> storage, 
+                IStorage<StorageTypePower> storage, 
                 IResource<StorageTypePower> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypePower> request)

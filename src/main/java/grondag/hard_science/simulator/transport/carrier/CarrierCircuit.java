@@ -86,7 +86,7 @@ public class CarrierCircuit
         this.carrier = carrier;
         this.channel = channel;
         this.ports = new PortTracker(this);
-        this.service = LogisticsService.serviceFor(carrier.storageType);
+        this.service = carrier.storageType.service();
     }
     
     /**

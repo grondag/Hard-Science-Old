@@ -8,4 +8,9 @@ public interface ISizedContainer
     {
         return this.getCapacity() - this.usedCapacity();
     }
+    
+    default void setCapacity(long capacity)
+    {
+        throw new UnsupportedOperationException("Container does not support capacity configuration");
+    }
 }

@@ -33,6 +33,7 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorageListener;
@@ -60,34 +61,20 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     public static final LogisticsService<StorageTypeStack> ITEM_SERVICE 
         = new LogisticsService<StorageTypeStack>(StorageType.ITEM);
     
+    public static final LogisticsService<StorageTypeFluid> FLUID_SERVICE 
+    = new LogisticsService<StorageTypeFluid>(StorageType.FLUID);   
+    
     public static final LogisticsService<StorageTypePower> POWER_SERVICE 
     = new LogisticsService<StorageTypePower>(StorageType.POWER);
     
     private final T storageType;
 
-    private final PrivilegedExecutor EXECUTOR;
-
-    public static LogisticsService<?> serviceFor(StorageType<?> storageType)
-    {
-        switch(storageType.enumType)
-        {
-        case ITEM:
-            return ITEM_SERVICE;
-            
-        case POWER:
-            return POWER_SERVICE;
-            
-        default:
-            assert false : "Unhandled enum mapping";
-        case FLUID:
-            return null;
-        }
-    }
+    public final PrivilegedExecutor executor;
     
     private LogisticsService(T storageType)
     {
         this.storageType = storageType;
-        this.EXECUTOR = new PrivilegedExecutor(
+        this.executor = new PrivilegedExecutor(
                 String.format("Hard Science %s Logistics Service", storageType.enumType.toString()));
     }
     
@@ -96,7 +83,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      */
     public boolean confirmServiceThread()
     {
-        return Thread.currentThread().getName().startsWith(EXECUTOR.threadName);
+        return Thread.currentThread().getName().startsWith(executor.threadName);
     }
 
     /**
@@ -106,7 +93,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      */
     public void connect(@Nonnull PortState first, @Nonnull PortState second)
     {
-        EXECUTOR.execute( () ->
+        executor.execute( () ->
         {
             if(Configurator.logTransportNetwork) 
                 Log.info("LogisticsService.connect: CONNECT STARTED for %s to %s", first.portName(), second.portName());
@@ -246,7 +233,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      */
     public void disconnect(@Nonnull PortState leaving)
     {
-        EXECUTOR.execute( () ->
+        executor.execute( () ->
         {
             if(Configurator.logTransportNetwork) 
                 Log.info("LogisticsService.disconnect: DISCONNECT STARTED for %s", leaving.portName());
@@ -622,7 +609,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     {
         try
         {
-            return EXECUTOR.submit(() ->
+            return executor.submit(() ->
             {
                 return findRoutesImpl(fromDevice, toDevice);
             }, true).get();
@@ -641,7 +628,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      */
     public Future<ImmutableList<Route>> findRoutes(IDevice fromDevice, IDevice toDevice)
     {
-        return EXECUTOR.submit( () ->
+        return executor.submit( () ->
         {
             return findRoutesImpl(fromDevice, toDevice);
         }, false);
@@ -798,7 +785,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             boolean simulate,
             IProcurementRequest<?> request)
     {
-        return EXECUTOR.submit( () ->
+        return executor.submit( () ->
         {
             return sendResourceImpl(route, resource, quantity, from, to, force, simulate, request);
         }, false);
@@ -816,7 +803,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     {
         try
         {
-            return EXECUTOR.submit(() ->
+            return executor.submit(() ->
             {
                 return sendResourceImpl(route, resource, quantity, from, to, force, simulate, request);
             }, true).get();
@@ -907,7 +894,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      */
     public void initializeListener(ItemStorageListener itemStorageListener)
     {
-        EXECUTOR.execute( () ->
+        executor.execute( () ->
         {
             itemStorageListener.initialize();;
         }, false);

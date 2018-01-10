@@ -12,7 +12,7 @@ import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.BlockFabricatorMachine;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -44,18 +44,18 @@ public class GuiBasicBuilder extends AbstractSimpleGui<BlockFabricatorTileEntity
 
         mainPanel.add(sizeControl(mainPanel, new MachineFabricationProgressGauge(te, RenderBounds.BOUNDS_PROGRESS), RenderBounds.BOUNDS_PROGRESS));
         
-        MachinePowerSupply ps = te.clientState().powerSupply;
+        MachinePowerSupplyInfo ps = te.clientState().powerSupplyInfo;
         
         if(ps != null)
         {
             mainPanel.add(sizeControl(mainPanel, new MachinePowerUsage(te, RenderBounds.BOUNDS_POWER_0), RenderBounds.BOUNDS_POWER_0));
             
-            if(ps.battery() != null)
+            if(ps.hasBattery())
             {
                 mainPanel.add(sizeControl(mainPanel, new MachineBattery(te, RenderBounds.BOUNDS_POWER_1), RenderBounds.BOUNDS_POWER_1));
             }
             
-            if(ps.fuelCell() != null)
+            if(ps.hasFuelCell())
             {
                 mainPanel.add(sizeControl(mainPanel, new MachineFuelCell(te, RenderBounds.BOUNDS_POWER_2), RenderBounds.BOUNDS_POWER_2));
             }

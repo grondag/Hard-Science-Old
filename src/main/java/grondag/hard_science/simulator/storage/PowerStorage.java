@@ -1,137 +1,101 @@
 package grondag.hard_science.simulator.storage;
 
 
-import java.util.List;
-import java.util.function.Predicate;
-
-import com.google.common.collect.ImmutableList;
-
-import grondag.hard_science.Log;
-import grondag.hard_science.machines.base.AbstractMachine;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.support.BatteryChemistry;
+import grondag.hard_science.machines.support.ThroughputRegulator;
+import grondag.hard_science.machines.support.TimeUnits;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import net.minecraft.nbt.NBTTagCompound;
 
-//TODO: need to merge this with battery somehow so that capture all the events
-public class PowerStorage extends AbstractStorage<StorageTypePower>
+/**
+ * Will need to split this implementation when introducing
+ * non-chemical energy storage.
+ */
+public class PowerStorage extends AbstractResourceStorage<StorageTypePower, AbstractSingleResourceContainer<StorageTypePower>>
 {
-    public PowerStorage(AbstractMachine owner)
+    private BatteryChemistry chemistry;
+
+    public PowerStorage(IDevice owner)
     {
         super(owner);
     }
 
     @Override
-    public StorageTypePower storageType()
+    protected AbstractSingleResourceContainer<StorageTypePower> createContainer(IDevice owner)
     {
-        return StorageType.POWER;
-    }
-
-    @Override
-    public boolean isResourceAllowed(IResource<StorageTypePower> resource)
-    {
-        return true;
-    }
-
-    @Override
-    public void onConnect()
-    {
-        assert this.getDomain() != null : "Null domain on storage connect";
-        
-        if(this.getDomain() == null)
-            Log.warn("Null domain on storage connect");
-        else
-            PowerStorageEvent.postAfterStorageConnect(this);
-    }
-
-    @Override
-    public void onDisconnect()
-    {
-        assert this.getDomain() != null : "Null domain on storage disconnect";
-        
-        if(this.getDomain() == null)
-            Log.warn("Null domain on storage connect");
-        else
-            PowerStorageEvent.postBeforeStorageDisconnect(this);
-    }
-
-    @Override
-    public synchronized long takeUpTo(IResource<StorageTypePower> resource, long limit, boolean simulate, IProcurementRequest<StorageTypePower> request)
-    {
-        long taken = this.machine().getPowerSupply().battery()
-                .provideEnergy(this.machine(), limit, true, simulate);
-        
-        if(taken > 0 && !simulate)
+        AbstractSingleResourceContainer<StorageTypePower> result = new AbstractSingleResourceContainer<StorageTypePower>(owner)
         {
-            this.setDirty();
-            if(this.isConnected() && this.getDomain() != null)
-            {
-                PowerStorageEvent.postStoredUpdate(this, resource, -taken, request);
-            }
-        }
-        return taken;
+            @Override
+            public StorageTypePower storageType() { return StorageType.POWER; }
+        };
+        result.setFixedResource(PowerResource.JOULES);
+        return result;
     }
-
-    @Override
-    public synchronized long add(IResource<StorageTypePower> resource, long howMany, boolean simulate, IProcurementRequest<StorageTypePower> request)
+    
+    public void configure(long volumeNanoliters, BatteryChemistry chemistry)
     {
-        long added = this.machine().getPowerSupply().battery().acceptEnergy(howMany, true, simulate);
-        
-        if(added > 0 && !simulate)
-        {
-            this.setDirty();
-            if(this.isConnected() && this.getDomain() != null)
-            {
-                PowerStorageEvent.postStoredUpdate(this, resource, added, request);
-            }
-        }
-        return added;
+        this.setCapacity(chemistry.capacityForNanoliters(volumeNanoliters));
+        this.chemistry = chemistry;
+        this.wrappedContainer.regulator = new ThroughputRegulator.Limited(
+                chemistry.maxChargeJoulesPerTick(this.wrappedContainer.capacity),
+                chemistry.maxDischargeJoulesPerTick(this.wrappedContainer.capacity));
     }
 
     @Override
-    public AbstractStorage<StorageTypePower> setCapacity(long capacity)
+    public void setCapacity(long capacity)
     {
         throw new UnsupportedOperationException("Attempt to set power storage capacity. Power capacity is determined by battery subsystem.");
     }
+    
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        //NB: super saves capacity, contents
+        super.serializeNBT(tag);
+        tag.setInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY, this.chemistry.ordinal());
+    }
+    
+    @Override
+    public void deserializeNBT(NBTTagCompound tag)
+    {
+        //NB: super saves capacity, contents
+        super.deserializeNBT(tag);
+        this.configure(
+                this.wrappedContainer.capacity,
+                Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.SILICON));
+    }
 
-    @Override
-    public long getCapacity()
+    /** for Battery wrapper */
+    public long maxEnergyInputJoulesPerTick()
     {
-        return this.machine().getPowerSupply().battery().maxStoredEnergyJoules();
-    }
-    
-    @Override
-    public long getQuantityStored(IResource<StorageTypePower> resource)
-    {
-        return this.machine().getPowerSupply().battery().storedEnergyJoules();
-    }
-    
-    @Override
-    public long usedCapacity()
-    {
-        return this.machine().getPowerSupply().battery().storedEnergyJoules();
+        return this.wrappedContainer.regulator.maxInputPerTick();
     }
 
-    @Override
-    public List<AbstractResourceWithQuantity<StorageTypePower>> find(Predicate<IResource<StorageTypePower>> predicate)
+    /** for Battery wrapper */
+    public float powerInputWatts()
     {
-        return this.usedCapacity() > 0 
-                ? ImmutableList.of(PowerResource.JOULES.withQuantity(this.usedCapacity()))
-                : ImmutableList.of();
+        return this.wrappedContainer.regulator.inputLastTick() * TimeUnits.TICKS_PER_SIMULATED_SECOND;
     }
     
-    @Override
-    public void serializeNBT(NBTTagCompound nbt)
+    /** for Battery wrapper */
+    public long energyInputCurrentTickJoules()
     {
-        super.serializeNBT(nbt);
+        return this.wrappedContainer.regulator.inputLastTick();
     }
     
-    @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    /** for Battery wrapper */
+    public long maxEnergyOutputJoulesPerTick()
     {
-        super.deserializeNBT(nbt);
+        return this.wrappedContainer.regulator.maxOutputPerTick();
+    }
+    
+    public BatteryChemistry getChemistry()
+    {
+        return chemistry;
     }
 }

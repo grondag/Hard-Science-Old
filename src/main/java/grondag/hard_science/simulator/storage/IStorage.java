@@ -1,60 +1,24 @@
 package grondag.hard_science.simulator.storage;
 
-import java.util.List;
-import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
-
-import grondag.hard_science.simulator.demand.IProcurementRequest;
-import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
-import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 
-public interface IStorage<T extends StorageType<T>>
-    extends ISizedContainer, ITypedStorage<T>
+/**
+ * All input and output for an IStorage must happen on the
+ * service thread for the storage type given by {@link #storageType()}.<p>
+ * 
+ * This allows resource transfers between storage contains to occur
+ * without synchronization or any type of two-phase commit protocol.
+ * It means, for example, that a storage with capacity to accept a resource
+ * at the start of a transport operation can guarantee that it will accept 
+ * delivery. <p>
+ *
+ * Any in-world or user-initiated operations involving a storage ARE subject
+ * to this constraint. Handle these by submitting them as privileged tasks
+ * so that they don't wait on simulator tasks that may be in the queue.
+ */
+public interface IStorage<T extends StorageType<T>> extends IResourceContainer<T>
 {
-    long getQuantityStored(IResource<T> resource);
-    
-    default boolean isResourceAllowed(IResource<T> resource) { return true; }
-    
-    default long availableCapacityFor(IResource<T> resource)
-    {
-        return this.isResourceAllowed(resource) ? this.availableCapacity() : 0;
-    }
-    
-     /**
-     * Increases quantityStored and returns quantityStored actually added.
-     * If simulate==true, will return forecasted result without making changes.
-     * Intended to be thread-safe. <p>
-     * 
-     * If request is non-null and not simulated, the amount added will be
-     * allocated (domain-wide) to the given request.
-     */
-    long add(IResource<T> resource, long howMany, boolean simulate, @Nullable IProcurementRequest<T> request);
-
-    /** Alternative syntax for {@link #add(IResource, long, boolean)} */
-    default long add(AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate, @Nullable IProcurementRequest<T> request)
-    {
-        return this.add(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate, request);
-    }
-    
-    /**
-     * Takes up to limit from this stack and returns how many were actually taken.
-     * If simulate==true, will return forecasted result without making changes.
-     * Intended to be thread-safe. <p>
-     * 
-     * If request is non-null and not simulated, the amount taken will reduce any
-     * allocation (domain-wide) to the given request.
-     */
-    long takeUpTo(IResource<T> resource, long limit, boolean simulate, @Nullable IProcurementRequest<T> request);
-
-    /**
-     * Returned resource stacks are disconnected from this collection.
-     * Changing them will have no effect on storage contents.
-     */
-    List<AbstractResourceWithQuantity<T>> find(Predicate<IResource<T>> predicate);
-   
     public default StorageWithQuantity<T> withQuantity(long quantity)
     {
         return new StorageWithQuantity<T>(this, quantity);
@@ -64,16 +28,4 @@ public interface IStorage<T extends StorageType<T>>
     {
         return new StorageWithResourceAndQuantity<T>(this, resource, quantity);
     }
-    
-    /**
-     * Call from device connect.
-     */
-    public void onConnect();
-
-    /**
-     * Call from device disconnect.
-     */
-
-    public void onDisconnect();
- 
 }

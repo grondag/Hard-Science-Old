@@ -4,7 +4,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractMachine;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
+
 /**
  * Power supplies have up to three components:<br><br>
  * 
@@ -30,12 +30,6 @@ public class MachinePowerSupply implements IMachinePowerProvider
     
     private final float maxPowerOutputWatts;
     private final long maxEnergyOutputPerTick;
-    
-    // used for packet serialization
-    private static final int BIT_IS_FAILURE = 1;
-    private static final int BIT_HAS_BATTERY = BIT_IS_FAILURE << 1;
-    private static final int BIT_HAS_FUEL_CELL = BIT_HAS_BATTERY << 1;
-    private static final int BIT_HAS_POWER_RECEIVER = BIT_HAS_FUEL_CELL << 1;
     
     private float powerOutputWatts;
 
@@ -225,7 +219,9 @@ public class MachinePowerSupply implements IMachinePowerProvider
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.fuelCell = tag.hasKey(ModNBTTag.MACHINE_FUEL_CELL_PLATE_SIZE) ? new PolyethyleneFuelCell(tag) : null;
-        this.battery = tag.hasKey(ModNBTTag.MACHINE_BATTERY_MAX_STORED_JOULES) ? new Battery(tag) : null;
+        //FIXME: probably not going to work like this
+        if(this.battery != null) this.battery.deserializeNBT(tag);
+//        this.battery = tag.hasKey(ModNBTTag.MACHINE_BATTERY_MAX_STORED_JOULES) ? new Battery(tag) : null;
         this.powerReceiver = tag.hasKey(ModNBTTag.MACHINE_POWER_RECEIVER_MAX_JOULES) ? new PowerReceiver(tag) : null;
     }
 
@@ -339,69 +335,4 @@ public class MachinePowerSupply implements IMachinePowerProvider
 //        return this.formattedAvgNetPowerGainLoss;
 //    }
 
-    @Override
-    public void fromBytes(PacketBuffer pBuff)
-    {
-        this.powerOutputWatts = pBuff.readFloat();
-        
-        int flags = pBuff.readByte();
-                
-        this.isFailureCause = (flags & BIT_IS_FAILURE) != 0;
-        
-        if((flags & BIT_HAS_BATTERY) != 0)
-        {
-            // should never be null if getting packet for it, and 
-            // won't properly initialize the battery 
-            // but safeguard against possibility
-            if(this.battery == null) 
-            {
-                if(Log.DEBUG_MODE) Log.info("Client machine power supply received update packet for non-existant battery. This is probably a bug.");
-                this.battery = new Battery();
-            }
-                
-            this.battery.fromBytes(pBuff);
-        }
-        
-        if((flags & BIT_HAS_FUEL_CELL) != 0)
-        {
-            // should never be null if getting packet for it, and 
-            // won't properly initialize the fuel cell 
-            // but safeguard against possibility
-            if(this.fuelCell == null) 
-            {
-                if(Log.DEBUG_MODE) Log.info("Client machine power supply received update packet for non-existant fuel cell. This is probably a bug.");
-                this.fuelCell = new PolyethyleneFuelCell();
-            }
-            this.fuelCell.fromBytes(pBuff);
-        }
-
-        if((flags & BIT_HAS_POWER_RECEIVER) != 0)
-        {
-            // should never be null if getting packet for it, and 
-            // won't properly initialize the power receiver 
-            // but safeguard against possibility
-            if(this.powerReceiver == null) 
-            {
-                if(Log.DEBUG_MODE) Log.info("Client machine power supply received update packet for non-existant receiver. This is probably a bug.");
-                this.powerReceiver = new PowerReceiver();
-            }
-            this.powerReceiver.fromBytes(pBuff);
-        }
-    }
-
-    @Override
-    public void toBytes(PacketBuffer pBuff)
-    {
-        pBuff.writeFloat(this.powerOutputWatts);
-        
-        int flags = this.isFailureCause ? BIT_IS_FAILURE : 0;
-        if(this.battery != null) flags |= BIT_HAS_BATTERY;
-        if(this.fuelCell != null) flags |= BIT_HAS_FUEL_CELL;
-        if(this.powerReceiver != null) flags |= BIT_HAS_POWER_RECEIVER;
-        
-        pBuff.writeByte(flags);
-        if(this.battery != null) this.battery.toBytes(pBuff);
-        if(this.fuelCell != null) this.fuelCell.toBytes(pBuff);
-        if(this.powerReceiver != null) this.powerReceiver.toBytes(pBuff);
-    }
 }

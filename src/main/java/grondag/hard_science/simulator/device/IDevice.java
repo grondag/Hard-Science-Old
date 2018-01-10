@@ -38,6 +38,8 @@ public interface IDevice extends
 
     public default boolean hasBlockManager() { return this.blockManager() != null; }
     
+    public default boolean isOn() { return true; }
+    
     /**
      * Null if this device has no transport facilities.
      * If null, implies device has no transport nodes.

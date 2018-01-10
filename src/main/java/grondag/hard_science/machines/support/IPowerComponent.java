@@ -1,15 +1,14 @@
 package grondag.hard_science.machines.support;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.machines.base.AbstractMachine;
 
-public interface IPowerComponent extends IReadWriteNBT, IMessagePlus
+public interface IPowerComponent extends IReadWriteNBT
 {
     /**
      * Governs display and informs interpretation of other attributes
      */
-    public PowerComponentType componentType();
+    public EnergyComponentType componentType();
     
     /**
      * If this component can store energy, the current stored energy.
@@ -37,24 +36,28 @@ public interface IPowerComponent extends IReadWriteNBT, IMessagePlus
      * If the component is a generator, will always be zero.
      */
     public float powerInputWatts();
-    
-    /**
-     * Running total of energy input in the current tick.
-     */
-    public long energyInputCurrentTickJoules();
+   
+    // Currently not used
+//    /**
+//     * Running total of energy input in the current tick.
+//     */
+//    public long energyInputCurrentTickJoules();
 
     /**
      * Maximum possible value of {@link #powerInputWatts()}. 
-     * May be an estimate if not known exactly.
+     * Derived from {@link #maxEnergyInputJoulesPerTick()}.
      */
-    public float maxPowerInputWatts();
-
+    public default float maxPowerInputWatts()
+    {
+        return MachinePower.joulesPerTickToWatts(this.maxEnergyInputJoulesPerTick());
+    }
+    
     /**
-     * Same semantics as {@link #maxPowerInputWatts()} but represented 
-     * as joules per tick for use by machine internal logic.
+     * Max single-tick input to this component, if it accepts input. 
+     * For use by machine internal logic and to derive
+     * {@link #maxPowerInputWatts()} for display on client.
      */
     public long maxEnergyInputJoulesPerTick();
-    
     
     /**
      * Level of power coming out of the component
@@ -71,28 +74,32 @@ public interface IPowerComponent extends IReadWriteNBT, IMessagePlus
      */
     public float powerOutputWatts();
 
-    /**
-     * Running total of energy output in the current tick.
-     */
-    public long energyOutputCurrentTickJoules();
+    // currently unused
+//    /**
+//     * Running total of energy output in the current tick.
+//     */
+//    public long energyOutputCurrentTickJoules();
 
     
     /**
      * Maximum possible value of {@link #powerOutputWatts()}. 
-     * May be an estimate if not known exactly.
+     * Derived from {@link #maxEnergyInputJoulesPerTick()}.
      */
-    public float maxPowerOutputWatts();
+    public default float maxPowerOutputWatts()
+    {
+        return MachinePower.joulesPerTickToWatts(this.maxEnergyOutputJoulesPerTick());
+    }
     
     /**
-     * Same semantics as {@link #maxPowerOutputWatts()} but represented 
-     * as joules per tick for use by machine internal logic.
+     * Max single-tick output from this component, if it can output. 
+     * For use by machine internal logic and to derive
+     * {@link #maxPowerOutputWatts()} for display on client.
      */
     public long maxEnergyOutputJoulesPerTick();
     
     /**
      * True if component is able to provide energy right now.
      * If false, any attempt to extract energy will receive a zero result.
-     * @param mte TODO
      */
     public boolean canProvideEnergy(AbstractMachine machine);
     

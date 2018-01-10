@@ -21,6 +21,7 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
     {
         super(CarrierLevel.BOTTOM, PortType.CARRIER);
         this.powerStorage = new PowerStorage(this);
+        this.powerStorage.configure(775193798450L, BatteryChemistry.SILICON);
     }
 
     @Override
@@ -28,7 +29,7 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
     {
         return new MachinePowerSupply(
                 null, 
-                new Battery(775193798450L, BatteryChemistry.SILICON), 
+                new Battery(this.powerStorage), 
                 new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
     }
     

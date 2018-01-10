@@ -2,20 +2,13 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.AbstractMachine;
-import net.minecraft.network.PacketBuffer;
 
 public abstract class AbstractPowerComponent implements IPowerComponent
 {
-
     /**
      * Set by subclasses via {@link #setMaxOutputJoulesPerTick(long)}
      */
     private long maxEnergyOutputPerTick;
-    
-    /**
-     * Derived from {@link #maxEnergyOutputPerTick}
-     */
-    private float maxPowerOutputWatts;
     
     /** total of all energy provided during the current tick. */
     private long outputThisTick;
@@ -32,7 +25,6 @@ public abstract class AbstractPowerComponent implements IPowerComponent
     protected final void setMaxOutputJoulesPerTick(long maxJoules)
     {
         this.maxEnergyOutputPerTick = maxJoules;
-        this.maxPowerOutputWatts = MachinePower.joulesPerTickToWatts(maxJoules);
     }
     
     
@@ -42,18 +34,12 @@ public abstract class AbstractPowerComponent implements IPowerComponent
         return this.outputLastTick * TimeUnits.TICKS_PER_SIMULATED_SECOND;
     }
 
-    @Override
-    public long energyOutputCurrentTickJoules()
-    {
-        return this.outputThisTick;
-    }
+//    @Override
+//    public long energyOutputCurrentTickJoules()
+//    {
+//        return this.outputThisTick;
+//    }
     
-    @Override
-    public float maxPowerOutputWatts()
-    {
-        return this.maxPowerOutputWatts;
-    }
-
     @Override
     public long maxEnergyOutputJoulesPerTick()
     {
@@ -98,19 +84,5 @@ public abstract class AbstractPowerComponent implements IPowerComponent
     {
         this.outputLastTick = this.outputThisTick;
         this.outputThisTick = 0;
-    }
-    
-     @Override
-    public void fromBytes(PacketBuffer pBuff)
-    {
-        this.setMaxOutputJoulesPerTick(pBuff.readVarLong());
-        this.outputLastTick = pBuff.readVarLong();
-    }
-
-    @Override
-    public void toBytes(PacketBuffer pBuff)
-    {
-        pBuff.writeVarLong(this.maxEnergyOutputPerTick);
-        pBuff.writeVarLong(this.outputLastTick);
     }
 }

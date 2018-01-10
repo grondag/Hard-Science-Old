@@ -11,10 +11,10 @@ import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
-import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractDevice implements IDevice
@@ -207,21 +207,22 @@ public abstract class AbstractDevice implements IDevice
      * 
      * See {@link #onProduce(IResource, long, boolean, boolean)}
      */
+    @SuppressWarnings("unchecked")
     protected long onProduceImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
     { 
         switch(resource.storageType().enumType)
         {
         case FLUID:
             if(this.hasFluidStorage()) 
-                return this.fluidStorage().onProduceImpl(resource, quantity, simulate, request);
+                return this.fluidStorage().takeUpTo((IResource<StorageTypeFluid>)resource, quantity, simulate, (IProcurementRequest<StorageTypeFluid>)request);
         
         case ITEM:
             if(this.hasItemStorage()) 
-                return this.itemStorage().onProduceImpl(resource, quantity, simulate, request);
+                return this.itemStorage().takeUpTo((IResource<StorageTypeStack>)resource, quantity, simulate, (IProcurementRequest<StorageTypeStack>)request);
 
         case POWER:
             if(this.hasPowerStorage()) 
-                return this.powerStorage().onProduceImpl(resource, quantity, simulate, request);
+                return this.powerStorage().takeUpTo((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
 
         default:
             assert false : "Unhandled enum mapping";
@@ -232,7 +233,7 @@ public abstract class AbstractDevice implements IDevice
     @Override
     public final long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
     {
-        assert LogisticsService.serviceFor(resource.storageType()).confirmServiceThread() 
+        assert resource.confirmServiceThread() 
             : "Transport logic running outside logistics service"; 
         return this.onProduceImpl(resource, quantity, simulate, request);
     }
@@ -243,21 +244,22 @@ public abstract class AbstractDevice implements IDevice
      * 
      * See {@link #onConsume(IResource, long, boolean, boolean)}
      */
+    @SuppressWarnings("unchecked")
     protected long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
     {
         switch(resource.storageType().enumType)
         {
         case FLUID:
             if(this.hasFluidStorage()) 
-                return this.fluidStorage().onConsumeImpl(resource, quantity, simulate, request);
-        
+                return this.fluidStorage().add((IResource<StorageTypeFluid>)resource, quantity, simulate, (IProcurementRequest<StorageTypeFluid>)request);
+  
         case ITEM:
             if(this.hasItemStorage()) 
-                return this.itemStorage().onConsumeImpl(resource, quantity, simulate, request);
+                return this.itemStorage().add((IResource<StorageTypeStack>)resource, quantity, simulate, (IProcurementRequest<StorageTypeStack>)request);
 
         case POWER:
             if(this.hasPowerStorage()) 
-                return this.powerStorage().onConsumeImpl(resource, quantity, simulate, request);
+                return this.powerStorage().add((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
 
         default:
             assert false : "Unhandled enum mapping";
@@ -268,7 +270,7 @@ public abstract class AbstractDevice implements IDevice
     @Override
     public final long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
     {
-        assert LogisticsService.serviceFor(resource.storageType()).confirmServiceThread() 
+        assert resource.confirmServiceThread() 
             : "Transport logic running outside logistics service"; 
         return this.onConsumeImpl(resource, quantity, simulate, request);
     }

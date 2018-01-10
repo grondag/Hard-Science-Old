@@ -2,10 +2,16 @@ package grondag.hard_science.simulator.resource;
 
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.simulator.storage.FluidStorageEvent;
+import grondag.hard_science.simulator.storage.IStorageEventFactory;
+import grondag.hard_science.simulator.storage.ItemStorageEvent;
+import grondag.hard_science.simulator.storage.PowerStorageEvent;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.FluidStack;
@@ -56,9 +62,14 @@ public abstract class StorageType<T extends StorageType<T>>
     @Nullable
     public abstract NBTTagCompound toNBT(IResource<T> resource);
     
-    
     @Nullable
     public abstract AbstractResourceWithQuantity<T> fromNBTWithQty(NBTTagCompound nbt);
+    
+    @Nonnull
+    public abstract IStorageEventFactory<T> eventFactory();
+    
+    @Nonnull
+    public abstract LogisticsService<T> service();
     
     public static <V extends StorageType<V>> NBTTagCompound toNBTWithType(IResource<V> resource)
     {
@@ -111,6 +122,18 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             return new ItemResourceWithQuantity(nbt);
         }
+
+        @Override
+        public IStorageEventFactory<StorageTypeStack> eventFactory()
+        {
+            return ItemStorageEvent.INSTANCE;
+        }
+
+        @Override
+        public LogisticsService<StorageTypeStack> service()
+        {
+            return LogisticsService.ITEM_SERVICE;
+        }
     }
             
     /**
@@ -143,6 +166,18 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             return new FluidResourceWithQuantity(nbt);
         }
+
+        @Override
+        public IStorageEventFactory<StorageTypeFluid> eventFactory()
+        {
+            return FluidStorageEvent.INSTANCE;
+        }
+
+        @Override
+        public LogisticsService<StorageTypeFluid> service()
+        {
+            return LogisticsService.FLUID_SERVICE;
+        }
     }
     
     
@@ -174,6 +209,18 @@ public abstract class StorageType<T extends StorageType<T>>
         public AbstractResourceWithQuantity<StorageTypePower> fromNBTWithQty(NBTTagCompound nbt)
         {
             return new PowerResourceWithQuantity(nbt);
+        }
+
+        @Override
+        public IStorageEventFactory<StorageTypePower> eventFactory()
+        {
+            return PowerStorageEvent.INSTANCE;
+        }
+
+        @Override
+        public LogisticsService<StorageTypePower> service()
+        {
+            return LogisticsService.POWER_SERVICE;
         }
     }
    

@@ -3,9 +3,9 @@ package grondag.hard_science.machines.support;
 public abstract class FuelCell extends AbstractPowerComponent
 {
     @Override
-    public PowerComponentType componentType()
+    public EnergyComponentType componentType()
     {
-        return PowerComponentType.GENERATOR;
+        return EnergyComponentType.GENERATOR;
     }
 
 }

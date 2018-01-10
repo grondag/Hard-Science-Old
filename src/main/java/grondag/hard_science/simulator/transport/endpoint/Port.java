@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.transport.endpoint;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.Carrier;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
@@ -12,7 +13,8 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  * Represents a single, resource-specific port
  * within a connnector.
  */
-public class Port extends IForgeRegistryEntry.Impl<Port>
+@SuppressWarnings("rawtypes")
+public class Port extends IForgeRegistryEntry.Impl<Port> implements ITypedStorage
 {
     public final StorageType<?> storageType;
     public final PortType portType;
@@ -84,5 +86,11 @@ public class Port extends IForgeRegistryEntry.Impl<Port>
         return mode == PortMode.CARRIER
                 ? this.internalCarrier
                 : this.externalCarrier;
+    }
+
+    @Override
+    public StorageType<?> storageType()
+    {
+        return this.storageType;
     }
 }

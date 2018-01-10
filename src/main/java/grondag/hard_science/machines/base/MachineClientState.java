@@ -2,7 +2,8 @@ package grondag.hard_science.machines.base;
 
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.machines.support.MachineControlState;
-import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
+import grondag.hard_science.machines.support.MachinePowerSupplyStatus;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
@@ -63,7 +64,12 @@ public class MachineClientState
     /**
      * Used for client rendering - will only be updated as needed.
      */
-    public MachinePowerSupply powerSupply;
+    public MachinePowerSupplyInfo powerSupplyInfo;
+    
+    /**
+     * Used for client rendering - will only be updated as needed.
+     */
+    public MachinePowerSupplyStatus powerSupplyStatus;
     
     public String machineName = "???";
     
@@ -71,7 +77,8 @@ public class MachineClientState
     {
         AbstractMachine tempMachine = mte.createNewMachine();
         this.bufferManager = tempMachine.getBufferManager();
-        this.powerSupply = tempMachine.getPowerSupply();
+        this.powerSupplyInfo = new MachinePowerSupplyInfo();
+        this.powerSupplyStatus = new MachinePowerSupplyStatus();
         this.hasOnOff = tempMachine.hasOnOff();
         this.hasRedstoneControl = tempMachine.hasRedstoneControl();
         this.maxPowerConsumptionWatts = tempMachine.maxPowerConsumptionWatts();
@@ -92,9 +99,10 @@ public class MachineClientState
         {
             this.bufferManager.deserializeFromArray(packet.materialBufferData);
         }
-        if(this.powerSupply != null)
+        if(this.controlState.hasPowerSupply())
         {
-            this.powerSupply.fromBytes(packet.powerProviderData);
+            this.powerSupplyInfo = packet.powerSupplyInfo;
+            this.powerSupplyStatus = packet.powerSupplyStatus;
         }
     }
     

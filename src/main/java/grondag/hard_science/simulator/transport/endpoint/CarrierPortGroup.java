@@ -13,10 +13,10 @@ import grondag.hard_science.Log;
 import grondag.hard_science.init.ModPorts;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -28,7 +28,8 @@ import net.minecraft.util.math.BlockPos;
  * throw an exception if called otherwise.  This avoids
  * the need for synchronization of these methods.
  */
-public class CarrierPortGroup implements Iterable<PortState>
+@SuppressWarnings("rawtypes")
+public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
 {
     private final StorageType<?> storageType;
 
@@ -233,7 +234,7 @@ public class CarrierPortGroup implements Iterable<PortState>
                 @Nonnull CarrierCircuit externalCircuit, 
                 @Nonnull PortState mate)
         {
-            assert LogisticsService.serviceFor(storageType).confirmServiceThread() 
+            assert confirmServiceThread() 
                 : "Transport logic running outside transport thread";
             
             assert internalCircuit == null ? carrierPortCount == 0 : carrierPortCount > 0
@@ -317,7 +318,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public void detach()
         {
-            assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
+            assert confirmServiceThread() : "Transport logic running outside transport thread";
 
             assert internalCircuit != null
                 : "Missing internal carrier on carrier port pre-detach.";
@@ -369,7 +370,7 @@ public class CarrierPortGroup implements Iterable<PortState>
         @Override
         public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
         {
-            assert LogisticsService.serviceFor(storageType).confirmServiceThread() : "Transport logic running outside transport thread";
+            assert confirmServiceThread() : "Transport logic running outside transport thread";
             
             // see notes in header
             if(internalCircuit == oldCircuit)
@@ -441,5 +442,11 @@ public class CarrierPortGroup implements Iterable<PortState>
                 }
             };
         }
+    }
+
+    @Override
+    public StorageType<?> storageType()
+    {
+        return this.storageType;
     }
 }
