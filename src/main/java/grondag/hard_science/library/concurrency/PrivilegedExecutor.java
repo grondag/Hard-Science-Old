@@ -21,6 +21,18 @@ public class PrivilegedExecutor extends ThreadPoolExecutor
 {
     public final String threadName;
     
+    
+    /**
+     * The String instance pass to the constructor will be the actual
+     * instance value in {@link Thread#getName()} for all threads
+     * created for this executor.  No numeric sequence nor anything
+     * else is added to the thread name, even if it needs to be
+     * recreated.<p>
+     * 
+     * This means we can always test a thread for ownership by
+     * this executor using == vs needing any kind of string comparison.
+     * We use these checks frequently, so is desirable to keep it lightweight.
+     */
     public PrivilegedExecutor(String threadName)
     {
         super
@@ -43,17 +55,24 @@ public class PrivilegedExecutor extends ThreadPoolExecutor
             }),
             new ThreadFactory()
             {
-                private AtomicInteger count = new AtomicInteger(1);
                 @Override
                 public Thread newThread(Runnable r)
                 {
-                    Thread thread = new Thread(r, threadName + " - " + count.getAndIncrement());
+                    Thread thread = new Thread(r, threadName);
                     thread.setDaemon(true);
                     return thread;
                 }
             }
         );
        this.threadName = threadName;
+    }
+    
+    /**
+     * True if the current thread is the execution thread for this service.
+     */
+    public boolean isRunningOn()
+    {
+        return Thread.currentThread().getName() == this.threadName;
     }
     
     @Override

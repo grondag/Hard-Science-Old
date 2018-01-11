@@ -12,7 +12,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
-public class FluidStorage extends AbstractResourceStorage<StorageTypeFluid, AbstractSingleResourceContainer<StorageTypeFluid>> implements IFluidHandler
+public class FluidStorage extends AbstractStorage<StorageTypeFluid, AbstractSingleResourceContainer<StorageTypeFluid>> implements IFluidHandler
 {
     protected final IFluidTankProperties myProps = new IFluidTankProperties()
     {
@@ -76,7 +76,14 @@ public class FluidStorage extends AbstractResourceStorage<StorageTypeFluid, Abst
         {
             @Override
             public StorageTypeFluid storageType() { return StorageType.FLUID; }
+
+            @Override
+            public ContainerUsage containerUsage()
+            {
+                return ContainerUsage.STORAGE;
+            }
         };
+        
         result.setCapacity(VolumeUnits.liters2nL(32000));
         return result;
     }

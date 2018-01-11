@@ -16,7 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
  * Will need to split this implementation when introducing
  * non-chemical energy storage.
  */
-public class PowerStorage extends AbstractResourceStorage<StorageTypePower, AbstractSingleResourceContainer<StorageTypePower>>
+public class PowerStorage extends AbstractStorage<StorageTypePower, AbstractSingleResourceContainer<StorageTypePower>>
 {
     private BatteryChemistry chemistry;
 
@@ -32,6 +32,12 @@ public class PowerStorage extends AbstractResourceStorage<StorageTypePower, Abst
         {
             @Override
             public StorageTypePower storageType() { return StorageType.POWER; }
+
+            @Override
+            public ContainerUsage containerUsage()
+            {
+                return ContainerUsage.STORAGE;
+            }
         };
         result.setFixedResource(PowerResource.JOULES);
         return result;

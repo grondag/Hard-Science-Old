@@ -83,7 +83,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      */
     public boolean confirmServiceThread()
     {
-        return Thread.currentThread().getName().startsWith(executor.threadName);
+        return executor.isRunningOn();
     }
 
     /**

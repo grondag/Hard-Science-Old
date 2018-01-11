@@ -18,7 +18,7 @@ import net.minecraftforge.items.IItemHandler;
  * to be unchanged since time they called getStackInSlot(). Will need to detect
  * when IStorage is being accessed this way, limit changes to server thread, etc.
  */
-public class ItemStorage extends AbstractResourceStorage<StorageTypeStack, AbstractMultiResourceContainer<StorageTypeStack>> implements IItemHandler
+public class ItemStorage extends AbstractStorage<StorageTypeStack, AbstractMultiResourceContainer<StorageTypeStack>> implements IItemHandler
 {
 
     public ItemStorage(AbstractMachine owner)
@@ -33,7 +33,14 @@ public class ItemStorage extends AbstractResourceStorage<StorageTypeStack, Abstr
         {
             @Override
             public StorageTypeStack storageType() { return StorageType.ITEM; }
+
+            @Override
+            public ContainerUsage containerUsage()
+            {
+                return ContainerUsage.STORAGE;
+            }
         };
+        
         // don't allow nested smart chests with contents
         result.predicate = r -> r != null 
                 && !(((ItemResource)r).getItem() == ModItems.smart_chest 

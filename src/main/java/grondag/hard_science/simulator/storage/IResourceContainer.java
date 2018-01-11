@@ -34,6 +34,11 @@ public interface IResourceContainer<T extends StorageType<T>>
     }
     
     /**
+     * Governs synchronization and thread access restrictions for this container.
+     */
+    ContainerUsage containerUsage();
+    
+    /**
      * Increases quantityStored and returns quantityStored actually added.
      * If simulate==true, will return forecasted result without making changes.
      * Thread safety depends on implementation. <p>

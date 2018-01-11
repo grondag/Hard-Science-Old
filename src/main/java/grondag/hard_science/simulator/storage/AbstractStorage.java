@@ -18,11 +18,11 @@ import net.minecraft.nbt.NBTTagCompound;
  * Implemented as a wrapper around a resource container, so 
  * can use same logic for both single and multi resource containers.
  */
-public abstract class AbstractResourceStorage<T extends StorageType<T>, V extends AbstractResourceContainer<T>> implements IStorage<T>
+public abstract class AbstractStorage<T extends StorageType<T>, V extends AbstractResourceContainer<T>> implements IStorage<T>
 {
     protected final V wrappedContainer;
     
-    protected AbstractResourceStorage(IDevice owner)
+    protected AbstractStorage(IDevice owner)
     {
         this.wrappedContainer = this.createContainer(owner);
     }
@@ -140,5 +140,11 @@ public abstract class AbstractResourceStorage<T extends StorageType<T>, V extend
     public void serializeNBT(NBTTagCompound tag)
     {
         this.wrappedContainer.serializeNBT(tag);
+    }
+    
+    @Override
+    public ContainerUsage containerUsage()
+    {
+        return this.wrappedContainer.containerUsage();
     }
 }
