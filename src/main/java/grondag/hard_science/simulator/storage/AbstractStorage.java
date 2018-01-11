@@ -18,7 +18,7 @@ import net.minecraft.nbt.NBTTagCompound;
  * Implemented as a wrapper around a resource container, so 
  * can use same logic for both single and multi resource containers.
  */
-public abstract class AbstractStorage<T extends StorageType<T>, V extends AbstractResourceContainer<T>> implements IStorage<T>
+public abstract class AbstractStorage<T extends StorageType<T>, V extends AbstractResourceContainer<T>> implements IResourceContainer<T>
 {
     protected final V wrappedContainer;
     

@@ -9,7 +9,7 @@ import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.ItemStorageListener;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,7 +50,7 @@ public class MachineStorageContainer extends MachineContainer
         
             if(playerIn instanceof EntityPlayerMP)
             {
-                IStorage<StorageType.StorageTypeStack> storage = ((MachineTileEntity)this.te).machine().itemStorage();
+                IResourceContainer<StorageType.StorageTypeStack> storage = ((MachineTileEntity)this.te).machine().itemStorage();
                 if(storage == null) return ItemStack.EMPTY;
                 
                 int consumed = (int) storage.addInteractively(ItemResourceWithQuantity.fromStack(slotStack), false);

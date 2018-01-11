@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import grondag.hard_science.library.world.IBlockRegion;
-import grondag.hard_science.simulator.storage.jobs.IWorldTask;
+import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
 import net.minecraft.client.renderer.BufferBuilder;

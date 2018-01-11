@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.storage.jobs;
+package grondag.hard_science.simulator.jobs;
 
 /**
  * Callback interface for task status changes.

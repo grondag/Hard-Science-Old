@@ -15,10 +15,10 @@
 //import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 //import grondag.hard_science.simulator.storage.ItemStorage;
 //import grondag.hard_science.simulator.storage.StorageWithQuantity;
-//import grondag.hard_science.simulator.storage.jobs.Job;
-//import grondag.hard_science.simulator.storage.jobs.RequestStatus;
-//import grondag.hard_science.simulator.storage.jobs.tasks.DeliveryTask;
-//import grondag.hard_science.simulator.storage.jobs.tasks.SimpleProcurementTask;
+//import grondag.hard_science.simulator.jobs.Job;
+//import grondag.hard_science.simulator.jobs.RequestStatus;
+//import grondag.hard_science.simulator.jobs.tasks.DeliveryTask;
+//import grondag.hard_science.simulator.jobs.tasks.SimpleProcurementTask;
 //import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 //import grondag.hard_science.simulator.transport.endpoint.PortType;
 //import grondag.hard_science.superblock.block.SuperModelBlock;

@@ -1,12 +1,12 @@
-package grondag.hard_science.simulator.storage.jobs.tasks;
+package grondag.hard_science.simulator.jobs.tasks;
 
 import grondag.hard_science.simulator.demand.IBroker;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.demand.IProducer;
+import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.jobs.AbstractTask;
-import grondag.hard_science.simulator.storage.jobs.RequestStatus;
 import it.unimi.dsi.fastutil.objects.AbstractObject2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 

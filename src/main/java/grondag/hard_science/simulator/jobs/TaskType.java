@@ -1,15 +1,15 @@
-package grondag.hard_science.simulator.storage.jobs;
+package grondag.hard_science.simulator.jobs;
 
 import java.util.function.Supplier;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.simulator.storage.jobs.tasks.BlockFabricationTask;
-import grondag.hard_science.simulator.storage.jobs.tasks.BlockProcurementTask;
-import grondag.hard_science.simulator.storage.jobs.tasks.DeliveryTask;
-import grondag.hard_science.simulator.storage.jobs.tasks.ExcavationTask;
-import grondag.hard_science.simulator.storage.jobs.tasks.PlacementTask;
-import grondag.hard_science.simulator.storage.jobs.tasks.SimpleProcurementTask;
+import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
+import grondag.hard_science.simulator.jobs.tasks.BlockProcurementTask;
+import grondag.hard_science.simulator.jobs.tasks.DeliveryTask;
+import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
+import grondag.hard_science.simulator.jobs.tasks.PlacementTask;
+import grondag.hard_science.simulator.jobs.tasks.SimpleProcurementTask;
 import net.minecraft.nbt.NBTTagCompound;
 
 public enum TaskType

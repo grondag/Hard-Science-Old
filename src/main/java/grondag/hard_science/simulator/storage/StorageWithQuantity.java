@@ -7,10 +7,10 @@ import grondag.hard_science.simulator.resource.StorageType;
  */
 public class StorageWithQuantity<T extends StorageType<T>>
 {
-    public final IStorage<T> storage;
+    public final IResourceContainer<T> storage;
     public final long quantity;
     
-    public StorageWithQuantity(IStorage<T> storage, long quantity)
+    public StorageWithQuantity(IResourceContainer<T> storage, long quantity)
     {
         this.storage = storage;
         this.quantity = quantity;

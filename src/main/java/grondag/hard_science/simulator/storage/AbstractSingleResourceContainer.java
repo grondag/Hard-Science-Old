@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -34,15 +33,15 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
      */
     protected boolean isFixedResource = false;
     
-    /**
-     * Make this something other than the dummy regulator during
-     * constructor if you want limits or accounting.
-     */
-    protected ThroughputRegulator regulator = ThroughputRegulator.DUMMY;
-    
-    public AbstractSingleResourceContainer(IDevice owner)
+    public AbstractSingleResourceContainer(IDevice owner, ContainerUsage usage)
     {
-        super(owner);
+        super(owner, usage);
+    }
+    
+    @Override
+    public IResource<T> resource()
+    {
+        return this.resource;
     }
     
     /**
@@ -68,7 +67,9 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
     @Override
     public boolean isResourceAllowed(@Nonnull IResource<T> resource)
     {
-        return this.resource == null || resource.isResourceEqual(this.resource);
+        // fall back to predicate if resource not set
+        return (this.resource == null && super.isResourceAllowed(resource))
+                || resource.isResourceEqual(this.resource);
     }
 
     @Override
@@ -165,5 +166,13 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
             this.resource = rwq.resource();
             this.used = rwq.getQuantity();
         }
+    }
+    
+    @Override
+    public List<AbstractResourceWithQuantity<T>> slots()
+    {
+        return this.resource == null || this.used == 0
+                ? ImmutableList.of()
+                : ImmutableList.of(this.resource.withQuantity(this.used));
     }
 }

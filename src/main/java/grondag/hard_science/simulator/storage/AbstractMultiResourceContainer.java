@@ -11,7 +11,6 @@ import org.magicwerk.brownies.collections.Key1List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -24,17 +23,6 @@ public abstract class AbstractMultiResourceContainer<T extends StorageType<T>>
     extends AbstractResourceContainer<T>
 {
     /**
-     * If non-null, restricts what may be placed in this container.
-     */
-    protected Predicate<IResource<T>> predicate; 
-    
-    /**
-     * Make this something other than the dummy regulator during
-     * constructor if you want limits or accounting.
-     */
-    protected ThroughputRegulator regulator = ThroughputRegulator.DUMMY;
-    
-    /**
      * All unique resources contained in this storage
      */
     protected Key1List<AbstractResourceWithQuantity<T>, IResource<T>> slots 
@@ -42,41 +30,9 @@ public abstract class AbstractMultiResourceContainer<T extends StorageType<T>>
               withPrimaryKey1Map(AbstractResourceWithQuantity::resource).
               build();
     
-    public AbstractMultiResourceContainer(IDevice owner)
+    public AbstractMultiResourceContainer(IDevice owner, ContainerUsage usage)
     {
-        super(owner);
-    }
-
-    /**
-     * Setting to a non-null value will configure this
-     * container to accept only resources that match the given predicate.  
-     * Setting to null will remove this constraint.
-     * Container must be empty when set to a non-null value.
-     */
-    public void setContentPredicate(Predicate<IResource<T>> predicate)
-    {
-        if(this.predicate != predicate && predicate != null)
-        {
-            if(this.used == 0)
-            {
-                this.predicate = predicate;
-            }
-            else assert false: "Attempt to configure non-empty resource container.";
-        }
-    }
-    
-    /**
-     * See {@link #setContentPredicate(Predicate)}
-     */
-    public Predicate<IResource<T>> getContentPredicate()
-    {
-        return this.predicate;
-    }
-    
-    @Override
-    public boolean isResourceAllowed(@Nonnull IResource<T> resource)
-    {
-        return this.predicate == null || predicate.test(resource);
+        super(owner, usage);
     }
     
     @Override
@@ -213,5 +169,13 @@ public abstract class AbstractMultiResourceContainer<T extends StorageType<T>>
                 }
             }   
         }
+    }
+    
+    @Override
+    public List<AbstractResourceWithQuantity<T>> slots()
+    {
+        return this.slots().isEmpty()
+                ? ImmutableList.of()
+                : ImmutableList.copyOf(this.slots);
     }
 }

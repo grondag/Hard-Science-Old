@@ -5,15 +5,15 @@ import java.util.concurrent.Future;
 
 import org.junit.Test;
 
-import grondag.hard_science.simulator.storage.jobs.AbstractTask;
-import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.simulator.storage.jobs.JobManager;
-import grondag.hard_science.simulator.storage.jobs.RequestPriority;
-import grondag.hard_science.simulator.storage.jobs.RequestStatus;
-import grondag.hard_science.simulator.storage.jobs.TaskType;
-import grondag.hard_science.simulator.storage.jobs.tasks.BlockFabricationTask;
-import grondag.hard_science.simulator.storage.jobs.tasks.ExcavationTask;
-import grondag.hard_science.simulator.storage.jobs.tasks.PlacementTask;
+import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.Job;
+import grondag.hard_science.simulator.jobs.JobManager;
+import grondag.hard_science.simulator.jobs.RequestPriority;
+import grondag.hard_science.simulator.jobs.RequestStatus;
+import grondag.hard_science.simulator.jobs.TaskType;
+import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
+import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
+import grondag.hard_science.simulator.jobs.tasks.PlacementTask;
 
 public class JobTest
 {

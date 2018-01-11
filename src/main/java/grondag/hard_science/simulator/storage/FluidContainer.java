@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.storage;
 
-
 import grondag.hard_science.Log;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
@@ -12,17 +11,37 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
-public class FluidStorage extends AbstractStorage<StorageTypeFluid, AbstractSingleResourceContainer<StorageTypeFluid>> implements IFluidHandler
+public class FluidContainer extends ResourceContainer<StorageTypeFluid> implements IFluidHandler
 {
+    public FluidContainer(IDevice owner, ContainerUsage usage)
+    {
+        super(new FluidInner(owner, usage));
+        this.setCapacity(VolumeUnits.liters2nL(32000));
+    }
+    
+    private static class FluidInner extends AbstractSingleResourceContainer<StorageTypeFluid>
+    {
+        public FluidInner(IDevice owner, ContainerUsage usage)
+        {
+            super(owner, usage);
+        }
+
+        @Override
+        public StorageTypeFluid storageType()
+        {
+            return StorageType.FLUID;
+        }
+    }
+    
     protected final IFluidTankProperties myProps = new IFluidTankProperties()
     {
 
         @Override
         public FluidStack getContents()
         {
-            FluidStack result = ((FluidResource)wrappedContainer.resource).sampleFluidStack().copy();
+            FluidStack result = ((FluidResource)FluidContainer.this.resource()).sampleFluidStack().copy();
             result.amount = (int) Math.min(
-                    VolumeUnits.nL2Liters(wrappedContainer.used),
+                    VolumeUnits.nL2Liters(FluidContainer.this.usedCapacity()),
                     Integer.MAX_VALUE);
             return result;
         }
@@ -31,7 +50,7 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid, AbstractSing
         public int getCapacity()
         {
             return (int) Math.min(
-                    VolumeUnits.nL2Liters(wrappedContainer.capacity),
+                    VolumeUnits.nL2Liters(FluidContainer.this.getCapacity()),
                     Integer.MAX_VALUE);
         }
 
@@ -50,46 +69,20 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid, AbstractSing
         @Override
         public boolean canFillFluidType(FluidStack fluidStack)
         {
-            return (wrappedContainer.resource == null 
-                    || ((FluidResource)wrappedContainer.resource).isStackEqual(fluidStack))
-                    && FluidStorage.this.availableCapacity() > 0;
+            return (FluidContainer.this.resource() == null 
+                    || ((FluidResource)FluidContainer.this.resource()).isStackEqual(fluidStack))
+                    && FluidContainer.this.availableCapacity() > 0;
         }
 
         @Override
         public boolean canDrainFluidType(FluidStack fluidStack)
         {
-            return wrappedContainer.resource != null 
-                    && ((FluidResource)wrappedContainer.resource).isStackEqual(fluidStack)
-                    && FluidStorage.this.usedCapacity() > 0;
+            return FluidContainer.this.resource() != null 
+                    && ((FluidResource)FluidContainer.this.resource()).isStackEqual(fluidStack)
+                    && FluidContainer.this.usedCapacity() > 0;
         }
     };
     
-    public FluidStorage(IDevice owner)
-    {
-        super(owner);
-    }
-    
-    @Override
-    protected AbstractSingleResourceContainer<StorageTypeFluid> createContainer(IDevice owner)
-    {
-        AbstractSingleResourceContainer<StorageTypeFluid> result = new AbstractSingleResourceContainer<StorageTypeFluid>(owner)
-        {
-            @Override
-            public StorageTypeFluid storageType() { return StorageType.FLUID; }
-
-            @Override
-            public ContainerUsage containerUsage()
-            {
-                return ContainerUsage.STORAGE;
-            }
-        };
-        
-        result.setCapacity(VolumeUnits.liters2nL(32000));
-        return result;
-    }
-
-
-
     @Override
     public IFluidTankProperties[] getTankProperties()
     {
@@ -106,13 +99,13 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid, AbstractSing
         
         FluidResource resource;
         
-        if(wrappedContainer.resource == null)
+        if(FluidContainer.this.resource() == null)
         {
             resource = FluidResource.fromStack(stack);
         }
         else
         {
-            FluidResource myResource = (FluidResource)wrappedContainer.resource;
+            FluidResource myResource = (FluidResource)FluidContainer.this.resource();
             if(!myResource.isStackEqual(stack)) return 0;
             resource = myResource;
         }
@@ -142,7 +135,8 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid, AbstractSing
     {
         if(resource == null) return null;
         
-        if(wrappedContainer.resource == null || !((FluidResource)wrappedContainer.resource).isStackEqual(resource))
+        if(FluidContainer.this.resource() == null 
+                || !((FluidResource)FluidContainer.this.resource()).isStackEqual(resource))
         {
             FluidStack result = resource.copy();
             result.amount = 0;
@@ -158,9 +152,9 @@ public class FluidStorage extends AbstractStorage<StorageTypeFluid, AbstractSing
         {
             return LogisticsService.FLUID_SERVICE.executor.submit( () ->
             {
-                if(wrappedContainer.resource == null) return null;
+                if(FluidContainer.this.resource() == null) return null;
                 // need to save a reference here because may become null on drain
-                FluidResource resource = (FluidResource) wrappedContainer.resource;
+                FluidResource resource = (FluidResource) FluidContainer.this.resource();
                 
                 long drained = VolumeUnits.liters2nL(maxDrain);
                 drained = this.takeUpTo(resource, drained, !doDrain, null);

@@ -57,7 +57,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     /**
      * Null if in domain mode.
      */
-    private final ItemStorage storage;
+    private final ItemContainer storage;
     
     /**
      * Domain if we are in domain mode, and last
@@ -75,7 +75,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      * connected to the store in {@link #storage}. Includes 
      * the primary store.  Null in domain mode.
      */
-    protected final Set<IStorage<StorageTypeStack>> stores;
+    protected final Set<IResourceContainer<StorageTypeStack>> stores;
     
     /**
      * Set true once disconnected and deregistered.
@@ -133,13 +133,13 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     * all physically connected storage machines.
     */
             
-    public ItemStorageListener(@Nonnull ItemStorage storage, @Nonnull EntityPlayerMP player)
+    public ItemStorageListener(@Nonnull ItemContainer storage, @Nonnull EntityPlayerMP player)
     {
         this.player = player;
         this.container = player.openContainer;
         this.mode = storage.isOn() ? Mode.CONNECTED : Mode.STORE;
         this.stores = storage.isOn() 
-                ? new HashSet<IStorage<StorageTypeStack>>()
+                ? new HashSet<IResourceContainer<StorageTypeStack>>()
                 : ImmutableSet.of(storage);
         this.storage = storage;
         this.domain = storage.getDomain();
@@ -159,9 +159,9 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             break;
             
         case CONNECTED:
-            for(IStorage<StorageTypeStack> store : this.domain.itemStorage.stores())
+            for(IResourceContainer<StorageTypeStack> store : this.domain.itemStorage.stores())
             {
-                ItemStorage itemStore = (ItemStorage)store;
+                ItemContainer itemStore = (ItemContainer)store;
                 if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), itemStore.device()))
                 {
                     this.stores.add(store);
@@ -201,7 +201,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         return this.isDead;
     }
     
-    private void addStore(ItemStorage storage, ImmutableList.Builder<ItemResourceDelegate> builder)
+    private void addStore(ItemContainer storage, ImmutableList.Builder<ItemResourceDelegate> builder)
     {
         this.totalCapacity += storage.getCapacity();
         for(AbstractResourceWithQuantity<StorageTypeStack> rwq : storage.find(StorageType.ITEM.MATCH_ANY))
@@ -210,7 +210,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         }
     }
     
-    private void removeStore(ItemStorage storage, ImmutableList.Builder<ItemResourceDelegate> builder)
+    private void removeStore(ItemContainer storage, ImmutableList.Builder<ItemResourceDelegate> builder)
     {
         this.totalCapacity -= storage.getCapacity();
         for(AbstractResourceWithQuantity<StorageTypeStack> rwq : storage.find(StorageType.ITEM.MATCH_ANY))
@@ -297,8 +297,8 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                     && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device()))
             {
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-                    this.addStore((ItemStorage) event.storage, builder);
-                    this.stores.add((ItemStorage) event.storage);
+                    this.addStore((ItemContainer) event.storage, builder);
+                    this.stores.add((ItemContainer) event.storage);
                     ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                             builder.build(), this.totalCapacity, false), player);
             }
@@ -308,7 +308,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         case DOMAIN:
         {
             ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-            this.addStore((ItemStorage) event.storage, builder);
+            this.addStore((ItemContainer) event.storage, builder);
             ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                     builder.build(), this.totalCapacity, false), player);
             break;
@@ -346,8 +346,8 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                     && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device()))
             {
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-                    this.removeStore((ItemStorage) event.storage, builder);
-                    this.stores.remove((ItemStorage) event.storage);
+                    this.removeStore((ItemContainer) event.storage, builder);
+                    this.stores.remove((ItemContainer) event.storage);
                     ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                             builder.build(), this.totalCapacity, false), player);
                 
@@ -358,7 +358,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         case DOMAIN:
         {
             ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-            this.removeStore((ItemStorage) event.storage, builder);
+            this.removeStore((ItemContainer) event.storage, builder);
             ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
                     builder.build(), this.totalCapacity, false), player);
             break;
@@ -435,13 +435,13 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     }
 
     @Override
-    public ImmutableList<IStorage<StorageTypeStack>> stores()
+    public ImmutableList<IResourceContainer<StorageTypeStack>> stores()
     {
         return ImmutableList.copyOf(this.stores);
     }
 
     @Override
-    public ImmutableList<IStorage<StorageTypeStack>> findSpaceFor(IResource<StorageTypeStack> resource, long quantity)
+    public ImmutableList<IResourceContainer<StorageTypeStack>> findSpaceFor(IResource<StorageTypeStack> resource, long quantity)
     {
         return this.mode == Mode.DOMAIN
                 ? this.domain.itemStorage.findSpaceFor(resource, quantity)
@@ -449,7 +449,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     }
 
     @Override
-    public ImmutableList<IStorage<StorageTypeStack>> getLocations(IResource<StorageTypeStack> resource)
+    public ImmutableList<IResourceContainer<StorageTypeStack>> getLocations(IResource<StorageTypeStack> resource)
     {
         return this.mode == Mode.DOMAIN
                 ? this.domain.itemStorage.getLocations(resource)

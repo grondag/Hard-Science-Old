@@ -10,13 +10,13 @@ public class StorageEvent
 {
     protected static abstract class ResourceUpdate<T extends StorageType<T>>
     {
-        public final IStorage<T> storage;
+        public final IResourceContainer<T> storage;
         public final IResource<T> resource;
         public final long delta;
         public final IProcurementRequest<T> request;
         
         protected ResourceUpdate(
-                IStorage<T> storage, 
+                IResourceContainer<T> storage, 
                 IResource<T> resource, 
                 long delta,
                 @Nullable IProcurementRequest<T> request)
@@ -30,9 +30,9 @@ public class StorageEvent
     
     protected static abstract class StorageNotification<T extends StorageType<T>>
     {
-        public final IStorage<T> storage;
+        public final IResourceContainer<T> storage;
         
-        protected StorageNotification(IStorage<T> storage)
+        protected StorageNotification(IResourceContainer<T> storage)
         {
             this.storage = storage;
         }
@@ -40,10 +40,10 @@ public class StorageEvent
     
     protected static abstract class CapacityChange<T extends StorageType<T>>
     {
-        public final IStorage<T> storage;
+        public final IResourceContainer<T> storage;
         public final long delta;
         
-        protected CapacityChange(IStorage<T> storage, long newCapacity)
+        protected CapacityChange(IResourceContainer<T> storage, long newCapacity)
         {
             this.storage = storage;
             this.delta = newCapacity;

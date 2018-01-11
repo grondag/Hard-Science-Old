@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.resource;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -112,7 +112,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
         return howMany;
     }
 
-    public StorageWithResourceAndQuantity<V> withStorage(IStorage<V> storage)
+    public StorageWithResourceAndQuantity<V> withStorage(IResourceContainer<V> storage)
     {
         return new StorageWithResourceAndQuantity<V>(storage, this.resource, this.quantity);
     }

@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.storage;
 
-
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.BatteryChemistry;
@@ -12,44 +11,42 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import net.minecraft.nbt.NBTTagCompound;
 
-/**
- * Will need to split this implementation when introducing
- * non-chemical energy storage.
- */
-public class PowerStorage extends AbstractStorage<StorageTypePower, AbstractSingleResourceContainer<StorageTypePower>>
+public class PowerContainer extends ResourceContainer<StorageTypePower>
 {
     private BatteryChemistry chemistry;
-
-    public PowerStorage(IDevice owner)
+    
+    public PowerContainer(IDevice owner, ContainerUsage usage)
     {
-        super(owner);
+        super(new PowerInner(owner, usage));
     }
-
-    @Override
-    protected AbstractSingleResourceContainer<StorageTypePower> createContainer(IDevice owner)
+    
+    private static class PowerInner extends AbstractSingleResourceContainer<StorageTypePower>
     {
-        AbstractSingleResourceContainer<StorageTypePower> result = new AbstractSingleResourceContainer<StorageTypePower>(owner)
+        public PowerInner(IDevice owner, ContainerUsage usage)
         {
-            @Override
-            public StorageTypePower storageType() { return StorageType.POWER; }
+            super(owner, usage);
+            this.setFixedResource(PowerResource.JOULES);
+        }
 
-            @Override
-            public ContainerUsage containerUsage()
-            {
-                return ContainerUsage.STORAGE;
-            }
-        };
-        result.setFixedResource(PowerResource.JOULES);
-        return result;
+        @Override
+        public StorageTypePower storageType()
+        {
+            return StorageType.POWER;
+        }
     }
     
     public void configure(long volumeNanoliters, BatteryChemistry chemistry)
     {
         this.setCapacity(chemistry.capacityForNanoliters(volumeNanoliters));
         this.chemistry = chemistry;
-        this.wrappedContainer.regulator = new ThroughputRegulator.Limited(
-                chemistry.maxChargeJoulesPerTick(this.wrappedContainer.capacity),
-                chemistry.maxDischargeJoulesPerTick(this.wrappedContainer.capacity));
+        this.configureRegulator();
+    }
+    
+    private void configureRegulator()
+    {
+        this.setRegulator( new ThroughputRegulator.Limited(
+                chemistry.maxChargeJoulesPerTick(this.getCapacity()),
+                chemistry.maxDischargeJoulesPerTick(this.getCapacity())));
     }
 
     @Override
@@ -71,33 +68,32 @@ public class PowerStorage extends AbstractStorage<StorageTypePower, AbstractSing
     {
         //NB: super saves capacity, contents
         super.deserializeNBT(tag);
-        this.configure(
-                this.wrappedContainer.capacity,
-                Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.SILICON));
+        this.chemistry = Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.SILICON);
+        this.configureRegulator();
     }
 
     /** for Battery wrapper */
     public long maxEnergyInputJoulesPerTick()
     {
-        return this.wrappedContainer.regulator.maxInputPerTick();
+        return this.getRegulator().maxInputPerTick();
     }
 
     /** for Battery wrapper */
     public float powerInputWatts()
     {
-        return this.wrappedContainer.regulator.inputLastTick() * TimeUnits.TICKS_PER_SIMULATED_SECOND;
+        return this.getRegulator().inputLastTick() * TimeUnits.TICKS_PER_SIMULATED_SECOND;
     }
     
     /** for Battery wrapper */
     public long energyInputCurrentTickJoules()
     {
-        return this.wrappedContainer.regulator.inputLastTick();
+        return this.getRegulator().inputLastTick();
     }
     
     /** for Battery wrapper */
     public long maxEnergyOutputJoulesPerTick()
     {
-        return this.wrappedContainer.regulator.maxOutputPerTick();
+        return this.getRegulator().maxOutputPerTick();
     }
     
     public BatteryChemistry getChemistry()

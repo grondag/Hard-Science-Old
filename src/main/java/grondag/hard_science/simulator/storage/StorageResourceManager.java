@@ -39,7 +39,7 @@ public class StorageResourceManager<T extends StorageType<T>>
     /**
      * List of all storage instances in the domain that contain this resource.
      */
-    private final SimpleUnorderedArrayList<IStorage<T>> stores = new SimpleUnorderedArrayList<IStorage<T>>();
+    private final SimpleUnorderedArrayList<IResourceContainer<T>> stores = new SimpleUnorderedArrayList<IResourceContainer<T>>();
 
     /**
      * Single listener or list of resource listeners.
@@ -65,7 +65,7 @@ public class StorageResourceManager<T extends StorageType<T>>
      * the storage, if non-null.
      * Useful when fabrication is storing items made for procurement requests.
      */
-    public StorageResourceManager(IResource<T> resource, IStorage<T> firstStorage, long allocatedQuantity, @Nullable IProcurementRequest<T> request)
+    public StorageResourceManager(IResource<T> resource, IResourceContainer<T> firstStorage, long allocatedQuantity, @Nullable IProcurementRequest<T> request)
     {
         this.resource = resource;
         if(firstStorage != null)
@@ -231,7 +231,7 @@ public class StorageResourceManager<T extends StorageType<T>>
      * Called by storage when resources are removed.
      * If request is non-null, then the amount taken reduces any allocation to that request.
      */
-    public synchronized void notifyTaken(IStorage<T> storage, long taken, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyTaken(IResourceContainer<T> storage, long taken, @Nullable IProcurementRequest<T> request)
     {
         if(taken == 0) return;
         
@@ -325,7 +325,7 @@ public class StorageResourceManager<T extends StorageType<T>>
     /**
      * If request is non-null, then the amount added is immediately allocated to that request.
      */
-    public synchronized void notifyAdded(IStorage<T> storage, long added, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyAdded(IResourceContainer<T> storage, long added, @Nullable IProcurementRequest<T> request)
     {
         if(added == 0) return;
         
@@ -363,7 +363,7 @@ public class StorageResourceManager<T extends StorageType<T>>
     public synchronized ImmutableList<StorageWithQuantity<T>> getLocations(IResource<T> resource)
     {
         ImmutableList.Builder<StorageWithQuantity<T>> builder = ImmutableList.builder();
-        for(IStorage<T> store : this.stores)
+        for(IResourceContainer<T> store : this.stores)
         {
             long quantity = store.getQuantityStored(resource);
             if(quantity > 0)
@@ -379,7 +379,7 @@ public class StorageResourceManager<T extends StorageType<T>>
      */
     public synchronized void addStoragesWithQuantityToBuilder(ImmutableList.Builder<StorageWithResourceAndQuantity<T>> builder)
     {
-        for(IStorage<T> store : this.stores)
+        for(IResourceContainer<T> store : this.stores)
         {
             long quantity = store.getQuantityStored(this.resource);
             if(quantity > 0)

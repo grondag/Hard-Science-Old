@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.storage.jobs.tasks;
+package grondag.hard_science.simulator.jobs.tasks;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,14 +7,14 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.demand.IProducer;
 import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.jobs.Job;
+import grondag.hard_science.simulator.jobs.RequestStatus;
+import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.IResourcePredicateWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.StorageManager;
-import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.simulator.storage.jobs.RequestStatus;
-import grondag.hard_science.simulator.storage.jobs.TaskType;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SimpleProcurementTask<V extends StorageType<V>> extends ProcurementTask<V>

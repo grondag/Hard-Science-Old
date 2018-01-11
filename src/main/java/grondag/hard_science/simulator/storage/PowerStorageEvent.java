@@ -13,20 +13,20 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
 {
     public static final PowerStorageEvent INSTANCE = new PowerStorageEvent();
     
-    public void postBeforeStorageDisconnect(IStorage<StorageTypePower> storage)
+    public void postBeforeStorageDisconnect(IResourceContainer<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new BeforePowerStorageDisconnect(storage));
     }
     
-    public void postAfterStorageConnect(IStorage<StorageTypePower> storage)
+    public void postAfterStorageConnect(IResourceContainer<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterPowerStorageConnect(storage));
     }
     
     public void postStoredUpdate(
-            IStorage<StorageTypePower> storage, 
+            IResourceContainer<StorageTypePower> storage, 
             IResource<StorageTypePower> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypePower> request)
@@ -41,7 +41,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     }
     
     public void postAvailableUpdate(
-            IStorage<StorageTypePower> storage, 
+            IResourceContainer<StorageTypePower> storage, 
             IResource<StorageTypePower> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypePower> request)
@@ -55,7 +55,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
                     request));
     }
     
-    public void postCapacityChange(IStorage<StorageTypePower> storage, long delta)
+    public void postCapacityChange(IResourceContainer<StorageTypePower> storage, long delta)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new PowerCapacityChange(storage, delta));
@@ -63,7 +63,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     
     public static class BeforePowerStorageDisconnect extends StorageNotification<StorageTypePower>
     {
-        private BeforePowerStorageDisconnect(IStorage<StorageTypePower> storage)
+        private BeforePowerStorageDisconnect(IResourceContainer<StorageTypePower> storage)
         {
             super(storage);
         }
@@ -71,7 +71,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     
     public static class AfterPowerStorageConnect extends StorageNotification<StorageTypePower>
     {
-        private AfterPowerStorageConnect(IStorage<StorageTypePower> storage)
+        private AfterPowerStorageConnect(IResourceContainer<StorageTypePower> storage)
         {
             super(storage);
         }
@@ -79,7 +79,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     
     public static class PowerCapacityChange extends CapacityChange<StorageTypePower>
     {
-        private PowerCapacityChange(IStorage<StorageTypePower> storage, long delta)
+        private PowerCapacityChange(IResourceContainer<StorageTypePower> storage, long delta)
         {
             super(storage, delta);
         }
@@ -91,7 +91,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     public static class PowerStoredUpdate extends ResourceUpdate<StorageTypePower>
     {
         private PowerStoredUpdate(
-                IStorage<StorageTypePower> storage, 
+                IResourceContainer<StorageTypePower> storage, 
                 IResource<StorageTypePower> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypePower> request)
@@ -106,7 +106,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     public static class PowerAvailableUpdate extends ResourceUpdate<StorageTypePower>
     {
         private PowerAvailableUpdate(
-                IStorage<StorageTypePower> storage, 
+                IResourceContainer<StorageTypePower> storage, 
                 IResource<StorageTypePower> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypePower> request)

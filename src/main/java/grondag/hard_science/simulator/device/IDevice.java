@@ -14,9 +14,9 @@ import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.FluidStorage;
-import grondag.hard_science.simulator.storage.ItemStorage;
-import grondag.hard_science.simulator.storage.PowerStorage;
+import grondag.hard_science.simulator.storage.FluidContainer;
+import grondag.hard_science.simulator.storage.ItemContainer;
+import grondag.hard_science.simulator.storage.PowerContainer;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 
 public interface IDevice extends 
@@ -164,7 +164,7 @@ public interface IDevice extends
     /**
      * Implement if device has fluid storage.  Will be null if not.
      */
-    public default FluidStorage fluidStorage() {return null;}
+    public default FluidContainer fluidStorage() {return null;}
     
     /**
      * Convenience for <code>{@link #powerStorage()} != null</code>
@@ -174,7 +174,7 @@ public interface IDevice extends
     /**
      * Implement if device has item storage. Will be null if not.
      */
-    public default ItemStorage itemStorage() {return null;}
+    public default ItemContainer itemStorage() {return null;}
 
     /**
      * Convenience for <code>{@link #powerStorage()} != null</code>
@@ -184,7 +184,7 @@ public interface IDevice extends
     /**
      * Implement if device has power storage. Will be null if not.
      */
-    public default PowerStorage powerStorage() {return null;}
+    public default PowerContainer powerStorage() {return null;}
 
     /**
      * Convenience for <code>{@link #powerStorage()} != null</code>

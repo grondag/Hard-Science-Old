@@ -6,7 +6,9 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -26,8 +28,21 @@ public interface IResourceContainer<T extends StorageType<T>>
     
     long getQuantityStored(@Nonnull IResource<T> resource);
 
-    boolean isResourceAllowed(@Nonnull IResource<T> resource);
+    default boolean isResourceAllowed(@Nonnull IResource<T> resource)
+    {
+        return this.getContentPredicate() == null || this.getContentPredicate().test(resource);
+    }
 
+    /**
+     * If this is a single-resource container, the resource it 
+     * currently contains or is configured to contain.<p>
+     * 
+     * Null for multi-resource containers, or if the container is
+     * empty and has no configured resource.
+     */
+    @Nullable
+    default IResource<T> resource() { return null; }
+    
     default long availableCapacityFor(@Nonnull IResource<T> resource)
     {
         return this.isResourceAllowed(resource) ? this.availableCapacity() : 0;
@@ -37,6 +52,18 @@ public interface IResourceContainer<T extends StorageType<T>>
      * Governs synchronization and thread access restrictions for this container.
      */
     ContainerUsage containerUsage();
+    
+    /**
+     * Implemented for some container types to collect stats
+     * and/or limit rate of input/output.
+     */
+    ThroughputRegulator getRegulator();
+    
+    /**
+     * Used by some container types to collect stats
+     * and/or limit rate of input/output.
+     */
+    void setRegulator(ThroughputRegulator regulator);
     
     /**
      * Increases quantityStored and returns quantityStored actually added.
@@ -135,4 +162,63 @@ public interface IResourceContainer<T extends StorageType<T>>
 
     default void onDisconnect() {}
 
+    public default StorageWithQuantity<T> withQuantity(long quantity)
+    {
+        return new StorageWithQuantity<T>(this, quantity);
+    }
+    
+    public default StorageWithResourceAndQuantity<T> withResourceAndQuantity(IResource<T> resource, long quantity)
+    {
+        return new StorageWithResourceAndQuantity<T>(this, resource, quantity);
+    }
+    
+    /**
+     * Submits privileged execution to service thread and waits.  
+     * For use by in-game user interactions.
+     * Fulfills constraint that all storage interactions must occur
+     * on service thread for that storage type.
+     */
+    public default long addInteractively(
+            @Nonnull IResource<T> resource, 
+            long howMany, 
+            boolean simulate)
+    {
+        try
+        {
+            return this.storageType().service().executor.submit( () ->
+            {
+                return this.add(resource, howMany, simulate, true, null);
+            }, true).get();
+        }
+        catch (Exception e)
+        {
+            Log.error("Error in storage interaction", e);
+            return 0;
+        }
+    }
+    
+    /** Alternate syntax for {@link #addInteractively(IResource, long, boolean)} */
+    default long addInteractively(@Nonnull AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate)
+    {
+        return this.addInteractively(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate);
+    }
+    
+    /**
+     * Setting to a non-null value will configure this
+     * container to accept only resources that match the given predicate.  
+     * Setting to null will remove this constraint.
+     * Container must be empty when set to a non-null value.
+     */
+    public void setContentPredicate(Predicate<IResource<T>> predicate);
+    
+    /**
+     * See {@link #setContentPredicate(Predicate)}
+     */
+    public Predicate<IResource<T>> getContentPredicate();
+    
+    /**
+     * Presents a list of all unique resources in this container, with quantities.
+     * List will not be modifiable.  Useful for implementing IItemHandler.
+     */
+    public List<AbstractResourceWithQuantity<T>> slots();
 }

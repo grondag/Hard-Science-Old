@@ -1,11 +1,11 @@
-package grondag.hard_science.simulator.storage.jobs.tasks;
+package grondag.hard_science.simulator.jobs.tasks;
 
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.storage.jobs.AbstractTask;
-import grondag.hard_science.simulator.storage.jobs.TaskType;
+import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.TaskType;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class BlockFabricationTask extends AbstractTask

@@ -13,20 +13,20 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
 {
     public static final ItemStorageEvent INSTANCE = new ItemStorageEvent();
     
-    public void postBeforeStorageDisconnect(IStorage<StorageTypeStack> storage)
+    public void postBeforeStorageDisconnect(IResourceContainer<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new BeforeItemStorageDisconnect(storage));
     }
     
-    public void postAfterStorageConnect(IStorage<StorageTypeStack> storage)
+    public void postAfterStorageConnect(IResourceContainer<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterItemStorageConnect(storage));
     }
     
     public void postStoredUpdate(
-            IStorage<StorageTypeStack> storage, 
+            IResourceContainer<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypeStack> request)
@@ -41,7 +41,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     }
     
     public void postAvailableUpdate(
-            IStorage<StorageTypeStack> storage, 
+            IResourceContainer<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
             @Nullable IProcurementRequest<StorageTypeStack> request)
@@ -55,7 +55,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
                     request));
     }
     
-    public void postCapacityChange(IStorage<StorageTypeStack> storage, long delta)
+    public void postCapacityChange(IResourceContainer<StorageTypeStack> storage, long delta)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new ItemCapacityChange(storage, delta));
@@ -63,7 +63,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     
     public static class BeforeItemStorageDisconnect extends StorageNotification<StorageTypeStack>
     {
-        private BeforeItemStorageDisconnect(IStorage<StorageTypeStack> storage)
+        private BeforeItemStorageDisconnect(IResourceContainer<StorageTypeStack> storage)
         {
             super(storage);
         }
@@ -71,7 +71,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     
     public static class AfterItemStorageConnect extends StorageNotification<StorageTypeStack>
     {
-        private AfterItemStorageConnect(IStorage<StorageTypeStack> storage)
+        private AfterItemStorageConnect(IResourceContainer<StorageTypeStack> storage)
         {
             super(storage);
         }
@@ -79,7 +79,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     
     public static class ItemCapacityChange extends CapacityChange<StorageTypeStack>
     {
-        private ItemCapacityChange(IStorage<StorageTypeStack> storage, long delta)
+        private ItemCapacityChange(IResourceContainer<StorageTypeStack> storage, long delta)
         {
             super(storage, delta);
         }
@@ -91,7 +91,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     public static class ItemStoredUpdate extends ResourceUpdate<StorageTypeStack>
     {
         private ItemStoredUpdate(
-                IStorage<StorageTypeStack> storage, 
+                IResourceContainer<StorageTypeStack> storage, 
                 IResource<StorageTypeStack> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypeStack> request)
@@ -106,7 +106,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     public static class ItemAvailableUpdate extends ResourceUpdate<StorageTypeStack>
     {
         private ItemAvailableUpdate(
-                IStorage<StorageTypeStack> storage, 
+                IResourceContainer<StorageTypeStack> storage, 
                 IResource<StorageTypeStack> resource, 
                 long delta,
                 @Nullable IProcurementRequest<StorageTypeStack> request)

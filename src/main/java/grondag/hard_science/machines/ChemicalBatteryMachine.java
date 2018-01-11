@@ -8,19 +8,20 @@ import grondag.hard_science.machines.support.BatteryChemistry;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.machines.support.PowerReceiver;
-import grondag.hard_science.simulator.storage.PowerStorage;
+import grondag.hard_science.simulator.storage.ContainerUsage;
+import grondag.hard_science.simulator.storage.PowerContainer;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class ChemicalBatteryMachine extends AbstractSimpleMachine
 {
-    protected final PowerStorage powerStorage;
+    protected final PowerContainer powerStorage;
     
     public ChemicalBatteryMachine()
     {
         super(CarrierLevel.BOTTOM, PortType.CARRIER);
-        this.powerStorage = new PowerStorage(this);
+        this.powerStorage = new PowerContainer(this, ContainerUsage.STORAGE);
         this.powerStorage.configure(775193798450L, BatteryChemistry.SILICON);
     }
 
@@ -74,7 +75,7 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
     }
     
     @Override
-    public PowerStorage powerStorage()
+    public PowerContainer powerStorage()
     {
         return this.powerStorage;
     }

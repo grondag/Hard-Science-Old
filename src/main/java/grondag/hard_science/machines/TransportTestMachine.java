@@ -9,8 +9,9 @@ import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IStorage;
-import grondag.hard_science.simulator.storage.ItemStorage;
+import grondag.hard_science.simulator.storage.ContainerUsage;
+import grondag.hard_science.simulator.storage.IResourceContainer;
+import grondag.hard_science.simulator.storage.ItemContainer;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
@@ -22,12 +23,12 @@ public class TransportTestMachine extends AbstractSimpleMachine
 {
     private final static ItemResource resource = ItemResource.fromStack(Items.BEEF.getDefaultInstance());
     
-    protected final ItemStorage itemStorage;
+    protected final ItemContainer itemStorage;
     
     public TransportTestMachine()
     {
         super(CarrierLevel.BOTTOM, PortType.CARRIER);
-        this.itemStorage = new ItemStorage(this);
+        this.itemStorage = new ItemContainer(this, ContainerUsage.STORAGE);
         this.itemStorage.setCapacity(Integer.MAX_VALUE);
         this.itemStorage.add(resource, Integer.MAX_VALUE, false, null);
     }
@@ -56,11 +57,11 @@ public class TransportTestMachine extends AbstractSimpleMachine
             long avail = this.itemStorage.getQuantityStored(resource);
             if(avail > 0)
             {
-                List<IStorage<StorageTypeStack>> list 
+                List<IResourceContainer<StorageTypeStack>> list 
                     = this.getDomain().itemStorage.findSpaceFor(resource, avail);
                 if(list.isEmpty()) return;
                 
-                for(IStorage<StorageTypeStack> store : list)
+                for(IResourceContainer<StorageTypeStack> store : list)
                 {
                     ImmutableList<Route> routes = 
                             LogisticsService.ITEM_SERVICE.findRoutesNow(this, store.device());
@@ -112,7 +113,7 @@ public class TransportTestMachine extends AbstractSimpleMachine
     }
     
     @Override
-    public ItemStorage itemStorage()
+    public ItemContainer itemStorage()
     {
         return this.itemStorage;
     }

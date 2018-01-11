@@ -21,14 +21,14 @@ import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
 import grondag.hard_science.materials.Matter;
 import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.RequestStatus;
+import grondag.hard_science.simulator.jobs.TaskType;
+import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IStorage;
-import grondag.hard_science.simulator.storage.jobs.AbstractTask;
-import grondag.hard_science.simulator.storage.jobs.RequestStatus;
-import grondag.hard_science.simulator.storage.jobs.TaskType;
-import grondag.hard_science.simulator.storage.jobs.tasks.BlockFabricationTask;
+import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -255,7 +255,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         ItemResource res = ItemResource.fromStack(stack);
         
         //TODO: pass in procurement request
-        List<IStorage<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, 1);
+        List<IResourceContainer<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, 1);
         
         if(locations.isEmpty()) return;
         

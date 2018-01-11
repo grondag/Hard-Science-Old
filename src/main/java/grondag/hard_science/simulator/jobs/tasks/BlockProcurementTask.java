@@ -1,11 +1,11 @@
-package grondag.hard_science.simulator.storage.jobs.tasks;
+package grondag.hard_science.simulator.jobs.tasks;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.simulator.storage.jobs.AbstractPositionedStackTask;
-import grondag.hard_science.simulator.storage.jobs.AbstractTask;
-import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.simulator.storage.jobs.TaskType;
+import grondag.hard_science.simulator.jobs.AbstractPositionedStackTask;
+import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.Job;
+import grondag.hard_science.simulator.jobs.TaskType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 

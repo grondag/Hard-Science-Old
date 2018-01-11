@@ -10,7 +10,7 @@ import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
-import grondag.hard_science.simulator.storage.FluidStorage;
+import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -87,7 +87,7 @@ public class ModularTankBlock extends MachineBlock
                 // client won't have the storage instance needed to do this
                 if(mste.getWorld().isRemote) return result;
                 
-                FluidStorage store = mste.machine().fluidStorage();
+                FluidContainer store = mste.machine().fluidStorage();
                 
                 if(store.usedCapacity() == 0) return result;
 

@@ -20,18 +20,18 @@ public interface IStorageAccess<T extends StorageType<T>>
     /**
      * Snapshot of stores currently part of this instance.
      */
-    public ImmutableList<IStorage<T>> stores();
+    public ImmutableList<IResourceContainer<T>> stores();
     
     /**
      * Orders results to encourage clustering of item storage.
      * Stores with the largest count of the resource (but still with empty space)
      * come first, followed by stores with available space in descending order.
      */
-    public default ImmutableList<IStorage<T>> findSpaceFor(IResource<T> resource, long quantity)
+    public default ImmutableList<IResourceContainer<T>> findSpaceFor(IResource<T> resource, long quantity)
     {
         return this.stores().stream()
             .filter(p -> p.availableCapacityFor(resource) > 0)
-            .sorted((IStorage<T> a, IStorage<T>b) 
+            .sorted((IResourceContainer<T> a, IResourceContainer<T>b) 
                     -> ComparisonChain.start()
                         .compare(b.getQuantityStored(resource), a.getQuantityStored(resource))
                         .compare(b.availableCapacityFor(resource), a.availableCapacityFor(resource))
@@ -49,11 +49,11 @@ public interface IStorageAccess<T extends StorageType<T>>
      * Results are sorted with lowest counts first to encourage
      * emptying of small amounts so that items are clustered.
      */
-    public default ImmutableList<IStorage<T>> getLocations(IResource<T> resource)
+    public default ImmutableList<IResourceContainer<T>> getLocations(IResource<T> resource)
     {
         return this.stores().stream()
                 .filter(p -> p.getQuantityStored(resource) > 0)
-                .sorted((IStorage<T> a, IStorage<T>b) 
+                .sorted((IResourceContainer<T> a, IResourceContainer<T>b) 
                         -> Long.compare(a.getQuantityStored(resource), b.getQuantityStored(resource)))
                 .collect(ImmutableList.toImmutableList());
     }
@@ -67,14 +67,14 @@ public interface IStorageAccess<T extends StorageType<T>>
         assert resource.confirmServiceThread() : "Storage action outside service thread.";
         
         if(howMany <= 0) return 0;
-        ImmutableList<IStorage<T>> stores = this.findSpaceFor(resource, howMany);
+        ImmutableList<IResourceContainer<T>> stores = this.findSpaceFor(resource, howMany);
         if(stores.isEmpty()) return 0;
         if(stores.size() == 1) return stores.get(0).add(resource, howMany, simulate, request);
         
         long demand = howMany;
         long result = 0;
         
-        for(IStorage<T> store : stores)
+        for(IResourceContainer<T> store : stores)
         {
             long added = store.add(resource, demand, simulate, request);
             if(added > 0)
@@ -95,14 +95,14 @@ public interface IStorageAccess<T extends StorageType<T>>
         assert resource.confirmServiceThread() : "Storage action outside service thread.";
         
         if(howMany <= 0) return 0;
-        ImmutableList<IStorage<T>> stores = this.getLocations(resource);
+        ImmutableList<IResourceContainer<T>> stores = this.getLocations(resource);
         if(stores.isEmpty()) return 0;
         if(stores.size() == 1) return stores.get(0).takeUpTo(resource, howMany, simulate, request);
         
         long demand = howMany;
         long result = 0;
         
-        for(IStorage<T> store : stores)
+        for(IResourceContainer<T> store : stores)
         {
             long taken = store.takeUpTo(resource, demand, simulate, request);
             if(taken > 0)

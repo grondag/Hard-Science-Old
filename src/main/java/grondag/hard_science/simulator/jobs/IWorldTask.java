@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.storage.jobs;
+package grondag.hard_science.simulator.jobs;
 
 /**
  *  Interface to be supported by all job tasks that require world access.

@@ -32,7 +32,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 public class StorageManager<T extends StorageType<T>> 
     implements ITypedStorage<T>, IDomainMember, ISizedContainer, IStorageAccess<T>
 {
-    protected final HashSet<IStorage<T>> stores = new HashSet<IStorage<T>>();
+    protected final HashSet<IResourceContainer<T>> stores = new HashSet<IResourceContainer<T>>();
     
     protected Domain domain;
     protected final T storageType;
@@ -74,7 +74,7 @@ public class StorageManager<T extends StorageType<T>>
      * to provide better performance in large storage networks. 
      */
     @Override
-    public ImmutableList<IStorage<T>> getLocations(IResource<T> resource)
+    public ImmutableList<IResourceContainer<T>> getLocations(IResource<T> resource)
     {
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
         
@@ -93,7 +93,7 @@ public class StorageManager<T extends StorageType<T>>
         return this.domain;
     }
 
-    protected synchronized void addStore(IStorage<T> store)
+    protected synchronized void addStore(IResourceContainer<T> store)
     {
         assert !stores.contains(store)
             : "Storage manager received request to add store it already has.";
@@ -107,7 +107,7 @@ public class StorageManager<T extends StorageType<T>>
         }
     }
     
-    public synchronized void removeStore(IStorage<T> store)
+    public synchronized void removeStore(IResourceContainer<T> store)
     {
         assert stores.contains(store)
          : "Storage manager received request to remove store it doesn't have.";
@@ -192,7 +192,7 @@ public class StorageManager<T extends StorageType<T>>
      * Read-only snapshot of all stores in the domain.
      */
     @Override
-    public ImmutableList<IStorage<T>> stores()
+    public ImmutableList<IResourceContainer<T>> stores()
     {
         return ImmutableList.copyOf(this.stores);
     }
@@ -213,7 +213,7 @@ public class StorageManager<T extends StorageType<T>>
      * Called by storage instances, or by self when a storage is removed.
      * If request is non-null, then the amount taken reduces any allocation to that request.
      */
-    public synchronized void notifyTaken(IStorage<T> storage, IResource<T> resource, long taken, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyTaken(IResourceContainer<T> storage, IResource<T> resource, long taken, @Nullable IProcurementRequest<T> request)
     {
         if(taken == 0) return;
         
@@ -243,7 +243,7 @@ public class StorageManager<T extends StorageType<T>>
     /**
      * If request is non-null, then the amount added is immediately allocated to that request.
      */
-    public synchronized void notifyAdded(IStorage<T> storage, IResource<T> resource, long added, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyAdded(IResourceContainer<T> storage, IResource<T> resource, long added, @Nullable IProcurementRequest<T> request)
     {
         if(added == 0) return;
 

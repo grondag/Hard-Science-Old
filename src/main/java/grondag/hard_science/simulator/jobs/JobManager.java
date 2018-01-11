@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.storage.jobs;
+package grondag.hard_science.simulator.jobs;
 
 import java.util.LinkedList;
 import java.util.concurrent.Callable;

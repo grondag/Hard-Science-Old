@@ -10,7 +10,7 @@ public class StorageWithResourceAndQuantity<T extends StorageType<T>> extends St
 {
     public final IResource<T> resource;
     
-    public StorageWithResourceAndQuantity(IStorage<T> storage, IResource<T> resource, long quantity)
+    public StorageWithResourceAndQuantity(IResourceContainer<T> storage, IResource<T> resource, long quantity)
     {
         super(storage, quantity);
         this.resource = resource;

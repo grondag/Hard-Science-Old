@@ -9,8 +9,8 @@ import grondag.hard_science.library.world.WorldMap;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.storage.jobs.Job;
-import grondag.hard_science.simulator.storage.jobs.WorldTaskManager;
+import grondag.hard_science.simulator.jobs.Job;
+import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 

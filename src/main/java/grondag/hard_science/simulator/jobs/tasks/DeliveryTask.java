@@ -1,14 +1,14 @@
-package grondag.hard_science.simulator.storage.jobs.tasks;
+package grondag.hard_science.simulator.jobs.tasks;
 
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.StorageManager;
-import grondag.hard_science.simulator.storage.jobs.AbstractTask;
-import grondag.hard_science.simulator.storage.jobs.TaskType;
 
 /**
  * Transports the result of a procurement request to the player
@@ -89,7 +89,7 @@ public class DeliveryTask<V extends StorageType<V>> extends AbstractTask
         {
             long allocation = rwq.getQuantity();
             
-            for(IStorage<V> store : sm.getLocations(rwq.resource()))
+            for(IResourceContainer<V> store : sm.getLocations(rwq.resource()))
             {
                 allocation -= store.takeUpTo(rwq.resource(), allocation, false, this.procurementTask);
                 if(allocation == 0) break;

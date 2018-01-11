@@ -2,7 +2,7 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.simulator.resource.PowerResource;
-import grondag.hard_science.simulator.storage.PowerStorage;
+import grondag.hard_science.simulator.storage.PowerContainer;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -15,7 +15,7 @@ public class Battery extends AbstractPowerComponent
     /**
      * Only populated on server. Null on client.
      */
-    private final PowerStorage powerStorage;
+    private final PowerContainer powerStorage;
     
     /**
      * Only populated on client
@@ -37,7 +37,7 @@ public class Battery extends AbstractPowerComponent
         this.powerStorage = null;
     }
     
-    public Battery(PowerStorage powerStorage)
+    public Battery(PowerContainer powerStorage)
     {
         this.powerStorage = powerStorage;
         this.setMaxOutputJoulesPerTick(this.powerStorage.maxEnergyOutputJoulesPerTick());

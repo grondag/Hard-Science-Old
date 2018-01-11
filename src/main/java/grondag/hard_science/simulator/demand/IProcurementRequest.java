@@ -2,11 +2,11 @@ package grondag.hard_science.simulator.demand;
 
 import java.util.List;
 
+import grondag.hard_science.simulator.jobs.ITask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.IResourcePredicateWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.jobs.ITask;
 
 /**
  * Implement in all resource procurement tasks.  Specifies

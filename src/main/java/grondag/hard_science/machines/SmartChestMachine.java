@@ -1,19 +1,26 @@
 package grondag.hard_science.machines;
 
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
-import grondag.hard_science.simulator.storage.ItemStorage;
+import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.storage.ContainerUsage;
+import grondag.hard_science.simulator.storage.ItemContainer;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SmartChestMachine extends AbstractSimpleMachine
 {
-    protected final ItemStorage itemStorage;
+    protected final ItemContainer itemStorage;
     
     public SmartChestMachine()
     {
         super(CarrierLevel.BOTTOM, PortType.CARRIER);
-        this.itemStorage = new ItemStorage(this);
+        this.itemStorage = new ItemContainer(this, ContainerUsage.STORAGE);
+        this.itemStorage.setContentPredicate( 
+                r -> r != null 
+                && !(((ItemResource)r).getItem() == ModItems.smart_chest 
+                        && ((ItemResource)r).hasTagCompound()));
     }
 
     @Override
@@ -57,7 +64,7 @@ public class SmartChestMachine extends AbstractSimpleMachine
     }
     
     @Override
-    public ItemStorage itemStorage()
+    public ItemContainer itemStorage()
     {
         return this.itemStorage;
     }

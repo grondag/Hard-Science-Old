@@ -8,7 +8,7 @@ import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.storage.IStorage;
+import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -52,7 +52,7 @@ public abstract class MachineStorageBlock extends MachineContainerBlock
                 // if device is somehow missing nothing to do, and would cause NPE to continue
                 if(mste.machine() == null) return result;
                 
-                IStorage<StorageTypeStack> store = mste.machine().itemStorage();
+                IResourceContainer<StorageTypeStack> store = mste.machine().itemStorage();
                 
                 if(store.usedCapacity() == 0) return result;
                 
