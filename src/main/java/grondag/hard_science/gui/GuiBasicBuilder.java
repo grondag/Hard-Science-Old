@@ -12,7 +12,7 @@ import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.BlockFabricatorMachine;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
+import grondag.hard_science.machines.support.DeviceEnergyInfo;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -44,7 +44,7 @@ public class GuiBasicBuilder extends AbstractSimpleGui<BlockFabricatorTileEntity
 
         mainPanel.add(sizeControl(mainPanel, new MachineFabricationProgressGauge(te, RenderBounds.BOUNDS_PROGRESS), RenderBounds.BOUNDS_PROGRESS));
         
-        MachinePowerSupplyInfo ps = te.clientState().powerSupplyInfo;
+        DeviceEnergyInfo ps = te.clientState().powerSupplyInfo;
         
         if(ps != null)
         {

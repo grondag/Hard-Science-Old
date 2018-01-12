@@ -1,26 +1,62 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.simulator.storage.PowerContainer;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
- * Power supplies have up to three components:<br><br>
+ * Power supplies have components that occur in the following 
+ * combinations:<p>
+ * <li>Battery - power storage devices</li>
+ * <li>Input Buffer - power consuming devices</li>
+ * <li>Generator, Output Buffer - power producing devices</li>
+ * <li>Input Buffer, Generator, Output Buffer - power consuming devices
+ * that contain an integrated generator</li><p>
  * 
- * Fuel cell - to generate power at a fixed rate.<br>
- * Battery - to store power and efficiently satisfy variable demand. <br>
- * Power Receiver - to receive external power if it is available. <br>
+ * Input buffer - necessary if this device consumes
+ * power. Device draws power from the buffer during
+ * the device tick.  Power is replenished from the
+ * local output buffer (if there is one) or from other
+ * output buffers or batteries on the power network if
+ * the device is connected and local output is unavailable.<p>
  * 
- * @author grondag
- *
+ * Generator - a fuel cell, PE cell, or other component
+ * within the device that can generate energy. If present,
+ * power supply must have an output buffer to accept the
+ * generated energy during the device tick.<p>
+ * 
+ * Output buffer - necessary if this device houses any
+ * kind of generator.  Accepts generated energy during the
+ * device tick. Tasks on the power service thread will then
+ * redistribute the energy as needed, either locally within
+ * the device (if it has an input buffer) or within the power 
+ * storage network if the device is connected and demand exists.<p>
+ * 
+ * Battery - Will only be present if this device <em>is</em> a battery
+ * and that is the only function it serves. In that case, the battery
+ * will be the only power component in the device/power supply.
+ * All transfers in and out will happen on the power service thread.
+ * Any device that consumes or generates power will use input and/or
+ * output buffer(s) instead of a battery so that device operations 
+ * can complete during device tick without waiting for the service thread.<p>
+ * 
+ * GENERAL NOTES<p>
+ * 
+ * All stored energy is represented in Joules (aka Watt-seconds).<br>
+ * All power input/output represents as Watts.<p>
+ * 
+ * Why not use IEnergyStorage or similar?<br>
+ * 1) Explicitly want to use standard power/energy units. (watts/joules) <br>
+ * 2) Want to support larger quanities (long vs int) <br>
+ * 3) Want ability to reject partial input/output
  */
-public class MachinePowerSupply implements IMachinePowerProvider
+public class DeviceEnergyManager implements IReadWriteNBT
 {
     private FuelCell fuelCell;
     private PowerContainer battery;
-    private PowerReceiver powerReceiver; 
     
     /**
      * Set to true if this provider's (low) level has recently caused a 
@@ -34,71 +70,123 @@ public class MachinePowerSupply implements IMachinePowerProvider
     
     private float powerOutputWatts;
 
-    public MachinePowerSupply(FuelCell fuelCell, PowerContainer battery, PowerReceiver powerReceiver)
+    public DeviceEnergyManager(FuelCell fuelCell, PowerContainer battery)
     {
         super();
         this.fuelCell = fuelCell;
         this.battery = battery;
-        this.powerReceiver = powerReceiver;
         
         this.maxPowerOutputWatts = 
                   (fuelCell == null ? 0 : fuelCell.maxPowerOutputWatts())
-                + (battery == null ? 0 : battery.maxPowerOutputWatts())
-                + (powerReceiver == null ? 0 : powerReceiver.maxPowerOutputWatts());      
+                + (battery == null ? 0 : battery.maxPowerOutputWatts());      
         
         this.maxEnergyOutputPerTick = 
                 (fuelCell == null ? 0 : fuelCell.maxEnergyOutputJoulesPerTick())
-              + (battery == null ? 0 : battery.maxEnergyOutputJoulesPerTick())
-              + (powerReceiver == null ? 0 : powerReceiver.maxEnergyOutputJoulesPerTick());  
+              + (battery == null ? 0 : battery.maxEnergyOutputJoulesPerTick());  
     }
  
     public FuelCell fuelCell() { return this.fuelCell; }
     public PowerContainer battery() { return this.battery; };
-    public PowerReceiver powerReceiver() { return this.powerReceiver; }; 
  
-    @Override
+    /**
+     * True if provider is actually able to provide power right now.
+     * If false, any attempt to extract power will receive a zero result.
+     */
     public boolean canProvideEnergy(AbstractMachine machine)
     {
-        return      (this.powerReceiver != null && this.powerReceiver.canProvideEnergy(machine)) 
-                ||  (this.fuelCell != null && this.fuelCell.canProvideEnergy(machine))
+        return      (this.fuelCell != null && this.fuelCell.canProvideEnergy(machine))
                 ||  (this.battery != null && this.battery.canProvideEnergy(machine));
     }
     
-    @Override
+    /**
+     * Recent energy consumption level. In watts. Does not include power used to charge the battery.
+     */
     public float powerOutputWatts()
     {
         return this.powerOutputWatts;
     }
 
-    @Override
+    /**
+     * 
+     * TODO: Add an optional per-machine limit so that display make sense?
+     * For example, why show max at 2000W if machine can only use 20W?
+     * 
+     * Highest possible continuous rate of power draw from this power
+     * supply for use within the local device.  Peak rate from the
+     * input buffer could be somewhat higher.  Limited by the following:
+     * <li>Input buffer max output
+     * <li>Fuel cell max output - if has local generator and not connected to power
+     * <li>Power network max draw - if connected to power network
+     * </li>
+     */
     public float maxPowerOutputWatts()
     {
         return this.maxPowerOutputWatts;
     }
 
-    @Override
+    /**
+     * Max discrete energy output per tick implied by {@link #maxPowerOutputWatts()}
+     * Effective limit for {@link #provideEnergy(long, boolean, boolean)}.  In joules.
+     */
     public long maxEnergyOutputPerTick()
     {
         return this.maxEnergyOutputPerTick;
     }
   
-    @Override
+    /**
+     * True if power manager is able to receive power right now.
+     * Will always be false for fuel cells or other closed providers.
+     * If false, any attempt to input power will receive a zero result.
+     */
     public boolean canAcceptEnergy()
     {
         return this.battery != null && this.battery.canAcceptEnergy();
     }
 
-    @Override
+    /**
+     * Adds energy to this provider. 
+     * 
+     * While conceptually this is power, is handled as energy due to the
+     * quantized nature of time in Minecraft. Intended to be called each tick.<br><br>
+     *
+     * @param maxInput
+     *            Maximum amount of energy to be inserted, in joules.<br>
+     *            Limited by {@link #maxEnergyInputPerTick()}.
+     *            
+     * @param allowPartial
+     *            If false, no energy will be input unless the entire requested amount can be accepted.
+     *            
+     * @param simulate
+     *            If true, result will be simulated and no state change occurs.
+     *            
+     * @return Energy accepted (or that would have been have been accepted, if simulated) in joules.
+     */
     public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
     {
         return this.battery.acceptEnergy(maxInput, allowPartial, simulate);
     }
    
     /**
+     * Consumes energy from this provider.<p>
+     * 
+     * While conceptually this is power, is handled as energy due to the
+     * quantized nature of time in Minecraft. Intended to be called each tick.<p>
+     *
      * Tries to draw power from grid start (if available), then from fuel cell, then from battery.
-     * Will combine output from multiple sources if necessary.
+     * Will combine output from multiple sources if necessary.<p>
+     * 
+     * @param maxOutput
+     *            Maximum amount of energy to be extracted, in joules.<br>
+     *            Limited by {@link #maxEnergyOutputPerTick()}.
+     *            
+     * @param allowPartial
+     *            If false, no energy will be extracted unless the entire requested amount can be provided.
+     *            
+     * @param simulate
+     *            If true, result will be simulated and no state change occurs.
+     *            
+     * @return Energy extracted (or that would have been have been extracted, if simulated) in joules.
      */
-    @Override
     public long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate)
     {
         // prevent shenannigans/derpage
@@ -126,115 +214,53 @@ public class MachinePowerSupply implements IMachinePowerProvider
     
     private long provideEnergyInner(AbstractMachine machine, long maxOutput, boolean simulate)
     {
-        long result = this.powerReceiver == null ? 0 : this.powerReceiver.provideEnergy(machine, maxOutput, true, simulate);
+        long result = this.fuelCell == null ? 0 : this.fuelCell.provideEnergy(machine, maxOutput, true, simulate);
         
-        if(result < maxOutput)
+        if(result < maxOutput && this.battery != null)
         {
-            result += this.fuelCell == null ? 0 : this.fuelCell.provideEnergy(machine, maxOutput - result, true, simulate);
-            
-            if(result < maxOutput && this.battery != null)
-            {
-                result += this.battery.provideEnergy(machine, maxOutput - result, true, simulate);
-            }
+            result += this.battery.provideEnergy(machine, maxOutput - result, true, simulate);
         }
         
         return result;        
     }
     
-    @Override
+    /**
+     * True if this provider's (low) level has recently caused a 
+     * processing failure.  Sent to clients for rendering to inform player
+     * but not saved to world because is transient information.
+     */
     public boolean isFailureCause()
     {
         return isFailureCause;
     }
 
-    @Override
+    /**
+     * See {@link #isFailureCause()}
+     */
     public void setFailureCause(boolean isFailureCause)
     {
         this.isFailureCause = isFailureCause;
     }
-    
-  //FIXME: remove cruft
-    
-//    private static boolean didWarnBadPacket = false;
-//
-//    @Override
-//    public int logAvgPowerInputDegrees()
-//    {
-//        return this.avgPowerInputDegrees;
-//    }
-
-//    @Override
-//    public int avgPowerOutputDegress()
-//    {
-//        return this.avgPowerOutputDegrees;
-//    }
-//    
-//    @Override
-//    public void deserializeFromArray(int[] bits)
-//    {
-//        if((bits == null || bits.length != 6))
-//        {
-//            if(!didWarnBadPacket)
-//            {
-//                Log.warn("Unable to deserialize power buffer on client - malformed packet. Machine power state may be woogy.");
-//                didWarnBadPacket = true;
-//            }
-//            return;
-//        }
-//  
-//        // sign on start long word is used to store failure indicator
-//        this.isFailureCause = (Useful.INT_SIGN_BIT & bits[0]) == Useful.INT_SIGN_BIT;
-//
-//        this.storedEnergyJoules = ((long)(Useful.INT_SIGN_BIT_INVERSE & bits[0])) << 32 | (bits[1] & 0xffffffffL);
-//        this.avgInputLastSamplePeriod = ((long)bits[2]) << 32 | (bits[3] & 0xffffffffL);
-//        this.avgOutputLastSamplePeriod = ((long)bits[4]) << 32 | (bits[5] & 0xffffffffL);
-//        this.avgPowerGainLoss = this.avgInputLastSamplePeriod - this.avgOutputLastSamplePeriod;
-//        
-//        this.avgPowerInputDegrees = (int) (this.avgInputLastSamplePeriod <= 0 ? 0 : Math.max(1, this.avgInputLastSamplePeriod * 180 / this.maxPowerInOrOutWatts()));
-//        this.avgPowerOutputDegrees = (int) (this.avgOutputLastSamplePeriod <= 0 ? 0 : Math.max(1, this.avgOutputLastSamplePeriod * 180 / this.maxPowerInOrOutWatts()));
-//     
-//        // clear client cached formated values
-//        this.formatedAvailableEnergyJoules = null;
-//        this.formattedAvgNetPowerGainLoss = null;
-//    }
-//
-//    @Override
-//    public int[] serializeToArray()
-//    {
-//        int[] result = new int[6];
-//
-//        // sign on start long word is used to store failure indicator
-//        result[0] = (int) (this.isFailureCause ? this.storedEnergyJoules >> 32 | Useful.INT_SIGN_BIT : this.storedEnergyJoules >> 32);
-//        result[1] = (int) (this.storedEnergyJoules);
-//
-//        result[2] = (int) (avgInputLastSamplePeriod >> 32);
-//        result[3] = (int) (avgInputLastSamplePeriod);
-//        
-//        result[4] = (int) (avgOutputLastSamplePeriod >> 32);
-//        result[5] = (int) (avgOutputLastSamplePeriod);
-//        
-//        return result;
-//    }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.fuelCell = tag.hasKey(ModNBTTag.MACHINE_FUEL_CELL_PLATE_SIZE) ? new PolyethyleneFuelCell(tag) : null;
-        //FIXME: probably not going to work like this
-        if(this.battery != null) this.battery.deserializeNBT(tag);
-//        this.battery = tag.hasKey(ModNBTTag.MACHINE_BATTERY_MAX_STORED_JOULES) ? new Battery(tag) : null;
-        this.powerReceiver = tag.hasKey(ModNBTTag.MACHINE_POWER_RECEIVER_MAX_JOULES) ? new PowerReceiver(tag) : null;
+        //FIXME: move serialization back to here? or remove
+//        if(this.battery != null) this.battery.deserializeNBT(tag);
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
         if(this.fuelCell != null) this.fuelCell.serializeNBT(tag);
-        if(this.battery != null) this.battery.serializeNBT(tag);
-        if(this.powerReceiver != null) this.powerReceiver.serializeNBT(tag);
+//        if(this.battery != null) this.battery.serializeNBT(tag);
     }
 
-    @Override
+    /**
+     * On server, regenerates power from PE and handles other housekeeping.
+     * Returns true if internal state was modified and should be sent to client and/or persisted.
+     */
     public boolean tick(AbstractMachine machine, long tick)
     {
         boolean didChange = false;
@@ -252,19 +278,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
                 
                 if(joulesNeeded > 0)
                 {
-                    if(this.powerReceiver != null)
-                    {
-                        long joulesAvailable = this.powerReceiver.provideEnergy(machine, joulesNeeded, true, false);
-                        if(joulesAvailable > 0)
-                        {
-                            didChange = true;
-                            if(this.battery.acceptEnergy(joulesAvailable, true, false) != joulesAvailable && Log.DEBUG_MODE)
-                            {
-                                Log.info("Battery energy acceptance mismatch during recharging. This is a bug.  Some energy was lost.");
-                            }
-                            joulesNeeded = this.battery.acceptEnergy(this.battery.maxEnergyInputJoulesPerTick(), true, true);
-                        }
-                    }
+                    //TODO: transfer energy in here
                     
                     if(joulesNeeded > 0 && this.fuelCell != null)
                     {
@@ -295,12 +309,6 @@ public class MachinePowerSupply implements IMachinePowerProvider
             {
                 this.fuelCell.advanceIOTracking();
                 powerLastTick += this.fuelCell.powerOutputWatts();
-            }
-            
-            if(this.powerReceiver != null)
-            {
-                this.powerReceiver.advanceIOTracking();
-                powerLastTick += this.powerReceiver.powerOutputWatts();
             }
             
             this.powerOutputWatts = powerLastTick;

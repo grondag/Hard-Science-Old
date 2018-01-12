@@ -7,14 +7,13 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
-import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.machines.support.DeviceEnergyManager;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.DemandManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.machines.support.MaterialBufferManager.VolumetricBufferSpec;
 import grondag.hard_science.machines.support.MatterUnits;
 import grondag.hard_science.machines.support.PolyethyleneFuelCell;
-import grondag.hard_science.machines.support.PowerReceiver;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
@@ -148,12 +147,11 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     }
 
     @Override
-    protected MachinePowerSupply createPowerSuppy()
+    protected DeviceEnergyManager createPowerSuppy()
     {
-        return new MachinePowerSupply(
+        return new DeviceEnergyManager(
                 PolyethyleneFuelCell.BASIC_1KW, 
-                this.powerStorage(), 
-                new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
+                this.powerStorage());
     }
     
     public BlockFabricationTask task()

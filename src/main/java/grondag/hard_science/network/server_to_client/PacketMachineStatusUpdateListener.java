@@ -2,8 +2,8 @@ package grondag.hard_science.network.server_to_client;
 
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineControlState;
-import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
-import grondag.hard_science.machines.support.MachinePowerSupplyStatus;
+import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import net.minecraft.client.Minecraft;
@@ -18,8 +18,8 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     public MachineControlState controlState;
     public long[] materialBufferData;
     public MachineStatusState statusState;
-    public MachinePowerSupplyInfo powerSupplyInfo;
-    public MachinePowerSupplyStatus powerSupplyStatus;
+    public DeviceEnergyInfo powerSupplyInfo;
+    public DeviceEnergyStatus powerSupplyStatus;
     public String machineName;
     
     public PacketMachineStatusUpdateListener() {}
@@ -35,8 +35,8 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         
         if(this.controlState.hasPowerSupply())
         {
-            this.powerSupplyInfo = new MachinePowerSupplyInfo(te.machine().getPowerSupply());
-            this.powerSupplyStatus = new MachinePowerSupplyStatus(te.machine().getPowerSupply());
+            this.powerSupplyInfo = new DeviceEnergyInfo(te.machine().getPowerSupply());
+            this.powerSupplyStatus = new DeviceEnergyStatus(te.machine().getPowerSupply());
         }
         
         this.machineName = te.machine().machineName();
@@ -62,9 +62,9 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         }
         if(this.controlState.hasPowerSupply()) 
         {
-            this.powerSupplyInfo = new MachinePowerSupplyInfo();
+            this.powerSupplyInfo = new DeviceEnergyInfo();
             this.powerSupplyInfo.fromBytes(pBuff);
-            this.powerSupplyStatus = new MachinePowerSupplyStatus();
+            this.powerSupplyStatus = new DeviceEnergyStatus();
             this.powerSupplyStatus.fromBytes(pBuff);
         }
         this.machineName = pBuff.readString(8);

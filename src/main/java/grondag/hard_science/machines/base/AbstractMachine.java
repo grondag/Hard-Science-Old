@@ -6,7 +6,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
-import grondag.hard_science.machines.support.MachinePowerSupply;
+import grondag.hard_science.machines.support.DeviceEnergyManager;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
@@ -35,7 +35,7 @@ public abstract class AbstractMachine extends AbstractDevice
      * Power provider for this machine, if it has one.
      */
     @Nullable
-    private MachinePowerSupply powerSupply;
+    private DeviceEnergyManager powerSupply;
     
     /**
      * Set to PolyEthylene buffer in subclass constructor if this machine uses PE.  
@@ -79,7 +79,7 @@ public abstract class AbstractMachine extends AbstractDevice
      * If this machine has a power provider, gives access.  Null if not.
      * Used to serialize/deserialize on client.
      */
-    public final @Nullable MachinePowerSupply getPowerSupply()
+    public final @Nullable DeviceEnergyManager getPowerSupply()
     {
         return this.powerSupply;
     }
@@ -88,7 +88,7 @@ public abstract class AbstractMachine extends AbstractDevice
      * If this machine has a power supply, used to create a new instance.
      * May be used on client to obtain a client-side version.
      */
-    protected @Nullable MachinePowerSupply createPowerSuppy()
+    protected @Nullable DeviceEnergyManager createPowerSuppy()
     {
         return null;
     }

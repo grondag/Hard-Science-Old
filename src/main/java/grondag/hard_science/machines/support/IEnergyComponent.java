@@ -3,13 +3,8 @@ package grondag.hard_science.machines.support;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.machines.base.AbstractMachine;
 
-public interface IPowerComponent extends IReadWriteNBT
+public interface IEnergyComponent extends IReadWriteNBT
 {
-    /**
-     * Governs display and informs interpretation of other attributes
-     */
-    public EnergyComponentType componentType();
-    
     /**
      * If this component can store energy, the current stored energy.
      * Always zero if component cannot store energy.

@@ -3,7 +3,7 @@ package grondag.hard_science.machines.support;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.AbstractMachine;
 
-public abstract class AbstractPowerComponent implements IPowerComponent
+public abstract class AbstractPowerComponent implements IEnergyComponent
 {
     /**
      * Set by subclasses via {@link #setMaxOutputJoulesPerTick(long)}

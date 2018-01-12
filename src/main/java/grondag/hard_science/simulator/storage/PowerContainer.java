@@ -4,8 +4,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.support.BatteryChemistry;
-import grondag.hard_science.machines.support.EnergyComponentType;
-import grondag.hard_science.machines.support.IPowerComponent;
+import grondag.hard_science.machines.support.IEnergyComponent;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.PowerResource;
@@ -13,7 +12,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class PowerContainer extends ResourceContainer<StorageTypePower> implements IPowerComponent
+public class PowerContainer extends ResourceContainer<StorageTypePower> implements IEnergyComponent
 {
     private BatteryChemistry chemistry;
     
@@ -95,12 +94,6 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     public long maxEnergyOutputJoulesPerTick()
     {
         return this.getRegulator().maxOutputPerTick();
-    }
-    
-    @Override
-    public EnergyComponentType componentType()
-    {
-        return EnergyComponentType.STORAGE;
     }
 
     /**

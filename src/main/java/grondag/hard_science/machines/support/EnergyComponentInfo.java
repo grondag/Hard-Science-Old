@@ -9,34 +9,27 @@ import net.minecraft.network.PacketBuffer;
 public class EnergyComponentInfo implements IMessagePlus
 {
     /**
-     * See {@link IPowerComponent#componentType()}
-     */
-    public EnergyComponentType componentType() { return this.componentType; }
-    private EnergyComponentType componentType;
-    
-    /**
-     * See {@link IPowerComponent#maxStoredEnergyJoules()}
+     * See {@link IEnergyComponent#maxStoredEnergyJoules()}
      */
     public long maxStoredEnergyJoules() { return this.maxStoredEnergyJoules; }
     private long maxStoredEnergyJoules;
     
     /**
-     * See {@link IPowerComponent#maxPowerInputWatts()}
+     * See {@link IEnergyComponent#maxPowerInputWatts()}
      */
     public float maxPowerInputWatts() { return this.maxPowerInputWatts; }
     private float maxPowerInputWatts;
     
     /**
-     * See {@link IPowerComponent#maxPowerOutputWatts()}
+     * See {@link IEnergyComponent#maxPowerOutputWatts()}
      */
     public float maxPowerOutputWatts() { return this.maxPowerOutputWatts; }
     private float maxPowerOutputWatts;
     
     public EnergyComponentInfo() {}
     
-    public EnergyComponentInfo(IPowerComponent from)
+    public EnergyComponentInfo(IEnergyComponent from)
     {
-        this.componentType = from.componentType();
         this.maxStoredEnergyJoules = from.maxStoredEnergyJoules();
         this.maxPowerInputWatts = from.maxPowerInputWatts();
         this.maxPowerOutputWatts = from.maxPowerOutputWatts();
@@ -45,7 +38,6 @@ public class EnergyComponentInfo implements IMessagePlus
     @Override
     public void fromBytes(PacketBuffer pBuff)
     {
-        this.componentType = pBuff.readEnumValue(EnergyComponentType.class);
         this.maxStoredEnergyJoules = pBuff.readVarLong();
         this.maxPowerInputWatts = pBuff.readFloat();
         this.maxPowerOutputWatts = pBuff.readFloat();
@@ -54,7 +46,6 @@ public class EnergyComponentInfo implements IMessagePlus
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
-        pBuff.writeEnumValue(this.componentType);
         pBuff.writeVarLong(this.maxStoredEnergyJoules);
         pBuff.writeFloat(this.maxPowerInputWatts);
         pBuff.writeFloat(this.maxPowerOutputWatts);        

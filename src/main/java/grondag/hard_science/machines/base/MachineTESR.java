@@ -6,8 +6,8 @@ import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
-import grondag.hard_science.machines.support.MachinePowerSupplyStatus;
+import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -96,10 +96,10 @@ public class MachineTESR extends SuperBlockTESR
             MachineControlRenderer.renderRedstoneControl(mte, tessellator, buffer, RenderBounds.BOUNDS_REDSTONE, displayAlpha);
         }
         
-        MachinePowerSupplyInfo mpi = mte.clientState().powerSupplyInfo;
+        DeviceEnergyInfo mpi = mte.clientState().powerSupplyInfo;
         if(mpi != null)
         {
-            MachinePowerSupplyStatus mps = mte.clientState().powerSupplyStatus;
+            DeviceEnergyStatus mps = mte.clientState().powerSupplyStatus;
             if(mps != null)
             {
                 MachineControlRenderer.renderPower(tessellator, buffer, RenderBounds.BOUNDS_POWER_0, mpi, mps, displayAlpha);

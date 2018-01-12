@@ -6,7 +6,7 @@ import net.minecraft.network.PacketBuffer;
 /**
  * Snapshot of dynamic energy component descriptive information for display on client.
  */
-public class MachinePowerSupplyStatus implements IMessagePlus
+public class DeviceEnergyStatus implements IMessagePlus
 {
     private boolean isFailureCause;
     private float powerOutputWatts;
@@ -15,9 +15,9 @@ public class MachinePowerSupplyStatus implements IMessagePlus
     // currently not used
 //    private EnergyComponentStatus powerReceiver;
 
-    public MachinePowerSupplyStatus() { }
+    public DeviceEnergyStatus() { }
     
-    public MachinePowerSupplyStatus(MachinePowerSupply powerSupply)
+    public DeviceEnergyStatus(DeviceEnergyManager powerSupply)
     {
         this.isFailureCause = powerSupply.isFailureCause();
         this.powerOutputWatts = powerSupply.powerOutputWatts();

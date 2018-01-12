@@ -4,9 +4,7 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.support.BatteryChemistry;
-import grondag.hard_science.machines.support.MachinePower;
-import grondag.hard_science.machines.support.MachinePowerSupply;
-import grondag.hard_science.machines.support.PowerReceiver;
+import grondag.hard_science.machines.support.DeviceEnergyManager;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.PowerContainer;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
@@ -25,12 +23,11 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
     }
 
     @Override
-    protected @Nullable MachinePowerSupply createPowerSuppy()
+    protected @Nullable DeviceEnergyManager createPowerSuppy()
     {
-        return new MachinePowerSupply(
+        return new DeviceEnergyManager(
                 null, 
-                this.powerStorage, 
-                new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
+                this.powerStorage);
     }
     
     @Override

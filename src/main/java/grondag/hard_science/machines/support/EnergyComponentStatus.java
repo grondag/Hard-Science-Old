@@ -9,27 +9,27 @@ import net.minecraft.network.PacketBuffer;
 public class EnergyComponentStatus implements IMessagePlus
 {
     /**
-     * See #IPowerComponent{@link #storedEnergyJoules}
+     * See #IEnergyComponent{@link #storedEnergyJoules}
      */
     public long storedEnergyJoules() { return this.storedEnergyJoules; }
     private long storedEnergyJoules;
     
     
     /**
-     * See #IPowerComponent{@link #powerInputWatts}
+     * See #IEnergyComponent{@link #powerInputWatts}
      */
     public float powerInputWatts() { return this.powerInputWatts; }
     private float powerInputWatts;
     
     /**
-     * See {@link IPowerComponent#powerOutputWatts()}
+     * See {@link IEnergyComponent#powerOutputWatts()}
      */
     public float powerOutputWatts() { return this.powerOutputWatts; }
     private float powerOutputWatts;
     
     public EnergyComponentStatus() {}
         
-    public EnergyComponentStatus(IPowerComponent from)
+    public EnergyComponentStatus(IEnergyComponent from)
     {
         this.storedEnergyJoules = from.storedEnergyJoules();
         this.powerInputWatts = from.powerInputWatts();

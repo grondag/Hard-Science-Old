@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
-import grondag.hard_science.machines.support.MachinePowerSupplyStatus;
+import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
@@ -21,7 +21,7 @@ public class MachineBattery extends AbstractMachineControl<MachineBattery, Radia
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachinePowerSupplyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
+        DeviceEnergyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
         if(mps != null && mps.hasBattery())
         {
             ArrayList<String> list = new ArrayList<String>(3);
@@ -33,10 +33,10 @@ public class MachineBattery extends AbstractMachineControl<MachineBattery, Radia
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachinePowerSupplyInfo mpi = this.tileEntity.clientState().powerSupplyInfo;
+        DeviceEnergyInfo mpi = this.tileEntity.clientState().powerSupplyInfo;
         if(mpi != null)
         {
-            MachinePowerSupplyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
+            DeviceEnergyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
             if(mps != null && mps.hasBattery())
             {
                 MachineControlRenderer.renderBattery(this.renderBounds, mpi, mps, 0xFF);

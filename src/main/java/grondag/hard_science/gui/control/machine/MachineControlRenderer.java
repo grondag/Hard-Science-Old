@@ -24,8 +24,8 @@ import grondag.hard_science.machines.support.EnergyComponentStatus;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
-import grondag.hard_science.machines.support.MachinePowerSupplyInfo;
-import grondag.hard_science.machines.support.MachinePowerSupplyStatus;
+import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.machines.support.VolumeUnits;
@@ -741,8 +741,8 @@ public class MachineControlRenderer
     
     public static void renderPower(
             RadialRenderBounds bounds, 
-            MachinePowerSupplyInfo mpi,
-            MachinePowerSupplyStatus mps,
+            DeviceEnergyInfo mpi,
+            DeviceEnergyStatus mps,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -753,8 +753,8 @@ public class MachineControlRenderer
             Tessellator tessellator, 
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
-            MachinePowerSupplyInfo mpi,
-            MachinePowerSupplyStatus mps,
+            DeviceEnergyInfo mpi,
+            DeviceEnergyStatus mps,
             final int alpha)
     {
      
@@ -786,8 +786,8 @@ public class MachineControlRenderer
     
     public static void renderFuelCell(
             RadialRenderBounds bounds, 
-            @Nonnull MachinePowerSupplyInfo mpi,
-            @Nonnull MachinePowerSupplyStatus mps,
+            @Nonnull DeviceEnergyInfo mpi,
+            @Nonnull DeviceEnergyStatus mps,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -798,8 +798,8 @@ public class MachineControlRenderer
             Tessellator tessellator, 
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
-            @Nonnull MachinePowerSupplyInfo mpi,
-            @Nonnull MachinePowerSupplyStatus mps,
+            @Nonnull DeviceEnergyInfo mpi,
+            @Nonnull DeviceEnergyStatus mps,
             final int alpha)
     {
      
@@ -832,8 +832,8 @@ public class MachineControlRenderer
     
     public static void renderBattery(
             RadialRenderBounds bounds, 
-            @Nonnull MachinePowerSupplyInfo mpi,
-            @Nonnull MachinePowerSupplyStatus mps,
+            @Nonnull DeviceEnergyInfo mpi,
+            @Nonnull DeviceEnergyStatus mps,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -850,8 +850,8 @@ public class MachineControlRenderer
             Tessellator tessellator, 
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
-            @Nonnull MachinePowerSupplyInfo xmpi,
-            @Nonnull MachinePowerSupplyStatus xmps,
+            @Nonnull DeviceEnergyInfo xmpi,
+            @Nonnull DeviceEnergyStatus xmps,
             final int alpha)
     {
      
