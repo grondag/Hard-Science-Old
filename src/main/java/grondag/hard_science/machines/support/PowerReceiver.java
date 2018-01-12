@@ -37,11 +37,11 @@ public class PowerReceiver extends AbstractPowerComponent
         return this.powerOutputWatts();
     }
 
-//    @Override
-//    public long energyInputCurrentTickJoules()
-//    {
-//        return this.energyOutputCurrentTickJoules();
-//    }
+    @Override
+    public long energyInputLastTickJoules()
+    {
+        return this.energyOutputLastTickJoules();
+    }
 
     @Override
     public long maxEnergyInputJoulesPerTick()
@@ -66,5 +66,17 @@ public class PowerReceiver extends AbstractPowerComponent
     {
         // TODO: once power networks exist, need to actually draw power from them...
         return maxOutput;
+    }
+
+    @Override
+    public boolean canAcceptEnergy()
+    {
+        return false;
+    }
+
+    @Override
+    public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
+    {
+        return 0;
     }
 }

@@ -3,6 +3,7 @@ package grondag.hard_science.machines.support;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.simulator.storage.PowerContainer;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -18,7 +19,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class MachinePowerSupply implements IMachinePowerProvider
 {
     private FuelCell fuelCell;
-    private Battery battery;
+    private PowerContainer battery;
     private PowerReceiver powerReceiver; 
     
     /**
@@ -33,7 +34,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
     
     private float powerOutputWatts;
 
-    public MachinePowerSupply(FuelCell fuelCell, Battery battery, PowerReceiver powerReceiver)
+    public MachinePowerSupply(FuelCell fuelCell, PowerContainer battery, PowerReceiver powerReceiver)
     {
         super();
         this.fuelCell = fuelCell;
@@ -52,7 +53,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
     }
  
     public FuelCell fuelCell() { return this.fuelCell; }
-    public Battery battery() { return this.battery; };
+    public PowerContainer battery() { return this.battery; };
     public PowerReceiver powerReceiver() { return this.powerReceiver; }; 
  
     @Override
@@ -286,7 +287,6 @@ public class MachinePowerSupply implements IMachinePowerProvider
             
             if(this.battery != null)
             {
-                this.battery.advanceIOTracking();
                 powerLastTick += this.battery.powerOutputWatts();
                 powerLastTick -= this.battery.powerInputWatts();
             }

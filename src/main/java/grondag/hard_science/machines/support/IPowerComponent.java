@@ -35,13 +35,15 @@ public interface IPowerComponent extends IReadWriteNBT
      * 
      * If the component is a generator, will always be zero.
      */
-    public float powerInputWatts();
+    public default float powerInputWatts()
+    {
+        return this.energyInputLastTickJoules() * TimeUnits.TICKS_PER_SIMULATED_SECOND;
+    }
    
-    // Currently not used
-//    /**
-//     * Running total of energy input in the current tick.
-//     */
-//    public long energyInputCurrentTickJoules();
+    /**
+     * Total energy input in the last complete tick.
+     */
+    public long energyInputLastTickJoules();
 
     /**
      * Maximum possible value of {@link #powerInputWatts()}. 
@@ -72,14 +74,15 @@ public interface IPowerComponent extends IReadWriteNBT
      * 
      * If the component is a generator, represents generator output.
      */
-    public float powerOutputWatts();
+    public default float powerOutputWatts()
+    {
+        return this.energyOutputLastTickJoules() * TimeUnits.TICKS_PER_SIMULATED_SECOND;
+    }
 
-    // currently unused
-//    /**
-//     * Running total of energy output in the current tick.
-//     */
-//    public long energyOutputCurrentTickJoules();
-
+    /**
+     * Total energy output in the last complete tick.
+     */
+    public long energyOutputLastTickJoules();
     
     /**
      * Maximum possible value of {@link #powerOutputWatts()}. 
@@ -130,10 +133,11 @@ public interface IPowerComponent extends IReadWriteNBT
      * Will always be false for external power sources and internal generators.
      * If false, any attempt to input energy will receive a zero result.
      */
-    public default boolean canAcceptEnergy() { return false; }
+    public boolean canAcceptEnergy();
     
     /**
-     * Adds energy to this component. 
+     * Adds energy to this component. Will only do something and return
+     * a non-zero value for storage-type components.
      * 
      * While conceptually this is power, is handled as energy due to the
      * quantized nature of time in Minecraft. Intended to be called each tick.<br><br>
@@ -150,10 +154,6 @@ public interface IPowerComponent extends IReadWriteNBT
      *            
      * @return Energy accepted (or that would have been have been accepted, if simulated) in joules.
      */
-     public default long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)  { return 0; }
+     public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate);
      
-     /**
-      * Called by power manager to move current tick total(s) to last tick, and start a new per-tick total.
-      */
-     public abstract void advanceIOTracking();
 }

@@ -2,16 +2,18 @@ package grondag.hard_science.simulator.storage;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.support.BatteryChemistry;
+import grondag.hard_science.machines.support.EnergyComponentType;
+import grondag.hard_science.machines.support.IPowerComponent;
 import grondag.hard_science.machines.support.ThroughputRegulator;
-import grondag.hard_science.machines.support.TimeUnits;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class PowerContainer extends ResourceContainer<StorageTypePower>
+public class PowerContainer extends ResourceContainer<StorageTypePower> implements IPowerComponent
 {
     private BatteryChemistry chemistry;
     
@@ -72,32 +74,90 @@ public class PowerContainer extends ResourceContainer<StorageTypePower>
         this.configureRegulator();
     }
 
-    /** for Battery wrapper */
+    public BatteryChemistry getChemistry()
+    {
+        return chemistry;
+    }
+
+    @Override
     public long maxEnergyInputJoulesPerTick()
     {
         return this.getRegulator().maxInputPerTick();
     }
-
-    /** for Battery wrapper */
-    public float powerInputWatts()
-    {
-        return this.getRegulator().inputLastTick() * TimeUnits.TICKS_PER_SIMULATED_SECOND;
-    }
     
-    /** for Battery wrapper */
-    public long energyInputCurrentTickJoules()
+    @Override
+    public long energyInputLastTickJoules()
     {
         return this.getRegulator().inputLastTick();
     }
     
-    /** for Battery wrapper */
+    @Override
     public long maxEnergyOutputJoulesPerTick()
     {
         return this.getRegulator().maxOutputPerTick();
     }
     
-    public BatteryChemistry getChemistry()
+    @Override
+    public EnergyComponentType componentType()
     {
-        return chemistry;
+        return EnergyComponentType.STORAGE;
+    }
+
+    /**
+     * Power storage components can only provide energy
+     * to the device if this is an input or isolated buffer,
+     * or if the caller is running on the power service thread.<p>
+     * 
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean canProvideEnergy(AbstractMachine machine)
+    {
+        return (!this.containerUsage().isOutputThreadRestricted 
+                || this.confirmServiceThread()) && this.usedCapacity() > 0;
+    }
+
+    @Override
+    public long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate)
+    {
+        return this.takeUpTo(PowerResource.JOULES, maxOutput, simulate, allowPartial, null);
+    }
+
+    @Override
+    public long energyOutputLastTickJoules()
+    {
+        return this.getRegulator().outputLastTick();
+    }
+
+    /**
+     * Power storage components can only accept energy
+     * from the device if this is an output or isolated buffer,
+     * or if the caller is running on the power service thread.<p>
+     * 
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean canAcceptEnergy()
+    {
+        return (!this.containerUsage().isInputThreadRestricted 
+                || this.confirmServiceThread()) && this.availableCapacity() > 0;
+    }
+
+    @Override
+    public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
+    {
+        return this.add(PowerResource.JOULES, maxInput, simulate, allowPartial, null);
+    }
+    
+    @Override
+    public long storedEnergyJoules()
+    {
+        return this.usedCapacity();
+    }
+    
+    @Override
+    public long maxStoredEnergyJoules()
+    {
+        return this.getCapacity();
     }
 }

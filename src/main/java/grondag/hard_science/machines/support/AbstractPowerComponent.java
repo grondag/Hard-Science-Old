@@ -20,25 +20,17 @@ public abstract class AbstractPowerComponent implements IPowerComponent
     
     /**
      * Must be called in subclasses during initialization and NBT deserialization.
-     * Does NOT need to be called during packet deserialization.
      */
     protected final void setMaxOutputJoulesPerTick(long maxJoules)
     {
         this.maxEnergyOutputPerTick = maxJoules;
     }
     
-    
     @Override
-    public float powerOutputWatts()
+    public long energyOutputLastTickJoules()
     {
-        return this.outputLastTick * TimeUnits.TICKS_PER_SIMULATED_SECOND;
+        return this.outputLastTick;
     }
-
-//    @Override
-//    public long energyOutputCurrentTickJoules()
-//    {
-//        return this.outputThisTick;
-//    }
     
     @Override
     public long maxEnergyOutputJoulesPerTick()
@@ -79,7 +71,9 @@ public abstract class AbstractPowerComponent implements IPowerComponent
      */
     protected abstract long provideEnergyImplementation(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate);
    
-    @Override
+    /**
+     * Called by power manager to move current tick total(s) to last tick, and start a new per-tick total.
+     */
     public void advanceIOTracking()
     {
         this.outputLastTick = this.outputThisTick;

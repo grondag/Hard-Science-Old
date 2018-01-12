@@ -3,7 +3,6 @@ package grondag.hard_science.machines;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
-import grondag.hard_science.machines.support.Battery;
 import grondag.hard_science.machines.support.BatteryChemistry;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MachinePowerSupply;
@@ -30,7 +29,7 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
     {
         return new MachinePowerSupply(
                 null, 
-                new Battery(this.powerStorage), 
+                this.powerStorage, 
                 new PowerReceiver(MachinePower.POWER_BUS_JOULES_PER_TICK));
     }
     
