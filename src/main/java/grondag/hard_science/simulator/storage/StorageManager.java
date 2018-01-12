@@ -76,6 +76,8 @@ public class StorageManager<T extends StorageType<T>>
     @Override
     public ImmutableList<IResourceContainer<T>> getLocations(IResource<T> resource)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
         
         if(summary == null || summary.quantityStored() == 0) return ImmutableList.of();
@@ -98,6 +100,8 @@ public class StorageManager<T extends StorageType<T>>
         assert !stores.contains(store)
             : "Storage manager received request to add store it already has.";
         
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         this.stores.add(store);
         this.capacity += store.getCapacity();
         
@@ -109,6 +113,8 @@ public class StorageManager<T extends StorageType<T>>
     
     public synchronized void removeStore(IResourceContainer<T> store)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         assert stores.contains(store)
          : "Storage manager received request to remove store it doesn't have.";
         
@@ -123,24 +129,32 @@ public class StorageManager<T extends StorageType<T>>
     
     public long getQuantityStored(IResource<T> resource)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         StorageResourceManager<T> stored = this.slots.getByKey1(resource);
         return stored == null ? 0 : stored.quantityStored();
     }
     
     public long getQuantityAvailable(IResource<T> resource)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         StorageResourceManager<T> stored = this.slots.getByKey1(resource);
         return stored == null ? 0 : stored.quantityAvailable();
     }
     
     public long getQuantityAllocated(IResource<T> resource)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         StorageResourceManager<T> stored = this.slots.getByKey1(resource);
         return stored == null ? 0 : stored.quantityAllocated();
     }
     
     public List<AbstractResourceWithQuantity<T>> findQuantityAvailable(Predicate<IResource<T>> predicate)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
         for(StorageResourceManager<T> entry : this.slots)
@@ -156,6 +170,8 @@ public class StorageManager<T extends StorageType<T>>
     
     public List<AbstractResourceWithQuantity<T>> findQuantityStored(Predicate<IResource<T>> predicate)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
         for(StorageResourceManager<T> entry : this.slots)
@@ -175,6 +191,8 @@ public class StorageManager<T extends StorageType<T>>
      */
     public ImmutableList<StorageWithResourceAndQuantity<T>> findStorageWithQuantity(Predicate<IResource<T>> predicate)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         ImmutableList.Builder<StorageWithResourceAndQuantity<T>> builder = ImmutableList.builder();
         
         for(StorageResourceManager<T> entry : this.slots)
@@ -194,18 +212,24 @@ public class StorageManager<T extends StorageType<T>>
     @Override
     public ImmutableList<IResourceContainer<T>> stores()
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         return ImmutableList.copyOf(this.stores);
     }
     
     @Override
     public long getCapacity()
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         return capacity;
     }
 
     @Override
     public long usedCapacity()
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         return this.used;
     }
     
@@ -215,6 +239,8 @@ public class StorageManager<T extends StorageType<T>>
      */
     public synchronized void notifyTaken(IResourceContainer<T> storage, IResource<T> resource, long taken, @Nullable IProcurementRequest<T> request)
     {
+        assert this.confirmServiceThread() : "Storage manager update outside service thread.";
+        
         if(taken == 0) return;
         
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
@@ -245,6 +271,8 @@ public class StorageManager<T extends StorageType<T>>
      */
     public synchronized void notifyAdded(IResourceContainer<T> storage, IResource<T> resource, long added, @Nullable IProcurementRequest<T> request)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         if(added == 0) return;
 
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
@@ -267,8 +295,10 @@ public class StorageManager<T extends StorageType<T>>
     
     public synchronized void notifyCapacityChanged(long delta)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         if(delta == 0) return;
-        
+
         this.capacity += delta;
         
         assert this.capacity >= 0
@@ -286,6 +316,8 @@ public class StorageManager<T extends StorageType<T>>
             @Nonnull IProcurementRequest<T> request, 
             long requestedAllocation)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         assert requestedAllocation >= 0
                 : "AbstractStorageManager.setAllocation got negative allocation request.";
         
@@ -304,13 +336,17 @@ public class StorageManager<T extends StorageType<T>>
             @Nonnull IResource<T> resource,
             long quantityRequested, 
             @Nonnull IProcurementRequest<T> request)
-    {        
+    {       
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         StorageResourceManager<T> stored = this.slots.getByKey1(resource);
         return stored == null ? 0 : stored.changeAllocation(request, quantityRequested);    
     }
     
     public synchronized void registerResourceListener(IResource<T> resource, IStorageResourceListener<T> listener)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
         if(summary == null)
         {
@@ -322,6 +358,8 @@ public class StorageManager<T extends StorageType<T>>
     
     public synchronized void unregisterResourceListener(IResource<T> resource, IStorageResourceListener<T> listener)
     {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
         StorageResourceManager<T> summary = this.slots.getByKey1(resource);
         if(summary != null)
         {

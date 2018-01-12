@@ -601,12 +601,17 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         we are out of possibilities and exit loop.
         or the same level but with a lower circuit number.
         
-        This version runs with highest priority on the transport thread 
-        so that results are always consistent with transport state, but
-        does block and can be safely called from server or other threads.
+        If this version is run from the service thread, it simply runs
+        and returns a result.  If it is run from a different thread
+        (typically the server thread) it is submitted as a privileged 
+        task to the service thread and blocks until the task is complete.
+        This ensures results are always consistent with transport state, but
+        allows it to be safely called from any thread.
     */
     public ImmutableList<Route> findRoutesNow(IDevice fromDevice, IDevice toDevice)
     {
+        if(this.confirmServiceThread()) return findRoutesImpl(fromDevice, toDevice);
+            
         try
         {
             return executor.submit(() ->
@@ -791,6 +796,16 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         }, false);
     }
     
+    /**
+     * Blocking version of {@link #sendResource(Route, IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
+     * 
+     * If this version is run from the service thread, it simply runs
+     * and returns a result.  If it is run from a different thread
+     * (typically the server thread) it is submitted as a privileged 
+     * task to the service thread and blocks until the task is complete.
+     * This ensures results are always consistent with transport state, but
+     * allows it to be safely called from any thread.
+     */
     public long sendResourceNow(
             Route route, 
             IResource<?> resource, 
@@ -801,6 +816,8 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             boolean simulate,
             IProcurementRequest<?> request)
     {
+        if(this.confirmServiceThread()) return sendResourceImpl(route, resource, quantity, from, to, force, simulate, request);
+                
         try
         {
             return executor.submit(() ->

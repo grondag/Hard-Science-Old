@@ -134,4 +134,36 @@ public class ForwardingResourceContainer<T extends StorageType<T>> implements IR
     {
         return this.wrappedContainer.slots();
     }
+
+    @Override
+    public long availableCapacity()
+    {
+        return this.wrappedContainer.availableCapacity();
+    }
+
+    @Override
+    public void setCapacity(long capacity)
+    {
+        this.wrappedContainer.setCapacity(capacity);
+    }
+
+    @Override
+    public long availableCapacityFor(IResource<T> resource)
+    {
+        return this.wrappedContainer.availableCapacityFor(resource);
+    }
+
+    @Override
+    public void onConnect()
+    {
+        this.wrappedContainer.onConnect();
+    }
+
+    @Override
+    public void onDisconnect()
+    {
+        this.wrappedContainer.onDisconnect();
+    }
+    
+    
 }

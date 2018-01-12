@@ -1,5 +1,6 @@
 package grondag.hard_science.simulator.storage;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -151,11 +152,11 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      */
     public void initialize()
     {
-        ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
+        HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map = new HashMap<IResource<StorageTypeStack>, ItemResourceDelegate>();
         switch(this.mode)
         {
         case STORE:
-            this.addStore(this.storage, builder);
+            this.addStore(this.storage, map);
             break;
             
         case CONNECTED:
@@ -165,7 +166,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                 if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), itemStore.device()))
                 {
                     this.stores.add(store);
-                    this.addStore(itemStore, builder);
+                    this.addStore(itemStore, map);
                 }
             }
             break;
@@ -174,7 +175,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             this.totalCapacity = this.domain.itemStorage.getCapacity();
             for(AbstractResourceWithQuantity<StorageTypeStack> rwq : this.domain.itemStorage.findQuantityStored(StorageType.ITEM.MATCH_ANY))
             {
-                builder.add(this.changeQuantity(rwq.resource(), rwq.getQuantity()));
+                map.put(rwq.resource(), this.changeQuantity(rwq.resource(), rwq.getQuantity()));
             }
             break;
             
@@ -183,7 +184,9 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             return;
         }
         this.domain.eventBus.register(this);
-        ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(builder.build(), this.totalCapacity, true), player);
+        ModMessages.INSTANCE.sendTo(
+                new PacketOpenContainerItemStorageRefresh(
+                        ImmutableList.copyOf(map.values()), this.totalCapacity, true), player);
     }
     
     /**
@@ -201,12 +204,18 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         return this.isDead;
     }
     
-    private void addStore(ItemContainer storage, ImmutableList.Builder<ItemResourceDelegate> builder)
+    /**
+     * Adds store and adds or updates item delegates in the map.
+     * Have to use a map because could have same resource and
+     * thus same delegate for more than one store. We only send
+     * a single delegate per resource.  
+     */
+    private void addStore(ItemContainer storage, HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map)
     {
         this.totalCapacity += storage.getCapacity();
         for(AbstractResourceWithQuantity<StorageTypeStack> rwq : storage.find(StorageType.ITEM.MATCH_ANY))
         {
-            builder.add(this.changeQuantity(rwq.resource(), rwq.getQuantity()));
+            map.put(rwq.resource(), this.changeQuantity(rwq.resource(), rwq.getQuantity()));
         }
     }
     
@@ -296,21 +305,21 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             if(event.storage.isOn() && !this.stores.contains(event.storage) 
                     && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device()))
             {
-                    ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-                    this.addStore((ItemContainer) event.storage, builder);
+                    HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map = new HashMap<IResource<StorageTypeStack>, ItemResourceDelegate>();
+                    this.addStore((ItemContainer) event.storage, map);
                     this.stores.add((ItemContainer) event.storage);
                     ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
-                            builder.build(), this.totalCapacity, false), player);
+                            ImmutableList.copyOf(map.values()), this.totalCapacity, false), player);
             }
             break;
         }
         
         case DOMAIN:
         {
-            ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
-            this.addStore((ItemContainer) event.storage, builder);
+            HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map = new HashMap<IResource<StorageTypeStack>, ItemResourceDelegate>();
+            this.addStore((ItemContainer) event.storage, map);
             ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
-                    builder.build(), this.totalCapacity, false), player);
+                    ImmutableList.copyOf(map.values()), this.totalCapacity, false), player);
             break;
         }
         case STORE:

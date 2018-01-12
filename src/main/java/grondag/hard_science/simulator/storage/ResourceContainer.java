@@ -23,15 +23,23 @@ public class ResourceContainer<T extends StorageType<T>> extends ForwardingResou
         super.onConnect();
         if(this.containerUsage().isListed)
         {
-            assert this.confirmServiceThread() : "Storage connect outside service thread.";
-            
-            assert this.getDomain() != null : "Null domain on storage connect";
-            
-            if(this.getDomain() == null)
-                Log.warn("Null domain on storage connect");
-            else
-                this.storageType().eventFactory().postAfterStorageConnect(this);
+            if(this.confirmServiceThread())
+                this.onConnectListed();
+            else this.storageType().service().executor.execute(() ->
+            {
+                this.onConnectListed();
+            });
         }
+    }
+    
+    private void onConnectListed()
+    {
+        assert this.getDomain() != null : "Null domain on storage connect";
+        
+        if(this.getDomain() == null)
+            Log.warn("Null domain on storage connect");
+        else
+            this.storageType().eventFactory().postAfterStorageConnect(this);
     }
     
     @Override
@@ -40,15 +48,23 @@ public class ResourceContainer<T extends StorageType<T>> extends ForwardingResou
         super.onDisconnect();
         if(this.containerUsage().isListed)
         {
-            assert this.confirmServiceThread() : "Storage disconnect outside service thread.";
-            
-            assert this.getDomain() != null : "Null domain on storage disconnect";
-            
-            if(this.getDomain() == null)
-                Log.warn("Null domain on storage disconnect");
-            else
-                this.storageType().eventFactory().postBeforeStorageDisconnect(this);
+            if(this.confirmServiceThread())
+                this.onDisconnectListed();
+            else this.storageType().service().executor.execute(() ->
+            {
+                this.onDisconnectListed();
+            });
         }
+    }
+    
+    private void onDisconnectListed()
+    {
+        assert this.getDomain() != null : "Null domain on storage disconnect";
+        
+        if(this.getDomain() == null)
+            Log.warn("Null domain on storage disconnect");
+        else
+            this.storageType().eventFactory().postBeforeStorageDisconnect(this);
     }
     
     @Override

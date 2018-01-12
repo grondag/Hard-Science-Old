@@ -170,30 +170,30 @@ public class PrivilegedExecutor extends ThreadPoolExecutor
     @Override 
     public void execute(Runnable command)
     {
-        throw new UnsupportedOperationException("ambiguous execution on privileged executor");
+        this.execute(command, false);
     }
     
     @Override
     public Future<?> submit(Runnable task)
     {
-        throw new UnsupportedOperationException("ambiguous execution on privileged executor");
+        return this.submit(task, false);
     }
 
     @Override
     public <T> Future<T> submit(Runnable task, T result)
     {
-        throw new UnsupportedOperationException("ambiguous execution on privileged executor");
+        return this.submit(task, result, false);
     }
 
     @Override
     public <T> Future<T> submit(Callable<T> task)
     {
-        throw new UnsupportedOperationException("ambiguous execution on privileged executor");
+        return this.submit(task, false);
     }
 
     @Override
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException
     {
-        throw new UnsupportedOperationException("ambiguous execution on privileged executor");
+        throw new UnsupportedOperationException("Unsupported operation on privileged executor");
     }
 }

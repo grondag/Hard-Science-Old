@@ -28,9 +28,8 @@ public class TransportTestMachine extends AbstractSimpleMachine
     public TransportTestMachine()
     {
         super(CarrierLevel.BOTTOM, PortType.CARRIER);
-        this.itemStorage = new ItemContainer(this, ContainerUsage.STORAGE);
-        this.itemStorage.setCapacity(Integer.MAX_VALUE);
-        this.itemStorage.add(resource, Integer.MAX_VALUE, false, null);
+        this.itemStorage = new ItemContainer(this, ContainerUsage.BUFFER_OUT);
+        this.itemStorage.setCapacity(64);
     }
 
     @Override
@@ -54,11 +53,14 @@ public class TransportTestMachine extends AbstractSimpleMachine
         super.doOffTick();
         if(this.isOn() && this.getDomain() != null)
         {
-            long avail = this.itemStorage.getQuantityStored(resource);
-            if(avail > 0)
+            this.itemStorage.add(resource, 16, false, null);
+            
+            LogisticsService.ITEM_SERVICE.executor.execute(() ->
             {
+                long remaining = this.itemStorage.getQuantityStored(resource);
+                
                 List<IResourceContainer<StorageTypeStack>> list 
-                    = this.getDomain().itemStorage.findSpaceFor(resource, avail);
+                    = this.getDomain().itemStorage.findSpaceFor(resource, remaining);
                 if(list.isEmpty()) return;
                 
                 for(IResourceContainer<StorageTypeStack> store : list)
@@ -68,12 +70,13 @@ public class TransportTestMachine extends AbstractSimpleMachine
                     
                     if(routes.isEmpty()) continue;
                     
-                    avail -= LogisticsService.ITEM_SERVICE
-                            .sendResourceNow(routes.get(0), resource, avail, this, store.device(), false, false, null);
+                    remaining -= LogisticsService.ITEM_SERVICE
+                            .sendResourceNow(routes.get(0), resource, remaining, this, store.device(), false, false, null);
                     
-                    if(avail <= 0) break;
+                    if(remaining <= 0) break;
                 }
-            }
+                
+            });
         }
     }
 

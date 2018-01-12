@@ -174,7 +174,7 @@ public abstract class AbstractMultiResourceContainer<T extends StorageType<T>>
     @Override
     public List<AbstractResourceWithQuantity<T>> slots()
     {
-        return this.slots().isEmpty()
+        return this.slots.isEmpty()
                 ? ImmutableList.of()
                 : ImmutableList.copyOf(this.slots);
     }
