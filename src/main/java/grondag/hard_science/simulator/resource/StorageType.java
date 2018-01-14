@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.init.ModRegistries;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.storage.FluidStorageEvent;
@@ -14,6 +15,7 @@ import grondag.hard_science.simulator.storage.PowerStorageEvent;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 
 
@@ -33,6 +35,11 @@ public abstract class StorageType<T extends StorageType<T>>
             return StorageType.ITEM;
         case POWER:
             return StorageType.POWER;
+            
+        case PRIVATE:
+            assert false : "Unsupported private storage type reference";
+            return null;
+            
         default:
             assert false : "Missing enum mapping for storage type";
             return null;
@@ -224,4 +231,50 @@ public abstract class StorageType<T extends StorageType<T>>
         }
     }
    
+    /**
+     * Must be stored in a battery.  Note that fuel is not counted as power 
+     * because making power from fuel is a non-trivial production step. 
+     */
+    public static final StorageTypeBulk PRIVATE = new StorageTypeBulk();
+    public static class StorageTypeBulk extends StorageType<StorageTypeBulk>
+    {
+        private StorageTypeBulk()
+        {
+            super(EnumStorageType.PRIVATE, new BulkResource(new ResourceLocation("empty")));
+        }
+
+        @Override
+        public IResource<StorageTypeBulk> fromNBT(NBTTagCompound nbt)
+        {
+            return nbt != null && nbt.hasKey(ModNBTTag.RESOURCE_IDENTITY)
+                ? ModRegistries.bulkResourceRegistry.getValue(new ResourceLocation(nbt.getString(ModNBTTag.RESOURCE_IDENTITY)))
+                : this.emptyResource;
+        }
+
+        @Override
+        public NBTTagCompound toNBT(IResource<StorageTypeBulk> resource)
+        {
+            NBTTagCompound result = new NBTTagCompound();
+            result.setString(ModNBTTag.RESOURCE_IDENTITY, ((BulkResource)resource).getRegistryName().toString());
+            return result;
+        }
+
+        @Override
+        public AbstractResourceWithQuantity<StorageTypeBulk> fromNBTWithQty(NBTTagCompound nbt)
+        {
+            return new BulkResourceWithQuantity(nbt);
+        }
+
+        @Override
+        public IStorageEventFactory<StorageTypeBulk> eventFactory()
+        {
+            return null;
+        }
+
+        @Override
+        public LogisticsService<StorageTypeBulk> service()
+        {
+            return null;
+        }
+    }
 }

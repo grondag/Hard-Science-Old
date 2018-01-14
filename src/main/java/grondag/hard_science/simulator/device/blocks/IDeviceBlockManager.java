@@ -55,6 +55,13 @@ public interface IDeviceBlockManager
      * For TOP display to support debugging.
      */
     public default CarrierCircuit powerCircuit() { return null; }
+    
+    /**
+     * If device fluid ports have an internal carrier circuit,
+     * the current primary fluid circuit.  Null if no connections or doesn't have.
+     * For TOP display to support debugging.
+     */
+    public default CarrierCircuit fluidCircuit() { return null; }
 
     /**
      * Get all ports on this device with the given StorageType. 

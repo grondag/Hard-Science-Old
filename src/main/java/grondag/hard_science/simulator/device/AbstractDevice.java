@@ -42,6 +42,7 @@ public abstract class AbstractDevice implements IDevice
     protected IDeviceBlockManager blockManager = null; 
     
     protected final ITransportManager<StorageTypeStack> itemTransportManager;
+    protected final ITransportManager<StorageTypeFluid> fluidTransportManager;
     protected final ITransportManager<StorageTypePower> powerTransportManager;
     
     
@@ -58,8 +59,8 @@ public abstract class AbstractDevice implements IDevice
     
     protected AbstractDevice()
     {
-        
         this.itemTransportManager = this.createItemTransportManager();
+        this.fluidTransportManager = this.createFluidTransportManager();
         this.powerTransportManager = this.createPowerTransportManager();
         this.bufferManager = this.createBufferManager();
         this.energyManager = this.createEnergyManager();
@@ -73,6 +74,14 @@ public abstract class AbstractDevice implements IDevice
         return null;
     }
 
+    /**
+     * Override to enable fluid transport
+     */
+    protected ITransportManager<StorageTypeFluid> createFluidTransportManager()
+    {
+        return null;
+    }
+    
     /**
      * Override to enable power transport
      */
@@ -140,7 +149,13 @@ public abstract class AbstractDevice implements IDevice
             
         case POWER:
             return this.powerTransportManager;
-            
+        
+        case FLUID:
+            return this.fluidTransportManager;
+
+        case PRIVATE:
+            assert false : "Unsupported private storage type reference";
+
         default:
             return null;
         }
@@ -283,6 +298,9 @@ public abstract class AbstractDevice implements IDevice
         case POWER:
             return this.energyManager().takeUpTo((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
 
+        case PRIVATE:
+            assert false : "Unsupported private storage type reference";
+
         default:
             assert false : "Unhandled enum mapping";
         }
@@ -319,6 +337,9 @@ public abstract class AbstractDevice implements IDevice
         case POWER:
             return this.energyManager().add((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
 
+        case PRIVATE:
+            assert false : "Unsupported private storage type reference";
+        
         default:
             assert false : "Unhandled enum mapping";
         }

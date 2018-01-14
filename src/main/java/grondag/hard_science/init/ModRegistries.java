@@ -1,6 +1,7 @@
 package grondag.hard_science.init;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -17,6 +18,7 @@ public class ModRegistries
 //    public static ForgeRegistry<Connection> connectionRegistry;
 //    public static ForgeRegistry<Connector> connectorRegistry;
     public static ForgeRegistry<Port> portRegistry;
+    public static ForgeRegistry<BulkResource> bulkResourceRegistry;
     
     @SubscribeEvent
     public static void newRegistries(RegistryEvent.NewRegistry event) 
@@ -37,6 +39,13 @@ public class ModRegistries
                 .setName(new ResourceLocation(HardScience.MODID, "ports"))
                 .setIDRange(0, Short.MAX_VALUE)
                 .setType(Port.class)
+                .create();
+        
+        bulkResourceRegistry = (ForgeRegistry<BulkResource>) new RegistryBuilder<BulkResource>()
+                .setName(new ResourceLocation(HardScience.MODID, "bulk_resources"))
+                .setIDRange(0, Short.MAX_VALUE)
+                .setType(BulkResource.class)
+                .setDefaultKey(new ResourceLocation(ModBulkResources.EMPTY_BULK_RESOURCE))
                 .create();
     }
 }

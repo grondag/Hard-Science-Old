@@ -3,6 +3,7 @@ package grondag.hard_science.machines.base;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.device.blocks.SimpleBlockHandler;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
@@ -38,6 +39,12 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
         return new SimpleTransportManager<StorageTypeStack>(this, StorageType.ITEM);
     }
 
+    @Override
+    protected ITransportManager<StorageTypeFluid> createFluidTransportManager()
+    {
+        return new SimpleTransportManager<StorageTypeFluid>(this, StorageType.FLUID);
+    }
+    
     @Override
     protected ITransportManager<StorageTypePower> createPowerTransportManager()
     {

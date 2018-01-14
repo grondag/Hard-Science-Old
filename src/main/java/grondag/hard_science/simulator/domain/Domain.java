@@ -83,13 +83,20 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         switch(storeType.enumType)
         {
         case FLUID:
-            return null;
+            return (StorageManager<V>) this.fluidStorage;
+            
         case ITEM:
             return (StorageManager<V>) this.itemStorage;
             
         case POWER:
+            return (StorageManager<V>) this.powerStorage;
+            
+        case PRIVATE:
+            assert false : "Unsupported private storage type reference";
             return null;
+            
         default:
+            assert false : "Unhandled enum mapping";
             return null;
         
         }

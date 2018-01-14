@@ -41,6 +41,12 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     private final PortState[] itemPorts;
     
     /**
+     * Fluid ports by face. This implementation assumes/allows
+     * only one port per face.
+     */
+    private final PortState[] fluidPorts;
+    
+    /**
      * Power ports by face. This implementation assumes/allows
      * only one port per face.
      */
@@ -52,13 +58,20 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
      * and/or multiblock.
      */
     private final CarrierPortGroup itemGroup;
+    
+    /**
+     * Manages shared circuit for item ports.  Not face-aware
+     * because is general-purpose class that can handle wireless
+     * and/or multiblock.
+     */
+    private final CarrierPortGroup fluidGroup;
 
     /**
      * Manages shared circuit for power ports.  Not face-aware
      * because is general-purpose class that can handle wireless
      * and/or multiblock.
      */
-private final CarrierPortGroup powerGroup; 
+    private final CarrierPortGroup powerGroup; 
     
     /**
      * Sets up ports and parents.
@@ -82,8 +95,10 @@ private final CarrierPortGroup powerGroup;
         this.packedBlockPos = PackedBlockPos.pack(owner.getLocation());
 
         boolean hasItemPorts = owner.hasTransportManager(StorageType.ITEM);
+        boolean hasFluidPorts = owner.hasTransportManager(StorageType.FLUID);
         boolean hasPowerPorts = owner.hasTransportManager(StorageType.POWER);
         this.itemPorts = hasItemPorts ?  new PortState[6] : null;
+        this.fluidPorts = hasFluidPorts ?  new PortState[6] : null;
         this.powerPorts = hasPowerPorts ?  new PortState[6] : null;
         
         BlockPos pos = PackedBlockPos.unpack(this.packedBlockPos);
@@ -97,6 +112,9 @@ private final CarrierPortGroup powerGroup;
              
             Port powerPort = hasPowerPorts
                 ? ModPorts.find( StorageType.POWER, level, PortType.DIRECT) : null;
+                
+            Port fluidPort = hasFluidPorts
+                    ? ModPorts.find( StorageType.FLUID, level, PortType.DIRECT) : null;
             
             for(EnumFacing face : EnumFacing.VALUES)
             {
@@ -105,9 +123,14 @@ private final CarrierPortGroup powerGroup;
                 
                 if(hasPowerPorts)
                     this.powerPorts[face.ordinal()]= new DirectPortState(powerPort, owner, pos, face);
+
+                if(hasPowerPorts)
+                    this.fluidPorts[face.ordinal()]= new DirectPortState(fluidPort, owner, pos, face);
+
             }
             this.itemGroup = null;
             this.powerGroup = null;
+            this.fluidGroup = null;
         }
         else
         {
@@ -115,15 +138,24 @@ private final CarrierPortGroup powerGroup;
             
             CarrierPortGroup itemGroup = null;
             CarrierPortGroup powerGroup = null;
+            CarrierPortGroup fluidGroup = null;
+            
             if(hasItemPorts)
             {
                 itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, level);
                 if(!level.isTop()) itemGroup.setConfiguredChannel(channel);
             }
+            
             if(hasPowerPorts)
             {
                 powerGroup = new CarrierPortGroup(owner, StorageType.POWER, level);
                 if(!level.isTop()) powerGroup.setConfiguredChannel(channel);
+            }
+            
+            if(hasFluidPorts)
+            {
+                fluidGroup = new CarrierPortGroup(owner, StorageType.FLUID, level);
+                if(!level.isTop()) fluidGroup.setConfiguredChannel(channel);
             }
             
             for(EnumFacing face : EnumFacing.VALUES)
@@ -133,10 +165,15 @@ private final CarrierPortGroup powerGroup;
 
                 if(powerGroup != null)
                     this.powerPorts[face.ordinal()] = powerGroup.createPort(portType == PortType.BRIDGE, pos, face);
+
+                if(fluidGroup != null)
+                    this.fluidPorts[face.ordinal()] = fluidGroup.createPort(portType == PortType.BRIDGE, pos, face);
+
             }
             
             this.itemGroup = itemGroup;
             this.powerGroup = powerGroup;
+            this.fluidGroup = fluidGroup;
         }
         
         
@@ -159,7 +196,14 @@ private final CarrierPortGroup powerGroup;
             return portListForFaceFromArray(face, powerPorts);
 
         case FLUID:
+            return portListForFaceFromArray(face, fluidPorts);
+            
+        case PRIVATE:
+            assert false : "Unsupported private storage type reference";
+            return Collections.emptyList();
+            
         default:
+            assert false : "Unhandled enum mapping";
             return Collections.emptyList();
         }
     }
@@ -214,8 +258,9 @@ private final CarrierPortGroup powerGroup;
 
         boolean hasItems = this.itemPorts != null;
         boolean hasPower = this.powerPorts != null;
+        boolean hasFluid = this.fluidPorts != null;
         
-        if(!(hasItems || hasPower)) return;
+        if(!(hasItems || hasPower || hasFluid)) return;
         
         for(EnumFacing face : EnumFacing.VALUES)
         {
@@ -247,6 +292,18 @@ private final CarrierPortGroup powerGroup;
                     LogisticsService.POWER_SERVICE.connect(myPort, mate);
                 }
             }
+            
+            if(hasFluid)
+            {
+                PortState myPort = this.fluidPorts[face.ordinal()];
+                if(myPort == null) break;
+                
+                assert !myPort.isAttached() : "Connection attempt on attached port";
+                for(PortState mate : neighbor.getPorts(StorageType.FLUID, oppositeFace))
+                {
+                    LogisticsService.FLUID_SERVICE.connect(myPort, mate);
+                }
+            }
         }
     }
 
@@ -269,8 +326,9 @@ private final CarrierPortGroup powerGroup;
 
         boolean hasItems = this.itemPorts != null;
         boolean hasPower = this.powerPorts != null;
+        boolean hasFluid = this.fluidPorts != null;
         
-        if(!(hasItems || hasPower)) return;
+        if(!(hasItems || hasPower || hasFluid)) return;
         
         for(EnumFacing face : EnumFacing.VALUES)
         {
@@ -288,6 +346,12 @@ private final CarrierPortGroup powerGroup;
                 PortState ps = this.powerPorts[face.ordinal()];
                 if(ps.isAttached()) LogisticsService.POWER_SERVICE.disconnect(ps);
             }
+            
+            if(hasFluid)
+            {
+                PortState ps = this.fluidPorts[face.ordinal()];
+                if(ps.isAttached()) LogisticsService.FLUID_SERVICE.disconnect(ps);
+            }
         }
     }
     
@@ -301,5 +365,11 @@ private final CarrierPortGroup powerGroup;
     public CarrierCircuit powerCircuit()
     { 
         return this.powerGroup.internalCircuit(); 
+    }
+    
+    @Override
+    public CarrierCircuit fluidCircuit()
+    { 
+        return this.fluidGroup.internalCircuit(); 
     }
 }

@@ -4,5 +4,6 @@ public enum EnumStorageType
 {
     ITEM,
     FLUID,
-    POWER
+    POWER,
+    PRIVATE
 }

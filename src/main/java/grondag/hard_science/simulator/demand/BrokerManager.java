@@ -51,13 +51,16 @@ public class BrokerManager implements IDomainMember
                 }
                     
                 case POWER:
-//                    return (IBroker<T>) this.POWER_BROKER;
-                    
                 case FLUID:
-                default:
                     //use per-resource default
-                
-                return this.getOrCreateSimpleBroker(resource);
+                    return this.getOrCreateSimpleBroker(resource);
+
+                case PRIVATE:
+                    assert false : "Private storage type reference";
+                    return null;
+                default:
+                    assert false : "Missing enum mapping";
+                    return null;
             }
         }
         
