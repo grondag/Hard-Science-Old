@@ -22,6 +22,12 @@ public interface ITransportManager<T extends StorageType<T>> extends IDeviceComp
      */
     public void refreshTransport();
     
+    /** 
+     * True if this device is attached to any circuit.
+     * If false, implies any off-device transport request will fail.
+     */
+    public boolean hasAnyCircuit();
+    
     /**
      * All legs accessible from circuits on which this device is connected.
      * @return

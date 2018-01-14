@@ -7,8 +7,10 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 
 /**
  * Shared logic for classes that contain one or more
@@ -23,14 +25,22 @@ public interface IStorageAccess<T extends StorageType<T>>
     public ImmutableList<IResourceContainer<T>> stores();
     
     /**
-     * Orders results to encourage clustering of item storage.
+     * Returns a list of stores of type STORAGE (no output buffers)
+     * that could accept the given resource and are reachable from 
+     * the given device, in order of preference for input.<p>
+     * 
+     * Orders results to encourage clustering of like storage.
      * Stores with the largest count of the resource (but still with empty space)
      * come first, followed by stores with available space in descending order.
      */
-    public default ImmutableList<IResourceContainer<T>> findSpaceFor(IResource<T> resource, long quantity)
+    public default ImmutableList<IResourceContainer<T>> findSpaceFor(@Nonnull IResource<T> resource, @Nonnull IDevice reachableFrom)
     {
+        LogisticsService<T> service = resource.storageType().service();
+                
         return this.stores().stream()
-            .filter(p -> p.availableCapacityFor(resource) > 0)
+            .filter(p -> p.containerUsage() == ContainerUsage.STORAGE 
+                    && p.availableCapacityFor(resource) > 0
+                    && service.areDevicesConnected(p.device(), reachableFrom))
             .sorted((IResourceContainer<T> a, IResourceContainer<T>b) 
                     -> ComparisonChain.start()
                         .compare(b.getQuantityStored(resource), a.getQuantityStored(resource))
@@ -62,12 +72,12 @@ public interface IStorageAccess<T extends StorageType<T>>
      * Aggregate version of {@link IStorage#add(IResource, long, boolean, IProcurementRequest)}
      * Must run on service thread for storage type.
      */
-    public default long add(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<T> request)
+    public default long add(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<T> request, IDevice reachableFrom)
     {
         assert resource.confirmServiceThread() : "Storage action outside service thread.";
         
         if(howMany <= 0) return 0;
-        ImmutableList<IResourceContainer<T>> stores = this.findSpaceFor(resource, howMany);
+        ImmutableList<IResourceContainer<T>> stores = this.findSpaceFor(resource, reachableFrom);
         if(stores.isEmpty()) return 0;
         if(stores.size() == 1) return stores.get(0).add(resource, howMany, simulate, request);
         

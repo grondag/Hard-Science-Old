@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
@@ -161,9 +162,21 @@ public interface IMachineBlock
 //                        machine.blockManager().itemCircuit().carrierAddress(),
 //                        machine.blockManager().itemCircuit().bridgeVersion()));
 //            }
-            probeInfo.text("Item Legs: " + machine.tranportManager(StorageType.ITEM).legs().toString()); 
+            probeInfo.text("Item Legs: " + machine.itemTransport().legs().toString()); 
         }
         
+        if(!machine.energyManager().isEmpty())
+        {
+            probeInfo.progress(machine.energyManager().storedEnergyJoules(), 
+                    machine.energyManager().maxStoredEnergyJoules());
+            probeInfo.text("Stored Energy: " + MachinePower.formatEnergy(
+                    machine.energyManager().storedEnergyJoules(), false));
+            float netCharge = machine.energyManager().netStorageWatts();
+            
+            probeInfo.text((netCharge >= 0 ? "Charge Rate: " : "Discharge Rate: ")
+                    + MachinePower.formatPower(
+                            (long) netCharge, true));
+        }
         if(machine.hasTransportManager(StorageType.POWER))
         {
 //            if(machine.blockManager().powerCircuit() != null)

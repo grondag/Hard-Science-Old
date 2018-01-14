@@ -3,12 +3,6 @@ package grondag.hard_science.simulator.resource;
 public abstract class AbstractResource<V extends StorageType<V>> implements IResource<V>
 {
     protected AbstractResource() {};
-    
-    @Override
-    public int hashCode()
-    {
-        return this.computeResourceHashCode();
-    }
 
     @SuppressWarnings("unchecked")
     @Override

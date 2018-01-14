@@ -167,6 +167,7 @@ public class CommonEventHandler
         if(event.phase == Phase.START) 
         {
             CommonProxy.updateCurrentTime();
+            CommonProxy.refreshWorldInfos();
         }
         else
         {

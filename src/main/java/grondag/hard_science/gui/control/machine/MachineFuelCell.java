@@ -6,7 +6,6 @@ import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.DeviceEnergyInfo;
-import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
@@ -21,11 +20,11 @@ public class MachineFuelCell extends AbstractMachineControl<MachineFuelCell, Rad
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        DeviceEnergyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
-        if(mps != null && mps.hasFuelCell())
+        DeviceEnergyInfo mpi = this.tileEntity.clientState().powerSupplyInfo;
+        if(mpi != null && mpi.hasGenerator())
         {
             ArrayList<String> list = new ArrayList<String>(3);
-            list.add(I18n.translateToLocalFormatted("machine.power_in", mps.fuelCell().powerOutputWatts()));
+            list.add(I18n.translateToLocalFormatted("machine.power_in", mpi.generationWatts()));
             renderContext.drawToolTip(list, mouseX, mouseY);
         }
     }
@@ -34,13 +33,9 @@ public class MachineFuelCell extends AbstractMachineControl<MachineFuelCell, Rad
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         DeviceEnergyInfo mpi = this.tileEntity.clientState().powerSupplyInfo;
-        if(mpi != null)
+        if(mpi != null && mpi.hasGenerator())
         {
-            DeviceEnergyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
-            if(mps != null && mps.hasFuelCell())
-            {
-                MachineControlRenderer.renderFuelCell(this.renderBounds, mpi, mps, 0xFF);
-            }
+            MachineControlRenderer.renderFuelCell(this.renderBounds, mpi, 0xFF);
         }
     }
 

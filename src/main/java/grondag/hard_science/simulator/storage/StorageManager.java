@@ -12,12 +12,14 @@ import org.magicwerk.brownies.collections.Key1List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 
 /**
 * Responsibilities:
@@ -186,8 +188,7 @@ public class StorageManager<T extends StorageType<T>>
     }
     
     /**
-     * Returns a list of stores that have the given resource with quantityIn included.
-     * Currently used only for testing.
+     * Returns a list of all stores that have resources matching the predicate with quantityIn included.
      */
     public ImmutableList<StorageWithResourceAndQuantity<T>> findStorageWithQuantity(Predicate<IResource<T>> predicate)
     {
@@ -204,6 +205,29 @@ public class StorageManager<T extends StorageType<T>>
         }
         
         return builder.build();
+    }
+    
+    /**
+     * Returns a list of stores that have the given resource available
+     * and reachable from the given device, in order of preference
+     * for extract. (Generally stores that can be emptied are preferred.)<p>
+     */
+    public ImmutableList<IResourceContainer<T>> findSourcesFor(@Nonnull IResource<T> resource, @Nonnull IDevice reachableFrom)
+    {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+
+        StorageResourceManager<T> summary = this.slots.getByKey1(resource);
+        
+        if(summary == null || summary.quantityStored() == 0) return ImmutableList.of();
+    
+        LogisticsService<T> service = this.storageType.service();
+        
+        return summary.getLocations(resource).stream()
+                .filter(s -> {return service.areDevicesConnected(s.storage.device(), reachableFrom);})
+                .sorted((StorageWithQuantity<T> a, StorageWithQuantity<T>b) 
+                        -> Long.compare(a.quantity, b.quantity))
+                .map(p -> p.storage)
+                .collect(ImmutableList.toImmutableList());
     }
     
     /**

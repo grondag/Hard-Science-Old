@@ -124,7 +124,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     }
 
     @Override
-    public int computeResourceHashCode()
+    public int hashCode()
     {
         int h = this.hash;
         if(h == -1)

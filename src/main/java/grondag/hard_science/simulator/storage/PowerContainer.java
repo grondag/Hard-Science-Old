@@ -2,7 +2,6 @@ package grondag.hard_science.simulator.storage;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.support.BatteryChemistry;
 import grondag.hard_science.machines.support.IEnergyComponent;
 import grondag.hard_science.machines.support.ThroughputRegulator;
@@ -38,7 +37,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     
     public void configure(long volumeNanoliters, BatteryChemistry chemistry)
     {
-        this.setCapacity(chemistry.capacityForNanoliters(volumeNanoliters));
+        super.setCapacity(chemistry.capacityForNanoliters(volumeNanoliters));
         this.chemistry = chemistry;
         this.configureRegulator();
     }
@@ -104,14 +103,14 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
      * {@inheritDoc}
      */
     @Override
-    public boolean canProvideEnergy(AbstractMachine machine)
+    public boolean canProvideEnergy()
     {
         return (!this.containerUsage().isOutputThreadRestricted 
                 || this.confirmServiceThread()) && this.usedCapacity() > 0;
     }
 
     @Override
-    public long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate)
+    public long provideEnergy(long maxOutput, boolean allowPartial, boolean simulate)
     {
         return this.takeUpTo(PowerResource.JOULES, maxOutput, simulate, allowPartial, null);
     }

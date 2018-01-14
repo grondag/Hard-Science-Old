@@ -114,4 +114,10 @@ public class SimpleTransportManager<T extends StorageType<T>> implements ITransp
     {
         return this.circuits.contains(circuit);
     }
+
+    @Override
+    public boolean hasAnyCircuit()
+    {
+        return !this.circuits.isEmpty();
+    }
 }

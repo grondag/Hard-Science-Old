@@ -4,7 +4,8 @@ import net.minecraft.util.math.MathHelper;
 
 public enum BatteryChemistry
 {
-    SILICON(MachinePower.JOULES_PER_SILICON_BATTERY_LITER, 20, 10, 950);
+    SILICON(MachinePower.JOULES_PER_SILICON_BATTERY_LITER, 20, 10, 950),
+    CAPACITOR(MachinePower.JOULES_PER_SILICON_BATTERY_LITER / 5, 1, 1, 1000);
     
     /**
      * How much energy batter can store in a given volume.  This is after any inefficiency cost has been incurred.  

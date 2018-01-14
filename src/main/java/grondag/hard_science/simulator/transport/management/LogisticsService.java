@@ -767,10 +767,11 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     /**
-     * Sends resource from one device to another and returns
-     * the quantity actually sent.  
+     * Sends resource from one device to another
+     * by any available route(s) and return
+     * the quantity actually sent.  Will send via
+     * more than one route if necessary / possible.
      * 
-     * @param route     how to get there
      * @param resource  stuff to send
      * @param quantity  how much
      * @param from      producing device
@@ -781,6 +782,86 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * @return          Future with quantity produced and consumed
      */
     public Future<Long> sendResource(
+            IResource<?> resource, 
+            final long quantity, 
+            IDevice from, 
+            IDevice to, 
+            boolean force, 
+            boolean simulate,
+            IProcurementRequest<?> request)
+    {
+        return executor.submit( () ->
+        {
+            return sendResourceImpl(resource, quantity, from, to, force, simulate, request);
+        }, false);
+    }
+    
+    /**
+     * Blocking version of {@link #sendResource(IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
+     * 
+     * If this version is run from the service thread, it simply runs
+     * and returns a result.  If it is run from a different thread
+     * (typically the server thread) it is submitted as a privileged 
+     * task to the service thread and blocks until the task is complete.
+     * This ensures results are always consistent with transport state, but
+     * allows it to be safely called from any thread.
+     */
+    public long sendResourceNow(
+            IResource<?> resource, 
+            final long quantity, 
+            IDevice from, 
+            IDevice to, 
+            boolean force, 
+            boolean simulate,
+            IProcurementRequest<?> request)
+    {
+        if(this.confirmServiceThread()) return sendResourceImpl(resource, quantity, from, to, force, simulate, request);
+        
+        try
+        {
+            return executor.submit(() ->
+            {
+                return sendResourceImpl(resource, quantity, from, to, force, simulate, request);
+            }, true).get();
+        }
+        catch (Exception e)
+        {
+            Log.error("Unable to send resources due to error", e);
+            return 0;
+        }
+    }
+    
+    private long sendResourceImpl(
+            IResource<?> resource, 
+            final long quantity, 
+            IDevice from, 
+            IDevice to, 
+            boolean force, 
+            boolean simulate,
+            IProcurementRequest<?> request)
+    {
+        ImmutableList<Route> routes = 
+                this.findRoutesImpl(from, to);
+        
+        if(routes.isEmpty()) return 0L;
+        
+        Long remaining = quantity;
+        
+        for(Route r : routes)
+        {
+            remaining -= 
+                    this.sendResourceOnRouteImpl(r, resource, remaining, from, to, force, simulate, request);
+            
+            if(remaining <= 0) break;
+        }
+        return quantity - remaining;
+    }
+    
+    /**
+     * Like {@link #sendResource(IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
+     * but specifies a single route to use.
+     */
+    public Future<Long> sendResourceOnRoute(
             Route route, 
             IResource<?> resource, 
             final long quantity, 
@@ -792,12 +873,12 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     {
         return executor.submit( () ->
         {
-            return sendResourceImpl(route, resource, quantity, from, to, force, simulate, request);
+            return sendResourceOnRouteImpl(route, resource, quantity, from, to, force, simulate, request);
         }, false);
     }
     
     /**
-     * Blocking version of {@link #sendResource(Route, IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
+     * Blocking version of {@link #sendResourceOnRoute(Route, IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
      * 
      * If this version is run from the service thread, it simply runs
      * and returns a result.  If it is run from a different thread
@@ -806,7 +887,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * This ensures results are always consistent with transport state, but
      * allows it to be safely called from any thread.
      */
-    public long sendResourceNow(
+    public long sendResourceOnRouteNow(
             Route route, 
             IResource<?> resource, 
             final long quantity, 
@@ -816,13 +897,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             boolean simulate,
             IProcurementRequest<?> request)
     {
-        if(this.confirmServiceThread()) return sendResourceImpl(route, resource, quantity, from, to, force, simulate, request);
+        if(this.confirmServiceThread()) return sendResourceOnRouteImpl(route, resource, quantity, from, to, force, simulate, request);
                 
         try
         {
             return executor.submit(() ->
             {
-                return sendResourceImpl(route, resource, quantity, from, to, force, simulate, request);
+                return sendResourceOnRouteImpl(route, resource, quantity, from, to, force, simulate, request);
             }, true).get();
         }
         catch (Exception e)
@@ -838,7 +919,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * we should be able to simulate a result, determine max throughput,
      * and then execute that result with confidence it will stick.
      */
-    private long sendResourceImpl(
+    private long sendResourceOnRouteImpl(
             Route route, 
             IResource<?> resource, 
             final long quantity, 

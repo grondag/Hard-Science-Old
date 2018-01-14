@@ -19,13 +19,10 @@ import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.EnergyComponentInfo;
-import grondag.hard_science.machines.support.EnergyComponentStatus;
+import grondag.hard_science.machines.support.DeviceEnergyInfo;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
-import grondag.hard_science.machines.support.DeviceEnergyInfo;
-import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.machines.support.VolumeUnits;
@@ -742,11 +739,10 @@ public class MachineControlRenderer
     public static void renderPower(
             RadialRenderBounds bounds, 
             DeviceEnergyInfo mpi,
-            DeviceEnergyStatus mps,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderPower(tes, tes.getBuffer(), bounds, mpi, mps, alpha);
+        renderPower(tes, tes.getBuffer(), bounds, mpi, alpha);
     }
 
     public static void renderPower(
@@ -754,11 +750,10 @@ public class MachineControlRenderer
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
             DeviceEnergyInfo mpi,
-            DeviceEnergyStatus mps,
             final int alpha)
     {
      
-        if(mps == null || mpi == null) return;
+        if(mpi == null) return;
         
         if(bounds != null)
         {     
@@ -768,10 +763,10 @@ public class MachineControlRenderer
             MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
             // render level
-            int arcLength = (int)(mps.powerOutputWatts() * 270 / mpi.maxPowerOutputWatts());
+            int arcLength = (int)(mpi.deviceDrawWatts() * 270 / mpi.maxDeviceDrawWatts());
             renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | 0xFFFFBF);
 
-            if(mps.isFailureCause() && warningLightBlinkOn())
+            if(mpi.isFailureCause() && warningLightBlinkOn())
             {
                 renderSpriteInBounds(tessellator, buffer, bounds,Textures.MACHINE_GAUGE_INNER.getSampleSprite(), alphaShifted | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
             }
@@ -780,46 +775,38 @@ public class MachineControlRenderer
 
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
                     new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.77, bounds.width(), bounds.height() * 0.25),
-                    MachinePower.formatPower(Math.round(mps.powerOutputWatts()), false), HorizontalAlignment.CENTER, alphaShifted | ModModels.COLOR_POWER);
+                    MachinePower.formatPower(Math.round(mpi.deviceDrawWatts()), false), HorizontalAlignment.CENTER, alphaShifted | ModModels.COLOR_POWER);
         }
     }
     
     public static void renderFuelCell(
             RadialRenderBounds bounds, 
             @Nonnull DeviceEnergyInfo mpi,
-            @Nonnull DeviceEnergyStatus mps,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderFuelCell(tes, tes.getBuffer(), bounds, mpi, mps, alpha);
+        renderGenerator(tes, tes.getBuffer(), bounds, mpi, alpha);
     }
 
-    public static void renderFuelCell(
+    public static void renderGenerator(
             Tessellator tessellator, 
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
             @Nonnull DeviceEnergyInfo mpi,
-            @Nonnull DeviceEnergyStatus mps,
             final int alpha)
     {
-     
-        EnergyComponentInfo eci = mpi.fuelCell();
-        if(eci == null) return;
-        
-        EnergyComponentStatus ecs = mps.fuelCell();
-        if(ecs == null) return;
        
         final int alphaShifted = alpha << 24;
         
         // render marks
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), alphaShifted | 0xFFFFFF, Rotation.ROTATE_NONE);
 
-        float output = ecs.powerOutputWatts();
+        float output = mpi.generationWatts();
         
         if(output > 0)
         {
             // render level
-            int arcLength = (int)(output * 270 / eci.maxPowerOutputWatts());
+            int arcLength = (int)(output * 270 / mpi.maxGenerationWatts());
             renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | ModModels.COLOR_FUEL_CELL);
         }
         renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), Textures.DECAL_FLAME.getSampleSprite(), alphaShifted | ModModels.COLOR_FUEL_CELL, Rotation.ROTATE_NONE); 
@@ -833,11 +820,10 @@ public class MachineControlRenderer
     public static void renderBattery(
             RadialRenderBounds bounds, 
             @Nonnull DeviceEnergyInfo mpi,
-            @Nonnull DeviceEnergyStatus mps,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderBattery(tes, tes.getBuffer(), bounds, mpi, mps, alpha);
+        renderBattery(tes, tes.getBuffer(), bounds, mpi, alpha);
     }
 
     /** Where the battery texture starts 0-1 */
@@ -851,45 +837,38 @@ public class MachineControlRenderer
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
             @Nonnull DeviceEnergyInfo xmpi,
-            @Nonnull DeviceEnergyStatus xmps,
             final int alpha)
     {
-     
-        EnergyComponentInfo eci = xmpi.battery();
-        if(eci == null) return;
-        
-        EnergyComponentStatus ecs = xmps.battery();
-        if(ecs == null) return;
         
         // render background
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_POWER_BACKGROUND.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         // render in/out level
-        if(ecs.powerInputWatts() > 0)
+        if(xmpi.netStorageWatts() > 0)
         {
-            int arcLength = (int)(ecs.powerInputWatts() * 180 / eci.maxPowerInputWatts());
+            int arcLength = (int)(xmpi.netStorageWatts() * 180 / xmpi.maxChargeWatts());
             renderRadialSprite(tessellator, buffer, bounds, 270, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
-                    MachinePower.formatPower(Math.round(ecs.powerInputWatts()), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
+                    MachinePower.formatPower(Math.round(xmpi.netStorageWatts()), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
         }
-        else if(ecs.powerOutputWatts() > 0)
+        else if(xmpi.netStorageWatts() < 0)
         {
-            int arcLength = (int)(ecs.powerOutputWatts() * 180 / eci.maxPowerOutputWatts());
+            int arcLength = (int)(-xmpi.netStorageWatts() * 180 / xmpi.maxDischargeWatts());
             renderRadialSprite(tessellator, buffer, bounds, 450 - arcLength, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
-                    MachinePower.formatPower((long) -ecs.powerOutputWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
+                    MachinePower.formatPower((long) -xmpi.netStorageWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
         }
 
         // render power storage
-        long j = ecs.storedEnergyJoules();
+        long j = xmpi.storedEnergyJoules();
         if(j > 0)
         {
             EnhancedSprite sprite = Textures.MACHINE_POWER_FOREGROUND.getSampleSprite();
             
             buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);   
-            double right = POWER_LEFT + POWER_WIDTH * j / eci.maxStoredEnergyJoules();
+            double right = POWER_LEFT + POWER_WIDTH * j / xmpi.maxStoredEnergyJoules();
             bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.left() + right * bounds.width(), bounds.bottom(), 
                     sprite.safeMinU(), sprite.safeMinV(), sprite.safeInterpolatedU(right), sprite.safeMaxV(), 
                     alpha, 0xFF, 0xFF, 0xFF);
@@ -898,7 +877,7 @@ public class MachineControlRenderer
             
         renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
                 new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
-                MachinePower.formatEnergy((long) ecs.storedEnergyJoules(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
+                MachinePower.formatEnergy((long) xmpi.storedEnergyJoules(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
         
     }
     

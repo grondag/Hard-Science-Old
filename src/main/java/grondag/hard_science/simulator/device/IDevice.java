@@ -7,6 +7,9 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Location.ILocated;
+import grondag.hard_science.machines.support.DeviceEnergyManager;
+import grondag.hard_science.machines.support.MaterialBufferManager;
+import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
@@ -14,13 +17,15 @@ import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.storage.ItemContainer;
-import grondag.hard_science.simulator.storage.PowerContainer;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 
 public interface IDevice extends 
-    IIdentified, ILocated, IDomainMember, IReadWriteNBT
+    IIdentified, ILocated, IDomainMember, IReadWriteNBT, ISimulationTickable
 {
     public default boolean doesPersist() { return true; }
     
@@ -49,6 +54,15 @@ public interface IDevice extends
 
     public default  boolean hasTransportManager(StorageType<?> storageType) { return this.tranportManager(storageType) != null; }
     
+    @SuppressWarnings("unchecked")
+    public default ITransportManager<StorageTypePower> powerTransport() { return (ITransportManager<StorageTypePower>) this.tranportManager(StorageType.POWER); }
+
+    @SuppressWarnings("unchecked")
+    public default ITransportManager<StorageTypeStack> itemTransport() { return (ITransportManager<StorageTypeStack>) this.tranportManager(StorageType.ITEM); }
+
+    @SuppressWarnings("unchecked")
+    public default ITransportManager<StorageTypeFluid> fluidTransport() { return (ITransportManager<StorageTypeFluid>) this.tranportManager(StorageType.FLUID); }
+
     /**
      * Signal that device should perform internal
      * initialization and register device blocks
@@ -71,32 +85,6 @@ public interface IDevice extends
     {
         if(this.hasBlockManager()) this.blockManager().disconnect();
     }
-    
-    /**
-     * If true, then {@link #doOnTick()} will be called during 
-     * world tick from server thread. Is checked only when devices
-     * are added or removed from device manager so result should not be dynamic.
-     */
-    public default boolean doesUpdateOnTick() { return false; }
-    
-    /**
-     * See {@link #doesUpdateOnTick()}
-     */
-    public default void doOnTick() {}
-    
-    /**
-     * If true, then {@link #doOffTick()} will be called once per server tick 
-     * from simulation thread pool. Is checked only when devices
-     * are added or removed from device manager so result should not be dynamic.
-     */
-    public default boolean doesUpdateOffTick() { return false; }
-    
-    /**
-     * See {@link #doesUpdateOffTick()}
-     */
-    public default void doOffTick() {}
-    
-    
     
     @Override
     public default AssignedNumber idType()
@@ -177,18 +165,17 @@ public interface IDevice extends
     public default ItemContainer itemStorage() {return null;}
 
     /**
-     * Convenience for <code>{@link #powerStorage()} != null</code>
+     * Convenience for <code>{@link #itemStorage()} != null</code>
      */
     public default boolean hasItemStorage() { return this.itemStorage() != null; }
     
-    /**
-     * Implement if device has power storage. Will be null if not.
-     */
-    public default PowerContainer powerStorage() {return null;}
+    public DeviceEnergyManager energyManager();
 
-    /**
-     * Convenience for <code>{@link #powerStorage()} != null</code>
+    /** 
+     * If this tile has a material buffer, gives access.  Null if not.
      */
-    public default boolean hasPowerStorage() { return this.powerStorage() != null; }
+    @Nullable
+    MaterialBufferManager getBufferManager();
+        
 }
 

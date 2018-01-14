@@ -50,12 +50,9 @@ public class GuiBasicBuilder extends AbstractSimpleGui<BlockFabricatorTileEntity
         {
             mainPanel.add(sizeControl(mainPanel, new MachinePowerUsage(te, RenderBounds.BOUNDS_POWER_0), RenderBounds.BOUNDS_POWER_0));
             
-            if(ps.hasBattery())
-            {
-                mainPanel.add(sizeControl(mainPanel, new MachineBattery(te, RenderBounds.BOUNDS_POWER_1), RenderBounds.BOUNDS_POWER_1));
-            }
+            mainPanel.add(sizeControl(mainPanel, new MachineBattery(te, RenderBounds.BOUNDS_POWER_1), RenderBounds.BOUNDS_POWER_1));
             
-            if(ps.hasFuelCell())
+            if(ps.hasGenerator())
             {
                 mainPanel.add(sizeControl(mainPanel, new MachineFuelCell(te, RenderBounds.BOUNDS_POWER_2), RenderBounds.BOUNDS_POWER_2));
             }

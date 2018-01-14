@@ -1,10 +1,25 @@
 package grondag.hard_science.machines.support;
 
-import grondag.hard_science.Log;
+import java.util.List;
+import java.util.concurrent.Future;
+
+import javax.annotation.Nullable;
+
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.simulator.ISimulationTickable;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.device.ComponentRegistry;
+import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.device.IDeviceComponent;
+import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.PowerResource;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
+import grondag.hard_science.simulator.storage.ContainerUsage;
+import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.PowerContainer;
+import grondag.hard_science.simulator.storage.StorageManager;
+import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -50,13 +65,32 @@ import net.minecraft.nbt.NBTTagCompound;
  * 
  * Why not use IEnergyStorage or similar?<br>
  * 1) Explicitly want to use standard power/energy units. (watts/joules) <br>
- * 2) Want to support larger quanities (long vs int) <br>
+ * 2) Want to support larger quantities (long vs int) <br>
  * 3) Want ability to reject partial input/output
  */
-public class DeviceEnergyManager implements IReadWriteNBT
+public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISimulationTickable
 {
-    private FuelCell fuelCell;
-    private PowerContainer battery;
+    private final IDevice owner;
+    private AbstractGenerator generator;
+    
+    private PowerContainer outputContainer;
+    private PowerContainer inputContainer;
+    
+    /**
+     * If we scheduled something to power service during the 
+     * last tick, the future for that task.  We don't want to
+     * schedule another task until previous is complete. Retain
+     * the reference here so that we can check. Will be null
+     * if we have never submitted.
+     */
+    private Future<?> powerTickFuture = null;
+    
+    /**
+     * Ticks since we last tried to top off power in the input buffer
+     * if it isn't urgent that we do so.  Prevents going to the power
+     * network every tick for small amounts.
+     */
+    private byte topOffCounter = 0;
     
     /**
      * Set to true if this provider's (low) level has recently caused a 
@@ -65,89 +99,116 @@ public class DeviceEnergyManager implements IReadWriteNBT
      */
     private boolean isFailureCause;
     
-    private final float maxPowerOutputWatts;
-    private final long maxEnergyOutputPerTick;
-    
-    private float powerOutputWatts;
-
-    public DeviceEnergyManager(FuelCell fuelCell, PowerContainer battery)
+    public DeviceEnergyManager(
+            IDevice owner, 
+            AbstractGenerator generator, 
+            PowerContainer inputContainer,
+            PowerContainer outputContainer)
     {
         super();
-        this.fuelCell = fuelCell;
-        this.battery = battery;
-        
-        this.maxPowerOutputWatts = 
-                  (fuelCell == null ? 0 : fuelCell.maxPowerOutputWatts())
-                + (battery == null ? 0 : battery.maxPowerOutputWatts());      
-        
-        this.maxEnergyOutputPerTick = 
-                (fuelCell == null ? 0 : fuelCell.maxEnergyOutputJoulesPerTick())
-              + (battery == null ? 0 : battery.maxEnergyOutputJoulesPerTick());  
+        this.owner = owner;
+        this.generator = generator;
+        this.inputContainer = inputContainer;
+        this.outputContainer = outputContainer;
     }
  
-    public FuelCell fuelCell() { return this.fuelCell; }
-    public PowerContainer battery() { return this.battery; };
+    public boolean isEmpty()
+    {
+        return this.inputContainer == null && this.outputContainer == null;
+    }
+    
+    @Override
+    public IDevice device()
+    {
+        return this.owner;
+    }
+    
+    @Nullable
+    public AbstractGenerator generator() { return this.generator; }
+    
+    /**
+     * Will be a storage if this is a battery-type device. 
+     * Will be an output buffer if device has a generator. 
+     * Will be null if device only consumes power.
+     */
+    @Nullable
+    public PowerContainer outputContainer() { return this.outputContainer; }
+    
+    @Nullable
+    public PowerContainer inputContainer() { return this.inputContainer; }
  
     /**
-     * True if provider is actually able to provide power right now.
-     * If false, any attempt to extract power will receive a zero result.
+     * True if can provide energy to the device right now. 
+     * Requires that the device have a power input buffer.
+     * Will always be false for generators or power storage
+     * devices that are not expected to consume power locally.
      */
-    public boolean canProvideEnergy(AbstractMachine machine)
+    public boolean canProvideEnergy()
     {
-        return      (this.fuelCell != null && this.fuelCell.canProvideEnergy(machine))
-                ||  (this.battery != null && this.battery.canProvideEnergy(machine));
+        return  this.inputContainer != null && this.inputContainer.canProvideEnergy();
     }
     
     /**
-     * Recent energy consumption level. In watts. Does not include power used to charge the battery.
+     * Recent energy consumption level by device from input buffer.
      */
-    public float powerOutputWatts()
+    public float deviceDrawWatts()
     {
-        return this.powerOutputWatts;
+        return this.inputContainer == null 
+            ? 0 
+            : MachinePower.joulesPerTickToWatts(this.inputContainer.energyOutputLastTickJoules());
+    }
+
+    /**
+     * Highest possible rate of power draw from this power
+     * supply for use within the local device. Based on {@link #maxDeviceDrawPerTick()}
+     */
+    public float maxDeviceDrawWatts()
+    {
+        return MachinePower.joulesPerTickToWatts(this.maxDeviceDrawPerTick());
     }
 
     /**
      * 
-     * TODO: Add an optional per-machine limit so that display make sense?
-     * For example, why show max at 2000W if machine can only use 20W?
-     * 
-     * Highest possible continuous rate of power draw from this power
-     * supply for use within the local device.  Peak rate from the
-     * input buffer could be somewhat higher.  Limited by the following:
-     * <li>Input buffer max output
-     * <li>Fuel cell max output - if has local generator and not connected to power
-     * <li>Power network max draw - if connected to power network
-     * </li>
-     */
-    public float maxPowerOutputWatts()
-    {
-        return this.maxPowerOutputWatts;
-    }
-
-    /**
-     * Max discrete energy output per tick implied by {@link #maxPowerOutputWatts()}
      * Effective limit for {@link #provideEnergy(long, boolean, boolean)}.  In joules.
      */
-    public long maxEnergyOutputPerTick()
+    public long maxDeviceDrawPerTick()
     {
-        return this.maxEnergyOutputPerTick;
+        return this.inputContainer == null 
+                ? 0 : inputContainer.maxEnergyOutputJoulesPerTick();  
     }
   
+    public long maxStoredEnergyJoules()
+    {
+        return (this.inputContainer == null ? 0 : this.inputContainer.maxStoredEnergyJoules())
+             + (this.outputContainer == null ? 0 : this.outputContainer.maxStoredEnergyJoules());
+    }
+    
+    public long storedEnergyJoules()
+    {
+        return (this.inputContainer == null ? 0 : this.inputContainer.storedEnergyJoules())
+             + (this.outputContainer == null ? 0 : this.outputContainer.storedEnergyJoules());
+    }
+    
+    public float netStorageWatts()
+    {
+        return (this.inputContainer == null ? 0 : this.inputContainer.netWattsLastTick())
+                + (this.outputContainer == null ? 0 : this.outputContainer.netWattsLastTick());
+
+    }
+    
     /**
-     * True if power manager is able to receive power right now.
-     * Will always be false for fuel cells or other closed providers.
-     * If false, any attempt to input power will receive a zero result.
+     * True if can accept energy from the device right now. 
+     * Requires that the device have a power output buffer.
+     * Will generally only be true machine with generators.
      */
     public boolean canAcceptEnergy()
     {
-        return this.battery != null && this.battery.canAcceptEnergy();
+        return this.outputContainer != null && this.outputContainer.canAcceptEnergy();
     }
 
     /**
-     * Adds energy to this provider. 
-     * 
-     * While conceptually this is power, is handled as energy due to the
-     * quantized nature of time in Minecraft. Intended to be called each tick.<br><br>
+     * Adds energy from this machine's output buffer if it has one.
+     * Intended to be called during device tick.
      *
      * @param maxInput
      *            Maximum amount of energy to be inserted, in joules.<br>
@@ -163,21 +224,18 @@ public class DeviceEnergyManager implements IReadWriteNBT
      */
     public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
     {
-        return this.battery.acceptEnergy(maxInput, allowPartial, simulate);
+        return this.outputContainer != null && this.outputContainer.canAcceptEnergy()
+            ? this.outputContainer.acceptEnergy(maxInput, allowPartial, simulate)
+            : 0;
     }
    
     /**
-     * Consumes energy from this provider.<p>
-     * 
-     * While conceptually this is power, is handled as energy due to the
-     * quantized nature of time in Minecraft. Intended to be called each tick.<p>
-     *
-     * Tries to draw power from grid start (if available), then from fuel cell, then from battery.
-     * Will combine output from multiple sources if necessary.<p>
+     * Consumes energy from this machine's input container if it has one.
+     * Also clears failure flag if a non-simulated attempt is successful.<p>
      * 
      * @param maxOutput
      *            Maximum amount of energy to be extracted, in joules.<br>
-     *            Limited by {@link #maxEnergyOutputPerTick()}.
+     *            Limited by {@link #maxDeviceDrawPerTick()}.
      *            
      * @param allowPartial
      *            If false, no energy will be extracted unless the entire requested amount can be provided.
@@ -187,41 +245,16 @@ public class DeviceEnergyManager implements IReadWriteNBT
      *            
      * @return Energy extracted (or that would have been have been extracted, if simulated) in joules.
      */
-    public long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate)
+    public long provideEnergy(long maxOutput, boolean allowPartial, boolean simulate)
     {
-        // prevent shenannigans/derpage
-        if(maxOutput <= 0) return 0; 
+        if(maxOutput <= 0 || this.inputContainer == null) return 0; 
         
-        long result = 0;
-        
-        // if not accepting partial fulfillment, have to simulate all results start
-        if(!allowPartial)
-        {
-            result = provideEnergyInner(machine, maxOutput, true);
-            if(result != maxOutput) return 0;
-            if(!simulate) result = provideEnergyInner(machine, maxOutput, false);
-        }
-        else
-        {
-            result = provideEnergyInner(machine, maxOutput, simulate);
-        }
+        long result = this.inputContainer.provideEnergy(maxOutput, allowPartial, simulate);
         
         // forgive self for prior failures if managed to do something this time
         if(result > 0 && !simulate && this.isFailureCause) this.setFailureCause(false);
         
         return result;
-    }
-    
-    private long provideEnergyInner(AbstractMachine machine, long maxOutput, boolean simulate)
-    {
-        long result = this.fuelCell == null ? 0 : this.fuelCell.provideEnergy(machine, maxOutput, true, simulate);
-        
-        if(result < maxOutput && this.battery != null)
-        {
-            result += this.battery.provideEnergy(machine, maxOutput - result, true, simulate);
-        }
-        
-        return result;        
     }
     
     /**
@@ -245,76 +278,200 @@ public class DeviceEnergyManager implements IReadWriteNBT
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.fuelCell = tag.hasKey(ModNBTTag.MACHINE_FUEL_CELL_PLATE_SIZE) ? new PolyethyleneFuelCell(tag) : null;
-        //FIXME: move serialization back to here? or remove
-//        if(this.battery != null) this.battery.deserializeNBT(tag);
+        this.generator = tag.hasKey(ModNBTTag.MACHINE_GENERATOR) 
+                ? (AbstractGenerator)ComponentRegistry.fromNBT(
+                        this.device(), tag.getCompoundTag(ModNBTTag.MACHINE_GENERATOR))
+                : null;
+                        
+        if(this.outputContainer != null) this.outputContainer.deserializeNBT(tag.getCompoundTag(ModNBTTag.ENERGY_OUTPUT_BUFFER));
+        if(this.inputContainer != null) this.inputContainer.deserializeNBT(tag.getCompoundTag(ModNBTTag.ENERGY_INPUT_BUFFER));
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        if(this.fuelCell != null) this.fuelCell.serializeNBT(tag);
-//        if(this.battery != null) this.battery.serializeNBT(tag);
+        if(this.generator != null) tag.setTag(ModNBTTag.MACHINE_GENERATOR, ComponentRegistry.toNBT(this.generator));
+        if(this.outputContainer != null) tag.setTag(ModNBTTag.ENERGY_OUTPUT_BUFFER, this.outputContainer.serializeNBT());
+        if(this.inputContainer != null) tag.setTag(ModNBTTag.ENERGY_INPUT_BUFFER, this.inputContainer.serializeNBT());
+    }
+
+    @Override
+    public boolean doesUpdateOffTick()
+    {
+        return !this.isEmpty();
+    }
+   
+    @Override
+    public void doOffTick()
+    {
+        // don't do stuff if device is off
+        if(!this.isOn()) return;
+        
+        // try to fill input container if either of these is true:
+        // 1) it has room and we haven't topped it off in a while
+        // 2) it doesn't have enough power to satisfy max draw next tick
+        boolean needsPowerTick = false;
+        if(this.inputContainer != null)
+        {
+            if(this.inputContainer.availableCapacity() > 0)
+            {
+                if(this.topOffCounter > 10
+                   || this.inputContainer.usedCapacity() < this.inputContainer.maxEnergyOutputJoulesPerTick())
+                {
+                    this.topOffCounter = 0;
+                    needsPowerTick = true;
+                }
+                else this.topOffCounter++;
+            }
+        }
+        // try to generate
+        if(this.generator != null && this.outputContainer != null)
+        {
+            this.generator.generate(this.outputContainer);
+               
+            needsPowerTick = needsPowerTick || 
+                this.outputContainer.availableCapacity() < this.generator.maxEnergyOutputJoulesPerTick();
+        }
+        
+        if(powerTickFuture != null)
+        {
+            if(powerTickFuture.isDone())
+            {
+                this.powerTickFuture = null;
+            }
+            else
+            {
+                assert false : "Power service overload : service tick did not complete before next device tick.";
+            }
+        }
+        
+        // if need to transfer in or out of buffers, 
+        // schedule task for that purpose
+        if(needsPowerTick && powerTickFuture == null)
+        {
+            this.powerTickFuture = LogisticsService.POWER_SERVICE.executor.submit(() -> 
+            {
+                this.fillInputIfNeeded();
+                this.emptyOutputIfNeeded();
+            });
+        }
+    }
+
+    private void fillInputIfNeeded()
+    {
+        if(this.inputContainer == null || this.inputContainer.availableCapacity() == 0)
+            return;
+        
+        StorageManager<StorageTypePower> manager = this.getDomain().powerStorage;
+            
+        // try local first
+        if(this.outputContainer != null)
+        {
+            long taken = outputContainer.takeUpTo(
+                    PowerResource.JOULES, 
+                    this.inputContainer.availableCapacity(),
+                    false);
+            if(taken > 0)
+            {
+                long accepted = this.inputContainer.add(
+                        PowerResource.JOULES, 
+                        taken,
+                        false);
+                
+                assert accepted == taken
+                        : "Device input buffer failed to accept input";
+            }
+        }
+        
+        // if input still not full, try energy network
+        if(this.inputContainer.availableCapacity() == 0 
+                || !this.powerTransport().hasAnyCircuit()
+                || manager.getQuantityAvailable(PowerResource.JOULES) == 0)
+            return;
+        
+        List<IResourceContainer<StorageTypePower>> stores 
+            = manager.findSourcesFor(PowerResource.JOULES, this.device());
+        
+        if(!stores.isEmpty())
+        {
+            for(IResourceContainer<StorageTypePower> s : stores)
+            {
+                LogisticsService.POWER_SERVICE.sendResourceNow(
+                    PowerResource.JOULES, 
+                    this.inputContainer.availableCapacity(), 
+                    s.device(), 
+                    this.device(), 
+                    false, 
+                    false, 
+                    null);
+                
+                if(this.inputContainer.availableCapacity() == 0) break;
+            }
+        }
+    }
+    
+    private void emptyOutputIfNeeded()
+    {
+        if(this.outputContainer == null 
+                || this.outputContainer.containerUsage() != ContainerUsage.BUFFER_OUT
+                || this.outputContainer.availableCapacity() > this.generator.maxEnergyOutputJoulesPerTick()
+                || !this.powerTransport().hasAnyCircuit()) 
+            return;
+        
+        long targetAmount = this.generator.maxEnergyOutputJoulesPerTick() 
+                - this.outputContainer.availableCapacity();
+        
+        StorageManager<StorageTypePower> manager = this.getDomain().powerStorage;
+        
+        // try to empty output container if it is an output buffer
+        // that is close to being full
+        // and dedicated storage is available
+        List<IResourceContainer<StorageTypePower>> dumps 
+            = manager.findSpaceFor(PowerResource.JOULES, this.device());
+        
+        if(!dumps.isEmpty())
+        {
+            for(IResourceContainer<StorageTypePower> s : dumps)
+            {
+                targetAmount -= LogisticsService.POWER_SERVICE.sendResourceNow(
+                        PowerResource.JOULES, 
+                        targetAmount, 
+                        this.device(), 
+                        s.device(), 
+                        false, 
+                        false, 
+                        null);
+                
+                if(targetAmount <= 0) break;
+            }
+        }
+    }
+  
+    /**
+     * Routes to appropriate power container. 
+     * See {@link PowerContainer#takeUpTo(IResource, long, boolean, IProcurementRequest)}
+     */
+    public long takeUpTo(IResource<StorageTypePower> resource, long quantity, boolean simulate, IProcurementRequest<StorageTypePower> request)
+    {
+        return this.outputContainer == null ? 0 
+            : this.outputContainer.takeUpTo(resource, quantity, simulate, request);
     }
 
     /**
-     * On server, regenerates power from PE and handles other housekeeping.
-     * Returns true if internal state was modified and should be sent to client and/or persisted.
+     * Routes to appropriate power container. 
+     * See {@link PowerContainer#add(IResource, long, boolean, IProcurementRequest)}
      */
-    public boolean tick(AbstractMachine machine, long tick)
+    public long add(IResource<StorageTypePower> resource, long quantity, boolean simulate,  IProcurementRequest<StorageTypePower> request)
     {
-        boolean didChange = false;
-        boolean canBatteryCharge = this.battery != null && this.battery.canAcceptEnergy();
-        
-        // if machine is off, nothing to do unless we are going to recharge the battery
-        if(canBatteryCharge || machine.isOn())
+        if(this.inputContainer != null)
         {
-            // Generate power to recharge battery if needed.
-            // Do this before we clear per-tick limits so we don't 
-            // consume capacity that is needed for production. 
-            if(canBatteryCharge)
-            {
-                long joulesNeeded = this.battery.acceptEnergy(this.battery.maxEnergyInputJoulesPerTick(), true, true);
-                
-                if(joulesNeeded > 0)
-                {
-                    //TODO: transfer energy in here
-                    
-                    if(joulesNeeded > 0 && this.fuelCell != null)
-                    {
-                        long joulesAvailable = this.fuelCell.provideEnergy(machine, joulesNeeded, true, false);
-                        if(joulesAvailable > 0)
-                        {
-                            didChange = true;
-                            if(this.battery.acceptEnergy(joulesAvailable, true, false) != joulesAvailable && Log.DEBUG_MODE)
-                            {
-                                Log.info("Battery energy acceptance mismatch during recharging. This is a bug.  Some energy was lost.");
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // update tracking totals
-            
-            float powerLastTick = 0;
-            
-            if(this.battery != null)
-            {
-                powerLastTick += this.battery.powerOutputWatts();
-                powerLastTick -= this.battery.powerInputWatts();
-            }
-            
-            if(this.fuelCell != null)
-            {
-                this.fuelCell.advanceIOTracking();
-                powerLastTick += this.fuelCell.powerOutputWatts();
-            }
-            
-            this.powerOutputWatts = powerLastTick;
-            
+            return this.inputContainer.add(resource, quantity, simulate, request);
         }
-        return didChange;
+        else if(this.outputContainer != null)
+        {
+            return this.outputContainer.add(resource, quantity, simulate, request);
+        }
+        return 0;
     }
 
 //    private String formatedAvailableEnergyJoules;
@@ -343,4 +500,17 @@ public class DeviceEnergyManager implements IReadWriteNBT
 //        return this.formattedAvgNetPowerGainLoss;
 //    }
 
+    @Override
+    public void onConnect()
+    {
+        if(this.inputContainer != null) this.inputContainer.onConnect();
+        if(this.outputContainer != null) this.outputContainer.onConnect();
+    }
+
+    @Override
+    public void onDisconnect()
+    {
+        if(this.inputContainer != null) this.inputContainer.onDisconnect();
+        if(this.outputContainer != null) this.outputContainer.onDisconnect();
+    }
 }

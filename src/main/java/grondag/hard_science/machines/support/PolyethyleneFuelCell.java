@@ -2,20 +2,31 @@ package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.materials.CubeSize;
+import grondag.hard_science.simulator.device.IDevice;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 
-public class PolyethyleneFuelCell extends FuelCell
+public class PolyethyleneFuelCell extends AbstractGenerator
 {
-    public static final PolyethyleneFuelCell BASIC_1KW = new PolyethyleneFuelCell(CubeSize.FIVE, 1, false);
-    public static final PolyethyleneFuelCell ADVANCED_1KW = new PolyethyleneFuelCell(CubeSize.FIVE, 1, true);
-    public static final PolyethyleneFuelCell ADVANCED_1MW = new PolyethyleneFuelCell(CubeSize.BLOCK, 1, true);
+    public static PolyethyleneFuelCell basic_1kw(IDevice owner)
+    {
+        return new PolyethyleneFuelCell(owner, CubeSize.FIVE, 1, false);
+    }
+    
+    public static PolyethyleneFuelCell advanced_1kw(IDevice owner)
+    {
+        return new PolyethyleneFuelCell(owner, CubeSize.FIVE, 1, true);
+    }
+    
+    public static PolyethyleneFuelCell advanced_1mw(IDevice owner)
+    {
+        return new PolyethyleneFuelCell(owner, CubeSize.BLOCK, 1, true);
+    }
     
     /**
-     * Type or cell
+     * Type of cell
      */
     private PolyethyleneFuelCellType cellType;
     
@@ -29,18 +40,20 @@ public class PolyethyleneFuelCell extends FuelCell
      */
     private int plateQuantity;
 
-    public PolyethyleneFuelCell()
+    public PolyethyleneFuelCell(IDevice owner)
     {
-        
+        super(owner);
     }
     
-    public PolyethyleneFuelCell(CubeSize plateSize, int plateQuantity, boolean hasThermalCapture)
+    public PolyethyleneFuelCell(IDevice owner, CubeSize plateSize, int plateQuantity, boolean hasThermalCapture)
     {
+        this(owner);
         this.setup(plateSize, plateQuantity, hasThermalCapture);
     }
     
-    public PolyethyleneFuelCell(NBTTagCompound tag)
+    public PolyethyleneFuelCell(IDevice owner, NBTTagCompound tag)
     {
+        this(owner);
         this.deserializeNBT(tag);
     }
     
@@ -58,9 +71,9 @@ public class PolyethyleneFuelCell extends FuelCell
     }
 
     @Override
-    protected long provideEnergyImplementation(AbstractMachine mte, long maxOutput, boolean allowPartial, boolean simulate)
+    protected long generateImplementation(long maxOutput, boolean allowPartial, boolean simulate)
     {
-        MaterialBufferDelegate fuelBuffer = mte.bufferHDPE();
+        MaterialBufferDelegate fuelBuffer = this.device().getBufferManager().bufferHDPE();
         
         if(fuelBuffer == null) return 0;
         
@@ -88,18 +101,6 @@ public class PolyethyleneFuelCell extends FuelCell
         }
         return energy;
     }   
-
-    @Override
-    public long energyInputLastTickJoules()
-    {
-        return 0;
-    }
-
-    @Override
-    public long maxEnergyInputJoulesPerTick()
-    {
-        return 0;
-    }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
@@ -142,17 +143,5 @@ public class PolyethyleneFuelCell extends FuelCell
     public PolyethyleneFuelCellType cellType()
     {
         return this.cellType;
-    }
-
-    @Override
-    public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
-    {
-        return 0;
-    }
-
-    @Override
-    public boolean canAcceptEnergy()
-    {
-        return false;
     }
 }

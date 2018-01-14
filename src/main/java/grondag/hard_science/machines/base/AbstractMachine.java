@@ -1,15 +1,11 @@
 package grondag.hard_science.machines.base;
 
-import javax.annotation.Nullable;
-
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
-import grondag.hard_science.machines.support.DeviceEnergyManager;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager;
-import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.AbstractDevice;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -25,24 +21,6 @@ public abstract class AbstractMachine extends AbstractDevice
     private MachineControlState controlState = new MachineControlState();
     protected MachineStatusState statusState = new MachineStatusState();
     
-    /** Levels of materials stored in this machine.  Is persisted to NBT. 
-     * Null (default) means disabled. 
-     */
-    @Nullable
-    private MaterialBufferManager bufferManager = null;
-    
-    /**
-     * Power provider for this machine, if it has one.
-     */
-    @Nullable
-    private DeviceEnergyManager powerSupply;
-    
-    /**
-     * Set to PolyEthylene buffer in subclass constructor if this machine uses PE.  
-     * Sent to power provider during update if this machine has one.
-     */
-    protected MaterialBufferDelegate bufferHDPE;
-    
     /**
      * If non-null will send notifications.
      */
@@ -50,56 +28,8 @@ public abstract class AbstractMachine extends AbstractDevice
     
     public AbstractMachine()
     {
-        this.bufferManager = this.createBufferManager();
-        this.controlState.hasMaterialBuffer(bufferManager != null);
-        this.powerSupply = this.createPowerSuppy();
-        this.controlState.hasPowerSupply(powerSupply != null);
-    }
-    
-    /** 
-     * If this tile has a material buffer, gives access.  Null if not.
-     * Used to serialize/deserialize on client.
-     */
-    public final @Nullable MaterialBufferManager getBufferManager()
-    {
-        return this.bufferManager;
-    }
-    
-    /**
-     * If this machine has a material buffer, used to create a new instance.
-     * May be used on client to create client-side delegate.
-     */
-    @Nullable
-    protected MaterialBufferManager createBufferManager()
-    {
-        return null;
-    }
-    
-    /** 
-     * If this machine has a power provider, gives access.  Null if not.
-     * Used to serialize/deserialize on client.
-     */
-    public final @Nullable DeviceEnergyManager getPowerSupply()
-    {
-        return this.powerSupply;
-    }
-    
-    /**
-     * If this machine has a power supply, used to create a new instance.
-     * May be used on client to obtain a client-side version.
-     */
-    protected @Nullable DeviceEnergyManager createPowerSuppy()
-    {
-        return null;
-    }
-    
-    /**
-     * Used for visual display.
-     * Defaults to max of power supply, or 1 (to help prevent /0) if there isn't one.
-     */
-    public float maxPowerConsumptionWatts()
-    {
-        return this.powerSupply == null ? 1 : this.powerSupply.maxPowerOutputWatts(); 
+        this.controlState.hasMaterialBuffer(this.getBufferManager() != null);
+        this.controlState.hasPowerSupply(!this.energyManager.isEmpty());
     }
     
     public boolean hasBacklog()
@@ -244,8 +174,6 @@ public abstract class AbstractMachine extends AbstractDevice
     {
         super.deserializeNBT(tag);
         this.getControlState().deserializeNBT(tag);
-        if(this.powerSupply != null) this.powerSupply.deserializeNBT(tag);
-        if(this.bufferManager != null) this.bufferManager.deserializeNBT(tag);
         if(this.hasFront() && tag.hasKey(ModNBTTag.MACHINE_FRONT)) this.setFront(Useful.safeEnumFromTag(tag, ModNBTTag.MACHINE_FRONT, EnumFacing.NORTH));
     }
 
@@ -254,8 +182,6 @@ public abstract class AbstractMachine extends AbstractDevice
     {
         super.serializeNBT(tag);
         this.getControlState().serializeNBT(tag);
-        if(this.powerSupply != null) this.powerSupply.serializeNBT(tag);
-        if(this.bufferManager != null) this.bufferManager.serializeNBT(tag);
         if(this.hasFront() && this.getFront() != null) Useful.saveEnumToTag(tag, ModNBTTag.MACHINE_FRONT, this.getFront());
     }
     
@@ -271,9 +197,8 @@ public abstract class AbstractMachine extends AbstractDevice
     public final void doOnTick()
     {
         super.doOnTick();
-        long tick = Simulator.instance().getTick();
         
-        if(this.powerSupply != null && this.powerSupply.tick(this, tick)) this.setDirty();
+        int tick = Simulator.instance().getTick();
         
         if((tick & 0xF) == 0 && this.isOn()) this.restock();
         
@@ -357,22 +282,13 @@ public abstract class AbstractMachine extends AbstractDevice
      */
     protected void blamePowerSupply()
     {
-        if(!this.getPowerSupply().isFailureCause())
+        if(!this.energyManager().isFailureCause())
         {
-            this.getPowerSupply().setFailureCause(true);
+            this.energyManager().setFailureCause(true);
             this.markTEPlayerUpdateDirty(false);
         }
     }
 
-    /**
-     * Returns HDPE material buffer if this machine has one.
-     */
-    @Nullable
-    public MaterialBufferDelegate bufferHDPE()
-    {
-        return this.bufferHDPE;
-    }
-    
     // TODO: machine facing still needed?
     // Assuming displays are AR, so not a necessity for realism
     

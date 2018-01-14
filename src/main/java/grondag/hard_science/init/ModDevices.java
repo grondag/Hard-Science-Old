@@ -8,7 +8,7 @@ import grondag.hard_science.machines.ModularTankMachine;
 import grondag.hard_science.machines.SmartChestMachine;
 import grondag.hard_science.machines.SolarAggregatorMachine;
 import grondag.hard_science.machines.SolarCableMachine;
-import grondag.hard_science.machines.SolarCellMachine;
+import grondag.hard_science.machines.PhotoElectricMachine;
 import grondag.hard_science.machines.TopBusMachine;
 import grondag.hard_science.machines.TransportTestMachine;
 import grondag.hard_science.machines.WaterPumpMachine;
@@ -23,7 +23,7 @@ public class ModDevices
         DeviceManager.register(HardScience.MODID + ":block_fabricator", BlockFabricatorMachine.class);
         DeviceManager.register(HardScience.MODID + ":smart_chest", SmartChestMachine.class);
         DeviceManager.register(HardScience.MODID + ":solar_aggregator", SolarAggregatorMachine.class);
-        DeviceManager.register(HardScience.MODID + ":solar_cell", SolarCellMachine.class);
+        DeviceManager.register(HardScience.MODID + ":solar_cell", PhotoElectricMachine.class);
         DeviceManager.register(HardScience.MODID + ":solar_cable", SolarCableMachine.class);
         DeviceManager.register(HardScience.MODID + ":bottom_bus", BottomBusMachine.class);
         DeviceManager.register(HardScience.MODID + ":middle_bus", MiddleBusMachine.class);

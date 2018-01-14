@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.machines.support.DeviceEnergyManager;
+import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.Domain;
@@ -42,10 +44,25 @@ public abstract class AbstractDevice implements IDevice
     protected final ITransportManager<StorageTypeStack> itemTransportManager;
     protected final ITransportManager<StorageTypePower> powerTransportManager;
     
+    
+    /** Levels of materials stored in this machine.  Is persisted to NBT. 
+     * Null (default) means disabled. 
+     */
+    @Nullable
+    private MaterialBufferManager bufferManager = null;
+    
+    /**
+     * Energy manager for this device.
+     */
+    protected DeviceEnergyManager energyManager;
+    
     protected AbstractDevice()
     {
+        
         this.itemTransportManager = this.createItemTransportManager();
         this.powerTransportManager = this.createPowerTransportManager();
+        this.bufferManager = this.createBufferManager();
+        this.energyManager = this.createEnergyManager();
     }
     
     /**
@@ -65,12 +82,47 @@ public abstract class AbstractDevice implements IDevice
     }
     
     /**
+     * If this machine has a material buffer, used to create a new instance.
+     * May be used on client to create client-side delegate.
+     */
+    @Nullable
+    protected MaterialBufferManager createBufferManager()
+    {
+        return null;
+    }
+    
+
+    @Override
+    @Nullable
+    public final MaterialBufferManager getBufferManager()
+    {
+        return this.bufferManager;
+    }
+    
+    /** 
+     * If this machine has an energy manager provider, gives access.  Null if not.
+     */
+    public final DeviceEnergyManager energyManager()
+    {
+        return this.energyManager;
+    }
+    
+    /**
      * Override to implement block manager functionality
      */
     protected IDeviceBlockManager createBlockManager()
     {
         return null;
     }
+    
+    /**
+     * Override to enable energy consumption / production.
+     */
+    protected DeviceEnergyManager createEnergyManager()
+    {
+        return new DeviceEnergyManager(this, null, null, null);
+    }
+    
     
     @Override
     public final IDeviceBlockManager blockManager()
@@ -164,6 +216,9 @@ public abstract class AbstractDevice implements IDevice
         
         this.domainID = tag.getInteger(ModNBTTag.DOMAIN_ID);
         this.channel = tag.getInteger(ModNBTTag.DEVICE_CHANNEL);
+        if(this.bufferManager != null) this.bufferManager.deserializeNBT(tag);
+        this.energyManager.deserializeNBT(tag);
+
     }
 
     @Override
@@ -173,6 +228,9 @@ public abstract class AbstractDevice implements IDevice
         Location.saveToNBT(location, tag);
         tag.setInteger(ModNBTTag.DOMAIN_ID, this.domainID);
         tag.setInteger(ModNBTTag.DEVICE_CHANNEL, this.channel);
+        if(this.bufferManager != null) this.bufferManager.serializeNBT(tag);
+        this.energyManager.serializeNBT(tag);
+
     }
     
     @Override
@@ -180,6 +238,7 @@ public abstract class AbstractDevice implements IDevice
     {
         this.blockManager = this.createBlockManager();
         IDevice.super.onConnect();
+        this.energyManager.onConnect();
         this.isConnected = true;
     }
     
@@ -188,6 +247,7 @@ public abstract class AbstractDevice implements IDevice
     {
         IDevice.super.onDisconnect();
         this.blockManager = null;
+        this.energyManager.onDisconnect();
         this.isConnected = false;
     }
 
@@ -221,8 +281,7 @@ public abstract class AbstractDevice implements IDevice
                 return this.itemStorage().takeUpTo((IResource<StorageTypeStack>)resource, quantity, simulate, (IProcurementRequest<StorageTypeStack>)request);
 
         case POWER:
-            if(this.hasPowerStorage()) 
-                return this.powerStorage().takeUpTo((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
+            return this.energyManager().takeUpTo((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
 
         default:
             assert false : "Unhandled enum mapping";
@@ -258,8 +317,7 @@ public abstract class AbstractDevice implements IDevice
                 return this.itemStorage().add((IResource<StorageTypeStack>)resource, quantity, simulate, (IProcurementRequest<StorageTypeStack>)request);
 
         case POWER:
-            if(this.hasPowerStorage()) 
-                return this.powerStorage().add((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
+            return this.energyManager().add((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
 
         default:
             assert false : "Unhandled enum mapping";
@@ -275,4 +333,16 @@ public abstract class AbstractDevice implements IDevice
         return this.onConsumeImpl(resource, quantity, simulate, request);
     }
 
+    @Override
+    public boolean doesUpdateOffTick()
+    {
+        return this.energyManager.doesUpdateOffTick();
+    }
+
+    @Override
+    public void doOffTick()
+    {
+        IDevice.super.doOffTick();
+        if(this.energyManager.doesUpdateOffTick()) this.energyManager.doOffTick();
+    }
 }

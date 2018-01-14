@@ -8,84 +8,160 @@ import net.minecraft.network.PacketBuffer;
  */
 public class DeviceEnergyInfo implements IMessagePlus
 {
-    private float maxPowerOutputWatts;
-    private EnergyComponentInfo battery;
-    private EnergyComponentInfo fuelCell;
-    // currently not used
-//    private EnergyComponentInfo powerReceiver;
+    private float maxGenerationWatts;
+    private float maxDeviceDrawWatts;
+    private float maxDischargeWatts;
+    private float maxChargeWatts;
+    private long maxStoredEnergyJoules;
+    
+    // if ever split this into static/dynamic packets
+    // dynamic stuff is here
+    private boolean isFailureCause;
+    private float generationWatts;
+    private float deviceDrawWatts;
+    private float netStorageWatts;
+    private long storedEnergyJoules;
     
     public DeviceEnergyInfo() { }
     
     public DeviceEnergyInfo(DeviceEnergyManager powerSupply)
     {
-        this.maxPowerOutputWatts = powerSupply.maxPowerOutputWatts();
-        if(powerSupply.battery() != null) this.battery = new EnergyComponentInfo(powerSupply.battery());
-        if(powerSupply.fuelCell() != null) this.fuelCell = new EnergyComponentInfo(powerSupply.fuelCell());
-//        if(powerSupply.powerReceiver() != null) this.powerReceiver = new EnergyComponentInfo(powerSupply.powerReceiver());
+        if(powerSupply.generator() != null)
+        {
+            this.maxGenerationWatts = powerSupply.generator().maxPowerOutputWatts();
+        }
+        
+        this.maxStoredEnergyJoules = powerSupply.maxStoredEnergyJoules();
+        
+        if(powerSupply.inputContainer() != null)
+        {
+            this.maxDeviceDrawWatts = powerSupply.inputContainer().maxPowerOutputWatts();
+        }
+        if(powerSupply.outputContainer() != null)
+        {
+            this.maxDischargeWatts = powerSupply.outputContainer().maxPowerOutputWatts();
+            this.maxChargeWatts = powerSupply.outputContainer().maxPowerInputWatts();
+        }
+        
+        // if ever split this into static/dynamic packets
+        // dynamic stuff is here
+        this.isFailureCause = powerSupply.isFailureCause();
+        if(powerSupply.generator() != null)
+        {
+            this.generationWatts = powerSupply.generator().powerOutputWatts();
+        }
+        this.storedEnergyJoules = powerSupply.storedEnergyJoules();
+        this.netStorageWatts = powerSupply.netStorageWatts();
+        if(powerSupply.inputContainer() != null)
+        {
+            this.deviceDrawWatts = powerSupply.inputContainer().powerOutputWatts();
+        }
     }
 
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
-        pBuff.writeFloat(this.maxPowerOutputWatts);
-        if(this.battery == null)
-        {
-            pBuff.writeBoolean(false);
-        }
-        else
-        {
-            pBuff.writeBoolean(true);
-            this.battery.toBytes(pBuff);
-        }
-        if(this.fuelCell == null)
-        {
-            pBuff.writeBoolean(false);
-        }
-        else
-        {
-            pBuff.writeBoolean(true);
-            this.fuelCell.toBytes(pBuff);
-        }
+        pBuff.writeFloat(this.maxChargeWatts);
+        pBuff.writeFloat(this.maxDeviceDrawWatts);
+        pBuff.writeFloat(this.maxDischargeWatts);
+        pBuff.writeFloat(this.maxGenerationWatts);
+        pBuff.writeLong(this.maxStoredEnergyJoules);
+        
+        pBuff.writeBoolean(this.isFailureCause);
+        pBuff.writeFloat(this.deviceDrawWatts);
+        pBuff.writeFloat(this.generationWatts);
+        pBuff.writeFloat(this.netStorageWatts);
+        pBuff.writeLong(this.storedEnergyJoules);
     }
 
     @Override
     public void fromBytes(PacketBuffer pBuff)
     {
-        this.maxPowerOutputWatts = pBuff.readFloat();
-        if(pBuff.readBoolean())
-        {
-            this.battery = new EnergyComponentInfo();
-            this.battery.fromBytes(pBuff);
-        }
-        if(pBuff.readBoolean())
-        {
-            this.fuelCell = new EnergyComponentInfo();
-            this.fuelCell.fromBytes(pBuff);
-        }
+        this.maxChargeWatts = pBuff.readFloat();
+        this.maxDeviceDrawWatts = pBuff.readFloat();
+        this.maxDischargeWatts = pBuff.readFloat();
+        this.maxGenerationWatts = pBuff.readFloat();
+        this.maxStoredEnergyJoules = pBuff.readLong();
+        
+        this.isFailureCause = pBuff.readBoolean();
+        this.deviceDrawWatts = pBuff.readFloat();
+        this.generationWatts = pBuff.readFloat();
+        this.netStorageWatts = pBuff.readFloat();
+        this.storedEnergyJoules = pBuff.readLong();
     }
 
-    public boolean hasBattery()
+    /**
+     * Max rate of discharge for power storage.
+     */
+    public float maxDischargeWatts()
     {
-        return this.battery != null;
+        return this.maxDischargeWatts;
     }
 
-    public float maxPowerOutputWatts()
+    /**
+     * Max rate of power production if this device
+     * contains a generator component.
+     */
+    public float maxGenerationWatts()
     {
-        return this.maxPowerOutputWatts;
+        return this.maxGenerationWatts;
+    }
+    
+    /**
+     * Max sustained rate of power consumption by this device 
+     */
+    public float maxDeviceDrawWatts()
+    {
+        return this.maxDeviceDrawWatts;
     }
 
-    public EnergyComponentInfo fuelCell()
+    public boolean hasGenerator()
     {
-        return this.fuelCell;
+        return this.maxGenerationWatts > 0;
     }
 
-    public EnergyComponentInfo battery()
+    /**
+     * Max rate of energy storage charge.
+     */
+    public float maxChargeWatts()
     {
-        return this.battery;
+        return this.maxChargeWatts;
     }
 
-    public boolean hasFuelCell()
+    /**
+     * Max energy storage charge
+     */
+    public double maxStoredEnergyJoules()
     {
-        return this.fuelCell != null;
+        return this.maxStoredEnergyJoules;
+    }
+    
+    public boolean isFailureCause()
+    {
+        return this.isFailureCause;
+    }
+
+    public long storedEnergyJoules()
+    {
+        return this.storedEnergyJoules;
+    }
+
+    /**
+     * Negative if net discharge from energy storage,
+     * positive if net charge.
+     */
+    public float netStorageWatts()
+    {
+        return this.netStorageWatts;
+    }
+    
+    public float deviceDrawWatts()
+    {
+        return this.deviceDrawWatts;
+    }
+
+    public float generationWatts()
+    {
+        return this.generationWatts;
     }
 }

@@ -150,18 +150,7 @@ public interface IResourceContainer<T extends StorageType<T>>
     {
         return this.takeUpTo(resource, limit, simulate, true, null);
     }
-
-    /**
-     * Call from device connect.
-     */
-    default void onConnect() {}
-
-    /**
-     * Call from device disconnect.
-     */
-
-    default void onDisconnect() {}
-
+  
     public default StorageWithQuantity<T> withQuantity(long quantity)
     {
         return new StorageWithQuantity<T>(this, quantity);

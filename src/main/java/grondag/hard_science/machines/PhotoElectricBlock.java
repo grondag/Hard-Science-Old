@@ -13,9 +13,9 @@ import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.Textures;
 
-public class SolarCellBlock extends MachineSimpleBlock
+public class PhotoElectricBlock extends MachineSimpleBlock
 {
-    public SolarCellBlock(String blockName)
+    public PhotoElectricBlock(String blockName)
     {
         super(blockName, createDefaulModelState());
     }
@@ -43,6 +43,6 @@ public class SolarCellBlock extends MachineSimpleBlock
     @Override
     public AbstractMachine createNewMachine()
     {
-        return new SolarCellMachine();
+        return new PhotoElectricMachine();
     }
 }

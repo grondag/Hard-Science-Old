@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.init.Items;
@@ -283,6 +285,11 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             this.nbtTag = nbtKey;
             this.tooltipKey = "machine.buffer_" + tooltipKey;
         }
+        
+        public boolean isHDPE()
+        {
+            return this.nbtTag == ModNBTTag.MATERIAL_HDPE;
+        }
     }
     
     private final VolumetricBufferSpec[] specs;
@@ -314,6 +321,8 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
      */
     private long avgDeltaLastSampleMillis = 0;
     
+    private final int hdpeIndex;
+    
     /**
      * Tracks buffer demand. Only used on server.
      */
@@ -323,6 +332,19 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     {
         this.specs = buffers;
         int size = buffers.length;
+        
+        int hdpeIndex = -1;
+        for(int i = 0; i < size; i++)
+        {
+            if(buffers[i].isHDPE())
+            {
+                hdpeIndex = i;
+                break;
+            }
+            
+        }
+        this.hdpeIndex = hdpeIndex;
+        
         this.levelsNanoLiters = new long[size];
         
         this.isDeltaTrackingEnabled = Configurator.MACHINES.enableDeltaTracking && FMLCommonHandler.instance().getSide() == Side.CLIENT;
@@ -338,6 +360,15 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         {
             this.deltaTrackingData = null; 
         }
+    }
+    
+    /**
+     * Returns HDPE material buffer if this machine has one.
+     */
+    @Nullable
+    public MaterialBufferDelegate bufferHDPE()
+    {
+        return this.hdpeIndex == -1 ? null : this.getBuffer(this.hdpeIndex);
     }
     
     /**

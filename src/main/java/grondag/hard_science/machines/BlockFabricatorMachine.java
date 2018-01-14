@@ -7,6 +7,7 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
+import grondag.hard_science.machines.support.BatteryChemistry;
 import grondag.hard_science.machines.support.DeviceEnergyManager;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.DemandManager;
@@ -26,7 +27,9 @@ import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.IResourceContainer;
+import grondag.hard_science.simulator.storage.PowerContainer;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -46,7 +49,6 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     private static final int WATTS_FABRICATION = 1200;
     private static final int JOULES_PER_TICK_IDLE = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_IDLE));
     private static final int JOULES_PER_TICK_FABRICATING = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_FABRICATION));
-    private static final int WATTS_MAX_CONSUMPTION = WATTS_FABRICATION;
     private static final long TICKS_PER_FULL_BLOCK = 40;
 
     private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(Matter.HDPE);
@@ -128,7 +130,6 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         
         // note that order has to match array declaration
         MaterialBufferManager bufferManager = this.getBufferManager();
-        this.bufferHDPE = bufferManager.getBuffer(BUFFER_INDEX_HDPE);
         this.bufferFiller = bufferManager.getBuffer(BUFFER_INDEX_FILLER);
         this.bufferResinA = bufferManager.getBuffer(BUFFER_INDEX_RESIN_A);
         this.bufferResinB = bufferManager.getBuffer(BUFFER_INDEX_RESIN_B);
@@ -147,11 +148,19 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     }
 
     @Override
-    protected DeviceEnergyManager createPowerSuppy()
+    protected DeviceEnergyManager createEnergyManager()
     {
+        PowerContainer output = new PowerContainer(this, ContainerUsage.BUFFER_OUT);
+        output.configure(VolumeUnits.LITER.nL, BatteryChemistry.SILICON);
+        
+        PowerContainer input = new PowerContainer(this, ContainerUsage.BUFFER_IN);
+        input.configure(VolumeUnits.MILLILITER.nL * 10L, BatteryChemistry.CAPACITOR);
+        
         return new DeviceEnergyManager(
-                PolyethyleneFuelCell.BASIC_1KW, 
-                this.powerStorage());
+                this,
+                PolyethyleneFuelCell.basic_1kw(this), 
+                input,
+                output);
     }
     
     public BlockFabricationTask task()
@@ -207,7 +216,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     {
         if(this.isTaskAbandoned()) return;
         
-        if(this.getPowerSupply().provideEnergy(this, JOULES_PER_TICK_FABRICATING, false, false) != 0)
+        if(this.energyManager().provideEnergy(JOULES_PER_TICK_FABRICATING, false, false) != 0)
         {
             if(this.getControlState().progressJob((short) 1))
             {
@@ -231,7 +240,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     {
         if(this.isTaskAbandoned()) return;
         
-        if(this.getPowerSupply().provideEnergy(this, JOULES_PER_TICK_IDLE, false, false) == 0)
+        if(this.energyManager().provideEnergy(JOULES_PER_TICK_IDLE, false, false) == 0)
         {
             this.blamePowerSupply();
             return;
@@ -252,7 +261,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         ItemResource res = ItemResource.fromStack(stack);
         
         //TODO: pass in procurement request
-        List<IResourceContainer<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, 1);
+        List<IResourceContainer<StorageTypeStack>> locations = this.getDomain().itemStorage.findSpaceFor(res, this);
         
         if(locations.isEmpty()) return;
         
@@ -316,17 +325,11 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         super.onDisconnect();
     }
 
-    @Override
-    public float maxPowerConsumptionWatts()
-    {
-        return WATTS_MAX_CONSUMPTION;
-    }
-    
     private void searchForWork()
     {
         if(this.getDomain() == null) return;
         
-        if(this.getPowerSupply().provideEnergy(this, JOULES_PER_TICK_IDLE, false, false) == 0)
+        if(this.energyManager().provideEnergy(JOULES_PER_TICK_IDLE, false, false) == 0)
         {
             this.blamePowerSupply();
             return;

@@ -35,12 +35,6 @@ public class PowerResource extends AbstractResource<StorageType.StorageTypePower
     }
 
     @Override
-    public int computeResourceHashCode()
-    {
-        return this.hashCode();
-    }
-
-    @Override
     public boolean isResourceEqual(IResource<StorageTypePower> other)
     {
         return other == this;

@@ -3,7 +3,6 @@ package grondag.hard_science.machines.base;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.DeviceEnergyInfo;
-import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
@@ -66,11 +65,6 @@ public class MachineClientState
      */
     public DeviceEnergyInfo powerSupplyInfo;
     
-    /**
-     * Used for client rendering - will only be updated as needed.
-     */
-    public DeviceEnergyStatus powerSupplyStatus;
-    
     public String machineName = "???";
     
     public MachineClientState(MachineTileEntity mte)
@@ -78,10 +72,11 @@ public class MachineClientState
         AbstractMachine tempMachine = mte.createNewMachine();
         this.bufferManager = tempMachine.getBufferManager();
         this.powerSupplyInfo = new DeviceEnergyInfo();
-        this.powerSupplyStatus = new DeviceEnergyStatus();
         this.hasOnOff = tempMachine.hasOnOff();
         this.hasRedstoneControl = tempMachine.hasRedstoneControl();
-        this.maxPowerConsumptionWatts = tempMachine.maxPowerConsumptionWatts();
+        
+        //TODO: seems redundant, move to DeviceEnergyInfo?
+        this.maxPowerConsumptionWatts = tempMachine.energyManager().maxDeviceDrawWatts();
     }
     
     /**
@@ -102,7 +97,6 @@ public class MachineClientState
         if(this.controlState.hasPowerSupply())
         {
             this.powerSupplyInfo = packet.powerSupplyInfo;
-            this.powerSupplyStatus = packet.powerSupplyStatus;
         }
     }
     

@@ -26,7 +26,6 @@ public interface IResource<V extends StorageType<V>> extends IResourcePredicate<
     public V storageType();
     public String displayName();
     public AbstractResourceWithQuantity<V> withQuantity(long quantity);
-    public int computeResourceHashCode();
     public boolean isResourceEqual(@Nullable IResource<V> other);
     
     @Override

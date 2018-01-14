@@ -6,7 +6,6 @@ import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.DeviceEnergyInfo;
-import grondag.hard_science.machines.support.DeviceEnergyStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
@@ -20,12 +19,12 @@ public class MachinePowerUsage extends AbstractMachineControl<MachinePowerUsage,
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        DeviceEnergyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
+        DeviceEnergyInfo mps = this.tileEntity.clientState().powerSupplyInfo;
         if(mps != null)
         {
             ArrayList<String> list = new ArrayList<String>(3);
             list.add(I18n.translateToLocalFormatted("machine.power_out", 
-                    mps.powerOutputWatts()));
+                    mps.deviceDrawWatts()));
             renderContext.drawToolTip(list, mouseX, mouseY);
         }
     }
@@ -36,11 +35,7 @@ public class MachinePowerUsage extends AbstractMachineControl<MachinePowerUsage,
         DeviceEnergyInfo mpi = this.tileEntity.clientState().powerSupplyInfo;
         if(mpi != null)
         {
-            DeviceEnergyStatus mps = this.tileEntity.clientState().powerSupplyStatus;
-            if(mps != null && mps.hasBattery())
-            {
-                MachineControlRenderer.renderPower(this.renderBounds, mpi, mps, 0xFF);
-            }
+            MachineControlRenderer.renderPower(this.renderBounds, mpi, 0xFF);
         }
     }
 

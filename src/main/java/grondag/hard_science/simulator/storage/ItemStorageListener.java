@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.magicwerk.brownies.collections.Key2List;
 import org.magicwerk.brownies.collections.function.IFunction;
@@ -15,6 +16,7 @@ import com.google.common.eventbus.Subscribe;
 
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
+import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
@@ -449,14 +451,28 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         return ImmutableList.copyOf(this.stores);
     }
 
-    @Override
-    public ImmutableList<IResourceContainer<StorageTypeStack>> findSpaceFor(IResource<StorageTypeStack> resource, long quantity)
+    /**
+     * For non-domain listeners, limits to connectivity from 
+     * the primary storage device.  Always empty for domain listener.
+     */
+    public ImmutableList<IResourceContainer<StorageTypeStack>> findSpaceFor(@Nonnull IResource<StorageTypeStack> resource)
     {
-        return this.mode == Mode.DOMAIN
-                ? this.domain.itemStorage.findSpaceFor(resource, quantity)
-                : IStorageAccess.super.findSpaceFor(resource, quantity);
+        return this.storage == null
+                ? ImmutableList.of()
+                : IStorageAccess.super.findSpaceFor(resource, this.storage.device());
     }
 
+    /**
+     * For non-domain listeners, limits to connectivity from 
+     * the primary storage device.  Always fails (returns 0) for domain listener.
+     */
+    public long add(@Nonnull IResource<StorageTypeStack> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<StorageTypeStack> request)
+    {
+        return this.storage == null
+                ? 0
+                : IStorageAccess.super.add(resource, howMany, simulate, request, this.storage.device());
+    }
+    
     @Override
     public ImmutableList<IResourceContainer<StorageTypeStack>> getLocations(IResource<StorageTypeStack> resource)
     {

@@ -60,7 +60,7 @@ public class TransportTestMachine extends AbstractSimpleMachine
                 long remaining = this.itemStorage.getQuantityStored(resource);
                 
                 List<IResourceContainer<StorageTypeStack>> list 
-                    = this.getDomain().itemStorage.findSpaceFor(resource, remaining);
+                    = this.getDomain().itemStorage.findSpaceFor(resource, this);
                 if(list.isEmpty()) return;
                 
                 for(IResourceContainer<StorageTypeStack> store : list)
@@ -71,7 +71,7 @@ public class TransportTestMachine extends AbstractSimpleMachine
                     if(routes.isEmpty()) continue;
                     
                     remaining -= LogisticsService.ITEM_SERVICE
-                            .sendResourceNow(routes.get(0), resource, remaining, this, store.device(), false, false, null);
+                            .sendResourceOnRouteNow(routes.get(0), resource, remaining, this, store.device(), false, false, null);
                     
                     if(remaining <= 0) break;
                 }

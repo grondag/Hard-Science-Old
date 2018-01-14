@@ -1,9 +1,9 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.simulator.device.IDeviceComponent;
 
-public interface IEnergyComponent extends IReadWriteNBT
+public interface IEnergyComponent extends IReadWriteNBT, IDeviceComponent
 {
     /**
      * If this component can store energy, the current stored energy.
@@ -41,6 +41,15 @@ public interface IEnergyComponent extends IReadWriteNBT
     public long energyInputLastTickJoules();
 
     /**
+     * Net result of {@link #powerInputWatts()} and {@link #powerOutputWatts()}.
+     * Will be negative if output was higher than input.
+     */
+    public default float netWattsLastTick()
+    {
+        return (this.energyInputLastTickJoules() - this.energyOutputLastTickJoules())
+                * TimeUnits.TICKS_PER_SIMULATED_SECOND;
+    }
+    /**
      * Maximum possible value of {@link #powerInputWatts()}. 
      * Derived from {@link #maxEnergyInputJoulesPerTick()}.
      */
@@ -57,15 +66,14 @@ public interface IEnergyComponent extends IReadWriteNBT
     public long maxEnergyInputJoulesPerTick();
     
     /**
-     * Level of power coming out of the component
-     * (presumably) due to power consumption during the last tick. 
-     * Always zero or positive. <br><br>
+     * Represents energy export or consumption. 
+     * Always zero or positive. <p>
      * 
-     * If the component stores power, this represents discharge. 
-     * A non-zero value implies {@link #powerInputWatts()} will be zero.<br><br>
+     * For batteries and output buffers, this represents discharge. 
+     * A non-zero value implies {@link #powerInputWatts()} will be zero.<p>
      * 
-     * If the component is an external power source, this is the power
-     * drawn from the external grid. <br><br>
+     * If the component is an input buffer this is the energy consumed 
+     * by the device during the last tick.<p>
      * 
      * If the component is a generator, represents generator output.
      */
@@ -99,7 +107,7 @@ public interface IEnergyComponent extends IReadWriteNBT
      * True if component is able to provide energy right now.
      * If false, any attempt to extract energy will receive a zero result.
      */
-    public boolean canProvideEnergy(AbstractMachine machine);
+    public boolean canProvideEnergy();
     
     /**
      * Consumes energy from this component. 
@@ -112,7 +120,7 @@ public interface IEnergyComponent extends IReadWriteNBT
                   other machine components.
      * @param maxOutput
      *            Maximum amount of energy to be extracted, in joules.<br>
-    *            Limited by {@link #maxEnergyOutputPerTick()}.
+    *            Limited by {@link #maxDeviceDrawPerTick()}.
      * @param allowPartial
      *            If false, no energy will be extracted unless the entire requested amount can be provided.
      * @param simulate
@@ -120,7 +128,7 @@ public interface IEnergyComponent extends IReadWriteNBT
      *
      * @return Energy extracted (or that would have been have been extracted, if simulated) in joules.
      */
-    public long provideEnergy(AbstractMachine machine, long maxOutput, boolean allowPartial, boolean simulate);
+    public long provideEnergy(long maxOutput, boolean allowPartial, boolean simulate);
     
     
     /**

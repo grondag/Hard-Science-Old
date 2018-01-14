@@ -2,6 +2,11 @@ package grondag.hard_science.machines.support;
 
 import java.util.function.Function;
 
+import grondag.hard_science.library.world.Location;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+
 public class MachinePower
 {
     public static final long JOULES_PER_KWH =                   3600000;
@@ -9,6 +14,12 @@ public class MachinePower
     public static final long JOULES_PER_SILICON_BATTERY_LITER = 4300000;
     
     public static final float JOULES_PER_POLYETHYLENE_NANOLITER = (float) JOULES_PER_POLYETHYLENE_LITER / VolumeUnits.LITER.nL;
+    
+    /** 
+     * What portion of battery component volume is actually dedicated to storage
+     * vs support circuitry, cooling, etc.
+     */
+    public static final float BATTERY_SPACE_FACTOR = .775f;
     
     /**
      * Efficiency of catalytic conversion plates for turning PE into electricity.
@@ -43,7 +54,72 @@ public class MachinePower
      */
     public static final long POWER_BUS_JOULES_PER_TICK = (long) wattsToJoulesPerTick(4096);
     
+    /**
+     * Max possible sum of World.getSunBrightnessFactor() for a single minecraft day.
+     * Used to allocate daily insolation per-tick based on current brightness
+     */
+    public static final float TOTAL_DAILY_BRIGHTNESS_FACTOR = 13559;
    
+    /**
+     * Mean daily insolation in an icy biome
+     */
+    public static final long DAILY_INSOLATION_MIN_JOULES =  7200000;
+
+    /**
+     * Mean daily insolation in desert hills
+     */
+    public static final long DAILY_INSOLATION_MAX_JOULES = 27000000;
+
+    /**
+     * Minimum insolation (0-1) that applies at sea level 
+     * on a sunny day in icy biome.
+     */
+    public static final float DAILY_INSOLATION_MIN_FACTOR = (float) 7200000 / DAILY_INSOLATION_MAX_JOULES;
+
+    /**
+     * How much daily insolation can normally vary.  Is
+     * 1 - {@link #DAILY_INSOLATION_MIN_FACTOR}.
+     */
+    public static final float DAILY_INSOLATION_VARIABILITY = 1 - DAILY_INSOLATION_MIN_FACTOR;
+
+    /**
+     * Returns factor of {@link #DAILY_INSOLATION_MAX_JOULES} that will
+     * be received during maximum world brightness for the given location.<p>
+     * 
+     * Factors influencing include:
+     * sky light - if none always zero
+     * rainfall - can it happen and how much?
+     * temp - higher = better
+     * height - higher is slightly better
+     */
+    public static float insolationFactor(Location location)
+    {
+        World world = location.world();
+        
+        if(!world.provider.hasSkyLight()) return 0;
+        
+        Biome b = world.getBiome(location);
+        
+        float tempFactor = MathHelper.clamp(b.getDefaultTemperature(), 0, 2f) / 2f;
+        
+        float rainFactor = b.canRain() 
+                ? (1 - MathHelper.clamp(b.getRainfall(), 0 , 1)) * 0.8f
+                        : 1;
+
+        float variation = tempFactor * 0.6f + rainFactor * 0.3f
+                + location.getY() / 255f * 0.1f;
+        
+            
+        return DAILY_INSOLATION_MIN_FACTOR +
+                DAILY_INSOLATION_VARIABILITY * variation;
+    }
+    
+    /**
+     * How much of insolation is captured by photo-electric cells as
+     * electrical energy. 
+     */
+    public static final float PHOTO_ELECTRIC_EFFICIENCY = 0.65f;
+    
 //    public static enum FuelCellSpec
 //    {
 //        STANDARD_INTEGRATED(JOULES_PER_KWH, 1000, 2000, POLYETHYLENE_CONVERSION_EFFICIENCY_PER_MILLE);

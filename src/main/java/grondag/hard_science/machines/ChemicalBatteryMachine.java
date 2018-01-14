@@ -5,29 +5,31 @@ import javax.annotation.Nullable;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.support.BatteryChemistry;
 import grondag.hard_science.machines.support.DeviceEnergyManager;
+import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.PowerContainer;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.endpoint.PortType;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class ChemicalBatteryMachine extends AbstractSimpleMachine
 {
-    protected final PowerContainer powerStorage;
     
     public ChemicalBatteryMachine()
     {
         super(CarrierLevel.BOTTOM, PortType.CARRIER);
-        this.powerStorage = new PowerContainer(this, ContainerUsage.STORAGE);
-        this.powerStorage.configure(775193798450L, BatteryChemistry.SILICON);
     }
 
     @Override
-    protected @Nullable DeviceEnergyManager createPowerSuppy()
+    protected @Nullable DeviceEnergyManager createEnergyManager()
     {
+        PowerContainer battery = new PowerContainer(this, ContainerUsage.STORAGE);
+        battery.configure(VolumeUnits.LITER.nL * 750L, BatteryChemistry.SILICON);
+        
         return new DeviceEnergyManager(
+                this,
+                null,
                 null, 
-                this.powerStorage);
+                battery);
     }
     
     @Override
@@ -42,37 +44,16 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
         return true;
     }
     
-    @Override
-    public void deserializeNBT(NBTTagCompound tag)
-    {
-        super.deserializeNBT(tag);
-        this.powerStorage.deserializeNBT(tag);
-    }
-
-    @Override
-    public void serializeNBT(NBTTagCompound tag)
-    {
-        super.serializeNBT(tag);
-        this.powerStorage.serializeNBT(tag);
-    }
 
     @Override
     public void onConnect()
     {
         super.onConnect();
-        this.powerStorage.onConnect();
     }
 
     @Override
     public void onDisconnect()
     {
-        this.powerStorage.onDisconnect();
         super.onDisconnect();
-    }
-    
-    @Override
-    public PowerContainer powerStorage()
-    {
-        return this.powerStorage;
     }
 }
