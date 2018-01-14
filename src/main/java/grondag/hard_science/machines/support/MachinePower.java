@@ -52,7 +52,7 @@ public class MachinePower
     /**
      * Max rate of power transfer for standard local power bus
      */
-    public static final long POWER_BUS_JOULES_PER_TICK = (long) wattsToJoulesPerTick(4096);
+    public static final long POWER_BUS_JOULES_PER_TICK = (long) wattsToJoulesPerTick(1000000);
     
     /**
      * Max possible sum of World.getSunBrightnessFactor() for a single minecraft day.

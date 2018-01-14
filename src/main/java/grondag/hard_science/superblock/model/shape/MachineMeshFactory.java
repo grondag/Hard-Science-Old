@@ -7,13 +7,13 @@ import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
-import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
 import grondag.hard_science.superblock.model.shape.machine.CableMeshFactory;
-import grondag.hard_science.superblock.model.shape.machine.SolarCellMeshFactory;
+import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
+import grondag.hard_science.superblock.model.shape.machine.PhotoCellMeshFactory;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
+import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import net.minecraft.block.state.IBlockState;
@@ -31,10 +31,11 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     public static enum MachineShape
     {
         BASIC_BOX,
-        SOLAR_CELL,
-        SOLAR_CABLE,
+        PHOTOCHEM_CELL,
+        PHOTOCHEM_CABLE,
         BOTTOM_BUS,
-        MIDDLE_BUS
+        MIDDLE_BUS,
+        PHOTOELECTRIC_CELL
     }
     
     private static final ShapeMeshGenerator[] HANDLERS;
@@ -54,10 +55,11 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
         HANDLERS = new ShapeMeshGenerator[MachineShape.values().length];
         
         HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory(true);
-        HANDLERS[MachineShape.SOLAR_CELL.ordinal()] = new SolarCellMeshFactory();
-        HANDLERS[MachineShape.SOLAR_CABLE.ordinal()] = new CableMeshFactory(1.0/16.0, true);
+        HANDLERS[MachineShape.PHOTOCHEM_CELL.ordinal()] = new PhotoCellMeshFactory(0.5f);
+        HANDLERS[MachineShape.PHOTOCHEM_CABLE.ordinal()] = new CableMeshFactory(1.0/16.0, true);
         HANDLERS[MachineShape.BOTTOM_BUS.ordinal()] = new CableMeshFactory(1.0 / 5.0, false);
         HANDLERS[MachineShape.MIDDLE_BUS.ordinal()] = new MachineCubeMeshFactory(false);
+        HANDLERS[MachineShape.PHOTOELECTRIC_CELL.ordinal()] = new PhotoCellMeshFactory(0.15f);
     }
     
     public static ShapeMeshGenerator getShapeMeshFactory()

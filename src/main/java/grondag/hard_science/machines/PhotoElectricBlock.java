@@ -24,16 +24,16 @@ public class PhotoElectricBlock extends MachineSimpleBlock
     {
         ModelState result = new ModelState();
         result.setShape(ModelShape.MACHINE);
-        MachineMeshFactory.setMachineShape(MachineShape.SOLAR_CELL, result);
+        MachineMeshFactory.setMachineShape(MachineShape.PHOTOELECTRIC_CELL, result);
         
         // top is main, sides/bottom are lamp
-        result.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_SUBTLE);
+        result.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_SUBTLE_ZOOM);
         result.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VIOLET, Chroma.WHITE, Luminance.EXTRA_DARK));
         
         result.setTexture(PaintLayer.OUTER, Textures.BORDER_GRITTY_INSET_PINSTRIPE);
         result.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VIOLET, Chroma.NEUTRAL, Luminance.DARK));
         
-        result.setTexture(PaintLayer.LAMP, Textures.TILE_DOTS_INVERSE);
+        result.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
         result.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.DARK));
 
 //        result.setStatic(true);

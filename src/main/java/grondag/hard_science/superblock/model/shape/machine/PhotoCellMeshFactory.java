@@ -21,13 +21,17 @@ import net.minecraft.world.World;
  * Square machines use lamp surface as the control face
  * and main surface as the casing sides.
  */
-public class SolarCellMeshFactory extends AbstractMachineMeshGenerator implements ICollisionHandler
+public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implements ICollisionHandler
 {
+    private final float height;
+    private final AxisAlignedBB AABB;
     
-    public SolarCellMeshFactory()
+    public PhotoCellMeshFactory(float height)
     {
         super(ModelState.STATE_FLAG_NONE, 
                 MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
+        this.height = height;
+        this.AABB = new AxisAlignedBB(0, 0, 0, 1, height, 1);
     }
     
     /**
@@ -48,7 +52,7 @@ public class SolarCellMeshFactory extends AbstractMachineMeshGenerator implement
         RawQuad quad = template.clone();
         quad.surfaceInstance = MachineMeshFactory.INSTANCE_MAIN;
         quad.setFace(EnumFacing.UP);
-        quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.5, EnumFacing.NORTH);
+        quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 1 - height, EnumFacing.NORTH);
         builder.add(quad);
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
@@ -56,7 +60,7 @@ public class SolarCellMeshFactory extends AbstractMachineMeshGenerator implement
             quad = template.clone();
             quad.surfaceInstance = MachineMeshFactory.INSTANCE_LAMP;
             quad.setFace(face);
-            quad.setupFaceQuad( 0.0, 0.0, 1.0, 0.5, 0.0, EnumFacing.UP);
+            quad.setupFaceQuad( 0.0, 0.0, 1.0, height, 0.0, EnumFacing.UP);
             builder.add(quad);
         }
         
@@ -105,7 +109,6 @@ public class SolarCellMeshFactory extends AbstractMachineMeshGenerator implement
         return ImmutableList.of(getCollisionBoundingBox(modelState));
     }
 
-    private static final AxisAlignedBB AABB = new AxisAlignedBB(0, 0, 0, 1, 0.5f, 1);
     @Override
     public AxisAlignedBB getCollisionBoundingBox(ModelState modelState)
     {

@@ -4,6 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.LoadedWorldInfo;
+import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.jobs.IWorldTask;
@@ -57,9 +58,9 @@ public class PhotoElectricCell extends AbstractGenerator
             public int runInServerTick(int maxOperations)
             {
                 this.isDone = true;
-                World world = device().getLocation().world();
-                
-                if(!world.canBlockSeeSky(device().getLocation().up()))
+                Location loc = device().getLocation();
+                World world = loc.world();
+                if(world.getHeight(loc.getX(), loc.getZ()) != loc.getY() + 1)
                 {
                     joulesPerTickBrightness = 0;
                     return 1;
@@ -68,6 +69,7 @@ public class PhotoElectricCell extends AbstractGenerator
                 float factor = MachinePower.insolationFactor(device().getLocation())
                         * MachinePower.DAILY_INSOLATION_MAX_JOULES 
                         / MachinePower.TOTAL_DAILY_BRIGHTNESS_FACTOR;
+                
                 
                 joulesPerTickBrightness = factor;
                 return 1;
