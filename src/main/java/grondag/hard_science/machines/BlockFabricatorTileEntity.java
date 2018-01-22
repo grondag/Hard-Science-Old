@@ -4,7 +4,7 @@ import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
-import grondag.hard_science.materials.MatterColors;
+import grondag.hard_science.matter.MatterColors;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

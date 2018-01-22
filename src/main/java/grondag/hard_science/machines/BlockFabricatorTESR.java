@@ -5,7 +5,7 @@ import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MaterialBufferManager;
+import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraftforge.fml.relauncher.Side;

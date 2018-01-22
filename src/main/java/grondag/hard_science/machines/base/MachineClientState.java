@@ -1,10 +1,10 @@
 package grondag.hard_science.machines.base;
 
 import grondag.hard_science.init.ModSuperModelBlocks;
+import grondag.hard_science.machines.energy.DeviceEnergyInfo;
+import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
 import grondag.hard_science.machines.support.MachineControlState;
-import grondag.hard_science.machines.support.DeviceEnergyInfo;
 import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;

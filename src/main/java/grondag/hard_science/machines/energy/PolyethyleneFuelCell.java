@@ -1,9 +1,11 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.machines.energy;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.TimeUnits;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
-import grondag.hard_science.materials.CubeSize;
+import grondag.hard_science.machines.matbuffer.MaterialBufferDelegate;
+import grondag.hard_science.matter.CubeSize;
+import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;

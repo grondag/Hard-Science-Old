@@ -1,7 +1,7 @@
 package grondag.hard_science.network.server_to_client;
 
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.energy.DeviceEnergyInfo;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;

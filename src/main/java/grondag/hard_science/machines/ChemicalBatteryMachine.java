@@ -3,9 +3,9 @@ package grondag.hard_science.machines;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
-import grondag.hard_science.machines.support.BatteryChemistry;
-import grondag.hard_science.machines.support.DeviceEnergyManager;
-import grondag.hard_science.machines.support.VolumeUnits;
+import grondag.hard_science.machines.energy.BatteryChemistry;
+import grondag.hard_science.machines.energy.DeviceEnergyManager;
+import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.PowerContainer;
 

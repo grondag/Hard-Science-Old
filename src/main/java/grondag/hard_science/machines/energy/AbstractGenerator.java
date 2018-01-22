@@ -1,4 +1,4 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.machines.energy;
 
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.storage.PowerContainer;

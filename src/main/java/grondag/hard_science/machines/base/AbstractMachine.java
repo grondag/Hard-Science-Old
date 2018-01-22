@@ -1,9 +1,9 @@
 package grondag.hard_science.machines.base;
 
+import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.AbstractDevice;
 import net.minecraft.entity.player.EntityPlayerMP;

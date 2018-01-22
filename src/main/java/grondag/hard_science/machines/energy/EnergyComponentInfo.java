@@ -1,4 +1,4 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.machines.energy;
 
 import grondag.hard_science.library.serialization.IMessagePlus;
 import net.minecraft.network.PacketBuffer;

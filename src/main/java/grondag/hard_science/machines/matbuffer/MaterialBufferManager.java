@@ -1,4 +1,4 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.machines.matbuffer;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -10,7 +10,6 @@ import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.init.Items;
@@ -23,276 +22,7 @@ import net.minecraftforge.items.IItemHandler;
 
 public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
 {
-    private static class DeltaTrackingData
-    {
-        /**
-         * Circular buffer with additions made in last 16 sample periods 
-         */
-        private final long deltaIn[] = new long[16];
-        
-        /**
-         * Circular buffer with removals made in last 16 sample periods.
-         * Always positive values.
-         */
-        private final long deltaOut[] = new long[16];
-        
-        /**
-         * Total of all samples in {@link #deltaIn}.  Maintained incrementally.
-         */
-        private long deltaTotalIn;
-        
-        /**
-         * Total of all samples in {@link #deltaOut}.  Maintained incrementally.
-         */
-        private long deltaTotalOut;
-        
-        /**
-         * Exponentially smoothed average {@link #deltaTotalIn}.
-         */
-        private float deltaAvgIn;
-        
-        /**
-         * Exponentially smoothed average {@link #deltaTotalOut}.
-         */
-        private float deltaAvgOut;
-    }
-    
-    
-    public class DemandManager
-    {
-        private final long[] demands = new long[MaterialBufferManager.this.specs.length];
-        
-        public void addDemand(int bufferIndex, long demandNanoLiters)
-        {
-            this.demands[bufferIndex] += demandNanoLiters;
-        }
-        
-        /**
-         * Also blames any buffers that can't meet demand.
-         */
-        public boolean canAllDemandsBeMetAndBlameIfNot()
-        {
-            boolean isReady = true;
-            
-            // want to check all so that we can blame any buffer that would hold us up
-            for(int i = specs.length - 1; i >= 0; i--)
-            {
-                if(this.demands[i] > MaterialBufferManager.this.getLevelNanoLiters(i))
-                {
-                    isReady = false;
-                    MaterialBufferManager.this.blame(i);
-                }
-            }
-
-            return isReady;
-        }
-        
-        public void clearAllDemand()
-        {
-            Arrays.fill(demands, 0);
-        }
-        
-        public void consumeAllDemandsAndClear()
-        {
-            for(int i = specs.length - 1; i >= 0; i--)
-            {
-                if(this.demands[i] > 0)
-                {
-                    MaterialBufferManager.this.use(i, this.demands[i]);
-                }
-            }
-            this.clearAllDemand();
-        }
-
-        /**
-         * Total of all demands, in nano liters.
-         */
-        public long totalDemandNanoLiters()
-        {
-            long result = 0;
-            for(int i = specs.length - 1; i >= 0; i--)
-            {
-                result += this.demands[i];
-            }
-            return result;
-        }
-    }
-    
-    public class MaterialBufferDelegate
-    {
-        private final int index;
-        
-        private MaterialBufferDelegate(int index)
-        {
-            this.index = index;
-        }
-        
-        public void addDemand(long demandNanoLiters)
-        {
-            MaterialBufferManager.this.demandManager.addDemand(this.index, demandNanoLiters);
-        }
-        
-        /**
-         * Returns number of items that can be accepted from the input stack. 
-         * DOES NOT UPDATE THE STACK.
-         * Updates internal buffer if simulate = false;
-         */
-        public int accept(@Nonnull ItemStack stack, boolean simulate)
-        {
-            return MaterialBufferManager.this.accept(this.index, stack, simulate);
-        }
-        
-        /** indicates the buffer caused a processing failure due to shortage */
-        public void blame()
-        {
-            MaterialBufferManager.this.blame(this.index);
-        }
-        
-        public void forgive()
-        {
-            MaterialBufferManager.this.forgive(this.index);
-        }
-        
-        public boolean canRestock()
-        {
-            return MaterialBufferManager.this.canRestock(this.index);      
-        }
-        
-        /**
-         * Empty capacity
-         */
-        public long emptySpaceNanoLiters()
-        {
-            return MaterialBufferManager.this.emptySpaceNanoLiters(this.index);  
-        }
-        
-        /**
-         * Extracts needed items from the given inventory if possible.
-         * Returns true if any restocking happened.
-         */
-        public boolean restock(IItemHandler itemHandler)
-        {
-            return MaterialBufferManager.this.restock(this.index, itemHandler);
-        }
-        
-        /**
-         * Convenience.  Values 0-1.
-         */
-        public float fullness()
-        {
-            return MaterialBufferManager.this.fullness(this.index);
-        }
-        
-        /**
-         * Convenience.  Values 0-100.
-         */
-        public int fullnessPercent()
-        {
-            return MaterialBufferManager.this.fullnessPercent(this.index);
-        }
-  
-        
-        /**
-         * Exponentially smoothed total of additions to this buffer within the past 3.2 seconds,
-         * normalized to values between 0 and 1.  Value of 1 represents the full capacity of the buffer. <br><br>
-         */
-        @SideOnly(Side.CLIENT)
-        public float getDeltaIn()
-        {
-            return MaterialBufferManager.this.getDeltaIn(this.index);
-        }
-
-        /** 
-         * Exponentially smoothed total of removals from this buffer within the past 3.2 seconds,
-         * normalized to values between 0 and 1.  Value of 1 represents the full capacity of the buffer. <br><br>
-         */
-        @SideOnly(Side.CLIENT)
-        public float getDeltaOut()
-        {
-            return MaterialBufferManager.this.getDeltaOut(this.index);
-        }
-        
-        public long getLevelNanoLiters()
-        {
-            return MaterialBufferManager.this.getLevelNanoLiters(this.index);
-        }
-
-        public boolean isFailureCause()
-        {
-            return MaterialBufferManager.this.isFailureCause(this.index);
-        }
-
-        public long maxCapacityNanoLiters()
-        {
-            return MaterialBufferManager.this.maxCapacityNanoLiters(this.index);
-        }
-        
-        public void setLevelNanoLiters(long nanoLiters)
-        {
-            MaterialBufferManager.this.setLevelNanoLiters(this.index, nanoLiters);
-        }
-
-        /**
-         * Decreases buffer by given amount, return amount actually decreased.
-         * Return value may be lower than input if amount requested was not available.
-         */
-        public long use(long nanoLiters)
-        {
-            return MaterialBufferManager.this.use(this.index, nanoLiters);
-        }
-
-        /**
-         * Same as {@link #use(long)} with additional options.
-         */
-        public long use(long nanoLiters, boolean allowPartial, boolean simulate)
-        {
-            return MaterialBufferManager.this.use(this.index, nanoLiters);
-        }
-        
-        public String tooltipKey()
-        {
-            return MaterialBufferManager.this.specs[this.index].tooltipKey;
-        }
-
-        public boolean isEmpty()
-        {
-            return MaterialBufferManager.this.getLevelNanoLiters(this.index) == 0;
-        }
-    }
-    
-    public static class VolumetricBufferSpec
-    {
-        public final VolumetricIngredientList inputs;
-        public final long maxCapacityNanoLiters;
-        
-        /**
-         * Level at which no more inputs can be accepted.
-         */
-        public final long fillLineNanoLiters;
-        
-        public final String nbtTag;
-        
-        public final String tooltipKey;
-        
-        public VolumetricBufferSpec(VolumetricIngredientList inputs, long maxCapacityNanoLiters, String nbtKey, String tooltipKey)
-        {
-            // would be strange, but whatever...  sometime I do strange things.
-            if(maxCapacityNanoLiters < 1) maxCapacityNanoLiters = 1;
-            
-            this.inputs = inputs;
-            this.maxCapacityNanoLiters = maxCapacityNanoLiters;
-            this.fillLineNanoLiters = this.maxCapacityNanoLiters - inputs.minNanoLitersPerItem + 1;
-            this.nbtTag = nbtKey;
-            this.tooltipKey = "machine.buffer_" + tooltipKey;
-        }
-        
-        public boolean isHDPE()
-        {
-            return this.nbtTag == ModNBTTag.MATERIAL_HDPE;
-        }
-    }
-    
-    private final VolumetricBufferSpec[] specs;
+    final VolumetricBufferSpec[] specs;
     
     private final long[] levelsNanoLiters;
     
@@ -326,7 +56,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     /**
      * Tracks buffer demand. Only used on server.
      */
-    private DemandManager demandManager = null;
+    DemandManager demandManager = null;
     
     public MaterialBufferManager(VolumetricBufferSpec... buffers)
     {
@@ -434,7 +164,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     {
         if(this.demandManager == null)
         {
-            this.demandManager = new DemandManager();
+            this.demandManager = new DemandManager(this);
         }
         return this.demandManager;
     }
@@ -561,7 +291,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     {
         if(index < 0 || index >= this.specs.length) 
             return null;
-        return new MaterialBufferDelegate(index);
+        return new MaterialBufferDelegate(this, index);
     }
     
     /**

@@ -1,4 +1,4 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.machines.energy;
 
 import java.util.concurrent.ThreadLocalRandom;
 

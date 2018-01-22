@@ -6,7 +6,7 @@ import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.energy.DeviceEnergyInfo;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;

@@ -1,4 +1,4 @@
-package grondag.hard_science.materials;
+package grondag.hard_science.matter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,6 @@ import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.machines.support.VolumeUnits;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

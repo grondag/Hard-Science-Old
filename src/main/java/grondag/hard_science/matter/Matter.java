@@ -1,14 +1,14 @@
-package grondag.hard_science.materials;
+package grondag.hard_science.matter;
 
-import static grondag.hard_science.materials.MatterModel.*;
-import static grondag.hard_science.materials.PackageType.*;
+import static grondag.hard_science.matter.MatterModel.*;
+import static grondag.hard_science.matter.PackageType.*;
 
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.materials.MatterModel.Naked;
+import grondag.hard_science.matter.MatterModel.Naked;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;

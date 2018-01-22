@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
-import grondag.hard_science.machines.support.DeviceEnergyManager;
-import grondag.hard_science.machines.support.MaterialBufferManager;
+import grondag.hard_science.machines.energy.DeviceEnergyManager;
+import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.Domain;

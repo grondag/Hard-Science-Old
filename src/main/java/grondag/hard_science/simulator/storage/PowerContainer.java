@@ -2,8 +2,8 @@ package grondag.hard_science.simulator.storage;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.support.BatteryChemistry;
-import grondag.hard_science.machines.support.IEnergyComponent;
+import grondag.hard_science.machines.energy.BatteryChemistry;
+import grondag.hard_science.machines.energy.IEnergyComponent;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.PowerResource;

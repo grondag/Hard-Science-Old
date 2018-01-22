@@ -1,8 +1,10 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.machines.energy;
 
 import java.util.function.Function;
 
+import grondag.hard_science.library.varia.TimeUnits;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.matter.VolumeUnits;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;

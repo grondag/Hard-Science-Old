@@ -1,6 +1,6 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.matter;
 
-import grondag.hard_science.materials.CubeSize;
+import grondag.hard_science.machines.energy.MachinePower;
 
 public class MatterUnits
 {

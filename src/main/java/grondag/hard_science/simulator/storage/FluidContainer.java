@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.machines.support.VolumeUnits;
+import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.StorageType;

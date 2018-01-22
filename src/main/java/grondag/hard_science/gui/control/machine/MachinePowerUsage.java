@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.energy.DeviceEnergyInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 

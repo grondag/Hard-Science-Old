@@ -1,6 +1,8 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.matter;
 
 import java.util.function.Function;
+
+import grondag.hard_science.machines.energy.MachinePower;
 
 public enum VolumeUnits
 {

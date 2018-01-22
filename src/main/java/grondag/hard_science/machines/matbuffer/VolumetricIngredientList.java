@@ -1,15 +1,12 @@
-package grondag.hard_science.machines.support;
+package grondag.hard_science.machines.matbuffer;
 
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.Log;
-import grondag.hard_science.materials.CubeSize;
-import grondag.hard_science.materials.Matter;
+import grondag.hard_science.matter.CubeSize;
+import grondag.hard_science.matter.Matter;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
 
 /**
  * Tracks a list of ingredients accepted by a machine with a unit value for each.
@@ -78,31 +75,5 @@ public class VolumetricIngredientList
         }
         
         return 0;
-    }
-    
-    public static class VolumetricIngredient
-    {
-        private final Ingredient ingredient;
-        private final long nanoLitersPerItem;
-        
-        public VolumetricIngredient(String ingredient, long nanoLitersPerItem)
-        {
-            this.ingredient = CraftingHelper.getIngredient(ingredient);
-            
-            if(this.ingredient == Ingredient.EMPTY)
-                Log.warn("VolumetricIngredient encountered invalid (empty) input ingredient.  This is a bug.");
-            
-            this.nanoLitersPerItem = nanoLitersPerItem;
-        }
-        
-        public VolumetricIngredient(Matter matter, CubeSize size)
-        {
-            this.ingredient = CraftingHelper.getIngredient(matter.getCube(size));
-            
-            if(this.ingredient == Ingredient.EMPTY)
-                Log.warn("VolumetricIngredient encountered invalid (empty) input ingredient.  This is a bug.");
-            
-            this.nanoLitersPerItem = size.nanoLiters;
-        }
     }
 }

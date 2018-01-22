@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.materials.MatterColors;
+import grondag.hard_science.matter.MatterColors;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.transport.carrier.Channel;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;

@@ -12,7 +12,7 @@ import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.BlockFabricatorMachine;
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.DeviceEnergyInfo;
+import grondag.hard_science.machines.energy.DeviceEnergyInfo;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

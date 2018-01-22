@@ -1,4 +1,4 @@
-package grondag.hard_science.materials;
+package grondag.hard_science.matter;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.machines.support.VolumeUnits;
+import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeBulk;
 import net.minecraft.nbt.NBTTagCompound;
 

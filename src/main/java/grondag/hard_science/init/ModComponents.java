@@ -1,8 +1,8 @@
 package grondag.hard_science.init;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.machines.support.PhotoElectricCell;
-import grondag.hard_science.machines.support.PolyethyleneFuelCell;
+import grondag.hard_science.machines.energy.PhotoElectricCell;
+import grondag.hard_science.machines.energy.PolyethyleneFuelCell;
 import grondag.hard_science.simulator.device.ComponentRegistry;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;

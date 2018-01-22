@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.machines.support.MachinePower;
+import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
