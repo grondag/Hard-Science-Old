@@ -1,15 +1,18 @@
 package grondag.hard_science.machines.base;
 
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.device.blocks.SimpleBlockHandler;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
+import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
+import grondag.hard_science.simulator.transport.endpoint.PortLayout;
+import grondag.hard_science.simulator.transport.management.FluidTransportManager;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 import grondag.hard_science.simulator.transport.management.SimpleTransportManager;
+import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * Base class for single-block machines.
@@ -17,20 +20,12 @@ import grondag.hard_science.simulator.transport.management.SimpleTransportManage
  */
 public abstract class AbstractSimpleMachine extends AbstractMachine
 {
-    /**
-     * Ports on a simple machine are all of the same level.
-     */
-    protected final CarrierLevel carrierLevel;
+    private IPortLayout portLayout;
     
-    /**
-     * Ports on a simple machine are all of the same type.
-     */
-    protected final PortType portType;
-
-    protected AbstractSimpleMachine(CarrierLevel carrierLevel, PortType portType)
+    public void setPortLayout(IPortLayout portLayout)
     {
-        this.carrierLevel = carrierLevel;
-        this.portType = portType;
+        assert !this.isConnected() : "Machine port layout changed while connected.";
+        this.portLayout = portLayout;
     }
     
     @Override
@@ -42,7 +37,7 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
     @Override
     protected ITransportManager<StorageTypeFluid> createFluidTransportManager()
     {
-        return new SimpleTransportManager<StorageTypeFluid>(this, StorageType.FLUID);
+        return new FluidTransportManager(this);
     }
     
     @Override
@@ -54,34 +49,21 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
     @Override
     protected IDeviceBlockManager createBlockManager()
     {
-        SimpleBlockHandler result = new SimpleBlockHandler(
-                this, 
-                this.hasChannel() ? this.getChannel() : 0, 
-                this.carrierLevel, 
-                this.portType);
-        
+        SimpleBlockHandler result = new SimpleBlockHandler(this, this.portLayout);
         return result;
     }
     
-//    @Override
-//    public boolean hasFront() { return true; }
-//    
-//    @Override
-//    public void setFront(@Nonnull EnumFacing frontFace)
-//    {
-//        this.frontFace = frontFace;
-//        
-//        // TODO: if changed after connected, 
-//        // then need to remove and replace device blocks
-//        // OR ensure this use case doesn't happen
-//    }
-//    
-//    @Nullable
-//    @Override
-//    public EnumFacing getFront()
-//    {
-//        return this.frontFace;
-//    }    
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        super.serializeNBT(tag);
+        tag.setTag(ModNBTTag.DEVICE_PORT_LAYOUT, PortLayout.toNBT(this.portLayout));
+    }
     
-    
+    @Override
+    public void deserializeNBT(NBTTagCompound tag)
+    {
+        super.deserializeNBT(tag);
+        this.portLayout = PortLayout.fromNBT(tag.getCompoundTag(ModNBTTag.DEVICE_PORT_LAYOUT));
+    }
 }

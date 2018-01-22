@@ -5,8 +5,6 @@ import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.ItemContainer;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SmartChestMachine extends AbstractSimpleMachine
@@ -15,7 +13,7 @@ public class SmartChestMachine extends AbstractSimpleMachine
     
     public SmartChestMachine()
     {
-        super(CarrierLevel.BOTTOM, PortType.CARRIER);
+        super();
         this.itemStorage = new ItemContainer(this, ContainerUsage.STORAGE);
         this.itemStorage.setContentPredicate( 
                 r -> r != null 

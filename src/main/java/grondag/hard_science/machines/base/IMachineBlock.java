@@ -12,6 +12,8 @@ import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.Privilege;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
+import grondag.hard_science.simulator.transport.endpoint.PortLayout;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.texture.Textures;
@@ -28,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -75,6 +78,7 @@ public interface IMachineBlock
         
         // restore placed machines or initialize them with simulation
         AbstractMachine machine = this.createNewMachine();
+        this.handleMachinePlacement(machine, worldIn, pos, state);
         
         if(stack.hasTagCompound())
         {
@@ -101,11 +105,6 @@ public interface IMachineBlock
             machine.setDomain(domain);
         }
         
-        if(machine.hasFront())
-        {
-            machine.setFront(((SuperBlock)this).getModelState(worldIn, pos, true).getAxisRotation().horizontalFace);
-        }
-      
         // machine fully ready to be connected to domain now
         DeviceManager.addDevice(machine);
         machine.onConnect();
@@ -117,6 +116,49 @@ public interface IMachineBlock
         }
 
     }
+
+    /**
+     * Retrieves ports available on faces of this device.
+     * Port faces are transformed to match block orientation
+     * if the port layout has an orientation.<p>
+     * 
+     * If this machine has item and power ports that use 
+     * species for carrier segregation, ports will have channel set 
+     * to block species of the given block state.<p>
+     * 
+     * Used server-side to initialize machines.  Used client-side
+     * to render connectivity of cables.
+     */
+    public default IPortLayout portLayout(IBlockAccess worldIn, BlockPos pos, IBlockState state)
+    {
+        return this.nominalPortLayout().localize(((SuperBlock)state.getBlock()).getModelState(worldIn, pos, true));
+    }
+    
+    /**
+     * The port layout for this machine before any 
+     * configuration or orientation. Typically will
+     * be implemented as a static constant value.
+     * @return
+     */
+    public PortLayout nominalPortLayout();
+    
+    /**
+     * Called immediately after a new machine is created during
+     * block placement to allow machine-specific configuration
+     * that is based on world state. Typically this is where the
+     * machine would capture things like species and orientation
+     * that depend on block/tile entity state and which may not
+     * be available later on when the chunk is unloaded.  Machine
+     * should serialize this information if needed for operation.
+     */
+    public default void handleMachinePlacement(AbstractMachine machine, World worldIn, BlockPos pos, IBlockState state)
+    {
+        if(machine.hasChannel() && state.getPropertyKeys().contains(SuperBlock.META))
+        {
+            machine.setChannel(state.getValue(SuperBlock.META));
+        }
+    }
+    
 
     /**
      * Handler for block break - call this from Block#breakBlock
@@ -162,7 +204,7 @@ public interface IMachineBlock
 //                        machine.blockManager().itemCircuit().carrierAddress(),
 //                        machine.blockManager().itemCircuit().bridgeVersion()));
 //            }
-            probeInfo.text("Item Legs: " + machine.itemTransport().legs().toString()); 
+            probeInfo.text("Item Legs: " + machine.itemTransport().legs(null).toString()); 
         }
         
         if(!machine.energyManager().isEmpty())
@@ -185,7 +227,7 @@ public interface IMachineBlock
 //                        machine.blockManager().powerCircuit().carrierAddress(),
 //                        machine.blockManager().powerCircuit().bridgeVersion()));
 //            }
-            probeInfo.text("Power Legs: " + machine.tranportManager(StorageType.POWER).legs().toString());
+            probeInfo.text("Power Legs: " + machine.tranportManager(StorageType.POWER).legs(null).toString());
         }
     }
     

@@ -193,7 +193,9 @@ public class ModBlocks
         event.getRegistry().register(new BottomBusBlock("bottom_bus"));
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
-        event.getRegistry().register(new ModularTankBlock("modular_tank"));
+        event.getRegistry().register(new ModularTankBlock("water_tank", ModFluids.WATER_RESOURCE));
+        event.getRegistry().register(new ModularTankBlock("h2o_tank", ModFluids.H2O_RESOURCE));
+        event.getRegistry().register(new ModularTankBlock("ammonia_tank", ModFluids.AMMONIA_RESOURCE));
         event.getRegistry().register(new WaterPumpBlock("water_pump"));
         event.getRegistry().register(new ChemicalBatteryBlock("chemical_battery"));
         event.getRegistry().register(new TransportTestBlock("transport_test"));

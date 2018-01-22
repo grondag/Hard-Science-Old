@@ -4,7 +4,7 @@ package grondag.hard_science.simulator.transport.endpoint;
  * Describes how a port is behaving or should behave in context
  * of how it is connected.  Obtained from {@link Port#effectivePort(Port, int, int)}.<p>
  * 
- * These outcomes are implied by the rules listed in PortType.
+ * These outcomes are implied by the rules listed in PortFunction.
  *
  */
 public enum PortMode

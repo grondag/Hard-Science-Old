@@ -117,4 +117,18 @@ public class Drone implements IDevice, IReadWriteNBT
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public void onConnect()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onDisconnect()
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

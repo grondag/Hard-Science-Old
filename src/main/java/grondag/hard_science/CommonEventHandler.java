@@ -11,6 +11,7 @@ import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
+import grondag.hard_science.simulator.transport.carrier.Channel;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
@@ -35,6 +36,7 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fluids.FluidRegistry.FluidRegisterEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -286,6 +288,13 @@ public class CommonEventHandler
             ExcavationRenderTracker.INSTANCE.stopPlayerTracking((EntityPlayerMP) event.player);
         }
     }
+    
+    @SubscribeEvent 
+    public static void onRegisterFluid(FluidRegisterEvent event)
+    {
+        Channel.addFluid(event.getFluidName(), event.getFluidID());
+    }
+    
 //	@SubscribeEvent
 //	public void onReplaceBiomeBlocks(ReplaceBiomeBlocks.ReplaceBiomeBlocks event) {
 //		if (event.getWorld().provider.getDimension() == 0) {

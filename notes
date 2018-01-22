@@ -1,3 +1,51 @@
+ Serialize port layout in devices
+ 
+ Let direct ports mate with direct ports to form device/device private links
+ 
+
+Portable fluid tanks are independent devices
+Portable fluid tanks have specific ports/fluids
+Portable fluid tanks have carrier ports for their fluid type
+Multi-block fluid tanks (later) have shared device instance
+Catalytic synthesis blocks have ethylene and ammonia carrier ports
+
+Outputs of CS include graphite, containerized resins, PE resin, other resins, fibers
+
+How does containerized fluid transport work?
+	Containers
+		are always same size (1M3) - but may not be full
+		are fluid-specific
+		(future) may require refrigerated storage
+
+	Demand side - input to a buffer
+		If have fluid circuit, try it first
+		If accept containers, search for containers in item storage
+		If container is bigger than buffer, place partial container in item output buffer
+		If no containers, post containerizer demand
+			If later obtain fluid supply, cancel container demand
+		
+	Supply side - output from a buffer
+		If have fluid circuit, search for available storage on it
+		If can output to container, obtain a container and fill it
+		Place filled containers in item output buffer
+		If output is for a specific job, output container as soon as 
+			it reaches the demanded amount.
+		If no available containers, post demand for empty container
+		
+	Containerizers
+		Import or export containerized fluid from an attached fluid circuit
+		Two optional limits
+			Min fill %/# - import containers if storage on local circuit falls below
+			Max fill %/# - export containers if storage on local circuit falls below
+			
+		Parameters
+			Accept export requests: will export a container on demand if above min
+			
+		
+	Supply side
+		
+		If have a fluid circuits, and 
+
 Storage Network
 
 In PacketOpenContainerStorageInteraction.handle, use listener instead of storage

@@ -252,7 +252,7 @@ public abstract class AbstractDevice implements IDevice
     public void onConnect()
     {
         this.blockManager = this.createBlockManager();
-        IDevice.super.onConnect();
+        this.blockManager.connect();
         this.energyManager.onConnect();
         this.isConnected = true;
     }
@@ -260,12 +260,16 @@ public abstract class AbstractDevice implements IDevice
     @Override
     public void onDisconnect()
     {
-        IDevice.super.onDisconnect();
-        this.blockManager = null;
+        if(this.blockManager != null)
+        {
+            this.blockManager.disconnect();
+            this.blockManager = null;
+        }
         this.energyManager.onDisconnect();
         this.isConnected = false;
     }
 
+    @Override
     public int getChannel()
     {
         return channel;

@@ -11,31 +11,39 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
 
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.carrier.Carrier;
 
 /**
  * Describes upward routes available from a circuit
  */
-public class Legs
+public class Legs<T extends StorageType<T>>
 {
-    public static final Legs EMPTY_LEGS = new Legs();
+    @SuppressWarnings("rawtypes")
+    private static final Legs<?> EMPTY_LEGS = new Legs();
+    
+    @SuppressWarnings("unchecked")
+    public static <E extends StorageType<E>> Legs<E> emptyLegs()
+    {
+        return (Legs<E>) EMPTY_LEGS;
+    }
     
     /**
      * Max circuit bridge version for all included circuits at time of create.
      * If any included circuit has a version higher than this, then
-     * this information is no longer valid. See {@link CarrierCircuit#bridgeVersion()}.
+     * this information is no longer valid. See {@link Carrier#bridgeVersion()}.
      */
     private final int maxBridgeVersion;
     
     /**
      * All circuits referenced by this instance.
      */
-    public final ImmutableSet<CarrierCircuit> circuits;
+    public final ImmutableSet<Carrier<T>> circuits;
     
     /**
      * See {@link #legs()}
      */
-    private final ImmutableList<ImmutableList<Leg>> legs;
+    private final ImmutableList<ImmutableList<Leg<T>>> legs;
     
     /**
      * Unique Top-level circuits across all legs.
@@ -43,21 +51,21 @@ public class Legs
      * least one island. Allows for connectivity checking
      * without building specific routes.
      */
-    public final ImmutableSet<CarrierCircuit> islands;
+    public final ImmutableSet<Carrier<T>> islands;
     
-    public Legs(CarrierCircuit forCircuit)
+    public Legs(Carrier<T> forCircuit)
     {
         int maxVersion = forCircuit.bridgeVersion();
         
-        ImmutableSet.Builder<CarrierCircuit> circuitBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<Carrier<T>> circuitBuilder = ImmutableSet.builder();
         circuitBuilder.add(forCircuit);
         
-        LegBuilder legBuilder = new LegBuilder();
+        LegBuilder<T> legBuilder = new LegBuilder<T>();
         
-        Leg firstLeg = Leg.create(forCircuit);
+        Leg<T> firstLeg = Leg.create(forCircuit);
         legBuilder.add(firstLeg);
         
-        ImmutableSet.Builder<CarrierCircuit> islandBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<Carrier<T>> islandBuilder = ImmutableSet.builder();
         
         if(forCircuit.parents().isEmpty())
         {
@@ -67,15 +75,15 @@ public class Legs
         else
         {
             // have parents, so let's expand legs
-            LinkedList<Leg> workList = new LinkedList<Leg>();
+            LinkedList<Leg<T>> workList = new LinkedList<Leg<T>>();
             workList.add(firstLeg);
             while(!workList.isEmpty())
             {
-                Leg workLeg = workList.poll();
+                Leg<T> workLeg = workList.poll();
                 
                 // not checking for empty because won't be in
                 // worklist if parents is empty
-                for(CarrierCircuit c : workLeg.end().parents())
+                for(Carrier<T> c : workLeg.end().parents())
                 {
                     // don't extend legs with circuits we can directly access
                     // but can't appy this check to the starting node
@@ -87,7 +95,7 @@ public class Legs
                     maxVersion = Math.max(maxVersion, c.bridgeVersion());
                     
                     // extend leg and add to legs
-                    Leg newLeg = workLeg.append(c);
+                    Leg<T> newLeg = workLeg.append(c);
                     
                     legBuilder.add(newLeg);
                     
@@ -117,26 +125,26 @@ public class Legs
      * Combines legs from multiple circuits - used to represent information 
      * for a device attached to more than one circuit.
       */
-    public Legs(Iterable<CarrierCircuit> circuits)
+    public Legs(Iterable<Carrier<T>> circuits)
     {
         int maxVersion = 0;
         
-        ImmutableSet.Builder<CarrierCircuit> circuitBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<Carrier<T>> circuitBuilder = ImmutableSet.builder();
         
-        LegBuilder legBuilder = new LegBuilder();
+        LegBuilder<T> legBuilder = new LegBuilder<T>();
         
-        ImmutableSet.Builder<CarrierCircuit> islandBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<Carrier<T>> islandBuilder = ImmutableSet.builder();
         
-        for(CarrierCircuit c : circuits)
+        for(Carrier<T> c : circuits)
         {
-            Legs legs = c.legs();
+            Legs<T> legs = c.legs();
             
             maxVersion = Math.max(maxVersion, legs.maxBridgeVersion);
             circuitBuilder.addAll(legs.circuits);
             
-            for(ImmutableList<Leg> list : legs.legs)
+            for(ImmutableList<Leg<T>> list : legs.legs)
             {
-                for(Leg leg : list)
+                for(Leg<T> leg : list)
                 {
                     legBuilder.add(leg);
                 }
@@ -164,7 +172,7 @@ public class Legs
     {
         if(this.circuits.isEmpty()) return true;
         
-        for(CarrierCircuit c : this.circuits)
+        for(Carrier<T> c : this.circuits)
         {
             if(c.bridgeVersion() > this.maxBridgeVersion) return false;
         }
@@ -183,7 +191,7 @@ public class Legs
      * This structure allows for fast pair-wise iterations through two
      * leg lists during route formation.
      */
-    public ImmutableList<ImmutableList<Leg>> legs()
+    public ImmutableList<ImmutableList<Leg<T>>> legs()
     {
         return this.legs;
     }
@@ -192,9 +200,9 @@ public class Legs
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        for(ImmutableList<Leg> list : this.legs)
+        for(ImmutableList<Leg<T>> list : this.legs)
         {
-            for(Leg leg : list)
+            for(Leg<T> leg : list)
             {
                 if(sb.length() > 0) sb.append(", ");
                 sb.append(leg.toString());
@@ -203,7 +211,7 @@ public class Legs
         sb.append(" Islands: ");
         {
             int i = 0;
-            for(CarrierCircuit c : this.islands)
+            for(Carrier<T> c : this.islands)
             {
                 sb.append(c.carrierAddress());
                 if(++i < this.islands.size())
@@ -215,7 +223,7 @@ public class Legs
         sb.append(" Circuits: ");
         {
             int i = 0;
-            for(CarrierCircuit c : this.circuits)
+            for(Carrier<T> c : this.circuits)
             {
                 sb.append(c.carrierAddress());
                 if(++i < this.circuits.size())
@@ -229,16 +237,16 @@ public class Legs
         return sb.toString();
     }
     
-    private static class LegBuilder
+    private static class LegBuilder<T extends StorageType<T>>
     {
         // create map of leg builders keyed by end circuit
         // and add builder for first circuit
-        private HashMap<CarrierCircuit, ImmutableList.Builder<Leg>> legBuilders
-         = new HashMap<CarrierCircuit, ImmutableList.Builder<Leg>>();
+        private HashMap<Carrier<T>, ImmutableList.Builder<Leg<T>>> legBuilders
+         = new HashMap<Carrier<T>, ImmutableList.Builder<Leg<T>>>();
         
-        protected void add(Leg leg)
+        protected void add(Leg<T> leg)
         {
-            ImmutableList.Builder<Leg> builder = legBuilders.get(leg.end());
+            ImmutableList.Builder<Leg<T>> builder = legBuilders.get(leg.end());
             if(builder == null)
             {
                 builder = new ImmutableList.Builder<>();
@@ -247,25 +255,25 @@ public class Legs
             builder.add(leg);
         }
         
-        protected ImmutableList<ImmutableList<Leg>> build()
+        protected ImmutableList<ImmutableList<Leg<T>>> build()
         {
-            ImmutableList.Builder<ImmutableList<Leg>> lastLegBuilder = ImmutableList.builder();
+            ImmutableList.Builder<ImmutableList<Leg<T>>> lastLegBuilder = ImmutableList.builder();
             
             // here's the reason for this whole mess: sort the lists by level, end carrier
             legBuilders
             .entrySet()
             .stream()
-            .sorted(new Comparator<Map.Entry<CarrierCircuit, ImmutableList.Builder<Leg>>>()
+            .sorted(new Comparator<Map.Entry<Carrier<T>, ImmutableList.Builder<Leg<T>>>>()
             {
                 @Override
-                public int compare(Entry<CarrierCircuit, Builder<Leg>> o1, Entry<CarrierCircuit, Builder<Leg>> o2)
+                public int compare(Entry<Carrier<T>, Builder<Leg<T>>> o1, Entry<Carrier<T>, Builder<Leg<T>>> o2)
                 {
-                    CarrierCircuit c1 = o1.getKey();
-                    CarrierCircuit c2 = o2.getKey();
+                    Carrier<T> c1 = o1.getKey();
+                    Carrier<T> c2 = o2.getKey();
                     return ComparisonChain
                             .start()
-                            .compare(c1.carrier.level.ordinal(),
-                                    c2.carrier.level.ordinal())
+                            .compare(c1.level().ordinal(),
+                                    c2.level().ordinal())
                             .compare(c1.carrierAddress(), c2.carrierAddress())
                             .result();
                 }

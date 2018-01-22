@@ -1,7 +1,9 @@
 package grondag.hard_science.machines;
 
+import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
+import grondag.hard_science.simulator.transport.endpoint.PortLayout;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -44,5 +46,12 @@ public class PhotoChemicalBlock extends MachineSimpleBlock
     public AbstractMachine createNewMachine()
     {
         return new PhotoElectricMachine();
+    }
+
+    @Override
+    public PortLayout nominalPortLayout()
+    {
+        // TODO implement
+        return ModPortLayouts.empty;
     }
 }

@@ -1,8 +1,9 @@
 package grondag.hard_science.machines;
 
-import grondag.hard_science.library.world.IBlockTest;
+import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
+import grondag.hard_science.simulator.transport.endpoint.PortLayout;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -13,7 +14,6 @@ import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.Textures;
-import grondag.hard_science.superblock.varia.BlockTests;
 
 public class MiddleBusBlock extends MachineSimpleBlock
 {
@@ -46,10 +46,10 @@ public class MiddleBusBlock extends MachineSimpleBlock
     {
         return new MiddleBusMachine();
     }
-    
+
     @Override
-    public IBlockTest blockJoinTest(ModelState modelState)
+    public PortLayout nominalPortLayout()
     {
-        return new BlockTests.SuperBlockCableMatch(modelState);
+        return ModPortLayouts.utb_mid_bridge_all;
     }
 }

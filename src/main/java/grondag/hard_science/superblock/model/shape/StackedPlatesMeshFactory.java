@@ -91,7 +91,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public List<RawQuad> getShapeQuads(ModelState modelState)
     {
-        return this.makeQuads(modelState.getMetaData(), getMatrix4d(modelState));
+        return this.makeQuads(modelState.getMetaData(), modelState.getMatrix4d());
     }
 
     @Override
@@ -133,7 +133,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public AxisAlignedBB getCollisionBoundingBox(ModelState modelState)
     {
-        return Useful.makeRotatedAABB(0, 0, 0, 1, (modelState.getMetaData() + 1) / 16f, 1, getMatrix4f(modelState));
+        return Useful.makeRotatedAABB(0, 0, 0, 1, (modelState.getMetaData() + 1) / 16f, 1, modelState.getMatrix4f());
     }
 
     @Override

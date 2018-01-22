@@ -3,8 +3,6 @@ package grondag.hard_science.machines;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class ModularTankMachine extends AbstractSimpleMachine
@@ -13,7 +11,7 @@ public class ModularTankMachine extends AbstractSimpleMachine
     
     public ModularTankMachine()
     {
-        super(CarrierLevel.BOTTOM, PortType.CARRIER);
+        super();
         this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE);
     }
     

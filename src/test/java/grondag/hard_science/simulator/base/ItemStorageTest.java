@@ -21,7 +21,7 @@
 //import grondag.hard_science.simulator.storage.StorageWithQuantity;
 //import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 //import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-//import grondag.hard_science.simulator.transport.endpoint.PortType;
+//import grondag.hard_science.simulator.transport.endpoint.PortFunction;
 //import net.minecraft.init.Items;
 //import net.minecraft.item.ItemStack;
 //
@@ -38,7 +38,7 @@
 //        
 //        StorageManager<StorageTypeStack> ism = d.itemStorage;
 //        
-//        ItemStorage store1 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        ItemStorage store1 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        store1.setCapacity(100);
 //        store1.setDomain(d);
 //        store1.setLocation(new Location(1, 1, 1, 1));
@@ -65,19 +65,19 @@
 //        assert ism.getCapacity() == store1.getCapacity();
 //        assert ism.availableCapacity() == store1.availableCapacity();
 //        
-//        ItemStorage store2 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        ItemStorage store2 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        store2.setCapacity(200);
 //        store2.setDomain(d);
 //        store2.setLocation(new Location(2, 1, 1, 1));
 //        DeviceManager.addDevice(store2);
 //        
-//        ItemStorage store3 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        ItemStorage store3 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        store3.setCapacity(300);
 //        store3.setDomain(d);
 //        store3.setLocation(new Location(3, 1, 1, 1));
 //        DeviceManager.addDevice(store3);
 //        
-//        ItemStorage store4 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        ItemStorage store4 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        store4.setCapacity(400);
 //        store4.setDomain(d);
 //        store4.setLocation(new Location(4, 1, 1, 1));
@@ -164,7 +164,7 @@
 //        
 //        
 //        // IItemHandler tests
-//        ItemStorage ihStore = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        ItemStorage ihStore = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        ihStore.setCapacity(64);
 //        assert ihStore.getSlots() == 1;
 //        assert ihStore.getSlotLimit(0) == 64;

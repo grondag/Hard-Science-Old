@@ -21,17 +21,17 @@ public class ModTileEntities
     {
         if(Configurator.VOLCANO.enableVolcano)
         {
-            GameRegistry.registerTileEntity(VolcanoTileEntity.class, HardScience.MODID + ":volcano_tile");
+            GameRegistry.registerTileEntity(VolcanoTileEntity.class, HardScience.prefixResource("volcano_tile"));
         }
 
-        GameRegistry.registerTileEntity(SuperTileEntity.class, HardScience.MODID + ":super_tile");
-        GameRegistry.registerTileEntity(SuperModelTileEntity.class, HardScience.MODID + ":super_model_tile");
-        GameRegistry.registerTileEntity(VirtualTileEntity.class, HardScience.MODID + ":virtual_tile");
+        GameRegistry.registerTileEntity(SuperTileEntity.class, HardScience.prefixResource("super_tile"));
+        GameRegistry.registerTileEntity(SuperModelTileEntity.class, HardScience.prefixResource("super_model_tile"));
+        GameRegistry.registerTileEntity(VirtualTileEntity.class, HardScience.prefixResource("virtual_tile"));
         
-        GameRegistry.registerTileEntity(MachineTileEntity.class, HardScience.MODID + ":machine_tile");
-        GameRegistry.registerTileEntity(MachineTileEntityTickable.class, HardScience.MODID + ":machine_tickable_tile");
-        GameRegistry.registerTileEntity(BlockFabricatorTileEntity.class, HardScience.MODID + ":block_fabricator_tile");
-        GameRegistry.registerTileEntity(ChemicalBatteryTileEntity.class, HardScience.MODID + ":chemical_battery_tile");
+        GameRegistry.registerTileEntity(MachineTileEntity.class, HardScience.prefixResource("machine_tile"));
+        GameRegistry.registerTileEntity(MachineTileEntityTickable.class, HardScience.prefixResource("machine_tickable_tile"));
+        GameRegistry.registerTileEntity(BlockFabricatorTileEntity.class, HardScience.prefixResource("block_fabricator_tile"));
+        GameRegistry.registerTileEntity(ChemicalBatteryTileEntity.class, HardScience.prefixResource("chemical_battery_tile"));
         
         if(event.getSide() == Side.CLIENT)
         {

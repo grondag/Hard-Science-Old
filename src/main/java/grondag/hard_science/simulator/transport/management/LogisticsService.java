@@ -10,7 +10,6 @@ import static grondag.hard_science.simulator.transport.management.ConnectionResu
 import static grondag.hard_science.simulator.transport.management.ConnectionResult.FAIL_CHANNEL_MISMATCH;
 import static grondag.hard_science.simulator.transport.management.ConnectionResult.FAIL_INCOMPATIBLE;
 import static grondag.hard_science.simulator.transport.management.ConnectionResult.FAIL_LEVEL_GAP;
-import static grondag.hard_science.simulator.transport.management.ConnectionResult.FAIL_STORAGE_TYPE;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -37,10 +36,9 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ItemStorageListener;
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
-import grondag.hard_science.simulator.transport.endpoint.Port;
+import grondag.hard_science.simulator.transport.carrier.Carrier;
 import grondag.hard_science.simulator.transport.endpoint.PortMode;
-import grondag.hard_science.simulator.transport.endpoint.PortState;
+import grondag.hard_science.simulator.transport.endpoint.Port;
 import grondag.hard_science.simulator.transport.routing.Leg;
 import grondag.hard_science.simulator.transport.routing.Legs;
 import grondag.hard_science.simulator.transport.routing.Route;
@@ -87,64 +85,65 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
 
     /**
-     * Attempts to connect two ports.  Asynchronous. <p>
+     * Attempts to connect two ports.  Must be called from service thread. <p>
      * 
-     * Assumes (does not verify) ports are physically adjacent or within wireless range.
+     * Assumes (does not verify) ports are physically adjacent or within wireless range.<p>
+     * 
+     * Returns true if ports were connected.
      */
-    public void connect(@Nonnull PortState first, @Nonnull PortState second)
+    public boolean connect(@Nonnull Port<T> first, @Nonnull Port<T> second)
     {
-        executor.execute( () ->
+        assert confirmServiceThread() : "LogisticsService.connect called outside service thread.";
+        
+        if(Configurator.logTransportNetwork) 
+            Log.info("LogisticsService.connect: CONNECT STARTED for %s to %s", first.toString(), second.toString());
+
+        ConnectionResult result = connectionResult(first, second);
+        
+        switch(result)
         {
-            if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.connect: CONNECT STARTED for %s to %s", first.portName(), second.portName());
-
-            ConnectionResult result = connectionResult(first, second);
+        case CARRIER_CARRIER:
+        case BRIDGE_CARRIER:
+        case CARRIER_BRIDGE:
+        case BRIDGE_DIRECT:
+        case CARRIER_DIRECT:
+        case DIRECT_BRIDGE:
+        case DIRECT_CARRIER:
+            connectPorts(first, second, result);
+            return true;
             
-            switch(result)
-            {
-            case CARRIER_CARRIER:
-            case BRIDGE_CARRIER:
-            case CARRIER_BRIDGE:
-            case BRIDGE_DIRECT:
-            case CARRIER_DIRECT:
-            case DIRECT_BRIDGE:
-            case DIRECT_CARRIER:
-                connectPorts(first, second, result);
-                break;
-                
-            case FAIL_CHANNEL_MISMATCH:
-                if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.connect: attempt abandoned - channel mismatch.");
-                break;
-                
-            case FAIL_INCOMPATIBLE:
-                if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.connect: attempt abandoned - incompatible port types.");
-                break;
+        case FAIL_CHANNEL_MISMATCH:
+            if(Configurator.logTransportNetwork) 
+                Log.info("LogisticsService.connect: attempt abandoned - channel mismatch.");
+            return false;
+            
+        case FAIL_INCOMPATIBLE:
+            if(Configurator.logTransportNetwork) 
+                Log.info("LogisticsService.connect: attempt abandoned - incompatible port types.");
+            return false;
 
-            case FAIL_LEVEL_GAP:
-                if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.connect: attempt abandoned - carrier level mismatch.");
-                break;
+        case FAIL_LEVEL_GAP:
+            if(Configurator.logTransportNetwork) 
+                Log.info("LogisticsService.connect: attempt abandoned - carrier level mismatch.");
+            return false;
 
-            case FAIL_STORAGE_TYPE:
-                if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.connect: attempt abandoned - incompatible storage types.");
-                break;
-                
-            default:
-                assert false : "LogisticsService.connect: Unhandled ConnectionResult enum";
-                if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.connect: attempt abandoned - unhandled result. This is a bug.");
-                break;
-            }
-        }, false);
+        case FAIL_STORAGE_TYPE:
+            if(Configurator.logTransportNetwork) 
+                Log.info("LogisticsService.connect: attempt abandoned - incompatible storage types.");
+            return false;
+            
+        default:
+            assert false : "LogisticsService.connect: Unhandled ConnectionResult enum";
+            if(Configurator.logTransportNetwork) 
+                Log.info("LogisticsService.connect: attempt abandoned - unhandled result. This is a bug.");
+            return false;
+        }
     }
 
     /**
      * Handles case when both ports are known to be carrier ports
      */
-    private void connectPorts(PortState first, PortState second, ConnectionResult result)
+    private void connectPorts(Port<T> first, Port<T> second, ConnectionResult result)
     {
         if(Configurator.logTransportNetwork) 
             Log.info("LogisticsService.connectPorts: start");
@@ -155,17 +154,19 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         // external must be the same as internal for carrier ports, but external
         // carrier value may not yet be set. For all port modes, the external
         // carrier is separate from internal, and is what the port will connect with.
-        CarrierCircuit firstCircuit = result.left == PortMode.CARRIER ? first.internalCircuit() : first.externalCircuit();
-        CarrierCircuit secondCircuit = result.right == PortMode.CARRIER ? second.internalCircuit() : second.externalCircuit();
+        Carrier<T> firstCircuit = result.left == PortMode.CARRIER ? first.internalCircuit() : first.externalCircuit();
+        Carrier<T> secondCircuit = result.right == PortMode.CARRIER ? second.internalCircuit() : second.externalCircuit();
         if(firstCircuit == null)
         {
-            CarrierCircuit newCircuit;
+            Carrier<T> newCircuit;
             if(secondCircuit == null)
             {
                 if(Configurator.logTransportNetwork) 
                     Log.info("LogisticsService.connectPorts: Neither port has circuit - creating new circuit");
 
-                newCircuit = new CarrierCircuit(first.port().externalCarrier(result.left), first.getConfiguredChannel());
+                newCircuit = new Carrier<T>(this.storageType, 
+                        first.externalLevel(result.left), 
+                        first.getChannel());
             }
             else
             {
@@ -217,7 +218,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         }
     }
 
-    private void attachBothPorts(PortState first, PortState second, CarrierCircuit toCircuit, ConnectionResult result)
+    private void attachBothPorts(Port<T> first, Port<T> second, Carrier<T> toCircuit, ConnectionResult result)
     {
         first.setMode(result.left);
         second.setMode(result.right);
@@ -229,90 +230,91 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * Disconnects two ports if they are connected,
      * and splits affected circuits if necessary.
      * Should be called from the port that is being
-     * removed if device removal is the cause.
+     * removed if device removal is the cause.<p>
+     * 
+     * Must be called from service thread.
      */
-    public void disconnect(@Nonnull PortState leaving)
+    public void disconnect(@Nonnull Port<T> leaving)
     {
-        executor.execute( () ->
+        assert confirmServiceThread() : "LogisticsService.connect called outside service thread.";
+
+        if(Configurator.logTransportNetwork) 
+            Log.info("LogisticsService.disconnect: DISCONNECT STARTED for %s", leaving.toString());
+
+        if(!leaving.isAttached())
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.disconnect: DISCONNECT STARTED for %s", leaving.portName());
+                Log.info("LogisticsService.disconnect: Disconnect abandoned - port not attached");
+            return;
+        }
 
-            if(!leaving.isAttached())
-            {
-                if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.disconnect: Disconnect abandoned - port not attached");
-                return;
-            }
+        Port<T> mate = leaving.mate();
 
-            PortState mate = leaving.mate();
+        assert mate != null : "Missing mate on port disconnect.";
 
-            assert mate != null : "Missing mate on port disconnect.";
+        if(Configurator.logTransportNetwork) 
+            Log.info("LogisticsService.disconnect: Port mate is %s", mate.toString());
 
+
+        // split isn't possible unless both ports are carrier ports
+        if(leaving.getMode() == PortMode.CARRIER && mate.getMode() == PortMode.CARRIER)
+        {
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.disconnect: Port mate is %s", mate.portName());
+                Log.info("LogisticsService.disconnect: Checking for possible split");
 
-
-            // split isn't possible unless both ports are carrier ports
-            if(leaving.getMode() == PortMode.CARRIER && mate.getMode() == PortMode.CARRIER)
+            // Carrier split will be necessary UNLESS the mate is navigable via
+            // an alternate route on the same carrier circuit. 
+            // Split also not necessary if no connected ports beyond the leaving port.
+            Set<Port<T>> reachableFromLeaving = findNavigableCarrierPorts(leaving, leaving.mate());
+            if(reachableFromLeaving.size() > 1 && !reachableFromLeaving.contains(leaving.mate()))
             {
-                if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.disconnect: Checking for possible split");
+                Carrier<T> existingCircuit = leaving.internalCircuit();
 
-                // Carrier split will be necessary UNLESS the mate is navigable via
-                // an alternate route on the same carrier circuit. 
-                // Split also not necessary if no connected ports beyond the leaving port.
-                Set<PortState> reachableFromLeaving = findNavigableCarrierPorts(leaving, leaving.mate());
-                if(reachableFromLeaving.size() > 1 && !reachableFromLeaving.contains(leaving.mate()))
+                Carrier<T> newCircuit = 
+                        new Carrier<T>(existingCircuit.storageType(), existingCircuit.level(), existingCircuit.channel);
+
+                // no alternate route, so must split
+                if(reachableFromLeaving.size() >= existingCircuit.portCount() / 2)
                 {
-                    CarrierCircuit existingCircuit = leaving.internalCircuit();
+                    if(Configurator.logTransportNetwork) 
+                        Log.info("LogisticsService.disconnect: Split needed, moving mate-side ports to new circuit %d", newCircuit.carrierAddress());
 
-                    CarrierCircuit newCircuit = 
-                            new CarrierCircuit(existingCircuit.carrier, existingCircuit.channel);
-
-                    // no alternate route, so must split
-                    if(reachableFromLeaving.size() >= existingCircuit.portCount() / 2)
+                    // Reachable ports are at least half of total. 
+                    // Swap mate and unreachable ports to a new circuit
+                    existingCircuit.movePorts(newCircuit, new Predicate<Port<T>>()
                     {
-                        if(Configurator.logTransportNetwork) 
-                            Log.info("LogisticsService.disconnect: Split needed, moving mate-side ports to new circuit %d", newCircuit.carrierAddress());
-
-                        // Reachable ports are at least half of total. 
-                        // Swap mate and unreachable ports to a new circuit
-                        existingCircuit.movePorts(newCircuit, new Predicate<PortState>()
+                        @Override
+                        public boolean test(Port<T> t)
                         {
-                            @Override
-                            public boolean test(PortState t)
-                            {
-                                return !reachableFromLeaving.contains(t);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        if(Configurator.logTransportNetwork) 
-                            Log.info("LogisticsService.disconnect: Split needed, moving leave-side ports to new circuit %d", newCircuit.carrierAddress());
-
-                        // Reachable ports are less than half of total.
-                        // Swap leaving port and reachable ports to a new circuit
-                        existingCircuit.movePorts(newCircuit, new Predicate<PortState>()
-                        {
-                            @Override
-                            public boolean test(PortState t)
-                            {
-                                return reachableFromLeaving.contains(t);
-                            }
-                        });
-                    }
+                            return !reachableFromLeaving.contains(t);
+                        }
+                    });
                 }
-                else if(Configurator.logTransportNetwork) 
+                else
                 {
-                    Log.info("LogisticsService.disconnect: Split not needed for %d ports. (If > 1 ports are still reachable)",
-                            reachableFromLeaving.size());
+                    if(Configurator.logTransportNetwork) 
+                        Log.info("LogisticsService.disconnect: Split needed, moving leave-side ports to new circuit %d", newCircuit.carrierAddress());
+
+                    // Reachable ports are less than half of total.
+                    // Swap leaving port and reachable ports to a new circuit
+                    existingCircuit.movePorts(newCircuit, new Predicate<Port<T>>()
+                    {
+                        @Override
+                        public boolean test(Port<T> t)
+                        {
+                            return reachableFromLeaving.contains(t);
+                        }
+                    });
                 }
             }
-            leaving.detach();
-            mate.detach();
-        }, false);
+            else if(Configurator.logTransportNetwork) 
+            {
+                Log.info("LogisticsService.disconnect: Split not needed for %d ports. (If > 1 ports are still reachable)",
+                        reachableFromLeaving.size());
+            }
+        }
+        leaving.detach();
+        mate.detach();
     }
 
     /**
@@ -328,19 +330,19 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * that are navigable may be left out. Useful as a performance optimization
      * when the results will not be needed if the stop node is found.
      */
-    private HashSet<PortState> findNavigableCarrierPorts(PortState startingFrom, @Nullable PortState stopAt)
+    private HashSet<Port<T>> findNavigableCarrierPorts(Port<T> startingFrom, @Nullable Port<T> stopAt)
     {
         assert startingFrom.getMode() == PortMode.CARRIER
                 : "transport topology search with non-carrier starting port";
 
-        CarrierCircuit onCircuit = startingFrom.internalCircuit();
+        Carrier<T> onCircuit = startingFrom.internalCircuit();
 
         /**
          * Ports known to reference the internal carrier of the starting port.
          * These are the ports that may need to be moved to a new circuit
          * if the current circuit must be split
          */
-        HashSet<PortState> results = new HashSet<PortState>();
+        HashSet<Port<T>> results = new HashSet<Port<T>>();
         results.add(startingFrom);
 
         /**
@@ -348,13 +350,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
          * Any port in this list should already have been added
          * to results.
          */
-        ArrayDeque<PortState> workList = new ArrayDeque<PortState>();
+        ArrayDeque<Port<T>> workList = new ArrayDeque<Port<T>>();
         workList.add(startingFrom);
 
         while(!workList.isEmpty())
         {
-            PortState port = workList.poll();
-            for(PortState peer : port.carrierMates())
+            Port<T> port = workList.poll();
+            for(Port<T> peer : port.carrierMates())
             {
                 if(peer.internalCircuit() == onCircuit && peer.isAttached())
                 {
@@ -367,7 +369,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                         // swapped if there is a split and it is attached
                         if(peer.isAttached())
                         {
-                            PortState mate = peer.mate();
+                            Port<T> mate = peer.mate();
                             if(mate.externalCircuit() == onCircuit && results.add(mate))
                             {
                                 if(mate == stopAt) return results;
@@ -392,62 +394,61 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
 
     /**
      * Convenient version of {@link #connectionResult(Port, int, Port, int)}
+     * to use if both ports already have channels fully configured.
      */
     @Nonnull
     public ConnectionResult connectionResult(
-            PortState port1,
-            PortState port2)
+            Port<T> port1,
+            Port<T> port2)
     {
         return connectionResult(
-                port1.port(), 
-                port1.getConfiguredChannel(), 
-                port2.port(), 
-                port2.getConfiguredChannel());
+                port1, 
+                port1.getChannel(), 
+                port2, 
+                port2.getChannel());
     }
 
     /**
      * Returns the effective port types for the two ports
      * to be mated with the given given channels.
-     * Implements all the rules described in PortType.<p>
+     * Implements all the rules described in PortFunction.<p>
      */
     @Nonnull
     public ConnectionResult connectionResult(
-            Port port1,
+            Port<T> port1,
             int channel1,
-            Port port2,
+            Port<T> port2,
             int channel2)
     {
-        if(port1.storageType != port2.storageType) 
-            return FAIL_STORAGE_TYPE;
-
+        if(port1.connector() != port2.connector()) return FAIL_INCOMPATIBLE;
+        
         boolean channelMatch = channel1 == channel2;
 
         // logic relies on enum ordering: CARRIER / DIRECT / BRIDGE
         // and that ports 1 and 2 are always sorted by that order
-        boolean swapOrder = port1.portType.ordinal() > port2.portType.ordinal();
+        boolean swapOrder = port1.function().ordinal() > port2.function().ordinal();
         if(swapOrder)
         {
-            Port swapPort = port1;
+            Port<T> swapPort = port1;
             port1 = port2;
             port2 = swapPort;
         }
 
-        switch(port1.portType)
+        switch(port1.function())
         {
         case CARRIER:
         {
-            switch(port2.portType)
+            switch(port2.function())
             {
             case CARRIER:
             {
-                if(port1.level == port2.level)
+                if(port1.internalLevel() == port2.internalLevel())
                 {
-                    // Two parents of same level and storage type, so just 
-                    // need to check for channel match.  Top level
-                    // parents ignore channel.
-                    return port1.level.isTop() || channelMatch
+                    // Two parents of same level, so just 
+                    // need to check for channel match.  
+                    return  channelMatch
                             ? CARRIER_CARRIER
-                                    : FAIL_CHANNEL_MISMATCH;
+                            : FAIL_CHANNEL_MISMATCH;
                 }
                 // non-top carrier-to-carrier must be same level
                 else return FAIL_LEVEL_GAP;
@@ -455,10 +456,12 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
 
             case DIRECT:
             {
-                if(port1.level == port2.level)
+                // direct ports can only join with parents at same level
+                if(port1.externalLevel() == port2.externalLevel())
                 {
-                    // direct ports can only join with parents at same level
-                    return swapOrder ? DIRECT_CARRIER : CARRIER_DIRECT; 
+                    return  channelMatch
+                            ? (swapOrder ? DIRECT_CARRIER : CARRIER_DIRECT)
+                            : FAIL_CHANNEL_MISMATCH;
                 }
                 else
                     return FAIL_LEVEL_GAP;
@@ -466,32 +469,37 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
 
             case BRIDGE:
             {
-                if(port1.level == port2.level)
+                if(port1.internalLevel() == port2.internalLevel())
                 {
                     // if bridge at same level as carrier
                     // then acts exactly like another carrier port
-                    return port1.level.isTop() || channelMatch
+                    return channelMatch
                             ? CARRIER_CARRIER
-                                    : FAIL_CHANNEL_MISMATCH;
+                            : FAIL_CHANNEL_MISMATCH;
                 }
-                else if(port1.level.above() == port2.level)
+                else if(port1.internalLevel().above() == port2.internalLevel())
                 {
                     // if bridge is one level above carrier then it acts
                     // as a proper bridge port
-                    return swapOrder ? BRIDGE_CARRIER : CARRIER_BRIDGE;
+                    
+                    if(this.storageType.channelsSpanLevels() && !channelMatch)
+                        // fluids need to match channels across levels
+                        return FAIL_CHANNEL_MISMATCH;
+                    
+                    else return swapOrder ? BRIDGE_CARRIER : CARRIER_BRIDGE;
                 }
                 else return FAIL_LEVEL_GAP;
             }
 
             default:
-                assert false : "Port.connectionResult(): Unhandled PortType enum";
+                assert false : "Port.connectionResult(): Unhandled PortFunction enum";
             return FAIL_INCOMPATIBLE;
             }
         }
 
         case DIRECT:
         {
-            switch(port2.portType)
+            switch(port2.function())
             {
             case CARRIER:
             {
@@ -503,6 +511,8 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             case DIRECT:
             {
                 // direct ports can't form circuits on their own
+                
+                // TODO: Let direct ports mate with direct ports to form device/device private links
                 return FAIL_INCOMPATIBLE;
             }
 
@@ -510,26 +520,32 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             {
                 // direct ports always act as direct ports
                 // so bridge port mode really only a question of level
-                if(port1.level == port2.level)
-                {       
-                    return swapOrder ? CARRIER_DIRECT : DIRECT_CARRIER; 
-                }
-                else if(port1.level.above() == port2.level)
+                if(port1.externalLevel() == port2.internalLevel())
                 {
-                    return swapOrder ? BRIDGE_DIRECT : DIRECT_BRIDGE;
+                    return channelMatch
+                            ? (swapOrder ? CARRIER_DIRECT : DIRECT_CARRIER)
+                            : FAIL_CHANNEL_MISMATCH;
+                }
+                else if(port1.externalLevel().above() == port2.internalLevel())
+                {
+                    if(this.storageType.channelsSpanLevels() && !channelMatch)
+                        // fluids need to match channels across levels
+                        return FAIL_CHANNEL_MISMATCH;
+                    
+                    else return swapOrder ? BRIDGE_DIRECT : DIRECT_BRIDGE;
                 }
                 else return FAIL_LEVEL_GAP;
             }
 
             default:
-                assert false : "Port.connectionResult(): Unhandled PortType enum";
+                assert false : "Port.connectionResult(): Unhandled PortFunction enum";
             return FAIL_INCOMPATIBLE;
             }
         }
 
         case BRIDGE:
         {
-            switch(port2.portType)
+            switch(port2.function())
             {
 
             case CARRIER:
@@ -542,19 +558,22 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
 
             case BRIDGE:
             {
-                if(port1.level == port2.level)
-                {
+                if(port1.internalLevel() == port2.internalLevel())
                     // two bridge ports of same level behave like carrier ports
-                    return port1.level.isTop() || channelMatch
+                    return channelMatch
                             ? CARRIER_CARRIER
-                                    : FAIL_CHANNEL_MISMATCH;
-                }
-                else if(port1.level == port2.level.below())
+                            : FAIL_CHANNEL_MISMATCH;
+                
+                else if(this.storageType.channelsSpanLevels() && !channelMatch)
+                    // fluids need to match channels across levels
+                    return FAIL_CHANNEL_MISMATCH;
+                
+                else if(port1.internalLevel() == port2.internalLevel().below())
                     // if this port is 1 lower, then it will act as carrier port
                     // and other as passive bridge
                     return swapOrder ? BRIDGE_CARRIER : CARRIER_BRIDGE;
 
-                else if(port1.level == port2.level.above())
+                else if(port1.internalLevel() == port2.internalLevel().above())
                     // if this port is 1 higher, then it will act as bridge port
                     // and other as carrier
                     return swapOrder ? CARRIER_BRIDGE : BRIDGE_CARRIER;
@@ -564,13 +583,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             }
 
             default:
-                assert false : "Port.connectionResult(): Unhandled PortType enum";
+                assert false : "Port.connectionResult(): Unhandled PortFunction enum";
             return FAIL_INCOMPATIBLE;
             }
         }
 
         default:
-            assert false : "Port.connectionResult(): Unhandled PortType enum";
+            assert false : "Port.connectionResult(): Unhandled PortFunction enum";
         return FAIL_INCOMPATIBLE;
         }
     }
@@ -578,7 +597,10 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     /**
         Generates list of possible routes between two devices.  
         Relies on sort order and structure guaranteed by 
-        {@link CarrierCircuit#legs()}.
+        {@link Carrier#legs()}.<p>
+        
+        For fluid transport, routes are limited by the given resource.
+        Resource is currently ignored for power and item requests.
        
         Approach: compare first leg of each list, with these possibilities...<p>
        
@@ -608,15 +630,15 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         This ensures results are always consistent with transport state, but
         allows it to be safely called from any thread.
     */
-    public ImmutableList<Route> findRoutesNow(IDevice fromDevice, IDevice toDevice)
+    public ImmutableList<Route<T>> findRoutesNow(IDevice fromDevice, IDevice toDevice, IResource<T> forResource)
     {
-        if(this.confirmServiceThread()) return findRoutesImpl(fromDevice, toDevice);
+        if(this.confirmServiceThread()) return findRoutesImpl(fromDevice, toDevice, forResource);
             
         try
         {
             return executor.submit(() ->
             {
-                return findRoutesImpl(fromDevice, toDevice);
+                return findRoutesImpl(fromDevice, toDevice, forResource);
             }, true).get();
         }
         catch (Exception e)
@@ -631,32 +653,34 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * returns a future and does not run in highest priority.  Will run after 
      * transport tasks submitted earlier.
      */
-    public Future<ImmutableList<Route>> findRoutes(IDevice fromDevice, IDevice toDevice)
+    public Future<ImmutableList<Route<T>>> findRoutes(IDevice fromDevice, IDevice toDevice, IResource<T> forResource)
     {
         return executor.submit( () ->
         {
-            return findRoutesImpl(fromDevice, toDevice);
+            return findRoutesImpl(fromDevice, toDevice, forResource);
         }, false);
     }
     
     /**
      * Implementation of {@link #findRoutesNow(IDevice, IDevice)}
      */
-    private ImmutableList<Route> findRoutesImpl(IDevice fromDevice, IDevice toDevice)
+    private ImmutableList<Route<T>> findRoutesImpl(IDevice fromDevice, IDevice toDevice, IResource<T> forResource)
     {
-        ITransportManager<?> tm1 = fromDevice.tranportManager(storageType);
+        @SuppressWarnings("unchecked")
+        ITransportManager<T> tm1 = (ITransportManager<T>) fromDevice.tranportManager(storageType);
         if(tm1 == null) return ImmutableList.of();
         
-        ITransportManager<?> tm2 = toDevice.tranportManager(storageType);
+        @SuppressWarnings("unchecked")
+        ITransportManager<T> tm2 = (ITransportManager<T>) toDevice.tranportManager(storageType);
         if(tm2 == null) return ImmutableList.of();
 
-        Legs legs1 = tm1.legs();
-        Legs legs2 = tm2.legs();
+        Legs<T> legs1 = tm1.legs(forResource);
+        Legs<T> legs2 = tm2.legs(forResource);
         
         boolean canConnect = false;
-        for(CarrierCircuit c : legs1.islands)
+        for(Carrier<T> c : legs1.islands)
         {
-            if(legs2.islands.contains(c))
+            if(c.canTransport(forResource) && legs2.islands.contains(c))
             {
                 canConnect = true;
                 break;
@@ -665,16 +689,16 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         
         if(!canConnect) return ImmutableList.of();
         
-        Iterator<ImmutableList<Leg>> itr1 = legs1.legs().iterator();
+        Iterator<ImmutableList<Leg<T>>> itr1 = legs1.legs().iterator();
         if(!itr1.hasNext()) return ImmutableList.of();
         
-        Iterator<ImmutableList<Leg>> itr2 = legs2.legs().iterator();
+        Iterator<ImmutableList<Leg<T>>> itr2 = legs2.legs().iterator();
         if(!itr2.hasNext()) return ImmutableList.of();
         
-        ImmutableList<Leg> list1 = itr1.next();
-        ImmutableList<Leg> list2 = itr2.next();
+        ImmutableList<Leg<T>> list1 = itr1.next();
+        ImmutableList<Leg<T>> list2 = itr2.next();
         
-        ImmutableList.Builder<Route> routeBuilder = ImmutableList.builder();
+        ImmutableList.Builder<Route<T>> routeBuilder = ImmutableList.builder();
         
         /**
          * prevent unterminated loop due to logic error.
@@ -686,8 +710,8 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         {
          
             // relying on circuits not to output legs with empty lists!
-            Leg firstLeg1 = list1.get(0);
-            Leg firstLeg2 = list2.get(0);
+            Leg<T> firstLeg1 = list1.get(0);
+            Leg<T> firstLeg2 = list2.get(0);
             
             if(firstLeg1.end() == firstLeg2.end())
             {
@@ -699,8 +723,8 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             else
             {
                 // check for same level
-                int level1 = firstLeg1.end().carrier.level.ordinal();
-                int level2 = firstLeg2.end().carrier.level.ordinal();
+                int level1 = firstLeg1.end().level().ordinal();
+                int level2 = firstLeg2.end().level().ordinal();
                 
                 if(level1 < level2)
                 {
@@ -749,13 +773,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         return routeBuilder.build();
     }
     
-    private void addCombinedRoutesToBuilder(List<Leg> list1, List<Leg> list2, ImmutableList.Builder<Route> builder)
+    private void addCombinedRoutesToBuilder(List<Leg<T>> list1, List<Leg<T>> list2, ImmutableList.Builder<Route<T>> builder)
     {
-        for(Leg l1 : list1)
+        for(Leg<T> l1 : list1)
         {
-            for(Leg l2 : list2)
+            for(Leg<T> l2 : list2)
             {
-                builder.add(new Route(l1, l2));
+                builder.add(new Route<T>(l1, l2));
             }
         }
     }
@@ -782,13 +806,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * @return          Future with quantity produced and consumed
      */
     public Future<Long> sendResource(
-            IResource<?> resource, 
+            IResource<T> resource, 
             final long quantity, 
             IDevice from, 
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<?> request)
+            IProcurementRequest<T> request)
     {
         return executor.submit( () ->
         {
@@ -807,13 +831,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * allows it to be safely called from any thread.
      */
     public long sendResourceNow(
-            IResource<?> resource, 
+            IResource<T> resource, 
             final long quantity, 
             IDevice from, 
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<?> request)
+            IProcurementRequest<T> request)
     {
         if(this.confirmServiceThread()) return sendResourceImpl(resource, quantity, from, to, force, simulate, request);
         
@@ -832,22 +856,22 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     private long sendResourceImpl(
-            IResource<?> resource, 
+            IResource<T> resource, 
             final long quantity, 
             IDevice from, 
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<?> request)
+            IProcurementRequest<T> request)
     {
-        ImmutableList<Route> routes = 
-                this.findRoutesImpl(from, to);
+        ImmutableList<Route<T>> routes = 
+                this.findRoutesImpl(from, to, resource);
         
         if(routes.isEmpty()) return 0L;
         
         Long remaining = quantity;
         
-        for(Route r : routes)
+        for(Route<T> r : routes)
         {
             remaining -= 
                     this.sendResourceOnRouteImpl(r, resource, remaining, from, to, force, simulate, request);
@@ -862,7 +886,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * but specifies a single route to use.
      */
     public Future<Long> sendResourceOnRoute(
-            Route route, 
+            Route<T> route, 
             IResource<?> resource, 
             final long quantity, 
             IDevice from, 
@@ -888,7 +912,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * allows it to be safely called from any thread.
      */
     public long sendResourceOnRouteNow(
-            Route route, 
+            Route<T> route, 
             IResource<?> resource, 
             final long quantity, 
             IDevice from, 
@@ -920,7 +944,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * and then execute that result with confidence it will stick.
      */
     private long sendResourceOnRouteImpl(
-            Route route, 
+            Route<T> route, 
             IResource<?> resource, 
             final long quantity, 
             IDevice from, 
@@ -931,8 +955,10 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     {
         StorageType<?> storageType = resource.storageType();
         
-        ITransportManager<?> tmFrom = from.tranportManager(storageType);
-        ITransportManager<?> tmTo = to.tranportManager(storageType);
+        @SuppressWarnings("unchecked")
+        ITransportManager<T> tmFrom = (ITransportManager<T>) from.tranportManager(storageType);
+        @SuppressWarnings("unchecked")
+        ITransportManager<T> tmTo = (ITransportManager<T>) to.tranportManager(storageType);
         
         if(tmFrom == null || tmTo == null)
         {
@@ -954,7 +980,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         limit = from.onProduce(resource, limit, true, request);
         limit = to.onConsume(resource, limit, true, request);
         
-        for(CarrierCircuit c : route.circuits())
+        for(Carrier<T> c : route.circuits())
         {
             long q = c.transmit(quantity, force, true);
             if(force)
@@ -971,7 +997,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         if(!simulate)
         {
             // actually send stuff!
-            for(CarrierCircuit c : route.circuits())
+            for(Carrier<T> c : route.circuits())
             {
                 assert limit == c.transmit(limit, force, false)
                       : "Circuit did not honor simulated result";
@@ -999,29 +1025,35 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     /**
-     * Returns true if any transport route exists between the two devices.
+     * Returns true if any transport route exists between the two devices
+     * that could be used to transport the given resource. Resource currently
+     * only matters for fluid circuits, which are always locked to a specific
+     * fluid.<p>
+     * 
      * By convention, returns true if both devices are the same device.<p>
      * 
      * Must be called from service thread.
      */
-    public boolean areDevicesConnected(IDevice fromDevice, IDevice toDevice)
+    public boolean areDevicesConnected(IDevice fromDevice, IDevice toDevice, IResource<T> forResource)
     {
         assert confirmServiceThread() : "Transport logic running outside logistics service";
         
         if(fromDevice == toDevice) return true;
                 
-        ITransportManager<?> tm1 = fromDevice.tranportManager(storageType);
+        @SuppressWarnings("unchecked")
+        ITransportManager<T> tm1 = (ITransportManager<T>) fromDevice.tranportManager(storageType);
         if(tm1 == null) return false;
         
-        ITransportManager<?> tm2 = toDevice.tranportManager(storageType);
+        @SuppressWarnings("unchecked")
+        ITransportManager<T> tm2 = (ITransportManager<T>) toDevice.tranportManager(storageType);
         if(tm2 == null) return false;
 
-        Legs legs1 = tm1.legs();
-        Legs legs2 = tm2.legs();
+        Legs<T> legs1 = tm1.legs(forResource);
+        Legs<T> legs2 = tm2.legs(forResource);
         
-        for(CarrierCircuit c : legs1.islands)
+        for(Carrier<T> c : legs1.islands)
         {
-            if(legs2.islands.contains(c))
+            if(c.canTransport(forResource) && legs2.islands.contains(c))
             {
                 return true;
             }

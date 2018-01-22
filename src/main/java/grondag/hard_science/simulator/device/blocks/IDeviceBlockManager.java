@@ -5,12 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.ImmutableList;
-
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
-import grondag.hard_science.simulator.transport.endpoint.PortState;
-import net.minecraft.util.EnumFacing;
+import grondag.hard_science.simulator.transport.endpoint.Port;
 
 /**
  * Manages the device block delegates for a device.
@@ -43,57 +39,12 @@ public interface IDeviceBlockManager
     public void disconnect();
 
     /**
-     * If device item ports have an internal carrier circuit,
-     * the current circuit.  Null if no connections or doesn't have.
-     * For TOP display to support debugging.
-     */
-    public default CarrierCircuit itemCircuit() { return null; }
-
-    /**
-     * If device power ports have an internal carrier circuit,
-     * the current circuit.  Null if no connections or doesn't have.
-     * For TOP display to support debugging.
-     */
-    public default CarrierCircuit powerCircuit() { return null; }
-    
-    /**
-     * If device fluid ports have an internal carrier circuit,
-     * the current primary fluid circuit.  Null if no connections or doesn't have.
-     * For TOP display to support debugging.
-     */
-    public default CarrierCircuit fluidCircuit() { return null; }
-
-    /**
-     * Get all ports on this device with the given StorageType. 
+     * Get all currently attached ports on this device 
+     * with the given StorageType, irrespective of channel
      *
      * @param storageType  Matches ports of this type.
-     * @param attachedOnly If true, only attached ports will be included.
      */
     @Nonnull
-    public default List<PortState> getPorts(StorageType<?> storageType, boolean attachedOnly)
-    {
-        ImmutableList.Builder<PortState> builder = ImmutableList.builder();
-        
-        for(IDeviceBlock block : this.blocks())
-        {
-            for(EnumFacing face : EnumFacing.VALUES)
-            {
-                for(PortState port : block.getPorts(storageType, face))
-                {
-                    if(!attachedOnly || port.isAttached())
-                    {
-                        builder.add(port);
-                    }
-                }
-            }
-            for(PortState port : block.getPorts(storageType, null))
-            {
-                if(!attachedOnly || port.isAttached())
-                {
-                    builder.add(port);
-                }
-            }
-        }
-        return builder.build();
-    }
+    public <T extends StorageType<T>> List<Port<T>> getAttachedPorts(T storageType);
+
 }

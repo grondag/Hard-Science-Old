@@ -12,50 +12,51 @@ import com.google.common.collect.ImmutableSet;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.simulator.transport.endpoint.PortState;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.endpoint.Port;
 
 /**
- * Encapsulated set used by CarrierCircuit to
+ * Encapsulated set used by Carrier to
  * track ports.  Main feature in addition to set
  * functionality is maintaining a list of all
  * upward-connected bridge ports.
  */
-public class PortTracker
+public class PortTracker<T extends StorageType<T>>
 {
     /**
-     * See {@link CarrierCircuit#bridgeVersion()}
+     * See {@link Carrier#bridgeVersion()}
      * Don't access directly, use {@link #updateBridgeVersion()}.
      */
     private static final AtomicInteger BRIDGE_VERSION_COUNTER = new AtomicInteger(0);
 
     /**
-     * See {@link CarrierCircuit#bridgeVersion()}
+     * See {@link Carrier#bridgeVersion()}
      */
     private int bridgeVersion;
     
-    private final HashSet<PortState> ports = new HashSet<PortState>();
+    private final HashSet<Port<T>> ports = new HashSet<Port<T>>();
     
     /**
      * Circuit that owns this tracker.  Used to know what side
      * of bridge we are on.
      */
-    private final CarrierCircuit owner;
+    private final Carrier<T> owner;
 
     /**
      * List of bridge ports where our owner is the external circuit.
      * These should mean that we are on the low side of the bridge,
      * because the internal circuit will belong to the bridge device.
      */
-    private final SimpleUnorderedArrayList<PortState> bridges
-        = new SimpleUnorderedArrayList<PortState>();
+    private final SimpleUnorderedArrayList<Port<T>> bridges
+        = new SimpleUnorderedArrayList<Port<T>>();
     
     /**
      * Unique upwards carrier circuits accessible from our
      * owner via bridge ports.
      */
-    ImmutableSet<CarrierCircuit> parents = ImmutableSet.of();
+    ImmutableSet<Carrier<T>> parents = ImmutableSet.of();
     
-    public PortTracker(CarrierCircuit owner)
+    public PortTracker(Carrier<T> owner)
     {
         this.owner = owner;
         this.updateBridgeVersion();
@@ -66,18 +67,18 @@ public class PortTracker
         this.bridgeVersion = BRIDGE_VERSION_COUNTER.incrementAndGet();
     }
     
-    public boolean contains(PortState portInstance)
+    public boolean contains(Port<T> portInstance)
     {
         return this.ports.contains(portInstance);
     }
 
    
-    public void add(PortState p)
+    public void add(Port<T> p)
     {
         if(Configurator.logTransportNetwork) 
             Log.info("PortTracker.add: circuit = %d, portState = %s",
                     this.owner.carrierAddress(),
-                    p.portName());
+                    p.toString());
         
         assert p.internalCircuit() == this.owner 
                 || p.externalCircuit() == this.owner
@@ -110,12 +111,12 @@ public class PortTracker
         }
     }
 
-    public void remove(PortState p)
+    public void remove(Port<T> p)
     {
         if(Configurator.logTransportNetwork) 
             Log.info("PortTracker.remove: circuit = %d, portState = %s",
                     this.owner.carrierAddress(),
-                    p.portName());
+                    p.toString());
         
         assert p.internalCircuit() == this.owner 
                 || p.externalCircuit() == this.owner
@@ -149,7 +150,7 @@ public class PortTracker
         }
     }
 
-    public void addAll(Iterable<PortState> other)
+    public void addAll(Iterable<Port<T>> other)
     {
         other.forEach(p -> this.add(p));
     }
@@ -157,10 +158,10 @@ public class PortTracker
     /**
      * Returns immutable list of current ports.
      * Allows for iteration while ensuring all updates occur via
-     * {@link #add(PortState)} and {@link #remove(PortState)} adhering
+     * {@link #add(Port)} and {@link #remove(Port)} adhering
      * to all logic and preventing concurrent modification exception. <p>
      */
-    public ImmutableList<PortState> snapshot()
+    public ImmutableList<Port<T>> snapshot()
     {
         return ImmutableList.copyOf(this.ports);
     }
@@ -189,7 +190,7 @@ public class PortTracker
     /**
      * All upward carrier circuits accessible from owning carrier via bridge ports.
      */
-    public ImmutableSet<CarrierCircuit> parents()
+    public ImmutableSet<Carrier<T>> parents()
     {
         if(this.parents == null)
         {
@@ -203,7 +204,7 @@ public class PortTracker
             }
             else
             {
-                ImmutableSet.Builder<CarrierCircuit> builder = ImmutableSet.builder();
+                ImmutableSet.Builder<Carrier<T>> builder = ImmutableSet.builder();
                 this.bridges.forEach(p -> builder.add(p.internalCircuit()));
                 this.parents = builder.build();
             }
@@ -213,7 +214,7 @@ public class PortTracker
     
     
     /**
-     * See {@link CarrierCircuit#bridgeVersion()}
+     * See {@link Carrier#bridgeVersion()}
      */
     public int bridgeVersion()
     {
@@ -221,9 +222,9 @@ public class PortTracker
     }
     
     /**
-     * Handles implementation of {@link CarrierCircuit#mergeInto(CarrierCircuit)}
+     * Handles implementation of {@link Carrier#mergeInto(Carrier)}
      */
-    protected void mergeInto(PortTracker into)
+    protected void mergeInto(PortTracker<T> into)
     {
         if(Configurator.logTransportNetwork) 
             Log.info("PortTracker.mergeInto: from = %d, to = %d",
@@ -239,7 +240,7 @@ public class PortTracker
      * If we did ports individuals then carrier group ports would no longer 
      * be associated with this circuit during removal and would fail assertion checks
      */
-    private void movePorts(List<PortState> targets, PortTracker into)
+    private void movePorts(List<Port<T>> targets, PortTracker<T> into)
     {
         targets.forEach(p -> this.remove(p));
         
@@ -249,9 +250,9 @@ public class PortTracker
     }
     
     /**
-     * Handles implementation of {@link CarrierCircuit#movePorts(CarrierCircuit, Predicate)}
+     * Handles implementation of {@link Carrier#movePorts(Carrier, Predicate)}
      */
-    public void movePorts(PortTracker into, Predicate<PortState> predicate)
+    public void movePorts(PortTracker<T> into, Predicate<Port<T>> predicate)
     {
         if(Configurator.logTransportNetwork) 
             Log.info("PortTracker.movePorts: from = %d, to = %d",

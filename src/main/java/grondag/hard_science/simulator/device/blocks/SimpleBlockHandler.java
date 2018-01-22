@@ -1,28 +1,29 @@
 package grondag.hard_science.simulator.device.blocks;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModPorts;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.CarrierPortGroup;
-import grondag.hard_science.simulator.transport.endpoint.DirectPortState;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import grondag.hard_science.simulator.transport.endpoint.Port;
-import grondag.hard_science.simulator.transport.endpoint.PortState;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 
 /**
  * Basic combined device block & block manager implementation for single-block machines.
@@ -31,196 +32,121 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
 {
     private final IDevice owner;
     private final long packedBlockPos;
-
-    private final Collection<IDeviceBlock> collection;
-
-    /**
-     * Item ports by face. This implementation assumes/allows
-     * only one port per face.
-     */
-    private final PortState[] itemPorts;
     
-    /**
-     * Fluid ports by face. This implementation assumes/allows
-     * only one port per face.
-     */
-    private final PortState[] fluidPorts;
-    
-    /**
-     * Power ports by face. This implementation assumes/allows
-     * only one port per face.
-     */
-    private final PortState[] powerPorts;
-
-    /**
-     * Manages shared circuit for item ports.  Not face-aware
-     * because is general-purpose class that can handle wireless
-     * and/or multiblock.
-     */
-    private final CarrierPortGroup itemGroup;
-    
-    /**
-     * Manages shared circuit for item ports.  Not face-aware
-     * because is general-purpose class that can handle wireless
-     * and/or multiblock.
-     */
-    private final CarrierPortGroup fluidGroup;
-
-    /**
-     * Manages shared circuit for power ports.  Not face-aware
-     * because is general-purpose class that can handle wireless
-     * and/or multiblock.
-     */
-    private final CarrierPortGroup powerGroup; 
+    private BlockPortManager<StorageTypeStack> itemPortManager;
+    private BlockPortManager<StorageTypePower> powerPortManager;
+    private BlockPortManager<StorageTypeFluid> fluidPortManager;
     
     /**
      * Sets up ports and parents.
-     * Should not be called until device has a location.<p>
+     * Assumes device block position is given by device location. 
+     * Thus should not be called until device has a location.<p>
      * 
-     * @param owner     Device associated with this device block
-     * @param channel   Channel for circuit segregation. Ignored for top-level devices.
-     * @param level     Transport level of the internal carrier for bridge/carrier port types.
-     * Level of port itself for direct ports. 
-     * @param portType  Type of port offered for each support storage type.  
-     * Assumes all faces offer same ports. 
+     * Channel will be used as the channel ID for any block or item
+     * ports that rely on it for carrier segregation. (Fluid ports
+     * segregate using channels derived from fluid carried.)<p>
+     * 
+     * PortLayout should already be transformed (if necessary)
+     * so that port facings are actual, in-world facings instead
+     * of nominal facing of the port layout for this device.
      */
-    public SimpleBlockHandler(
-            IDevice owner, 
-            int channel, 
-            CarrierLevel level, 
-            PortType portType)
+    public SimpleBlockHandler(IDevice owner, IPortLayout portLayout)
     {
         this.owner = owner;
-        this.collection = ImmutableList.of(this);
         this.packedBlockPos = PackedBlockPos.pack(owner.getLocation());
-
-        boolean hasItemPorts = owner.hasTransportManager(StorageType.ITEM);
-        boolean hasFluidPorts = owner.hasTransportManager(StorageType.FLUID);
-        boolean hasPowerPorts = owner.hasTransportManager(StorageType.POWER);
-        this.itemPorts = hasItemPorts ?  new PortState[6] : null;
-        this.fluidPorts = hasFluidPorts ?  new PortState[6] : null;
-        this.powerPorts = hasPowerPorts ?  new PortState[6] : null;
-        
-        BlockPos pos = PackedBlockPos.unpack(this.packedBlockPos);
-        
-        if(portType == PortType.DIRECT)
-        {
-            // create individual direct ports - no common internal circuit
-            
-            Port itemPort = hasItemPorts
-                ? ModPorts.find( StorageType.ITEM, level, PortType.DIRECT) : null;
-             
-            Port powerPort = hasPowerPorts
-                ? ModPorts.find( StorageType.POWER, level, PortType.DIRECT) : null;
-                
-            Port fluidPort = hasFluidPorts
-                    ? ModPorts.find( StorageType.FLUID, level, PortType.DIRECT) : null;
-            
-            for(EnumFacing face : EnumFacing.VALUES)
-            {
-                if(hasItemPorts)
-                    this.itemPorts[face.ordinal()]= new DirectPortState(itemPort, owner, pos, face);
-                
-                if(hasPowerPorts)
-                    this.powerPorts[face.ordinal()]= new DirectPortState(powerPort, owner, pos, face);
-
-                if(hasPowerPorts)
-                    this.fluidPorts[face.ordinal()]= new DirectPortState(fluidPort, owner, pos, face);
-
-            }
-            this.itemGroup = null;
-            this.powerGroup = null;
-            this.fluidGroup = null;
-        }
-        else
-        {
-            // bridge or carrier ports - all share common internal circuit
-            
-            CarrierPortGroup itemGroup = null;
-            CarrierPortGroup powerGroup = null;
-            CarrierPortGroup fluidGroup = null;
-            
-            if(hasItemPorts)
-            {
-                itemGroup = new CarrierPortGroup(owner, StorageType.ITEM, level);
-                if(!level.isTop()) itemGroup.setConfiguredChannel(channel);
-            }
-            
-            if(hasPowerPorts)
-            {
-                powerGroup = new CarrierPortGroup(owner, StorageType.POWER, level);
-                if(!level.isTop()) powerGroup.setConfiguredChannel(channel);
-            }
-            
-            if(hasFluidPorts)
-            {
-                fluidGroup = new CarrierPortGroup(owner, StorageType.FLUID, level);
-                if(!level.isTop()) fluidGroup.setConfiguredChannel(channel);
-            }
-            
-            for(EnumFacing face : EnumFacing.VALUES)
-            {
-                if(itemGroup != null)
-                    this.itemPorts[face.ordinal()] = itemGroup.createPort(portType == PortType.BRIDGE, pos, face);
-
-                if(powerGroup != null)
-                    this.powerPorts[face.ordinal()] = powerGroup.createPort(portType == PortType.BRIDGE, pos, face);
-
-                if(fluidGroup != null)
-                    this.fluidPorts[face.ordinal()] = fluidGroup.createPort(portType == PortType.BRIDGE, pos, face);
-
-            }
-            
-            this.itemGroup = itemGroup;
-            this.powerGroup = powerGroup;
-            this.fluidGroup = fluidGroup;
-        }
-        
-        
-      
-        
-
-    }
-
-    @Override
-    public Iterable<PortState> getPorts(StorageType<?> storageType, EnumFacing face)
-    {
-        if(face == null) return Collections.emptyList();
-        
-        switch(storageType.enumType)
-        {
-        case ITEM:
-            return portListForFaceFromArray(face, itemPorts);
-        
-        case POWER:
-            return portListForFaceFromArray(face, powerPorts);
-
-        case FLUID:
-            return portListForFaceFromArray(face, fluidPorts);
-            
-        case PRIVATE:
-            assert false : "Unsupported private storage type reference";
-            return Collections.emptyList();
-            
-        default:
-            assert false : "Unhandled enum mapping";
-            return Collections.emptyList();
-        }
-    }
-    
-    private Iterable<PortState> portListForFaceFromArray(EnumFacing face, PortState[] ports)
-    {
-        if(ports == null) return Collections.emptyList();
-        PortState result = ports[face.ordinal()];
-        return result == null 
-                ? Collections.emptyList() 
-                : ImmutableList.of(result);
+        this.fluidPortManager = BlockPortManager.create(portLayout.createFluidPorts(owner));
+        this.itemPortManager = BlockPortManager.create(portLayout.createItemPorts(owner));
+        this.powerPortManager = BlockPortManager.create(portLayout.createPowerPorts(owner));
     }
     
     @Override
     public Collection<IDeviceBlock> blocks()
     {
-        return this.collection;
+        return ImmutableList.of(this);
+    }
+
+    @Override
+    public void connect()
+    {
+        if(Configurator.logDeviceChanges)
+            Log.info("SimpleBlockHandler.connect: " + this.description());
+
+        DeviceManager.blockManager().addOrUpdateDelegate(this);
+        this.onAdded();
+    }
+
+    protected void onAdded()
+    {
+        if(Configurator.logDeviceChanges)
+            Log.info("SimpleBlockHandler.onAdded: " + this.description());
+
+        if(   this.itemPortManager.isEmpty()
+           && this.powerPortManager.isEmpty()
+           && this.fluidPortManager.isEmpty()) return;
+        
+        // build list of adjacent device blocks and the face
+        // to which they are adjacent
+        ImmutableList.Builder<Pair<IDeviceBlock, EnumFacing>> builder = ImmutableList.builder();
+        for(EnumFacing face : EnumFacing.VALUES)
+        {
+            IDeviceBlock neighbor = this.getNeighbor(face);
+            if(neighbor != null)
+            {
+                builder.add(Pair.of(neighbor, face));
+            }
+        }
+        ImmutableList<Pair<IDeviceBlock, EnumFacing>> neighbors = builder.build();
+        
+        if(neighbors.isEmpty()) return;
+        
+        this.doConnect(itemPortManager, LogisticsService.ITEM_SERVICE, neighbors);
+        this.doConnect(powerPortManager, LogisticsService.POWER_SERVICE, neighbors);
+        this.doConnect(fluidPortManager, LogisticsService.FLUID_SERVICE, neighbors);
+    }
+
+    private <T extends StorageType<T>> void doConnect(
+            @Nullable BlockPortManager<T> myPortManager,
+            @Nonnull LogisticsService<T> service,
+            @Nonnull ImmutableList<Pair<IDeviceBlock, EnumFacing>> neighbors)
+    {
+        if(myPortManager.isEmpty()) return;
+        
+        service.executor.execute(()->
+        {
+            for(Pair<IDeviceBlock, EnumFacing> n : neighbors)
+            {
+                EnumFacing face = n.getValue();
+                
+                for(Port<T> myPort : myPortManager.getPorts(face))
+                {
+                    // this is always called when this block is new
+                    // so none of my ports should be connected yet
+                    if(myPort.isAttached())
+                    {
+                        assert false : "Found attached port during port connection - skipping";
+                        continue;
+                    }
+                    
+                    for(Port<T> matePort : 
+                        n.getLeft().getConnectablePorts(
+                                myPort, face.getOpposite()))
+                    {
+                        if(service.connect(myPort, matePort)) break;
+                    }
+                }
+            }
+        }, false);
+    }
+    
+    @Override
+    public void disconnect()
+    {
+        if(Configurator.logDeviceChanges)
+            Log.info("SimpleBlockHandler.disconnect: " + this.description());
+        
+        // NB: will call back to onRemoval(), which contains logic 
+        // for breaking connections
+        DeviceManager.blockManager().removeDelegate(this);        
     }
 
     @Override
@@ -241,135 +167,67 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
         return this.owner;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void connect()
+    public <T extends StorageType<T>> BlockPortManager<T> portManager(T storageType)
     {
-        if(Configurator.logDeviceChanges)
-            Log.info("SimpleBlockHandler.connect: " + this.description());
-
-        DeviceManager.blockManager().addOrUpdateDelegate(this);
-        this.connectToNeighbors();
-    }
-
-    protected void connectToNeighbors()
-    {
-        if(Configurator.logDeviceChanges)
-            Log.info("SimpleBlockHandler.connectToNeighbors: " + this.description());
-
-        boolean hasItems = this.itemPorts != null;
-        boolean hasPower = this.powerPorts != null;
-        boolean hasFluid = this.fluidPorts != null;
-        
-        if(!(hasItems || hasPower || hasFluid)) return;
-        
-        for(EnumFacing face : EnumFacing.VALUES)
+        switch(storageType.enumType)
         {
-            IDeviceBlock neighbor = this.getNeighbor(face);
-            if(neighbor == null) continue;
-
-            EnumFacing oppositeFace = face.getOpposite();
+        case FLUID:
+            return (BlockPortManager<T>) this.fluidPortManager;
             
-            if(hasItems)
-            {
-                PortState myPort = this.itemPorts[face.ordinal()];
-                if(myPort == null) break;
-                
-                assert !myPort.isAttached() : "Connection attempt on attached port";
-                for(PortState mate : neighbor.getPorts(StorageType.ITEM, oppositeFace))
-                {
-                    LogisticsService.ITEM_SERVICE.connect(myPort, mate);
-                }
-            }
+        case ITEM:
+            return (BlockPortManager<T>) this.itemPortManager;
             
-            if(hasPower)
-            {
-                PortState myPort = this.powerPorts[face.ordinal()];
-                if(myPort == null) break;
-                
-                assert !myPort.isAttached() : "Connection attempt on attached port";
-                for(PortState mate : neighbor.getPorts(StorageType.POWER, oppositeFace))
-                {
-                    LogisticsService.POWER_SERVICE.connect(myPort, mate);
-                }
-            }
+        case POWER:
+            return (BlockPortManager<T>) this.powerPortManager;
             
-            if(hasFluid)
-            {
-                PortState myPort = this.fluidPorts[face.ordinal()];
-                if(myPort == null) break;
-                
-                assert !myPort.isAttached() : "Connection attempt on attached port";
-                for(PortState mate : neighbor.getPorts(StorageType.FLUID, oppositeFace))
-                {
-                    LogisticsService.FLUID_SERVICE.connect(myPort, mate);
-                }
-            }
+        case PRIVATE:
+            assert false : "Reference to private storage type";
+            return null;
+        default:
+            assert false : "Unhandled enum mapping";
+            return null;
         }
     }
-
-    @Override
-    public void disconnect()
-    {
-        if(Configurator.logDeviceChanges)
-            Log.info("SimpleBlockHandler.disconnect: " + this.description());
         
-        // NB: will call back to onRemoval(), which contains logic 
-        // for breaking connections
-        DeviceManager.blockManager().removeDelegate(this);
+    @Override
+    public <T extends StorageType<T>> List<Port<T>> getAttachedPorts(T storageType)
+    {
+        return this.portManager(storageType).getAttachedPorts();
     }
 
+    @Override
+    public <T extends StorageType<T>> Iterable<Port<T>> getConnectablePorts(Port<T> fromPort, EnumFacing actualFace)
+    {
+        return this.portManager(fromPort.storageType())
+                .getConnectablePorts(fromPort, actualFace);
+    }
+    
     @Override
     public void onRemoval()
     {
         if(Configurator.logDeviceChanges)
             Log.info("SimpleBlockHandler.onRemoval: " + this.description());
-
-        boolean hasItems = this.itemPorts != null;
-        boolean hasPower = this.powerPorts != null;
-        boolean hasFluid = this.fluidPorts != null;
         
-        if(!(hasItems || hasPower || hasFluid)) return;
+        this.doDisconnect(this.itemPortManager, LogisticsService.ITEM_SERVICE);
+        this.doDisconnect(this.powerPortManager, LogisticsService.POWER_SERVICE);
+        this.doDisconnect(this.fluidPortManager, LogisticsService.FLUID_SERVICE);
+    }
+    
+    private <T extends StorageType<T>> void doDisconnect(
+            @Nullable BlockPortManager<T> portManager,
+            @Nonnull LogisticsService<T> service)
+    {
+        if(portManager.isEmpty()) return;
         
-        for(EnumFacing face : EnumFacing.VALUES)
+        service.executor.execute(() -> 
         {
-            IDeviceBlock neighbor = this.getNeighbor(face);
-            if(neighbor == null) continue;
-            
-            if(hasItems)
+            for(Port<T> ps : portManager.getAttachedPorts())
             {
-                PortState ps = this.itemPorts[face.ordinal()];
-                if(ps.isAttached()) LogisticsService.ITEM_SERVICE.disconnect(ps);
+                service.disconnect(ps);
             }
-            
-            if(hasPower)
-            {
-                PortState ps = this.powerPorts[face.ordinal()];
-                if(ps.isAttached()) LogisticsService.POWER_SERVICE.disconnect(ps);
-            }
-            
-            if(hasFluid)
-            {
-                PortState ps = this.fluidPorts[face.ordinal()];
-                if(ps.isAttached()) LogisticsService.FLUID_SERVICE.disconnect(ps);
-            }
-        }
+        }, false);
     }
-    
-    @Override
-    public CarrierCircuit itemCircuit()
-    { 
-        return this.itemGroup.internalCircuit(); 
-    }
-    
-    @Override
-    public CarrierCircuit powerCircuit()
-    { 
-        return this.powerGroup.internalCircuit(); 
-    }
-    
-    @Override
-    public CarrierCircuit fluidCircuit()
-    { 
-        return this.fluidGroup.internalCircuit(); 
-    }
+
 }

@@ -89,5 +89,16 @@ public class HardScience
        proxy.serverStopping(event);
    }
    
-
+   /**
+    * Puts mod ID and . in front of whatever is passed in
+    */
+   public static String prefixName(String name)
+   {
+       return String.format("%s.%s", MODID, name.toLowerCase());
+   }
+   
+   public static String prefixResource(String name)
+   {
+       return String.format("%s:%s", MODID, name.toLowerCase());
+   }
 }

@@ -12,8 +12,6 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.ItemContainer;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import grondag.hard_science.simulator.transport.routing.Route;
 import net.minecraft.init.Items;
@@ -27,7 +25,7 @@ public class TransportTestMachine extends AbstractSimpleMachine
     
     public TransportTestMachine()
     {
-        super(CarrierLevel.BOTTOM, PortType.CARRIER);
+        super();
         this.itemStorage = new ItemContainer(this, ContainerUsage.BUFFER_OUT);
         this.itemStorage.setCapacity(64);
     }
@@ -65,8 +63,8 @@ public class TransportTestMachine extends AbstractSimpleMachine
                 
                 for(IResourceContainer<StorageTypeStack> store : list)
                 {
-                    ImmutableList<Route> routes = 
-                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, store.device());
+                    ImmutableList<Route<StorageTypeStack>> routes = 
+                            LogisticsService.ITEM_SERVICE.findRoutesNow(this, store.device(), null);
                     
                     if(routes.isEmpty()) continue;
                     
@@ -75,7 +73,6 @@ public class TransportTestMachine extends AbstractSimpleMachine
                     
                     if(remaining <= 0) break;
                 }
-                
             });
         }
     }

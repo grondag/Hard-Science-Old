@@ -3,13 +3,9 @@ package grondag.hard_science.superblock.model.shape;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.vecmath.Matrix4d;
-import javax.vecmath.Matrix4f;
-
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
@@ -19,11 +15,9 @@ import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.placement.BlockOrientationType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.block.model.ModelRotation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
 
 
 public abstract class ShapeMeshGenerator
@@ -143,114 +137,6 @@ public abstract class ShapeMeshGenerator
 
     public abstract SideShape sideShape(ModelState modelState, EnumFacing side);
     
-    /**
-     * Find appropriate transformation assuming base model is oriented to Y orthogonalAxis, positive.
-     * This is different than the Minecraft/Forge default because I brain that way.<br><br>
-     * 
-     * @see #getMatrixForAxisAndRotation(net.minecraft.util.EnumFacing.Axis, boolean, Rotation) for
-     * more explanation.
-     */
-    protected static Matrix4f getMatrix4f(ModelState modelState)
-    {
-        if(modelState.hasAxis())
-        {
-            if(modelState.hasAxisRotation())
-            {
-                return getMatrixForAxisAndRotation(modelState.getAxis(), modelState.isAxisInverted(), modelState.getAxisRotation());
-            }
-            else
-            {
-                return getMatrixForAxis(modelState.getAxis(), modelState.isAxisInverted());
-            }
-        }
-        else if(modelState.hasAxisRotation())
-        {
-            return getMatrixForRotation(modelState.getAxisRotation());
-        }
-        else
-        {
-            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y0);
-        }
-    }
-    
-    /** for compatibility with double-valued raw quad vertices */
-    protected static Matrix4d getMatrix4d(ModelState modelState)
-    {
-        return new Matrix4d(getMatrix4f(modelState));
-    }
-    
-    /**
-     * See {@link #getMatrixForAxisAndRotation(net.minecraft.util.EnumFacing.Axis, boolean, Rotation)}
-     */
-    protected static Matrix4f getMatrixForAxis(EnumFacing.Axis axis, boolean isAxisInverted)
-    {
-        switch(axis)
-        {
-        case X:
-            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X90_Y270 : ModelRotation.X90_Y90);
-    
-        case Y:
-            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X180_Y0 : ModelRotation.X0_Y0);
-    
-        case Z:
-            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X90_Y0 : ModelRotation.X270_Y0);
-            
-        default:
-            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y0);
-        
-        }
-    }
-    
-    /**
-     * See {@link #getMatrixForAxisAndRotation(net.minecraft.util.EnumFacing.Axis, boolean, Rotation)}
-     */
-    protected static Matrix4f getMatrixForRotation(Rotation rotation)
-    {
-        switch(rotation)
-        {
-        default:
-        case ROTATE_NONE:
-            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y0);
-    
-        case ROTATE_90:
-            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y90);
-    
-        case ROTATE_180:
-            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y180);
-            
-        case ROTATE_270:
-            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y270);
-        }
-    }
-    
-    /**
-     * Models in default state should have orthogonalAxis = Y with positive
-     * orientation (if orientation applies) and whatever rotation
-     * that represents "none".  Generally, in this mod, north is
-     * considered "top" of the reference frame when looking down
-     * the Y-orthogonalAxis. <br><br>
-     * 
-     * Models that are oriented to an edge, like stairs and wedges
-     * should have a default geometry such that the North and East
-     * faces are "full" or "behind" the sloped part of the geometry.<br><br>
-     *
-     * 
-     * With a model in the default state, the rotation occurs
-     * start - around the Y-orthogonalAxis, followed by the transformation
-     * from the Y orthogonalAxis/orientation to whatever new orthogonalAxis/orientation is 
-     * given. <br><br>
-     * 
-     * Because 4d rotational matrices are the brain-child of
-     * malevolent walrus creatures from hyperspace, this means
-     * the order of multiplication is the opposite of what I just described.
-     */
-    protected static Matrix4f getMatrixForAxisAndRotation(EnumFacing.Axis axis, boolean isAxisInverted, Rotation rotation)
-    {
-        Matrix4f result = getMatrixForAxis(axis, isAxisInverted);
-        result.mul(getMatrixForRotation(rotation));
-        return result;
-    }
-
     public int getStateFlags(ModelState modelState)
     {
         return stateFlags;

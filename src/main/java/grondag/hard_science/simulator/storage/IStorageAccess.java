@@ -40,7 +40,7 @@ public interface IStorageAccess<T extends StorageType<T>>
         return this.stores().stream()
             .filter(p -> p.containerUsage() == ContainerUsage.STORAGE 
                     && p.availableCapacityFor(resource) > 0
-                    && service.areDevicesConnected(p.device(), reachableFrom))
+                    && service.areDevicesConnected(p.device(), reachableFrom, resource))
             .sorted((IResourceContainer<T> a, IResourceContainer<T>b) 
                     -> ComparisonChain.start()
                         .compare(b.getQuantityStored(resource), a.getQuantityStored(resource))

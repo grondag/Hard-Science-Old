@@ -33,7 +33,7 @@ public class StairMeshFactory extends AbstractWedgeMeshFactory
         // Four rotations x 3 axes gives 12 orientations - one for each edge of a cube.
         // Default geometry is Y orthogonalAxis with full sides against north/east faces.
 
-        Matrix4d matrix = getMatrix4d(modelState);
+        Matrix4d matrix = modelState.getMatrix4d();
         
         RawQuad template = new RawQuad();
         template.color = 0xFFFFFFFF;

@@ -29,6 +29,7 @@ public class MatterColors
     public static final int RESIN_B = 0xFFeceea8;
     public static final int RAW_MINERAL_DUST = 0xFF646973;
     public static final int DEPLETED_MINERAL_DUST = 0xFF737164;
+    public static final int AMMONIA = 0x46c4ff; // arbitrary
     
     public static final int CYAN = 0xFF00FFFF;
     public static final int MAGENTA = 0xFFFF00FF;

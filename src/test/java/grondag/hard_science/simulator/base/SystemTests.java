@@ -20,7 +20,7 @@
 //import grondag.hard_science.simulator.jobs.tasks.DeliveryTask;
 //import grondag.hard_science.simulator.jobs.tasks.SimpleProcurementTask;
 //import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-//import grondag.hard_science.simulator.transport.endpoint.PortType;
+//import grondag.hard_science.simulator.transport.endpoint.PortFunction;
 //import grondag.hard_science.superblock.block.SuperModelBlock;
 //import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 //import grondag.hard_science.superblock.model.state.PaintLayer;
@@ -60,11 +60,11 @@
 //        
 //        domain = DomainManager.instance().createDomain();
 //        
-//        store1 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        store1 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        store1.setDomain(domain);
 //        DeviceManager.addDevice(store1);
 //        
-//        store2 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        store2 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        store2.setDomain(domain);
 //        DeviceManager.addDevice(store2);
 //        

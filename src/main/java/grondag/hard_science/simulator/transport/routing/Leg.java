@@ -3,7 +3,8 @@ package grondag.hard_science.simulator.transport.routing;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.carrier.Carrier;
 
 /**
  * Describes one half of a route - path from a starting
@@ -11,28 +12,28 @@ import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
  * the highest level circuit if more than one circuit.
  * To form a route, end circuits of two legs must be the same.
  */
-public abstract class Leg
+public abstract class Leg<T extends StorageType<T>>
 {
     /**
      * Lowest-level circuit in the leg. 
      * Will be same as {@link #end()} for direct routes.
      */
     @Nonnull
-    public abstract CarrierCircuit start();
+    public abstract Carrier<T> start();
     
     /**
      * Highest-level circuit in the leg. 
      * Will be same as {@link #start()} for direct routes.
      */
     @Nonnull
-    public abstract CarrierCircuit end();
+    public abstract Carrier<T> end();
     
     /**
      * If leg has three circuits, the circuit between
      * {@link #start()} and {@link #end()}. Null otherwise.
      */
     @Nullable
-    public abstract CarrierCircuit inner();
+    public abstract Carrier<T> inner();
     
     /**
      * Number of circuits in the leg. 
@@ -45,55 +46,55 @@ public abstract class Leg
      * circuit.  Only valid if size < 3 and provided circuit
      * is one level higher than current end.
      */
-    public abstract Leg append(CarrierCircuit newEnd);
+    public abstract Leg<T> append(Carrier<T> newEnd);
     
-    protected final CarrierCircuit start;
+    protected final Carrier<T> start;
     
-    private Leg(CarrierCircuit first)
+    private Leg(Carrier<T> first)
     {
         this.start = first;
     }
     
     @Nonnull 
-    public static Leg create(@Nonnull CarrierCircuit single)
+    public static <V extends StorageType<V>> Leg<V> create(@Nonnull Carrier<V> single)
     {
-        return new SingleLeg(single);
+        return new SingleLeg<V>(single);
     }
     
     @Nonnull 
-    public static Leg create(@Nonnull CarrierCircuit start, @Nonnull CarrierCircuit end)
+    public static <V extends StorageType<V>> Leg<V> create(@Nonnull Carrier<V> start, @Nonnull Carrier<V> end)
     {
-        return new DoubleLeg(start, end);
+        return new DoubleLeg<V>(start, end);
     }
     
     @Nonnull 
-    public static Leg create(@Nonnull CarrierCircuit start, @Nonnull CarrierCircuit inner, @Nonnull CarrierCircuit end)
+    public static <V extends StorageType<V>> Leg<V> create(@Nonnull Carrier<V> start, @Nonnull Carrier<V> inner, @Nonnull Carrier<V> end)
     {
-        return new TripleLeg(start, inner, end);
+        return new TripleLeg<V>(start, inner, end);
     }
     
-    private static class SingleLeg extends Leg
+    private static class SingleLeg<T extends StorageType<T>> extends Leg<T>
     {
-        private SingleLeg(@Nonnull CarrierCircuit single)
+        private SingleLeg(@Nonnull Carrier<T> single)
         {
             super(single);
         }
 
         @Override
-        public CarrierCircuit start()
+        public Carrier<T> start()
         {
             return this.start;
         }
 
         @Override
         @Nonnull 
-        public CarrierCircuit end()
+        public Carrier<T> end()
         {
             return this.start;
         }
 
         @Override
-        public CarrierCircuit inner()
+        public Carrier<T> inner()
         {
             return null;
         }
@@ -106,9 +107,9 @@ public abstract class Leg
         }
 
         @Override
-        public Leg append(@Nonnull CarrierCircuit newEnd)
+        public Leg<T> append(@Nonnull Carrier<T> newEnd)
         {
-            return new DoubleLeg(this.start, newEnd) ;
+            return new DoubleLeg<T>(this.start, newEnd) ;
         }
         
         @Override
@@ -118,39 +119,39 @@ public abstract class Leg
         }
     }
     
-    private static class DoubleLeg extends Leg
+    private static class DoubleLeg<T extends StorageType<T>> extends Leg<T>
     {
-        protected final CarrierCircuit end;
+        protected final Carrier<T> end;
         
-        private DoubleLeg(@Nonnull CarrierCircuit start, @Nonnull CarrierCircuit end)
+        private DoubleLeg(@Nonnull Carrier<T> start, @Nonnull Carrier<T> end)
         {
             super(start);
             this.end = end;
             
             // allow for gap of bottom/top because will see that in triple subclass
-            assert start.carrier.level.ordinal() < end.carrier.level.ordinal()
+            assert start.level().ordinal() < end.level().ordinal()
                     : "Circuit level mismatch in leg constructor.";
             
-            assert start.carrier.storageType == end.carrier.storageType
+            assert start.storageType() == end.storageType()
                     : "Circuit type mismatch in leg constructor.";
         }
 
         @Override
         @Nonnull 
-        public CarrierCircuit start()
+        public Carrier<T> start()
         {
             return this.start;
         }
 
         @Override
         @Nonnull 
-        public CarrierCircuit end()
+        public Carrier<T> end()
         {
             return this.end;
         }
 
         @Override
-        public CarrierCircuit inner()
+        public Carrier<T> inner()
         {
             return null;
         }
@@ -163,9 +164,9 @@ public abstract class Leg
 
         @Override
         @Nonnull 
-        public Leg append(@Nonnull CarrierCircuit newEnd)
+        public Leg<T> append(@Nonnull Carrier<T> newEnd)
         {
-            return new TripleLeg(this.start, this.end, newEnd);
+            return new TripleLeg<T>(this.start, this.end, newEnd);
         }
         
         @Override
@@ -175,42 +176,42 @@ public abstract class Leg
         }
     }
     
-    private static class TripleLeg extends DoubleLeg
+    private static class TripleLeg<T extends StorageType<T>> extends DoubleLeg<T>
     {
-        protected final CarrierCircuit inner;
+        protected final Carrier<T> inner;
         
-        private TripleLeg(@Nonnull CarrierCircuit start, @Nonnull CarrierCircuit inner, @Nonnull CarrierCircuit end)
+        private TripleLeg(@Nonnull Carrier<T> start, @Nonnull Carrier<T> inner, @Nonnull Carrier<T> end)
         {
             super(start, end);
             this.inner = inner;
             
-            assert start.carrier.level == inner.carrier.level.below()
-                    && inner.carrier.level == end.carrier.level.below()
+            assert start.level() == inner.level().below()
+                    && inner.level() == end.level().below()
                     : "Circuit level mismatch in leg constructor.";
             
             
-            assert start.carrier.storageType == inner.carrier.storageType
-                    && inner.carrier.storageType  == end.carrier.storageType
+            assert start.storageType() == inner.storageType()
+                    && inner.storageType()  == end.storageType()
                     : "Circuit type mismatch in leg constructor.";
         }
 
         @Override
         @Nonnull 
-        public CarrierCircuit start()
+        public Carrier<T> start()
         {
             return this.start;
         }
 
         @Override
         @Nonnull 
-        public CarrierCircuit end()
+        public Carrier<T> end()
         {
             return this.end;
         }
 
         @Override
         @Nonnull 
-        public CarrierCircuit inner()
+        public Carrier<T> inner()
         {
             return this.inner;
         }
@@ -222,7 +223,7 @@ public abstract class Leg
         }
         
         @Override
-        public Leg append(@Nonnull CarrierCircuit newEnd)
+        public Leg<T> append(@Nonnull Carrier<T> newEnd)
         {
             throw new UnsupportedOperationException("Cannot append circuit to a leg with three circuits.");
         }

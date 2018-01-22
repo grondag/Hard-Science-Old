@@ -8,12 +8,6 @@ package grondag.hard_science.library.varia;
  */
 public class SimpleUnorderedArrayList<T> extends AbstractUnorderedArrayList<T>
 {
-    @Override
-    public void add(T newItem)
-    {
-        super.add(newItem);
-    }
-    
     /**
      * Returns true if was added (not already present)
      */

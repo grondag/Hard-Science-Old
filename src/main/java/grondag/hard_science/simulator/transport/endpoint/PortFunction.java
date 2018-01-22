@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
-public enum PortType
+public enum PortFunction
 {
     /**
      * Carrier port are attached to an internal carrier within the device.

@@ -8,15 +8,13 @@ import grondag.hard_science.machines.support.DeviceEnergyManager;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.PowerContainer;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 
 public class ChemicalBatteryMachine extends AbstractSimpleMachine
 {
     
     public ChemicalBatteryMachine()
     {
-        super(CarrierLevel.BOTTOM, PortType.CARRIER);
+        super();
     }
 
     @Override
@@ -42,13 +40,6 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
     public boolean hasRedstoneControl()
     {
         return true;
-    }
-    
-
-    @Override
-    public void onConnect()
-    {
-        super.onConnect();
     }
 
     @Override

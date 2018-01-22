@@ -4,21 +4,22 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.transport.carrier.Carrier;
 
 /**
  * Defines a path from one circuit to another circuit.
  */
-public class Route
+public class Route<T extends StorageType<T>>
 {
     /**
      * List of all circuits in the route. 
      * First circuit will be first in the list
      * and last will be last. (duh)
      */
-    private final ImmutableList<CarrierCircuit> circuits;
+    private final ImmutableList<Carrier<T>> circuits;
     
-    public Route(Leg leg1, Leg leg2)
+    public Route(Leg<T> leg1, Leg<T> leg2)
     {
         if(leg1.end() != leg2.end())
             throw new UnsupportedOperationException("Pathological route construction: leg endpoints do not match.");
@@ -26,12 +27,12 @@ public class Route
         if(leg1.start.carrierAddress() > leg2.start.carrierAddress())
         {
             // ensure lower-numbered endpoint is first
-            Leg swap = leg1;
+            Leg<T> swap = leg1;
             leg1 = leg2;
             leg2 = swap;
         }
         
-        ImmutableList.Builder<CarrierCircuit> builder = ImmutableList.builder();
+        ImmutableList.Builder<Carrier<T>> builder = ImmutableList.builder();
         
         builder.add(leg1.start);
         if(leg1.size() == 3)
@@ -98,7 +99,7 @@ public class Route
      * The endpoint circuit in the route with the lower carrier address.
      * Will be same as {@link #last()} in a direct route.
      */
-    public CarrierCircuit first()
+    public Carrier<T> first()
     {
         return this.circuits.get(0);
     }
@@ -107,12 +108,12 @@ public class Route
      * The endpoint circuit in the route with the higher carrier address.
      * Will be same as {@link #first()} in a direct route.
      */
-    public CarrierCircuit last()
+    public Carrier<T> last()
     {
         return this.circuits.get(this.circuits.size()-1);
     }
     
-    public List<CarrierCircuit> circuits()
+    public List<Carrier<T>> circuits()
     {
         return this.circuits;
     }
@@ -126,7 +127,7 @@ public class Route
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        for ( CarrierCircuit c : this.circuits)
+        for ( Carrier<T> c : this.circuits)
         {
             if (sb.length() > 0) sb.append(".");
             sb.append(c.carrierAddress());

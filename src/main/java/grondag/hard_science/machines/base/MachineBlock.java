@@ -302,4 +302,16 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     { 
         this.addMachineProbeInfo(mode, probeInfo, player, world, blockState, data);
     }
+    
+    @Override
+    public void handleMachinePlacement(AbstractMachine machine, World worldIn, BlockPos pos, IBlockState state)
+    {
+        // captures device channel
+        IMachineBlock.super.handleMachinePlacement(machine, worldIn, pos, state);
+        
+        if(machine instanceof AbstractSimpleMachine)
+        {
+            ((AbstractSimpleMachine)machine).setPortLayout(this.portLayout(worldIn, pos, state));
+        }
+    }
 }

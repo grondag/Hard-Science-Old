@@ -290,7 +290,7 @@ public class SuperDispatcher
         private DispatchDelegate(BlockRenderMode blockRenderMode)
         {
             this.blockRenderMode = blockRenderMode;
-            this.modelResourceString = HardScience.MODID + ":" + SuperDispatcher.RESOURCE_BASE_NAME  + blockRenderMode.ordinal();
+            this.modelResourceString = HardScience.prefixResource(SuperDispatcher.RESOURCE_BASE_NAME  + blockRenderMode.ordinal());
         }
 
         /** only used for block layer version */

@@ -10,7 +10,7 @@
 //import grondag.hard_science.simulator.storage.ItemStorage;
 //import grondag.hard_science.simulator.storage.StorageResourceManager;
 //import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-//import grondag.hard_science.simulator.transport.endpoint.PortType;
+//import grondag.hard_science.simulator.transport.endpoint.PortFunction;
 //import net.minecraft.init.Items;
 //
 //public class StorageResourceManagerTest
@@ -21,8 +21,8 @@
 //    {
 //        ItemResource res = ItemResource.fromStack(Items.COOKED_CHICKEN.getDefaultInstance());
 //        
-//        ItemStorage store1 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
-//        ItemStorage store2 = new ItemStorage(CarrierLevel.BOTTOM, PortType.CARRIER);
+//        ItemStorage store1 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
+//        ItemStorage store2 = new ItemStorage(CarrierLevel.BOTTOM, PortFunction.CARRIER);
 //        
 ////        BlockProcurementTask task = new BlockProcurementTask();
 //        

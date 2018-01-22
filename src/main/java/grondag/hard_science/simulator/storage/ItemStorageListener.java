@@ -165,7 +165,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             for(IResourceContainer<StorageTypeStack> store : this.domain.itemStorage.stores())
             {
                 ItemContainer itemStore = (ItemContainer)store;
-                if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), itemStore.device()))
+                if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), itemStore.device(), null))
                 {
                     this.stores.add(store);
                     this.addStore(itemStore, map);
@@ -305,7 +305,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             assert event.storage != this.storage : "Attempt to reconnect primary storage to listener.";
             
             if(event.storage.isOn() && !this.stores.contains(event.storage) 
-                    && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device()))
+                    && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device(), null))
             {
                     HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map = new HashMap<IResource<StorageTypeStack>, ItemResourceDelegate>();
                     this.addStore((ItemContainer) event.storage, map);
@@ -354,7 +354,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                 this.die();
             }
             else if(this.stores.contains(event.storage) 
-                    && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device()))
+                    && !LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), event.storage.device(), null))
             {
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
                     this.removeStore((ItemContainer) event.storage, builder);

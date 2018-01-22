@@ -2,8 +2,9 @@ package grondag.hard_science.simulator.transport.management;
 
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
+import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.transport.carrier.Carrier;
 import grondag.hard_science.simulator.transport.routing.Legs;
 
 /**
@@ -29,14 +30,17 @@ public interface ITransportManager<T extends StorageType<T>> extends IDeviceComp
     public boolean hasAnyCircuit();
     
     /**
-     * All legs accessible from circuits on which this device is connected.
-     * @return
+     * All legs accessible from circuits on which this device is connected
+     * and which can be used for the given resource. Resource only
+     * matters for fluid transport at current time and can be null
+     * for those storage types but must be provided for fluid or result
+     * will always be empty.
      */
-    public Legs legs();
+    public Legs<T> legs(IResource<T> forResource);
     
     /**
      * True if can send/receive on the given circuit. Used to validate
      * transport routes.
      */
-    public boolean isConnectedTo(CarrierCircuit circuit);
+    public boolean isConnectedTo(Carrier<T> circuit);
 }

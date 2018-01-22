@@ -55,7 +55,9 @@ tile.bottom_bus.name=Local Transport Bus
 tile.middle_bus.name=Intermediate Transport Bus
 tile.top_bus.name=Supersonic Transport Bus
 tile.water_pump.name=Water Intake Pump
-tile.modular_tank.name=Modular Tank
+tile.water_tank.name=Portable Water Tank
+tile.h2o_tank.name=Portable Purified Water Tank
+tile.ammonia_tank.name=Portable Ammonia Tank
 tile.chemical_battery.name=Chemical Battery
 
 machine.redstone_enabled=Redstone control is ENABLED.

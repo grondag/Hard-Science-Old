@@ -223,7 +223,7 @@ public class StorageManager<T extends StorageType<T>>
         LogisticsService<T> service = this.storageType.service();
         
         return summary.getLocations(resource).stream()
-                .filter(s -> {return service.areDevicesConnected(s.storage.device(), reachableFrom);})
+                .filter(s -> {return service.areDevicesConnected(s.storage.device(), reachableFrom, resource);})
                 .sorted((StorageWithQuantity<T> a, StorageWithQuantity<T>b) 
                         -> Long.compare(a.quantity, b.quantity))
                 .map(p -> p.storage)

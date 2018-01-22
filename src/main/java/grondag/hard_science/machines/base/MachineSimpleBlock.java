@@ -93,4 +93,16 @@ public abstract class MachineSimpleBlock extends SuperSimpleBlock implements IMa
         this.handleBreakBlock(worldIn, pos, state);
         super.breakBlock(worldIn, pos, state);
     }
+
+    @Override
+    public void handleMachinePlacement(AbstractMachine machine, World worldIn, BlockPos pos, IBlockState state)
+    {
+        // captures device channel
+        IMachineBlock.super.handleMachinePlacement(machine, worldIn, pos, state);
+
+        if(machine instanceof AbstractSimpleMachine)
+        {
+            ((AbstractSimpleMachine)machine).setPortLayout(this.portLayout(worldIn, pos, state));
+        }
+    }
 }

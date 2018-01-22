@@ -152,7 +152,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Factory for block test that should be used for border/shape joins
      * for this block.  Used in model state refresh from world.
      */
-    public IBlockTest blockJoinTest(ModelState modelState)
+    public IBlockTest blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
     {
         return new BlockTests.SuperBlockBorderMatch(this, modelState, true);
     }
@@ -1275,5 +1275,4 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Has nothing to do with block geometry.
      */
     protected abstract WorldLightOpacity worldLightOpacity(IBlockState state);
-
 }

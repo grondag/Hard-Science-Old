@@ -5,13 +5,17 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModRegistries;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.support.MachinePower;
+import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.simulator.storage.FluidStorageEvent;
 import grondag.hard_science.simulator.storage.IStorageEventFactory;
 import grondag.hard_science.simulator.storage.ItemStorageEvent;
 import grondag.hard_science.simulator.storage.PowerStorageEvent;
+import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -78,6 +82,15 @@ public abstract class StorageType<T extends StorageType<T>>
     @Nonnull
     public abstract LogisticsService<T> service();
     
+    /**
+     * Units per tick throughput for the given level on storage
+     * transport networks of this storage type.  Channel only
+     * matter for fluid networks, which have fixed channels for
+     * each type of transportable fluid. For other storage types
+     * (power and items) this depends solely on level.
+     */       
+    public abstract long transportCapacity(CarrierLevel level, int channel);
+    
     public static <V extends StorageType<V>> NBTTagCompound toNBTWithType(IResource<V> resource)
     {
         NBTTagCompound result = resource.storageType().toNBT(resource);
@@ -93,6 +106,17 @@ public abstract class StorageType<T extends StorageType<T>>
         return (IResource<V>) sType.fromNBT(tag);
     }
     
+    /**
+     * If true, connections from this carrier
+     * at different levels must share the same
+     * channel.  Only true for fluids.
+     * See {@link Channel#Channel()}.
+     */
+     public boolean channelsSpanLevels()
+     {
+         return this == StorageType.FLUID;
+     }
+     
     /**
      * Materials stored as item stacks. AbstractStorage managers for other storage types that can be encapsulated
      * as item stacks will use the item stack storage manager as a subsystem.
@@ -141,6 +165,25 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             return LogisticsService.ITEM_SERVICE;
         }
+
+        @Override
+        public long transportCapacity(CarrierLevel level, int channel)
+        {
+            //TODO: make configurable
+            switch(level)
+            {
+            case BOTTOM:
+                return 1;
+            case MIDDLE:
+                return 4;
+            case TOP:
+                return 16;
+                
+            default:
+                assert false: "Unhandled enum mapping";
+                return 0;
+            }
+        }
     }
             
     /**
@@ -184,6 +227,25 @@ public abstract class StorageType<T extends StorageType<T>>
         public LogisticsService<StorageTypeFluid> service()
         {
             return LogisticsService.FLUID_SERVICE;
+        }
+
+        @Override
+        public long transportCapacity(CarrierLevel level, int channel)
+        {
+            //TODO: make dependent on viscosity and other factors
+            switch(level)
+            {
+            case BOTTOM:
+                return VolumeUnits.LITER.nL * 10;
+            case MIDDLE:
+                return VolumeUnits.KILOLITER.nL;
+            case TOP:
+                return VolumeUnits.KILOLITER.nL * 16;
+                
+            default:
+                assert false: "Unhandled enum mapping";
+                return 0;
+            }
         }
     }
     
@@ -229,6 +291,25 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             return LogisticsService.POWER_SERVICE;
         }
+
+        @Override
+        public long transportCapacity(CarrierLevel level, int channel)
+        {
+            //TODO: make configurable
+            switch(level)
+            {
+            case BOTTOM:
+                return MachinePower.POWER_BUS_JOULES_PER_TICK;
+            case MIDDLE:
+                return MachinePower.POWER_BUS_JOULES_PER_TICK * 1000;
+            case TOP:
+                return MachinePower.POWER_BUS_JOULES_PER_TICK * 1000000;
+                
+            default:
+                assert false: "Unhandled enum mapping";
+                return 0;
+            }
+        }
     }
    
     /**
@@ -240,7 +321,7 @@ public abstract class StorageType<T extends StorageType<T>>
     {
         private StorageTypeBulk()
         {
-            super(EnumStorageType.PRIVATE, new BulkResource(new ResourceLocation("empty")));
+            super(EnumStorageType.PRIVATE, new BulkResource(new ResourceLocation(HardScience.prefixResource("empty"))));
         }
 
         @Override
@@ -275,6 +356,12 @@ public abstract class StorageType<T extends StorageType<T>>
         public LogisticsService<StorageTypeBulk> service()
         {
             return null;
+        }
+
+        @Override
+        public long transportCapacity(CarrierLevel level, int channel)
+        {
+            return 0;
         }
     }
 }

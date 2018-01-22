@@ -172,8 +172,6 @@ public class ModNBTTag
 
     public static final String MACHINE_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String MACHINE_FRONT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-
     public static final String DEVICE_CHANNEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String DEVICE_COMPONENT_TYPE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -182,5 +180,9 @@ public class ModNBTTag
 
     public static final String ENERGY_OUTPUT_BUFFER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String ENERGY_INPUT_BUFFER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String PORT_LAYOUT_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PORT_LAYOUT_FACEMAP = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String DEVICE_PORT_LAYOUT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
 }

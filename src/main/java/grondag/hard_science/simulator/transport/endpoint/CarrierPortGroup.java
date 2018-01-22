@@ -10,13 +10,13 @@ import com.google.common.collect.AbstractIterator;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModPorts;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.transport.carrier.CarrierCircuit;
+import grondag.hard_science.simulator.transport.carrier.Carrier;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.carrier.Channel;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -28,27 +28,23 @@ import net.minecraft.util.math.BlockPos;
  * throw an exception if called otherwise.  This avoids
  * the need for synchronization of these methods.
  */
-@SuppressWarnings("rawtypes")
-public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
+public class CarrierPortGroup<T extends StorageType<T>> implements Iterable<Port<T>>, ITypedStorage<T>
 {
-    private final StorageType<?> storageType;
+    private final T storageType;
 
     private final CarrierLevel carrierLevel;
 
+    private int carrierChannel;
+    
     /**
      * Physical device on which this port is present.
      */
     private final IDevice device;
 
-    private CarrierCircuit internalCircuit;
+    private Carrier<T> internalCircuit;
 
-    private SimpleUnorderedArrayList<PortState> ports
-        = new SimpleUnorderedArrayList<PortState>();
-
-    /**
-     * See {@link PortState#getConfiguredChannel()}
-     */
-    private byte channel = 0;
+    private SimpleUnorderedArrayList<Port<T>> ports
+        = new SimpleUnorderedArrayList<Port<T>>();
 
     /**
      * Counts how many ports in this group are attached to the internal
@@ -60,7 +56,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
 
     public CarrierPortGroup(
             @Nonnull IDevice device, 
-            @Nonnull StorageType<?> storageType, 
+            @Nonnull T storageType, 
             @Nonnull CarrierLevel carrierLevel)
     {
         this.device = device;
@@ -68,11 +64,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
         this.carrierLevel = carrierLevel;
     }
 
-    /**
-     * See {@link PortState#getConfiguredChannel()} <p>
-     * 
-     * Device must be disconnected (no internal channel) when changing.
-     */
+
     public void setConfiguredChannel(int channel)
     {
         if(this.internalCircuit != null)
@@ -81,30 +73,29 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
         assert !this.carrierLevel.isTop()
         : "Attempt to configure channel on top-level transport device";
 
-        this.channel = (byte) (channel & 0xF);
+        for(Port<T> p : this.ports)
+        {
+            p.setChannel(channel);
+        }
     }
 
     /**
      * Creates a new port and adds it to this carrier port group.
      * @param isBridge  Returns a bridge-type port if true, carrier type otherwise.
      */
-    public PortState createPort(boolean isBridge, BlockPos pos, EnumFacing face)
+    public Port<T> createPort(boolean isBridge, PortConnector connector, BlockPos pos, EnumFacing face)
     {
         synchronized(this)
         {
             if(this.internalCircuit != null)
                 throw new UnsupportedOperationException("Attempt to add port with live transport circuit");
             
-            Port port = ModPorts.find(
-                    this.storageType, 
-                    this.carrierLevel, 
-                    isBridge ? PortType.BRIDGE : PortType.CARRIER);
-
-            assert port != null : "CarrierPortGroup.createPort: Unable to find configured port type.";
+            CarrierPortState result = new CarrierPortState(
+                    isBridge ? PortFunction.BRIDGE : PortFunction.CARRIER,
+                    connector, 
+                    pos, 
+                    face);
             
-            if(port == null) return null;
-            
-            CarrierPortState result = new CarrierPortState(port, pos, face);
             this.ports.add(result);
             return result;
         }
@@ -122,7 +113,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
     /**
      * Device must not be connected.
      */
-    public void removePort(PortState port)
+    public void removePort(Port<T> port)
     {
         synchronized(this)
         {
@@ -137,26 +128,34 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
     }
 
     @Override
-    public Iterator<PortState> iterator()
+    public Iterator<Port<T>> iterator()
     {
         return this.ports.iterator();
     }
 
-    public CarrierCircuit internalCircuit()
+    public Carrier<T> internalCircuit()
     {
         return this.internalCircuit;
     }
     
-    private class CarrierPortState extends PortState
+    private class CarrierPortState extends Port<T>
     {
-        private CarrierPortState(@Nonnull Port port, BlockPos pos, EnumFacing face)
+        private CarrierPortState( PortFunction function, PortConnector connector, BlockPos pos, EnumFacing face)
         {
-            super(port, pos, face);
+            super(storageType, function, connector, carrierLevel, pos, face);
+        }
+
+        @Override
+        public int getChannel()
+        {
+            return this.function() == PortFunction.CARRIER || this.mode == PortMode.CARRIER
+                    ? CarrierPortGroup.this.carrierChannel 
+                    : super.getChannel();
         }
 
         @Override
         @Nullable
-        public CarrierCircuit internalCircuit()
+        public Carrier<T> internalCircuit()
         {
             return internalCircuit;
         }
@@ -170,7 +169,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
          */
         @Override
         @Nullable
-        public CarrierCircuit externalCircuit()
+        public Carrier<T> externalCircuit()
         {
             switch(this.getMode())
             {
@@ -213,12 +212,6 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
             return device;
         }
 
-        @Override
-        public int getConfiguredChannel()
-        { 
-            return channel; 
-        }
-
         /**
          * For carrier ports, externalCircuit must match existing internal
          * circuit if internal circuit is non-null.
@@ -231,8 +224,8 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
          */
         @Override
         public void attach(
-                @Nonnull CarrierCircuit externalCircuit, 
-                @Nonnull PortState mate)
+                @Nonnull Carrier<T> externalCircuit, 
+                @Nonnull Port<T> mate)
         {
             assert confirmServiceThread() 
                 : "Transport logic running outside transport thread";
@@ -255,7 +248,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
                 // established a carrier shared with another device.
                 if(internalCircuit == null)
                 {
-                    internalCircuit = new CarrierCircuit(this.port().internalCarrier, this.getConfiguredChannel());
+                    internalCircuit = new Carrier<T>(storageType, carrierLevel, this.getChannel());
                     
                     if(Configurator.logTransportNetwork) 
                         Log.info("CarrierPortGroup.attach %s: created new internal circuit %d",
@@ -277,7 +270,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
                 // These checks should have been done already but doesn't hurt to check again
                 if(internalCircuit == null)
                 {
-                    if(externalCircuit.channel != this.getConfiguredChannel()) 
+                    if(externalCircuit.channel != this.getChannel()) 
                     {
                         throw new UnsupportedOperationException("CarrierPortGroup request for mismatched channel attach");
                     }
@@ -368,7 +361,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
          * {@inheritDoc}
          */
         @Override
-        public void swapCircuit(@Nonnull CarrierCircuit oldCircuit, @Nonnull CarrierCircuit newCircuit)
+        public void swapCircuit(@Nonnull Carrier<T> oldCircuit, @Nonnull Carrier<T> newCircuit)
         {
             assert confirmServiceThread() : "Transport logic running outside transport thread";
             
@@ -383,7 +376,7 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
                 
                 internalCircuit = newCircuit;
                 
-                for(PortState port : CarrierPortGroup.this.ports)
+                for(Port<T> port : CarrierPortGroup.this.ports)
                 {
                     // reproducing per-port logic here because
                     // super method would call device refresh before
@@ -411,26 +404,26 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
 
         @Override
         @Nonnull
-        public Iterable<PortState> carrierMates()
+        public Iterable<Port<T>> carrierMates()
         {
             if(this.mode != PortMode.CARRIER) return Collections.emptyList();
             
-            return new Iterable<PortState>() 
+            return new Iterable<Port<T>>() 
             {
 
                 @Override
-                public Iterator<PortState> iterator()
+                public Iterator<Port<T>> iterator()
                 {
-                    return new AbstractIterator<PortState>() 
+                    return new AbstractIterator<Port<T>>() 
                     {
-                        private Iterator<PortState> unfiltered = ports.iterator();
+                        private Iterator<Port<T>> unfiltered = ports.iterator();
 
                         @Override
-                        protected PortState computeNext()
+                        protected Port<T> computeNext()
                         {
                             while (unfiltered.hasNext()) 
                             {
-                                PortState element = unfiltered.next();
+                                Port<T> element = unfiltered.next();
                                 if (element != CarrierPortState.this) 
                                 {
                                     return element;
@@ -442,11 +435,44 @@ public class CarrierPortGroup implements Iterable<PortState>, ITypedStorage
                 }
             };
         }
+
+        @Override
+        public CarrierLevel level()
+        {
+            return carrierLevel;
+        }
     }
 
     @Override
-    public StorageType<?> storageType()
+    public T storageType()
     {
         return this.storageType;
+    }
+
+    /**
+     * See {@link #setCarrierChannel(int)}
+     */
+    public int getCarrierChannel()
+    {
+        return carrierChannel;
+    }
+
+    /**
+     * Sets the channel to be used for internal carrier and all 
+     * ports operating in carrier mode.<p>
+     * 
+     * Device must be disconnected (no internal carrier) when changing.
+     */
+    public void setCarrierChannel(int carrierChannel)
+    {
+        if(this.internalCircuit != null)
+            throw new UnsupportedOperationException("Attempt to configure channel with live carrier");
+
+        this.carrierChannel = Channel.channelOverride(carrierChannel, this.carrierLevel, this.storageType);
+    }
+    
+    public CarrierLevel level()
+    {
+        return this.carrierLevel;
     }
 }

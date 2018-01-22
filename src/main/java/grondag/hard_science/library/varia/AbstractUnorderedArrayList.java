@@ -1,5 +1,6 @@
 package grondag.hard_science.library.varia;
 
+import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -15,7 +16,7 @@ import grondag.hard_science.Log;
  * @author grondag
  *
  */
-public class AbstractUnorderedArrayList<T> implements Iterable<T>
+public class AbstractUnorderedArrayList<T> extends AbstractCollection<T>
 {
 
     protected Object[] items = new Object[4];
@@ -32,14 +33,15 @@ public class AbstractUnorderedArrayList<T> implements Iterable<T>
         return this.size == 0;
     }
     
-
-    protected void add(T newItem)
+    @Override
+    public boolean add(T newItem)
     {
         if(this.size == this.items.length)
         {
             this.increaseCapacity();
         }
         this.items[size++] = newItem;
+        return true;
     }
     
     /** returns index of item if it exists in this list. -1 if not. */
@@ -76,19 +78,22 @@ public class AbstractUnorderedArrayList<T> implements Iterable<T>
         this.items[size] = null;
     }
     
-    protected void remove(T itemToRemove)
+    @Override
+    public boolean remove(Object itemToRemove)
     {
         for(int i = this.size - 1; i >= 0; i--)
         {
             if(items[i] == itemToRemove)
             {
                 this.remove(i);
-                return;
+                return true;
             }
         }
+        return false;
     }
     
-    public boolean contains(T itemToFind)
+    @Override
+    public boolean contains(Object itemToFind)
     {
         for(int i = this.size - 1; i >= 0; i--)
         {
@@ -113,14 +118,6 @@ public class AbstractUnorderedArrayList<T> implements Iterable<T>
         int newCapacity = this.items.length * 2;
         this.items = Arrays.copyOf(this.items, newCapacity);
     }
-    
-    /**
-     * Returns a copy of the underlying array for populated elements.
-     */
-    public Object[] toArray()
-    {
-        return Arrays.copyOf(items, this.size);
-    }
 
     /**
      * Iterator does not fail on concurrent modification but is
@@ -142,4 +139,6 @@ public class AbstractUnorderedArrayList<T> implements Iterable<T>
                 return get(i++);
             }};
     }
+
+
 }

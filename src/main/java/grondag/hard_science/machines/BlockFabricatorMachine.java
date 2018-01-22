@@ -5,10 +5,10 @@ import java.util.concurrent.Future;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
-import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.BatteryChemistry;
 import grondag.hard_science.machines.support.DeviceEnergyManager;
+import grondag.hard_science.machines.support.MachineControlState.MachineState;
+import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.DemandManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
@@ -30,8 +30,6 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.PowerContainer;
-import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.endpoint.PortType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
@@ -126,8 +124,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     
     public BlockFabricatorMachine()
     {
-        super(CarrierLevel.BOTTOM, PortType.CARRIER);
-        
+        super();
         // note that order has to match array declaration
         MaterialBufferManager bufferManager = this.getBufferManager();
         this.bufferFiller = bufferManager.getBuffer(BUFFER_INDEX_FILLER);

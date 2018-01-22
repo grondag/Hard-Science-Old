@@ -1,7 +1,5 @@
 package grondag.hard_science.machines.base;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineStatusState;
@@ -174,7 +172,6 @@ public abstract class AbstractMachine extends AbstractDevice
     {
         super.deserializeNBT(tag);
         this.getControlState().deserializeNBT(tag);
-        if(this.hasFront() && tag.hasKey(ModNBTTag.MACHINE_FRONT)) this.setFront(Useful.safeEnumFromTag(tag, ModNBTTag.MACHINE_FRONT, EnumFacing.NORTH));
     }
 
     @Override
@@ -182,7 +179,6 @@ public abstract class AbstractMachine extends AbstractDevice
     {
         super.serializeNBT(tag);
         this.getControlState().serializeNBT(tag);
-        if(this.hasFront() && this.getFront() != null) Useful.saveEnumToTag(tag, ModNBTTag.MACHINE_FRONT, this.getFront());
     }
     
     /**
@@ -288,25 +284,4 @@ public abstract class AbstractMachine extends AbstractDevice
             this.markTEPlayerUpdateDirty(false);
         }
     }
-
-    // TODO: machine facing still needed?
-    // Assuming displays are AR, so not a necessity for realism
-    
-    /**
-     * Override to true if this machine has an orientation.
-     * If true, then placement logic will call {@link #setFront(EnumFacing)}
-     * right after the machine is created and before it is added 
-     * to the device manager.  Will also cause front to be serialized.
-     */
-    public boolean hasFront() { return false; }
-    
-    /**
-     * See {@link #hasFront()}
-     */
-    public void setFront(EnumFacing frontFace) {}
-    
-    /**
-     * See {@link #hasFront()}
-     */
-    public EnumFacing getFront() { return null; }
 }

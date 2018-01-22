@@ -1,7 +1,11 @@
 package grondag.hard_science.machines;
 
+import grondag.hard_science.init.ModPortLayouts;
+import grondag.hard_science.library.world.IBlockTest;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
+import grondag.hard_science.simulator.transport.endpoint.PortLayout;
+import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
@@ -12,6 +16,10 @@ import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.Textures;
+import grondag.hard_science.superblock.varia.BlockTests;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 
 public class SolarCableBlock extends MachineSimpleBlock
 {
@@ -43,5 +51,18 @@ public class SolarCableBlock extends MachineSimpleBlock
     public AbstractMachine createNewMachine()
     {
         return new SolarCableMachine();
+    }
+    
+    @Override
+    public IBlockTest blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
+    {
+        return new BlockTests.SuperBlockCableMatch(this.portLayout(worldIn, pos, state), state.getValue(SuperBlock.META));
+    }
+
+    @Override
+    public PortLayout nominalPortLayout()
+    {
+        // TODO implement
+        return ModPortLayouts.empty;
     }
 }

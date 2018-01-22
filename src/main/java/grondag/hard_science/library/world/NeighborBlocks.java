@@ -243,11 +243,11 @@ public class NeighborBlocks {
         {
             if(test.wantsModelState())
             {
-                return test.testBlock(world, getBlockState(face), pos.add(face.getDirectionVec()), getModelState(face));
+                return test.testBlock(face, world, getBlockState(face), pos.add(face.getDirectionVec()), getModelState(face));
             }
             else
             {
-                return test.testBlock(world, getBlockState(face), pos.add(face.getDirectionVec()));
+                return test.testBlock(face, world, getBlockState(face), pos.add(face.getDirectionVec()));
             }
         }
         
@@ -255,11 +255,11 @@ public class NeighborBlocks {
         {
             if(test.wantsModelState())
             {
-                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector), getModelState(corner));
+                return test.testBlock(corner, world, getBlockState(corner), pos.add(corner.directionVector), getModelState(corner));
             }
             else
             {
-                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector));
+                return test.testBlock(corner, world, getBlockState(corner), pos.add(corner.directionVector));
             }
         }
         
@@ -267,11 +267,11 @@ public class NeighborBlocks {
         {
             if(test.wantsModelState())
             {
-                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector), getModelState(corner));
+                return test.testBlock(corner, world, getBlockState(corner), pos.add(corner.directionVector), getModelState(corner));
             }
             else
             {
-                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector));
+                return test.testBlock(corner, world, getBlockState(corner), pos.add(corner.directionVector));
             }
         }
         

@@ -4,6 +4,8 @@ package grondag.hard_science.superblock.model.state;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Matrix4f;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
@@ -22,6 +24,7 @@ import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.SimpleJoin;
+import grondag.hard_science.library.world.Transform;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -395,17 +398,14 @@ public class ModelStateFactory
 
                 if((STATE_FLAG_NEEDS_CORNER_JOIN & stateFlags) == STATE_FLAG_NEEDS_CORNER_JOIN)
                 {
-                    //                    Output.getLog().info("ModelState.refreshFromWorld corner join refresh @" + pos.toString());
                     neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this, true));
-
-
+                    NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(world, state, pos, this));
                     b3 = P3B_BLOCK_JOIN.setValue(CornerJoinBlockStateSelector.findIndex(tests), b3);
                 }
                 else if ((STATE_FLAG_NEEDS_SIMPLE_JOIN & stateFlags) == STATE_FLAG_NEEDS_SIMPLE_JOIN)
                 {
                     neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(this));
+                    NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(world, state, pos, this));
                     b3 = P3B_BLOCK_JOIN.setValue(SimpleJoin.getIndex(tests), b3);
                 }
 
@@ -803,12 +803,6 @@ public class ModelStateFactory
          */
         public Rotation getAxisRotation()
         {
-            if(Configurator.BLOCKS.debugModelState)
-            {
-                populateStateFlagsIfNeeded();
-                if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == 0)
-                    Log.warn("getAxisRotation on model state does not apply for shape");
-            }
             return P3B_AXIS_ROTATION.getValue(bits3);
         }
 
@@ -1142,6 +1136,30 @@ public class ModelStateFactory
                 return result;
             }
             return null;
+        }
+        
+        /**
+         * See {@link Transform#rotateFace(ModelState, EnumFacing)}
+         */
+        public EnumFacing rotateFace(EnumFacing face)
+        {
+            return Transform.rotateFace(this, face);
+        }
+        
+        /**
+         * Find appropriate transformation assuming base model is oriented to Y orthogonalAxis, positive.
+         * This is different than the Minecraft/Forge default because I brain that way.<br><br>
+         * See {@link Transform#getMatrix4f(ModelState)}
+         */
+        public Matrix4f getMatrix4f()
+        {
+            return Transform.getMatrix4f(this);
+        }
+        
+        /** for compatibility with double-valued raw quad vertices */
+        public Matrix4d getMatrix4d()
+        {
+            return new Matrix4d(this.getMatrix4f());
         }
         
         @Override

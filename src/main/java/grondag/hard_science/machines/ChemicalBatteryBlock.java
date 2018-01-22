@@ -1,8 +1,10 @@
 package grondag.hard_science.machines;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
+import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
+import grondag.hard_science.simulator.transport.endpoint.PortLayout;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
@@ -35,5 +37,11 @@ public class ChemicalBatteryBlock extends MachineBlock
     public TextureAtlasSprite getSymbolSprite()
     {
         return Textures.DECAL_ELECTRICITY.getSampleSprite();
+    }
+
+    @Override
+    public PortLayout nominalPortLayout()
+    {
+        return ModPortLayouts.power_low_carrier_all;
     }
 }

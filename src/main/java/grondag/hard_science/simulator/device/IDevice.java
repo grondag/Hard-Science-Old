@@ -74,17 +74,11 @@ public interface IDevice extends
      * 1) Device Manager after all simulation components are deserialized.<br>
      * ...or...<br>
      * 2) Block placement logic after domain /location are set and 
-     * and deserialization from stack (if applies) is complete.
+     * and deserialization from stack (if applies) is complete.<p>
      */
-    public default void onConnect()
-    {
-        if(this.hasBlockManager()) this.blockManager().connect();
-    }
+    public void onConnect();
     
-    public default void onDisconnect()
-    {
-        if(this.hasBlockManager()) this.blockManager().disconnect();
-    }
+    public void onDisconnect();
     
     @Override
     public default AssignedNumber idType()
@@ -134,20 +128,6 @@ public interface IDevice extends
         }
     }
 
-    /**
-     * True if supports channels for transport circuit segregation.
-     */
-    public default boolean hasChannel() { return this.getChannel() != CHANNEL_UNSUPPORTED; }
-    
-    public static final int CHANNEL_UNSUPPORTED = -1;
-    
-    /**
-     * Configured transport channel for connection segregation.
-     * Will return {@link #CHANNEL_UNSUPPORTED} if not supported.  
-     * Is generally the block meta/species.
-     * Default implementation is no channel support.
-     */
-    public default int getChannel() { return CHANNEL_UNSUPPORTED; }
     
     /**
      * Implement if device has fluid storage.  Will be null if not.
@@ -176,6 +156,21 @@ public interface IDevice extends
      */
     @Nullable
     MaterialBufferManager getBufferManager();
+    
+    /**
+     * True if supports channels for item & power transport circuit segregation.
+     */
+    public default boolean hasChannel() { return this.getChannel() != CHANNEL_UNSUPPORTED; }
+    
+    public static final int CHANNEL_UNSUPPORTED = -1;
+    
+    /**
+     * Configured transport channel for item & power connection segregation.
+     * Will return {@link #CHANNEL_UNSUPPORTED} if not supported.  
+     * Is generally the block meta/species.
+     * Default implementation is no channel support.
+     */
+    public default int getChannel() { return CHANNEL_UNSUPPORTED; }
         
 }
 
