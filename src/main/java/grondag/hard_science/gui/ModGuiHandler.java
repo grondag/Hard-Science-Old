@@ -1,7 +1,6 @@
 package grondag.hard_science.gui;
 
 import grondag.hard_science.machines.BlockFabricatorTileEntity;
-import grondag.hard_science.machines.SolarAggregatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
 import net.minecraft.entity.player.EntityPlayer;
@@ -79,18 +78,6 @@ public class ModGuiHandler implements IGuiHandler
                     {
                         BlockFabricatorTileEntity containerTileEntity = (BlockFabricatorTileEntity) te;
                         return new GuiBasicBuilder(containerTileEntity);
-                    }
-                    return null;
-                }
-                    
-                case SOLAR_AGGREGATOR:
-                {
-                    BlockPos pos = new BlockPos(x, y, z);
-                    TileEntity te = world.getTileEntity(pos);
-                    if (te instanceof SolarAggregatorTileEntity) 
-                    {
-                        SolarAggregatorTileEntity mte = (SolarAggregatorTileEntity) te;
-                        return new GuiSolarAggregator(mte);
                     }
                     return null;
                 }

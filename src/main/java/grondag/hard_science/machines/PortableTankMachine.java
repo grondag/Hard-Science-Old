@@ -5,11 +5,11 @@ import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class ModularTankMachine extends AbstractSimpleMachine
+public class PortableTankMachine extends AbstractSimpleMachine
 {
     protected final FluidContainer fluidStorage;
     
-    public ModularTankMachine()
+    public PortableTankMachine()
     {
         super();
         this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE);

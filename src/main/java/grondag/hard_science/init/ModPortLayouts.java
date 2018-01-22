@@ -39,7 +39,7 @@ public class ModPortLayouts
     /**
      * For full-block batteries or power-only machines.
      */
-    public static final PortLayout power_low_carrier_all = null;
+    public static final PortLayout power_low_carrier_flex_all = null;
     
     /**
      * For full-block machines needing only power and item transport.
@@ -132,13 +132,13 @@ public class ModPortLayouts
                 PortFaces.COMPACT_POWER_LOW_CARRIER));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("power_low_carrier_all"),
-                PortFaces.STD_POWER_LOW_CARRIER,
-                PortFaces.STD_POWER_LOW_CARRIER,
-                PortFaces.STD_POWER_LOW_CARRIER,
-                PortFaces.STD_POWER_LOW_CARRIER,
-                PortFaces.STD_POWER_LOW_CARRIER,
-                PortFaces.STD_POWER_LOW_CARRIER));
+                HardScience.prefixResource("power_low_carrier_flex_all"),
+                PortFaces.FLEX_POWER_LOW_CARRIER,
+                PortFaces.FLEX_POWER_LOW_CARRIER,
+                PortFaces.FLEX_POWER_LOW_CARRIER,
+                PortFaces.FLEX_POWER_LOW_CARRIER,
+                PortFaces.FLEX_POWER_LOW_CARRIER,
+                PortFaces.FLEX_POWER_LOW_CARRIER));
         
         event.getRegistry().register(new PortLayout(
                 HardScience.prefixResource("non_fluid_low_carrier_all"),

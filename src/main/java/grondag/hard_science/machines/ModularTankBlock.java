@@ -45,7 +45,7 @@ public class ModularTankBlock extends MachineBlock
     @Override
     public AbstractMachine createNewMachine()
     {
-        ModularTankMachine result = new ModularTankMachine();
+        PortableTankMachine result = new PortableTankMachine();
         result.fluidStorage.setContentPredicate(this.fluidResource);
         return result;
     }

@@ -63,6 +63,10 @@ public class PortFaces
     public static final PortFace COMPACT_POWER_LOW_CARRIER = PortFace.find(
             POWER_LOW_CARRIER_COMPACT);
     
+    public static final PortFace FLEX_POWER_LOW_CARRIER = PortFace.find(
+            POWER_LOW_CARRIER,
+            POWER_LOW_CARRIER_COMPACT);
+    
     public static final PortFace STD_WATER_LOW_CARRIER = PortFace.find(
             WATER_LOW_CARRIER);
     
