@@ -21,7 +21,7 @@ import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.energy.DeviceEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;
-import grondag.hard_science.machines.matbuffer.MaterialBufferDelegate;
+import grondag.hard_science.machines.matbuffer.BufferDelegate2;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineStatusState;
@@ -915,7 +915,7 @@ public class MachineControlRenderer
         return (CommonProxy.currentTimeMillis() & 0x400) == 0x400;
     }
 
-    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, MaterialBufferDelegate materialBuffer, int alpha)
+    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, BufferDelegate2 materialBuffer, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderGauge(tes, tes.getBuffer(), spec, te, materialBuffer, alpha);
@@ -924,7 +924,7 @@ public class MachineControlRenderer
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, MaterialBufferDelegate materialBuffer, int alpha)
+    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, BufferDelegate2 materialBuffer, int alpha)
     {
         // render marks
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, spec, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
@@ -976,7 +976,7 @@ public class MachineControlRenderer
         }
     }
     
-    public static void renderCMY(RadialRenderBounds bounds, MaterialBufferDelegate cyan, MaterialBufferDelegate magenta, MaterialBufferDelegate yellow, int alpha)
+    public static void renderCMY(RadialRenderBounds bounds, BufferDelegate2 cyan, BufferDelegate2 magenta, BufferDelegate2 yellow, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderCMY(tes, tes.getBuffer(), bounds, cyan, magenta, yellow, alpha);
@@ -985,7 +985,7 @@ public class MachineControlRenderer
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderCMY(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, MaterialBufferDelegate cyan, MaterialBufferDelegate magenta, MaterialBufferDelegate yellow, int alpha)
+    public static void renderCMY(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, BufferDelegate2 cyan, BufferDelegate2 magenta, BufferDelegate2 yellow, int alpha)
     {
         // render marks
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);

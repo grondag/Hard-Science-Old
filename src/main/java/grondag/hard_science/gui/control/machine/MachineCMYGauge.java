@@ -4,21 +4,21 @@ import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.matbuffer.MaterialBufferDelegate;
-import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
+import grondag.hard_science.machines.matbuffer.BufferDelegate2;
+import grondag.hard_science.machines.matbuffer.BufferManager2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
 public class MachineCMYGauge extends AbstractMachineControl<MachineCMYGauge, RadialRenderBounds>
 {
-    private final MaterialBufferDelegate cyan;
-    private final MaterialBufferDelegate magenta;
-    private final MaterialBufferDelegate yellow;
+    private final BufferDelegate2 cyan;
+    private final BufferDelegate2 magenta;
+    private final BufferDelegate2 yellow;
     
     public MachineCMYGauge(MachineTileEntity tileEntity, int cyanIndex, int magentaIndex, int yellowIndex, RadialRenderBounds spec)
     {
         super(tileEntity, spec);
-        MaterialBufferManager mbm = tileEntity.clientState().bufferManager;
+        BufferManager2 mbm = tileEntity.clientState().bufferManager;
         if(mbm == null || cyanIndex >= mbm.bufferCount() || magentaIndex >= mbm.bufferCount() || yellowIndex >= mbm.bufferCount()) 
         {
             Log.warn("Machine CMY gauge GUI could not be initialized.  Bad buffer of buffer index.");

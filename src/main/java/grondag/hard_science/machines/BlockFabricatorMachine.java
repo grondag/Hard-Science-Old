@@ -9,12 +9,12 @@ import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.energy.PolyethyleneFuelCell;
-import grondag.hard_science.machines.matbuffer.DemandManager;
-import grondag.hard_science.machines.matbuffer.MaterialBufferDelegate;
-import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
-import grondag.hard_science.machines.matbuffer.VolumetricIngredientList;
+import grondag.hard_science.machines.matbuffer.BufferDelegate2;
+import grondag.hard_science.machines.matbuffer.BufferManager2;
+import grondag.hard_science.machines.matbuffer.DemandManager2;
 import grondag.hard_science.machines.matbuffer.VolumetricBufferSpec;
 import grondag.hard_science.machines.matbuffer.VolumetricIngredient;
+import grondag.hard_science.machines.matbuffer.VolumetricIngredientList;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.matter.Matter;
 import grondag.hard_science.matter.MatterUnits;
@@ -113,20 +113,20 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     BlockFabricationTask task = null;
     
     // Buffer setup - all persisted
-    private final MaterialBufferDelegate bufferFiller;
-    private final MaterialBufferDelegate bufferResinA;
-    private final MaterialBufferDelegate bufferResinB;
-    private final MaterialBufferDelegate bufferNanoLights;
-    private final MaterialBufferDelegate bufferCyan;
-    private final MaterialBufferDelegate bufferMagenta;
-    private final MaterialBufferDelegate bufferYellow;
-    private final MaterialBufferDelegate bufferTiO2;   
+    private final BufferDelegate2 bufferFiller;
+    private final BufferDelegate2 bufferResinA;
+    private final BufferDelegate2 bufferResinB;
+    private final BufferDelegate2 bufferNanoLights;
+    private final BufferDelegate2 bufferCyan;
+    private final BufferDelegate2 bufferMagenta;
+    private final BufferDelegate2 bufferYellow;
+    private final BufferDelegate2 bufferTiO2;   
     
     public BlockFabricatorMachine()
     {
         super();
         // note that order has to match array declaration
-        MaterialBufferManager bufferManager = this.getBufferManager();
+        BufferManager2 bufferManager = this.getBufferManager();
         this.bufferFiller = bufferManager.getBuffer(BUFFER_INDEX_FILLER);
         this.bufferResinA = bufferManager.getBuffer(BUFFER_INDEX_RESIN_A);
         this.bufferResinB = bufferManager.getBuffer(BUFFER_INDEX_RESIN_B);
@@ -139,9 +139,9 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     }
     
     @Override
-    protected MaterialBufferManager createBufferManager()
+    protected BufferManager2 createBufferManager()
     {
-        return new MaterialBufferManager(BUFFER_SPECS);
+        return new BufferManager2(BUFFER_SPECS);
     }
 
     @Override
@@ -286,7 +286,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         
         int lightValue = PlacementItem.getStackLightValue(stack);
         
-        DemandManager demand = this.getBufferManager().demandManager();
+        DemandManager2 demand = this.getBufferManager().demandManager();
         
         demand.clearAllDemand();
         

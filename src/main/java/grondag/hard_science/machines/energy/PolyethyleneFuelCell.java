@@ -3,7 +3,7 @@ package grondag.hard_science.machines.energy;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.TimeUnits;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.matbuffer.MaterialBufferDelegate;
+import grondag.hard_science.machines.matbuffer.BufferDelegate2;
 import grondag.hard_science.matter.CubeSize;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
@@ -75,7 +75,7 @@ public class PolyethyleneFuelCell extends AbstractGenerator
     @Override
     protected long generateImplementation(long maxOutput, boolean allowPartial, boolean simulate)
     {
-        MaterialBufferDelegate fuelBuffer = this.device().getBufferManager().bufferHDPE();
+        BufferDelegate2 fuelBuffer = this.device().getBufferManager().bufferHDPE();
         
         if(fuelBuffer == null) return 0;
         

@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.base;
 
-import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
+import grondag.hard_science.machines.matbuffer.BufferManager2;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineStatusState;
@@ -249,7 +249,7 @@ public abstract class AbstractMachine extends AbstractDevice
     
     protected void restock()
     {
-        MaterialBufferManager bufferManager = this.getBufferManager();
+        BufferManager2 bufferManager = this.getBufferManager();
         
         if(!bufferManager.canRestockAny() || this.machineTE == null) return;
         

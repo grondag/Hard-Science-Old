@@ -8,7 +8,7 @@ import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
-import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
+import grondag.hard_science.machines.matbuffer.BufferManager2;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
@@ -155,7 +155,7 @@ public interface IDevice extends
      * If this tile has a material buffer, gives access.  Null if not.
      */
     @Nullable
-    MaterialBufferManager getBufferManager();
+    BufferManager2 getBufferManager();
     
     /**
      * True if supports channels for item & power transport circuit segregation.

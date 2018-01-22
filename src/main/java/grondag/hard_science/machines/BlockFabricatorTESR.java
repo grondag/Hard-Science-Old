@@ -5,7 +5,7 @@ import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
+import grondag.hard_science.machines.matbuffer.BufferManager2;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraftforge.fml.relauncher.Side;
@@ -19,7 +19,7 @@ public class BlockFabricatorTESR extends MachineTESR
     @Override
     protected void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha)
     {
-        MaterialBufferManager mbm = te.clientState().bufferManager;
+        BufferManager2 mbm = te.clientState().bufferManager;
         
         for(RadialGaugeSpec spec : BlockFabricatorTileEntity.BASIC_BUILDER_GAUGE_SPECS)
         {

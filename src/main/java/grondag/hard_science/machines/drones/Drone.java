@@ -4,7 +4,7 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
-import grondag.hard_science.machines.matbuffer.MaterialBufferManager;
+import grondag.hard_science.machines.matbuffer.BufferManager2;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
@@ -112,7 +112,7 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public MaterialBufferManager getBufferManager()
+    public BufferManager2 getBufferManager()
     {
         // TODO Auto-generated method stub
         return null;
