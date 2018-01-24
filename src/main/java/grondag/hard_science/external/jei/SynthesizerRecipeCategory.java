@@ -1,5 +1,7 @@
 package grondag.hard_science.external.jei;
 
+
+import javax.annotation.Nonnull;
 import grondag.hard_science.HardScience;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
@@ -10,38 +12,42 @@ import mezz.jei.api.recipe.IRecipeCategory;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
-public class BuilderRecipeCategory implements IRecipeCategory<BuilderRecipeWrapper>
+public class SynthesizerRecipeCategory implements IRecipeCategory<SynthesizerRecipeWrapper>
 {
 
-    public static final String UID = "hard_science.builder";
+    public static final String UID = "hard_science.synthesizer";
     private final IDrawableStatic background;
     private final String localizedName;
 
-    public BuilderRecipeCategory(IGuiHelper guiHelper)
+    public SynthesizerRecipeCategory(IGuiHelper guiHelper)
     {
         ResourceLocation location = new ResourceLocation("hard_science", "textures/gui/builder.png");
         background = guiHelper.createDrawable(location, 0, 0, 166, 65, 0, 0, 0, 0);
-        localizedName = I18n.format("hard_science.jei.builder");
+        localizedName = I18n.format("hard_science.jei.synthesizer");
     }
 
+    @Nonnull
     @Override
     public String getUid()
     {
         return UID;
     }
 
+    @Nonnull
     @Override
     public String getTitle()
     {
         return localizedName;
     }
 
+    @Nonnull
     @Override
     public String getModName()
     {
         return HardScience.MODNAME;
     }
 
+    @Nonnull
     @Override
     public IDrawable getBackground()
     {
@@ -50,9 +56,9 @@ public class BuilderRecipeCategory implements IRecipeCategory<BuilderRecipeWrapp
 
 
     @Override
-    public void setRecipe(IRecipeLayout recipeLayout, BuilderRecipeWrapper recipeWrapper, IIngredients ingredients)
+    public void setRecipe(IRecipeLayout recipeLayout, SynthesizerRecipeWrapper recipeWrapper, IIngredients ingredients)
     {
-        // TODO
+        recipeLayout.getFluidStacks();
     }
 
 }

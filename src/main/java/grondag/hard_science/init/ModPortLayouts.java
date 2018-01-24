@@ -54,7 +54,7 @@ public class ModPortLayouts
     @SubscribeEvent
     public static void registerLayouts(RegistryEvent.Register<PortLayout> event) 
     {
-        for(FluidResource f : ModFluids.ALL_USED_FLUIDS)
+        for(FluidResource f : ModFluids.ALL_PORTED_FLUIDS)
         {
             PortDescription<StorageTypeFluid> desc = PortDescription.find(
                     StorageType.FLUID, 

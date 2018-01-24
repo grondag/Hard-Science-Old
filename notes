@@ -1,7 +1,22 @@
  Serialize port layout in devices
- 
  Let direct ports mate with direct ports to form device/device private links
  
+ Material Handling
+ 	Bulk Container
+ 		various sizes (see matter cubes) can contain up to max.
+ 		Quantity stored is in NBT as nL
+ 		Stores Forge Liquids, which may be flowable solids
+ 	
+	FluidBuffer
+		For any fluid (gas,liquid or flowable solid) input/or output
+		Can input/output from pipes, bulk containers
+		In rare cases, (sand) can accept non-bulk item stacks
+ 		If more than one fluid/item resource can fill a fluid buffer,
+ 		then a generic fluid must be defined to represent those mixed/generic ingredients.
+		
+ 	ItemBuffer
+ 		For any input or output that is a discrete item stack
+ 	
 
 Portable fluid tanks are independent devices
 Portable fluid tanks have specific ports/fluids
