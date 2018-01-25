@@ -40,7 +40,7 @@ probe.machine.domain=Domain: %s
 
 
 #JEI
-hard_science.jei.builder=Hard Science Builder
+hard_science.jei.bulk_conversion=Hard Science Bulk Resource
 
 #MACHINES
 machine.is_on=Machine is ON.
@@ -203,6 +203,14 @@ item.volcano_wand.name=Volcano Wand
 item.basalt_rubble.name=Basalt Rubble
 item.lava_blob.name=Lava Ball
 item.excavation_marker.name=Excavation Marker
+
+#FLUIDS
+fluid.flowable_mineral_filler=Flowable Mineral Filler
+fluid.flowable_mineral_filler.desc="This is the test description for Flowable Mineral Filler. \nIt is very nice. \n\nHere are some line feeds. Yay!"
+fluid.raw_mineral_dust=Raw Mineral Dust
+fluid.depleted_mineral_dust=Depleted Mineral Dust
+fluid.ammonia=Ammonia (NH3), Low-Pressure
+fluid.purified_water=H2O (Purified Water)
 
 #MATTER
 matter.tio2=Titanium Dioxide

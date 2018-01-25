@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.crafting.BuilderRecipe;
-import grondag.hard_science.crafting.BulkConversionReceipe;
+import grondag.hard_science.crafting.BulkConversionRecipe;
 import grondag.hard_science.crafting.SynthesizerRecipe;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -27,17 +27,17 @@ public class ModRecipes
             GameRegistry.addSmelting(ModBlocks.basalt_cobble, new ItemStack(ModItems.basalt_cut, 1, 0), 0.1F);
         }
         
-        BulkConversionReceipe.addConversion(
+        BulkConversionRecipe.addConversion(
                 ModFluids.FLOWABLE_MINERAL_FILLER_RESOURCE,
                 ItemResource.fromStack(Item.getItemFromBlock(Blocks.SAND).getDefaultInstance()), 
                 VolumeUnits.KILOLITER.nL);
 
-        BulkConversionReceipe.addConversion(
+        BulkConversionRecipe.addConversion(
                 ModFluids.FLOWABLE_MINERAL_FILLER_RESOURCE,
                 ModFluids.DEPLETED_MINERAL_DUST_RESOURCE,
                 1.0);
         
-        BulkConversionReceipe.addConversion(
+        BulkConversionRecipe.addConversion(
                 ModFluids.FLOWABLE_MINERAL_FILLER_RESOURCE,
                 ModFluids.RAW_MINERAL_DUST_RESOURCE,
                 1.0);
