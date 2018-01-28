@@ -71,4 +71,9 @@ public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<Stora
         }
         
     };
+
+    public ItemStack toStack()
+    {
+        return ((ItemResource)this.resource()).stackWithQuantity((int)this.getQuantity());
+    }
 }

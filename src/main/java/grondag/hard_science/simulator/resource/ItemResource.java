@@ -66,6 +66,13 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         return stack.copy();
     }
     
+    public ItemStack stackWithQuantity(int quantity)
+    {
+        ItemStack result = new ItemStack(this.item, quantity, this.meta, this.caps);
+        if(this.tag != null) stack.setTagCompound(this.tag);
+        return result;
+    }
+    
     public Item getItem()
     {
         return this.item;
@@ -153,7 +160,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
 
   
     @Override
-    public boolean isResourceEqual(IResource<StorageTypeStack> other)
+    public boolean isResourceEqual(IResource<?> other)
     {
         if(other == this) return true;
         if(other == null) return false;

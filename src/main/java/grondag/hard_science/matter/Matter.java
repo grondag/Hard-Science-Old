@@ -1,69 +1,177 @@
 package grondag.hard_science.matter;
 
-import static grondag.hard_science.matter.MatterModel.*;
-import static grondag.hard_science.matter.PackageType.*;
+import grondag.hard_science.simulator.resource.FluidResource;
+import grondag.hard_science.simulator.transport.carrier.Channel;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 
-import java.util.List;
-
-import com.google.common.collect.ImmutableList;
-
-import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.matter.MatterModel.Naked;
-import net.minecraft.item.Item;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.registries.IForgeRegistry;
-
-
-public enum Matter
+/**
+ * Describes a substance used in material processing
+ * that is handled/measured by volume. Will always
+ * have an associated Fluid and Fluid Resource.<p>
+ * 
+ * Solid materials are generally powdered, granulated
+ * or plastic such that they can be handled as a fluid.
+ * Many in-game items representing non-flowable pieces
+ * of solid matter will need to be converted somehow
+ * into the fluid resource before they can be used.
+ *
+ */
+public class Matter
 {
-    TIO2(VACPACK, PACKAGE_STANDARD_VACPACK, new Formula("TiO2", 0xFFFFFFFF), new SymbolBottom("dust", 0xFFFFFFFF)),
-    HDPE(NAKED, new Naked("noise_subtle_0_0", MatterColors.HDPE),  new Formula("C2H4", 0xFF999999)),
-    CARBON_BLACK(VACPACK, PACKAGE_STANDARD_VACPACK, new FormulaLeft("C", 0xFFFFFFFF), new SymbolRight("dust", 0xFF000000)),
-    CARBON_GRAPHITE(VACPACK, PACKAGE_STANDARD_VACPACK, new FormulaLeft("C", 0xFFFFFFFF), new SymbolRight("big_hexagon", 0xFF000000)),
+    private final String systemName;
+    private final int color;
+    private final IComposition composition;
+    private final double tempK;
+    private final double pressureP;
+    private final MatterPhase phase;
     
-    CARBON_FIBER(VACPACK, PACKAGE_STANDARD_VACPACK, new FormulaLeft("C", 0xFFFFFFFF), new SymbolRight2("skinny_diagonal_ridges_seamless", 0xFF000000)),
+    /**
+     * g/cm3, water ~1.0
+     */
+    private final double density;
     
-    RAW_MINERAL_DUST(VACPACK, new Naked("noise_strong_0_0", MatterColors.RAW_MINERAL_DUST), new DustModel(0xFFFFFFFF, "dust", "arrow", "funnel")),
-    DEPLETED_MINERAL_DUST(VACPACK, new Naked("noise_strong_0_0", MatterColors.DEPLETED_MINERAL_DUST), new DustModel(0xFFFFFFFF, "funnel", "arrow", "dust")),
-    
-    /** Color of water is inverse of light absorbed by water: wavelength 698nm */
-    WATER(IBC, PACKAGE_STANDARD_IBC, new Formula("H2O", 0xFFFFFFFF), new SymbolBottom("drip", MatterColors.WATER)),
-    CONSTRUCTION_RESIN_A(IBC, PACKAGE_STANDARD_IBC, new SymbolCenter("mix", MatterColors.RESIN_A)),
-    CONSTRUCTION_RESIN_B(IBC, PACKAGE_STANDARD_IBC, new SymbolCenterRotated("mix", MatterColors.RESIN_B, Rotation.ROTATE_180)),
-    DYE_CYAN(VACPACK, PACKAGE_STANDARD_VACPACK, new SymbolCenter("dust", MatterColors.CYAN)),
-    DYE_MAGENTA(VACPACK, PACKAGE_STANDARD_VACPACK, new SymbolCenter("dust", MatterColors.MAGENTA)),
-    DYE_YELLOW(VACPACK, PACKAGE_STANDARD_VACPACK, new SymbolCenter("dust", MatterColors.YELLOW)),
-    NANO_LIGHTS(VACPACK, PACKAGE_STANDARD_VACPACK, new SymbolCenter("star_16", 0xFFFFFFFF)),
-    UREA(VACPACK, PACKAGE_STANDARD_VACPACK, new SymbolCenter("big_diamond", MatterColors.UREA));
+    private Fluid fluid;
+    private FluidResource resource;
+    private int channel = Channel.INVALID_CHANNEL;
 
-    public final PackageType packageType;
-    
-    private final MatterCube items[] = new MatterCube[CubeSize.values().length];
-    
-    public final List<MatterModel> models;
-    
-    private Matter(PackageType packageType, MatterModel... models)
+    public Matter(
+            String systemName,
+            int color,
+            IComposition composition,
+            double tempCelsius,
+            double pressureAtm,
+            MatterPhase phase,
+            double density
+            )
     {
-        this.packageType = packageType;
-        
-        this.models = FMLCommonHandler.instance().getSide() == Side.CLIENT 
-                ? ImmutableList.copyOf(models)
-                : null;
+        this.systemName = systemName;
+        this.color = color;
+        this.composition = composition;
+        this.tempK = Temperature.celsiusToKelvin(tempCelsius);
+        this.pressureP = Gas.atmToPascals(pressureAtm);
+        this.phase = phase;
+        this.density = density;
     }
     
-    public void register(IForgeRegistry<Item> itemReg)
+    /**
+     * Use this form for gasses that can
+     * have density estimated as an ideal gas.
+     */
+    public Matter(
+            String systemName,
+            int color,
+            IComposition molecule,
+            double tempCelsius,
+            double pressureAtm
+            )
     {
-        for(CubeSize size : CubeSize.values())
+        this(systemName, color, molecule, tempCelsius, pressureAtm, MatterPhase.GAS, 
+               Gas.idealGasDensityCA(molecule, tempCelsius, pressureAtm));
+    }
+    
+    public String systemName()
+    {
+        return this.systemName;
+    }
+    
+    public Fluid fluid()
+    {
+        return this.fluid;
+    }
+    
+    public FluidResource resource()
+    {
+        return this.resource;
+    }
+    
+    public int channel()
+    {
+        return this.channel;
+    }
+    
+    public MatterPhase phase()
+    {
+        return this.phase;
+    }
+    
+    public IComposition composition()
+    {
+        return this.composition;
+    }
+    
+    public double temperatureK()
+    {
+        return this.tempK;
+    }
+    
+    public double temperatureC()
+    {
+        return Temperature.kelvinToCelsius(this.tempK);
+    }
+    
+    public double pressureAtm()
+    {
+        return Gas.pascalsToAtm(this.pressureP);
+    }
+    
+    public double pressurePascals()
+    {
+        return this.pressureP;
+    }
+    
+    /**
+     * g/cm3, water ~1.0
+     */
+    public double density()
+    {
+        return this.density;
+    }
+    
+    public double gPerMol()
+    {
+        return this.composition.weight();
+    }
+    
+    public double molsPerLiter()
+    {
+        return this.density / this.gPerMol() * 1000;
+        // g / cm3 / (g / mol)
+        // mol / cm3
+    }
+    
+    public double molsPerKL()
+    {
+        return this.molsPerLiter() * 1000;
+    }
+    
+    public double litersPerMol()
+    {
+        return this.gPerMol() / this.density * 1000;
+    }
+    
+    public double nlPerMol()
+    {
+        return this.gPerMol() / this.density * VolumeUnits.MILLILITER.nL;
+    }
+    
+    public double kLPerMol()
+    {
+        return this.litersPerMol() / 1000;
+    }
+    
+    public void register()
+    {
+        this.fluid = FluidRegistry.getFluid(systemName);
+        if(this.fluid == null)
         {
-            MatterCube cube = new MatterCube(this, size);
-            this.items[size.ordinal()] = cube;
-            itemReg.register(cube);
+            this.fluid = new Fluid(this.systemName, this.phase.iconResource, this.phase.iconResource, this.color);
+            if(this.phase == MatterPhase.GAS) this.fluid.setGaseous(true);
+            this.fluid.setDensity((int) this.density());
+            this.fluid.setTemperature((int) this.temperatureK());
+            FluidRegistry.registerFluid(this.fluid);
         }
-    }
-    
-    public MatterCube getCube(CubeSize size)
-    {
-        return this.items[size.ordinal()];
+        this.channel = Channel.channelForFluid(this.fluid);
+        this.resource = new FluidResource(this.fluid, null);
     }
 }

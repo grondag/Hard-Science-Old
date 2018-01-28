@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.matter.CubeSize;
-import grondag.hard_science.matter.Matter;
+import grondag.hard_science.matter.MatterPackaging;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -28,9 +28,9 @@ public class VolumetricIngredientList
             {
                 list.add((VolumetricIngredient) arg);
             }
-            else if(arg instanceof Matter)
+            else if(arg instanceof MatterPackaging)
             {
-                Matter m = (Matter) arg;
+                MatterPackaging m = (MatterPackaging) arg;
                 list.add(new VolumetricIngredient(m, CubeSize.SIX));
                 list.add(new VolumetricIngredient(m, CubeSize.FIVE));
                 list.add(new VolumetricIngredient(m, CubeSize.FOUR));

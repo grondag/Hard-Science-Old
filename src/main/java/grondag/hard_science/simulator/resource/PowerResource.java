@@ -35,7 +35,7 @@ public class PowerResource extends AbstractResource<StorageType.StorageTypePower
     }
 
     @Override
-    public boolean isResourceEqual(IResource<StorageTypePower> other)
+    public boolean isResourceEqual(IResource<?> other)
     {
         return other == this;
     }

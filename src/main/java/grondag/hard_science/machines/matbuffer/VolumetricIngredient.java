@@ -2,7 +2,7 @@ package grondag.hard_science.machines.matbuffer;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.matter.CubeSize;
-import grondag.hard_science.matter.Matter;
+import grondag.hard_science.matter.MatterPackaging;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 
@@ -21,7 +21,7 @@ public class VolumetricIngredient
         this.nanoLitersPerItem = nanoLitersPerItem;
     }
     
-    public VolumetricIngredient(Matter matter, CubeSize size)
+    public VolumetricIngredient(MatterPackaging matter, CubeSize size)
     {
         this.ingredient = CraftingHelper.getIngredient(matter.getCube(size));
         

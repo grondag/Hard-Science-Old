@@ -9,13 +9,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
+/**
+ * Package sizes for solid material blocks
+ * and fluid containers. 
+ */
 public class MatterCube extends Item
 {
     /** number of times a 1M block was divided to get this cube */
-    public final Matter matter;
+    public final MatterPackaging matter;
     public final CubeSize cubeSize;
     
-    public MatterCube(Matter matter, CubeSize cubeSize)
+    public MatterCube(MatterPackaging matter, CubeSize cubeSize)
     {
         super();
         this.matter = matter;

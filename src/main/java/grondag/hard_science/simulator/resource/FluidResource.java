@@ -125,7 +125,7 @@ public class FluidResource extends AbstractResource<StorageType.StorageTypeFluid
 
   
     @Override
-    public boolean isResourceEqual(IResource<StorageTypeFluid> other)
+    public boolean isResourceEqual(IResource<?> other)
     {
         if(other == this) return true;
         if(other == null) return false;

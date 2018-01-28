@@ -35,6 +35,7 @@ public class PhotoElectricCell extends AbstractGenerator
         super(owner);
         this.setMaxOutputJoulesPerTick((long) (
                 MachinePower.DAILY_INSOLATION_MAX_JOULES
+                * MachinePower.PHOTO_ELECTRIC_EFFICIENCY
                 / MachinePower.TOTAL_DAILY_BRIGHTNESS_FACTOR));
     }
     
@@ -68,6 +69,7 @@ public class PhotoElectricCell extends AbstractGenerator
                 
                 float factor = MachinePower.insolationFactor(device().getLocation())
                         * MachinePower.DAILY_INSOLATION_MAX_JOULES 
+                        * MachinePower.PHOTO_ELECTRIC_EFFICIENCY
                         / MachinePower.TOTAL_DAILY_BRIGHTNESS_FACTOR;
                 
                 

@@ -488,7 +488,7 @@ public class QuadHelper
     //    }
 
        /**
-        * Generates a raw quad that isn't uv-locked - originally for putting symbols on Matter Cubes.
+        * Generates a raw quad that isn't uv-locked - originally for putting symbols on MatterPackaging Cubes.
         * Bit of a mess, but thought might get some reuse out of it, so putting here.
         * 
         * @param rawTextureName should not have mod/blocks prefix

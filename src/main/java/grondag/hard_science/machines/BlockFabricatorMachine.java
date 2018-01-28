@@ -16,7 +16,7 @@ import grondag.hard_science.machines.matbuffer.VolumetricBufferSpec;
 import grondag.hard_science.machines.matbuffer.VolumetricIngredient;
 import grondag.hard_science.machines.matbuffer.VolumetricIngredientList;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.matter.Matter;
+import grondag.hard_science.matter.MatterPackaging;
 import grondag.hard_science.matter.MatterUnits;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.domain.DomainManager;
@@ -49,29 +49,29 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     private static final int JOULES_PER_TICK_FABRICATING = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_FABRICATION));
     private static final long TICKS_PER_FULL_BLOCK = 40;
 
-    private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(Matter.HDPE);
+    private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.HDPE);
     
     private static final VolumetricIngredientList FILLER_INGREDIENTS = new VolumetricIngredientList(
-            Matter.RAW_MINERAL_DUST,
-            Matter.DEPLETED_MINERAL_DUST,
+            MatterPackaging.RAW_MINERAL_DUST,
+            MatterPackaging.DEPLETED_MINERAL_DUST,
             new VolumetricIngredient("sand", MatterUnits.nL_ONE_BLOCK),
             new VolumetricIngredient("red_sand", MatterUnits.nL_ONE_BLOCK));
     
-    private static final VolumetricIngredientList RESIN_A_INGREDIENTS = new VolumetricIngredientList(Matter.CONSTRUCTION_RESIN_A);
+    private static final VolumetricIngredientList RESIN_A_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.CONSTRUCTION_RESIN_A);
     
-    private static final VolumetricIngredientList RESIN_B_INGREDIENTS = new VolumetricIngredientList(Matter.CONSTRUCTION_RESIN_B);
+    private static final VolumetricIngredientList RESIN_B_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.CONSTRUCTION_RESIN_B);
     
-    private static final VolumetricIngredientList NANOLIGHT_INGREDIENTS = new VolumetricIngredientList(Matter.NANO_LIGHTS);
+    private static final VolumetricIngredientList NANOLIGHT_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.NANO_LIGHTS);
     
-    private static final VolumetricIngredientList CYAN_INGREDIENTS = new VolumetricIngredientList(Matter.DYE_CYAN);
+    private static final VolumetricIngredientList CYAN_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.DYE_CYAN);
     
-    private static final VolumetricIngredientList MAGENTA_INGREDIENTS = new VolumetricIngredientList(Matter.DYE_MAGENTA);
+    private static final VolumetricIngredientList MAGENTA_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.DYE_MAGENTA);
     
-    private static final VolumetricIngredientList YELLOW_INGREDIENTS = new VolumetricIngredientList(Matter.DYE_YELLOW);
+    private static final VolumetricIngredientList YELLOW_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.DYE_YELLOW);
     
-    private static final VolumetricIngredientList TiO2_INGREDIENTS = new VolumetricIngredientList(Matter.TIO2);
+    private static final VolumetricIngredientList TiO2_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.TIO2);
     
-//    private static final VolumetricIngredientList CARBON_INGREDIENTS = new VolumetricIngredientList(Matter.CARBON_BLACK);
+//    private static final VolumetricIngredientList CARBON_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.CARBON_BLACK);
 
     // so TESR knows which buffer to render for each gauge
     public static final int BUFFER_INDEX_HDPE = 0;

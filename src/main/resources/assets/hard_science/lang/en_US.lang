@@ -40,7 +40,8 @@ probe.machine.domain=Domain: %s
 
 
 #JEI
-hard_science.jei.bulk_conversion=Hard Science Bulk Resource
+jei_category.hard_science.bulk_conversion=Hard Science Bulk Resource
+jei_category.hard_science.solar_electrolysis=Solar Electrolysis
 
 #MACHINES
 machine.is_on=Machine is ON.
@@ -206,7 +207,7 @@ item.excavation_marker.name=Excavation Marker
 
 #FLUIDS
 fluid.flowable_mineral_filler=Flowable Mineral Filler
-fluid.flowable_mineral_filler.desc="This is the test description for Flowable Mineral Filler. \nIt is very nice. \n\nHere are some line feeds. Yay!"
+fluid.flowable_mineral_filler.desc=This is the test description for Flowable Mineral Filler. \nIt is very nice. \n\nHere are some line feeds. Yay!
 fluid.raw_mineral_dust=Raw Mineral Dust
 fluid.depleted_mineral_dust=Depleted Mineral Dust
 fluid.ammonia=Ammonia (NH3), Low-Pressure

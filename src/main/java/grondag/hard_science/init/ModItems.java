@@ -6,7 +6,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
-import grondag.hard_science.matter.Matter;
+import grondag.hard_science.matter.MatterPackaging;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.ExcavationMarker;
@@ -62,7 +62,7 @@ public class ModItems
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
         itemReg.register(new ExcavationMarker().setCreativeTab(HardScience.tabMod));
         
-        for(Matter matter : Matter.values())
+        for(MatterPackaging matter : MatterPackaging.values())
         {
             matter.register(itemReg);
         }       

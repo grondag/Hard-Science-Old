@@ -29,7 +29,19 @@ public class MatterColors
     public static final int RESIN_B = 0xFFeceea8;
     public static final int RAW_MINERAL_DUST = 0xFF646973;
     public static final int DEPLETED_MINERAL_DUST = 0xFF737164;
-    public static final int AMMONIA = 0x46c4ff; // arbitrary
+    public static final int AMMONIA = 0x9046c490; // arbitrary
+    
+    public static final int FRESH_AIR = 0x30FFFFFF;
+    
+    public static final int RETURN_AIR = 0x60FFFF80;
+    
+    public static final int OXYGEN = 0x909ea6cd; // approximate liquid color
+    
+    public static final int HYDROGEN = 0x90ffdcf2; // approximate emission spectrum
+    
+    public static final int ETHENE = 0x90b6ff99; // arbitrary
+    
+    public static final int GRAPHITE = 0xFF202020;
     
     public static final int CYAN = 0xFF00FFFF;
     public static final int MAGENTA = 0xFFFF00FF;

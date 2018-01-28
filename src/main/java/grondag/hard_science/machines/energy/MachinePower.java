@@ -122,6 +122,19 @@ public class MachinePower
      */
     public static final float PHOTO_ELECTRIC_EFFICIENCY = 0.65f;
     
+    /**
+     * How much of insolation is captured by photo-chemical cells as
+     * chemical energy. 
+     */
+    public static final float PHOTO_CHEMICAL_EFFICIENCY = PHOTO_ELECTRIC_EFFICIENCY;
+    
+    /**
+     * For machines that capture atmospheric carbon by splitting CO2, energy premium
+     * to reflect fact that CO2 capture may use active concentration mechanism.
+     * Cost should not be charged if device has access to concentrated CO2.
+     */
+    public static final float CARBON_CAPTURE_EFFICIENCY = 0.80f;
+    
 //    public static enum FuelCellSpec
 //    {
 //        STANDARD_INTEGRATED(JOULES_PER_KWH, 1000, 2000, POLYETHYLENE_CONVERSION_EFFICIENCY_PER_MILLE);

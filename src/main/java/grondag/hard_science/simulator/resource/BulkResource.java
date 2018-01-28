@@ -48,7 +48,7 @@ public class BulkResource extends IForgeRegistryEntry.Impl<BulkResource> impleme
     }
   
     @Override
-    public boolean isResourceEqual(IResource<StorageTypeBulk> other)
+    public boolean isResourceEqual(IResource<?> other)
     {
         return this.equals(other);
     }

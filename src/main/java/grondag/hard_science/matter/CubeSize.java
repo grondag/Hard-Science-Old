@@ -14,7 +14,10 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-
+/**
+ * Package sizes for solid material blocks
+ * and fluid containers.
+ */
 public enum CubeSize
 {
     BLOCK(0, 1f, "medium_square"),

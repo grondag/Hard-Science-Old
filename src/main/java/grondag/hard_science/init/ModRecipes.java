@@ -6,6 +6,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.crafting.BuilderRecipe;
 import grondag.hard_science.crafting.BulkConversionRecipe;
 import grondag.hard_science.crafting.SynthesizerRecipe;
+import grondag.hard_science.matter.Matters;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.ItemResource;
 import net.minecraft.init.Blocks;
@@ -28,18 +29,18 @@ public class ModRecipes
         }
         
         BulkConversionRecipe.addConversion(
-                ModFluids.FLOWABLE_MINERAL_FILLER_RESOURCE,
+                Matters.FLOWABLE_MINERAL_FILLER.resource(),
                 ItemResource.fromStack(Item.getItemFromBlock(Blocks.SAND).getDefaultInstance()), 
                 VolumeUnits.KILOLITER.nL);
 
         BulkConversionRecipe.addConversion(
-                ModFluids.FLOWABLE_MINERAL_FILLER_RESOURCE,
-                ModFluids.DEPLETED_MINERAL_DUST_RESOURCE,
+                Matters.FLOWABLE_MINERAL_FILLER.resource(),
+                Matters.DEPLETED_MINERAL_DUST.resource(),
                 1.0);
         
         BulkConversionRecipe.addConversion(
-                ModFluids.FLOWABLE_MINERAL_FILLER_RESOURCE,
-                ModFluids.RAW_MINERAL_DUST_RESOURCE,
+                Matters.FLOWABLE_MINERAL_FILLER.resource(),
+                Matters.RAW_MINERAL_DUST.resource(),
                 1.0);
     }
 }
