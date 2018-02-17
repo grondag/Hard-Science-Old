@@ -6,7 +6,11 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
+import grondag.hard_science.matter.MassUnits;
+import grondag.hard_science.matter.MatterCube2;
 import grondag.hard_science.matter.MatterPackaging;
+import grondag.hard_science.matter.Matters;
+import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.ExcavationMarker;
@@ -51,6 +55,19 @@ public class ModItems
  
         itemReg.register(new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble").setCreativeTab(HardScience.tabMod));
 
+        // start generated crafting items
+        
+//        itemReg.register(new CraftingItem("flex_tank_kl", new ModelState()));
+//        itemReg.register(new CraftingItem("dura_tank_kl", new ModelState()));
+//        itemReg.register(new CraftingItem("flex_valve_ball", new ModelState()));
+//        itemReg.register(new CraftingItem("flex_valve_housing", new ModelState()));
+//        itemReg.register(new CraftingItem("flex_control_valve", new ModelState()));
+//        itemReg.register(new CraftingItem("dura_valve_ball", new ModelState()));
+//        itemReg.register(new CraftingItem("dura_valve_housing", new ModelState()));
+//        itemReg.register(new CraftingItem("dura_control_valve", new ModelState()));
+//        itemReg.register(new CraftingItem("short_throw_actuator", new ModelState()));
+        
+
         if(Configurator.VOLCANO.enableVolcano)
         {
             itemReg.register(new LavaBlobItem().setRegistryName("lava_blob").setUnlocalizedName("lava_blob").setCreativeTab(HardScience.tabMod));
@@ -61,6 +78,18 @@ public class ModItems
         
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
         itemReg.register(new ExcavationMarker().setCreativeTab(HardScience.tabMod));
+        
+        itemReg.register(new MatterCube2(Matters.GOLD, MassUnits.GRAM.withQuantity(10)));
+        itemReg.register(new MatterCube2(Matters.GOLD, MassUnits.KILOGRAM.withQuantity(1)));
+        itemReg.register(new MatterCube2(Matters.GOLD, MassUnits.KILOGRAM.withQuantity(100)));
+
+        itemReg.register(new MatterCube2(Matters.AMMONIA_GAS, VolumeUnits.KILOLITER.withQuantity(1)));
+
+        itemReg.register(new MatterCube2(Matters.FLEX_RESIN, VolumeUnits.LITER.withQuantity(10)));
+        itemReg.register(new MatterCube2(Matters.FLEX_RESIN, VolumeUnits.KILOLITER.withQuantity(1)));
+        
+        itemReg.register(new MatterCube2(Matters.CRUSHED_STONE, MassUnits.KILOGRAM.withQuantity(Matters.CRUSHED_STONE.kgPerBlock())));
+
         
         for(MatterPackaging matter : MatterPackaging.values())
         {
@@ -101,9 +130,4 @@ public class ModItems
             }
         }
     }
-    
-//    public static void preInit(FMLPreInitializationEvent event) 
-//    {
-//  
-//    }
 }

@@ -75,7 +75,8 @@ public interface IHardScienceRecipe extends IRecipeWrapper
             for(FluidResourceWithQuantity rwq : this.fluidInputs())
             {
                 FluidResource resource = (FluidResource)rwq.resource();
-                int liters = (int) Math.ceil(rwq.getQuantity() / VolumeUnits.LITER.nL);
+                int liters = (int) Math.ceil((double)rwq.getQuantity() / VolumeUnits.LITER.nL);
+                assert liters > 0 : "invalid recipe mapping";
                 FluidStack input = resource.newStackWithLiters(liters);
                 builder.add(input);
             }
@@ -100,7 +101,9 @@ public interface IHardScienceRecipe extends IRecipeWrapper
             for(FluidResourceWithQuantity rwq : this.fluidOutputs())
             {
                 FluidResource resource = (FluidResource)rwq.resource();
-                int liters = (int) Math.ceil(rwq.getQuantity() / VolumeUnits.LITER.nL);
+                int liters = (int) Math.ceil((double)rwq.getQuantity() / VolumeUnits.LITER.nL);
+                assert liters > 0 : "invalid recipe mapping";
+                
                 FluidStack input = resource.newStackWithLiters(liters);
                 builder.add(input);
             }

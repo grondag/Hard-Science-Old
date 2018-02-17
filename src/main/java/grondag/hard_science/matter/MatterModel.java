@@ -1,6 +1,7 @@
 package grondag.hard_science.matter;
 
 import java.util.ArrayList;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.init.ModModels;
@@ -54,7 +55,50 @@ public abstract class MatterModel
         }
         
     }
+    
+    public static class Solid extends TexColor
+    {
 
+        public Solid(int color)
+        {
+            super("noise_strong_0_0", color);
+        }
+
+        @Override
+        public void addRawQuads(ArrayList<RawQuad> quadList)
+        {
+            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
+        }
+    }
+    
+    public static class Gas extends TexColor
+    {
+        public Gas(int color)
+        {
+            super("clouds", color);
+        }
+
+        @Override
+        public void addRawQuads(ArrayList<RawQuad> quadList)
+        {
+            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1.0/16.0, Rotation.ROTATE_NONE, quadList);            
+        }
+    }
+
+    public static class Fluid extends TexColor
+    {
+        public Fluid(int color)
+        {
+            super("fluid_vortex", color);
+        }
+
+        @Override
+        public void addRawQuads(ArrayList<RawQuad> quadList)
+        {
+            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1.0/16.0, Rotation.ROTATE_NONE, quadList);            
+        }
+    }
+    
     public static class SymbolCenter extends TexColor
     {
         public SymbolCenter(String symbolString, int color)

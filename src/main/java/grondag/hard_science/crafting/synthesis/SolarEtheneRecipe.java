@@ -33,23 +33,23 @@ public class SolarEtheneRecipe extends AbstractRecipe
         {
             super(
                     ImmutableList.of(
-                            Matters.H2O.resource(),
-                            Matters.FRESH_AIR.resource(),
+                            Matters.H2O_FLUID.fluidResource(),
+                            Matters.FRESH_AIR.fluidResource(),
                             PowerResource.JOULES),
                     ImmutableList.of(
-                            Matters.ETHENE_GAS.resource(),
-                            Matters.RETURN_AIR.resource(),
-                            Matters.OXYGEN_GAS.resource()
+                            Matters.ETHENE_GAS.fluidResource(),
+                            Matters.RETURN_AIR.fluidResource(),
+                            Matters.O2_GAS.fluidResource()
                             ));
             
-            model.createInput(Matters.H2O.resource(), Matters.H2O.nlPerMol());
+            model.createInput(Matters.H2O_FLUID.fluidResource(), Matters.H2O_FLUID.nlPerMol());
             
-            double co2Fraction = Compounds.FRESH_AIR.getFraction(Molecules.CO2);
+            double co2Fraction = Compounds.FRESH_AIR.getFraction(Molecules.CO2_GAS);
             // this gives us 1Mol of CO2
             // no need to divide or multiply - ration of C to H is already 1:2
             double airInputNL = Matters.FRESH_AIR.nlPerMol() / co2Fraction;
             
-            model.createInput(Matters.FRESH_AIR.resource(),
+            model.createInput(Matters.FRESH_AIR.fluidResource(),
                     airInputNL);
 
             model.createInput(
@@ -59,24 +59,24 @@ public class SolarEtheneRecipe extends AbstractRecipe
                     
                     // flip sign because CO2 formation is exothermic
                     // and charge extra for hypothetical CO2 concentration mechanism
-                    - Molecules.CO2.enthalpyJoules / MachinePower.CARBON_CAPTURE_EFFICIENCY
+                    - Molecules.CO2_GAS.enthalpyJoules / MachinePower.CARBON_CAPTURE_EFFICIENCY
                     
                     // ethylene enthalpy is positive, increasing cost of this reaction
                     + Molecules.ETHENE_GAS.enthalpyJoules);
 
             model.createOutput(
-                    Matters.ETHENE_GAS.resource(),
+                    Matters.ETHENE_GAS.fluidResource(),
                     // half a mol, because 4H vs 2H in water
                     Matters.ETHENE_GAS.nlPerMol() / 2);
             
             // will have half mole of O2 from one liter of water
             // plus one mole of O2 from the CO2 we used
             model.createOutput(
-                    Matters.OXYGEN_GAS.resource(), 
-                    Matters.OXYGEN_GAS.nlPerMol() * 1.5);
+                    Matters.O2_GAS.fluidResource(), 
+                    Matters.O2_GAS.nlPerMol() * 1.5);
             
             model.createOutput(
-                    Matters.RETURN_AIR.resource(), 
+                    Matters.RETURN_AIR.fluidResource(), 
                     airInputNL * (1 - co2Fraction));
         }
 

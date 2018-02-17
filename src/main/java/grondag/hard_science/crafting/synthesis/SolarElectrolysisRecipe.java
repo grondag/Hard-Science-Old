@@ -33,25 +33,25 @@ public class SolarElectrolysisRecipe extends AbstractRecipe
         {
             super(
                     ImmutableList.of(
-                            Matters.H2O.resource(),
+                            Matters.H2O_FLUID.fluidResource(),
                             PowerResource.JOULES),
                     ImmutableList.of(
-                            Matters.HYDROGEN_GAS.resource(),
-                            Matters.OXYGEN_GAS.resource()
+                            Matters.H2_GAS.fluidResource(),
+                            Matters.O2_GAS.fluidResource()
                             ));
             
-            model.createInput(Matters.H2O.resource(), Matters.H2O.nlPerMol());
+            model.createInput(Matters.H2O_FLUID.fluidResource(), Matters.H2O_FLUID.nlPerMol());
             model.createInput(
                     PowerResource.JOULES, 
                     // need to flip sign because water formation is exothermic
                     -Molecules.H2O_FLUID.enthalpyJoules / MachinePower.PHOTO_CHEMICAL_EFFICIENCY);
 
             model.createOutput(
-                    Matters.HYDROGEN_GAS.resource(), 
-                    Matters.HYDROGEN_GAS.nlPerMol());
+                    Matters.H2_GAS.fluidResource(), 
+                    Matters.H2_GAS.nlPerMol());
             model.createOutput(
-                    Matters.OXYGEN_GAS.resource(), 
-                    Matters.OXYGEN_GAS.nlPerMol() / 2);
+                    Matters.O2_GAS.fluidResource(), 
+                    Matters.O2_GAS.nlPerMol() / 2);
         }
 
         @Override

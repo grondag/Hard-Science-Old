@@ -14,10 +14,11 @@ public class MachinePower
     public static final long JOULES_PER_KWH =                   3600000;
     public static final long JOULES_PER_POLYETHYLENE_LITER =   42600000;
     public static final long JOULES_PER_SILICON_BATTERY_LITER = 4300000;
+    public static final long JOULES_PER_GRAPHENE_CAPACITOR_LITER = 1000000;
     
     public static final float JOULES_PER_POLYETHYLENE_NANOLITER = (float) JOULES_PER_POLYETHYLENE_LITER / VolumeUnits.LITER.nL;
     
-    /** 
+    /** s
      * What portion of battery component volume is actually dedicated to storage
      * vs support circuitry, cooling, etc.
      */

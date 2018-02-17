@@ -488,6 +488,15 @@ public class QuadHelper
     //    }
 
        /**
+        * Same as {@link #addTextureToAllFaces(String, float, float, float, double, int, boolean, float, Rotation, List)}
+        * but with uvFraction = 1.
+        */
+       public static void addTextureToAllFaces(String rawTextureName, float left, float top, float size, float scaleFactor, int color, boolean contractUVs, Rotation texturRotation, List<RawQuad> list)
+       {
+           addTextureToAllFaces(rawTextureName, left, top, size, scaleFactor, color, contractUVs, 1.0, texturRotation, list);
+       }
+       
+       /**
         * Generates a raw quad that isn't uv-locked - originally for putting symbols on MatterPackaging Cubes.
         * Bit of a mess, but thought might get some reuse out of it, so putting here.
         * 
@@ -497,10 +506,13 @@ public class QuadHelper
         * @param size           assuming square box
         * @param scaleFactor    quads will be scaled out from center by this- use value > 1 to bump out overlays
         * @param color          color of textures
+        * @param uvFraction     how much of texture to include, starting from u,v 0,0.  
+        *                       Pass 1 to include whole texture. Mainly of use when trying to 
+        *                       apply big textures to item models and don't want whole thing.
         * @param contractUVs    should be true for everything except fonts maybe
         * @param list           your mutable list of quads
         */
-       public static void addTextureToAllFaces(String rawTextureName, float left, float top, float size, float scaleFactor, int color, boolean contractUVs, Rotation texturRotation, List<RawQuad> list)
+       public static void addTextureToAllFaces(String rawTextureName, float left, float top, float size, float scaleFactor, int color, boolean contractUVs, double uvFraction, Rotation texturRotation, List<RawQuad> list)
        {
            RawQuad template = new RawQuad();
            template.textureName = "hard_science:blocks/" + rawTextureName;
@@ -516,31 +528,31 @@ public class QuadHelper
            switch(texturRotation)
            {
         case ROTATE_180:
-            fv[0] = new FaceVertex.UV(left, bottom, 0, 1, 0);
+            fv[0] = new FaceVertex.UV(left, bottom, 0, uvFraction, 0);
             fv[1] = new FaceVertex.UV(right, bottom, 0, 0, 0);
-            fv[2] = new FaceVertex.UV(right, top, 0, 0, 1);
-            fv[3] = new FaceVertex.UV(left, top, 0, 1, 1);
+            fv[2] = new FaceVertex.UV(right, top, 0, 0, uvFraction);
+            fv[3] = new FaceVertex.UV(left, top, 0, uvFraction, uvFraction);
             break;
 
         case ROTATE_270:
             fv[0] = new FaceVertex.UV(left, bottom, 0, 0, 0);
-            fv[1] = new FaceVertex.UV(right, bottom, 0, 0, 1);
-            fv[2] = new FaceVertex.UV(right, top, 0, 1, 1);
-            fv[3] = new FaceVertex.UV(left, top, 0, 1, 0);
+            fv[1] = new FaceVertex.UV(right, bottom, 0, 0, uvFraction);
+            fv[2] = new FaceVertex.UV(right, top, 0, uvFraction, uvFraction);
+            fv[3] = new FaceVertex.UV(left, top, 0, uvFraction, 0);
             break;
         
         case ROTATE_90:
-            fv[0] = new FaceVertex.UV(left, bottom, 0, 1, 1);
-            fv[1] = new FaceVertex.UV(right, bottom, 0, 1, 0);
+            fv[0] = new FaceVertex.UV(left, bottom, 0, uvFraction, uvFraction);
+            fv[1] = new FaceVertex.UV(right, bottom, 0, uvFraction, 0);
             fv[2] = new FaceVertex.UV(right, top, 0, 0, 0);
-            fv[3] = new FaceVertex.UV(left, top, 0, 0, 1);
+            fv[3] = new FaceVertex.UV(left, top, 0, 0, uvFraction);
             break;
         
         case ROTATE_NONE:
         default:
-            fv[0] = new FaceVertex.UV(left, bottom, 0, 0, 1);
-            fv[1] = new FaceVertex.UV(right, bottom, 0, 1, 1);
-            fv[2] = new FaceVertex.UV(right, top, 0, 1, 0);
+            fv[0] = new FaceVertex.UV(left, bottom, 0, 0, uvFraction);
+            fv[1] = new FaceVertex.UV(right, bottom, 0, uvFraction, uvFraction);
+            fv[2] = new FaceVertex.UV(right, top, 0, uvFraction, 0);
             fv[3] = new FaceVertex.UV(left, top, 0, 0, 0);
             break;
            

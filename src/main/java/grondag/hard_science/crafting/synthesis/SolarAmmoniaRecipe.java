@@ -33,22 +33,22 @@ public class SolarAmmoniaRecipe extends AbstractRecipe
         {
             super(
                     ImmutableList.of(
-                            Matters.H2O.resource(),
-                            Matters.FRESH_AIR.resource(),
+                            Matters.H2O_FLUID.fluidResource(),
+                            Matters.FRESH_AIR.fluidResource(),
                             PowerResource.JOULES),
                     ImmutableList.of(
-                            Matters.AMMONIA.resource(),
-                            Matters.RETURN_AIR.resource(),
-                            Matters.OXYGEN_GAS.resource()
+                            Matters.AMMONIA_GAS.fluidResource(),
+                            Matters.RETURN_AIR.fluidResource(),
+                            Matters.O2_GAS.fluidResource()
                             ));
             
-            model.createInput(Matters.H2O.resource(), Matters.H2O.nlPerMol());
+            model.createInput(Matters.H2O_FLUID.fluidResource(), Matters.H2O_FLUID.nlPerMol());
             
-            double nitroFraction = Compounds.FRESH_AIR.getFraction(Molecules.N2);
+            double nitroFraction = Compounds.FRESH_AIR.getFraction(Molecules.N2_GAS);
             // divide by 2 because N2
             double airInputNL = Matters.FRESH_AIR.nlPerMol() / nitroFraction / 2;
             
-            model.createInput(Matters.FRESH_AIR.resource(),
+            model.createInput(Matters.FRESH_AIR.fluidResource(),
                     airInputNL);
 
             model.createInput(
@@ -60,17 +60,17 @@ public class SolarAmmoniaRecipe extends AbstractRecipe
                     + Molecules.AMMONIA_GAS.enthalpyJoules);
 
             model.createOutput(
-                    Matters.AMMONIA.resource(),
+                    Matters.AMMONIA_GAS.fluidResource(),
                     // we'll get 2/3 yield per mol of water because
                     // 3 hydrogen instead of 2
-                    Matters.AMMONIA.nlPerMol() * 2 / 3);
+                    Matters.AMMONIA_GAS.nlPerMol() * 2 / 3);
             
             model.createOutput(
-                    Matters.OXYGEN_GAS.resource(), 
-                    Matters.OXYGEN_GAS.nlPerMol() / 2);
+                    Matters.O2_GAS.fluidResource(), 
+                    Matters.O2_GAS.nlPerMol() / 2);
             
             model.createOutput(
-                    Matters.RETURN_AIR.resource(), 
+                    Matters.RETURN_AIR.fluidResource(), 
                     airInputNL * (1 - nitroFraction));
         }
 

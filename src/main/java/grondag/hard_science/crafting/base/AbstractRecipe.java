@@ -267,8 +267,8 @@ public class AbstractRecipe implements IHardScienceRecipe
                 for(FluidResourceWithQuantity rwq : this.fluidInputs)
                 {
                     GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer, 
-                            Long.toString(VolumeUnits.nL2Liters(rwq.getQuantity())) + "L", 
+                            minecraft.fontRenderer,
+                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
                             RecipeLayout.LEFT, 
                             layout.inputY[inputIndex] + 20, 
                             20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
@@ -304,8 +304,8 @@ public class AbstractRecipe implements IHardScienceRecipe
                 for(FluidResourceWithQuantity rwq : this.fluidOutputs)
                 {
                     GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer, 
-                            Long.toString(VolumeUnits.nL2Liters(rwq.getQuantity())) + "L", 
+                            minecraft.fontRenderer,
+                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
                             RecipeLayout.RIGHT, 
                             layout.outputY[outputIndex] + 20, 
                             20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);

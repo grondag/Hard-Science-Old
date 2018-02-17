@@ -204,6 +204,22 @@ item.volcano_wand.name=Volcano Wand
 item.basalt_rubble.name=Basalt Rubble
 item.lava_blob.name=Lava Ball
 item.excavation_marker.name=Excavation Marker
+item.duraplast_plate_1m.name=Duraplast Plate, 1m square
+item.duraplast_strut_1m.name=Duraplast Strut, 1m square
+item.duraplast_square_frame_1m.name=Duraplast Square Frame, 1m
+item.duraplast_joining_tool.name=Duraplast Joining Tool
+item.duraplast_cubic_frame_1m.name=Duraplast Cubic Frame, 1m
+item.duraplast_machine_casing_1m.name=Duraplast Machine Housing, 1m
+
+#generated items start here
+item.flex_tank_kl.name=Basic Tank
+item.dura_tank_kl.name=Rugged Tank
+item.flex_valve_ball.name=Valve Ball
+item.flex_valve_housing.name=Valve Housing
+item.flex_control_valve.name=Control Valve
+item.dura_valve_ball.name=HP Valve Ball
+item.dura_valve_housing.name=HP Valve Housing
+item.dura_control_valve.name=HP Control Valve
 
 #FLUIDS
 fluid.flowable_mineral_filler=Flowable Mineral Filler

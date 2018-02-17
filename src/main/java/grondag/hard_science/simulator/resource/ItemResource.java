@@ -14,7 +14,6 @@ import net.minecraft.nbt.NBTTagCompound;
 /**
  * Identifier for resources.
  * Instances with same inputs will have same hashCode and return true for equals().
- * Moreover, due to caching, instances with same inputs should always be the same instance.
  */
 public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
 {
@@ -37,6 +36,11 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         this.tag = tag;
         this.caps = caps;
         this.stack = null;
+    }
+    
+    public static ItemResource fromItem(Item item)
+    {
+        return fromStack(item.getDefaultInstance());
     }
     
     public static ItemResource fromStack(ItemStack stack)

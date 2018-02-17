@@ -9,10 +9,10 @@ import grondag.hard_science.gui.control.machine.MachineFuelCell;
 import grondag.hard_science.gui.control.machine.MachinePowerUsage;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
-import grondag.hard_science.machines.BlockFabricatorMachine;
-import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.energy.DeviceEnergyInfo;
+import grondag.hard_science.machines.impl.building.BlockFabricatorMachine;
+import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

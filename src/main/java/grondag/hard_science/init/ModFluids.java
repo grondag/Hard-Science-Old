@@ -91,7 +91,7 @@ public class ModFluids
             m.register();
             if(m.phase() != MatterPhase.SOLID)
             {
-                builder.add(m.resource());
+                builder.add(m.fluidResource());
             }
         }
 //        WATER_CHANNEL = Channel.channelForFluid(FluidRegistry.WATER);

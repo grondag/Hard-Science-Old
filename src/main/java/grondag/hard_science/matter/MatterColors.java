@@ -47,5 +47,7 @@ public class MatterColors
     public static final int MAGENTA = 0xFFFF00FF;
     public static final int YELLOW = 0xFFFFFF00;
     
+    public static final int SILICA = 0xFFfefdf9;
+    
             
 }

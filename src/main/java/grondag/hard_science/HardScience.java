@@ -3,6 +3,7 @@ package grondag.hard_science;
 import grondag.hard_science.init.ModItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -100,5 +101,10 @@ public class HardScience
    public static String prefixResource(String name)
    {
        return String.format("%s:%s", MODID, name.toLowerCase());
+   }
+   
+   public static ResourceLocation resource(String name)
+   {
+       return new ResourceLocation(prefixResource(name));
    }
 }

@@ -3,7 +3,7 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import grondag.hard_science.machines.SmartChestMachine;
+import grondag.hard_science.machines.impl.logistics.SmartChestMachine;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;

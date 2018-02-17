@@ -1,17 +1,17 @@
 package grondag.hard_science.init;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.machines.BlockFabricatorMachine;
-import grondag.hard_science.machines.BottomBusMachine;
-import grondag.hard_science.machines.ChemicalBatteryMachine;
-import grondag.hard_science.machines.MiddleBusMachine;
-import grondag.hard_science.machines.PhotoElectricMachine;
-import grondag.hard_science.machines.PortableTankMachine;
-import grondag.hard_science.machines.SmartChestMachine;
-import grondag.hard_science.machines.SolarCableMachine;
-import grondag.hard_science.machines.TopBusMachine;
-import grondag.hard_science.machines.TransportTestMachine;
-import grondag.hard_science.machines.WaterPumpMachine;
+import grondag.hard_science.machines.impl.building.BlockFabricatorMachine;
+import grondag.hard_science.machines.impl.logistics.BottomBusMachine;
+import grondag.hard_science.machines.impl.logistics.ChemicalBatteryMachine;
+import grondag.hard_science.machines.impl.logistics.MiddleBusMachine;
+import grondag.hard_science.machines.impl.logistics.PortableTankMachine;
+import grondag.hard_science.machines.impl.logistics.SmartChestMachine;
+import grondag.hard_science.machines.impl.logistics.TopBusMachine;
+import grondag.hard_science.machines.impl.logistics.TransportTestMachine;
+import grondag.hard_science.machines.impl.logistics.WaterPumpMachine;
+import grondag.hard_science.machines.impl.production.PhotoElectricMachine;
+import grondag.hard_science.machines.impl.production.SolarCableMachine;
 import grondag.hard_science.simulator.device.DeviceManager;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 

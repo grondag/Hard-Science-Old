@@ -19,6 +19,7 @@ import grondag.hard_science.library.render.SimpleItemBlockModel;
 import grondag.hard_science.library.render.SparseLayerMapBuilder;
 import grondag.hard_science.library.render.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.items.CraftingItem;
 import grondag.hard_science.superblock.items.SuperModelItemOverrideList;
 import grondag.hard_science.superblock.model.painter.QuadPainter;
 import grondag.hard_science.superblock.model.painter.QuadPainterFactory;
@@ -254,7 +255,9 @@ public class SuperDispatcher
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
     {
-        ModelState key = PlacementItem.getStackModelState(stack);
+        ModelState key = stack.getItem() instanceof CraftingItem
+                ? ((CraftingItem)stack.getItem()).modelState
+                : PlacementItem.getStackModelState(stack);
         return itemCache.get(key);
     }
   
@@ -280,6 +283,14 @@ public class SuperDispatcher
             index = Integer.parseInt(resourceString.substring(start));
         }
         return this.delegates[index];
+    }
+    
+    /**
+     * Delegate to use for generic crafting item rendering
+     */
+    public DispatchDelegate getItemDelegate()
+    {
+        return this.delegates[BlockRenderMode.TRANSLUCENT_SHADED.ordinal()];
     }
     
     public class DispatchDelegate implements IBakedModel, IModel

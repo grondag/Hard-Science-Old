@@ -7,19 +7,24 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.library.font.RasterFont;
-import grondag.hard_science.machines.BlockFabricatorTESR;
-import grondag.hard_science.machines.BlockFabricatorTileEntity;
-import grondag.hard_science.machines.ChemicalBatteryTESR;
-import grondag.hard_science.machines.ChemicalBatteryTileEntity;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
+import grondag.hard_science.machines.impl.building.BlockFabricatorTESR;
+import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
+import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTESR;
+import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTileEntity;
+import grondag.hard_science.machines.impl.processing.CrushinatorTESR;
+import grondag.hard_science.machines.impl.processing.CrushinatorTileEntity;
 import grondag.hard_science.matter.MatterCube;
+import grondag.hard_science.matter.MatterCube2;
 import grondag.hard_science.matter.MatterCubeItemModel;
+import grondag.hard_science.matter.MatterCubeItemModel1;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperModelTileEntityTESR;
 import grondag.hard_science.superblock.block.SuperTileEntityTESR;
+import grondag.hard_science.superblock.items.CraftingItem;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.texture.EnhancedSprite;
@@ -104,6 +109,16 @@ public class ModModels
                 {
                     event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
                             new MatterCubeItemModel((MatterCube) item));
+                }
+                else if(item instanceof MatterCube2)
+                {
+                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
+                            new MatterCubeItemModel1((MatterCube2) item));
+                }
+                else if(item instanceof CraftingItem)
+                {
+                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
+                            ModModels.MODEL_DISPATCH.getItemDelegate());
                 }
                 else
                 {
@@ -316,6 +331,16 @@ public class ModModels
                     ModelBakery.registerItemVariants(item, item.getRegistryName());
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
                 }
+                else if(item instanceof MatterCube2)
+                {
+                    ModelBakery.registerItemVariants(item, item.getRegistryName());
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
+                }
+                else if(item instanceof CraftingItem)
+                {
+                    ModelBakery.registerItemVariants(item, item.getRegistryName());
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
+                }
                 // Would not actually do it this way if start using OBJ models
 //                else if(item == ModItems.obj_test_model)
 //                {
@@ -336,7 +361,7 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntity.class, MachineTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntityTickable.class, MachineTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(ChemicalBatteryTileEntity.class, ChemicalBatteryTESR.INSTANCE);
-
+        ClientRegistry.bindTileEntitySpecialRenderer(CrushinatorTileEntity.class, CrushinatorTESR.INSTANCE);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

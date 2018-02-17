@@ -1,7 +1,7 @@
 package grondag.hard_science.gui;
 
-import grondag.hard_science.machines.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -21,7 +21,8 @@ public class ModGuiHandler implements IGuiHandler
         BLOCK_FABRICATOR,
         SOLAR_AGGREGATOR, 
         MODULAR_TANK, 
-        GLASS_BATTERY;
+        GLASS_BATTERY,
+        CRUSHINATOR;
     }
     
     @Override
@@ -40,9 +41,9 @@ public class ModGuiHandler implements IGuiHandler
 //        {
 //            BlockPos pos = new BlockPos(x, y, z);
 //            TileEntity te = world.getTileEntity(pos);
-//            if (te instanceof BlockFabricatorTileEntity) 
+//            if (te instanceof CrushinatorTileEntity) 
 //            {
-//                return new BlockFabricatorContainer(player.inventory, (BlockFabricatorTileEntity) te, GuiBasicBuilder.LAYOUT);
+//                return new BlockFabricatorContainer(player.inventory, (CrushinatorTileEntity) te, GuiBasicBuilder.LAYOUT);
 //            }
 //        }
         return null;
@@ -87,5 +88,4 @@ public class ModGuiHandler implements IGuiHandler
         }
         return null;
     }
-
 }

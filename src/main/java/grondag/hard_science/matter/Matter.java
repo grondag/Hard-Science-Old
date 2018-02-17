@@ -1,7 +1,10 @@
 package grondag.hard_science.matter;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.transport.carrier.Channel;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 
@@ -20,7 +23,8 @@ import net.minecraftforge.fluids.FluidRegistry;
 public class Matter
 {
     private final String systemName;
-    private final int color;
+    public final int color;
+    public final String label;
     private final IComposition composition;
     private final double tempK;
     private final double pressureP;
@@ -38,6 +42,7 @@ public class Matter
     public Matter(
             String systemName,
             int color,
+            String label,
             IComposition composition,
             double tempCelsius,
             double pressureAtm,
@@ -47,6 +52,7 @@ public class Matter
     {
         this.systemName = systemName;
         this.color = color;
+        this.label = label;
         this.composition = composition;
         this.tempK = Temperature.celsiusToKelvin(tempCelsius);
         this.pressureP = Gas.atmToPascals(pressureAtm);
@@ -61,12 +67,13 @@ public class Matter
     public Matter(
             String systemName,
             int color,
+            String label,
             IComposition molecule,
             double tempCelsius,
             double pressureAtm
             )
     {
-        this(systemName, color, molecule, tempCelsius, pressureAtm, MatterPhase.GAS, 
+        this(systemName, color, label, molecule, tempCelsius, pressureAtm, MatterPhase.GAS, 
                Gas.idealGasDensityCA(molecule, tempCelsius, pressureAtm));
     }
     
@@ -75,16 +82,32 @@ public class Matter
         return this.systemName;
     }
     
+    public String displayName()
+    {
+        return I18n.translateToLocal("matter." + this.systemName).trim();
+    }
+    
+    /**
+     * Null if not a fluid or gas.
+     */
+    @Nullable
     public Fluid fluid()
     {
         return this.fluid;
     }
-    
-    public FluidResource resource()
+
+    /**
+     * Null if not a fluid or gas.
+     */
+    @Nullable
+    public FluidResource fluidResource()
     {
         return this.resource;
     }
     
+    /**
+     * Only valid if this is a fluid.
+     */
     public int channel()
     {
         return this.channel;
@@ -160,18 +183,32 @@ public class Matter
         return this.litersPerMol() / 1000;
     }
     
+    public MatterStack defaultStack()
+    {
+        return this.phase == MatterPhase.SOLID
+               ? new MatterStack(this, MassUnits.KILOGRAM.ng)
+               : new MatterStack(this, VolumeUnits.LITER.nL);
+    }
     public void register()
     {
-        this.fluid = FluidRegistry.getFluid(systemName);
-        if(this.fluid == null)
+        if(this.phase != MatterPhase.SOLID)
         {
-            this.fluid = new Fluid(this.systemName, this.phase.iconResource, this.phase.iconResource, this.color);
-            if(this.phase == MatterPhase.GAS) this.fluid.setGaseous(true);
-            this.fluid.setDensity((int) this.density());
-            this.fluid.setTemperature((int) this.temperatureK());
-            FluidRegistry.registerFluid(this.fluid);
+            this.fluid = FluidRegistry.getFluid(systemName);
+            if(this.fluid == null)
+            {
+                this.fluid = new Fluid(this.systemName, this.phase.iconResource, this.phase.iconResource, this.color);
+                if(this.phase == MatterPhase.GAS) this.fluid.setGaseous(true);
+                this.fluid.setDensity((int) this.density());
+                this.fluid.setTemperature((int) this.temperatureK());
+                FluidRegistry.registerFluid(this.fluid);
+            }
+            this.channel = Channel.channelForFluid(this.fluid);
+            this.resource = new FluidResource(this.fluid, null);
         }
-        this.channel = Channel.channelForFluid(this.fluid);
-        this.resource = new FluidResource(this.fluid, null);
+    }
+
+    public long kgPerBlock()
+    {
+        return (long) (this.density * 1000);
     }
 }

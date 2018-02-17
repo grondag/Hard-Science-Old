@@ -2,17 +2,18 @@ package grondag.hard_science.init;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.machines.BlockFabricatorBlock;
-import grondag.hard_science.machines.BottomBusBlock;
-import grondag.hard_science.machines.ChemicalBatteryBlock;
-import grondag.hard_science.machines.MiddleBusBlock;
-import grondag.hard_science.machines.ModularTankBlock;
-import grondag.hard_science.machines.PhotoElectricBlock;
-import grondag.hard_science.machines.SmartChestBlock;
-import grondag.hard_science.machines.SolarCableBlock;
-import grondag.hard_science.machines.TopBusBlock;
-import grondag.hard_science.machines.TransportTestBlock;
-import grondag.hard_science.machines.WaterPumpBlock;
+import grondag.hard_science.machines.impl.building.BlockFabricatorBlock;
+import grondag.hard_science.machines.impl.logistics.BottomBusBlock;
+import grondag.hard_science.machines.impl.logistics.ChemicalBatteryBlock;
+import grondag.hard_science.machines.impl.logistics.MiddleBusBlock;
+import grondag.hard_science.machines.impl.logistics.ModularTankBlock;
+import grondag.hard_science.machines.impl.logistics.SmartChestBlock;
+import grondag.hard_science.machines.impl.logistics.TopBusBlock;
+import grondag.hard_science.machines.impl.logistics.TransportTestBlock;
+import grondag.hard_science.machines.impl.logistics.WaterPumpBlock;
+import grondag.hard_science.machines.impl.processing.CrushinatorBlock;
+import grondag.hard_science.machines.impl.production.PhotoElectricBlock;
+import grondag.hard_science.machines.impl.production.SolarCableBlock;
 import grondag.hard_science.matter.Matters;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
@@ -70,6 +71,7 @@ public class ModBlocks
     public static final Block extension_bus = null;
     public static final Block intermediate_bus = null;
     public static final Block depleted_fluid = null;
+    public static final Block crushinator = null;
     
 //    public static final Block solar_aggregator = null;
     
@@ -194,12 +196,13 @@ public class ModBlocks
         event.getRegistry().register(new BottomBusBlock("bottom_bus"));
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
-        event.getRegistry().register(new ModularTankBlock("water_tank", Matters.WATER.resource()));
-        event.getRegistry().register(new ModularTankBlock("h2o_tank", Matters.H2O.resource()));
-        event.getRegistry().register(new ModularTankBlock("ammonia_tank", Matters.AMMONIA.resource()));
+        event.getRegistry().register(new ModularTankBlock("water_tank", Matters.WATER.fluidResource()));
+        event.getRegistry().register(new ModularTankBlock("h2o_tank", Matters.H2O_FLUID.fluidResource()));
+        event.getRegistry().register(new ModularTankBlock("ammonia_tank", Matters.AMMONIA_GAS.fluidResource()));
         event.getRegistry().register(new WaterPumpBlock("water_pump"));
         event.getRegistry().register(new ChemicalBatteryBlock("chemical_battery"));
         event.getRegistry().register(new TransportTestBlock("transport_test"));
+        event.getRegistry().register(new CrushinatorBlock("crushinator"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
