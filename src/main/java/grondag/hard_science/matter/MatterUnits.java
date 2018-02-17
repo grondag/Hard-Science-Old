@@ -5,7 +5,7 @@ import grondag.hard_science.machines.energy.MachinePower;
 public class MatterUnits
 {
     public static final long nL_LITER = VolumeUnits.LITER.nL;
-    public static final long nL_ONE_BLOCK = CubeSize.BLOCK.nanoLiters;
+    public static final long nL_ONE_BLOCK = VolumeUnits.KILOLITER.nL;
     public static final long nL_TWO_BLOCKS = nL_ONE_BLOCK * 2;
     public static final long nL_HALF_STACK_OF_BLOCKS_nL = nL_ONE_BLOCK * 32;
     public static final long nL_FULL_STACK_OF_BLOCKS_nL = nL_ONE_BLOCK * 64;

@@ -9,14 +9,14 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.crafting.BulkConversionRecipe;
+import grondag.hard_science.crafting.BulkLoadingRecipe;
 import grondag.hard_science.crafting.fabrication.EmergencyFabricatorRecipe;
 import grondag.hard_science.crafting.synthesis.SolarAmmoniaRecipe;
 import grondag.hard_science.crafting.synthesis.SolarElectrolysisRecipe;
 import grondag.hard_science.crafting.synthesis.SolarEtheneRecipe;
-import grondag.hard_science.matter.MatterStack;
-import grondag.hard_science.matter.Matters;
-import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.init.ModBulkResources;
+import grondag.hard_science.simulator.resource.BulkResource;
+import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.superblock.texture.Textures;
 import mezz.jei.api.IJeiRuntime;
 import mezz.jei.api.IModPlugin;
@@ -57,7 +57,7 @@ public class HardScienceJEIPlugIn implements IModPlugin
     {
         registry.addRecipeCategories(
                 new EmergencyFabricatorRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
-                new BulkConversionRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
+                new BulkLoadingRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new SolarElectrolysisRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new SolarAmmoniaRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new SolarEtheneRecipe.Category(registry.getJeiHelpers().getGuiHelper())
@@ -71,7 +71,7 @@ public class HardScienceJEIPlugIn implements IModPlugin
         
 //        registry.addRecipes(EmergencyFabricatorRecipe.allRecipes(), EmergencyFabricatorRecipe.UID);
 //
-//        registry.addRecipes(BulkConversionRecipe.allRecipes(), BulkConversionRecipe.UID);
+        registry.addRecipes(BulkLoadingRecipe.allRecipes(), BulkLoadingRecipe.UID);
 //        registry.addIngredientInfo(Matters.MINERAL_FILLER.fluidResource().newStackWithLiters(Fluid.BUCKET_VOLUME), FluidStack.class, "fluid.flowable_mineral_filler.desc");
 //
 //        registry.addRecipes(
@@ -105,91 +105,91 @@ public class HardScienceJEIPlugIn implements IModPlugin
     public void registerIngredients(IModIngredientRegistration registry)
     {
         registry.register(
-                MatterStack.class, 
+                BulkResourceWithQuantity.class, 
                 
-                Matters.all().values().stream()
-                    .map(m -> new MatterStack(m, VolumeUnits.LITER.nL))
+                ModBulkResources.all().values().stream()
+                    .map(m -> m.defaultStack())
                     .collect(Collectors.toList()),
                     
-                new IIngredientHelper<MatterStack>()
+                new IIngredientHelper<BulkResourceWithQuantity>()
                 {
                     @Override
-                    public List<MatterStack> expandSubtypes(List<MatterStack> ingredients)
+                    public List<BulkResourceWithQuantity> expandSubtypes(List<BulkResourceWithQuantity> ingredients)
                     {
                         return ingredients;
                     }
 
                     @Override
-                    public MatterStack getMatch(Iterable<MatterStack> ingredients, MatterStack ingredientToMatch)
+                    public BulkResourceWithQuantity getMatch(Iterable<BulkResourceWithQuantity> ingredients, BulkResourceWithQuantity ingredientToMatch)
                     {
-                        for(MatterStack m : ingredients)
+                        for(BulkResourceWithQuantity m : ingredients)
                         {
-                            if(m.matter == ingredientToMatch.matter) return m;
+                            if(m.resource() == ingredientToMatch.resource()) return m;
                         }
                         return null;
                     }
 
                     @Override
-                    public String getDisplayName(MatterStack ingredient)
+                    public String getDisplayName(BulkResourceWithQuantity ingredient)
                     {
-                        return ingredient.displayName();
+                        return ingredient.toString();
                     }
 
                     @Override
-                    public String getUniqueId(MatterStack ingredient)
-                    {
-                        return ingredient.systemName();
-                    }
-
-                    @Override
-                    public String getWildcardId(MatterStack ingredient)
+                    public String getUniqueId(BulkResourceWithQuantity ingredient)
                     {
                         return ingredient.systemName();
                     }
 
                     @Override
-                    public String getModId(MatterStack ingredient)
+                    public String getWildcardId(BulkResourceWithQuantity ingredient)
+                    {
+                        return ingredient.systemName();
+                    }
+
+                    @Override
+                    public String getModId(BulkResourceWithQuantity ingredient)
                     {
                         return HardScience.MODID;
                     }
 
                     @Override
-                    public Iterable<Color> getColors(MatterStack ingredient)
+                    public Iterable<Color> getColors(BulkResourceWithQuantity ingredient)
                     {
                         return ImmutableList.of();
                     }
 
                     @Override
-                    public String getResourceId(MatterStack ingredient)
+                    public String getResourceId(BulkResourceWithQuantity ingredient)
                     {
                         return HardScience.prefixResource(ingredient.systemName());
                     }
 
                     @Override
-                    public MatterStack copyIngredient(MatterStack ingredient)
+                    public BulkResourceWithQuantity copyIngredient(BulkResourceWithQuantity ingredient)
                     {
-                        // matter stacks are immutable
-                        return ingredient;
+                        return (BulkResourceWithQuantity) ingredient.clone();
                     }
 
                     @Override
-                    public String getErrorInfo(MatterStack ingredient)
+                    public String getErrorInfo(BulkResourceWithQuantity ingredient)
                     {
-                        return ingredient.displayName();
+                        return ingredient.toString();
                     }
                 },
                 
-                new IIngredientRenderer<MatterStack>()
+                new IIngredientRenderer<BulkResourceWithQuantity>()
                 {
                     @Override
-                    public void render(Minecraft minecraft, int xCoord, int yCoord, MatterStack ingredient)
+                    public void render(Minecraft minecraft, int xCoord, int yCoord, BulkResourceWithQuantity ingredient)
                     {
                         GlStateManager.enableBlend();
                         GlStateManager.enableAlpha();
-
-                        float red = (ingredient.matter.color >> 16 & 0xFF) / 255.0F;
-                        float green = (ingredient.matter.color >> 8 & 0xFF) / 255.0F;
-                        float blue = (ingredient.matter.color & 0xFF) / 255.0F;
+                        BulkResource matter = (BulkResource)ingredient.resource();
+                        
+                        float red = (matter.color >> 16 & 0xFF) / 255.0F;
+                        float green = (matter.color >> 8 & 0xFF) / 255.0F;
+                        float blue = (matter.color & 0xFF) / 255.0F;
 
                         GlStateManager.color(red, green, blue, 1.0F);
                         
@@ -198,7 +198,7 @@ public class HardScienceJEIPlugIn implements IModPlugin
                         TextureAtlasSprite textureSprite;
                         double uMin, uMax, vMin, vMax;
                         
-                        switch(ingredient.matter.phase())
+                        switch(matter.phase())
                         {
                         case GAS:
                             textureSprite = Textures.BIGTEX_CLOUDS.getSampleSprite();
@@ -240,9 +240,9 @@ public class HardScienceJEIPlugIn implements IModPlugin
                     }
 
                     @Override
-                    public List<String> getTooltip(Minecraft minecraft, MatterStack ingredient, ITooltipFlag tooltipFlag)
+                    public List<String> getTooltip(Minecraft minecraft, BulkResourceWithQuantity ingredient, ITooltipFlag tooltipFlag)
                     {
-                        return ImmutableList.of(ingredient.displayName());
+                        return ImmutableList.of(ingredient.toString());
                     }
                     
                 });

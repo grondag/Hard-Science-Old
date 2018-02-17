@@ -6,6 +6,11 @@ import java.util.ArrayList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.crafting.BulkLoadingRecipe;
+import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.simulator.resource.ItemResource;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -22,12 +27,22 @@ public class ModRecipes
             GameRegistry.addSmelting(ModBlocks.basalt_cobble, new ItemStack(ModItems.basalt_cut, 1, 0), 0.1F);
         }
         
-//        BulkConversionRecipe.addConversion(
-//                Matters.MINERAL_FILLER.fluidResource(),
-//                ItemResource.fromStack(Item.getItemFromBlock(Blocks.SAND).getDefaultInstance()), 
-//                VolumeUnits.KILOLITER.nL);
+        BulkLoadingRecipe.addConversion(
+                ModBulkResources.MINERAL_FILLER,
+                ItemResource.fromStack(Item.getItemFromBlock(Blocks.SAND).getDefaultInstance()), 
+                VolumeUnits.KILOLITER.nL);
         
-//        BulkConversionRecipe.addConversion(
+        BulkLoadingRecipe.addConversion(
+                ModBulkResources.CRUSHED_STONE,
+                ItemResource.fromStack(Item.getItemFromBlock(Blocks.SAND).getDefaultInstance()), 
+                VolumeUnits.KILOLITER.nL);
+        
+        BulkLoadingRecipe.addConversion(
+                ModBulkResources.CRUSHED_STONE,
+                ItemResource.fromStack(Item.getItemFromBlock(Blocks.GRAVEL).getDefaultInstance()), 
+                VolumeUnits.KILOLITER.nL);
+        
+//        BulkLoadingRecipe.addConversion(
 //                Matters.MINERAL_FILLER.fluidResource(),
 //                Matters.RAW_MINERAL_DUST.fluidResource(),
 //                1.0);

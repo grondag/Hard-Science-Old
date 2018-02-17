@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 
@@ -32,6 +33,11 @@ public interface ICraftingProcess<R extends IHardScienceRecipe>
         return ImmutableList.of();
     }
     
+    public default ImmutableList<BulkResource>bulkInputs()
+    {
+        return ImmutableList.of();
+    }
+    
     public default ImmutableList<FluidResource>fluidOutputs()
     {
         return ImmutableList.of();
@@ -42,6 +48,11 @@ public interface ICraftingProcess<R extends IHardScienceRecipe>
      * that produce highly configurable items, like superblocks.
      */
     public default ImmutableList<ItemResource>itemOutputs()
+    {
+        return ImmutableList.of();
+    }
+    
+    public default ImmutableList<BulkResource>bulkOutputs()
     {
         return ImmutableList.of();
     }

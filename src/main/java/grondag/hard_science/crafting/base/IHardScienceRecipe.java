@@ -3,6 +3,7 @@ package grondag.hard_science.crafting.base;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.FluidResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
@@ -40,12 +41,22 @@ public interface IHardScienceRecipe extends IRecipeWrapper
         return ImmutableList.of();
     }
     
+    public default ImmutableList<BulkResourceWithQuantity>bulkInputs()
+    {
+        return ImmutableList.of();
+    }
+    
     public default ImmutableList<FluidResourceWithQuantity>fluidOutputs()
     {
         return ImmutableList.of();
     }
     
     public default ImmutableList<ItemResourceWithQuantity>itemOutputs()
+    {
+        return ImmutableList.of();
+    }
+    
+    public default ImmutableList<BulkResourceWithQuantity>bulkOutputs()
     {
         return ImmutableList.of();
     }
@@ -93,6 +104,11 @@ public interface IHardScienceRecipe extends IRecipeWrapper
             }
             ingredients.setInputs(ItemStack.class, builder.build());
         }
+        
+        if(!this.bulkInputs().isEmpty())
+        {
+            ingredients.setInputs(BulkResourceWithQuantity.class, this.bulkInputs());
+        }
        
         if(!this.fluidOutputs().isEmpty())
         {
@@ -120,6 +136,10 @@ public interface IHardScienceRecipe extends IRecipeWrapper
             }
             ingredients.setOutputs(ItemStack.class, builder.build());
         }
+        
+        if(!this.bulkOutputs().isEmpty())
+        {
+            ingredients.setOutputs(BulkResourceWithQuantity.class, this.bulkOutputs());
+        }
     }
-
 }

@@ -6,10 +6,9 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
+import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.MassUnits;
-import grondag.hard_science.matter.MatterCube2;
 import grondag.hard_science.matter.MatterPackaging;
-import grondag.hard_science.matter.Matters;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
@@ -79,16 +78,16 @@ public class ModItems
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
         itemReg.register(new ExcavationMarker().setCreativeTab(HardScience.tabMod));
         
-        itemReg.register(new MatterCube2(Matters.GOLD, MassUnits.GRAM.withQuantity(10)));
-        itemReg.register(new MatterCube2(Matters.GOLD, MassUnits.KILOGRAM.withQuantity(1)));
-        itemReg.register(new MatterCube2(Matters.GOLD, MassUnits.KILOGRAM.withQuantity(100)));
+        itemReg.register(new BulkItem(ModBulkResources.GOLD, MassUnits.GRAM.withQuantity(10)));
+        itemReg.register(new BulkItem(ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(1)));
+        itemReg.register(new BulkItem(ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(100)));
 
-        itemReg.register(new MatterCube2(Matters.AMMONIA_GAS, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem(ModBulkResources.AMMONIA_GAS, VolumeUnits.KILOLITER.withQuantity(1)));
 
-        itemReg.register(new MatterCube2(Matters.FLEX_RESIN, VolumeUnits.LITER.withQuantity(10)));
-        itemReg.register(new MatterCube2(Matters.FLEX_RESIN, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem(ModBulkResources.FLEX_RESIN, VolumeUnits.LITER.withQuantity(10)));
+        itemReg.register(new BulkItem(ModBulkResources.FLEX_RESIN, VolumeUnits.KILOLITER.withQuantity(1)));
         
-        itemReg.register(new MatterCube2(Matters.CRUSHED_STONE, MassUnits.KILOGRAM.withQuantity(Matters.CRUSHED_STONE.kgPerBlock())));
+        itemReg.register(new BulkItem(ModBulkResources.CRUSHED_STONE, MassUnits.KILOGRAM.withQuantity(ModBulkResources.CRUSHED_STONE.kgPerBlock())));
 
         
         for(MatterPackaging matter : MatterPackaging.values())

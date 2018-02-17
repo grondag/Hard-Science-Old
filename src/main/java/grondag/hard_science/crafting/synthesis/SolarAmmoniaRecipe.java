@@ -8,9 +8,9 @@ import grondag.hard_science.crafting.base.AbstractRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
+import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.Compounds;
-import grondag.hard_science.matter.Matters;
 import grondag.hard_science.matter.Molecules;
 import grondag.hard_science.simulator.resource.PowerResource;
 import mezz.jei.api.IGuiHelper;
@@ -33,22 +33,22 @@ public class SolarAmmoniaRecipe extends AbstractRecipe
         {
             super(
                     ImmutableList.of(
-                            Matters.H2O_FLUID.fluidResource(),
-                            Matters.FRESH_AIR.fluidResource(),
+                            ModBulkResources.H2O_FLUID.fluidResource(),
+                            ModBulkResources.FRESH_AIR.fluidResource(),
                             PowerResource.JOULES),
                     ImmutableList.of(
-                            Matters.AMMONIA_GAS.fluidResource(),
-                            Matters.RETURN_AIR.fluidResource(),
-                            Matters.O2_GAS.fluidResource()
+                            ModBulkResources.AMMONIA_GAS.fluidResource(),
+                            ModBulkResources.RETURN_AIR.fluidResource(),
+                            ModBulkResources.O2_GAS.fluidResource()
                             ));
             
-            model.createInput(Matters.H2O_FLUID.fluidResource(), Matters.H2O_FLUID.nlPerMol());
+            model.createInput(ModBulkResources.H2O_FLUID.fluidResource(), ModBulkResources.H2O_FLUID.nlPerMol());
             
             double nitroFraction = Compounds.FRESH_AIR.getFraction(Molecules.N2_GAS);
             // divide by 2 because N2
-            double airInputNL = Matters.FRESH_AIR.nlPerMol() / nitroFraction / 2;
+            double airInputNL = ModBulkResources.FRESH_AIR.nlPerMol() / nitroFraction / 2;
             
-            model.createInput(Matters.FRESH_AIR.fluidResource(),
+            model.createInput(ModBulkResources.FRESH_AIR.fluidResource(),
                     airInputNL);
 
             model.createInput(
@@ -60,17 +60,17 @@ public class SolarAmmoniaRecipe extends AbstractRecipe
                     + Molecules.AMMONIA_GAS.enthalpyJoules);
 
             model.createOutput(
-                    Matters.AMMONIA_GAS.fluidResource(),
+                    ModBulkResources.AMMONIA_GAS.fluidResource(),
                     // we'll get 2/3 yield per mol of water because
                     // 3 hydrogen instead of 2
-                    Matters.AMMONIA_GAS.nlPerMol() * 2 / 3);
+                    ModBulkResources.AMMONIA_GAS.nlPerMol() * 2 / 3);
             
             model.createOutput(
-                    Matters.O2_GAS.fluidResource(), 
-                    Matters.O2_GAS.nlPerMol() / 2);
+                    ModBulkResources.O2_GAS.fluidResource(), 
+                    ModBulkResources.O2_GAS.nlPerMol() / 2);
             
             model.createOutput(
-                    Matters.RETURN_AIR.fluidResource(), 
+                    ModBulkResources.RETURN_AIR.fluidResource(), 
                     airInputNL * (1 - nitroFraction));
         }
 

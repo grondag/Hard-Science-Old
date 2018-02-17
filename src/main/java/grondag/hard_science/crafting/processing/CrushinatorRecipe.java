@@ -16,9 +16,9 @@ import grondag.hard_science.crafting.base.AbstractRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
-import grondag.hard_science.matter.Matter;
-import grondag.hard_science.matter.Matters;
+import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.Item;
@@ -80,7 +80,7 @@ public class CrushinatorRecipe extends AbstractRecipe
         ImmutableList.Builder<AbstractResourceWithQuantity<?>> inBuilder = ImmutableList.builder();
         for(int i = 0; i < inputs.length; i += 2)
         {
-            Matter m = Matters.get((String)inputs[i]);
+            BulkResource m = ModBulkResources.get((String)inputs[i]);
             inBuilder.add(m.fluidResource().withQuantity((long)inputs[i+1]));
         }
         

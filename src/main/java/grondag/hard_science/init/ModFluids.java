@@ -4,9 +4,8 @@ import java.util.HashMap;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.matter.Matter;
 import grondag.hard_science.matter.MatterPhase;
-import grondag.hard_science.matter.Matters;
+import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
 import jline.internal.Log;
@@ -86,9 +85,9 @@ public class ModFluids
     {
         ImmutableList.Builder<FluidResource> builder = ImmutableList.builder();
         
-        for(Matter m : Matters.all().values())
+        for(BulkResource m : ModBulkResources.all().values())
         {
-            m.register();
+            m.registerFluidIfNeeded();
             if(m.phase() != MatterPhase.SOLID)
             {
                 builder.add(m.fluidResource());

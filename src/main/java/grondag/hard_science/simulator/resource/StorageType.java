@@ -5,8 +5,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.hard_science.HardScience;
-import grondag.hard_science.init.ModRegistries;
+import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.energy.MachinePower;
@@ -16,10 +15,10 @@ import grondag.hard_science.simulator.storage.IStorageEventFactory;
 import grondag.hard_science.simulator.storage.ItemStorageEvent;
 import grondag.hard_science.simulator.storage.PowerStorageEvent;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
+import grondag.hard_science.simulator.transport.carrier.Channel;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 
 
@@ -321,22 +320,23 @@ public abstract class StorageType<T extends StorageType<T>>
     {
         private StorageTypeBulk()
         {
-            super(EnumStorageType.PRIVATE, new BulkResource(new ResourceLocation(HardScience.prefixResource("empty"))));
+            super(EnumStorageType.PRIVATE, ModBulkResources.FRESH_AIR);
         }
 
         @Override
         public IResource<StorageTypeBulk> fromNBT(NBTTagCompound nbt)
         {
             return nbt != null && nbt.hasKey(ModNBTTag.RESOURCE_IDENTITY)
-                ? ModRegistries.bulkResourceRegistry.getValue(new ResourceLocation(nbt.getString(ModNBTTag.RESOURCE_IDENTITY)))
-                : this.emptyResource;
+//                ? ModRegistries.bulkResourceRegistry.getValue(new ResourceLocation(nbt.getString(ModNBTTag.RESOURCE_IDENTITY)))
+                    ? ModBulkResources.get(nbt.getString(ModNBTTag.RESOURCE_IDENTITY))
+                    : this.emptyResource;
         }
 
         @Override
         public NBTTagCompound toNBT(IResource<StorageTypeBulk> resource)
         {
             NBTTagCompound result = new NBTTagCompound();
-            result.setString(ModNBTTag.RESOURCE_IDENTITY, ((BulkResource)resource).getRegistryName().toString());
+            result.setString(ModNBTTag.RESOURCE_IDENTITY, ((BulkResource)resource).systemName());
             return result;
         }
 

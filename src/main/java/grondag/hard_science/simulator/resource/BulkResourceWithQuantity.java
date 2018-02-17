@@ -4,6 +4,8 @@ import java.util.Comparator;
 
 import javax.annotation.Nonnull;
 
+import grondag.hard_science.matter.MassUnits;
+import grondag.hard_science.matter.MatterPhase;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeBulk;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,7 +28,15 @@ public class BulkResourceWithQuantity extends AbstractResourceWithQuantity<Stora
         super(tag);
     }
     
-    
+    /**
+     * Is nanoliters for bulk resources.
+     */
+    @Override
+    public long getQuantity()
+    {
+        return super.getQuantity();
+    }
+
     @Override
     public StorageTypeBulk storageType()
     {
@@ -67,9 +77,26 @@ public class BulkResourceWithQuantity extends AbstractResourceWithQuantity<Stora
         
     };
     
+    
+    public String systemName()
+    {
+        return ((BulkResource)this.resource()).systemName();
+    }
+    
     @Override
     public String toString()
     {
-        return String.format("%s x %,dL", this.resource().toString(), VolumeUnits.nL2Liters(this.getQuantity()));
+        return this.resource().displayName() 
+                + ", "
+                + this.quantityLabel();
+    }
+    
+    public String quantityLabel()
+    {
+        BulkResource r = (BulkResource) this.resource();
+        return r.phase() == MatterPhase.SOLID
+                // x1000 because 1L = 1000g at density = 1.0
+                ? MassUnits.formatMass((long) (this.quantity * r.density() * 1000), false)
+                : VolumeUnits.formatVolume(this.quantity, false);
     }
 }

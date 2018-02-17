@@ -72,7 +72,7 @@ public class MatterCubeItemModel1 implements IBakedModel
     
     private final List<BakedQuad> quads;
     
-    public MatterCubeItemModel1(MatterCube2 matterCube)
+    public MatterCubeItemModel1(BulkItem matterCube)
     {
         {
             ImmutableMap.Builder<TransformType, TRSRTransformation> builder = ImmutableMap.builder();

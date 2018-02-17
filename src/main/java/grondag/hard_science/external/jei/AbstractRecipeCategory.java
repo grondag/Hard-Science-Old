@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.AbstractRecipe;
+import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IDrawableAnimated;
@@ -92,9 +93,9 @@ public class AbstractRecipeCategory<T extends AbstractRecipe> implements IRecipe
     {
         RecipeLayout layout = recipe.layout();
         
-        //NB: add 1 to all stack coordinates to allow for slot margin
         int fluidIndex = 0;
         int itemIndex = 0;
+        int bulkIndex = 0;
         {
             int inputIndex = 0;
             List<List<ItemStack>> itemInputs = ingredients.getInputs(ItemStack.class);
@@ -103,13 +104,14 @@ public class AbstractRecipeCategory<T extends AbstractRecipe> implements IRecipe
      
                 for(List<ItemStack> input : itemInputs)
                 {
-                    recipeLayout.getItemStacks().init(itemIndex, true, RecipeLayout.LEFT+1, layout.inputY[inputIndex]+1);
+                    recipeLayout.getItemStacks().init(itemIndex, true, RecipeLayout.LEFT, layout.inputY[inputIndex]);
                     recipeLayout.getItemStacks().set(itemIndex, input);
                     itemIndex++;
                     inputIndex++;
                 }
             }
             
+            //NB: add 1 to non-stack coordinates to allow for slot margin
             List<List<FluidStack>> fluidInputs = ingredients.getInputs(FluidStack.class);
             if(!fluidInputs.isEmpty())
             {
@@ -118,6 +120,18 @@ public class AbstractRecipeCategory<T extends AbstractRecipe> implements IRecipe
                     recipeLayout.getFluidStacks().init(fluidIndex, true, RecipeLayout.LEFT+1, layout.inputY[inputIndex]+1);
                     recipeLayout.getFluidStacks().set(fluidIndex, input);
                     fluidIndex++;
+                    inputIndex++;
+                }
+            }
+            
+            List<List<BulkResourceWithQuantity>> bulkInputs = ingredients.getInputs(BulkResourceWithQuantity.class);
+            if(!bulkInputs.isEmpty())
+            {
+                for(List<BulkResourceWithQuantity> input : bulkInputs)
+                {
+                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).init(bulkIndex, true, RecipeLayout.LEFT+1, layout.inputY[inputIndex]+1);
+                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).set(bulkIndex, input);
+                    bulkIndex++;
                     inputIndex++;
                 }
             }
@@ -132,7 +146,7 @@ public class AbstractRecipeCategory<T extends AbstractRecipe> implements IRecipe
      
                 for(List<ItemStack> output : itemOutputs)
                 {
-                    recipeLayout.getItemStacks().init(itemIndex, false, RecipeLayout.RIGHT+1, layout.outputY[outputIndex]+1);
+                    recipeLayout.getItemStacks().init(itemIndex, false, RecipeLayout.RIGHT, layout.outputY[outputIndex]);
                     recipeLayout.getItemStacks().set(itemIndex, output);
                     itemIndex++;
                     outputIndex++;
@@ -147,6 +161,18 @@ public class AbstractRecipeCategory<T extends AbstractRecipe> implements IRecipe
                     recipeLayout.getFluidStacks().init(fluidIndex, false, RecipeLayout.RIGHT+1, layout.outputY[outputIndex]+1);
                     recipeLayout.getFluidStacks().set(fluidIndex, output);
                     fluidIndex++;
+                    outputIndex++;
+                }
+            }
+            
+            List<List<BulkResourceWithQuantity>> bulkOutputs = ingredients.getOutputs(BulkResourceWithQuantity.class);
+            if(!bulkOutputs.isEmpty())
+            {
+                for(List<BulkResourceWithQuantity> output : bulkOutputs)
+                {
+                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).init(bulkIndex, false, RecipeLayout.RIGHT+1, layout.outputY[outputIndex]+1);
+                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).set(bulkIndex, output);
+                    bulkIndex++;
                     outputIndex++;
                 }
             }

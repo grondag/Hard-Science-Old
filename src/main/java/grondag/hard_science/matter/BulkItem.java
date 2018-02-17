@@ -5,6 +5,7 @@ import java.util.List;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.matter.MassUnits.Mass;
 import grondag.hard_science.matter.VolumeUnits.Volume;
+import grondag.hard_science.simulator.resource.BulkResource;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,13 +16,13 @@ import net.minecraft.world.World;
  * Package sizes for solid material blocks
  * and fluid containers. 
  */
-public class MatterCube2 extends Item
+public class BulkItem extends Item
 {
     public final long nanoLiters;
     public final long nanoGrams;
-    public final Matter matter;
+    public final BulkResource matter;
     
-    public MatterCube2(Matter matter, Volume volume)
+    public BulkItem(BulkResource matter, Volume volume)
     {
         super();
         this.matter = matter;
@@ -36,7 +37,7 @@ public class MatterCube2 extends Item
         this.setUnlocalizedName(name);
     }
     
-    public MatterCube2(Matter matter, Mass mass)
+    public BulkItem(BulkResource matter, Mass mass)
     {
         super();
         this.matter = matter;

@@ -1,32 +1,94 @@
 package grondag.hard_science.simulator.resource;
 
 
+import javax.annotation.Nullable;
+
+import grondag.hard_science.matter.Gas;
+import grondag.hard_science.matter.IComposition;
+import grondag.hard_science.matter.MatterPhase;
+import grondag.hard_science.matter.Temperature;
+import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeBulk;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import grondag.hard_science.simulator.transport.carrier.Channel;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 
 /**
- * Identifier for resources used within device processing or system accounting.
- * Private resources have no storage manager and no logistics service. 
+ * Resources used within device processing or system accounting.
+ * Bulk resources have no storage manager and no logistics service. 
  * They do not publish any events and cannot be transported.
  * They CAN be stored in isolated containers.
  */
-public class BulkResource extends IForgeRegistryEntry.Impl<BulkResource> implements IResource<StorageTypeBulk>
+//public class BulkResource extends IForgeRegistryEntry.Impl<BulkResource> implements IResource<StorageTypeBulk>
+public class BulkResource implements IResource<StorageTypeBulk>
 {
-    public BulkResource(ResourceLocation name)
+    private final String systemName;
+    public final int color;
+    public final String label;
+    private final IComposition composition;
+    private final double tempK;
+    private final double pressureP;
+    private final MatterPhase phase;
+    
+    /**
+     * g/cm3, water ~1.0
+     */
+    private final double density;
+    
+    private Fluid fluid;
+    private FluidResource resource;
+    private int channel = Channel.INVALID_CHANNEL;
+    
+    public BulkResource(
+            String systemName,
+            int color,
+            String label,
+            IComposition composition,
+            double tempCelsius,
+            double pressureAtm,
+            MatterPhase phase,
+            double density
+            )
     {
-        this.setRegistryName(name);
+//        this.setRegistryName(systemName);
+        this.systemName = systemName;
+        this.color = color;
+        this.label = label;
+        this.composition = composition;
+        this.tempK = Temperature.celsiusToKelvin(tempCelsius);
+        this.pressureP = Gas.atmToPascals(pressureAtm);
+        this.phase = phase;
+        this.density = density;
     }
     
-    public BulkResource(String name)
+    /**
+     * Use this form for gasses that can
+     * have density estimated as an ideal gas.
+     */
+    public BulkResource(
+            String systemName,
+            int color,
+            String label,
+            IComposition molecule,
+            double tempCelsius,
+            double pressureAtm
+            )
     {
-        this.setRegistryName(name);
+        this(systemName, color, label, molecule, tempCelsius, pressureAtm, MatterPhase.GAS, 
+                Gas.idealGasDensityCA(molecule, tempCelsius, pressureAtm));
+
+    }
+    
+    public String systemName()
+    {
+        return this.systemName;
     }
     
     @Override
     public String displayName()
     {
-        return this.getRegistryName().toString();
+        return I18n.translateToLocal("matter." + this.systemName).trim();
     }
 
     @Override
@@ -35,17 +97,27 @@ public class BulkResource extends IForgeRegistryEntry.Impl<BulkResource> impleme
         return new BulkResourceWithQuantity(this, quantity);
     }
     
+    public BulkResourceWithQuantity withLiters(double liters)
+    {
+        return new BulkResourceWithQuantity(this, (long) (liters * VolumeUnits.LITER.nL));
+    }
+    
+    public BulkResourceWithQuantity withKilograms(double kg)
+    {
+        return new BulkResourceWithQuantity(this, (long) (kg / this.density * VolumeUnits.LITER.nL));
+    }
+    
     @Override
     public String toString()
     {
         return this.displayName();
     }
 
-    @Override
-    public int hashCode()
-    {
-        return this.getRegistryName().hashCode();
-    }
+//    @Override
+//    public int hashCode()
+//    {
+//        return this.getRegistryName().hashCode();
+//    }
   
     @Override
     public boolean isResourceEqual(IResource<?> other)
@@ -60,7 +132,8 @@ public class BulkResource extends IForgeRegistryEntry.Impl<BulkResource> impleme
         if(other == null) return false;
         if(other instanceof BulkResource)
         {
-            return ((BulkResource)other).getRegistryName().equals(this.getRegistryName());
+            return ((BulkResource)other).systemName().equals(this.systemName());
+//            return ((BulkResource)other).getRegistryName().equals(this.getRegistryName());
         }
         return false;
     }
@@ -69,5 +142,131 @@ public class BulkResource extends IForgeRegistryEntry.Impl<BulkResource> impleme
     public StorageTypeBulk storageType()
     {
         return StorageType.PRIVATE;
+    }
+    
+    /**
+     * Null if not a fluid or gas.
+     */
+    @Nullable
+    public Fluid fluid()
+    {
+        return this.fluid;
+    }
+
+    /**
+     * Null if not a fluid or gas.
+     */
+    @Nullable
+    public FluidResource fluidResource()
+    {
+        return this.resource;
+    }
+    
+    /**
+     * Only valid if this is a fluid.
+     */
+    public int channel()
+    {
+        return this.channel;
+    }
+    
+    public MatterPhase phase()
+    {
+        return this.phase;
+    }
+    
+    public IComposition composition()
+    {
+        return this.composition;
+    }
+    
+    public double temperatureK()
+    {
+        return this.tempK;
+    }
+    
+    public double temperatureC()
+    {
+        return Temperature.kelvinToCelsius(this.tempK);
+    }
+    
+    public double pressureAtm()
+    {
+        return Gas.pascalsToAtm(this.pressureP);
+    }
+    
+    public double pressurePascals()
+    {
+        return this.pressureP;
+    }
+    
+    /**
+     * g/cm3, water ~1.0
+     */
+    public double density()
+    {
+        return this.density;
+    }
+    
+    public double gPerMol()
+    {
+        return this.composition.weight();
+    }
+    
+    public double molsPerLiter()
+    {
+        return this.density / this.gPerMol() * 1000;
+        // g / cm3 / (g / mol)
+        // mol / cm3
+    }
+    
+    public double molsPerKL()
+    {
+        return this.molsPerLiter() * 1000;
+    }
+    
+    public double litersPerMol()
+    {
+        return this.gPerMol() / this.density * 1000;
+    }
+    
+    public double nlPerMol()
+    {
+        return this.gPerMol() / this.density * VolumeUnits.MILLILITER.nL;
+    }
+    
+    public double kLPerMol()
+    {
+        return this.litersPerMol() / 1000;
+    }
+    
+    public BulkResourceWithQuantity defaultStack()
+    {
+        return this.phase == MatterPhase.SOLID
+               ? this.withKilograms(1)
+               : this.withLiters(1);
+    }
+    
+    public long kgPerBlock()
+    {
+        return (long) (this.density * 1000);
+    }
+    
+    public void registerFluidIfNeeded()
+    {
+        if(this.phase != MatterPhase.SOLID)
+        {
+            this.fluid = FluidRegistry.getFluid(systemName);
+            if(this.fluid == null)
+            {
+                this.fluid = new Fluid(this.systemName, this.phase.iconResource, this.phase.iconResource, this.color);
+                if(this.phase == MatterPhase.GAS) this.fluid.setGaseous(true);
+                this.fluid.setDensity((int) this.density());
+                this.fluid.setTemperature((int) this.temperatureK());
+                FluidRegistry.registerFluid(this.fluid);
+            }
+            this.channel = Channel.channelForFluid(this.fluid);
+            this.resource = new FluidResource(this.fluid, null);
+        }
     }
 }

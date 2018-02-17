@@ -1,7 +1,6 @@
 package grondag.hard_science.crafting.base;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
@@ -13,6 +12,8 @@ import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.BulkResource;
+import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.FluidResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -30,8 +31,10 @@ public class AbstractRecipe implements IHardScienceRecipe
     
     private final ImmutableList<FluidResourceWithQuantity> fluidInputs;
     private final ImmutableList<ItemResourceWithQuantity> itemInputs;
+    private final ImmutableList<BulkResourceWithQuantity> bulkInputs;
     private final ImmutableList<FluidResourceWithQuantity> fluidOutputs;
     private final ImmutableList<ItemResourceWithQuantity> itemOutputs;
+    private final ImmutableList<BulkResourceWithQuantity> bulkOutputs;
     private final long energyInputJoules;
     private final long energyOutputJoules;
     private final int ticksDuration;
@@ -51,6 +54,8 @@ public class AbstractRecipe implements IHardScienceRecipe
         ImmutableList.Builder<FluidResourceWithQuantity> fluidOutputs = ImmutableList.builder();
         ImmutableList.Builder<ItemResourceWithQuantity> itemInputs = ImmutableList.builder();
         ImmutableList.Builder<ItemResourceWithQuantity> itemOutputs = ImmutableList.builder();
+        ImmutableList.Builder<BulkResourceWithQuantity> bulkInputs = ImmutableList.builder();
+        ImmutableList.Builder<BulkResourceWithQuantity> bulkOutputs = ImmutableList.builder();
         long energyInputJoules = 0;
         long energyOutputJoules = 0;
         
@@ -70,6 +75,10 @@ public class AbstractRecipe implements IHardScienceRecipe
                 energyInputJoules = rwq.getQuantity();
                 break;
 
+            case PRIVATE:
+                bulkInputs.add((BulkResourceWithQuantity) rwq);
+                break;
+                
             default:
                 break;
             
@@ -92,6 +101,10 @@ public class AbstractRecipe implements IHardScienceRecipe
                 energyOutputJoules = rwq.getQuantity();
                 break;
 
+            case PRIVATE:
+                bulkOutputs.add((BulkResourceWithQuantity) rwq);
+                break;
+                
             default:
                 break;
             
@@ -100,8 +113,10 @@ public class AbstractRecipe implements IHardScienceRecipe
         
         this.fluidInputs = fluidInputs.build();
         this.itemInputs = itemInputs.build();
+        this.bulkInputs = bulkInputs.build();
         this.fluidOutputs = fluidOutputs.build();
         this.itemOutputs = itemOutputs.build();
+        this.bulkOutputs = bulkOutputs.build();
         this.energyInputJoules = energyInputJoules;
         this.energyOutputJoules = energyOutputJoules;
         this.ticksDuration = ticksDuration;
@@ -141,6 +156,20 @@ public class AbstractRecipe implements IHardScienceRecipe
             this.itemInputs = builder.build();
         }
         
+        if(process.bulkInputs().isEmpty())
+        {
+            this.bulkInputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
+            for(BulkResource r : process.bulkInputs())
+            {
+                builder.add(r.withQuantity(result.inputValueDiscrete(r)));
+            }
+            this.bulkInputs = builder.build();
+        }
+        
         if(process.fluidOutputs().isEmpty())
         {
             this.fluidOutputs = ImmutableList.of();
@@ -168,6 +197,20 @@ public class AbstractRecipe implements IHardScienceRecipe
             }
             this.itemOutputs = builder.build();
         }
+        
+        if(process.bulkOutputs().isEmpty())
+        {
+            this.bulkOutputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
+            for(BulkResource r : process.bulkOutputs())
+            {
+                builder.add(r.withQuantity(result.outputValueDiscrete(r)));
+            }
+            this.bulkOutputs = builder.build();
+        }
        
         this.energyInputJoules = process.consumesEnergy()
                 ? Math.round(result.inputValue(PowerResource.JOULES))
@@ -193,6 +236,12 @@ public class AbstractRecipe implements IHardScienceRecipe
     }
 
     @Override
+    public ImmutableList<BulkResourceWithQuantity> bulkInputs()
+    {
+        return this.bulkInputs;
+    }
+    
+    @Override
     public ImmutableList<FluidResourceWithQuantity> fluidOutputs()
     {
         return this.fluidOutputs;
@@ -204,6 +253,12 @@ public class AbstractRecipe implements IHardScienceRecipe
         return this.itemOutputs;
     }
 
+    @Override
+    public ImmutableList<BulkResourceWithQuantity> bulkOutputs()
+    {
+        return this.bulkOutputs;
+    }
+    
     @Override
     public long energyInputJoules()
     {
@@ -227,8 +282,8 @@ public class AbstractRecipe implements IHardScienceRecipe
         if(this.layout == null)
         {
             this.layout = new RecipeLayout(
-                    this.itemInputs.size() + this.fluidInputs.size(),
-                    this.itemOutputs.size() + this.fluidOutputs.size());
+                    this.itemInputs.size() + this.fluidInputs.size() + this.bulkInputs.size(),
+                    this.itemOutputs.size() + this.fluidOutputs.size() + this.bulkOutputs.size());
         }
         return this.layout;
     }
@@ -265,6 +320,20 @@ public class AbstractRecipe implements IHardScienceRecipe
             if(!this.fluidInputs.isEmpty())
             {
                 for(FluidResourceWithQuantity rwq : this.fluidInputs)
+                {
+                    GuiUtil.drawAlignedStringNoShadow(
+                            minecraft.fontRenderer,
+                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
+                            RecipeLayout.LEFT, 
+                            layout.inputY[inputIndex] + 20, 
+                            20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+                    inputIndex++;
+                }
+            }
+            
+            if(!this.bulkInputs.isEmpty())
+            {
+                for(BulkResourceWithQuantity rwq : this.bulkInputs)
                 {
                     GuiUtil.drawAlignedStringNoShadow(
                             minecraft.fontRenderer,
@@ -312,6 +381,20 @@ public class AbstractRecipe implements IHardScienceRecipe
                     outputIndex++;
                 }
             }
+            
+            if(!this.bulkOutputs.isEmpty())
+            {
+                for(BulkResourceWithQuantity rwq : this.bulkOutputs)
+                {
+                    GuiUtil.drawAlignedStringNoShadow(
+                            minecraft.fontRenderer,
+                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
+                            RecipeLayout.RIGHT, 
+                            layout.outputY[outputIndex] + 20, 
+                            20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+                    outputIndex++;
+                }
+            }
         }
         
         IHardScienceRecipe.super.drawInfo(minecraft, recipeWidth, recipeHeight, mouseX, mouseY);
@@ -339,13 +422,4 @@ public class AbstractRecipe implements IHardScienceRecipe
                     8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM);
         }
     }
-
-    @Override
-    public List<String> getTooltipStrings(int mouseX, int mouseY)
-    {
-        // TODO Auto-generated method stub
-        return IHardScienceRecipe.super.getTooltipStrings(mouseX, mouseY);
-    }
-
-    
 }

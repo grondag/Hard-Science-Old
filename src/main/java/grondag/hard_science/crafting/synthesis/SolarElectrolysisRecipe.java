@@ -8,8 +8,8 @@ import grondag.hard_science.crafting.base.AbstractRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
+import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.machines.energy.MachinePower;
-import grondag.hard_science.matter.Matters;
 import grondag.hard_science.matter.Molecules;
 import grondag.hard_science.simulator.resource.PowerResource;
 import mezz.jei.api.IGuiHelper;
@@ -33,25 +33,25 @@ public class SolarElectrolysisRecipe extends AbstractRecipe
         {
             super(
                     ImmutableList.of(
-                            Matters.H2O_FLUID.fluidResource(),
+                            ModBulkResources.H2O_FLUID.fluidResource(),
                             PowerResource.JOULES),
                     ImmutableList.of(
-                            Matters.H2_GAS.fluidResource(),
-                            Matters.O2_GAS.fluidResource()
+                            ModBulkResources.H2_GAS.fluidResource(),
+                            ModBulkResources.O2_GAS.fluidResource()
                             ));
             
-            model.createInput(Matters.H2O_FLUID.fluidResource(), Matters.H2O_FLUID.nlPerMol());
+            model.createInput(ModBulkResources.H2O_FLUID.fluidResource(), ModBulkResources.H2O_FLUID.nlPerMol());
             model.createInput(
                     PowerResource.JOULES, 
                     // need to flip sign because water formation is exothermic
                     -Molecules.H2O_FLUID.enthalpyJoules / MachinePower.PHOTO_CHEMICAL_EFFICIENCY);
 
             model.createOutput(
-                    Matters.H2_GAS.fluidResource(), 
-                    Matters.H2_GAS.nlPerMol());
+                    ModBulkResources.H2_GAS.fluidResource(), 
+                    ModBulkResources.H2_GAS.nlPerMol());
             model.createOutput(
-                    Matters.O2_GAS.fluidResource(), 
-                    Matters.O2_GAS.nlPerMol() / 2);
+                    ModBulkResources.O2_GAS.fluidResource(), 
+                    ModBulkResources.O2_GAS.nlPerMol() / 2);
         }
 
         @Override

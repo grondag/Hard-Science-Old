@@ -15,7 +15,7 @@ import static grondag.hard_science.simulator.transport.endpoint.PortFunction.BRI
 import static grondag.hard_science.simulator.transport.endpoint.PortFunction.CARRIER;
 import static grondag.hard_science.simulator.transport.endpoint.PortFunction.DIRECT;
 
-import grondag.hard_science.matter.Matters;
+import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -77,76 +77,76 @@ public class PortDescriptions
 
 
     public static final PortDescription<StorageTypeFluid> WATER_LOW_CARRIER =
-            PortDescription.find(FLUID, BOTTOM, CARRIER, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, BOTTOM, CARRIER, STANDARD, ModBulkResources.WATER.channel());
     
     public static final PortDescription<StorageTypeFluid> WATER_LOW_DIRECT =
-            PortDescription.find(FLUID, BOTTOM, DIRECT, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, BOTTOM, DIRECT, STANDARD, ModBulkResources.WATER.channel());
     
     public static final PortDescription<StorageTypeFluid> WATER_MID_CARRIER =
-            PortDescription.find(FLUID, MIDDLE, CARRIER, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, MIDDLE, CARRIER, STANDARD, ModBulkResources.WATER.channel());
     
     public static final PortDescription<StorageTypeFluid> WATER_MID_DIRECT =
-            PortDescription.find(FLUID, MIDDLE, DIRECT, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, MIDDLE, DIRECT, STANDARD, ModBulkResources.WATER.channel());
 
     public static final PortDescription<StorageTypeFluid> WATER_MID_BRIDGE =
-            PortDescription.find(FLUID, MIDDLE, BRIDGE, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, MIDDLE, BRIDGE, STANDARD, ModBulkResources.WATER.channel());
     
     public static final PortDescription<StorageTypeFluid> WATER_TOP_CARRIER =
-            PortDescription.find(FLUID, TOP, CARRIER, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, TOP, CARRIER, STANDARD, ModBulkResources.WATER.channel());
     
     public static final PortDescription<StorageTypeFluid> WATER_TOP_DIRECT =
-            PortDescription.find(FLUID, TOP, DIRECT, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, TOP, DIRECT, STANDARD, ModBulkResources.WATER.channel());
 
     public static final PortDescription<StorageTypeFluid> WATER_TOP_BRIDGE =
-            PortDescription.find(FLUID, TOP, BRIDGE, STANDARD, Matters.WATER.channel());
+            PortDescription.find(FLUID, TOP, BRIDGE, STANDARD, ModBulkResources.WATER.channel());
 
     
     public static final PortDescription<StorageTypeFluid> H2O_LOW_CARRIER =
-            PortDescription.find(FLUID, BOTTOM, CARRIER, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, BOTTOM, CARRIER, STANDARD, ModBulkResources.H2O_FLUID.channel());
     
     public static final PortDescription<StorageTypeFluid> H2O_LOW_DIRECT =
-            PortDescription.find(FLUID, BOTTOM, DIRECT, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, BOTTOM, DIRECT, STANDARD, ModBulkResources.H2O_FLUID.channel());
     
     public static final PortDescription<StorageTypeFluid> H2O_MID_CARRIER =
-            PortDescription.find(FLUID, MIDDLE, CARRIER, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, MIDDLE, CARRIER, STANDARD, ModBulkResources.H2O_FLUID.channel());
     
     public static final PortDescription<StorageTypeFluid> H2O_MID_DIRECT =
-            PortDescription.find(FLUID, MIDDLE, DIRECT, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, MIDDLE, DIRECT, STANDARD, ModBulkResources.H2O_FLUID.channel());
 
     public static final PortDescription<StorageTypeFluid> H2O_MID_BRIDGE =
-            PortDescription.find(FLUID, MIDDLE, BRIDGE, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, MIDDLE, BRIDGE, STANDARD, ModBulkResources.H2O_FLUID.channel());
     
     public static final PortDescription<StorageTypeFluid> H2O_TOP_CARRIER =
-            PortDescription.find(FLUID, TOP, CARRIER, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, TOP, CARRIER, STANDARD, ModBulkResources.H2O_FLUID.channel());
     
     public static final PortDescription<StorageTypeFluid> H2O_TOP_DIRECT =
-            PortDescription.find(FLUID, TOP, DIRECT, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, TOP, DIRECT, STANDARD, ModBulkResources.H2O_FLUID.channel());
 
     public static final PortDescription<StorageTypeFluid> H2O_TOP_BRIDGE =
-            PortDescription.find(FLUID, TOP, BRIDGE, STANDARD, Matters.H2O_FLUID.channel());
+            PortDescription.find(FLUID, TOP, BRIDGE, STANDARD, ModBulkResources.H2O_FLUID.channel());
     
     
     public static final PortDescription<StorageTypeFluid> AMMONIA_LOW_CARRIER =
-            PortDescription.find(FLUID, BOTTOM, CARRIER, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, BOTTOM, CARRIER, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
     
     public static final PortDescription<StorageTypeFluid> AMMONIA_LOW_DIRECT =
-            PortDescription.find(FLUID, BOTTOM, DIRECT, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, BOTTOM, DIRECT, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
     
     public static final PortDescription<StorageTypeFluid> AMMONIA_MID_CARRIER =
-            PortDescription.find(FLUID, MIDDLE, CARRIER, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, MIDDLE, CARRIER, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
     
     public static final PortDescription<StorageTypeFluid> AMMONIA_MID_DIRECT =
-            PortDescription.find(FLUID, MIDDLE, DIRECT, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, MIDDLE, DIRECT, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
 
     public static final PortDescription<StorageTypeFluid> AMMONIA_MID_BRIDGE =
-            PortDescription.find(FLUID, MIDDLE, BRIDGE, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, MIDDLE, BRIDGE, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
     
     public static final PortDescription<StorageTypeFluid> AMMONIA_TOP_CARRIER =
-            PortDescription.find(FLUID, TOP, CARRIER, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, TOP, CARRIER, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
     
     public static final PortDescription<StorageTypeFluid> AMMONIA_TOP_DIRECT =
-            PortDescription.find(FLUID, TOP, DIRECT, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, TOP, DIRECT, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
 
     public static final PortDescription<StorageTypeFluid> AMMONIA_TOP_BRIDGE =
-            PortDescription.find(FLUID, TOP, BRIDGE, STANDARD, Matters.AMMONIA_GAS.channel());
+            PortDescription.find(FLUID, TOP, BRIDGE, STANDARD, ModBulkResources.AMMONIA_GAS.channel());
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -18,6 +19,8 @@ public abstract class AbstractCraftingProcess<R extends IHardScienceRecipe> impl
     private final ImmutableList<FluidResource> fluidOutputs;
     private final ImmutableList<ItemResource> itemInputs;
     private final ImmutableList<ItemResource> itemOutputs;
+    private final ImmutableList<BulkResource> bulkInputs;
+    private final ImmutableList<BulkResource> bulkOutputs;
     
     protected AbstractCraftingProcess(
             List<IResource<?>> inputs,
@@ -33,6 +36,8 @@ public abstract class AbstractCraftingProcess<R extends IHardScienceRecipe> impl
         ImmutableList.Builder<FluidResource> fluidOutputs = ImmutableList.builder();
         ImmutableList.Builder<ItemResource> itemInputs = ImmutableList.builder();
         ImmutableList.Builder<ItemResource> itemOutputs = ImmutableList.builder();
+        ImmutableList.Builder<BulkResource> bulkInputs = ImmutableList.builder();
+        ImmutableList.Builder<BulkResource> bulkOutputs = ImmutableList.builder();
         
         for(IResource<?> r : inputs)
         {
@@ -43,6 +48,9 @@ public abstract class AbstractCraftingProcess<R extends IHardScienceRecipe> impl
                 break;
             case ITEM:
                 itemInputs.add((ItemResource) r);
+                break;
+            case PRIVATE:
+                bulkInputs.add((BulkResource) r);
                 break;
             case POWER:
                 consumesEnergy = true;
@@ -63,6 +71,9 @@ public abstract class AbstractCraftingProcess<R extends IHardScienceRecipe> impl
             case ITEM:
                 itemOutputs.add((ItemResource) r);
                 break;
+            case PRIVATE:
+                bulkOutputs.add((BulkResource) r);
+                break;
             case POWER:
                 producesEnergy = true;
                 break;
@@ -77,6 +88,8 @@ public abstract class AbstractCraftingProcess<R extends IHardScienceRecipe> impl
         this.fluidOutputs = fluidOutputs.build();
         this.itemInputs = itemInputs.build();
         this.itemOutputs = itemOutputs.build();
+        this.bulkInputs = bulkInputs.build();
+        this.bulkOutputs = bulkOutputs.build();
     }
     
     @Override
@@ -89,6 +102,12 @@ public abstract class AbstractCraftingProcess<R extends IHardScienceRecipe> impl
     public ImmutableList<ItemResource> itemInputs()
     {
         return this.itemInputs;
+    }
+    
+    @Override
+    public ImmutableList<BulkResource> bulkInputs()
+    {
+        return this.bulkInputs;
     }
 
     @Override
@@ -103,6 +122,12 @@ public abstract class AbstractCraftingProcess<R extends IHardScienceRecipe> impl
         return this.itemOutputs;
     }
 
+    @Override
+    public ImmutableList<BulkResource> bulkOutputs()
+    {
+        return this.bulkOutputs;
+    }
+    
     public ImmutableList<IResource<?>> allInputs()
     {
         return this.allInputs;

@@ -17,7 +17,7 @@ import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTileEntity;
 import grondag.hard_science.machines.impl.processing.CrushinatorTESR;
 import grondag.hard_science.machines.impl.processing.CrushinatorTileEntity;
 import grondag.hard_science.matter.MatterCube;
-import grondag.hard_science.matter.MatterCube2;
+import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.MatterCubeItemModel;
 import grondag.hard_science.matter.MatterCubeItemModel1;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -110,10 +110,10 @@ public class ModModels
                     event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
                             new MatterCubeItemModel((MatterCube) item));
                 }
-                else if(item instanceof MatterCube2)
+                else if(item instanceof BulkItem)
                 {
                     event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
-                            new MatterCubeItemModel1((MatterCube2) item));
+                            new MatterCubeItemModel1((BulkItem) item));
                 }
                 else if(item instanceof CraftingItem)
                 {
@@ -331,7 +331,7 @@ public class ModModels
                     ModelBakery.registerItemVariants(item, item.getRegistryName());
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
                 }
-                else if(item instanceof MatterCube2)
+                else if(item instanceof BulkItem)
                 {
                     ModelBakery.registerItemVariants(item, item.getRegistryName());
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
