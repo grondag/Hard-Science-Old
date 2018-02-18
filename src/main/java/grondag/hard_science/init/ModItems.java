@@ -41,7 +41,16 @@ public class ModItems
     
     public static final Item smart_chest = null;
     public static final Item solar_cell = null;
-            
+
+    public static final Item crushed_stone_1kL = null;
+    public static final Item crushed_basalt_1kL = null;
+    public static final Item gold_10g = null;
+    public static final Item gold_1kg = null;
+    public static final Item gold_100kg = null;
+    public static final Item ammonia_1000L = null;
+    public static final Item flex_resin_1L = null;
+    public static final Item flex_resin_1kL = null;
+    
     // tools
 //    public static final Item obj_test_model = null;
     public static final Item excavation_marker = null;
@@ -54,8 +63,6 @@ public class ModItems
  
         itemReg.register(new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble").setCreativeTab(HardScience.tabMod));
 
-        
-
         if(Configurator.VOLCANO.enableVolcano)
         {
             itemReg.register(new LavaBlobItem().setRegistryName("lava_blob").setUnlocalizedName("lava_blob").setCreativeTab(HardScience.tabMod));
@@ -67,23 +74,22 @@ public class ModItems
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
         itemReg.register(new ExcavationMarker().setCreativeTab(HardScience.tabMod));
         
-        itemReg.register(new BulkItem(ModBulkResources.GOLD, MassUnits.GRAM.withQuantity(10)));
-        itemReg.register(new BulkItem(ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(1)));
-        itemReg.register(new BulkItem(ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(100)));
+        itemReg.register(new BulkItem("gold_10g", ModBulkResources.GOLD, MassUnits.GRAM.withQuantity(10)));
+        itemReg.register(new BulkItem("gold_1kg", ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(1)));
+        itemReg.register(new BulkItem("gold_100kg", ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(100)));
 
-        itemReg.register(new BulkItem(ModBulkResources.AMMONIA_GAS, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem("ammonia_1000L", ModBulkResources.AMMONIA_GAS, VolumeUnits.KILOLITER.withQuantity(1)));
 
-        itemReg.register(new BulkItem(ModBulkResources.FLEX_RESIN, VolumeUnits.LITER.withQuantity(10)));
-        itemReg.register(new BulkItem(ModBulkResources.FLEX_RESIN, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem("flex_resin_1L", ModBulkResources.FLEX_RESIN, VolumeUnits.LITER.withQuantity(10)));
+        itemReg.register(new BulkItem("flex_resin_1kL", ModBulkResources.FLEX_RESIN, VolumeUnits.KILOLITER.withQuantity(1)));
         
-        itemReg.register(new BulkItem(ModBulkResources.CRUSHED_STONE, VolumeUnits.KILOLITER.withQuantity(1)));
-        itemReg.register(new BulkItem(ModBulkResources.CRUSHED_BASALT, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem("crushed_stone_1kL", ModBulkResources.CRUSHED_STONE, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem("crushed_basalt_1kL", ModBulkResources.CRUSHED_BASALT, VolumeUnits.KILOLITER.withQuantity(1)));
         
         for(MatterPackaging matter : MatterPackaging.values())
         {
             matter.register(itemReg);
         }       
-        
 //        itemReg.register(new Item().setRegistryName("obj_test_model").setUnlocalizedName("obj_test_model").setCreativeTab(HardScience.tabMod));
     }
 

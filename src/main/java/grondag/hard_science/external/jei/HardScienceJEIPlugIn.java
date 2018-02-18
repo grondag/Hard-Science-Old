@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.crafting.BulkExportRecipe;
 import grondag.hard_science.crafting.BulkLoadingRecipe;
 import grondag.hard_science.crafting.fabrication.EmergencyFabricatorRecipe;
 import grondag.hard_science.crafting.processing.CrushinatorRecipe;
@@ -60,6 +61,7 @@ public class HardScienceJEIPlugIn implements IModPlugin
     {
         registry.addRecipeCategories(
                 new BulkLoadingRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
+                new BulkExportRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new CrushinatorRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
 
                 new EmergencyFabricatorRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
@@ -75,6 +77,7 @@ public class HardScienceJEIPlugIn implements IModPlugin
         HardScienceJEIPlugIn.registry = registry;
         
         registry.addRecipes(BulkLoadingRecipe.allRecipes(), BulkLoadingRecipe.UID);
+        registry.addRecipes(BulkExportRecipe.allRecipes(), BulkExportRecipe.UID);
         registry.addRecipes(CrushinatorRecipe.allRecipes(), CrushinatorRecipe.UID);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.crushinator), CrushinatorRecipe.UID);
 

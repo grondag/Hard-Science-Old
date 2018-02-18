@@ -75,7 +75,7 @@ private static Map<String, BulkResource> all = new HashMap<String, BulkResource>
     public final static BulkResource MINERAL_FILLER = register("mineral_filler", MatterColors.DEPLETED_MINERAL_DUST, "mf", Compounds.MINERAL_FILLER, 20, 1, MatterPhase.SOLID, 2.0);
 
     public final static BulkResource CRUSHED_STONE = register("crushed_stone", MatterColors.RAW_MINERAL_DUST, "cs", Compounds.RAW_MINERAL_DUST, 20, 1, MatterPhase.SOLID, 2.0);    
-    public final static BulkResource CRUSHED_BASALT = register("crushed_basalt", BlockColorMapProvider.COLOR_BASALT.getColor(EnumColorMap.BASE), "cs", Compounds.RAW_MINERAL_DUST, 20, 1, MatterPhase.SOLID, 2.0);    
+    public final static BulkResource CRUSHED_BASALT = register("crushed_basalt", BlockColorMapProvider.COLOR_BASALT.getColor(EnumColorMap.BASE), "cb", Compounds.RAW_MINERAL_DUST, 20, 1, MatterPhase.SOLID, 2.0);    
 
     public final static BulkResource H2_GAS = register("h2_gas", 0xFFEA3323, "H2", Molecules.H2_GAS, 20, 1);
     public final static BulkResource N2_GAS = register("n2_gas", 0xFF526FDC, "N2", Molecules.N2_GAS, 20, 1);

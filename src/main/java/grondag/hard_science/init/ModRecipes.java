@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.crafting.BulkExportRecipe;
 import grondag.hard_science.crafting.BulkLoadingRecipe;
 import grondag.hard_science.crafting.processing.CrushinatorRecipe;
 import grondag.hard_science.matter.VolumeUnits;
@@ -28,6 +29,10 @@ public class ModRecipes
             GameRegistry.addSmelting(ModBlocks.basalt_cobble, new ItemStack(ModItems.basalt_cut, 1, 0), 0.1F);
         }
         
+        ///////////////////////////////////////////////////////////
+        /// BULK IMPORT
+        ///////////////////////////////////////////////////////////
+
         BulkLoadingRecipe.addConversion(
                 ModBulkResources.MINERAL_FILLER,
                 ItemResource.fromStack(Item.getItemFromBlock(Blocks.SAND).getDefaultInstance()), 
@@ -43,6 +48,24 @@ public class ModRecipes
                 ItemResource.fromStack(Item.getItemFromBlock(Blocks.GRAVEL).getDefaultInstance()), 
                 VolumeUnits.KILOLITER.nL);
         
+        ///////////////////////////////////////////////////////////
+        /// BULK EXPORT
+        ///////////////////////////////////////////////////////////
+        
+        BulkExportRecipe.addConversion(
+                ItemResource.fromItem(ModItems.crushed_stone_1kL), 
+                ModBulkResources.CRUSHED_STONE, 
+                VolumeUnits.KILOLITER.nL);
+        
+        BulkExportRecipe.addConversion(
+                ItemResource.fromItem(ModItems.crushed_basalt_1kL), 
+                ModBulkResources.CRUSHED_BASALT, 
+                VolumeUnits.KILOLITER.nL);
+        
+        ///////////////////////////////////////////////////////////
+        /// CRUSHINATOR
+        ///////////////////////////////////////////////////////////
+
         CrushinatorRecipe.addFab(ModItems.basalt_cobble, ModBulkResources.CRUSHED_BASALT.withLiters(1000));
         CrushinatorRecipe.addFab(ModItems.basalt_rubble, ModBulkResources.CRUSHED_BASALT.withLiters(1000.0 / 9.0));
         CrushinatorRecipe.addFab(ModItems.basalt_cut, ModBulkResources.CRUSHED_BASALT.withLiters(1000.0));

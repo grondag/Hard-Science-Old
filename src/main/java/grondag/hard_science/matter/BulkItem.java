@@ -22,34 +22,26 @@ public class BulkItem extends Item
     public final long nanoGrams;
     public final BulkResource matter;
     
-    public BulkItem(BulkResource matter, Volume volume)
+    public BulkItem(String itemName, BulkResource matter, Volume volume)
     {
         super();
         this.matter = matter;
         this.nanoLiters = volume.nanoLiters();
-        this.nanoGrams = (long) (matter.density() * this.nanoLiters);
+        this.nanoGrams = (long) (matter.density() * this.nanoLiters * 1000);
         this.setCreativeTab(HardScience.tabMod);
-        String name = matter.systemName() 
-                + "_cube_" 
-                + volume.unit().name().toLowerCase()
-                + volume.quantity;
-        this.setRegistryName(name);
-        this.setUnlocalizedName(name);
+        this.setRegistryName(itemName);
+        this.setUnlocalizedName(itemName);
     }
     
-    public BulkItem(BulkResource matter, Mass mass)
+    public BulkItem(String itemName, BulkResource matter, Mass mass)
     {
         super();
         this.matter = matter;
         this.nanoGrams = mass.nanoGrams();
-        this.nanoLiters = (long) (this.nanoGrams / matter.density());
+        this.nanoLiters = (long) (this.nanoGrams / matter.density() / 1000);
         this.setCreativeTab(HardScience.tabMod);
-        String name = matter.systemName() 
-                + "_cube_" 
-                + mass.unit().name().toLowerCase()
-                + mass.quantity;
-        this.setRegistryName(name);
-        this.setUnlocalizedName(name);
+        this.setRegistryName(itemName);
+        this.setUnlocalizedName(itemName);
     }
 
     @Override
