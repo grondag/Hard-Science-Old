@@ -1,10 +1,6 @@
 package grondag.hard_science.crafting.processing;
 
-import static grondag.hard_science.HardScience.resource;
-
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import org.magicwerk.brownies.collections.Key1List;
 
@@ -16,14 +12,12 @@ import grondag.hard_science.crafting.base.AbstractRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
-import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.BulkResource;
+import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResource;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class CrushinatorRecipe extends AbstractRecipe
 {
@@ -31,7 +25,7 @@ public class CrushinatorRecipe extends AbstractRecipe
 
     private static final Key1List<Process, ItemResource> fabs 
     = new Key1List.Builder<Process, ItemResource>().
-          withKey1Map(Process::outputResource).
+          withKey1Map(Process::inputResource).
           build();
     
     /**
@@ -42,7 +36,7 @@ public class CrushinatorRecipe extends AbstractRecipe
         ImmutableList.Builder<CrushinatorRecipe> builder = ImmutableList.builder();
         for(Process p : fabs)
         {
-            builder.add(p.configureFromOutputs(ImmutableList.of(p.outputResource().withQuantity(1))));
+            builder.add(p.configureFromInputs(ImmutableList.of(p.allInputs().get(0).withQuantity(1))));
         }
         return builder.build();
     }
@@ -52,42 +46,15 @@ public class CrushinatorRecipe extends AbstractRecipe
         return ImmutableList.copyOf(fabs);
     }
     
-    @Nullable
-    public static List<Process> getFabs(ItemResource itemResource)
-    {
-        return ImmutableList.copyOf(fabs.getAllByKey1(itemResource));
-    }
-    
-    /**
-     * First output is primary output
-     */
+
     public static void addFab(
-            List<AbstractResourceWithQuantity<?>> inputs, 
-            List<AbstractResourceWithQuantity<?>> outputs)
+            Item input, 
+            BulkResourceWithQuantity... outputs)
     { 
-        Process fab = new Process(inputs, outputs);
+        Process fab = new Process(
+                ImmutableList.of(ItemResource.fromItem(input).withQuantity(1)),
+                ImmutableList.copyOf(outputs));
         fabs.add(fab);
-    }
-    
-    /**
-     * First output is primary output
-     */
-    public static void addFab(
-            Object[] inputs,
-            String itemName, 
-            long quantity)
-    { 
-        ImmutableList.Builder<AbstractResourceWithQuantity<?>> inBuilder = ImmutableList.builder();
-        for(int i = 0; i < inputs.length; i += 2)
-        {
-            BulkResource m = ModBulkResources.get((String)inputs[i]);
-            inBuilder.add(m.fluidResource().withQuantity((long)inputs[i+1]));
-        }
-        
-        Item item = ForgeRegistries.ITEMS.getValue(resource(itemName));
-        
-        addFab(inBuilder.build(), 
-                ImmutableList.of(ItemResource.fromItem(item).withQuantity(quantity)));
     }
     
     protected CrushinatorRecipe(AbstractCraftingProcess<?> process, Result result, int ticksDuration)
@@ -109,14 +76,11 @@ public class CrushinatorRecipe extends AbstractRecipe
     
     public static class Process extends AbstractSingleModelProcess<CrushinatorRecipe>
     {
-        public ItemResource outputResource()
+        public ItemResource inputResource()
         {
-            return this.itemOutputs().get(0);
+            return this.itemInputs().get(0);
         }
         
-        /**
-         * First item output is the primary output
-         */
         protected Process(List<AbstractResourceWithQuantity<?>> inputs, List<AbstractResourceWithQuantity<?>> outputs)
         {
             super(

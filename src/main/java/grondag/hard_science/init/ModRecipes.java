@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.BulkLoadingRecipe;
+import grondag.hard_science.crafting.processing.CrushinatorRecipe;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.ItemResource;
 import net.minecraft.init.Blocks;
@@ -42,7 +43,15 @@ public class ModRecipes
                 ItemResource.fromStack(Item.getItemFromBlock(Blocks.GRAVEL).getDefaultInstance()), 
                 VolumeUnits.KILOLITER.nL);
         
-//        BulkLoadingRecipe.addConversion(
+        CrushinatorRecipe.addFab(ModItems.basalt_cobble, ModBulkResources.CRUSHED_BASALT.withLiters(1000));
+        CrushinatorRecipe.addFab(ModItems.basalt_rubble, ModBulkResources.CRUSHED_BASALT.withLiters(1000.0 / 9.0));
+        CrushinatorRecipe.addFab(ModItems.basalt_cut, ModBulkResources.CRUSHED_BASALT.withLiters(1000.0));
+
+        CrushinatorRecipe.addFab(Item.getItemFromBlock(Blocks.COBBLESTONE), ModBulkResources.CRUSHED_STONE.withLiters(1000));
+        CrushinatorRecipe.addFab(Item.getItemFromBlock(Blocks.STONE), ModBulkResources.CRUSHED_STONE.withLiters(1000));
+
+        
+        //        BulkLoadingRecipe.addConversion(
 //                Matters.MINERAL_FILLER.fluidResource(),
 //                Matters.RAW_MINERAL_DUST.fluidResource(),
 //                1.0);

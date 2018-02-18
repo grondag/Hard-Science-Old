@@ -14,6 +14,8 @@ import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 public class BlockColorMapProvider
 {
     public static final BlockColorMapProvider INSTANCE = new BlockColorMapProvider();
+    public static final ColorMap COLOR_BASALT = INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK);
+    
     // note: can't be static because must come after Hue static initializaiton
     public final int hueCount = Hue.values().length;
     private final ColorMap[] validColors;

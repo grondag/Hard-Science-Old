@@ -54,17 +54,6 @@ public class ModItems
  
         itemReg.register(new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble").setCreativeTab(HardScience.tabMod));
 
-        // start generated crafting items
-        
-//        itemReg.register(new CraftingItem("flex_tank_kl", new ModelState()));
-//        itemReg.register(new CraftingItem("dura_tank_kl", new ModelState()));
-//        itemReg.register(new CraftingItem("flex_valve_ball", new ModelState()));
-//        itemReg.register(new CraftingItem("flex_valve_housing", new ModelState()));
-//        itemReg.register(new CraftingItem("flex_control_valve", new ModelState()));
-//        itemReg.register(new CraftingItem("dura_valve_ball", new ModelState()));
-//        itemReg.register(new CraftingItem("dura_valve_housing", new ModelState()));
-//        itemReg.register(new CraftingItem("dura_control_valve", new ModelState()));
-//        itemReg.register(new CraftingItem("short_throw_actuator", new ModelState()));
         
 
         if(Configurator.VOLCANO.enableVolcano)
@@ -87,8 +76,8 @@ public class ModItems
         itemReg.register(new BulkItem(ModBulkResources.FLEX_RESIN, VolumeUnits.LITER.withQuantity(10)));
         itemReg.register(new BulkItem(ModBulkResources.FLEX_RESIN, VolumeUnits.KILOLITER.withQuantity(1)));
         
-        itemReg.register(new BulkItem(ModBulkResources.CRUSHED_STONE, MassUnits.KILOGRAM.withQuantity(ModBulkResources.CRUSHED_STONE.kgPerBlock())));
-
+        itemReg.register(new BulkItem(ModBulkResources.CRUSHED_STONE, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem(ModBulkResources.CRUSHED_BASALT, VolumeUnits.KILOLITER.withQuantity(1)));
         
         for(MatterPackaging matter : MatterPackaging.values())
         {

@@ -85,7 +85,7 @@ public class ModBlocks
         workingModel = new ModelState();
         workingModel.setShape(ModelShape.CUBE);
         workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
-        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
         event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", BlockSubstance.BASALT, workingModel));
 
         if(Configurator.VOLCANO.enableVolcano)
@@ -96,9 +96,9 @@ public class ModBlocks
             workingModel = new ModelState();
             workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_COOL_ZOOM);
-            workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+            workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
             workingModel.setTexture(PaintLayer.CUT, Textures.BIGTEX_BASALT_CUT);
-            workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+            workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.COLOR_BASALT);
             
             Block dynamicBasaltHeight = new TerrainDynamicBlock("basalt_cool_dynamic_height", BlockSubstance.BASALT, workingModel.clone(), false);
             Block staticBasaltHeight = new TerrainStaticBlock("basalt_cool_static_height", BlockSubstance.BASALT, workingModel.clone(), false);
@@ -124,7 +124,7 @@ public class ModBlocks
             workingModel = new ModelState();
             workingModel.setShape(ModelShape.CUBE);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_CUT_ZOOM);
-            workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+            workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
             Block cubicBasalt  = new TerrainCubicBlock("basalt_cut", BlockSubstance.BASALT, workingModel.clone());
             event.getRegistry().register(cubicBasalt);
             

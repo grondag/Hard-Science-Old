@@ -11,9 +11,11 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.BulkLoadingRecipe;
 import grondag.hard_science.crafting.fabrication.EmergencyFabricatorRecipe;
+import grondag.hard_science.crafting.processing.CrushinatorRecipe;
 import grondag.hard_science.crafting.synthesis.SolarAmmoniaRecipe;
 import grondag.hard_science.crafting.synthesis.SolarElectrolysisRecipe;
 import grondag.hard_science.crafting.synthesis.SolarEtheneRecipe;
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
@@ -34,6 +36,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.ItemStack;
 
 
 @JEIPlugin
@@ -56,8 +59,10 @@ public class HardScienceJEIPlugIn implements IModPlugin
     public void registerCategories(IRecipeCategoryRegistration registry)
     {
         registry.addRecipeCategories(
-                new EmergencyFabricatorRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new BulkLoadingRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
+                new CrushinatorRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
+
+                new EmergencyFabricatorRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new SolarElectrolysisRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new SolarAmmoniaRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
                 new SolarEtheneRecipe.Category(registry.getJeiHelpers().getGuiHelper())
@@ -69,9 +74,13 @@ public class HardScienceJEIPlugIn implements IModPlugin
     {
         HardScienceJEIPlugIn.registry = registry;
         
-//        registry.addRecipes(EmergencyFabricatorRecipe.allRecipes(), EmergencyFabricatorRecipe.UID);
-//
         registry.addRecipes(BulkLoadingRecipe.allRecipes(), BulkLoadingRecipe.UID);
+        registry.addRecipes(CrushinatorRecipe.allRecipes(), CrushinatorRecipe.UID);
+        registry.addRecipeCatalyst(new ItemStack(ModBlocks.crushinator), CrushinatorRecipe.UID);
+
+        
+//        registry.addRecipes(EmergencyFabricatorRecipe.allRecipes(), EmergencyFabricatorRecipe.UID);
+
 //        registry.addIngredientInfo(Matters.MINERAL_FILLER.fluidResource().newStackWithLiters(Fluid.BUCKET_VOLUME), FluidStack.class, "fluid.flowable_mineral_filler.desc");
 //
 //        registry.addRecipes(
