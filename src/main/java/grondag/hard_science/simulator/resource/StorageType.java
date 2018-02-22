@@ -16,7 +16,6 @@ import grondag.hard_science.simulator.storage.IStorageEventFactory;
 import grondag.hard_science.simulator.storage.ItemStorageEvent;
 import grondag.hard_science.simulator.storage.PowerStorageEvent;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
-import grondag.hard_science.simulator.transport.carrier.Channel;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -126,17 +125,6 @@ public abstract class StorageType<T extends StorageType<T>>
                 .fromEnum(Useful.safeEnumFromTag(tag, ModNBTTag.RESOURCE_TYPE, EnumStorageType.ITEM));
         return (IResource<V>) sType.fromNBT(tag);
     }
-    
-    /**
-     * If true, connections from this carrier
-     * at different levels must share the same
-     * channel.  Only true for fluids.
-     * See {@link Channel#Channel()}.
-     */
-     public boolean channelsSpanLevels()
-     {
-         return this == StorageType.FLUID;
-     }
      
     /**
      * Materials stored as item stacks. AbstractStorage managers for other storage types that can be encapsulated

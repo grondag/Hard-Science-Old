@@ -58,8 +58,7 @@ public interface IPortDescription<T extends StorageType<T>> extends ITypedStorag
                     toPort.level(), 
                     toPort.getChannel(), 
                     toPort.connector(),
-                    toPort.function() == PortFunction.BRIDGE,
-                    this.storageType().channelsSpanLevels());
+                    toPort.function() == PortFunction.BRIDGE);
         }
         else
         {
@@ -70,8 +69,7 @@ public interface IPortDescription<T extends StorageType<T>> extends ITypedStorag
                     this.level(),
                     this.getChannel(),
                     this.connector(),
-                    this.function() == PortFunction.BRIDGE,
-                    this.storageType().channelsSpanLevels());
+                    this.function() == PortFunction.BRIDGE);
         }
     }
     
@@ -94,8 +92,7 @@ public interface IPortDescription<T extends StorageType<T>> extends ITypedStorag
                     toPort.getChannel() == Channel.CONFIGURABLE_FOLLOWS_DEVICE 
                             ? toChannel : toPort.getChannel(), 
                     toPort.connector(),
-                    toPort.function() == PortFunction.BRIDGE,
-                    this.storageType().channelsSpanLevels());
+                    toPort.function() == PortFunction.BRIDGE);
         }
         else
         {
@@ -108,8 +105,7 @@ public interface IPortDescription<T extends StorageType<T>> extends ITypedStorag
                     this.getChannel() == Channel.CONFIGURABLE_FOLLOWS_DEVICE 
                         ? withChannel : this.getChannel(),
                     this.connector(),
-                    this.function() == PortFunction.BRIDGE,
-                    this.storageType().channelsSpanLevels());
+                    this.function() == PortFunction.BRIDGE);
         }
     }
     
@@ -129,8 +125,7 @@ public interface IPortDescription<T extends StorageType<T>> extends ITypedStorag
             CarrierLevel toLevel, 
             int toChannel, 
             PortConnector toConnector,
-            boolean toIsBridge,
-            boolean channelsSpanLevels
+            boolean toIsBridge
             )
     {
         if(fromConnector == toConnector)
@@ -143,9 +138,8 @@ public interface IPortDescription<T extends StorageType<T>> extends ITypedStorag
             }
             else if(toIsBridge && toLevel.below() == fromLevel)
             {
-                // assume bridge mode
-                return !channelsSpanLevels 
-                        || fromChannel == toChannel;
+                // bridge mode
+                return true;
             }
             else return false;
         }

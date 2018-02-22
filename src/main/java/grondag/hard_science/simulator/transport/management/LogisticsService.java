@@ -481,12 +481,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                 {
                     // if bridge is one level above carrier then it acts
                     // as a proper bridge port
-                    
-                    if(this.storageType.channelsSpanLevels() && !channelMatch)
-                        // fluids need to match channels across levels
-                        return FAIL_CHANNEL_MISMATCH;
-                    
-                    else return swapOrder ? BRIDGE_CARRIER : CARRIER_BRIDGE;
+                    return swapOrder ? BRIDGE_CARRIER : CARRIER_BRIDGE;
                 }
                 else return FAIL_LEVEL_GAP;
             }
@@ -528,11 +523,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                 }
                 else if(port1.externalLevel().above() == port2.internalLevel())
                 {
-                    if(this.storageType.channelsSpanLevels() && !channelMatch)
-                        // fluids need to match channels across levels
-                        return FAIL_CHANNEL_MISMATCH;
-                    
-                    else return swapOrder ? BRIDGE_DIRECT : DIRECT_BRIDGE;
+                    return swapOrder ? BRIDGE_DIRECT : DIRECT_BRIDGE;
                 }
                 else return FAIL_LEVEL_GAP;
             }
@@ -563,10 +554,6 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                     return channelMatch
                             ? CARRIER_CARRIER
                             : FAIL_CHANNEL_MISMATCH;
-                
-                else if(this.storageType.channelsSpanLevels() && !channelMatch)
-                    // fluids need to match channels across levels
-                    return FAIL_CHANNEL_MISMATCH;
                 
                 else if(port1.internalLevel() == port2.internalLevel().below())
                     // if this port is 1 lower, then it will act as carrier port

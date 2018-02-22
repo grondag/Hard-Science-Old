@@ -40,6 +40,6 @@ public class WaterPumpBlock extends MachineBlock
     @Override
     public PortLayout nominalPortLayout()
     {
-        return ModPortLayouts.water_and_power_low;
+        return ModPortLayouts.utb_low_carrier_all;
     }
 }

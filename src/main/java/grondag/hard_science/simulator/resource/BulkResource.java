@@ -9,7 +9,6 @@ import grondag.hard_science.matter.MatterPhase;
 import grondag.hard_science.matter.Temperature;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeBulk;
-import grondag.hard_science.simulator.transport.carrier.Channel;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -38,7 +37,6 @@ public class BulkResource implements IResource<StorageTypeBulk>
     
     private Fluid fluid;
     private FluidResource resource;
-    private int channel = Channel.INVALID_CHANNEL;
     
     public BulkResource(
             String systemName,
@@ -145,7 +143,7 @@ public class BulkResource implements IResource<StorageTypeBulk>
     }
     
     /**
-     * Null if not a fluid or gas.
+     * Null if not a managed resource.
      */
     @Nullable
     public Fluid fluid()
@@ -154,20 +152,12 @@ public class BulkResource implements IResource<StorageTypeBulk>
     }
 
     /**
-     * Null if not a fluid or gas.
+     * Null if not a managed resource.
      */
     @Nullable
     public FluidResource fluidResource()
     {
         return this.resource;
-    }
-    
-    /**
-     * Only valid if this is a fluid.
-     */
-    public int channel()
-    {
-        return this.channel;
     }
     
     public MatterPhase phase()
@@ -252,21 +242,17 @@ public class BulkResource implements IResource<StorageTypeBulk>
         return (long) (this.density * 1000);
     }
     
-    public void registerFluidIfNeeded()
+    public void registerFluid()
     {
-        if(this.phase != MatterPhase.SOLID)
+        this.fluid = FluidRegistry.getFluid(systemName);
+        if(this.fluid == null)
         {
-            this.fluid = FluidRegistry.getFluid(systemName);
-            if(this.fluid == null)
-            {
-                this.fluid = new Fluid(this.systemName, this.phase.iconResource, this.phase.iconResource, this.color);
-                if(this.phase == MatterPhase.GAS) this.fluid.setGaseous(true);
-                this.fluid.setDensity((int) this.density());
-                this.fluid.setTemperature((int) this.temperatureK());
-                FluidRegistry.registerFluid(this.fluid);
-            }
-            this.channel = Channel.channelForFluid(this.fluid);
-            this.resource = new FluidResource(this.fluid, null);
+            this.fluid = new Fluid(this.systemName, this.phase.iconResource, this.phase.iconResource, this.color);
+            if(this.phase == MatterPhase.GAS) this.fluid.setGaseous(true);
+            this.fluid.setDensity((int) this.density());
+            this.fluid.setTemperature((int) this.temperatureK());
+            FluidRegistry.registerFluid(this.fluid);
         }
+        this.resource = new FluidResource(this.fluid, null);
     }
 }

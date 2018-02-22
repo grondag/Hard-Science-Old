@@ -8,13 +8,12 @@ import com.google.common.collect.ImmutableSet;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.StoragePacket;
-import grondag.hard_science.simulator.transport.endpoint.PortMode;
 import grondag.hard_science.simulator.transport.endpoint.Port;
+import grondag.hard_science.simulator.transport.endpoint.PortMode;
 import grondag.hard_science.simulator.transport.routing.Legs;
 
 /**
@@ -321,18 +320,12 @@ public class Carrier<T extends StorageType<T>> implements ITypedStorage<T>
     }
 
     /**
-     * True if circuit is able to transport the given bulkResource.
-     * Needed for fluid circuits which are always locked to a
-     * specific fluid. Will always be true for everything else.
+     * True if circuit is able to transport the given resource.
+     * Currently always true.
      */
     public boolean canTransport(IResource<T> forResource)
     {
-        if(this.storageType == StorageType.FLUID)
-        {
-            return forResource != null
-                && Channel.doesFluidMatchChannel(this.channel, (FluidResource) forResource);
-        }
-        else return true;
+        return true;
     }
 
     @Override

@@ -1,13 +1,6 @@
 package grondag.hard_science.simulator.transport.carrier;
 
-import grondag.hard_science.Log;
-import grondag.hard_science.simulator.resource.FluidResource;
-import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 
 /**
  * Channels are integer IDs used to tag transport ports
@@ -15,25 +8,13 @@ import net.minecraftforge.fluids.FluidRegistry;
  * defines constants and utility methods for working
  * with channel values.<p>
  * 
- * Item and power circuits/ports use device species to
+ * Circuits/ports use device species to
  * determine channel, or one of the constants defined below.
  * Different tiers of circuit do NOT need the same channel.
  * For convenience, this logic is codified in 
  * {@link StorageType#channelsSpanLevels()}<p>
  * 
- * Fluid circuit/ports use MC Forge fluid registry ID as the
- * channel for circuits/ports handling a fluid.  Unlike Item
- * and power connections, ports and circuits at every 
- * tier must have compatible channels in order to connect.
- * This constraints models the in-world requirement to prevent 
- * fluids from sharing pipes so they don't mix.<p>
- * 
- * Note that channel values for fluids are determined at run time
- * and should never be serialized. Always use {@link #channelForFluid(Fluid)}
- * to obtain fluid channel values. Once obtained, value will not 
- * change until MC restarts.<p>
- * 
- * By convention, top-level item and power ports/circuits
+ * By convention, top-level ports/circuits
  * should always used TOP_CHANNEL as their channel so that they pass all
  * tests for channel matching without special handling.
  *
@@ -48,11 +29,8 @@ public class Channel
     public static final int MIN_CHANNEL_VALUE = -8;
     
     /**
-     * Max value that will be used for channel.  
-     * Item and power channels only go up 15 but fluid
-     * channels are limited only by the number of fluids
-     * registered in the game.  So, setting an arbitrary
-     * limit and will warn if exceeded.<p>
+     * Max value that will be used for channel.
+     * Non-top channels currently limited to 0-15 <p>
      * 
      * Note this max value is also the value used to 
      * represent the "top" channel for top-level item/power
@@ -82,65 +60,9 @@ public class Channel
      * in port layout and should not be encountered in device ports. <p>
      * 
      * Generally only applies only to carrier ports. 
-     * Does not apply to fluid ports nor to the external
-     * side of bridge ports.
+     * Does not apply to the external side of bridge ports.
      */
     public static final int CONFIGURABLE_FOLLOWS_DEVICE = -3;
-
-    
-    /**
-     * Cache fluid ID map from Forge.  Note that we never
-     * serialize the IDs, we only use them as transient identifiers.
-     */
-    private static final Object2IntOpenHashMap<Fluid> fluidIDs;
-
-    static
-    {
-        fluidIDs = new Object2IntOpenHashMap<Fluid>();
-        fluidIDs.defaultReturnValue(INVALID_CHANNEL);
-    }
-    
-    public static int channelForFluid(IResource<StorageTypeFluid> forResource)
-    {
-        return channelForFluid((FluidResource)forResource);
-    }
-    
-    public static int channelForFluid(FluidResource forResource)
-    {
-        return forResource == null 
-            ? INVALID_CHANNEL 
-            : channelForFluid(forResource.getFluid());
-    }
-    
-    public static int channelForFluid(Fluid fluid)
-    {
-        return fluid == null 
-                ? INVALID_CHANNEL
-                : fluidIDs.getInt(fluid);
-    }
-
-    public static boolean doesFluidMatchChannel(int channel, IResource<StorageTypeFluid> forResource)
-    {
-        return doesFluidMatchChannel(channel, (FluidResource)forResource);
-    }
-    
-    /**
-     * True if the circuit channel matches the fluid of the given bulkResource
-     */
-    public static boolean doesFluidMatchChannel(int channel, FluidResource forResource)
-    {
-        return forResource != null 
-            && forResource == StorageType.FLUID.emptyResource
-            && doesFluidMatchChannel(channel, forResource.getFluid());
-    }
-    
-    /**
-     * True if the circuit channel matches the fluid of the given bulkResource
-     */
-    public static boolean doesFluidMatchChannel(int channel, Fluid forFluid)
-    {
-        return forFluid != null && channel == channelForFluid(forFluid);
-    }
 
     /**
      * True if the channel is likely to be a valid value and
@@ -152,25 +74,14 @@ public class Channel
     }
     
     /**
-     * Encapsulates the logic that top-level, non-fluid carriers
+     * Encapsulates the logic that top-level carriers
      * should always used {@link #TOP_CHANNEL} as their channel.
      * Returns input channel if logic does not apply.
      */
     public static int channelOverride(int channel, CarrierLevel level, StorageType<?> storageType)
     {
-        return level.isTop() && !storageType.channelsSpanLevels()
+        return level.isTop()
                 ? TOP_CHANNEL
                 : channel;
-    }
-    
-    /**
-     * Called from common event handler when fluid is registered.
-     */
-    public static void addFluid(String fluidName, int fluidID)
-    {
-        if(fluidID >= MAX_CHANNEL_VALUE)
-            Log.warn("Max fluid channel transport value exceeded. Too many fluids. Unexpected behavior may result.");
-        
-        fluidIDs.put(FluidRegistry.getFluid(fluidName), fluidID);
     }
 }

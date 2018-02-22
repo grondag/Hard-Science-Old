@@ -9,7 +9,6 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.simulator.transport.management.FluidTransportManager;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 import grondag.hard_science.simulator.transport.management.SimpleTransportManager;
 import net.minecraft.nbt.NBTTagCompound;
@@ -37,7 +36,7 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
     @Override
     protected ITransportManager<StorageTypeFluid> createFluidTransportManager()
     {
-        return new FluidTransportManager(this);
+        return new SimpleTransportManager<StorageTypeFluid>(this, StorageType.FLUID);
     }
     
     @Override
