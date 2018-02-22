@@ -2,20 +2,16 @@ package grondag.hard_science.simulator.resource;
 
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
-
-import grondag.hard_science.library.serialization.ModNBTTag;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * Extension of predicate for IResource that includes
- * information about the resource that can be inspected
+ * information about the bulkResource that can be inspected
  * by producers or search functions when a brute-force
  * comparision against every possibility isn't realistic.<p>
  * 
  * Which attributes are implemented will depend on the 
- * type of resource. Attributes that don't apply always
+ * type of bulkResource. Attributes that don't apply always
  * return 0 or null. <p>
  */
 public interface IResourcePredicate<V extends StorageType<V>> extends Predicate<IResource<V>>
@@ -56,26 +52,26 @@ public interface IResourcePredicate<V extends StorageType<V>> extends Predicate<
      */
     public default boolean ignoreCaps() { return false; }
 
-    @Nullable
-    public static IResourcePredicate<?> fromNBT(NBTTagCompound tag)
-    {
-        if(tag.hasKey(ModNBTTag.PREDICATE_TYPE))
-        {
-            return null;
-        }
-        else
-        {
-            return StorageType.fromNBTWithType(tag);
-        }
-    }
+//    @Nullable
+//    public static IResourcePredicate<?> fromNBT(NBTTagCompound tag)
+//    {
+//        if(tag.hasKey(ModNBTTag.PREDICATE_TYPE))
+//        {
+//            return null;
+//        }
+//        else
+//        {
+//            return StorageType.fromNBTWithType(tag);
+//        }
+//    }
     
-    public static NBTTagCompound toNBT(IResourcePredicate<?> predicate)
-    {
-        if(predicate.isEqualityPredicate())
-        {
-            return StorageType.toNBTWithType((IResource<?>) predicate);
-        }
-        
-        return new NBTTagCompound();
-    }
+//    public static NBTTagCompound toNBT(IResourcePredicate<?> predicate)
+//    {
+//        if(predicate.isEqualityPredicate())
+//        {
+//            return StorageType.toNBTWithType((IResource<?>) predicate);
+//        }
+//        
+//        return new NBTTagCompound();
+//    }
 }

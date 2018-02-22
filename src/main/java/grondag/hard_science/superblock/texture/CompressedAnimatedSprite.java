@@ -136,7 +136,7 @@ public class CompressedAnimatedSprite extends EnhancedSprite
         
         JPEGImageReaderSpi jpeg = getJpegReader();
         
-        // by default resource manager will give us a .png extension
+        // by default bulkResource manager will give us a .png extension
         // we use .jpg for larger textures, so strip this off and go case by case
         String baseName = location.getResourcePath().substring(0, location.getResourcePath().length() - 4);
         

@@ -49,7 +49,7 @@ import grondag.hard_science.simulator.transport.routing.Route;
  * 
  * Avoids the need for synchronization
  * by ensuring all inquires and changes to transport and storage of a given
- * resource type are executed within a single thread. <p>
+ * bulkResource type are executed within a single thread. <p>
  * 
  * Most requests can be prioritized so that the called can block and expect
  * a reasonably quick return. Useful to handle player actions and world events.
@@ -599,7 +599,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         Relies on sort order and structure guaranteed by 
         {@link Carrier#legs()}.<p>
         
-        For fluid transport, routes are limited by the given resource.
+        For fluid transport, routes are limited by the given bulkResource.
         Resource is currently ignored for power and item requests.
        
         Approach: compare first leg of each list, with these possibilities...<p>
@@ -791,12 +791,12 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     /**
-     * Sends resource from one device to another
+     * Sends bulkResource from one device to another
      * by any available route(s) and return
      * the quantity actually sent.  Will send via
      * more than one route if necessary / possible.
      * 
-     * @param resource  stuff to send
+     * @param bulkResource  stuff to send
      * @param quantity  how much
      * @param from      producing device
      * @param to        consuming device
@@ -1026,7 +1026,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     
     /**
      * Returns true if any transport route exists between the two devices
-     * that could be used to transport the given resource. Resource currently
+     * that could be used to transport the given bulkResource. Resource currently
      * only matters for fluid circuits, which are always locked to a specific
      * fluid.<p>
      * 

@@ -9,7 +9,7 @@ import org.magicwerk.brownies.collections.Key2List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.crafting.base.AbstractRecipe;
+import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.crafting.base.ICraftingProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
@@ -21,11 +21,13 @@ import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import mezz.jei.api.IGuiHelper;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
 /**
  * Represents a one-way conversion from a specific fluid 
- * or item resource to a general bulk (fluid) resource.
+ * or item bulkResource to a general bulk (fluid) bulkResource.
  * Used when a fabrication process can accept multiple 
  * inputs with varying types or conversion parameters
  * but no processing is required. <p>
@@ -48,7 +50,8 @@ import net.minecraft.util.ResourceLocation;
  * the only place they will ever exist is in a machine input buffer.
  *
  */
-public class BulkLoadingRecipe<T extends StorageType<T>> extends AbstractRecipe
+@Deprecated
+public class BulkLoadingRecipe<T extends StorageType<T>> extends GenericRecipe
 {
     public static final String UID = HardScience.prefixName("bulk_conversion");
 
@@ -96,6 +99,16 @@ public class BulkLoadingRecipe<T extends StorageType<T>> extends AbstractRecipe
                 0);
     }
 
+    public BulkLoadingRecipe(NBTTagCompound tag)
+    {
+        super(tag);
+    }
+    
+    public BulkLoadingRecipe(PacketBuffer pBuff)
+    {
+        super(pBuff);
+    }
+    
     public static class Category extends AbstractRecipeCategory<BulkLoadingRecipe<?>>
     {
         
@@ -115,7 +128,7 @@ public class BulkLoadingRecipe<T extends StorageType<T>> extends AbstractRecipe
         private SingleParameterModel model = new SingleParameterModel();
         
         /**
-         * The bulk resource that is the result of this conversion.
+         * The bulk bulkResource that is the result of this conversion.
          */
         private final BulkResource outputResource;
         public BulkResource outputResource() { return this.outputResource; }
@@ -124,10 +137,10 @@ public class BulkLoadingRecipe<T extends StorageType<T>> extends AbstractRecipe
         public IResource<T> inputResource() { return this.inputResource; }
         
         /**
-         * For item resource inputs, conversion factor is nL output resulting
+         * For item bulkResource inputs, conversion factor is nL output resulting
          * from a single stack of input.<p>
          * 
-         * For fluid resource inputs, conversion factor simple maps input
+         * For fluid bulkResource inputs, conversion factor simple maps input
          * nL to output nL.
          */
         private Process(BulkResource outputResource, IResource<T> inputResource, double conversionFactor)
@@ -146,7 +159,7 @@ public class BulkLoadingRecipe<T extends StorageType<T>> extends AbstractRecipe
             if(minOutputs.size() != 1 || !minOutputs.get(0).resource().isResourceEqual(this.outputResource))
             {
                 assert false : "Invalid crafting configuration.";
-                return (BulkLoadingRecipe<T>) AbstractRecipe.EMPTY_RECIPE;
+                return (BulkLoadingRecipe<T>) GenericRecipe.EMPTY_RECIPE;
             }
             
             long outputNeeded = minOutputs.get(0).getQuantity();
@@ -169,7 +182,7 @@ public class BulkLoadingRecipe<T extends StorageType<T>> extends AbstractRecipe
             if(maxInputs.size() != 1 || !maxInputs.get(0).resource().isResourceEqual(this.inputResource))
             {
                 assert false : "Invalid crafting configuration.";
-                return (BulkLoadingRecipe<T>) AbstractRecipe.EMPTY_RECIPE;
+                return (BulkLoadingRecipe<T>) GenericRecipe.EMPTY_RECIPE;
             }
             
             long inputAvailable = maxInputs.get(0).getQuantity();

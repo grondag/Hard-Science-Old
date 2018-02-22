@@ -141,7 +141,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     @Override
     protected BufferManager2 createBufferManager()
     {
-        return new BufferManager2(BUFFER_SPECS);
+        return new BufferManager2(this);
     }
 
     @Override
@@ -245,7 +245,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         
         // If we got to this point, we have a fabricated block.
         // Put it in domain storage if there is room for it
-        // and tag the task with the location of the resource so drone can find it
+        // and tag the task with the location of the bulkResource so drone can find it
         // otherwise stall
         if(this.getDomain() == null) return;
         
@@ -392,34 +392,34 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
         }
     }
 
-    @Override
-    public void updateMachine(long tick)
-    {
-        super.updateMachine(tick);
-        
-        if(!this.isOn()) return;
-        
-        if(this.getDomain() == null) return;
-        
-        if((tick & 0x1F) == 0x1F)
-        {
-            this.setCurrentBacklog(this.getDomain().jobManager.getQueueDepth(TaskType.BLOCK_FABRICATION));
-        }
-        
-        switch(this.getControlState().getMachineState())
-        {
-        case FABRICATING:
-            this.progressFabrication();
-            break;
-            
-        case TRANSPORTING:
-            this.outputFabricatedBlock();
-            break;
-            
-        default:
-            this.searchForWork();
-            break;
-            
-        }
-    }
+//    @Override
+//    public void updateMachine(long tick)
+//    {
+//        super.updateMachine(tick);
+//        
+//        if(!this.isOn()) return;
+//        
+//        if(this.getDomain() == null) return;
+//        
+//        if((tick & 0x1F) == 0x1F)
+//        {
+//            this.setCurrentBacklog(this.getDomain().jobManager.getQueueDepth(TaskType.BLOCK_FABRICATION));
+//        }
+//        
+//        switch(this.getControlState().getMachineState())
+//        {
+//        case FABRICATING:
+//            this.progressFabrication();
+//            break;
+//            
+//        case TRANSPORTING:
+//            this.outputFabricatedBlock();
+//            break;
+//            
+//        default:
+//            this.searchForWork();
+//            break;
+//            
+//        }
+//    }
 }

@@ -3,7 +3,7 @@ package grondag.hard_science.machines.support;
 import grondag.hard_science.simulator.Simulator;
 
 /**
- * Handles constraints and accounting for resource containers.
+ * Handles constraints and accounting for bulkResource containers.
  * @author grondag
  *
  */
@@ -71,6 +71,15 @@ public abstract class ThroughputRegulator
     {
         
     }
+    
+    public boolean isFailureCause()
+    {
+        return false;
+    }
+    
+    public void blame() {};
+    
+    public void forgive() {};
 
     /**
      * Has no limits but tracks input/output per tick.
@@ -88,6 +97,8 @@ public abstract class ThroughputRegulator
         protected long outputThisTick;
         
         protected int lastTickSeen = Integer.MIN_VALUE;
+        
+        protected boolean isFailureCause = false;
 
         protected synchronized void updateTracking()
         {
@@ -143,6 +154,24 @@ public abstract class ThroughputRegulator
         {
             this.updateTracking();
             return this.outputLastTick;
+        }
+
+        @Override
+        public boolean isFailureCause()
+        {
+            return this.isFailureCause;
+        }
+
+        @Override
+        public void blame()
+        {
+            this.isFailureCause = true;
+        }
+
+        @Override
+        public void forgive()
+        {
+            this.isFailureCause = false;
         }
     }
     

@@ -27,7 +27,10 @@ import net.minecraftforge.fluids.FluidStack;
  * 
  * In JEI, "template" or "example" recipe instances should
  * be registered to provide discoverability and documentation
- * of the process and the range of things it can craft.
+ * of the process and the range of things it can craft.</p>
+ * 
+ * Serializable so that machines can save current WIP recipe and
+ * transmit for display on client.
  */
 public interface IHardScienceRecipe extends IRecipeWrapper
 {

@@ -26,11 +26,11 @@ public interface IStorageAccess<T extends StorageType<T>>
     
     /**
      * Returns a list of stores of type STORAGE (no output buffers)
-     * that could accept the given resource and are reachable from 
+     * that could accept the given bulkResource and are reachable from 
      * the given device, in order of preference for input.<p>
      * 
      * Orders results to encourage clustering of like storage.
-     * Stores with the largest count of the resource (but still with empty space)
+     * Stores with the largest count of the bulkResource (but still with empty space)
      * come first, followed by stores with available space in descending order.
      */
     public default ImmutableList<IResourceContainer<T>> findSpaceFor(@Nonnull IResource<T> resource, @Nonnull IDevice reachableFrom)
@@ -51,8 +51,8 @@ public interface IStorageAccess<T extends StorageType<T>>
     }
     
     /**
-     * Returns all locations where the resource is stored.
-     * Note that the resource may be allocated so the stored
+     * Returns all locations where the bulkResource is stored.
+     * Note that the bulkResource may be allocated so the stored
      * quantities may not be available for use, but allocations
      * are not stored by location.<p>
      * 

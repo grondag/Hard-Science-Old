@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 public class RadialGaugeSpec extends RadialRenderBounds
 {
     /**
-     * Index of resource in TileEntity machine buffer manager
+     * Index of bulkResource in TileEntity machine buffer manager
      */
     public final int bufferIndex;
 

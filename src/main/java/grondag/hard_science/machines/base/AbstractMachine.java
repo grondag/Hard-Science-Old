@@ -1,18 +1,11 @@
 package grondag.hard_science.machines.base;
 
-import grondag.hard_science.machines.matbuffer.BufferManager2;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.AbstractDevice;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 
 public abstract class AbstractMachine extends AbstractDevice
 {
@@ -182,26 +175,6 @@ public abstract class AbstractMachine extends AbstractDevice
     }
     
     /**
-     * Will be called after machine power and material buffers are updated (if applies).
-     * Will be called irrespective of power or on/off, so check those if needed.
-     * Always called from server thread.
-     * @param tick  current world tick, in case needed
-     */
-    protected void updateMachine(long tick){}
-
-    @Override
-    public final void doOnTick()
-    {
-        super.doOnTick();
-        
-        int tick = Simulator.instance().getTick();
-        
-        if((tick & 0xF) == 0 && this.isOn()) this.restock();
-        
-        this.updateMachine(tick);
-    };
-    
-    /**
      * Make false to disable on/off switch.
      */
     public boolean hasOnOff() { return true;}
@@ -247,30 +220,30 @@ public abstract class AbstractMachine extends AbstractDevice
         return this.getStatusState().hasRedstonePower();
     }
     
-    protected void restock()
-    {
-        BufferManager2 bufferManager = this.getBufferManager();
-        
-        if(!bufferManager.canRestockAny() || this.machineTE == null) return;
-        
-        //FIXME: temp hack - should use world from location and check for loaded chunk
-        World teWorld = machineTE.getWorld();
-        
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            
-            TileEntity tileentity = teWorld.getTileEntity(this.getLocation().offset(face));
-            if (tileentity != null)
-            {
-                // Currently no power cost for pulling in items - would complicate fuel loading for fuel cells.
-                // If want to add this will require privileged handling or machines must get 
-                // power some other way to load fuel - seems tedious.
-                // Assuming this is covered by the "emergency" power supply that uses ambient energy harvesters.
-                IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-                if(bufferManager.restock(capability)) this.setDirty();
-            }
-        }
-    }
+//    protected void restock()
+//    {
+//        BufferManager2 bufferManager = this.getBufferManager();
+//        
+//        if(!bufferManager.canRestockAny() || this.machineTE == null) return;
+//        
+//        //FIXME: temp hack - should use world from location and check for loaded chunk
+//        World teWorld = machineTE.getWorld();
+//        
+//        for(EnumFacing face : EnumFacing.VALUES)
+//        {
+//            
+//            TileEntity tileentity = teWorld.getTileEntity(this.getLocation().offset(face));
+//            if (tileentity != null)
+//            {
+//                // Currently no power cost for pulling in items - would complicate fuel loading for fuel cells.
+//                // If want to add this will require privileged handling or machines must get 
+//                // power some other way to load fuel - seems tedious.
+//                // Assuming this is covered by the "emergency" power supply that uses ambient energy harvesters.
+//                IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
+//                if(bufferManager.restock(capability)) this.setDirty();
+//            }
+//        }
+//    }
     
     /**
      * Call when power stops production.
@@ -283,5 +256,33 @@ public abstract class AbstractMachine extends AbstractDevice
             this.energyManager().setFailureCause(true);
             this.markTEPlayerUpdateDirty(false);
         }
+    }
+    
+    /**
+     * Consumes the given number of joules from the power supply,
+     * returning true if all power was available. If not all power
+     * is available then returns false and blames the power supply.
+     */
+    protected boolean provideAllPowerOrBlameSupply(long joules)
+    {
+        long result = this.energyManager().provideEnergy(joules, false, false);
+        if(result != joules)
+        {
+            this.blamePowerSupply();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Consumes up to the given number of joules from the power supply,
+     * returning the number actually consumed. 
+     * If the amount is less than requested blames the power supply.
+     */
+    protected long provideSomePowerAndBlameSupply(long joules)
+    {
+        long result = this.energyManager().provideEnergy(joules, true, false);
+        if(result != joules) this.blamePowerSupply();
+        return result;
     }
 }

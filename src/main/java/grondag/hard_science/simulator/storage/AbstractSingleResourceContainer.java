@@ -21,14 +21,14 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
 {
     /**
      * Resource contained in this storage.  
-     * Null if not configured or contains no resource.
+     * Null if not configured or contains no bulkResource.
      */
     protected IResource<T> resource;
     
     /**
      * If true, then this container can only hold
-     * the resource identified by {@link #resource} and
-     * {@link #resource} will be non-null even when
+     * the bulkResource identified by {@link #bulkResource} and
+     * {@link #bulkResource} will be non-null even when
      * container is empty.
      */
     protected boolean isFixedResource = false;
@@ -46,10 +46,10 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
     
     /**
      * Setting to a non-null value will configure this
-     * container to accept only the given resource.  
+     * container to accept only the given bulkResource.  
      * Setting to null will remove this constraint.
      * Container must be empty or already contain
-     * the given resource when called.
+     * the given bulkResource when called.
      */
     public void setFixedResource(@Nullable IResource<T> resource)
     {
@@ -60,14 +60,14 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
                 this.resource = resource;
                 this.isFixedResource = resource != null;
             }
-            else assert false: "Attempt to configure non-empty resource container.";
+            else assert false: "Attempt to configure non-empty bulkResource container.";
         }
     }
     
     @Override
     public boolean isResourceAllowed(@Nonnull IResource<T> resource)
     {
-        // fall back to predicate if resource not set
+        // fall back to predicate if bulkResource not set
         return (this.resource == null && super.isResourceAllowed(resource))
                 || resource.isResourceEqual(this.resource);
     }
@@ -105,7 +105,7 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
         
         // should be caught by isResourceAllowed, but just to be sure...
         assert this.resource == null || this.resource.isResourceEqual(resource)
-                : "Mismatched addition in resource container";
+                : "Mismatched addition in bulkResource container";
         
         if(!simulate)
         {

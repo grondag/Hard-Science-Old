@@ -8,7 +8,8 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.AbstractCraftingProcess;
-import grondag.hard_science.crafting.base.AbstractRecipe;
+import grondag.hard_science.crafting.base.GenericRecipe;
+import grondag.hard_science.crafting.base.IHardScienceRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
@@ -17,9 +18,11 @@ import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResource;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
-public class CrushinatorRecipe extends AbstractRecipe
+public class CrushinatorRecipe extends GenericRecipe
 {
     public static final String UID = HardScience.prefixName("crushinator");
 
@@ -31,9 +34,9 @@ public class CrushinatorRecipe extends AbstractRecipe
     /**
      * Generates list of sample recipes to display in JEI
      */
-    public static List<CrushinatorRecipe>allRecipes()
+    public static List<IHardScienceRecipe>allRecipes()
     {
-        ImmutableList.Builder<CrushinatorRecipe> builder = ImmutableList.builder();
+        ImmutableList.Builder<IHardScienceRecipe> builder = ImmutableList.builder();
         for(Process p : fabs)
         {
             builder.add(p.configureFromInputs(ImmutableList.of(p.allInputs().get(0).withQuantity(1))));
@@ -62,6 +65,16 @@ public class CrushinatorRecipe extends AbstractRecipe
         super(process, result, ticksDuration);
     }
 
+    public CrushinatorRecipe(NBTTagCompound tag)
+    {
+        super(tag);
+    }
+    
+    public CrushinatorRecipe(PacketBuffer pBuff)
+    {
+        super(pBuff);
+    }
+    
     public static class Category extends AbstractRecipeCategory<CrushinatorRecipe>
     {
         public Category(IGuiHelper guiHelper)

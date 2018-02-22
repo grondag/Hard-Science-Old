@@ -15,7 +15,7 @@ import net.minecraft.nbt.NBTTagCompound;
  * Forwards all calls to a wrapped instance.
  * Main purpose is to enable subclassing of wrapped types.
  * Specifically, lets us reuse ContainerUsage semantics 
- * implementation for both single and multi-resource containers.
+ * implementation for both single and multi-bulkResource containers.
  * May find other uses down the road.
  */
 public class ForwardingResourceContainer<T extends StorageType<T>> implements IResourceContainer<T>

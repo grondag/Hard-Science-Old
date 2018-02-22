@@ -1,5 +1,6 @@
 package grondag.hard_science.simulator.resource;
 
+import java.io.IOException;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -19,11 +20,14 @@ import grondag.hard_science.simulator.transport.carrier.Channel;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
 
 /**
- * Set up like an enum but using classes to enable generic-based type safety for resource classes.
+ * Set up like an enum but using classes to enable generic-based type safety for bulkResource classes.
  * Probably a better way to do this but I don't think a regular enum will do.
  */
 public abstract class StorageType<T extends StorageType<T>>
@@ -65,9 +69,27 @@ public abstract class StorageType<T extends StorageType<T>>
             public boolean test(IResource<T> t) { return true; }
         };
     }
+    @Nullable
+    public abstract IResource<T> fromBytes(PacketBuffer pBuff);
+    
+    @Nullable
+    public AbstractResourceWithQuantity<T> fromBytesWithQty(PacketBuffer pBuff)
+    {
+        return fromBytes(pBuff).withQuantity(pBuff.readVarLong());
+    }
     
     @Nullable
     public abstract IResource<T> fromNBT(NBTTagCompound nbt);
+    
+    @Nullable
+    public abstract void toBytes(IResource<T> resource, PacketBuffer pBuff);
+    
+    @Nullable
+    public void toBytes(AbstractResourceWithQuantity<T> rwq, PacketBuffer pBuff)
+    {
+        this.toBytes(rwq.resource(), pBuff);
+        pBuff.writeVarLong(rwq.quantity);
+    }
     
     @Nullable
     public abstract NBTTagCompound toNBT(IResource<T> resource);
@@ -183,6 +205,25 @@ public abstract class StorageType<T extends StorageType<T>>
                 return 0;
             }
         }
+
+        @Override
+        public IResource<StorageTypeStack> fromBytes(PacketBuffer pBuff)
+        {
+            try
+            {
+                return ItemResource.fromStack(pBuff.readItemStack());
+            }
+            catch (IOException e)
+            {
+                return this.emptyResource;
+            }
+        }
+
+        @Override
+        public void toBytes(IResource<StorageTypeStack> resource, PacketBuffer pBuff)
+        {
+            pBuff.writeItemStack(((ItemResource)resource).sampleItemStack());
+        }
     }
             
     /**
@@ -245,6 +286,19 @@ public abstract class StorageType<T extends StorageType<T>>
                 assert false: "Unhandled enum mapping";
                 return 0;
             }
+        }
+
+        @Override
+        public IResource<StorageTypeFluid> fromBytes(PacketBuffer pBuff)
+        {
+            Fluid f = FluidRegistry.getFluid(pBuff.readString(256));
+            return new FluidResource(f, null);
+        }
+
+        @Override
+        public void toBytes(IResource<StorageTypeFluid> resource, PacketBuffer pBuff)
+        {
+            pBuff.writeString(((FluidResource)resource).getFluid().getName());
         }
     }
     
@@ -309,6 +363,18 @@ public abstract class StorageType<T extends StorageType<T>>
                 return 0;
             }
         }
+
+        @Override
+        public IResource<StorageTypePower> fromBytes(PacketBuffer pBuff)
+        {
+            return PowerResource.JOULES;
+        }
+
+        @Override
+        public void toBytes(IResource<StorageTypePower> resource, PacketBuffer pBuff)
+        {
+            // NOOP - always joules
+        }
     }
    
     /**
@@ -362,6 +428,18 @@ public abstract class StorageType<T extends StorageType<T>>
         public long transportCapacity(CarrierLevel level, int channel)
         {
             return 0;
+        }
+
+        @Override
+        public IResource<StorageTypeBulk> fromBytes(PacketBuffer pBuff)
+        {
+            return ModBulkResources.get(pBuff.readString(256));
+        }
+
+        @Override
+        public void toBytes(IResource<StorageTypeBulk> resource, PacketBuffer pBuff)
+        {
+            pBuff.writeString(((BulkResource)resource).systemName());
         }
     }
 }

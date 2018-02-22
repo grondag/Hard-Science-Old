@@ -77,7 +77,7 @@ public class MatterCubeItemModel1 implements IBakedModel
         {
             ImmutableMap.Builder<TransformType, TRSRTransformation> builder = ImmutableMap.builder();
             
-            float renderScale = (float) MathHelper.clamp(Math.log10(matterCube.nanoLiters) / 12, 0.1, 1.0);
+            float renderScale = (float) MathHelper.clamp(Math.log10(matterCube.maxNanoLiters) / 12, 0.1, 1.0);
             
             builder.put(TransformType.GUI,                     getTransform(0, 0, 0, 0, 0, 0, renderScale));
             builder.put(TransformType.GROUND,                  getTransform(0, 3, 0, 0, 0, 0, 0.25f * renderScale));

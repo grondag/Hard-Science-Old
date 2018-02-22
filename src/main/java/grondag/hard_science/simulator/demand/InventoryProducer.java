@@ -12,7 +12,7 @@ public class InventoryProducer<V extends StorageType<V>>
     /**
      * Broker that is tracking demand for our resource.
      * If null, means {@link #tearDown()} has run
-     * and we should ignore any incomimng requests.
+     * and we should ignore any incoming requests.
      */
     private SimpleBroker<V> broker;
     
@@ -73,7 +73,7 @@ public class InventoryProducer<V extends StorageType<V>>
         
         for( IResourcePredicateWithQuantity<V> demand : request.openDemands())
         {
-            if(demand.predicate().test(this.resource))
+            if(demand.test(this.resource))
             {
                 this.itMe = true;
                 long allocated = this.storageManager.changeAllocation(this.resource, demand.getQuantity(), request);

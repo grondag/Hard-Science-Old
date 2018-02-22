@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.AbstractCraftingProcess;
-import grondag.hard_science.crafting.base.AbstractRecipe;
+import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
@@ -22,10 +22,12 @@ import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
-public class EmergencyFabricatorRecipe extends AbstractRecipe
+public class EmergencyFabricatorRecipe extends GenericRecipe
 {
     public static final String UID = HardScience.prefixName("emergency_fab");
 
@@ -95,6 +97,16 @@ public class EmergencyFabricatorRecipe extends AbstractRecipe
         super(process, result, ticksDuration);
     }
 
+    public EmergencyFabricatorRecipe(NBTTagCompound tag)
+    {
+        super(tag);
+    }
+    
+    public EmergencyFabricatorRecipe(PacketBuffer pBuff)
+    {
+        super(pBuff);
+    }
+    
     public static class Category extends AbstractRecipeCategory<EmergencyFabricatorRecipe>
     {
         public Category(IGuiHelper guiHelper)

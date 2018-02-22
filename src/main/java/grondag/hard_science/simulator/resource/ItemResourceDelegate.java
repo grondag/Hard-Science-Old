@@ -12,7 +12,7 @@ import net.minecraft.network.PacketBuffer;
  * with server-side resources using the handle.
  * 
  * Includes a quantityIn directly instead of in a sub class
- * because uses cases for resource delegates typically require it.
+ * because uses cases for bulkResource delegates typically require it.
  */
 public class ItemResourceDelegate implements IMessagePlus
 {

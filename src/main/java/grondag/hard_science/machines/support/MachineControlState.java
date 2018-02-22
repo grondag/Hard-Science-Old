@@ -2,6 +2,7 @@ package grondag.hard_science.machines.support;
 
 import javax.annotation.Nonnull;
 
+import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
@@ -121,6 +122,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     private static BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
     private static BooleanElement PACKED_HAS_MATERIAL_BUFFER = PACKER.createBooleanElement();
     private static BooleanElement PACKED_HAS_POWER_SUPPLY= PACKER.createBooleanElement();
+    private static BooleanElement PACKED_HAS_RECIPE= PACKER.createBooleanElement();
 
     private static final long DEFAULT_BITS;
     
@@ -137,8 +139,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     private short jobDurationTicks = 0;
     private short jobRemainingTicks = 0;
     private BlockPos targetPos = null;
-    
-    
+    private GenericRecipe currentRecipe = null;
     
     //////////////////////////////////////////////////////////////////////
     // ACCESS METHODS
@@ -162,6 +163,19 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     {
         this.modelState = value; 
         this.updateModelStateStatus();
+    }
+    
+    /**
+     * If true, then recipe should be populated.
+     */
+    public boolean hasRecipe() { return PACKED_HAS_RECIPE.getValue(bits); }
+    private void updateRecipeStatus() { bits = PACKED_HAS_RECIPE.setValue(this.currentRecipe != null, bits); }
+    
+    public GenericRecipe getRecipe() { return this.currentRecipe; }
+    public void setRecipe( GenericRecipe value)
+    {
+        this.currentRecipe = value; 
+        this.updateRecipeStatus();
     }
     
     public boolean hasTargetPos() { return PACKED_HAS_TARGET_POS.getValue(bits); }
@@ -279,6 +293,10 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
                 this.jobDurationTicks = tag.getShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS);
                 this.jobRemainingTicks = tag.getShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS);
             }
+            if(this.hasRecipe())
+            {
+                this.currentRecipe = new GenericRecipe(tag);
+            }
         }
     }
 
@@ -298,6 +316,10 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         {
             tag.setShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS, this.jobDurationTicks);
             tag.setShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS, this.jobRemainingTicks);
+        }
+        if(this.hasRecipe())
+        {
+            this.currentRecipe.serializeNBT(tag);
         }
     }   
     
@@ -320,7 +342,12 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
             this.jobRemainingTicks = pBuff.readShort();
         }
         
+        if(this.hasRecipe())
+        {
+            this.currentRecipe = new GenericRecipe(pBuff);
+        }
     }
+    
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
@@ -337,6 +364,10 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         {
             pBuff.writeShort(this.jobDurationTicks);
             pBuff.writeShort(this.jobRemainingTicks);
+        }
+        if(this.hasRecipe())
+        {
+            this.currentRecipe.toBytes(pBuff);
         }
     }
 }

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.external.jei.HardScienceJEIPlugIn;
 import grondag.hard_science.external.jei.RecipeLayout;
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.machines.energy.MachinePower;
@@ -19,12 +20,16 @@ import grondag.hard_science.simulator.resource.FluidResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.PowerResource;
+import grondag.hard_science.simulator.resource.StorageType;
 import mezz.jei.api.gui.IDrawable;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.PacketBuffer;
 
-public class AbstractRecipe implements IHardScienceRecipe
+public class GenericRecipe implements IHardScienceRecipe
 {
-    public static final AbstractRecipe EMPTY_RECIPE = new AbstractRecipe(
+    public static final GenericRecipe EMPTY_RECIPE = new GenericRecipe(
             ImmutableList.of(), 
             ImmutableList.of(), 
             0) {};
@@ -44,7 +49,7 @@ public class AbstractRecipe implements IHardScienceRecipe
      */
     private RecipeLayout layout;
     
-    protected AbstractRecipe(
+    protected GenericRecipe(
             Collection<AbstractResourceWithQuantity<?>> inputs,
             Collection<AbstractResourceWithQuantity<?>> outputs,
             int ticksDuration
@@ -122,7 +127,7 @@ public class AbstractRecipe implements IHardScienceRecipe
         this.ticksDuration = ticksDuration;
     }
     
-    protected AbstractRecipe(
+    public GenericRecipe(
             AbstractCraftingProcess<?> process,
             SingleParameterModel.Result result,
             int ticksDuration
@@ -221,6 +226,163 @@ public class AbstractRecipe implements IHardScienceRecipe
                 : 0;
         
         this.ticksDuration = ticksDuration;
+    }
+    
+    public GenericRecipe(NBTTagCompound tag)
+    {
+        this.energyInputJoules = tag.getLong(ModNBTTag.RECIPE_INPUT_JOULES);
+        this.energyOutputJoules = tag.getLong(ModNBTTag.RECIPE_OUTPUT_JOULES);
+        this.ticksDuration = tag.getInteger(ModNBTTag.RECIPE_TICKS_DURATION);
+
+        if(tag.hasKey(ModNBTTag.RECIPE_FLUID_INPUTS))
+        {
+            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_FLUID_INPUTS, 10);
+            ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
+            list.forEach(t -> builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromNBTWithQty((NBTTagCompound) t)));
+            this.fluidInputs = builder.build();
+        }
+        else this.fluidInputs = ImmutableList.of();
+       
+        if(tag.hasKey(ModNBTTag.RECIPE_ITEM_INPUTS))
+        {
+            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_ITEM_INPUTS, 10);
+            ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
+            list.forEach(t -> builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromNBTWithQty((NBTTagCompound) t)));
+            this.itemInputs = builder.build();
+        }
+        else this.itemInputs = ImmutableList.of();
+        
+        if(tag.hasKey(ModNBTTag.RECIPE_BULK_INPUTS))
+        {
+            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_BULK_INPUTS, 10);
+            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
+            list.forEach(t -> builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromNBTWithQty((NBTTagCompound) t)));
+            this.bulkInputs = builder.build();
+        }
+        else this.bulkInputs = ImmutableList.of();
+        
+        
+        if(tag.hasKey(ModNBTTag.RECIPE_FLUID_OUTPUTS))
+        {
+            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_FLUID_OUTPUTS, 10);
+            ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
+            list.forEach(t -> builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromNBTWithQty((NBTTagCompound) t)));
+            this.fluidOutputs = builder.build();
+        }
+        else this.fluidOutputs = ImmutableList.of();
+       
+        if(tag.hasKey(ModNBTTag.RECIPE_ITEM_OUTPUTS))
+        {
+            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_ITEM_OUTPUTS, 10);
+            ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
+            list.forEach(t -> builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromNBTWithQty((NBTTagCompound) t)));
+            this.itemOutputs = builder.build();
+        }
+        else this.itemOutputs = ImmutableList.of();
+        
+        if(tag.hasKey(ModNBTTag.RECIPE_BULK_OUTPUTS))
+        {
+            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_BULK_OUTPUTS, 10);
+            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
+            list.forEach(t -> builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromNBTWithQty((NBTTagCompound) t)));
+            this.bulkOutputs = builder.build();
+        }
+        else this.bulkOutputs = ImmutableList.of();
+    }
+    
+    public GenericRecipe(PacketBuffer pBuff)
+    {
+        this.energyInputJoules = pBuff.readVarLong();
+        this.energyOutputJoules = pBuff.readVarLong();
+        this.ticksDuration = pBuff.readVarInt();
+
+        int size = pBuff.readByte();
+        if(size == 0)
+        {
+            this.fluidInputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
+            for(int i = 0; i < size; i++)
+            {
+                builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromBytesWithQty(pBuff));
+            }
+            this.fluidInputs = builder.build();
+        }
+       
+        size = pBuff.readByte();
+        if(size == 0)
+        {
+            this.itemInputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
+            for(int i = 0; i < size; i++)
+            {
+                builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromBytesWithQty(pBuff));
+            }
+            this.itemInputs = builder.build();
+        }
+
+        if(size == 0)
+        {
+            this.bulkInputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
+            for(int i = 0; i < size; i++)
+            {
+                builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromBytesWithQty(pBuff));
+            }
+            this.bulkInputs = builder.build();
+        }
+        
+        size = pBuff.readByte();
+        if(size == 0)
+        {
+            this.fluidOutputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
+            for(int i = 0; i < size; i++)
+            {
+                builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromBytesWithQty(pBuff));
+            }
+            this.fluidOutputs = builder.build();
+        }
+       
+        size = pBuff.readByte();
+        if(size == 0)
+        {
+            this.itemOutputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
+            for(int i = 0; i < size; i++)
+            {
+                builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromBytesWithQty(pBuff));
+            }
+            this.itemOutputs = builder.build();
+        }
+
+        if(size == 0)
+        {
+            this.bulkOutputs = ImmutableList.of();
+        }
+        else
+        {
+            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
+            for(int i = 0; i < size; i++)
+            {
+                builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromBytesWithQty(pBuff));
+            }
+            this.bulkOutputs = builder.build();
+        }
     }
     
     @Override
@@ -421,5 +583,85 @@ public class AbstractRecipe implements IHardScienceRecipe
                     layout.width, 
                     8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM);
         }
+    }
+
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        tag.setLong(ModNBTTag.RECIPE_INPUT_JOULES, energyInputJoules);
+        tag.setLong(ModNBTTag.RECIPE_OUTPUT_JOULES, energyOutputJoules);
+        tag.setInteger(ModNBTTag.RECIPE_TICKS_DURATION, ticksDuration);
+
+        if(!this.fluidInputs.isEmpty())
+        {
+            NBTTagList list = new NBTTagList();
+            this.fluidInputs.stream().forEach(r -> list.appendTag(r.toNBT()));
+            tag.setTag(ModNBTTag.RECIPE_FLUID_INPUTS, list);
+        }
+       
+        if(!this.itemInputs.isEmpty())
+        {
+            NBTTagList list = new NBTTagList();
+            this.itemInputs.stream().forEach(r -> list.appendTag(r.toNBT()));
+            tag.setTag(ModNBTTag.RECIPE_ITEM_INPUTS, list);
+        }
+        
+        if(!this.bulkInputs.isEmpty())
+        {
+            NBTTagList list = new NBTTagList();
+            this.bulkInputs.stream().forEach(r -> list.appendTag(r.toNBT()));
+            tag.setTag(ModNBTTag.RECIPE_BULK_INPUTS, list);
+        }
+        
+        if(!this.fluidOutputs.isEmpty())
+        {
+            NBTTagList list = new NBTTagList();
+            this.fluidOutputs.stream().forEach(r -> list.appendTag(r.toNBT()));
+            tag.setTag(ModNBTTag.RECIPE_FLUID_OUTPUTS, list);
+        }
+       
+        if(!this.itemOutputs.isEmpty())
+        {
+            NBTTagList list = new NBTTagList();
+            this.itemOutputs.stream().forEach(r -> list.appendTag(r.toNBT()));
+            tag.setTag(ModNBTTag.RECIPE_ITEM_OUTPUTS, list);
+        }
+
+        if(!this.bulkOutputs.isEmpty())
+        {
+            NBTTagList list = new NBTTagList();
+            this.bulkOutputs.stream().forEach(r -> list.appendTag(r.toNBT()));
+            tag.setTag(ModNBTTag.RECIPE_BULK_OUTPUTS, list);
+        }
+    }
+
+    public void toBytes(PacketBuffer pBuff)
+    {
+        pBuff.writeVarLong(energyInputJoules);
+        pBuff.writeVarLong(energyOutputJoules);
+        pBuff.writeVarInt(ticksDuration);
+
+        pBuff.writeByte(this.fluidInputs.size());
+        if(!this.fluidInputs.isEmpty()) 
+            this.fluidInputs.stream().forEach(r -> StorageType.FLUID.toBytes(r, pBuff));
+       
+        pBuff.writeByte(this.itemInputs.size());
+        if(!this.itemInputs.isEmpty()) 
+            this.itemInputs.stream().forEach(r -> StorageType.ITEM.toBytes(r, pBuff));
+
+        pBuff.writeByte(this.bulkInputs.size());
+        if(!this.bulkInputs.isEmpty()) 
+            this.bulkInputs.stream().forEach(r -> StorageType.PRIVATE.toBytes(r, pBuff));
+        
+        pBuff.writeByte(this.fluidOutputs.size());
+        if(!this.fluidOutputs.isEmpty()) 
+            this.fluidOutputs.stream().forEach(r -> StorageType.FLUID.toBytes(r, pBuff));
+       
+        pBuff.writeByte(this.itemOutputs.size());
+        if(!this.itemOutputs.isEmpty()) 
+            this.itemOutputs.stream().forEach(r -> StorageType.ITEM.toBytes(r, pBuff));
+
+        pBuff.writeByte(this.bulkOutputs.size());
+        if(!this.bulkOutputs.isEmpty()) 
+            this.bulkOutputs.stream().forEach(r -> StorageType.PRIVATE.toBytes(r, pBuff));
     }
 }

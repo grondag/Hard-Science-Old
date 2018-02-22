@@ -834,7 +834,7 @@ public class RawQuad
     }
     
     /** 
-     * Simple scale transformation of all vertex coordinates 
+     * Unique scale transformation of all vertex coordinates 
      * using block center (0.5, 0.5, 0.5) as origin.
      */
     public void scaleFromBlockCenter(double scale)

@@ -5,7 +5,7 @@ public enum RequestStatus
     /** Request is being constructed, scheduled, etc. Status not yet meaningful.*/
     NEW(false),
     
-    /** Request is waiting for planned external dependencies (schedule, resource availability, target capacity) to be met */
+    /** Request is waiting for planned external dependencies (schedule, bulkResource availability, target capacity) to be met */
     WAITING(false),
     
     /** 

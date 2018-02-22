@@ -38,7 +38,7 @@ public interface IClickHandler<T>
             
             ItemStack heldStack = mc.player.inventory.getItemStack();
             
-            // if alt/right/middle clicking on same resource, don't count that as a deposit
+            // if alt/right/middle clicking on same bulkResource, don't count that as a deposit
             if(heldStack != null && !heldStack.isEmpty() && 
                     !(ItemHelper.canStacksCombine(heldStack, target.displayStack()) && (GuiScreen.isAltKeyDown() || mouseButton > 0)))
             {

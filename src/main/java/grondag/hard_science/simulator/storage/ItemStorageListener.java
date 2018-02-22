@@ -86,7 +86,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     private boolean isDead = false;
     
     /**
-     * Sequence counter for generating resource handles.
+     * Sequence counter for generating bulkResource handles.
      */
     private int nextHandle = 1;
     
@@ -208,9 +208,9 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     
     /**
      * Adds store and adds or updates item delegates in the map.
-     * Have to use a map because could have same resource and
+     * Have to use a map because could have same bulkResource and
      * thus same delegate for more than one store. We only send
-     * a single delegate per resource.  
+     * a single delegate per bulkResource.  
      */
     private void addStore(ItemContainer storage, HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map)
     {
@@ -249,7 +249,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         {
             d.setQuantity(d.getQuantity() + delta);
             
-            assert d.getQuantity() >= 0 : "Negative resource quantity";
+            assert d.getQuantity() >= 0 : "Negative bulkResource quantity";
         }
         return d;
     }
@@ -426,7 +426,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     }
 
     /**
-     * Will deregister for events if haven't already and release resource references.
+     * Will deregister for events if haven't already and release bulkResource references.
      */
     public void die()
     {

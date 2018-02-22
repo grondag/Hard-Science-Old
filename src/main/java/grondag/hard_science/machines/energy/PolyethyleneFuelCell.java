@@ -1,12 +1,13 @@
 package grondag.hard_science.machines.energy;
 
+import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.TimeUnits;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.matbuffer.BufferDelegate2;
 import grondag.hard_science.matter.CubeSize;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.storage.BulkContainer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 
@@ -75,7 +76,7 @@ public class PolyethyleneFuelCell extends AbstractGenerator
     @Override
     protected long generateImplementation(long maxOutput, boolean allowPartial, boolean simulate)
     {
-        BufferDelegate2 fuelBuffer = this.device().getBufferManager().bufferHDPE();
+        BulkContainer fuelBuffer = this.device().getBufferManager().bufferHDPE();
         
         if(fuelBuffer == null) return 0;
         
@@ -83,7 +84,7 @@ public class PolyethyleneFuelCell extends AbstractGenerator
         long fuel = MathHelper.ceil(maxOutput * this.cellType.fuelNanoLitersPerJoule); 
         
         // see what fuel we can get
-        fuel = fuelBuffer.use(fuel, true, true);
+        fuel = fuelBuffer.takeUpTo(ModBulkResources.HDPE, fuel, true);
         
         if(fuel == 0)
         {
@@ -99,7 +100,7 @@ public class PolyethyleneFuelCell extends AbstractGenerator
             if(!allowPartial && energy < maxOutput) return 0;
             
             // consume fuel if not simulating
-            if(!simulate) fuelBuffer.use(fuel);
+            if(!simulate) fuelBuffer.takeUpTo(ModBulkResources.HDPE, fuel, false);
         }
         return energy;
     }   

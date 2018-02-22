@@ -73,7 +73,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     public ItemStack stackWithQuantity(int quantity)
     {
         ItemStack result = new ItemStack(this.item, quantity, this.meta, this.caps);
-        if(this.tag != null) stack.setTagCompound(this.tag);
+        if(this.tag != null) result.setTagCompound(this.tag);
         return result;
     }
     

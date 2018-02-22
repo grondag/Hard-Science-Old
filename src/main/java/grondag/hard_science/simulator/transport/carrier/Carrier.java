@@ -321,7 +321,7 @@ public class Carrier<T extends StorageType<T>> implements ITypedStorage<T>
     }
 
     /**
-     * True if circuit is able to transport the given resource.
+     * True if circuit is able to transport the given bulkResource.
      * Needed for fluid circuits which are always locked to a
      * specific fluid. Will always be true for everything else.
      */

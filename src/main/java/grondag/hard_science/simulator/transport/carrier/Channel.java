@@ -125,7 +125,7 @@ public class Channel
     }
     
     /**
-     * True if the circuit channel matches the fluid of the given resource
+     * True if the circuit channel matches the fluid of the given bulkResource
      */
     public static boolean doesFluidMatchChannel(int channel, FluidResource forResource)
     {
@@ -135,7 +135,7 @@ public class Channel
     }
     
     /**
-     * True if the circuit channel matches the fluid of the given resource
+     * True if the circuit channel matches the fluid of the given bulkResource
      */
     public static boolean doesFluidMatchChannel(int channel, Fluid forFluid)
     {

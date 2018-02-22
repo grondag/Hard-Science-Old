@@ -248,13 +248,13 @@ public class ModModels
 //    private static int loadNonBlockTexture(String location)
 //    {
 //    
-//        IResource resource;
+//        IResource bulkResource;
 //        BufferedImage bufferedImage;
 //        
 //        try
 //        {
-//            resource = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(location));
-//            bufferedImage = TextureUtil.readBufferedImage(resource.getInputStream());
+//            bulkResource = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(location));
+//            bufferedImage = TextureUtil.readBufferedImage(bulkResource.getInputStream());
 //        }
 //        catch (IOException e)
 //        {

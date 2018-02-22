@@ -33,7 +33,7 @@ public abstract class ProcurementTask<V extends StorageType<V>> extends Abstract
         if(this.broker == null)
         {
             this.broker = this.getDomain().brokerManager
-                    .brokerForResourcePredicate(this.allDemands().get(0).predicate());
+                    .brokerForResourcePredicate(this.allDemands().get(0));
         }
         return this.broker;
     }

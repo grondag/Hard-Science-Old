@@ -77,7 +77,7 @@ public abstract class AbstractResourceContainer<T extends StorageType<T>> implem
             {
                 this.predicate = predicate;
             }
-            else assert false: "Attempt to configure non-empty resource container.";
+            else assert false: "Attempt to configure non-empty bulkResource container.";
         }
     }
     

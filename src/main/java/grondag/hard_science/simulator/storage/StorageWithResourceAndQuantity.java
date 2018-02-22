@@ -4,7 +4,7 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 
 /**
- * Simple data class for returning store-related inquiry results.
+ * Unique data class for returning store-related inquiry results.
  */
 public class StorageWithResourceAndQuantity<T extends StorageType<T>> extends StorageWithQuantity<T>
 {

@@ -1,7 +1,7 @@
 package grondag.hard_science.library.varia;
 
 /**
- * Simple library for color conversion and manipulation.
+ * Unique library for color conversion and manipulation.
  * Less complicated than java.awt.color and has conversions it seems to lack.
  * 
  * Hat tip to http://easyrgb.com for their reference page on conversion formulas.

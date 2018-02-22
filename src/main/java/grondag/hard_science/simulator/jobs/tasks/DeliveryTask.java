@@ -65,14 +65,14 @@ public class DeliveryTask<V extends StorageType<V>> extends AbstractTask
         /**
          * Delivery can be direct or packaged.
          * Direct delivery requires three things:
-         * 1) allocated resource is in a location accessible via fast transport
+         * 1) allocated bulkResource is in a location accessible via fast transport
          * 2) the transport network is not backlogged - transport is effectively instant
          * 3) the receiver can take immediate ownership at the destination
          * 
          * Direct won't be possible for anything that has to be picked up
          * from storage.  Direct won't be possible if drone transport is required.
          * 
-         * Packaged delivery means a new resource is created that is uniquely tagged
+         * Packaged delivery means a new bulkResource is created that is uniquely tagged
          * with this delivery request so that it is not accidentally consumed by 
          * another request and easily identified for pick up.  
          * 

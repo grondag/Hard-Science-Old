@@ -21,7 +21,7 @@ public interface IResourceContainer<T extends StorageType<T>>
 {
 
     /**
-     * Returned resource stacks are disconnected from this collection.
+     * Returned bulkResource stacks are disconnected from this collection.
      * Changing them will have no effect on storage contents.
      */
     List<AbstractResourceWithQuantity<T>> find(@Nonnull Predicate<IResource<T>> predicate);
@@ -34,11 +34,11 @@ public interface IResourceContainer<T extends StorageType<T>>
     }
 
     /**
-     * If this is a single-resource container, the resource it 
+     * If this is a single-bulkResource container, the bulkResource it 
      * currently contains or is configured to contain.<p>
      * 
-     * Null for multi-resource containers, or if the container is
-     * empty and has no configured resource.
+     * Null for multi-bulkResource containers, or if the container is
+     * empty and has no configured bulkResource.
      */
     @Nullable
     default IResource<T> resource() { return null; }
@@ -64,6 +64,23 @@ public interface IResourceContainer<T extends StorageType<T>>
      * and/or limit rate of input/output.
      */
     void setRegulator(ThroughputRegulator regulator);
+    
+    
+    /**
+     * Convenient access for regulator method.
+     */
+    public default void blame()
+    {
+        this.getRegulator().blame();
+    }
+    
+    /**
+     * Convenient access for regulator method.
+     */
+    public default void forgive()
+    {
+        this.getRegulator().forgive();
+    }
     
     /**
      * Increases quantityStored and returns quantityStored actually added.
@@ -210,4 +227,12 @@ public interface IResourceContainer<T extends StorageType<T>>
      * List will not be modifiable.  Useful for implementing IItemHandler.
      */
     public List<AbstractResourceWithQuantity<T>> slots();
+    
+    /**
+     * True if no storage capacity is used.
+     */
+    public default boolean isEmpty()
+    {
+        return this.usedCapacity() == 0;
+    }
 }

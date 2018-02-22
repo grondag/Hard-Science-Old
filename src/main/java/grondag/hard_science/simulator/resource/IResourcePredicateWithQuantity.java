@@ -1,11 +1,7 @@
 package grondag.hard_science.simulator.resource;
 
-import net.minecraft.nbt.NBTTagCompound;
-
-public interface IResourcePredicateWithQuantity<V extends StorageType<V>>
+public interface IResourcePredicateWithQuantity<V extends StorageType<V>> extends IResourcePredicate<V>
 {
-
-    IResourcePredicate<V> predicate();
 
     long getQuantity();
 
@@ -16,6 +12,6 @@ public interface IResourcePredicateWithQuantity<V extends StorageType<V>>
     
     void setQuantity(long quantity);
 
-    NBTTagCompound toNBT();
+//    NBTTagCompound toNBT();
 
 }

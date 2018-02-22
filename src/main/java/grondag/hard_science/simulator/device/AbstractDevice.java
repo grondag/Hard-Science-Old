@@ -97,7 +97,7 @@ public abstract class AbstractDevice implements IDevice
     @Nullable
     protected BufferManager2 createBufferManager()
     {
-        return null;
+        return new BufferManager2(this);
     }
     
 
@@ -361,7 +361,8 @@ public abstract class AbstractDevice implements IDevice
     @Override
     public boolean doesUpdateOffTick()
     {
-        return this.energyManager.doesUpdateOffTick();
+        return this.energyManager.doesUpdateOffTick() 
+            || this.bufferManager.doesUpdateOffTick();
     }
 
     @Override
@@ -369,5 +370,6 @@ public abstract class AbstractDevice implements IDevice
     {
         IDevice.super.doOffTick();
         if(this.energyManager.doesUpdateOffTick()) this.energyManager.doOffTick();
+        if(this.bufferManager.doesUpdateOffTick()) this.bufferManager.doOffTick();
     }
 }

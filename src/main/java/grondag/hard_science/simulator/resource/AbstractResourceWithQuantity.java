@@ -12,13 +12,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
 {
     private IResource<V> resource;
     protected long quantity;
-    
-    @Override
-    public IResourcePredicate<V> predicate()
-    {
-        return this.resource;
-    }
-
+  
     public AbstractResourceWithQuantity(@Nonnull IResource<V> resource, long quantity)
     {
         this.resource = resource;
@@ -127,5 +121,17 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     public AbstractResourceWithQuantity<V> clone()
     {
         return this.resource.withQuantity(quantity);
+    }
+
+    @Override
+    public boolean test(IResource<V> t)
+    {
+        return this.resource.test(t);
+    }
+
+    @Override
+    public V storageType()
+    {
+        return this.resource.storageType();
     }
 }

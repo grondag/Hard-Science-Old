@@ -78,13 +78,13 @@ public class ModItems
         itemReg.register(new BulkItem("gold_1kg", ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(1)));
         itemReg.register(new BulkItem("gold_100kg", ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(100)));
 
-        itemReg.register(new BulkItem("ammonia_1000L", ModBulkResources.AMMONIA_GAS, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem("ammonia_1000L", ModBulkResources.AMMONIA_GAS, VolumeUnits.KILOLITER.nL));
 
-        itemReg.register(new BulkItem("flex_resin_1L", ModBulkResources.FLEX_RESIN, VolumeUnits.LITER.withQuantity(10)));
-        itemReg.register(new BulkItem("flex_resin_1kL", ModBulkResources.FLEX_RESIN, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem("flex_resin_1L", ModBulkResources.FLEX_RESIN, VolumeUnits.LITER.nL * 10));
+        itemReg.register(new BulkItem("flex_resin_1kL", ModBulkResources.FLEX_RESIN, VolumeUnits.KILOLITER.nL));
         
-        itemReg.register(new BulkItem("crushed_stone_1kL", ModBulkResources.CRUSHED_STONE, VolumeUnits.KILOLITER.withQuantity(1)));
-        itemReg.register(new BulkItem("crushed_basalt_1kL", ModBulkResources.CRUSHED_BASALT, VolumeUnits.KILOLITER.withQuantity(1)));
+        itemReg.register(new BulkItem("crushed_stone_1kL", ModBulkResources.CRUSHED_STONE, VolumeUnits.KILOLITER.nL));
+        itemReg.register(new BulkItem("crushed_basalt_1kL", ModBulkResources.CRUSHED_BASALT, VolumeUnits.KILOLITER.nL));
         
         for(MatterPackaging matter : MatterPackaging.values())
         {

@@ -31,7 +31,7 @@ public interface ITransportManager<T extends StorageType<T>> extends IDeviceComp
     
     /**
      * All legs accessible from circuits on which this device is connected
-     * and which can be used for the given resource. Resource only
+     * and which can be used for the given bulkResource. Resource only
      * matters for fluid transport at current time and can be null
      * for those storage types but must be provided for fluid or result
      * will always be empty.

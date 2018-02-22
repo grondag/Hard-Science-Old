@@ -13,11 +13,6 @@ import grondag.hard_science.superblock.items.SuperItemBlock;
 
 public class BrokerManager implements IDomainMember
 {
-//    public final SimpleBroker<StorageTypeStack> ITEM_BROKER = new SimpleBroker<StorageTypeStack>();
-//    public final SimpleBroker<StorageTypeStack> FLUID_BROKER = new SimpleBroker<StorageTypeStack>();
-//    public final SimpleBroker<StorageTypeStack> GAS_BROKER = new SimpleBroker<StorageTypeStack>();
-//    public final SimpleBroker<StorageTypeStack> POWER_BROKER = new SimpleBroker<StorageTypeStack>(this);
-//    public final SimpleBroker<StorageTypeStack> BLOCK_BROKER = new SimpleBroker<StorageTypeStack>(this);
     
     private final HashMap<IResource<?>, IBroker<?>> simpleBrokers 
         = new HashMap<IResource<?>, IBroker<?>>();

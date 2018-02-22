@@ -7,6 +7,26 @@
  		Quantity stored is in NBT as nL
  		Stores Forge Liquids, which may be flowable solids
  	
+ 	Process
+ 		Can be discrete or continuous
+ 		Continuous have only bulk input and outputs, all are variable
+ 		Discrete have specific item inputs and fixed-amount bulk inputs/outputs
+ 	
+ 		Inputs
+ 		ItemConversion (w/ ItemPredicate) -> Bulk Resource
+ 		FluidConversion -> Bulk Resource
+ 		ItemPredicate (specific)
+ 		
+ 		Outputs
+ 		BulkResource -> Fluid
+ 		BulkResource -> Container (if not fluid or fluid transport unavailable)
+ 		ItemStack
+ 		 
+ 	JEI recipes...
+ 		Do not show bulk resources
+ 		For each bulk input show example BulkContainer or FluidStack
+ 		
+ 	
 	FluidBuffer
 		For any fluid (gas,liquid or flowable solid) input/or output
 		Can input/output from pipes, bulk containers

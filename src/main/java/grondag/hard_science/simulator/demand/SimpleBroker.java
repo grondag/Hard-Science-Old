@@ -9,7 +9,7 @@ import grondag.hard_science.simulator.resource.StorageType;
  * TODO: BLAR BLAr stuff below is RWONG
  * Automatically listens to resources in storage and registers storage resources
  * as producers so long as there are open requests. Unlistens and deregisters
- * the storage resource when there are no longer any open requests.<p>
+ * the storage bulkResource when there are no longer any open requests.<p>
  * 
  * Also removes self from parent collection if there are no open requests.
  * 

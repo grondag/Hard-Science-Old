@@ -162,14 +162,14 @@ package grondag.hard_science.machines.matbuffer;
 //     * Decreases buffer by given amount, return amount actually decreased.
 //     * Does not permit negatives.
 //     */
-//    public long use(long nanoLiters)
+//    public long use(long maxNanoLiters)
 //    {
-//        long result = Math.min(nanoLiters, this.currentLevelNanoLiters);
+//        long result = Math.min(maxNanoLiters, this.currentLevelNanoLiters);
 //        this.currentLevelNanoLiters -= result;
 //        
-//        if(Log.DEBUG_MODE && nanoLiters != result)
+//        if(Log.DEBUG_MODE && maxNanoLiters != result)
 //        {
-//            Log.warn("Machine material buffered received request higher than currentLevelNanoLiters. %d vs %d", nanoLiters, this.currentLevelNanoLiters);
+//            Log.warn("Machine material buffered received request higher than currentLevelNanoLiters. %d vs %d", maxNanoLiters, this.currentLevelNanoLiters);
 //        }
 //        return result;
 //    }

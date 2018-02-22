@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.AbstractCraftingProcess;
-import grondag.hard_science.crafting.base.AbstractRecipe;
+import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
@@ -14,9 +14,11 @@ import grondag.hard_science.matter.Compounds;
 import grondag.hard_science.matter.Molecules;
 import grondag.hard_science.simulator.resource.PowerResource;
 import mezz.jei.api.IGuiHelper;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
-public class SolarAmmoniaRecipe extends AbstractRecipe
+public class SolarAmmoniaRecipe extends GenericRecipe
 {
     public static final String UID = HardScience.prefixName("solar_ammonia");
    
@@ -27,6 +29,16 @@ public class SolarAmmoniaRecipe extends AbstractRecipe
         super(process, result, ticksDuration);
     }
 
+    public SolarAmmoniaRecipe(NBTTagCompound tag)
+    {
+        super(tag);
+    }
+    
+    public SolarAmmoniaRecipe(PacketBuffer pBuff)
+    {
+        super(pBuff);
+    }
+    
     public static class Process extends AbstractSingleModelProcess<SolarAmmoniaRecipe>
     {
         protected Process()

@@ -1,19 +1,10 @@
 package grondag.hard_science.simulator.resource;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
-import net.minecraft.nbt.NBTTagCompound;
-
 public class ResourcePredicateWithQuantity<V extends StorageType<V>> implements IResourcePredicateWithQuantity<V>
 {
     private final IResourcePredicate<V> predicate;
     
     private long quantity;
-    
-    @Override
-    public IResourcePredicate<V> predicate()
-    {
-        return this.predicate;
-    }
     
     @Override
     public long getQuantity()
@@ -39,21 +30,27 @@ public class ResourcePredicateWithQuantity<V extends StorageType<V>> implements 
         this.predicate = predicate;
         this.quantity = quantity;
     }
-    
-    @SuppressWarnings("unchecked")
-    public ResourcePredicateWithQuantity(NBTTagCompound tag)
-    {
-        this.predicate = (IResourcePredicate<V>) IResourcePredicate.fromNBT(tag);
-        this.quantity = tag.getLong(ModNBTTag.RESOURCE_QUANTITY);
-    }
-    
+
     @Override
-    public NBTTagCompound toNBT()
+    public boolean test(IResource<V> t)
     {
-        NBTTagCompound result = IResourcePredicate.toNBT(this.predicate);
-        result.setLong(ModNBTTag.RESOURCE_QUANTITY, this.quantity);
-        return result;
+        return this.predicate.test(t);
     }
+    
+//    @SuppressWarnings("unchecked")
+//    public ResourcePredicateWithQuantity(NBTTagCompound tag)
+//    {
+//        this.predicate = (IResourcePredicate<V>) IResourcePredicate.fromNBT(tag);
+//        this.quantity = tag.getLong(ModNBTTag.RESOURCE_QUANTITY);
+//    }
+    
+//    @Override
+//    public NBTTagCompound toNBT()
+//    {
+//        NBTTagCompound result = IResourcePredicate.toNBT(this.predicate);
+//        result.setLong(ModNBTTag.RESOURCE_QUANTITY, this.quantity);
+//        return result;
+//    }
 
     
 }

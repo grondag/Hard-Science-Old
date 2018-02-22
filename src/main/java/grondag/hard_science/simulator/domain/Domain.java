@@ -46,6 +46,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     public final JobManager jobManager;
     public final BuildManager buildManager;
     public final BrokerManager brokerManager;
+    public final ProcessManager processManager;
     
     private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
     
@@ -59,6 +60,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         this.jobManager = new JobManager(this);
         this.buildManager = new BuildManager(this);
         this.brokerManager = new BrokerManager(this);
+        this.processManager = new ProcessManager(this);
     }
     
     Domain (DomainManager domainManager, NBTTagCompound tag)
@@ -207,6 +209,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         
         tag.setTag(ModNBTTag.DOMAIN_JOB_MANAGER, this.jobManager.serializeNBT());
         tag.setTag(ModNBTTag.DOMAIN_BUILD_MANAGER, this.buildManager.serializeNBT());
+        this.processManager.serializeNBT(tag);
     }
 
     @Override
@@ -228,6 +231,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         
         this.jobManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
         this.buildManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_BUILD_MANAGER));
+        this.processManager.deserializeNBT(tag);
     }
     
     public DomainManager domainManager()

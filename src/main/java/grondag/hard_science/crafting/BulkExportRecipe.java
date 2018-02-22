@@ -9,21 +9,23 @@ import org.magicwerk.brownies.collections.Key2List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.crafting.base.AbstractRecipe;
+import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.crafting.base.ICraftingProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
-import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import mezz.jei.api.IGuiHelper;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
-public class BulkExportRecipe<T extends StorageType<T>> extends AbstractRecipe
+@Deprecated
+public class BulkExportRecipe<T extends StorageType<T>> extends GenericRecipe
 {
     public static final String UID = HardScience.prefixName("bulk_export");
 
@@ -71,6 +73,16 @@ public class BulkExportRecipe<T extends StorageType<T>> extends AbstractRecipe
                 0);
     }
 
+    public BulkExportRecipe(NBTTagCompound tag)
+    {
+        super(tag);
+    }
+    
+    public BulkExportRecipe(PacketBuffer pBuff)
+    {
+        super(pBuff);
+    }
+    
     public static class Category extends AbstractRecipeCategory<BulkExportRecipe<?>>
     {
         
@@ -90,7 +102,7 @@ public class BulkExportRecipe<T extends StorageType<T>> extends AbstractRecipe
         private SingleParameterModel model = new SingleParameterModel();
         
         /**
-         * The bulk resource that is the input for this conversion.
+         * The bulk bulkResource that is the input for this conversion.
          */
         private final BulkResource inputResource;
         public BulkResource inputResource() { return this.inputResource; }
@@ -102,10 +114,10 @@ public class BulkExportRecipe<T extends StorageType<T>> extends AbstractRecipe
         public IResource<T> outputResource() { return this.outputResource; }
         
         /**
-         * For item resource inputs, conversion factor is nL output resulting
+         * For item bulkResource inputs, conversion factor is nL output resulting
          * from a single stack of input.<p>
          * 
-         * For fluid resource inputs, conversion factor simple maps input
+         * For fluid bulkResource inputs, conversion factor simple maps input
          * nL to output nL.
          */
         private Process(IResource<T> outputResource, BulkResource inputResource, double conversionFactor)
@@ -124,7 +136,7 @@ public class BulkExportRecipe<T extends StorageType<T>> extends AbstractRecipe
             if(minOutputs.size() != 1 || !minOutputs.get(0).resource().isResourceEqual(this.outputResource))
             {
                 assert false : "Invalid crafting configuration.";
-                return (BulkExportRecipe<T>) AbstractRecipe.EMPTY_RECIPE;
+                return (BulkExportRecipe<T>) GenericRecipe.EMPTY_RECIPE;
             }
             
             long outputNeeded = minOutputs.get(0).getQuantity();
@@ -147,7 +159,7 @@ public class BulkExportRecipe<T extends StorageType<T>> extends AbstractRecipe
             if(maxInputs.size() != 1 || !maxInputs.get(0).resource().isResourceEqual(this.inputResource))
             {
                 assert false : "Invalid crafting configuration.";
-                return (BulkExportRecipe<T>) AbstractRecipe.EMPTY_RECIPE;
+                return (BulkExportRecipe<T>) GenericRecipe.EMPTY_RECIPE;
             }
             
             long inputAvailable = maxInputs.get(0).getQuantity();

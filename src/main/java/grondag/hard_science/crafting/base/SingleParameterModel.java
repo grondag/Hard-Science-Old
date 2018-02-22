@@ -8,7 +8,7 @@ public class SingleParameterModel
         = new Object2DoubleOpenHashMap<Object>();
     
     private Object2DoubleOpenHashMap<Object> outputs 
-    = new Object2DoubleOpenHashMap<Object>();
+        = new Object2DoubleOpenHashMap<Object>();
     
     public void createInput(Object key, double coefficient)
     {

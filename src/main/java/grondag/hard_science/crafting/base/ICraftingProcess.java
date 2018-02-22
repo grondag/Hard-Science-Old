@@ -120,6 +120,11 @@ public interface ICraftingProcess<R extends IHardScienceRecipe>
     public R configureFromOutputs(
             @Nonnull List<AbstractResourceWithQuantity<?>> minOutputs);
     
+    public default R configureFromOutputs(AbstractResourceWithQuantity<?> minOutput)
+    {
+        return this.configureFromInputs(ImmutableList.of(minOutput));
+    }
+    
     public R configureFromInputs(
             @Nonnull List<AbstractResourceWithQuantity<?>> maxInputs);
 }

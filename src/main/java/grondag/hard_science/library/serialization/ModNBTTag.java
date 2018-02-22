@@ -185,4 +185,26 @@ public class ModNBTTag
     public static final String PORT_LAYOUT_FACEMAP = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String DEVICE_PORT_LAYOUT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
+    public static final String RECIPE_INPUT_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_TICKS_DURATION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_OUTPUT_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_FLUID_INPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_ITEM_INPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_BULK_INPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_FLUID_OUTPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_ITEM_OUTPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String RECIPE_BULK_OUTPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String PROCESS_MIN_STOCKING_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PROCESS_STOCKING_PRIORITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PROCESS_SETTINGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String BUFFER_ITEMS_IN = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String BUFFER_ITEMS_OUT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String BUFFER_FLUIDS_IN = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String BUFFER_FLUIDS_OUT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String BUFFER_BULK = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String BULK_ITEM_NL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String BUFFER_PURPOSE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
 }

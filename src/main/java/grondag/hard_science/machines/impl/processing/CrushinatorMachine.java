@@ -1,21 +1,77 @@
 package grondag.hard_science.machines.impl.processing;
 
+import java.util.function.Predicate;
+
+import com.google.common.collect.ImmutableList;
+
+import grondag.hard_science.crafting.BulkItemInput;
+import grondag.hard_science.crafting.processing.CrushinatorRecipe2;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.energy.MachinePower;
+import grondag.hard_science.machines.matbuffer.BufferManager2;
+import grondag.hard_science.machines.matbuffer.BulkBufferPurpose;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
+import grondag.hard_science.machines.support.ThroughputRegulator;
+import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.simulator.jobs.TaskType;
+import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.domain.Domain;
+import grondag.hard_science.simulator.resource.BulkResource;
+import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.BulkContainer;
 import grondag.hard_science.simulator.storage.ContainerUsage;
+import grondag.hard_science.simulator.storage.ItemContainer;
 import grondag.hard_science.simulator.storage.PowerContainer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 
 public class CrushinatorMachine extends AbstractSimpleMachine
 {
     ////////////////////////////////////////////////////////////////////////
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * 
+     * Estimated number of crusher cycles that need to run to catch
+     * up with demand in the given domain based on input material
+     * available.
+     */
+    public static int estimatedBacklogDepth(Domain domain)
+    {
+        int result = 0;
+        for(ItemResourceWithQuantity d : demands(domain))
+        {
+            result += (int)d.getQuantity();
+        }
+        return result;
+    }
+    
+    public static ImmutableList<ItemResourceWithQuantity> demands(Domain domain)
+    {
+        return null;
+    }
+    
+    private static final ImmutableList<Predicate<?>> imports;
+    
+    static
+    {
+        ImmutableList.Builder<Predicate<?>> importBuilder = ImmutableList.builder();
+        for(BulkResource b: CrushinatorRecipe2.allInputs())
+        {
+            for(BulkItemInput i : BulkItemInput.inputsForResource(b))
+            {
+                importBuilder.add(i.ingredient());
+            }
+        }
+        imports = importBuilder.build();
+    }
+    
+    private static final long BULK_BUFFER_SIZE = VolumeUnits.KILOLITER.nL;
     
     //FIXME: make configurable
     private static final int WATTS_IDLE = 20;
@@ -29,6 +85,12 @@ public class CrushinatorMachine extends AbstractSimpleMachine
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
     
+    // these will be populated during construction 
+    // when super constructor calls createBuffer method
+    private ItemContainer itemInput;
+    private ItemContainer itemOutput;
+    private BulkContainer bulkInput;
+    private BulkContainer bulkOutput;
     
     public CrushinatorMachine()
     {
@@ -36,11 +98,62 @@ public class CrushinatorMachine extends AbstractSimpleMachine
         this.statusState.setHasBacklog(true);
     }
     
-//    @Override
-//    protected BufferManager2 createBufferManager()
-//    {
-//        return new BufferManager2(BUFFER_SPECS);
-//    }
+    @Override
+    protected BufferManager2 createBufferManager()
+    {
+        this.itemInput = new ItemContainer(this, ContainerUsage.BUFFER_IN);
+        this.itemInput.setCapacity(64);
+        this.itemInput.setRegulator(new ThroughputRegulator.Tracking());
+        this.itemInput.setContentPredicate(new Predicate<IResource<StorageTypeStack>>() 
+        {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            @Override
+            public boolean test(IResource<StorageTypeStack> t)
+            {
+                ItemStack stack = ((ItemResource)t).sampleItemStack();
+                for(Predicate p : imports)
+                {
+                    if(p.test(stack)) return true;
+                }
+                return false;
+            }
+        });
+        
+        this.itemOutput = new ItemContainer(this, ContainerUsage.BUFFER_OUT);
+        this.itemOutput.setRegulator(new ThroughputRegulator.Tracking());
+        this.itemOutput.setCapacity(64);
+        this.itemOutput.setContentPredicate(new Predicate<IResource<StorageTypeStack>>() 
+        {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            @Override
+            public boolean test(IResource<StorageTypeStack> t)
+            {
+                ItemStack stack = ((ItemResource)t).sampleItemStack();
+                if(stack.getItem() instanceof BulkItem)
+                {
+                    BulkResource b = ((BulkItem)stack.getItem()).matter;
+                    if(!CrushinatorRecipe2.getForOutput(b).isEmpty()) return true;
+                }
+                
+                // allow inputs to be moved to export if operation is aborted
+                for(Predicate p : imports)
+                {
+                    if(p.test(stack)) return true;
+                }
+                
+                return false;
+            }
+        });
+        
+        this.bulkInput = new BulkContainer(this, BulkBufferPurpose.PRIMARY_INPUT);
+        this.bulkInput.setCapacity(BULK_BUFFER_SIZE);
+        
+        this.bulkOutput = new BulkContainer(this, BulkBufferPurpose.PRIMARY_OUTPUT);
+        this.bulkOutput.setCapacity(BULK_BUFFER_SIZE);
+        
+        return new BufferManager2(this, itemInput, itemOutput, bulkInput, bulkOutput);
+       
+    }
 
     @Override
     protected DeviceEnergyManager createEnergyManager()
@@ -55,24 +168,11 @@ public class CrushinatorMachine extends AbstractSimpleMachine
                 null);
     }
     
-    
-    @Override
-    public boolean togglePower(EntityPlayerMP player)
-    {
-        boolean result = super.togglePower(player);
-        if(result && !this.isOn())
-        {
-            this.abandonTaskInProgress();
-        }
-        return result;
-    }
-    
-    private void abandonTaskInProgress()
+    private void clearState()
     {
         this.getControlState().clearJobTicks();
-        this.getControlState().setModelState(null);
-        this.getControlState().setTargetPos(null);
-        this.getControlState().setMachineState(MachineState.THINKING);
+        this.getControlState().setRecipe(null);
+        this.getControlState().setMachineState(MachineState.IDLE);
         this.setDirty();
     }
     
@@ -94,11 +194,6 @@ public class CrushinatorMachine extends AbstractSimpleMachine
         }
     }
     
-    /**
-     * Unlike inputs, outputs need to go into domain-managed storage
-     * so that drones can locate them for pickup. If no domain storage
-     * available, then stall.
-     */
     private void outputFabricatedBlock()
     {
         if(this.energyManager().provideEnergy(JOULES_PER_TICK_IDLE, false, false) == 0)
@@ -109,7 +204,7 @@ public class CrushinatorMachine extends AbstractSimpleMachine
         
         // If we got to this point, we have a fabricated block.
         // Put it in domain storage if there is room for it
-        // and tag the task with the location of the resource so drone can find it
+        // and tag the task with the location of the bulkResource so drone can find it
         // otherwise stall
         if(this.getDomain() == null) return;
         
@@ -138,14 +233,6 @@ public class CrushinatorMachine extends AbstractSimpleMachine
 //          return;
     }
    
-
-    @Override
-    public void onDisconnect()
-    {
-        this.abandonTaskInProgress();
-        super.onDisconnect();
-    }
-
     /**
      * Machine will first try to process whatever is in the input buffer.
      * If the input buffer is empty and the machine is in automatic mode, 
@@ -154,7 +241,7 @@ public class CrushinatorMachine extends AbstractSimpleMachine
      * Crushing is a multi-step process.  Block -> Cobble -> Gravel -> Sand.
      * Stocking levels for Cobble and Gravel may be zero.
      * If this is the case, and machine cannot find the input for the demand
-     * it is trying to satisfy, will work back to whatever resource is available
+     * it is trying to satisfy, will work back to whatever bulkResource is available
      * and process it.
      */
     private void searchForWork()
@@ -228,18 +315,57 @@ public class CrushinatorMachine extends AbstractSimpleMachine
     }
 
     @Override
-    public void updateMachine(long tick)
+    public void doOffTick()
     {
-        super.updateMachine(tick);
+        super.doOffTick();
+        
+        //TODO: if the machine is off, export any input items
         
         if(!this.isOn()) return;
         
         if(this.getDomain() == null) return;
         
-        if((tick & 0x1F) == 0x1F)
+        if((Simulator.instance().getTick() & 0x1F) == 0x1F)
         {
-            this.setCurrentBacklog(this.getDomain().jobManager.getQueueDepth(TaskType.BLOCK_FABRICATION));
+            this.setCurrentBacklog(estimatedBacklogDepth(this.getDomain()));
         }
+        
+        // if we don't have power to do basic control functions
+        // then abort and blame power
+        if(!this.provideAllPowerOrBlameSupply(JOULES_PER_TICK_IDLE)) return;
+        
+        // if we don't have anything in item input buffer
+        // and no request is pending then
+        // (and the compute countdown timer is zero?)
+        // then look for something so that we don't idle
+        if(this.itemInput.isEmpty())
+        {
+            // look for bulk resources that are in demand
+            // for those in demand, take the highest priority
+        }
+        
+        // if there is something in item input and 
+        // the bulk input buffer is empty, load the bulk input buffer
+        // if we don't have power to do this then abort and blame power
+        
+        // if there is something in the bulk input buffer then
+        // determine max output based on available space in
+        // output buffers
+        
+        // process the bulk input buffer, up to the smaller of max output
+        // and available material in the input buffer
+        // also limit by power
+        // if we don't have power to start or run out of power
+        // before we finish then stop and blame power
+        
+        // add the material to the bulk output buffer
+        // if at any point it becomes full, output a bulk container
+        // and put the remainder in the (now empty) output buffer
+        // if we don't have power to do this then abort and blame power
+        
+        // request that the output be put into primary storage if
+        // an off-device storage location is available
+        // if we don't have power to do this then abort and blame power
         
         switch(this.getControlState().getMachineState())
         {
@@ -247,14 +373,9 @@ public class CrushinatorMachine extends AbstractSimpleMachine
             this.progressFabrication();
             break;
             
-        case TRANSPORTING:
-            this.outputFabricatedBlock();
-            break;
-            
         default:
             this.searchForWork();
             break;
-            
         }
     }
 }

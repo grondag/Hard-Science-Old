@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.crafting.base.AbstractRecipe;
+import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
@@ -22,7 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 
-public class AbstractRecipeCategory<T extends AbstractRecipe> implements IRecipeCategory<T>
+public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeCategory<T>
 {
     
     private final String UID;

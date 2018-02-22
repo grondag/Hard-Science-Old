@@ -7,7 +7,7 @@ import grondag.hard_science.simulator.transport.carrier.Carrier;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 /**
- * Describes resource transmission within a connected, wireless or drone network.
+ * Describes bulkResource transmission within a connected, wireless or drone network.
  * If resources must cross over network boundaries will require multiple packets.
  * @see IItinerary.
  */
