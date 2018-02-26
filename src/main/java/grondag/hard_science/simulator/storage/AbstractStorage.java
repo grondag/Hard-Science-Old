@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -52,7 +52,7 @@ public abstract class AbstractStorage<T extends StorageType<T>, V extends Abstra
     }
     
     @Override
-    public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
+    public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         long taken = this.wrappedContainer.takeUpTo(resource, limit, simulate, allowPartial, request);
         if(this.wrappedContainer.isConnected() && this.wrappedContainer.getDomain() != null)
@@ -64,7 +64,7 @@ public abstract class AbstractStorage<T extends StorageType<T>, V extends Abstra
     }
     
     @Override
-    public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
+    public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         long added = this.wrappedContainer.add(resource, howMany, simulate, allowPartial, request);
         if(this.wrappedContainer.isConnected() && this.wrappedContainer.getDomain() != null)

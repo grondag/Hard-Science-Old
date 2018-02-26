@@ -11,10 +11,10 @@ import org.magicwerk.brownies.collections.Key1List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
@@ -161,7 +161,7 @@ public class StorageManager<T extends StorageType<T>>
         
         for(StorageResourceManager<T> entry : this.slots)
         {
-            if(predicate.test(entry.resource))
+            if(predicate.test(entry.resource) && entry.quantityAvailable() > 0)
             {
                 builder.add(entry.resource.withQuantity(entry.quantityAvailable()));
             }
@@ -178,7 +178,7 @@ public class StorageManager<T extends StorageType<T>>
         
         for(StorageResourceManager<T> entry : this.slots)
         {
-            if(predicate.test(entry.resource))
+            if(predicate.test(entry.resource) && entry.quantityStored() > 0)
             {
                 builder.add(entry.resource.withQuantity(entry.quantityStored()));
             }
@@ -261,7 +261,7 @@ public class StorageManager<T extends StorageType<T>>
      * Called by storage instances, or by self when a storage is removed.
      * If request is non-null, then the amount taken reduces any allocation to that request.
      */
-    public synchronized void notifyTaken(IResourceContainer<T> storage, IResource<T> resource, long taken, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyTaken(IResourceContainer<T> storage, IResource<T> resource, long taken, @Nullable NewProcurementTask<T> request)
     {
         assert this.confirmServiceThread() : "Storage manager update outside service thread.";
         
@@ -293,7 +293,7 @@ public class StorageManager<T extends StorageType<T>>
     /**
      * If request is non-null, then the amount added is immediately allocated to that request.
      */
-    public synchronized void notifyAdded(IResourceContainer<T> storage, IResource<T> resource, long added, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyAdded(IResourceContainer<T> storage, IResource<T> resource, long added, @Nullable NewProcurementTask<T> request)
     {
         assert this.confirmServiceThread() : "Storage manager access outside service thread.";
 
@@ -337,7 +337,7 @@ public class StorageManager<T extends StorageType<T>>
      */
     public long setAllocation(
             @Nonnull IResource<T> resource, 
-            @Nonnull IProcurementRequest<T> request, 
+            @Nonnull NewProcurementTask<T> request, 
             long requestedAllocation)
     {
         assert this.confirmServiceThread() : "Storage manager access outside service thread.";
@@ -359,7 +359,7 @@ public class StorageManager<T extends StorageType<T>>
     public long changeAllocation(
             @Nonnull IResource<T> resource,
             long quantityRequested, 
-            @Nonnull IProcurementRequest<T> request)
+            @Nonnull NewProcurementTask<T> request)
     {       
         assert this.confirmServiceThread() : "Storage manager access outside service thread.";
 
@@ -388,6 +388,7 @@ public class StorageManager<T extends StorageType<T>>
         if(summary != null)
         {
             summary.unregisterResourceListener(listener);
+            if(summary.isEmpty()) this.hasEmptySlots = true;
         }
     }
 

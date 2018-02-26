@@ -6,11 +6,7 @@ import java.util.ArrayList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.crafting.BulkExportRecipe;
-import grondag.hard_science.crafting.BulkItemInput;
-import grondag.hard_science.crafting.processing.CrushinatorRecipe2;
-import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.crafting.processing.MicronizerRecipe;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -32,99 +28,87 @@ public class ModRecipes
         }
         
         ///////////////////////////////////////////////////////////
-        /// BULK IMPORT
+        /// MICRONIZER
         ///////////////////////////////////////////////////////////
 
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.MINERAL_FILLER,
+        MicronizerRecipe.add(
                 new OreIngredient("sand"), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_STONE,
+                0.5,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
 
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.CRUSHED_STONE,
+        MicronizerRecipe.add(
                 new OreIngredient("gravel"), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_STONE,
+                0.65,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_STONE,
+        MicronizerRecipe.add(
                 new OreIngredient("sandstone"), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_STONE,
+                0.7,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_STONE,
+        MicronizerRecipe.add(
                 new OreIngredient("cobblestone"), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_STONE,
+                0.8,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_STONE,
+        MicronizerRecipe.add(
                 new OreIngredient("stone"), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_STONE,
+                1.0,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_STONE,
+        MicronizerRecipe.add(
                 Ingredient.fromItem(Item.getItemFromBlock(Blocks.COBBLESTONE_WALL)), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_STONE,
+                0.8,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_STONE,
+        MicronizerRecipe.add(
                 Ingredient.fromItem(Item.getItemFromBlock(Blocks.STONE_SLAB)), 
-                VolumeUnits.KILOLITER.nL / 2));
+                ModBulkResources.MICRONIZED_STONE,
+                1.0,
+                MicronizerRecipe.FixedConverter.HALF_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_STONE,
+        MicronizerRecipe.add(
                 Ingredient.fromItem(Item.getItemFromBlock(Blocks.STONE_SLAB2)), 
-                VolumeUnits.KILOLITER.nL / 2));
+                ModBulkResources.MICRONIZED_STONE,
+                1.0,
+                MicronizerRecipe.FixedConverter.HALF_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_BASALT,
+        MicronizerRecipe.add(
                 Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cobble)), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_BASALT,
+                1.0,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_BASALT,
+        MicronizerRecipe.add(
                 Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cut)), 
-                VolumeUnits.KILOLITER.nL));
+                ModBulkResources.MICRONIZED_BASALT,
+                1.2,
+                MicronizerRecipe.FixedConverter.FULL_BLOCK);
 
-        BulkItemInput.add(new BulkItemInput.PerItem(
-                ModBulkResources.BUFFERED_BASALT,
+        MicronizerRecipe.add(
                 Ingredient.fromItem(ModItems.basalt_rubble), 
-                VolumeUnits.KILOLITER.nL / 9));
+                ModBulkResources.MICRONIZED_BASALT,
+                1.0,
+                MicronizerRecipe.FixedConverter.NINTH_BLOCK);
         
-        BulkItemInput.add(new BulkItemInput.Terrain(
-                ModBulkResources.BUFFERED_BASALT,
-                Item.getItemFromBlock(ModBlocks.basalt_cool_static_height)));
+        MicronizerRecipe.add(
+                Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cool_static_height)),
+                ModBulkResources.MICRONIZED_BASALT,
+                1.2,
+                MicronizerRecipe.TerrainConverter.INSTANCE);
+                
+        MicronizerRecipe.add(
+                Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cool_static_filler)),
+                ModBulkResources.MICRONIZED_BASALT,
+                1.2,
+                MicronizerRecipe.TerrainConverter.INSTANCE);
 
-        BulkItemInput.add(new BulkItemInput.Terrain(
-                ModBulkResources.BUFFERED_BASALT,
-                Item.getItemFromBlock(ModBlocks.basalt_cool_static_filler)));
-
-        ///////////////////////////////////////////////////////////
-        /// BULK EXPORT
-        ///////////////////////////////////////////////////////////
-        
-        BulkExportRecipe.addConversion(
-                ItemResource.fromItem(ModItems.crushed_stone_1kL), 
-                ModBulkResources.CRUSHED_STONE, 
-                VolumeUnits.KILOLITER.nL);
-        
-        BulkExportRecipe.addConversion(
-                ItemResource.fromItem(ModItems.crushed_basalt_1kL), 
-                ModBulkResources.CRUSHED_BASALT, 
-                VolumeUnits.KILOLITER.nL);
-        
-        ///////////////////////////////////////////////////////////
-        /// CRUSHINATOR
-        ///////////////////////////////////////////////////////////
-
-        CrushinatorRecipe2.add(ModBulkResources.BUFFERED_BASALT, ModBulkResources.CRUSHED_BASALT, 1.0);
-        CrushinatorRecipe2.add(ModBulkResources.BUFFERED_STONE, ModBulkResources.CRUSHED_STONE, 1.0);
-
-        
-        //        BulkLoadingRecipe.addConversion(
-//                Matters.MINERAL_FILLER.fluidResource(),
-//                Matters.RAW_MINERAL_DUST.fluidResource(),
-//                1.0);
-    
 
         //TODO: actual recipe
 //        EmergencyFabricatorRecipe.addFab(

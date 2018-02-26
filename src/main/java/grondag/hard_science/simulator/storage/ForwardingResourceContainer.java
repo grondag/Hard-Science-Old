@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import grondag.hard_science.machines.support.ThroughputRegulator;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -88,13 +88,13 @@ public class ForwardingResourceContainer<T extends StorageType<T>> implements IR
     }
 
     @Override
-    public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
+    public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         return this.wrappedContainer.add(resource, howMany, simulate, allowPartial, request);
     }
 
     @Override
-    public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
+    public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         return this.wrappedContainer.takeUpTo(resource, limit, simulate, allowPartial, request);
     }

@@ -14,8 +14,8 @@ import grondag.hard_science.machines.impl.building.BlockFabricatorTESR;
 import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTESR;
 import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTileEntity;
-import grondag.hard_science.machines.impl.processing.CrushinatorTESR;
-import grondag.hard_science.machines.impl.processing.CrushinatorTileEntity;
+import grondag.hard_science.machines.impl.processing.MicronizerTESR;
+import grondag.hard_science.machines.impl.processing.MicronizerTileEntity;
 import grondag.hard_science.matter.MatterCube;
 import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.MatterCubeItemModel;
@@ -361,7 +361,7 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntity.class, MachineTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntityTickable.class, MachineTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(ChemicalBatteryTileEntity.class, ChemicalBatteryTESR.INSTANCE);
-        ClientRegistry.bindTileEntitySpecialRenderer(CrushinatorTileEntity.class, CrushinatorTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(MicronizerTileEntity.class, MicronizerTESR.INSTANCE);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

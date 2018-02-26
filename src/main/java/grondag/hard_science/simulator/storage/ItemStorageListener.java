@@ -16,8 +16,8 @@ import com.google.common.eventbus.Subscribe;
 
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.domain.Domain;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -466,7 +466,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      * For non-domain listeners, limits to connectivity from 
      * the primary storage device.  Always fails (returns 0) for domain listener.
      */
-    public long add(@Nonnull IResource<StorageTypeStack> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<StorageTypeStack> request)
+    public long add(@Nonnull IResource<StorageTypeStack> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<StorageTypeStack> request)
     {
         return this.storage == null
                 ? 0

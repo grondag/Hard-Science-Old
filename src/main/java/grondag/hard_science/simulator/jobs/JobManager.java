@@ -17,8 +17,10 @@ import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
+import grondag.hard_science.simulator.jobs.tasks.PerpetualTask;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IDirtListener;
+import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.persistence.NullDirtListener;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,6 +28,13 @@ import net.minecraft.nbt.NBTTagList;
 
 public class JobManager implements IReadWriteNBT, IDomainMember
 {
+    private static final int PROCESS_JOB_ID = IIdentified.FIRST_SYSTEM_ID;
+    
+    /**
+     * Lazily created / retrieved.  Task holder for automated resource processing.
+     */
+    private Job processJob;
+    
     /**
      * Should be used for job/task accounting - not for any actual work done by tasks.
      */
@@ -65,6 +74,31 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     {
         this.domain = domain;
         this.dirtListener = domain == null ? NullDirtListener.INSTANCE : domain.getDirtListener();
+    }
+    
+    /**
+     * Retrieves task holder for automated resource processing.
+     * Creates job if does not already exist.
+     */
+    public Job processSystemJob()
+    {
+        if(this.processJob == null)
+        {
+            synchronized(this)
+            {
+                if(this.processJob == null)
+                {
+                    this.processJob = DomainManager.jobFromId(PROCESS_JOB_ID);
+                    if(this.processJob == null)
+                    {
+                        this.processJob = Job.createSystemJob(RequestPriority.MEDIUM, PROCESS_JOB_ID);
+                        this.processJob.addTask(new PerpetualTask(true));
+                        this.processJob.onJobAdded(this);
+                    }
+                }
+            }
+        }
+        return this.processJob;
     }
 
     /**
@@ -116,6 +150,8 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     /** Asynchronously adds job to backlog */
     public void addJob(Job job)
     {
+        assert !job.isSystemJob() : "Invalid use of system job";
+        
         EXECUTOR.execute(new Runnable()
         {
             @Override
@@ -186,6 +222,8 @@ public class JobManager implements IReadWriteNBT, IDomainMember
      */
     public void notifyReadyStatus(Job job)
     {
+        assert !job.isSystemJob() : "Invalid use of system job";
+        
         EXECUTOR.execute(new Runnable()
         {
             @Override
@@ -205,6 +243,8 @@ public class JobManager implements IReadWriteNBT, IDomainMember
      */
     public void notifyTerminated(Job job)
     {
+        assert !job.isSystemJob() : "Invalid use of system job";
+        
         EXECUTOR.execute(new Runnable()
         {
             @Override
@@ -228,6 +268,8 @@ public class JobManager implements IReadWriteNBT, IDomainMember
      */
     public void notifyPriorityChange(Job job)
     {
+        assert !job.isSystemJob() : "Invalid use of system job";
+        
         if(!job.isHeld() && job.hasReadyWork()) EXECUTOR.execute(new Runnable()
         {
             @Override
@@ -243,6 +285,8 @@ public class JobManager implements IReadWriteNBT, IDomainMember
      */
     public void notifyHoldChange(Job job)
     {
+        assert !job.isSystemJob() : "Invalid use of system job";
+        
         if(job.isHeld())
         {
             EXECUTOR.execute(new Runnable()

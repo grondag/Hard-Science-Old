@@ -83,8 +83,8 @@ public class ModItems
         itemReg.register(new BulkItem("flex_resin_1L", ModBulkResources.FLEX_RESIN, VolumeUnits.LITER.nL * 10));
         itemReg.register(new BulkItem("flex_resin_1kL", ModBulkResources.FLEX_RESIN, VolumeUnits.KILOLITER.nL));
         
-        itemReg.register(new BulkItem("crushed_stone_1kL", ModBulkResources.CRUSHED_STONE, VolumeUnits.KILOLITER.nL));
-        itemReg.register(new BulkItem("crushed_basalt_1kL", ModBulkResources.CRUSHED_BASALT, VolumeUnits.KILOLITER.nL));
+        itemReg.register(new BulkItem("crushed_stone_1kL", ModBulkResources.MICRONIZED_STONE, VolumeUnits.KILOLITER.nL));
+        itemReg.register(new BulkItem("crushed_basalt_1kL", ModBulkResources.MICRONIZED_BASALT, VolumeUnits.KILOLITER.nL));
         
         for(MatterPackaging matter : MatterPackaging.values())
         {

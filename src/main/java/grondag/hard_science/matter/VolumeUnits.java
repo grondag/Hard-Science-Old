@@ -151,6 +151,11 @@ public enum VolumeUnits
         return convertFromTo(value, VolumeUnits.NANOLITER, VolumeUnits.LITER);
     }
     
+    public static long nL2Blocks(long value)
+    {
+        return convertFromTo(value, VolumeUnits.NANOLITER, VolumeUnits.KILOLITER);
+    }
+    
     public static long liters2nL(long value)
     {
         return convertFromTo(value, VolumeUnits.LITER, VolumeUnits.NANOLITER);

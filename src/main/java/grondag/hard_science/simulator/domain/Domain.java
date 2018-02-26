@@ -11,6 +11,7 @@ import com.google.common.eventbus.EventBus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.demand.BrokerManager;
+import grondag.hard_science.simulator.fobs.TransientTaskContainer;
 import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IDirtListener;
@@ -47,6 +48,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     public final BuildManager buildManager;
     public final BrokerManager brokerManager;
     public final ProcessManager processManager;
+    public final TransientTaskContainer systemTasks;
     
     private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
     
@@ -61,6 +63,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         this.buildManager = new BuildManager(this);
         this.brokerManager = new BrokerManager(this);
         this.processManager = new ProcessManager(this);
+        this.systemTasks = new TransientTaskContainer(this);
     }
     
     Domain (DomainManager domainManager, NBTTagCompound tag)

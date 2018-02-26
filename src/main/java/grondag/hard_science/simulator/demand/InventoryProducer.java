@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.demand;
 
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
-import grondag.hard_science.simulator.resource.IResourcePredicateWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.IStorageResourceListener;
 import grondag.hard_science.simulator.storage.StorageManager;
@@ -46,13 +46,13 @@ public class InventoryProducer<V extends StorageType<V>>
     }
     
     @Override
-    public void cancelWIP(IProcurementRequest<V> request)
+    public void cancelWIP(NewProcurementTask<V> request)
     {
         // NOOP because inventory producer does not track WIP
     }
 
     @Override
-    public void notifyNewDemand(IBroker<V> broker, IProcurementRequest<V> request)
+    public void notifyNewDemand(IBroker<V> broker, NewProcurementTask<V> request)
     {
         assert this.broker != null
                 : "Inventory Producer received new demand after tear down.";
@@ -68,37 +68,33 @@ public class InventoryProducer<V extends StorageType<V>>
      * from {@link #fillDemand(IProcurementRequest)} so that we can 
      * reliably ignore callback from storage while we are allocating demand.
      */
-    private synchronized void fillDemand(IProcurementRequest<V> request)
+    private synchronized void fillDemand(NewProcurementTask<V> request)
     {
-        
-        for( IResourcePredicateWithQuantity<V> demand : request.openDemands())
+        long demand = request.demandFor(this.resource);
+        if(demand > 0)
         {
-            if(demand.test(this.resource))
+            this.itMe = true;
+            long allocated = this.storageManager.changeAllocation(this.resource, demand, request);
+            this.itMe = false;
+            
+            // found some inventory, so give it to the request
+            if(allocated > 0)
             {
-                this.itMe = true;
-                long allocated = this.storageManager.changeAllocation(this.resource, demand.getQuantity(), request);
-                this.itMe = false;
-                
-                // found some inventory, so give it to the request
-                if(allocated > 0)
+                long claimed = request.startWIP(this.resource, allocated, this);
+                if(claimed > 0)
                 {
-                    long claimed = request.startWIP(this.resource, allocated, this);
-                    if(claimed > 0)
-                    {
-                        request.completeWIP(this.resource, claimed, this);
-                    }
-                    
-                    if(claimed < allocated)
-                    {
-                        // unwind if somehow all or part of the request got fulfilled some other way
-                        this.itMe = true;
-                        this.storageManager.changeAllocation(this.resource, claimed - allocated, request);
-                        this.itMe = false;
-                    }
+                    request.completeWIP(this.resource, claimed, this);
+                }
+                
+                if(claimed < allocated)
+                {
+                    // unwind if somehow all or part of the request got fulfilled some other way
+                    this.itMe = true;
+                    this.storageManager.changeAllocation(this.resource, claimed - allocated, request);
+                    this.itMe = false;
                 }
             }
         }
-        
     }
     
     /**
@@ -115,7 +111,7 @@ public class InventoryProducer<V extends StorageType<V>>
     {
         if(!itMe && availableQuantity > 0 && this.broker != null && !this.broker.requests.isEmpty())
         {
-            for(IProcurementRequest<V> request : this.broker.requests)
+            for(NewProcurementTask<V> request : this.broker.requests)
             {
                 this.fillDemand(request);
                 if(this.storageManager.getQuantityAvailable(this.resource) == 0) break;

@@ -12,6 +12,7 @@ import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.ComponentRegistry;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
@@ -451,7 +452,7 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
      * Routes to appropriate power container. 
      * See {@link PowerContainer#takeUpTo(IResource, long, boolean, IProcurementRequest)}
      */
-    public long takeUpTo(IResource<StorageTypePower> resource, long quantity, boolean simulate, IProcurementRequest<StorageTypePower> request)
+    public long takeUpTo(IResource<StorageTypePower> resource, long quantity, boolean simulate, NewProcurementTask<StorageTypePower> request)
     {
         return this.outputContainer == null ? 0 
             : this.outputContainer.takeUpTo(resource, quantity, simulate, request);
@@ -461,7 +462,7 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
      * Routes to appropriate power container. 
      * See {@link PowerContainer#add(IResource, long, boolean, IProcurementRequest)}
      */
-    public long add(IResource<StorageTypePower> resource, long quantity, boolean simulate,  IProcurementRequest<StorageTypePower> request)
+    public long add(IResource<StorageTypePower> resource, long quantity, boolean simulate,  NewProcurementTask<StorageTypePower> request)
     {
         if(this.inputContainer != null)
         {

@@ -9,8 +9,8 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -93,7 +93,7 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
             long howMany, 
             boolean simulate, 
             boolean allowPartial, 
-            @Nullable IProcurementRequest<T> request)
+            @Nullable NewProcurementTask<T> request)
     {
         if(howMany < 1 || !this.isResourceAllowed(resource)) return 0;
         
@@ -123,7 +123,7 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
             long limit, 
             boolean simulate, 
             boolean allowPartial, 
-            IProcurementRequest<T> request)
+            NewProcurementTask<T> request)
     {
         if(limit < 1) return 0;
         

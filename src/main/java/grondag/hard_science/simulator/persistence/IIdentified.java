@@ -22,7 +22,25 @@ public interface IIdentified
      * Use this to represent a "default" reference.  All other system IDs should be > this value.
      */
     public static final int DEFAULT_ID = 1;
+    
+    /**
+     * Numbers starting from FIRST_SYSTEM_ID up to LAST_SYSTEM_ID (inclusive) are available as context-dependent system identifiers
+     */
+    public static final int FIRST_SYSTEM_ID = 2;
 
+    /**
+     * Numbers starting from FIRST_SYSTEM_ID up to LAST_SYSTEM_ID (inclusive) are available as context-dependent system identifiers
+     */
+    public static final int LAST_SYSTEM_ID = 999;
+    
+    /**
+     * True if id is in the range of {@link #FIRST_SYSTEM_ID} thru
+     * {@link #LAST_SYSTEM_ID} (inclusive).
+     */
+    public static boolean isSystemID(int id)
+    {
+        return id >= FIRST_SYSTEM_ID && id >= LAST_SYSTEM_ID;
+    }
     
     /** implement an int in class, return it here */
     public int getIdRaw();

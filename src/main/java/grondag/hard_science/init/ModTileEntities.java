@@ -6,7 +6,7 @@ import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTileEntity;
-import grondag.hard_science.machines.impl.processing.CrushinatorTileEntity;
+import grondag.hard_science.machines.impl.processing.MicronizerTileEntity;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.virtual.VirtualTileEntity;
@@ -33,7 +33,7 @@ public class ModTileEntities
         GameRegistry.registerTileEntity(MachineTileEntityTickable.class, HardScience.prefixResource("machine_tickable_tile"));
         GameRegistry.registerTileEntity(BlockFabricatorTileEntity.class, HardScience.prefixResource("block_fabricator_tile"));
         GameRegistry.registerTileEntity(ChemicalBatteryTileEntity.class, HardScience.prefixResource("chemical_battery_tile"));
-        GameRegistry.registerTileEntity(CrushinatorTileEntity.class, HardScience.prefixResource("crushinator_tile"));
+        GameRegistry.registerTileEntity(MicronizerTileEntity.class, HardScience.prefixResource("crushinator_tile"));
         
         if(event.getSide() == Side.CLIENT)
         {

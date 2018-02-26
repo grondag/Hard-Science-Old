@@ -1,18 +1,11 @@
 package grondag.hard_science.simulator.demand;
 
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 
 /**
  * Default broker for discrete resources that don't have specialized brokers/producers.
- * 
- * TODO: BLAR BLAr stuff below is RWONG
- * Automatically listens to resources in storage and registers storage resources
- * as producers so long as there are open requests. Unlistens and deregisters
- * the storage bulkResource when there are no longer any open requests.<p>
- * 
- * Also removes self from parent collection if there are no open requests.
- * 
  */
 public class SimpleBroker<V extends StorageType<V>> extends AbstractBroker<V>
 {
@@ -32,7 +25,7 @@ public class SimpleBroker<V extends StorageType<V>> extends AbstractBroker<V>
     }
     
     @Override
-    public synchronized void unregisterRequest(IProcurementRequest<V> request)
+    public synchronized void unregisterRequest(NewProcurementTask<V> request)
     {
         super.unregisterRequest(request);
         this.checkForTearDown();

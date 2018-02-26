@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.impl.logistics;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
+import grondag.hard_science.machines.matbuffer.BulkBufferPurpose;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,7 +13,7 @@ public class PortableTankMachine extends AbstractSimpleMachine
     public PortableTankMachine()
     {
         super();
-        this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE);
+        this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE, BulkBufferPurpose.PRIMARY_INOUT);
     }
     
     @Override

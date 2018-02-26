@@ -12,23 +12,23 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class CrushinatorBlock extends MachineBlock
+public class MicronizerBlock extends MachineBlock
 {
-    public CrushinatorBlock(String name)
+    public MicronizerBlock(String name)
     {
-        super(name, ModGui.CRUSHINATOR.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_FILMSTRIP));
+        super(name, ModGui.MICRONIZER.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_FILMSTRIP));
     }
 
     @Override
     public AbstractMachine createNewMachine()
     {
-        return new CrushinatorMachine();
+        return new MicronizerMachine();
     }
     
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta)
     {
-        return new CrushinatorTileEntity();
+        return new MicronizerTileEntity();
     }
     
     @SideOnly(Side.CLIENT)

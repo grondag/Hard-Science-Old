@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 
@@ -68,7 +68,7 @@ public class ResourceContainer<T extends StorageType<T>> extends ForwardingResou
     }
     
     @Override
-    public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
+    public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         long taken;
         
@@ -102,7 +102,7 @@ public class ResourceContainer<T extends StorageType<T>> extends ForwardingResou
     }
     
     @Override
-    public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, IProcurementRequest<T> request)
+    public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         long added;
         

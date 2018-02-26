@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.storage;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 
@@ -16,13 +16,13 @@ public interface IStorageEventFactory<T extends StorageType<T>>
             IResourceContainer<T> storage, 
             IResource<T> resource, 
             long delta,
-            @Nullable IProcurementRequest<T> request);
+            @Nullable NewProcurementTask<T> request);
     
     public void postAvailableUpdate(
             IResourceContainer<T> storage, 
             IResource<T> resource, 
             long delta,
-            @Nullable IProcurementRequest<T> request);
+            @Nullable NewProcurementTask<T> request);
     
     public void postCapacityChange(IResourceContainer<T> storage, long delta);
 }

@@ -237,9 +237,14 @@ public class BulkResource implements IResource<StorageTypeBulk>
                : this.withLiters(1);
     }
     
-    public long kgPerBlock()
+    public double kgPerBlock()
     {
-        return (long) (this.density * 1000);
+        return this.density * 1000;
+    }
+    
+    public double tonnesPerBlock()
+    {
+        return this.density;
     }
     
     public void registerFluid()

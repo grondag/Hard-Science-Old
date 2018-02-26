@@ -38,7 +38,7 @@ public abstract class AbstractPositionedStackTask extends AbstractPositionedTask
     public void setStack(ItemStack stack)
     {
         this.stack = stack;
-        this.job.setDirty();
+        this.setDirty();
     }
     
     @Override

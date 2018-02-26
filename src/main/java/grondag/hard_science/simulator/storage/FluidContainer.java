@@ -1,24 +1,68 @@
 package grondag.hard_science.simulator.storage;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.matbuffer.BulkBufferPurpose;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public class FluidContainer extends ResourceContainer<StorageTypeFluid> implements IFluidHandler
 {
-    public FluidContainer(IDevice owner, ContainerUsage usage)
+    private BulkBufferPurpose bufferPurpose;
+    
+    /**
+     * Content key should be either at BulkBufferPurpose entry
+     * or a specific fluid resource.  If it is specific fluid
+     * resource, this container will only accept that fluid.
+     */
+    public FluidContainer(IDevice owner, ContainerUsage usage, @Nonnull BulkBufferPurpose bufferPurpose)
     {
         super(new FluidInner(owner, usage));
+        this.bufferPurpose = bufferPurpose;
+        if(bufferPurpose.fluidResource != null)
+        {
+            this.setContentPredicate(bufferPurpose.fluidResource);
+        }
         this.setCapacity(VolumeUnits.liters2nL(32000));
     }
     
+    /**
+     * Will be a fluid resource if this container is limited
+     * to a specific fluid.
+     * @return
+     */
+    public final BulkBufferPurpose bufferPurpose()
+    {
+        return this.bufferPurpose;
+    }
+    
+    @Override
+    public void deserializeNBT(NBTTagCompound tag)
+    {
+        super.deserializeNBT(tag);
+        this.bufferPurpose = Useful.safeEnumFromTag(tag, ModNBTTag.BUFFER_PURPOSE, BulkBufferPurpose.INVALID);
+    }
+
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        super.serializeNBT(tag);
+        Useful.saveEnumToTag(tag, ModNBTTag.BUFFER_PURPOSE, this.bufferPurpose);
+    }
+
+
+
     private static class FluidInner extends AbstractSingleResourceContainer<StorageTypeFluid>
     {
         public FluidInner(IDevice owner, ContainerUsage usage)

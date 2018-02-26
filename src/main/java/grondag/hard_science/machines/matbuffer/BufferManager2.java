@@ -27,10 +27,8 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
     private final IDevice owner;
     private final ItemContainer itemInput;
     private final ItemContainer itemOutput;
-    private final ImmutableMap<FluidResource, FluidContainer> fluidInputs;
-    private final ImmutableMap<FluidResource, FluidContainer> fluidOutputs;
-    private final ImmutableMap<BulkBufferPurpose, BulkContainer> bulkBuffers;
-    
+    private final ImmutableMap<BulkBufferPurpose, FluidContainer> fluidInputs;
+    private final ImmutableMap<BulkBufferPurpose, FluidContainer> fluidOutputs;
     
     public BufferManager2(IDevice owner, ResourceContainer<?>... containers)
     {
@@ -38,9 +36,8 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         ItemContainer itemInput = null;
         ItemContainer itemOutput = null;
         
-        ImmutableMap.Builder<FluidResource, FluidContainer> fluidInputs = ImmutableMap.builder();
-        ImmutableMap.Builder<FluidResource, FluidContainer> fluidOutputs = ImmutableMap.builder();
-        ImmutableMap.Builder<BulkBufferPurpose, BulkContainer> bulkBuffers = ImmutableMap.builder();
+        ImmutableMap.Builder<BulkBufferPurpose, FluidContainer> fluidInputs = ImmutableMap.builder();
+        ImmutableMap.Builder<BulkBufferPurpose, FluidContainer> fluidOutputs = ImmutableMap.builder();
 
         for(ResourceContainer<?> c : containers)
         {
@@ -48,9 +45,9 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
             {
             case FLUID:
                 if(c.containerUsage() == ContainerUsage.BUFFER_IN)
-                    fluidInputs.put((FluidResource)c.resource(), (FluidContainer) c);
+                    fluidInputs.put(((FluidContainer)c).bufferPurpose(), (FluidContainer) c);
                 else if(c.containerUsage() == ContainerUsage.BUFFER_OUT)
-                    fluidOutputs.put((FluidResource)c.resource(), (FluidContainer) c);
+                    fluidOutputs.put(((FluidContainer)c).bufferPurpose(), (FluidContainer) c);
                 else
                     assert false : "Invalid buffer construction";
                 break;
@@ -65,10 +62,7 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
                 break;
                 
             case PRIVATE:
-                if(c.containerUsage() == ContainerUsage.BUFFER_ISOLATED)
-                    bulkBuffers.put(((BulkContainer)c).bufferPurpose, (BulkContainer) c);
-                else
-                    assert false : "Invalid buffer construction";
+                assert false : "Invalid buffer construction";
                 break;
                 
             case POWER:
@@ -95,7 +89,6 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         this.itemOutput = itemOutput;
         this.fluidInputs = fluidInputs.build();
         this.fluidOutputs = fluidOutputs.build();
-        this.bulkBuffers = bulkBuffers.build();
     }
 
     public ItemContainer itemInput() 
@@ -108,19 +101,14 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         return this.itemOutput;
     }
     
-    public ImmutableMap<FluidResource, FluidContainer> fluidInputs()
+    public ImmutableMap<BulkBufferPurpose, FluidContainer> fluidInputs()
     {
         return this.fluidInputs;
     }
     
-    public ImmutableMap<FluidResource, FluidContainer> fluidOutputs()
+    public ImmutableMap<BulkBufferPurpose, FluidContainer> fluidOutputs()
     {
         return this.fluidOutputs;
-    }
-    
-    public ImmutableMap<BulkBufferPurpose, BulkContainer> bulkBuffers()
-    {
-        return this.bulkBuffers;
     }
     
     @Override
@@ -152,8 +140,8 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
             NBTTagList list = tag.getTagList(ModNBTTag.BUFFER_FLUIDS_OUT, 10);
             list.forEach(t -> 
             {
-                FluidResource r = (FluidResource) StorageType.FLUID.fromNBT((NBTTagCompound) t);
-                FluidContainer c = this.fluidOutputs.get(r);
+                BulkBufferPurpose p = Useful.safeEnumFromTag((NBTTagCompound)t, ModNBTTag.BUFFER_PURPOSE, BulkBufferPurpose.INVALID);
+                FluidContainer c = this.fluidOutputs.get(p);
                 if(c == null)
                     assert false : "Fluid container not found during buffer manager deserialization";
                 else
@@ -161,21 +149,6 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
             });
         }
         else assert this.fluidOutputs.isEmpty() : "Invalid fluid buffer deserialization";
-        
-        if(tag.hasKey(ModNBTTag.BUFFER_BULK))
-        {
-            NBTTagList list = tag.getTagList(ModNBTTag.BUFFER_FLUIDS_OUT, 10);
-            list.forEach(t -> 
-            {
-                BulkBufferPurpose p = Useful.safeEnumFromTag(tag, ModNBTTag.BUFFER_PURPOSE, BulkBufferPurpose.INVALID);
-                BulkContainer c = this.bulkBuffers.get(p);
-                if(c == null)
-                    assert false : "Fluid container not found during buffer manager deserialization";
-                else
-                    c.deserializeNBT((NBTTagCompound)t);
-            });
-        }
-        else assert this.bulkBuffers.isEmpty() : "Invalid bulk buffer deserialization";
     }
 
     @Override
@@ -187,11 +160,9 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         if(!this.fluidInputs.isEmpty())
         {
             NBTTagList list = new NBTTagList();
-            for(Entry<FluidResource, FluidContainer> e : this.fluidInputs.entrySet())
+            for(Entry<BulkBufferPurpose, FluidContainer> e : this.fluidInputs.entrySet())
             {
-                NBTTagCompound t = StorageType.FLUID.toNBT(e.getKey());
-                e.getValue().serializeNBT(t);
-                list.appendTag(t);
+                list.appendTag(e.getValue().serializeNBT());
             }
             tag.setTag(ModNBTTag.BUFFER_FLUIDS_IN, list);
         }
@@ -199,26 +170,12 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         if(!this.fluidOutputs.isEmpty())
         {
             NBTTagList list = new NBTTagList();
-            for(Entry<FluidResource, FluidContainer> e : this.fluidOutputs.entrySet())
+            for(Entry<BulkBufferPurpose, FluidContainer> e : this.fluidOutputs.entrySet())
             {
-                NBTTagCompound t = StorageType.FLUID.toNBT(e.getKey());
-                e.getValue().serializeNBT(t);
-                list.appendTag(t);
+                list.appendTag(e.getValue().serializeNBT());
             }
             tag.setTag(ModNBTTag.BUFFER_FLUIDS_OUT, list);
         }
-        
-        if(!this.bulkBuffers.isEmpty())
-        {
-            NBTTagList list = new NBTTagList();
-            for(Entry<BulkBufferPurpose, BulkContainer> e : this.bulkBuffers.entrySet())
-            {
-                NBTTagCompound t = e.getValue().serializeNBT();
-                Useful.saveEnumToTag(t, ModNBTTag.BUFFER_PURPOSE, e.getKey());
-                list.appendTag(t);
-            }
-            tag.setTag(ModNBTTag.BUFFER_BULK, list);
-        }        
     }
 
     @Override
@@ -298,8 +255,8 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
 
     public long[] serializeToArray()
     {
-        // TODO Auto-generated method stub
-        return null;
+        //TODO: stub
+        return new long[0];
     }
 
     public boolean hasFailureCauseClientSideOnly()
@@ -308,12 +265,14 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         return false;
     }
 
+    @Deprecated
     public BufferDelegate2 getBuffer(int index)
     {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Deprecated
     public int bufferCount()
     {
         // TODO Auto-generated method stub
@@ -322,6 +281,7 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
 
     public BulkContainer bufferHDPE()
     {
+        //TODO stub
         return null;
     }
 

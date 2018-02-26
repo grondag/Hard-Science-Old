@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -78,7 +78,7 @@ public class TransportTestMachine extends AbstractSimpleMachine
     }
 
     @Override
-    public long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, IProcurementRequest<?> request)
+    public long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, NewProcurementTask<?> request)
     {
         // can't put stuff in it
         return 0;

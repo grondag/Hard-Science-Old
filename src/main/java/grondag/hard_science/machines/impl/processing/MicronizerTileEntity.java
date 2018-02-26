@@ -4,7 +4,7 @@ import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import net.minecraftforge.items.IItemHandler;
 
 
-public class CrushinatorTileEntity extends MachineTileEntityTickable
+public class MicronizerTileEntity extends MachineTileEntityTickable
 {
 
     @Override

@@ -10,9 +10,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class CrushinatorTESR extends MachineTESR
+public class MicronizerTESR extends MachineTESR
 {
-    public static final CrushinatorTESR INSTANCE = new CrushinatorTESR();
+    public static final MicronizerTESR INSTANCE = new MicronizerTESR();
     
     @Override
     protected void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha)

@@ -6,10 +6,10 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager2;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -284,23 +284,25 @@ public abstract class AbstractDevice implements IDevice
      * Override if your device handles transport requests. 
      * Base implementation handles service check.<p>
      * 
-     * See {@link #onProduce(IResource, long, boolean, boolean)}
+     * See {@link #onProduce(IResource, long, boolean, NewProcurementTask)}
      */
     @SuppressWarnings("unchecked")
-    protected long onProduceImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    protected long onProduceImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     { 
         switch(resource.storageType().enumType)
         {
         case FLUID:
             if(this.hasFluidStorage()) 
-                return this.fluidStorage().takeUpTo((IResource<StorageTypeFluid>)resource, quantity, simulate, (IProcurementRequest<StorageTypeFluid>)request);
+                return this.fluidStorage().takeUpTo((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
         
         case ITEM:
             if(this.hasItemStorage()) 
-                return this.itemStorage().takeUpTo((IResource<StorageTypeStack>)resource, quantity, simulate, (IProcurementRequest<StorageTypeStack>)request);
+                return this.itemStorage().takeUpTo((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
+            else if(this.getBufferManager().itemOutput() != null)
+                return this.getBufferManager().itemOutput().takeUpTo((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
 
         case POWER:
-            return this.energyManager().takeUpTo((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
+            return this.energyManager().takeUpTo((IResource<StorageTypePower>)resource, quantity, simulate, (NewProcurementTask<StorageTypePower>)request);
 
         case PRIVATE:
             assert false : "Unsupported private storage type reference";
@@ -312,7 +314,7 @@ public abstract class AbstractDevice implements IDevice
     }
     
     @Override
-    public final long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    public final long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     {
         assert resource.confirmServiceThread() 
             : "Transport logic running outside logistics service"; 
@@ -323,23 +325,25 @@ public abstract class AbstractDevice implements IDevice
      * Override if your device handles transport requests. 
      * Base implementation handles service check.<p>
      * 
-     * See {@link #onConsume(IResource, long, boolean, boolean)}
+     * See {@link #onConsume(IResource, long, boolean, NewProcurementTask)}
      */
     @SuppressWarnings("unchecked")
-    protected long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    protected long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     {
         switch(resource.storageType().enumType)
         {
         case FLUID:
             if(this.hasFluidStorage()) 
-                return this.fluidStorage().add((IResource<StorageTypeFluid>)resource, quantity, simulate, (IProcurementRequest<StorageTypeFluid>)request);
+                return this.fluidStorage().add((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
   
         case ITEM:
             if(this.hasItemStorage()) 
-                return this.itemStorage().add((IResource<StorageTypeStack>)resource, quantity, simulate, (IProcurementRequest<StorageTypeStack>)request);
-
+                return this.itemStorage().add((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
+            else if(this.getBufferManager().itemInput() != null)
+                return this.getBufferManager().itemInput().add((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
+        
         case POWER:
-            return this.energyManager().add((IResource<StorageTypePower>)resource, quantity, simulate, (IProcurementRequest<StorageTypePower>)request);
+            return this.energyManager().add((IResource<StorageTypePower>)resource, quantity, simulate, (NewProcurementTask<StorageTypePower>)request);
 
         case PRIVATE:
             assert false : "Unsupported private storage type reference";
@@ -351,7 +355,7 @@ public abstract class AbstractDevice implements IDevice
     }
     
     @Override
-    public final long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request)
+    public final long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     {
         assert resource.confirmServiceThread() 
             : "Transport logic running outside logistics service"; 

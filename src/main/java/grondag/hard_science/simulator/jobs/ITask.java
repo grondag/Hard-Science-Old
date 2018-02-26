@@ -22,7 +22,7 @@ public interface ITask
 
     /**
      * Called when an antecedent that previously declared itself
-     * ready via {@link #onAntecedentTerminated(AbstractTask)} becomes
+     * ready via {@link #onAntecedentTerminated(ITask)} becomes
      * unready again for any reason.<p>
      * 
      * Will add called as an antecedent for this task and if status 
@@ -32,11 +32,11 @@ public interface ITask
      * If this task has consequents, and this task was previously 
      * COMPLETE, then will cascade the backtrack to the consequent tasks.
      */
-    void backTrack(AbstractTask antecedent);
+    void backTrack(ITask antecedent);
     
     TaskType requestType();
 
-    Job job();
+    public RequestPriority priority();
 
     RequestStatus getStatus();
 
@@ -61,11 +61,5 @@ public interface ITask
     
     public int getId();
     
-    public void onAntecedentTerminated(AbstractTask antecedent);
-    
-    /**
-     * Called on all tasks after deserialization is complete.  
-     * Override to handle actions that may require other objects to be deserialized start.
-     */
-    public default void afterDeserialization() {};
+    public void onAntecedentTerminated(ITask antecedent);
 }

@@ -7,13 +7,13 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.superblock.placement.Build;
-import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.superblock.placement.Build;
+import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,6 +27,13 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
  */
 public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, IDomainMember
 {
+    public static final String SYSTEM_USER_NAME = "system";
+    
+    public static Job createSystemJob(RequestPriority priority, int systemJobID)
+    {
+        return new Job(priority, systemJobID);
+    }
+    
     protected RequestPriority priority = RequestPriority.MEDIUM;
     
     /**
@@ -72,12 +79,33 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     
     private boolean isHeld;
     
-    public Job() {};
+    private final boolean isSystemJob;
+    
+    /** used by NBT deserialization */
+    public Job()
+    {
+        // system jobs aren't serialized
+        this.isSystemJob = false;
+    };
     
     public Job(RequestPriority priority, EntityPlayer player)
     {
         this.priority = priority;
-        this.userName = player.getName();
+        this.userName = player == null ? SYSTEM_USER_NAME : player.getName();
+        DomainManager.instance().assignedNumbersAuthority().register(this);
+        this.isSystemJob = false;
+    }
+    
+    /**
+     * System-type job, does not show in backlog, not persisted.
+     */
+    private Job (RequestPriority priority, int systemJobID)
+    {
+        assert IIdentified.isSystemID(systemJobID) : "Bad ID for system job";
+        this.id = systemJobID;
+        this.isSystemJob = true;
+        this.priority = priority;
+        this.userName = SYSTEM_USER_NAME;
         DomainManager.instance().assignedNumbersAuthority().register(this);
     }
     
@@ -86,8 +114,14 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
      */
     public Job(JobManager manager, NBTTagCompound tag)
     {
+        this.isSystemJob = false;
         this.jobManager = manager;
         this.deserializeNBT(tag);
+    }
+    
+    public boolean isSystemJob()
+    {
+        return this.isSystemJob;
     }
     
     /**
@@ -133,6 +167,11 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     
     protected void updateReadyWork(int delta)
     {
+        
+        // system jobs don't update job manager with ready work
+        // because not in the backlog
+        if(this.isSystemJob) return;
+        
         if(delta > 0)
         {
             if(this.readyWorkCount == 0)
@@ -222,11 +261,20 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         if(priority != this.priority)
         {
             this.priority = priority;
-            this.jobManager.notifyPriorityChange(this);
-            this.setDirty();
+            
+            // system jobs don't update job manager with 
+            // priority because not in the backlog
+            if(!this.isSystemJob)
+            {
+                this.jobManager.notifyPriorityChange(this);
+                this.setDirty();
+            }
         }
     }
     
+    /** 
+     * Will be {@link Job#SYSTEM_USER_NAME} for automated jobs.
+     */
     public String userName()
     {
         return this.userName;
@@ -237,7 +285,9 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         if(newStatus != this.status)
         {
             this.status = newStatus;
-            if(newStatus.isTerminated)
+            // system jobs don't update job manager with 
+            // termination because not in the backlog
+            if(newStatus.isTerminated && !this.isSystemJob)
             {
                 this.jobManager.notifyTerminated(this);
             }
@@ -313,7 +363,11 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         if(this.isHeld)
         {
             this.isHeld = false;
-            this.jobManager.notifyHoldChange(this);
+            
+            // system jobs don't update job manager with 
+            // hold because not in the backlog
+            if(!this.isSystemJob) this.jobManager.notifyHoldChange(this);
+            
             this.setDirty();
         }
     }
@@ -323,7 +377,9 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         if(!this.isHeld)
         {
             this.isHeld = true;
-            this.jobManager.notifyHoldChange(this);
+            // system jobs don't update job manager with 
+            // hold because not in the backlog
+            if(!this.isSystemJob) this.jobManager.notifyHoldChange(this);
             this.setDirty();
         }
     }
@@ -535,7 +591,8 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
 
     public void setDirty()
     {
-        this.jobManager.setDirty();
+        // system jobs aren't serialized, no need to mark owner dirty
+        if(!this.isSystemJob) this.jobManager.setDirty();
     }
     
     public void setDimensionID(int dimensionID)

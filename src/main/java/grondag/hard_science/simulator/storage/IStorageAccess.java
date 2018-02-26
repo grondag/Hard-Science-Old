@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
@@ -69,10 +70,10 @@ public interface IStorageAccess<T extends StorageType<T>>
     }
     
     /**
-     * Aggregate version of {@link IStorage#add(IResource, long, boolean, IProcurementRequest)}
+     * Aggregate version of {@link IStorage#add(IResource, long, boolean, NewProcurementTask)}
      * Must run on service thread for storage type.
      */
-    public default long add(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<T> request, IDevice reachableFrom)
+    public default long add(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<T> request, IDevice reachableFrom)
     {
         assert resource.confirmServiceThread() : "Storage action outside service thread.";
         
@@ -100,7 +101,7 @@ public interface IStorageAccess<T extends StorageType<T>>
     /**
      * Aggregate version of {@link IStorage#takeUpTo(IResource, long, boolean, IProcurementRequest)}
      */
-    public default long takeUpTo(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable IProcurementRequest<T> request)
+    public default long takeUpTo(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<T> request)
     {
         assert resource.confirmServiceThread() : "Storage action outside service thread.";
         

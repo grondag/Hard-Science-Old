@@ -3,14 +3,13 @@ package grondag.hard_science.machines.impl.logistics;
 import java.util.List;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
-import grondag.hard_science.init.ModFluids;
+import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
@@ -34,19 +33,16 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class ModularTankBlock extends MachineBlock
 {
-    private final FluidResource fluidResource;
     
-    public ModularTankBlock(String name, FluidResource fluidResource)
+    public ModularTankBlock(String name)
     {
         super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_CHANNEL_DOTS));
-        this.fluidResource = fluidResource;
     }
 
     @Override
     public AbstractMachine createNewMachine()
     {
         PortableTankMachine result = new PortableTankMachine();
-        result.fluidStorage.setContentPredicate(this.fluidResource);
         return result;
     }
     
@@ -122,6 +118,6 @@ public class ModularTankBlock extends MachineBlock
     @Override
     public PortLayout nominalPortLayout()
     {
-        return ModFluids.FLUID_CARRIERS.get(this.fluidResource);
+        return ModPortLayouts.utb_low_carrier_all;
     }
 }

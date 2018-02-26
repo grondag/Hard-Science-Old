@@ -9,8 +9,8 @@ import javax.annotation.Nullable;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.machines.support.ThroughputRegulator;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDeviceComponent;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
@@ -95,23 +95,23 @@ public interface IResourceContainer<T extends StorageType<T>>
             long howMany, 
             boolean simulate, 
             boolean allowPartial, 
-            @Nullable IProcurementRequest<T> request);
+            @Nullable NewProcurementTask<T> request);
 
     /**
-     * Alternate syntax for {@link #add(IResource, long, boolean, boolean, IProcurementRequest)}
+     * Alternate syntax for {@link #add(IResource, long, boolean, boolean, NewProcurementTask)}
      * that assumes allowPartial == true.
      */
     public default long add(
             @Nonnull IResource<T> resource, 
             long howMany, 
             boolean simulate, 
-            @Nullable IProcurementRequest<T> request)
+            @Nullable NewProcurementTask<T> request)
     {
         return this.add(resource, howMany, simulate, true, request);
     }
 
     /**
-     * Alternate syntax for {@link #add(IResource, long, boolean, boolean, IProcurementRequest)}
+     * Alternate syntax for {@link #add(IResource, long, boolean, boolean, NewProcurementTask)}
      * that assumes allowPartial == true and request == null.
      */
     public default long add(
@@ -122,8 +122,8 @@ public interface IResourceContainer<T extends StorageType<T>>
         return this.add(resource, howMany, simulate, true, null);
     }
     
-    /** Alternate syntax for {@link #add(IResource, long, boolean, IProcurementRequest)} */
-    default long add(@Nonnull AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate, @Nullable IProcurementRequest<T> request)
+    /** Alternate syntax for {@link #add(IResource, long, boolean, NewProcurementTask)} */
+    default long add(@Nonnull AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate, @Nullable NewProcurementTask<T> request)
     {
         return this.add(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate, request);
     }
@@ -141,23 +141,23 @@ public interface IResourceContainer<T extends StorageType<T>>
             long limit, 
             boolean simulate, 
             boolean allowPartial, 
-            @Nullable IProcurementRequest<T> request);
+            @Nullable NewProcurementTask<T> request);
     
     /**
-     * Alternate syntax for {@link #takeUpTo(IResource, long, boolean, boolean, IProcurementRequest)}
+     * Alternate syntax for {@link #takeUpTo(IResource, long, boolean, boolean, NewProcurementTask)}
      * which assumed allowPartial == true.
      */
     public default long takeUpTo(
             @Nonnull IResource<T> resource, 
             long limit, 
             boolean simulate, 
-            @Nullable IProcurementRequest<T> request)
+            @Nullable NewProcurementTask<T> request)
     {
         return this.takeUpTo(resource, limit, simulate, true, request);
     }
     
     /**
-     * Alternate syntax for {@link #takeUpTo(IResource, long, boolean, boolean, IProcurementRequest)}
+     * Alternate syntax for {@link #takeUpTo(IResource, long, boolean, boolean, NewProcurementTask)}
      * which assumes allowPartial == true and request == null.
      */
     public default long takeUpTo(

@@ -1,6 +1,9 @@
 package grondag.hard_science.simulator.demand;
 
 import java.util.Collection;
+
+import grondag.hard_science.simulator.fobs.INewTaskListener;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.StorageType;
 /**
  * Manages allocation and production for one or more resources.
@@ -17,12 +20,12 @@ import grondag.hard_science.simulator.resource.StorageType;
  * to attempt to allocate resources, but continues to track all 
  * requests until the request is met.
  */
-public interface IBroker<V extends StorageType<V>>
+public interface IBroker<V extends StorageType<V>> extends INewTaskListener
 {
     /**
      * Starts tracking the given request if was not already tracked.
      */
-    public void registerRequest(IProcurementRequest<V> request);
+    public void registerRequest(NewProcurementTask<V> request);
     
     /**
      * Stops tracking the given request if was being tracked.
@@ -32,27 +35,14 @@ public interface IBroker<V extends StorageType<V>>
      * If being called due to cancellation, does NOT unallocate. 
      * Task is responsible for unclaiming any allocated resources.
      */
-    public void unregisterRequest(IProcurementRequest<V> request);
-    
-    /**
-     * Called by request if priority changes but should still be 
-     * tracked by this broker.  
-     */
-    public void notifyPriorityChange(IProcurementRequest<V> request);
-    
-    /**
-     * Called by request if new demands are added, perhaps because
-     * WIP was cancelled. Signals broker to wake up any producers
-     * that have given up on existing demands.
-     */
-    public void notifyNewDemand(IProcurementRequest<V> request);
+    public void unregisterRequest(NewProcurementTask<V> request);
     
     /**
      * Returns a collection of all requests registered with this broker
      * that have open demands, ordered by priority (highest start)
      * and seniority (earliest start).
      */
-    public Collection<IProcurementRequest<V>> openRequests();
+    public Collection<NewProcurementTask<V>> openRequests();
     
     /**
      * Informs broker that producer should be notified when there are

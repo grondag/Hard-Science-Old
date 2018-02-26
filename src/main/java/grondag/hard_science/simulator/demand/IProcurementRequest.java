@@ -5,7 +5,6 @@ import java.util.List;
 import grondag.hard_science.simulator.jobs.ITask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
-import grondag.hard_science.simulator.resource.IResourcePredicateWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType;
 
 /**
@@ -15,31 +14,13 @@ import grondag.hard_science.simulator.resource.StorageType;
  */
 public interface IProcurementRequest <V extends StorageType<V>> extends ITask
 {
-    /**
-     * List of resources with quantities that would satisfy this request.
-     * Should be in order of preference, best to worst.
-     */
-    public List<IResourcePredicateWithQuantity<V>> allDemands();
     
     /**
-     * Same as {@link #allDemands()} but less resources that are allocated or WIP.
-     * Should be in order of preference, best to worst.
-     */
-    public List<IResourcePredicateWithQuantity<V>> openDemands();
-    
-    /**
-     * Same as {@link #allDemands()} but only resources and amounts that are allocated.
-     * These are always actual resources, not predicates.
+     * Resources and amounts that are allocated to this request.
+     * These are always actual resources.
      * Order here has no meaning. 
      */
     public List<AbstractResourceWithQuantity<V>> allocatedDemands();
-    
-    /**
-     * Same as {@link #allDemands()} but only resources and amounts that are WIP.
-     * These are always actual resources, not predicates
-     * Order here has no meaning. 
-     */
-    public List<AbstractResourceWithQuantity<V>> wipDemands();
     
     /**
      * Called by a producer when starting to produce a resource for this request.
@@ -66,8 +47,38 @@ public interface IProcurementRequest <V extends StorageType<V>> extends ITask
     
     /**
      * Called by storage system if an allocated resource becomes unavailable.
-     * Will cause openDemands to refresh.  Should update broker when this occurs.
+     * Will cause open and allocated demands to refresh.  Should update broker when this occurs.
      */
     public void breakAllocation(IResource<V> resource, long newAllocation);
+
+    /**
+     * Called by the owner of this request when it accepts delivery of resources
+     * allocated by this request.  Will reduce allocation.<p>
+     * 
+     * Does NOT notify storage system to reduce allocation - passing this request
+     * to all storage operations will cause the storage system to update 
+     * allocations automatically. For example, if the owner withdraws an
+     * allocated resource from storage and does not put it back, storage manager
+     * will automatically reflect the reduced allocation.
+     */
+    public void reportDelivery(IResource<V> resource, long deliveredQuantity);
+    
+    /**
+     * Returns maximum quantity of the given resource that could be used
+     * by this request.  Does not include allocated or delivered amounts.
+     * Not guaranteed request will still need it if 
+     * allocation is later requested, because of concurrency.
+     * Will return zero if the resource cannot be used to satisfy this request.<p>
+     * 
+     * Value does not decrease as resources are delivered. 
+     * For that, see {@link #deliveredQuantity(IResource)}
+     */
+    public long demandFor(IResource<V> resource);
+    
+    /**
+     * Quantity of the given resource that has been delivered by this request.
+     * Not included in open demand or allocations.
+     */
+    public long deliveredQuantity(IResource<V> resource);
     
 }

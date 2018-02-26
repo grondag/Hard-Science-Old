@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.storage;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.StorageEvent.CapacityChange;
@@ -29,7 +29,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
             IResourceContainer<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
-            @Nullable IProcurementRequest<StorageTypeStack> request)
+            @Nullable NewProcurementTask<StorageTypeStack> request)
     {
         if(storage.getDomain() == null) return;
         
@@ -44,7 +44,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
             IResourceContainer<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
             long delta,
-            @Nullable IProcurementRequest<StorageTypeStack> request)
+            @Nullable NewProcurementTask<StorageTypeStack> request)
     {
         if(storage.getDomain() == null) return;
         
@@ -94,7 +94,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
                 IResourceContainer<StorageTypeStack> storage, 
                 IResource<StorageTypeStack> resource, 
                 long delta,
-                @Nullable IProcurementRequest<StorageTypeStack> request)
+                @Nullable NewProcurementTask<StorageTypeStack> request)
         {
             super(storage, resource, delta, request);
         }
@@ -109,7 +109,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
                 IResourceContainer<StorageTypeStack> storage, 
                 IResource<StorageTypeStack> resource, 
                 long delta,
-                @Nullable IProcurementRequest<StorageTypeStack> request)
+                @Nullable NewProcurementTask<StorageTypeStack> request)
         {
             super(storage, resource, delta, request);
         }

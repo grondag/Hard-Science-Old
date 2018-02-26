@@ -36,6 +36,7 @@ public class DeviceEnergyInfo implements IMessagePlus
         if(powerSupply.inputContainer() != null)
         {
             this.maxDeviceDrawWatts = powerSupply.inputContainer().maxPowerOutputWatts();
+            this.maxChargeWatts = powerSupply.inputContainer().maxPowerInputWatts();
         }
         if(powerSupply.outputContainer() != null)
         {

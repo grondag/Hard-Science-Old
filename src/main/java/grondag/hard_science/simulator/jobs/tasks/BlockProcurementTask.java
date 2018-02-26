@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.jobs.tasks;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.simulator.jobs.AbstractPositionedStackTask;
-import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.ITask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.TaskType;
 import net.minecraft.item.ItemStack;
@@ -47,7 +47,7 @@ public class BlockProcurementTask extends AbstractPositionedStackTask
     }
 
     @Override
-    public void onAntecedentTerminated(AbstractTask antecedent)
+    public void onAntecedentTerminated(ITask antecedent)
     {
         //TODO: for now, procurement tasks done
         // as soon as fabrication is done

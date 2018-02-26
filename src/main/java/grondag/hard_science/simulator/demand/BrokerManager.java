@@ -5,9 +5,9 @@ import java.util.HashMap;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.resource.IResource;
-import grondag.hard_science.simulator.resource.IResourcePredicate;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 
@@ -19,47 +19,43 @@ public class BrokerManager implements IDomainMember
     
     private final Domain domain;
     
+    public final AbstractBroker<StorageTypeStack> crushinatorInputBroker;
+    
     public BrokerManager(Domain domain)
     {
         this.domain = domain;
+        this.crushinatorInputBroker = new AbstractBroker<StorageTypeStack>(this){};
     }
     
-    public <T extends StorageType<T>> IBroker<T> brokerForResourcePredicate(IResourcePredicate<T> predicate)
+    public <T extends StorageType<T>> IBroker<T> brokerForResource(IResource<T> resource)
     {
-        if(predicate.isEqualityPredicate())
+        switch(resource.storageType().enumType)
         {
-            IResource<T> resource = (IResource<T>)predicate;
-            
-            switch(resource.storageType().enumType)
+            case ITEM:
             {
-                case ITEM:
+                ItemResource item = (ItemResource)resource;
+                
+                if(item.getItem() instanceof SuperItemBlock)
                 {
-                    ItemResource item = (ItemResource)resource;
-                    
-                    if(item.getItem() instanceof SuperItemBlock)
+                    if(((SuperItemBlock)item.getItem()).getBlock().getClass() == SuperModelBlock.class)
                     {
-                        if(((SuperItemBlock)item.getItem()).getBlock().getClass() == SuperModelBlock.class)
-                        {
 //                            return (IBroker<T>) this.BLOCK_BROKER;
-                        }
                     }
                 }
-                    
-                case POWER:
-                case FLUID:
-                    //use per-resource default
-                    return this.getOrCreateSimpleBroker(resource);
-
-                case PRIVATE:
-                    assert false : "Private storage type reference";
-                    return null;
-                default:
-                    assert false : "Missing enum mapping";
-                    return null;
             }
+                
+            case POWER:
+            case FLUID:
+                //use per-resource default
+                return this.getOrCreateSimpleBroker(resource);
+
+            case PRIVATE:
+                assert false : "Private storage type reference";
+                return null;
+            default:
+                assert false : "Missing enum mapping";
+                return null;
         }
-        
-        return null;
     }
     
     @SuppressWarnings("unchecked")

@@ -9,20 +9,22 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.fobs.INewTaskListener;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
+import grondag.hard_science.simulator.fobs.NewTask;
+import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
-public class StorageResourceManager<T extends StorageType<T>>
+public class StorageResourceManager<T extends StorageType<T>> implements INewTaskListener
 {
     /**
      * Resource this instance manages.
@@ -65,7 +67,7 @@ public class StorageResourceManager<T extends StorageType<T>>
      * the storage, if non-null.
      * Useful when fabrication is storing items made for procurement requests.
      */
-    public StorageResourceManager(IResource<T> resource, IResourceContainer<T> firstStorage, long allocatedQuantity, @Nullable IProcurementRequest<T> request)
+    public StorageResourceManager(IResource<T> resource, IResourceContainer<T> firstStorage, long allocatedQuantity, @Nullable NewProcurementTask<T> request)
     {
         this.resource = resource;
         if(firstStorage != null)
@@ -87,7 +89,7 @@ public class StorageResourceManager<T extends StorageType<T>>
      * Total quantityIn allocated can be different from return value if request already had an allocation.
      * Provides no notification to the request.
      */
-    public synchronized long changeAllocation(@Nonnull IProcurementRequest<T> request, long quantityRequested)
+    public synchronized long changeAllocation(@Nonnull NewProcurementTask<T> request, long quantityRequested)
     {
         long allocated = this.getAllocation(request);
         long newAllocation = Useful.clamp(allocated + quantityRequested, 0, allocated + this.quantityAvailable());
@@ -97,20 +99,20 @@ public class StorageResourceManager<T extends StorageType<T>>
     /**
      * Returns current allocation for the given request.
      */
-    public synchronized long getAllocation(@Nonnull IProcurementRequest<T> request)
+    public synchronized long getAllocation(@Nonnull NewProcurementTask<T> request)
     {
         if(this.allocations == null) return 0;
         
         if(this.allocations instanceof Pair)
         {
             @SuppressWarnings("unchecked")
-            Pair<IProcurementRequest<T>, Long> pair = (Pair<IProcurementRequest<T>, Long>)this.allocations;
+            Pair<NewProcurementTask<T>, Long> pair = (Pair<NewProcurementTask<T>, Long>)this.allocations;
             return pair.getLeft() == request ? pair.getRight() : 0;
         }
         else
         {
             @SuppressWarnings("unchecked")
-            Object2LongOpenHashMap<IProcurementRequest<T>> map = (Object2LongOpenHashMap<IProcurementRequest<T>>)this.allocations;
+            Object2LongOpenHashMap<NewProcurementTask<T>> map = (Object2LongOpenHashMap<NewProcurementTask<T>>)this.allocations;
             return map.getLong(request);
         }
     }
@@ -121,8 +123,13 @@ public class StorageResourceManager<T extends StorageType<T>>
      * and will not set allocation so that total allocated is more the total available.
      * Provides no notification to the request.
      */
-    public synchronized long setAllocation(@Nonnull IProcurementRequest<T> request, long requestedAllocation)
+    public synchronized long setAllocation(@Nonnull NewProcurementTask<T> request, long requestedAllocation)
     {
+        /**
+         * 1 = start listening, -1 = stop
+         */
+        byte listenBehavior = 0;
+        
         if(requestedAllocation < 0)
         {
             Log.warn("StorageResourceManager received request to set resource allocation less than zero. This is a bug.");
@@ -154,18 +161,20 @@ public class StorageResourceManager<T extends StorageType<T>>
             if(requestedAllocation > 0)
             {
                 this.allocations = Pair.of(request, requestedAllocation);
+                listenBehavior = 1;
             }
         }
         else if(this.allocations instanceof Pair)
         {
             @SuppressWarnings("unchecked")
-            Pair<IProcurementRequest<T>, Long> pair = (Pair<IProcurementRequest<T>, Long>)this.allocations;
+            Pair<NewProcurementTask<T>, Long> pair = (Pair<NewProcurementTask<T>, Long>)this.allocations;
             if(pair.getLeft() == request)
             {
                 // already tracking this request as the only allocation
                 if(requestedAllocation == 0)
                 {
                     this.allocations = null;
+                    listenBehavior = -1;
                 }
                 else
                 {
@@ -174,11 +183,15 @@ public class StorageResourceManager<T extends StorageType<T>>
             }
             else
             {
+                assert requestedAllocation > 0
+                    : "Logic error resulted in tracking a zero allocation";
+                
                 // need to start tracking more than one allocation
                 // upgrade tracking data structure to HashMap
-                Object2LongOpenHashMap<IProcurementRequest<T>> map = new Object2LongOpenHashMap<IProcurementRequest<T>>();
+                Object2LongOpenHashMap<NewProcurementTask<T>> map = new Object2LongOpenHashMap<NewProcurementTask<T>>();
                 map.put(pair.getLeft(), pair.getRight());
                 map.put(request, requestedAllocation);
+                listenBehavior = 1;
                 this.allocations = map;
             }
         }
@@ -186,23 +199,43 @@ public class StorageResourceManager<T extends StorageType<T>>
         {
             //already using a hash map
             @SuppressWarnings("unchecked")
-            Object2LongOpenHashMap<IProcurementRequest<T>> map = (Object2LongOpenHashMap<IProcurementRequest<T>>)this.allocations;
+            Object2LongOpenHashMap<NewProcurementTask<T>> map = (Object2LongOpenHashMap<NewProcurementTask<T>>)this.allocations;
             if(requestedAllocation == 0)
             {
                 map.remove(request);
+                listenBehavior = -1;
             }
             else
             {
                 map.put(request, requestedAllocation);
+                listenBehavior = 1;
             }
         }
         
         // asynch - returns immediately
         if(this.quantityAvailable() != startingAvailable) this.notifyListenersOfAvailability();
         
+        // listen for event termination to remove allocations
+        // if the event is cancelled unexpectedly
+        if(listenBehavior == 1 )
+            request.addListener(this);
+        else if(listenBehavior == -1)
+            request.removeListener(this);
+        
         return requestedAllocation;
     }
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public void notifyStatusChange(NewTask task, RequestStatus oldStatus)
+    {
+        if(task instanceof NewProcurementTask && task.status().isTerminated && !oldStatus.isTerminated)
+        {
+            // this will also remove us as listener
+            this.setAllocation((NewProcurementTask)task, 0);
+        }
+    }
+
     /**
      * Does not include allocated amounts.
      */
@@ -231,7 +264,7 @@ public class StorageResourceManager<T extends StorageType<T>>
      * Called by storage when resources are removed.
      * If request is non-null, then the amount taken reduces any allocation to that request.
      */
-    public synchronized void notifyTaken(IResourceContainer<T> storage, long taken, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyTaken(IResourceContainer<T> storage, long taken, @Nullable NewProcurementTask<T> request)
     {
         if(taken == 0) return;
         
@@ -269,7 +302,7 @@ public class StorageResourceManager<T extends StorageType<T>>
             {
                 // single allocation, set allocation to total stored and notify
                 @SuppressWarnings("unchecked")
-                Pair<IProcurementRequest<T>, Long> pair = (Pair<IProcurementRequest<T>, Long>)this.allocations;
+                Pair<NewProcurementTask<T>, Long> pair = (Pair<NewProcurementTask<T>, Long>)this.allocations;
                 long newAllocation = this.setAllocation(pair.getLeft(), this.quantityStored);
                 pair.getLeft().breakAllocation(this.resource, newAllocation);
             }
@@ -277,30 +310,26 @@ public class StorageResourceManager<T extends StorageType<T>>
             {
                 // Multiple allocations, have to decide which one is impacted.
                 @SuppressWarnings("unchecked")
-                Object2LongOpenHashMap<IProcurementRequest<T>> map = (Object2LongOpenHashMap<IProcurementRequest<T>>)this.allocations;
+                Object2LongOpenHashMap<NewProcurementTask<T>> map = (Object2LongOpenHashMap<NewProcurementTask<T>>)this.allocations;
                 
                 // Sort by priority and seniority
-                List<Entry<IProcurementRequest<T>>> list =
+                List<Entry<NewProcurementTask<T>>> list =
                 map.object2LongEntrySet().stream()
-                .sorted(new Comparator<Entry<IProcurementRequest<T>>>() 
+                .sorted(new Comparator<Entry<NewProcurementTask<T>>>() 
                 {
                     @Override
-                    public int compare(Entry<IProcurementRequest<T>> o1, Entry<IProcurementRequest<T>> o2)
+                    public int compare(Entry<NewProcurementTask<T>> o1, Entry<NewProcurementTask<T>> o2)
                     {
                         // note reverse order
-                        IProcurementRequest<T> k1 = o2.getKey();
-                        IProcurementRequest<T> k2 = o1.getKey();
-                        
-                        return ComparisonChain.start()
-                                .compare(k1.job().getPriority().ordinal(), k2.job().getPriority().ordinal())
-                                .compare(k1.getId(), k2.getId())
-                                .result();
+                        NewProcurementTask<T> k1 = o2.getKey();
+                        NewProcurementTask<T> k2 = o1.getKey();
+                        return k1.priority().compareTo(k2.priority());
                     }
                 })
                 .collect(Collectors.toList());
                 
                 // Break allocations until allocation total is within the stored amount.
-                for(Entry<IProcurementRequest<T>> entry : list)
+                for(Entry<NewProcurementTask<T>> entry : list)
                 {
                     long gap = this.quantityAllocated - this.quantityStored;
                     if(gap <= 0) break;
@@ -308,7 +337,7 @@ public class StorageResourceManager<T extends StorageType<T>>
                     long delta = Math.min(gap, entry.getLongValue());
                     if(delta > 0)
                     {
-                        IProcurementRequest<T> brokenRequest = entry.getKey();
+                        NewProcurementTask<T> brokenRequest = entry.getKey();
                         if(this.changeAllocation(brokenRequest, -delta) != 0)
                         {
                             brokenRequest.breakAllocation(this.resource, this.getAllocation(brokenRequest));
@@ -325,7 +354,7 @@ public class StorageResourceManager<T extends StorageType<T>>
     /**
      * If request is non-null, then the amount added is immediately allocated to that request.
      */
-    public synchronized void notifyAdded(IResourceContainer<T> storage, long added, @Nullable IProcurementRequest<T> request)
+    public synchronized void notifyAdded(IResourceContainer<T> storage, long added, @Nullable NewProcurementTask<T> request)
     {
         if(added == 0) return;
         
@@ -507,7 +536,7 @@ public class StorageResourceManager<T extends StorageType<T>>
         if(this.listeners == null && this.stores.isEmpty())
         {
             assert(this.allocations == null 
-                    || ((Object2LongOpenHashMap<IProcurementRequest<T>>)this.allocations).isEmpty())
+                    || ((Object2LongOpenHashMap<NewProcurementTask<T>>)this.allocations).isEmpty())
                 : "StorageResourceManager empty with non-null allocations";
             
             assert(this.quantityAllocated() == 0)

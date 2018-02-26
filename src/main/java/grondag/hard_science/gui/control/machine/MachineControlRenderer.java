@@ -844,15 +844,15 @@ public class MachineControlRenderer
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_POWER_BACKGROUND.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         // render in/out level
-        if(xmpi.netStorageWatts() > 0)
+        if(xmpi.netStorageWatts() > 0 && xmpi.maxChargeWatts() > 0)
         {
-            int arcLength = (int)(xmpi.netStorageWatts() * 180 / xmpi.maxChargeWatts());
+            int arcLength = Math.min(180, (int)(xmpi.netStorageWatts() * 180 / xmpi.maxChargeWatts()));
             renderRadialSprite(tessellator, buffer, bounds, 270, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
                     MachinePower.formatPower(Math.round(xmpi.netStorageWatts()), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
         }
-        else if(xmpi.netStorageWatts() < 0)
+        else if(xmpi.netStorageWatts() < 0 && xmpi.maxDischargeWatts() > 0)
         {
             int arcLength = (int)(-xmpi.netStorageWatts() * 180 / xmpi.maxDischargeWatts());
             renderRadialSprite(tessellator, buffer, bounds, 450 - arcLength, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);

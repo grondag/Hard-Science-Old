@@ -6,9 +6,11 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import com.google.common.collect.ComparisonChain;
-
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
+import grondag.hard_science.simulator.fobs.NewTask;
+import grondag.hard_science.simulator.fobs.TaskPriority;
+import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.resource.StorageType;
 
 public class AbstractBroker<V extends StorageType<V>> implements IBroker<V>
@@ -16,19 +18,16 @@ public class AbstractBroker<V extends StorageType<V>> implements IBroker<V>
     protected final BrokerManager brokerManager;
     
     protected SimpleUnorderedArrayList<IProducer<V>> producers = new SimpleUnorderedArrayList<IProducer<V>>();
-    protected ConcurrentSkipListSet<IProcurementRequest<V>> requests = new ConcurrentSkipListSet<IProcurementRequest<V>>(new Comparator<IProcurementRequest<V>>() 
+    protected ConcurrentSkipListSet<NewProcurementTask<V>> requests = new ConcurrentSkipListSet<NewProcurementTask<V>>(new Comparator<NewProcurementTask<V>>() 
             {
                 @Override
-                public int compare(IProcurementRequest<V> o1, IProcurementRequest<V> o2)
+                public int compare(NewProcurementTask<V> o1, NewProcurementTask<V> o2)
                 {
-                    return ComparisonChain.start()
-                            .compare(o1.job().getPriority().ordinal(), o2.job().getPriority().ordinal())
-                            .compare(o1.getId(), o2.getId())
-                            .result();
+                    return o1.priority().compareTo(o2.priority());
                 }
             });
     
-    private Set<IProcurementRequest<V>> requestsReadOnly = Collections.unmodifiableSet(this.requests);
+    private Set<NewProcurementTask<V>> requestsReadOnly = Collections.unmodifiableSet(this.requests);
 
     public AbstractBroker(BrokerManager brokerManager)
     {
@@ -37,39 +36,76 @@ public class AbstractBroker<V extends StorageType<V>> implements IBroker<V>
     }
 
     @Override
-    public synchronized void registerRequest(IProcurementRequest<V> request)
+    public synchronized void registerRequest(NewProcurementTask<V> request)
     {
         if(this.requests.add(request))
         {
-            this.notifyNewDemand(request);
+            this.notifyProducersOfDemandChange(request);
+            request.addListener(this);
         }
     }
 
     @Override
-    public synchronized void unregisterRequest(IProcurementRequest<V> request)
+    public synchronized void unregisterRequest(NewProcurementTask<V> request)
     {
+        request.removeListener(this);
         this.requests.remove(request);
     }
 
     @Override
-    public synchronized void notifyPriorityChange(IProcurementRequest<V> request)
+    public void notifyStatusChange(NewTask task, RequestStatus oldStatus)
     {
-        // remove and re-add to update sort
-        this.requests.remove(request);
-        this.requests.add(request);
+        if(task.status().isTerminated)
+        {
+            task.removeListener(this);
+            this.requests.remove(task);
+        }
     }
 
+    /**
+     * Called by request if new demands are added, perhaps because
+     * WIP was cancelled. Signals broker to wake up any producers
+     * that have given up on existing demands.<p>
+     * 
+     * {@inheritDoc}
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public synchronized void notifyNewDemand(IProcurementRequest<V> request)
+    public synchronized void notifyDemandChange(NewTask task)
+    {
+        if(task instanceof NewProcurementTask)
+        {
+            this.notifyProducersOfDemandChange((NewProcurementTask)task);
+        }
+    }
+
+    protected void notifyProducersOfDemandChange(NewProcurementTask<V> task)
     {
         for(IProducer<V> p : this.producers)
         {
-            p.notifyNewDemand(this, request);
+            p.notifyNewDemand(this, task);
+        }
+    }
+    /**
+     * Called by request if priority changes but should still be 
+     * tracked by this broker. <p>
+     * 
+     *  {@inheritDoc}
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public synchronized void notifyPriorityChange(NewTask task, TaskPriority oldPriority)
+    {
+        // remove and re-add to update sort
+        this.requests.remove(task);
+        if(task instanceof NewProcurementTask)
+        {
+            this.requests.add((NewProcurementTask)task);    
         }
     }
 
     @Override
-    public Collection<IProcurementRequest<V>> openRequests()
+    public Collection<NewProcurementTask<V>> openRequests()
     {
         return this.requestsReadOnly;
     }

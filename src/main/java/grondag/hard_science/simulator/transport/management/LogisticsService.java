@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.concurrency.PrivilegedExecutor;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -49,7 +49,7 @@ import grondag.hard_science.simulator.transport.routing.Route;
  * 
  * Avoids the need for synchronization
  * by ensuring all inquires and changes to transport and storage of a given
- * bulkResource type are executed within a single thread. <p>
+ * resource type are executed within a single thread. <p>
  * 
  * Most requests can be prioritized so that the called can block and expect
  * a reasonably quick return. Useful to handle player actions and world events.
@@ -586,8 +586,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         Relies on sort order and structure guaranteed by 
         {@link Carrier#legs()}.<p>
         
-        For fluid transport, routes are limited by the given bulkResource.
-        Resource is currently ignored for power and item requests.
+        Resource is currently ignored.
        
         Approach: compare first leg of each list, with these possibilities...<p>
        
@@ -778,12 +777,12 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     /**
-     * Sends bulkResource from one device to another
+     * Sends resource from one device to another
      * by any available route(s) and return
      * the quantity actually sent.  Will send via
      * more than one route if necessary / possible.
      * 
-     * @param bulkResource  stuff to send
+     * @param resource  stuff to send
      * @param quantity  how much
      * @param from      producing device
      * @param to        consuming device
@@ -799,7 +798,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<T> request)
+            NewProcurementTask<T> request)
     {
         return executor.submit( () ->
         {
@@ -808,7 +807,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     /**
-     * Blocking version of {@link #sendResource(IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
+     * Blocking version of {@link #sendResource(IResource, long, IDevice, IDevice, boolean, boolean, NewProcurementTask)}
      * 
      * If this version is run from the service thread, it simply runs
      * and returns a result.  If it is run from a different thread
@@ -824,7 +823,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<T> request)
+            NewProcurementTask<T> request)
     {
         if(this.confirmServiceThread()) return sendResourceImpl(resource, quantity, from, to, force, simulate, request);
         
@@ -849,7 +848,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<T> request)
+            NewProcurementTask<T> request)
     {
         ImmutableList<Route<T>> routes = 
                 this.findRoutesImpl(from, to, resource);
@@ -869,7 +868,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     /**
-     * Like {@link #sendResource(IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
+     * Like {@link #sendResource(IResource, long, IDevice, IDevice, boolean, boolean, NewProcurementTask)}
      * but specifies a single route to use.
      */
     public Future<Long> sendResourceOnRoute(
@@ -880,7 +879,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<?> request)
+            NewProcurementTask<?> request)
     {
         return executor.submit( () ->
         {
@@ -889,7 +888,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     }
     
     /**
-     * Blocking version of {@link #sendResourceOnRoute(Route, IResource, long, IDevice, IDevice, boolean, boolean, IProcurementRequest)}
+     * Blocking version of {@link #sendResourceOnRoute(Route, IResource, long, IDevice, IDevice, boolean, boolean, NewProcurementTask)}
      * 
      * If this version is run from the service thread, it simply runs
      * and returns a result.  If it is run from a different thread
@@ -906,7 +905,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<?> request)
+            NewProcurementTask<?> request)
     {
         if(this.confirmServiceThread()) return sendResourceOnRouteImpl(route, resource, quantity, from, to, force, simulate, request);
                 
@@ -938,7 +937,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             IDevice to, 
             boolean force, 
             boolean simulate,
-            IProcurementRequest<?> request)
+            NewProcurementTask<?> request)
     {
         StorageType<?> storageType = resource.storageType();
         
@@ -1013,7 +1012,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     
     /**
      * Returns true if any transport route exists between the two devices
-     * that could be used to transport the given bulkResource. Resource currently
+     * that could be used to transport the given resource. Resource currently
      * only matters for fluid circuits, which are always locked to a specific
      * fluid.<p>
      * 

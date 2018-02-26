@@ -11,7 +11,7 @@ import grondag.hard_science.machines.impl.logistics.SmartChestBlock;
 import grondag.hard_science.machines.impl.logistics.TopBusBlock;
 import grondag.hard_science.machines.impl.logistics.TransportTestBlock;
 import grondag.hard_science.machines.impl.logistics.WaterPumpBlock;
-import grondag.hard_science.machines.impl.processing.CrushinatorBlock;
+import grondag.hard_science.machines.impl.processing.MicronizerBlock;
 import grondag.hard_science.machines.impl.production.PhotoElectricBlock;
 import grondag.hard_science.machines.impl.production.SolarCableBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -195,13 +195,11 @@ public class ModBlocks
         event.getRegistry().register(new BottomBusBlock("bottom_bus"));
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
-        event.getRegistry().register(new ModularTankBlock("water_tank", ModBulkResources.WATER.fluidResource()));
-        event.getRegistry().register(new ModularTankBlock("h2o_tank", ModBulkResources.H2O_FLUID.fluidResource()));
-        event.getRegistry().register(new ModularTankBlock("ammonia_tank", ModBulkResources.AMMONIA_GAS.fluidResource()));
+        event.getRegistry().register(new ModularTankBlock("modular_tank"));
         event.getRegistry().register(new WaterPumpBlock("water_pump"));
         event.getRegistry().register(new ChemicalBatteryBlock("chemical_battery"));
         event.getRegistry().register(new TransportTestBlock("transport_test"));
-        event.getRegistry().register(new CrushinatorBlock("crushinator"));
+        event.getRegistry().register(new MicronizerBlock("crushinator"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 

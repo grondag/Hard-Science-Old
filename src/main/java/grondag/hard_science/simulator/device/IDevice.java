@@ -10,9 +10,9 @@ import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager2;
 import grondag.hard_science.simulator.ISimulationTickable;
-import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
@@ -104,13 +104,13 @@ public interface IDevice extends
      * Called by transport system for this device to handle outbound transport requests.
      * SHOULD ONLY BE CALLED FROM LOGISTICS SERVICE to ensure consistency of results.
      */
-    public long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request);
+    public long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request);
 
     /**
      * Called by transport system for this device to handle inbound transport requests
      * SHOULD ONLY BE CALLED FROM LOGISTICS SERVICE to ensure consistency of results.
      */
-    public long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable IProcurementRequest<?> request);
+    public long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request);
 
     /**
      * Called after ports on this device are attached

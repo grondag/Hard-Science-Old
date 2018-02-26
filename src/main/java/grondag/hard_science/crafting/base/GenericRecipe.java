@@ -13,8 +13,6 @@ import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
-import grondag.hard_science.simulator.resource.BulkResource;
-import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.FluidResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -36,10 +34,8 @@ public class GenericRecipe implements IHardScienceRecipe
     
     private final ImmutableList<FluidResourceWithQuantity> fluidInputs;
     private final ImmutableList<ItemResourceWithQuantity> itemInputs;
-    private final ImmutableList<BulkResourceWithQuantity> bulkInputs;
     private final ImmutableList<FluidResourceWithQuantity> fluidOutputs;
     private final ImmutableList<ItemResourceWithQuantity> itemOutputs;
-    private final ImmutableList<BulkResourceWithQuantity> bulkOutputs;
     private final long energyInputJoules;
     private final long energyOutputJoules;
     private final int ticksDuration;
@@ -59,8 +55,6 @@ public class GenericRecipe implements IHardScienceRecipe
         ImmutableList.Builder<FluidResourceWithQuantity> fluidOutputs = ImmutableList.builder();
         ImmutableList.Builder<ItemResourceWithQuantity> itemInputs = ImmutableList.builder();
         ImmutableList.Builder<ItemResourceWithQuantity> itemOutputs = ImmutableList.builder();
-        ImmutableList.Builder<BulkResourceWithQuantity> bulkInputs = ImmutableList.builder();
-        ImmutableList.Builder<BulkResourceWithQuantity> bulkOutputs = ImmutableList.builder();
         long energyInputJoules = 0;
         long energyOutputJoules = 0;
         
@@ -81,9 +75,6 @@ public class GenericRecipe implements IHardScienceRecipe
                 break;
 
             case PRIVATE:
-                bulkInputs.add((BulkResourceWithQuantity) rwq);
-                break;
-                
             default:
                 break;
             
@@ -107,9 +98,6 @@ public class GenericRecipe implements IHardScienceRecipe
                 break;
 
             case PRIVATE:
-                bulkOutputs.add((BulkResourceWithQuantity) rwq);
-                break;
-                
             default:
                 break;
             
@@ -118,10 +106,8 @@ public class GenericRecipe implements IHardScienceRecipe
         
         this.fluidInputs = fluidInputs.build();
         this.itemInputs = itemInputs.build();
-        this.bulkInputs = bulkInputs.build();
         this.fluidOutputs = fluidOutputs.build();
         this.itemOutputs = itemOutputs.build();
-        this.bulkOutputs = bulkOutputs.build();
         this.energyInputJoules = energyInputJoules;
         this.energyOutputJoules = energyOutputJoules;
         this.ticksDuration = ticksDuration;
@@ -161,20 +147,6 @@ public class GenericRecipe implements IHardScienceRecipe
             this.itemInputs = builder.build();
         }
         
-        if(process.bulkInputs().isEmpty())
-        {
-            this.bulkInputs = ImmutableList.of();
-        }
-        else
-        {
-            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
-            for(BulkResource r : process.bulkInputs())
-            {
-                builder.add(r.withQuantity(result.inputValueDiscrete(r)));
-            }
-            this.bulkInputs = builder.build();
-        }
-        
         if(process.fluidOutputs().isEmpty())
         {
             this.fluidOutputs = ImmutableList.of();
@@ -203,20 +175,6 @@ public class GenericRecipe implements IHardScienceRecipe
             this.itemOutputs = builder.build();
         }
         
-        if(process.bulkOutputs().isEmpty())
-        {
-            this.bulkOutputs = ImmutableList.of();
-        }
-        else
-        {
-            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
-            for(BulkResource r : process.bulkOutputs())
-            {
-                builder.add(r.withQuantity(result.outputValueDiscrete(r)));
-            }
-            this.bulkOutputs = builder.build();
-        }
-       
         this.energyInputJoules = process.consumesEnergy()
                 ? Math.round(result.inputValue(PowerResource.JOULES))
                 : 0;
@@ -252,16 +210,6 @@ public class GenericRecipe implements IHardScienceRecipe
         }
         else this.itemInputs = ImmutableList.of();
         
-        if(tag.hasKey(ModNBTTag.RECIPE_BULK_INPUTS))
-        {
-            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_BULK_INPUTS, 10);
-            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
-            list.forEach(t -> builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromNBTWithQty((NBTTagCompound) t)));
-            this.bulkInputs = builder.build();
-        }
-        else this.bulkInputs = ImmutableList.of();
-        
-        
         if(tag.hasKey(ModNBTTag.RECIPE_FLUID_OUTPUTS))
         {
             NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_FLUID_OUTPUTS, 10);
@@ -279,15 +227,6 @@ public class GenericRecipe implements IHardScienceRecipe
             this.itemOutputs = builder.build();
         }
         else this.itemOutputs = ImmutableList.of();
-        
-        if(tag.hasKey(ModNBTTag.RECIPE_BULK_OUTPUTS))
-        {
-            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_BULK_OUTPUTS, 10);
-            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
-            list.forEach(t -> builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromNBTWithQty((NBTTagCompound) t)));
-            this.bulkOutputs = builder.build();
-        }
-        else this.bulkOutputs = ImmutableList.of();
     }
     
     public GenericRecipe(PacketBuffer pBuff)
@@ -325,20 +264,6 @@ public class GenericRecipe implements IHardScienceRecipe
             }
             this.itemInputs = builder.build();
         }
-
-        if(size == 0)
-        {
-            this.bulkInputs = ImmutableList.of();
-        }
-        else
-        {
-            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
-            for(int i = 0; i < size; i++)
-            {
-                builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromBytesWithQty(pBuff));
-            }
-            this.bulkInputs = builder.build();
-        }
         
         size = pBuff.readByte();
         if(size == 0)
@@ -369,20 +294,6 @@ public class GenericRecipe implements IHardScienceRecipe
             }
             this.itemOutputs = builder.build();
         }
-
-        if(size == 0)
-        {
-            this.bulkOutputs = ImmutableList.of();
-        }
-        else
-        {
-            ImmutableList.Builder<BulkResourceWithQuantity> builder = ImmutableList.builder();
-            for(int i = 0; i < size; i++)
-            {
-                builder.add((BulkResourceWithQuantity) StorageType.PRIVATE.fromBytesWithQty(pBuff));
-            }
-            this.bulkOutputs = builder.build();
-        }
     }
     
     @Override
@@ -398,12 +309,6 @@ public class GenericRecipe implements IHardScienceRecipe
     }
 
     @Override
-    public ImmutableList<BulkResourceWithQuantity> bulkInputs()
-    {
-        return this.bulkInputs;
-    }
-    
-    @Override
     public ImmutableList<FluidResourceWithQuantity> fluidOutputs()
     {
         return this.fluidOutputs;
@@ -415,12 +320,6 @@ public class GenericRecipe implements IHardScienceRecipe
         return this.itemOutputs;
     }
 
-    @Override
-    public ImmutableList<BulkResourceWithQuantity> bulkOutputs()
-    {
-        return this.bulkOutputs;
-    }
-    
     @Override
     public long energyInputJoules()
     {
@@ -444,8 +343,8 @@ public class GenericRecipe implements IHardScienceRecipe
         if(this.layout == null)
         {
             this.layout = new RecipeLayout(
-                    this.itemInputs.size() + this.fluidInputs.size() + this.bulkInputs.size(),
-                    this.itemOutputs.size() + this.fluidOutputs.size() + this.bulkOutputs.size());
+                    this.itemInputs.size() + this.fluidInputs.size(),
+                    this.itemOutputs.size() + this.fluidOutputs.size());
         }
         return this.layout;
     }
@@ -492,20 +391,6 @@ public class GenericRecipe implements IHardScienceRecipe
                     inputIndex++;
                 }
             }
-            
-            if(!this.bulkInputs.isEmpty())
-            {
-                for(BulkResourceWithQuantity rwq : this.bulkInputs)
-                {
-                    GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer,
-                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
-                            RecipeLayout.LEFT, 
-                            layout.inputY[inputIndex] + 20, 
-                            20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
-                    inputIndex++;
-                }
-            }
         }
         
         if(layout.outputCount > 0)
@@ -533,20 +418,6 @@ public class GenericRecipe implements IHardScienceRecipe
             if(!this.fluidOutputs.isEmpty())
             {
                 for(FluidResourceWithQuantity rwq : this.fluidOutputs)
-                {
-                    GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer,
-                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
-                            RecipeLayout.RIGHT, 
-                            layout.outputY[outputIndex] + 20, 
-                            20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
-                    outputIndex++;
-                }
-            }
-            
-            if(!this.bulkOutputs.isEmpty())
-            {
-                for(BulkResourceWithQuantity rwq : this.bulkOutputs)
                 {
                     GuiUtil.drawAlignedStringNoShadow(
                             minecraft.fontRenderer,
@@ -605,13 +476,6 @@ public class GenericRecipe implements IHardScienceRecipe
             tag.setTag(ModNBTTag.RECIPE_ITEM_INPUTS, list);
         }
         
-        if(!this.bulkInputs.isEmpty())
-        {
-            NBTTagList list = new NBTTagList();
-            this.bulkInputs.stream().forEach(r -> list.appendTag(r.toNBT()));
-            tag.setTag(ModNBTTag.RECIPE_BULK_INPUTS, list);
-        }
-        
         if(!this.fluidOutputs.isEmpty())
         {
             NBTTagList list = new NBTTagList();
@@ -624,13 +488,6 @@ public class GenericRecipe implements IHardScienceRecipe
             NBTTagList list = new NBTTagList();
             this.itemOutputs.stream().forEach(r -> list.appendTag(r.toNBT()));
             tag.setTag(ModNBTTag.RECIPE_ITEM_OUTPUTS, list);
-        }
-
-        if(!this.bulkOutputs.isEmpty())
-        {
-            NBTTagList list = new NBTTagList();
-            this.bulkOutputs.stream().forEach(r -> list.appendTag(r.toNBT()));
-            tag.setTag(ModNBTTag.RECIPE_BULK_OUTPUTS, list);
         }
     }
 
@@ -648,10 +505,6 @@ public class GenericRecipe implements IHardScienceRecipe
         if(!this.itemInputs.isEmpty()) 
             this.itemInputs.stream().forEach(r -> StorageType.ITEM.toBytes(r, pBuff));
 
-        pBuff.writeByte(this.bulkInputs.size());
-        if(!this.bulkInputs.isEmpty()) 
-            this.bulkInputs.stream().forEach(r -> StorageType.PRIVATE.toBytes(r, pBuff));
-        
         pBuff.writeByte(this.fluidOutputs.size());
         if(!this.fluidOutputs.isEmpty()) 
             this.fluidOutputs.stream().forEach(r -> StorageType.FLUID.toBytes(r, pBuff));
@@ -659,9 +512,5 @@ public class GenericRecipe implements IHardScienceRecipe
         pBuff.writeByte(this.itemOutputs.size());
         if(!this.itemOutputs.isEmpty()) 
             this.itemOutputs.stream().forEach(r -> StorageType.ITEM.toBytes(r, pBuff));
-
-        pBuff.writeByte(this.bulkOutputs.size());
-        if(!this.bulkOutputs.isEmpty()) 
-            this.bulkOutputs.stream().forEach(r -> StorageType.PRIVATE.toBytes(r, pBuff));
     }
 }

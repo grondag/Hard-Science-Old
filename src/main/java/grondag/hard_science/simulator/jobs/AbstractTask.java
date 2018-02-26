@@ -31,10 +31,10 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     private int[] dependencyData = null;
     
     /** DO NOT REFERENCE DIRECTLY! Use {@link #consequents()} */
-    private final SimpleUnorderedArrayList<AbstractTask> consequents = new SimpleUnorderedArrayList<AbstractTask>();
+    private final SimpleUnorderedArrayList<ITask> consequents = new SimpleUnorderedArrayList<>();
     
     /** DO NOT REFERENCE DIRECTLY! Use {@link #antecedents()} */
-    private final SimpleUnorderedArrayList<AbstractTask> antecedents = new SimpleUnorderedArrayList<AbstractTask>();
+    private final SimpleUnorderedArrayList<ITask> antecedents = new SimpleUnorderedArrayList<>();
 
     /**
      * Objects wanting a callback when task is completed. Null if none. 
@@ -78,7 +78,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         assert this.status == RequestStatus.NEW
                 : "AbstractTask.initialize called on task with non-NEW status";
         
-        this.job.setDirty();
+        this.setDirty();
         
         if(this.antecedents().isEmpty())
         {
@@ -139,10 +139,15 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         this.id = id;
     }
 
-    @Override
     public Job job()
     {
         return this.job;
+    }
+    
+    @Override
+    public RequestPriority priority()
+    {
+        return this.job.priority;
     }
     
     @Override
@@ -158,7 +163,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
             RequestStatus oldStatus = this.status;
             this.status = newStatus;
             this.job.notifyTaskStatusChange(this, oldStatus);
-            this.job.setDirty();
+            this.setDirty();
         }
     }
 
@@ -243,7 +248,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     {
         if(!this.consequents().isEmpty())
         {
-            for(AbstractTask r : this.consequents())
+            for(ITask r : this.consequents())
             {
                 r.onAntecedentTerminated(this);;
             }
@@ -259,7 +264,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     {
         if(!this.consequents().isEmpty())
         {
-            for(AbstractTask r : this.consequents())
+            for(ITask r : this.consequents())
             {
                 r.backTrack(this);
             }
@@ -272,25 +277,25 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         consequent.addAntecedent(antecedent);
     }
     
-    private synchronized void addConsequent(AbstractTask consequent)
+    private synchronized void addConsequent(ITask consequent)
     {
         this.consequents().addIfNotPresent(consequent);
-        this.job.setDirty();
+        this.setDirty();
     }
 
-    private synchronized void addAntecedent(AbstractTask antecedent)
+    private synchronized void addAntecedent(ITask antecedent)
     {
         this.antecedents().addIfNotPresent(antecedent);
-        this.job.setDirty();
+        this.setDirty();
     }
 
-    public synchronized void onAntecedentTerminated(AbstractTask antecedent)
+    public synchronized void onAntecedentTerminated(ITask antecedent)
     {
         assert this.status == RequestStatus.NEW || this.status == RequestStatus.WAITING
                 : "AbstractTask.onAntecedentTerminated called with invalid status";
         
         this.antecedents().removeIfPresent(antecedent);
-        this.job.setDirty();
+        this.setDirty();
         if(antecedent.getStatus().didEndWithoutCompleting())
         {
             this.cancel();
@@ -301,9 +306,9 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         }
     }
     
-    public synchronized void backTrack(AbstractTask antecedent)
+    public synchronized void backTrack(ITask antecedent)
     {
-        assert !antecedent.status.isTerminated 
+        assert !antecedent.getStatus().isTerminated 
             : "AbstractTask.backTrack called with terminal status";
     
         this.addAntecedent(antecedent);
@@ -337,9 +342,9 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
      * this list is never modified if this task or any of the consequent tasks
      * have status changes of any kind.
      */
-    protected SimpleUnorderedArrayList<AbstractTask> consequents()
+    protected SimpleUnorderedArrayList<ITask> consequents()
     {
-        this.deserializeDependenciesIfNeeded();
+        this.initializeDependencies();
         return this.consequents;
     }
 
@@ -349,13 +354,13 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
      * or if a prior dependency becomes unready, then anteceded
      * must be re-added via {@link #addAntecedent(AbstractTask)}.
      */
-    protected SimpleUnorderedArrayList<AbstractTask> antecedents()
+    protected SimpleUnorderedArrayList<ITask> antecedents()
     {
-        this.deserializeDependenciesIfNeeded();
+        this.initializeDependencies();
         return this.antecedents;
     }
 
-    protected void deserializeDependenciesIfNeeded()
+    protected void initializeDependencies()
     {
         if(this.dependencyData != null)
         {
@@ -371,12 +376,12 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
                         
                         if(ant == this.id)
                         {
-                            AbstractTask conReq = DomainManager.taskFromId(con);
+                            ITask conReq = DomainManager.taskFromId(con);
                             if(conReq != null) this.consequents.add(conReq);
                         }
                         else if(con == this.id)
                         {
-                            AbstractTask antReq = DomainManager.taskFromId(ant);
+                            ITask antReq = DomainManager.taskFromId(ant);
                             if(antReq != null) this.antecedents.add(antReq);
                         }
                         
@@ -404,8 +409,8 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         this.serializeID(tag);
         Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_STATUS, this.status);
         
-        SimpleUnorderedArrayList<AbstractTask> antecedents = this.antecedents();
-        SimpleUnorderedArrayList<AbstractTask> consequents = this.consequents();
+        SimpleUnorderedArrayList<ITask> antecedents = this.antecedents();
+        SimpleUnorderedArrayList<ITask> consequents = this.consequents();
         
         int dependencyCount = antecedents.size() + consequents.size();
         if(dependencyCount > 0)
@@ -415,7 +420,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
             
             if(!consequents.isEmpty())
             {
-                for(AbstractTask r : consequents)
+                for(ITask r : consequents)
                 {
                     depData[i++] = this.getId();
                     depData[i++] = r.getId();
@@ -424,7 +429,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
             
             if(!antecedents.isEmpty())
             {
-                for(AbstractTask r : antecedents)
+                for(ITask r : antecedents)
                 {
                     depData[i++] = r.getId();
                     depData[i++] = this.getId();
@@ -440,4 +445,20 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     {
         return this.job.getDomain();
     }
+    
+    /**
+     * Called on all tasks after deserialization is complete.  
+     * Override to handle actions that may require other objects to be deserialized start.
+     */
+    public void afterDeserialization() {};
+    
+    /**
+     * If this task (or its holder) is serialized, causes
+     * serialization to occur at next opportunity.
+     */
+    public void setDirty()
+    {
+        this.job.setDirty();
+    }
+    
 }

@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.storage;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.simulator.demand.IProcurementRequest;
+import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.storage.StorageEvent.CapacityChange;
@@ -32,7 +32,7 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
             IResourceContainer<StorageTypeFluid> storage, 
             IResource<StorageTypeFluid> resource, 
             long delta,
-            @Nullable IProcurementRequest<StorageTypeFluid> request)
+            @Nullable NewProcurementTask<StorageTypeFluid> request)
     {
         if(storage.getDomain() == null) return;
         
@@ -48,7 +48,7 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
             IResourceContainer<StorageTypeFluid> storage, 
             IResource<StorageTypeFluid> resource, 
             long delta,
-            @Nullable IProcurementRequest<StorageTypeFluid> request)
+            @Nullable NewProcurementTask<StorageTypeFluid> request)
     {
         if(storage.getDomain() == null) return;
         
@@ -99,7 +99,7 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
                 IResourceContainer<StorageTypeFluid> storage, 
                 IResource<StorageTypeFluid> resource, 
                 long delta,
-                @Nullable IProcurementRequest<StorageTypeFluid> request)
+                @Nullable NewProcurementTask<StorageTypeFluid> request)
         {
             super(storage, resource, delta, request);
         }
@@ -114,7 +114,7 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
                 IResourceContainer<StorageTypeFluid> storage, 
                 IResource<StorageTypeFluid> resource, 
                 long delta,
-                @Nullable IProcurementRequest<StorageTypeFluid> request)
+                @Nullable NewProcurementTask<StorageTypeFluid> request)
         {
             super(storage, resource, delta, request);
         }

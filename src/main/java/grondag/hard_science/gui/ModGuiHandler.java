@@ -22,7 +22,7 @@ public class ModGuiHandler implements IGuiHandler
         SOLAR_AGGREGATOR, 
         MODULAR_TANK, 
         GLASS_BATTERY,
-        CRUSHINATOR;
+        MICRONIZER;
     }
     
     @Override
@@ -41,9 +41,9 @@ public class ModGuiHandler implements IGuiHandler
 //        {
 //            BlockPos pos = new BlockPos(x, y, z);
 //            TileEntity te = world.getTileEntity(pos);
-//            if (te instanceof CrushinatorTileEntity) 
+//            if (te instanceof MicronizerTileEntity) 
 //            {
-//                return new BlockFabricatorContainer(player.inventory, (CrushinatorTileEntity) te, GuiBasicBuilder.LAYOUT);
+//                return new BlockFabricatorContainer(player.inventory, (MicronizerTileEntity) te, GuiBasicBuilder.LAYOUT);
 //            }
 //        }
         return null;
