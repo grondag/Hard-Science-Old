@@ -47,34 +47,34 @@ public enum ContainerUsage
      * ARE listed in the domain storage manager. (But only while
      * the device is connected to the device manager.)<p>
      * 
-     * Other threads may call add() and its derivatives
-     * without restriction. For this reason, all updates to
-     * this object are synchronized. Notification of adds will be 
-     * queued to the service thread after add it complete.
-     * (If the device is connected to the device manager.)<p>
+     * For this to work correctly, all calls to storage-updating
+     * methods must occur from the appropriate service thread.
+     * Otherwise, machine amounts could be temporarily different
+     * than what is expected by storage listeners who have not yet
+     * received the corresponding event.  This could lead to assertion
+     * errors or race conditions.
      * 
-     * This arrangement allow the owning device to place content 
-     * in this buffer outside of the storage service thread and
-     * contents are still visible for retrieval on the transport network.<p>
-     *  
-     * It also means the storage service can trust that decreases
-     * in quantity stored can only happen as a result of an action 
-     * occurring on the service thread.  This is an important 
-     * guarantee for the transport network, which assumes that
-     * inventory for a transfer will remain available based on
-     * prior simulation results within the same call.
+     * All of that is identical STORAGE.  The difference
+     * for BUFFER_OUT is that it should only accept input
+     * from the local device. It will not be selected as
+     * a destination for general storage.  This means the 
+     * owning device can queue a task to move content from
+     * the machine to the output buffer and trust that  
+     * available capacity will remain available when the
+     * task runs, unless earlier tasks remain incomplete.
+     * 
      */
-    BUFFER_OUT(true, false, true),
+    BUFFER_OUT(true, true, true);
     
-    /**
-     * No actions and no content are published to domain event manager.
-     * All access to the object is synchronized and actions can
-     * take place on any thread.<p>
-     * 
-     * Isolated buffers are used for internal device buffers that
-     * do not interact directly with the transport network.
-     */
-    BUFFER_ISOLATED(false, false, false);
+//    /**
+//     * No actions and no content are published to domain event manager.
+//     * All access to the object is synchronized and actions can
+//     * take place on any thread.<p>
+//     * 
+//     * Isolated buffers are used for internal device buffers that
+//     * do not interact directly with the transport network.
+//     */
+//    BUFFER_ISOLATED(false, false, false);
     
     /**
      * True if contents are listed with the storage manager
@@ -83,7 +83,8 @@ public enum ContainerUsage
     public final boolean isListed;
     
     /**
-     * True if updates must be synchronized. (True for all except STORAGE)
+     * True if updates must be synchronized because calls may
+     * occur on different threads.
      */
     public final boolean needsSynch;
     

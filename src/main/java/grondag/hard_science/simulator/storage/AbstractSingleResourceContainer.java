@@ -67,6 +67,8 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
     @Override
     public boolean isResourceAllowed(@Nonnull IResource<T> resource)
     {
+        if(resource == null) return false;
+        
         // fall back to predicate if bulkResource not set
         return (this.resource == null && super.isResourceAllowed(resource))
                 || resource.isResourceEqual(this.resource);
@@ -75,6 +77,8 @@ public abstract class AbstractSingleResourceContainer<T extends StorageType<T>>
     @Override
     public List<AbstractResourceWithQuantity<T>> find(@Nonnull Predicate<IResource<T>> predicate)
     {
+        if(predicate == null) return ImmutableList.of();
+        
         if(this.resource == null || this.used == 0 || !predicate.test(this.resource)) 
             return ImmutableList.of();
         else

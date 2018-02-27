@@ -7,7 +7,6 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +17,7 @@ public interface IPortLayout
     
     public default ImmutableList<Port<StorageTypeFluid>> createFluidPorts(IDevice owner)
     {
-        return Helper.createFluidPorts(this, owner, owner.getLocation());
+        return Helper.createPorts(StorageType.FLUID, this, owner, owner.getLocation(), owner.getChannel());
     }
     
     public default ImmutableList<Port<StorageTypeStack>> createItemPorts(IDevice owner)
@@ -77,55 +76,7 @@ public interface IPortLayout
             }
             return builder.build();
         }
-        
-        private static ImmutableList<Port<StorageTypeFluid>> createFluidPorts(IPortLayout layout, IDevice owner, BlockPos pos)
-        {
-            Int2ObjectOpenHashMap<CarrierPortGroup<StorageTypeFluid>> carrierGroups = 
-                    new Int2ObjectOpenHashMap<CarrierPortGroup<StorageTypeFluid>>();
-            
-            ImmutableList.Builder<Port<StorageTypeFluid>> builder = ImmutableList.builder();
-            
-            for(EnumFacing face : EnumFacing.VALUES)
-            {
-                PortFace pf = layout.getFace(face);
-                
-                for(PortDescription<?> pd : pf.ports(StorageType.FLUID))
-                {
-                    @SuppressWarnings("unchecked")
-                    IPortDescription<StorageTypeFluid> desc = (IPortDescription<StorageTypeFluid>) pd;
-                    
-                    if(desc.function() == PortFunction.DIRECT)
-                    {
-                        builder.add(new DirectPortState<StorageTypeFluid>(owner, desc, pos, face));
-                    }
-                    else
-                    {
-                        CarrierPortGroup<StorageTypeFluid> group = carrierGroups.get(desc.getChannel());
-                        if(group == null)
-                        {
-                            group = new CarrierPortGroup<StorageTypeFluid>(
-                                    owner, StorageType.FLUID, desc.level());
-                            group.setCarrierChannel(desc.getChannel());
-                            carrierGroups.put(desc.getChannel(), group);
-                        }
-                        else
-                        {
-                            assert group.level() == desc.level()
-                                : "Mixed carrier port levels for same device";
-                            
-                            assert group.getCarrierChannel() == desc.getChannel()
-                                    : "Mixed carrier channels for same device";
-                        }
-                        builder.add(group.createPort(
-                                desc.function() == PortFunction.BRIDGE,
-                                        desc.connector(), pos, face));   
-                    }
-                }
-            }
-            return builder.build();
-        }
-    }
-    
+    }        
 
     /**
      * True if this layout has at least one port on the given

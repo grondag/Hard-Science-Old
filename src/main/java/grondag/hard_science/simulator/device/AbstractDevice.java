@@ -16,6 +16,7 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.transport.management.ITransportManager;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -294,13 +295,22 @@ public abstract class AbstractDevice implements IDevice
         case FLUID:
             if(this.hasFluidStorage()) 
                 return this.fluidStorage().takeUpTo((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
-        
+            else
+            {
+                FluidContainer output 
+                    = this.getBufferManager().getFluidOutput((IResource<StorageTypeFluid>)resource);
+                if(output != null)
+                    return output.takeUpTo((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
+                }
+            break;
+            
         case ITEM:
             if(this.hasItemStorage()) 
                 return this.itemStorage().takeUpTo((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
             else if(this.getBufferManager().itemOutput() != null)
                 return this.getBufferManager().itemOutput().takeUpTo((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
-
+            break;
+            
         case POWER:
             return this.energyManager().takeUpTo((IResource<StorageTypePower>)resource, quantity, simulate, (NewProcurementTask<StorageTypePower>)request);
 
@@ -335,13 +345,22 @@ public abstract class AbstractDevice implements IDevice
         case FLUID:
             if(this.hasFluidStorage()) 
                 return this.fluidStorage().add((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
-  
+            else
+            {
+                FluidContainer input 
+                    = this.getBufferManager().getFluidInput((IResource<StorageTypeFluid>)resource);
+                if(input != null)
+                    return input.add((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
+            }            
+        break;
+            
         case ITEM:
             if(this.hasItemStorage()) 
                 return this.itemStorage().add((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
             else if(this.getBufferManager().itemInput() != null)
                 return this.getBufferManager().itemInput().add((IResource<StorageTypeStack>)resource, quantity, simulate, (NewProcurementTask<StorageTypeStack>)request);
-        
+            break;
+            
         case POWER:
             return this.energyManager().add((IResource<StorageTypePower>)resource, quantity, simulate, (NewProcurementTask<StorageTypePower>)request);
 

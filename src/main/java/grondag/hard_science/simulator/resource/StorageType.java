@@ -260,13 +260,13 @@ public abstract class StorageType<T extends StorageType<T>>
         @Override
         public long transportCapacity(CarrierLevel level, int channel)
         {
-            //TODO: make dependent on viscosity and other factors
+            //TODO: make configurable
             switch(level)
             {
             case BOTTOM:
-                return VolumeUnits.LITER.nL * 10;
-            case MIDDLE:
                 return VolumeUnits.KILOLITER.nL;
+            case MIDDLE:
+                return VolumeUnits.KILOLITER.nL * 4;
             case TOP:
                 return VolumeUnits.KILOLITER.nL * 16;
                 

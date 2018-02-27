@@ -25,7 +25,7 @@ public abstract class NewTask implements IReadWriteNBT, IDomainMember //, IIdent
     
     public final synchronized void addListener(INewTaskListener listener)
     {
-        if(this.listeners != null) this.listeners = new SimpleUnorderedArrayList<>();
+        if(this.listeners == null) this.listeners = new SimpleUnorderedArrayList<>();
         this.listeners.addIfNotPresent(listener);
     }
     

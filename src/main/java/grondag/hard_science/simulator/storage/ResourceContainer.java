@@ -12,7 +12,7 @@ import grondag.hard_science.simulator.resource.StorageType;
  */
 public class ResourceContainer<T extends StorageType<T>> extends ForwardingResourceContainer<T>
 {
-    public ResourceContainer(IResourceContainer<T> wrappedContainer)
+    protected ResourceContainer(IResourceContainer<T> wrappedContainer)
     {
         super(wrappedContainer);
     }

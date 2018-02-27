@@ -83,6 +83,8 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
         @Override
         public FluidStack getContents()
         {
+            if(FluidContainer.this.usedCapacity() == 0) return null;
+            
             FluidStack result = ((FluidResource)FluidContainer.this.resource()).sampleFluidStack().copy();
             result.amount = (int) Math.min(
                     VolumeUnits.nL2Liters(FluidContainer.this.usedCapacity()),
@@ -101,29 +103,29 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
         @Override
         public boolean canFill()
         {
-            return true;
+            return FluidContainer.this.availableCapacity() >= VolumeUnits.LITER.nL;
         }
 
         @Override
         public boolean canDrain()
         {
-            return true;
+            return FluidContainer.this.usedCapacity() >= VolumeUnits.LITER.nL;
         }
 
         @Override
         public boolean canFillFluidType(FluidStack fluidStack)
         {
-            return (FluidContainer.this.resource() == null 
-                    || ((FluidResource)FluidContainer.this.resource()).isStackEqual(fluidStack))
-                    && FluidContainer.this.availableCapacity() > 0;
+            // must have capacity for at least 1mb
+            return FluidContainer.this.availableCapacityFor(FluidResource.fromStack(fluidStack)) >= VolumeUnits.LITER.nL;
         }
 
         @Override
         public boolean canDrainFluidType(FluidStack fluidStack)
         {
-            return FluidContainer.this.resource() != null 
-                    && ((FluidResource)FluidContainer.this.resource()).isStackEqual(fluidStack)
-                    && FluidContainer.this.usedCapacity() > 0;
+            // must contain at least 1mb
+            return FluidContainer.this.takeUpTo(
+                    FluidResource.fromStack(fluidStack), 
+                    VolumeUnits.LITER.nL, true) == VolumeUnits.LITER.nL; 
         }
     };
     

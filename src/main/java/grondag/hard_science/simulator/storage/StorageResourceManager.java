@@ -361,13 +361,14 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
         // track store for this resource
         if(this.stores.addIfNotPresent(storage))
         {
-            // if store was added, confirm amount added
-            // matches the total amount in the store
-            if(storage.getQuantityStored(resource) != added)
-            {
-                Log.warn("Storage Resource Manager encountered request to add a quanity in a new storage"
-                        + " that did not match the quantityIn in the storage. This is a bug.");
-            }
+            // if store is newly added, amount of delta should match
+            // total amount in the store, UNLESS this is an output buffer
+            // because output buffers can get new content outside the service thread
+            
+            assert storage.getQuantityStored(resource) == added
+                    || storage.containerUsage() == ContainerUsage.BUFFER_OUT
+                    : "Storage Resource Manager encountered request to add a quanity in a new storage"
+                        + " that did not match the quantity in the storage.";
         }
         
         /**

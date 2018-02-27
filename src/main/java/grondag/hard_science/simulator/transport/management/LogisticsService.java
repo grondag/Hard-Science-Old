@@ -855,7 +855,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         
         if(routes.isEmpty()) return 0L;
         
-        Long remaining = quantity;
+        long remaining = quantity;
         
         for(Route<T> r : routes)
         {

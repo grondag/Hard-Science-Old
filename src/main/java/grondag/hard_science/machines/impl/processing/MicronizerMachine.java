@@ -18,7 +18,6 @@ import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.ItemResource;
-import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ContainerUsage;
@@ -39,7 +38,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
     
     //FIXME: make configurable
     private static final int WATTS_IDLE = 20;
-    private static final int WATTS_PROCESSING = 180000;
+    private static final int WATTS_PROCESSING = 10000;
     private static final int JOULES_PER_TICK_IDLE = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_IDLE));
     private static final int JOULES_PER_TICK_PROCESSING = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_PROCESSING));
 
@@ -102,7 +101,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
     protected DeviceEnergyManager createEnergyManager()
     {
         PowerContainer input = new PowerContainer(this, ContainerUsage.BUFFER_IN);
-        input.configure(VolumeUnits.MILLILITER.nL * 10L, BatteryChemistry.CAPACITOR);
+        input.configure(VolumeUnits.LITER.nL * 10L, BatteryChemistry.CAPACITOR);
         
         return new DeviceEnergyManager(
                 this,
@@ -223,7 +222,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
         /** exit if nothing in input buffer */
         if(this.itemInput.isEmpty()) return;
         
-        ItemStack stack = itemInput.extractItem(0, 1, true);
+        ItemStack stack = itemInput.extractItem(0, 1, false);
         if(stack == null || stack.isEmpty())
         {
             assert false : "Unable to retrive item input stack from input container";
@@ -242,15 +241,9 @@ public class MicronizerMachine extends AbstractSimpleMachine
             // refuse non inputs.  But if we do, try to clear
             // the input buffer by moving the offending resource
             // to the output buffer.
-            long toMove = itemOutput.availableCapacityFor(booger);
-            
-            if(toMove > 0)
-            {
-                toMove = itemInput.takeUpTo(booger, toMove, false);
-                long moved = itemOutput.add(booger, toMove, false);
-                assert toMove == moved
-                        : "Items lost when trying to clear micronizer buffer.";
-            }
+            long moved = itemOutput.add(booger, 1, false);
+            assert moved == 1
+                    : "Items lost when trying to clear micronizer buffer.";
             return;
         }
         
@@ -270,7 +263,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
     
     private void exportOutputIfPossible()
     {
-        // exist if last request isn't done yet
+        // exit if last request isn't done yet
         if(this.outputFuture != null && !this.outputFuture.isDone()) return;
         
         // exit if nothing to store
@@ -278,7 +271,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
         
         // exit if output has capacity for at least another tick
         // and we are still processing the same output
-        if(this.fluidOutput != null 
+        if(this.outputResource != null 
                 && this.fluidOutput.availableCapacityFor(outputResource) >= this.nanoLitersPerTick) return;
         
         this.outputFuture = LogisticsService.FLUID_SERVICE.executor.submit(() -> 
@@ -296,8 +289,8 @@ public class MicronizerMachine extends AbstractSimpleMachine
                 for(IResourceContainer<StorageTypeFluid> store : dumps)
                 {
                     if(targetAmount <= 0) break;
-                    targetAmount -= LogisticsService.POWER_SERVICE.sendResourceNow(
-                            PowerResource.JOULES, 
+                    targetAmount -= LogisticsService.FLUID_SERVICE.sendResourceNow(
+                            this.fluidOutput.resource(), 
                             targetAmount, 
                             this, 
                             store.device(), 

@@ -11,8 +11,9 @@ import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.FluidResource;
+import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.BulkContainer;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.storage.ItemContainer;
@@ -279,7 +280,7 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         return 0;
     }
 
-    public BulkContainer bufferHDPE()
+    public FluidContainer bufferHDPE()
     {
         //TODO stub
         return null;
@@ -320,4 +321,25 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
     {
         return this.owner;
     }
+
+    public FluidContainer getFluidOutput(IResource<StorageTypeFluid> resource)
+    {
+        // TODO This implementation won't perform well on machines with many buffers
+        if(this.fluidOutputs.isEmpty()) return null;
+        for(FluidContainer f : this.fluidOutputs.values())
+        {
+            if(f.getQuantityStored(resource) > 0) return f;
+        }
+        return null;
+    }
+
+    public FluidContainer getFluidInput(IResource<StorageTypeFluid> resource)
+    {
+        // TODO This implementation won't perform well on machines with many buffers
+        if(this.fluidInputs.isEmpty()) return null;
+        for(FluidContainer f : this.fluidInputs.values())
+        {
+            if(f.isResourceAllowed(resource)) return f;
+        }
+        return null;    }
 }
