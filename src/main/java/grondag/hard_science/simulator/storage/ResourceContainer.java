@@ -1,6 +1,5 @@
 package grondag.hard_science.simulator.storage;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -12,9 +11,17 @@ import grondag.hard_science.simulator.resource.StorageType;
  */
 public class ResourceContainer<T extends StorageType<T>> extends ForwardingResourceContainer<T>
 {
-    protected ResourceContainer(IResourceContainer<T> wrappedContainer)
+    protected ResourceContainer(AbstractResourceContainer<T> wrappedContainer)
     {
         super(wrappedContainer);
+    }
+    
+    /**
+     * True if running on service thread or does not need to be.
+     */
+    protected boolean isThreadOK()
+    {
+        return !this.containerUsage().isListed || !this.isConnected() || this.confirmServiceThread();
     }
     
     @Override
@@ -23,79 +30,44 @@ public class ResourceContainer<T extends StorageType<T>> extends ForwardingResou
         super.onConnect();
         if(this.containerUsage().isListed)
         {
-            if(this.confirmServiceThread())
-                this.onConnectListed();
-            else this.storageType().service().executor.execute(() ->
-            {
-                this.onConnectListed();
-            });
-        }
-    }
-    
-    private void onConnectListed()
-    {
-        assert this.getDomain() != null : "Null domain on storage connect";
-        
-        if(this.getDomain() == null)
-            Log.warn("Null domain on storage connect");
-        else
+            assert this.getDomain() != null : "Null domain on storage connect";
+            assert this.confirmServiceThread() : "Storage connect outside service thread";
             this.storageType().eventFactory().postAfterStorageConnect(this);
+        }
     }
     
     @Override
     public void onDisconnect()
     {
-        super.onDisconnect();
         if(this.containerUsage().isListed)
         {
-            if(this.confirmServiceThread())
-                this.onDisconnectListed();
-            else this.storageType().service().executor.execute(() ->
-            {
-                this.onDisconnectListed();
-            });
+            assert this.getDomain() != null : "Null domain on storage disconnect";
+            assert this.confirmServiceThread() : "Storage disconnect outside service thread";
+            this.storageType().eventFactory().postBeforeStorageDisconnect(this);
         }
+        super.onDisconnect();
     }
     
-    private void onDisconnectListed()
-    {
-        assert this.getDomain() != null : "Null domain on storage disconnect";
-        
-        if(this.getDomain() == null)
-            Log.warn("Null domain on storage disconnect");
-        else
-            this.storageType().eventFactory().postBeforeStorageDisconnect(this);
-    }
     
     @Override
     public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         long taken;
         
-        if(this.containerUsage().needsSynch)
+        if(this.containerUsage().isListed)
+        {
+            taken = super.takeUpTo(resource, limit, simulate, allowPartial, request);
+            if(this.isConnected() && this.getDomain() != null)
+            {
+                assert this.confirmServiceThread() : "storage operation outside service thread";
+                if(!simulate) this.storageType().eventFactory().postStoredUpdate(this, resource, -taken, request);
+            }
+        }
+        else
         {
             synchronized(this)
             {
                 taken = super.takeUpTo(resource, limit, simulate, allowPartial, request);
-            }
-        }
-        else taken = super.takeUpTo(resource, limit, simulate, allowPartial, request);
-        
-        if(this.isConnected())
-        {
-            assert !this.containerUsage().isOutputThreadRestricted || this.confirmServiceThread() 
-                : "storage operation outside service thread";
-                
-            if(!simulate && taken != 0 && this.containerUsage().isListed && this.getDomain() != null)
-            {
-                if(this.confirmServiceThread())
-                {
-                    this.storageType().eventFactory().postStoredUpdate(this, resource, -taken, request);
-                }
-                else this.storageType().service().executor.execute(() ->
-                {
-                    this.storageType().eventFactory().postStoredUpdate(this, resource, -taken, request);
-                });
             }
         }
         return taken;
@@ -106,30 +78,20 @@ public class ResourceContainer<T extends StorageType<T>> extends ForwardingResou
     {
         long added;
         
-        if(this.containerUsage().needsSynch)
+        if(this.containerUsage().isListed)
+        {
+            added = super.add(resource, howMany, simulate, allowPartial, request);
+            if(this.isConnected() && this.getDomain() != null)
+            {
+                assert this.confirmServiceThread() : "storage operation outside service thread";
+                if(!simulate) this.storageType().eventFactory().postStoredUpdate(this, resource, added, request);
+            }
+        }
+        else
         {
             synchronized(this)
             {
                 added = super.add(resource, howMany, simulate, allowPartial, request);
-            }
-        }
-        else added = super.add(resource, howMany, simulate, allowPartial, request);
-        
-        if(this.isConnected())
-        {
-            assert !this.containerUsage().isInputThreadRestricted || this.confirmServiceThread() 
-                : "storage operation outside service thread";
-                
-            if(!simulate && added != 0 && this.containerUsage().isListed && this.getDomain() != null)
-            {
-                if(this.confirmServiceThread())
-                {
-                    this.storageType().eventFactory().postStoredUpdate(this, resource, added, request);
-                }
-                else this.storageType().service().executor.execute(() ->
-                {
-                    this.storageType().eventFactory().postStoredUpdate(this, resource, added, request);
-                });
             }
         }
         return added;
@@ -138,36 +100,23 @@ public class ResourceContainer<T extends StorageType<T>> extends ForwardingResou
     @Override
     public void setCapacity(long capacity)
     {
-        long oldCapacity, delta;
-        if(this.containerUsage().needsSynch)
+        if(this.containerUsage().isListed)
         {
-            synchronized(this)
+            long oldCapacity = this.getCapacity();
+            super.setCapacity(capacity);
+            long delta = this.getCapacity() - oldCapacity;
+            if(delta != 0 && this.isConnected() && this.getDomain() != null)
             {
-                oldCapacity = this.getCapacity();
-                super.setCapacity(capacity);
-                delta = this.getCapacity() - oldCapacity;
+                assert this.confirmServiceThread() : "storage operation outside service thread";
+                this.storageType().eventFactory().postCapacityChange(this, delta);
             }
         }
         else
         {
-            assert !this.isConnected() || this.confirmServiceThread() 
-                : "storage operation outside service thread";
-            
-            oldCapacity = this.getCapacity();
-            super.setCapacity(capacity);
-            delta = this.getCapacity() - oldCapacity;
-        }
-      
-        if(delta != 0 && this.isConnected() && this.getDomain() != null)
-        {
-            if(this.confirmServiceThread())
+            synchronized(this)
             {
-                this.storageType().eventFactory().postCapacityChange(this, delta);
+                super.setCapacity(capacity);
             }
-            else this.storageType().service().executor.execute(() ->
-            {
-                this.storageType().eventFactory().postCapacityChange(this, delta);
-            });
         }
     }
 }

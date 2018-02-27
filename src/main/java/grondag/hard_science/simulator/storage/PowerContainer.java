@@ -105,8 +105,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     @Override
     public boolean canProvideEnergy()
     {
-        return (!this.containerUsage().isOutputThreadRestricted 
-                || this.confirmServiceThread()) && this.usedCapacity() > 0;
+        return this.isThreadOK() && this.usedCapacity() > 0;
     }
 
     @Override
@@ -131,8 +130,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     @Override
     public boolean canAcceptEnergy()
     {
-        return (!this.containerUsage().isInputThreadRestricted 
-                || this.confirmServiceThread()) && this.availableCapacity() > 0;
+        return this.confirmServiceThread() && this.availableCapacity() > 0;
     }
 
     @Override

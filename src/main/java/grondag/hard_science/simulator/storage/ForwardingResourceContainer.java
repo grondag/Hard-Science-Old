@@ -20,9 +20,9 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public class ForwardingResourceContainer<T extends StorageType<T>> implements IResourceContainer<T>
 {
-    private final IResourceContainer<T> wrappedContainer;
+    private final AbstractResourceContainer<T> wrappedContainer;
     
-    public ForwardingResourceContainer(IResourceContainer<T> wrappedContainer)
+    public ForwardingResourceContainer(AbstractResourceContainer<T> wrappedContainer)
     {
         this.wrappedContainer = wrappedContainer;
     }
