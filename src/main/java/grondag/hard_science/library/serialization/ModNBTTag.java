@@ -206,4 +206,6 @@ public class ModNBTTag
 
     public static final String TASK_DELIVERED_QTY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
+    public static final String PRIVATE_BUFFER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
 }

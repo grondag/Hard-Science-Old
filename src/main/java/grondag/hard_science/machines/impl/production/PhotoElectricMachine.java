@@ -20,7 +20,7 @@ public class PhotoElectricMachine extends AbstractSimpleMachine
     {
         // Want to use a capacitor so that we don't have energy
         // loss of a battery if the energy can be used immediately.
-        PowerContainer output = new PowerContainer(this, ContainerUsage.BUFFER_OUT);
+        PowerContainer output = new PowerContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT);
         output.configure(VolumeUnits.LITER.nL, BatteryChemistry.CAPACITOR);
         
         return new DeviceEnergyManager(

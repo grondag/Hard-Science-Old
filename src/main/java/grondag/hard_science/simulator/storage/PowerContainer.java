@@ -17,22 +17,8 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     
     public PowerContainer(IDevice owner, ContainerUsage usage)
     {
-        super(new PowerInner(owner, usage));
-    }
-    
-    private static class PowerInner extends AbstractSingleResourceContainer<StorageTypePower>
-    {
-        public PowerInner(IDevice owner, ContainerUsage usage)
-        {
-            super(owner, usage);
-            this.setFixedResource(PowerResource.JOULES);
-        }
-
-        @Override
-        public StorageTypePower storageType()
-        {
-            return StorageType.POWER;
-        }
+        super(StorageType.POWER, owner, usage, 1);
+        this.setContentPredicate(PowerResource.JOULES);
     }
     
     public void configure(long volumeNanoliters, BatteryChemistry chemistry)
@@ -72,11 +58,6 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
         this.configureRegulator();
     }
 
-    public BatteryChemistry getChemistry()
-    {
-        return chemistry;
-    }
-
     @Override
     public long maxEnergyInputJoulesPerTick()
     {
@@ -97,15 +78,16 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
 
     /**
      * Power storage components can only provide energy
-     * to the device if this is an input or isolated buffer,
-     * or if the caller is running on the power service thread.<p>
+     * to the device if this is an isolated or disconnected buffer,
+     * or if the caller is running on the power service thread.
+     * Also must have contain energy!<p>
      * 
      * {@inheritDoc}
      */
     @Override
     public boolean canProvideEnergy()
     {
-        return this.isThreadOK() && this.usedCapacity() > 0;
+        return this.usedCapacity() > 0 && (!this.containerUsage().isListed || !this.isConnected() || this.confirmServiceThread());
     }
 
     @Override

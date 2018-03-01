@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import org.magicwerk.brownies.collections.Key1List;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.device.IDevice;
@@ -225,7 +226,16 @@ public class StorageManager<T extends StorageType<T>>
         return summary.getLocations(resource).stream()
                 .filter(s -> {return service.areDevicesConnected(s.storage.device(), reachableFrom, resource);})
                 .sorted((StorageWithQuantity<T> a, StorageWithQuantity<T>b) 
-                        -> Long.compare(a.quantity, b.quantity))
+                        -> ComparisonChain.start()
+                        // pull from public output buffers before
+                        // pulling from public storage
+                        .compare(b.storage.containerUsage().ordinal(), 
+                                 a.storage.containerUsage().ordinal())
+                        
+                        // pull from smaller stores first,
+                        // to favor having fewer containers
+                        .compare(a.quantity, b.quantity)
+                        .result())
                 .map(p -> p.storage)
                 .collect(ImmutableList.toImmutableList());
     }

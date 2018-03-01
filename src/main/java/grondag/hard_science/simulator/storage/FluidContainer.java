@@ -28,7 +28,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
      */
     public FluidContainer(IDevice owner, ContainerUsage usage, @Nonnull BulkBufferPurpose bufferPurpose)
     {
-        super(new FluidInner(owner, usage));
+        super(StorageType.FLUID, owner, usage, 1);
         this.bufferPurpose = bufferPurpose;
         if(bufferPurpose.fluidResource != null)
         {
@@ -59,22 +59,6 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
     {
         super.serializeNBT(tag);
         Useful.saveEnumToTag(tag, ModNBTTag.BUFFER_PURPOSE, this.bufferPurpose);
-    }
-
-
-
-    private static class FluidInner extends AbstractSingleResourceContainer<StorageTypeFluid>
-    {
-        public FluidInner(IDevice owner, ContainerUsage usage)
-        {
-            super(owner, usage);
-        }
-
-        @Override
-        public StorageTypeFluid storageType()
-        {
-            return StorageType.FLUID;
-        }
     }
     
     protected final IFluidTankProperties myProps = new IFluidTankProperties()

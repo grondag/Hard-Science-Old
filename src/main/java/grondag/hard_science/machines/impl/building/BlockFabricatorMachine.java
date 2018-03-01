@@ -131,10 +131,10 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     @Override
     protected DeviceEnergyManager createEnergyManager()
     {
-        PowerContainer output = new PowerContainer(this, ContainerUsage.BUFFER_OUT);
+        PowerContainer output = new PowerContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT);
         output.configure(VolumeUnits.LITER.nL, BatteryChemistry.SILICON);
         
-        PowerContainer input = new PowerContainer(this, ContainerUsage.BUFFER_IN);
+        PowerContainer input = new PowerContainer(this, ContainerUsage.PRIVATE_BUFFER_IN);
         input.configure(VolumeUnits.MILLILITER.nL * 10L, BatteryChemistry.CAPACITOR);
         
         return new DeviceEnergyManager(

@@ -22,21 +22,7 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
 {
     public ItemContainer(IDevice owner, ContainerUsage usage)
     {
-        super(new ItemInner(owner, usage));
-    }
-    
-    private static class ItemInner extends AbstractMultiResourceContainer<StorageTypeStack>
-    {
-        public ItemInner(IDevice owner, ContainerUsage usage)
-        {
-            super(owner, usage);
-        }
-
-        @Override
-        public StorageTypeStack storageType()
-        {
-            return StorageType.ITEM;
-        }
+        super(StorageType.ITEM, owner, usage, Integer.MAX_VALUE);
     }
     
     /**
@@ -100,6 +86,8 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
    {
        if(slot < 0) return stack;
        
+       //TODO: should not need to run this on service thread for input buffers
+       
        try
        {
            return LogisticsService.ITEM_SERVICE.executor.submit( () ->
@@ -144,6 +132,8 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
    @Override
    public ItemStack extractItem(int slot, int amount, boolean simulate)
    {
+       //TODO: should not need to run this on service thread for private output buffers
+
        try
        {
            return LogisticsService.ITEM_SERVICE.executor.submit( () ->

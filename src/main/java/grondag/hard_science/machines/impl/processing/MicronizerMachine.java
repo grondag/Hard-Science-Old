@@ -80,18 +80,18 @@ public class MicronizerMachine extends AbstractSimpleMachine
     @Override
     protected BufferManager2 createBufferManager()
     {
-        this.itemInput = new ItemContainer(this, ContainerUsage.BUFFER_IN);
+        this.itemInput = new ItemContainer(this, ContainerUsage.PRIVATE_BUFFER_IN);
         this.itemInput.setCapacity(64);
         this.itemInput.setRegulator(new ThroughputRegulator.Tracking());
         this.itemInput.setContentPredicate(MicronizerRecipe.RESOURCE_PREDICATE);
         
-        this.itemOutput = new ItemContainer(this, ContainerUsage.BUFFER_OUT);
+        this.itemOutput = new ItemContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT);
         this.itemOutput.setRegulator(new ThroughputRegulator.Tracking());
         this.itemOutput.setCapacity(64);
         // allow inputs to be moved to export if operation is aborted
         this.itemOutput.setContentPredicate(MicronizerRecipe.RESOURCE_PREDICATE);
         
-        this.fluidOutput = new FluidContainer(this, ContainerUsage.BUFFER_OUT, BulkBufferPurpose.PRIMARY_INOUT);
+        this.fluidOutput = new FluidContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT, BulkBufferPurpose.PRIMARY_INOUT);
         this.fluidOutput.setCapacity(BULK_BUFFER_SIZE);
         
         return new BufferManager2(this, itemInput, itemOutput, fluidOutput);
@@ -100,7 +100,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
     @Override
     protected DeviceEnergyManager createEnergyManager()
     {
-        PowerContainer input = new PowerContainer(this, ContainerUsage.BUFFER_IN);
+        PowerContainer input = new PowerContainer(this, ContainerUsage.PRIVATE_BUFFER_IN);
         input.configure(VolumeUnits.LITER.nL * 10L, BatteryChemistry.CAPACITOR);
         
         return new DeviceEnergyManager(

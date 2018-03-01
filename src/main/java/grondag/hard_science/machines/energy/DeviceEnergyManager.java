@@ -414,7 +414,7 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
     private void emptyOutputIfNeeded()
     {
         if(this.outputContainer == null 
-                || this.outputContainer.containerUsage() != ContainerUsage.BUFFER_OUT
+                || this.outputContainer.containerUsage() != ContainerUsage.PRIVATE_BUFFER_OUT
                 || this.outputContainer.availableCapacity() > this.generator.maxEnergyOutputJoulesPerTick()
                 || !this.powerTransport().hasAnyCircuit()) 
             return;

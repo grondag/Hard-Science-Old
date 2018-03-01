@@ -26,7 +26,7 @@ public class TransportTestMachine extends AbstractSimpleMachine
     public TransportTestMachine()
     {
         super();
-        this.itemStorage = new ItemContainer(this, ContainerUsage.BUFFER_OUT);
+        this.itemStorage = new ItemContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT);
         this.itemStorage.setCapacity(64);
     }
 

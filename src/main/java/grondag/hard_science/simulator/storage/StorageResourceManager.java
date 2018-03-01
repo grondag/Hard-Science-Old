@@ -366,7 +366,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
             // because output buffers can get new content outside the service thread
             
             assert storage.getQuantityStored(resource) == added
-                    || storage.containerUsage() == ContainerUsage.BUFFER_OUT
+                    || storage.containerUsage() == ContainerUsage.PRIVATE_BUFFER_OUT
                     : "Storage Resource Manager encountered request to add a quanity in a new storage"
                         + " that did not match the quantity in the storage.";
         }

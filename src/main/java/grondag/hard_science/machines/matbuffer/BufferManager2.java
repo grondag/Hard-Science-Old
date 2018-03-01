@@ -14,10 +14,10 @@ import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
+import grondag.hard_science.simulator.storage.ResourceContainer;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.storage.ItemContainer;
-import grondag.hard_science.simulator.storage.ResourceContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -45,18 +45,18 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
             switch(c.storageType().enumType)
             {
             case FLUID:
-                if(c.containerUsage() == ContainerUsage.BUFFER_IN)
+                if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_IN)
                     fluidInputs.put(((FluidContainer)c).bufferPurpose(), (FluidContainer) c);
-                else if(c.containerUsage() == ContainerUsage.BUFFER_OUT)
+                else if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_OUT)
                     fluidOutputs.put(((FluidContainer)c).bufferPurpose(), (FluidContainer) c);
                 else
                     assert false : "Invalid buffer construction";
                 break;
                 
             case ITEM:
-                if(c.containerUsage() == ContainerUsage.BUFFER_IN && itemInput == null)
+                if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_IN && itemInput == null)
                     itemInput = (ItemContainer)c;
-                else if(c.containerUsage() == ContainerUsage.BUFFER_OUT && itemOutput == null)
+                else if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_OUT && itemOutput == null)
                     itemOutput = (ItemContainer) c;
                 else
                     assert false : "Invalid buffer construction";
@@ -76,13 +76,13 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         
         if(itemInput == null)
         {
-            itemInput = new ItemContainer(owner, ContainerUsage.BUFFER_IN);
+            itemInput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN);
             itemInput.setCapacity(0);
         }
         
         if(itemOutput == null)
         {
-            itemOutput = new ItemContainer(owner, ContainerUsage.BUFFER_OUT);
+            itemOutput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_OUT);
             itemOutput.setCapacity(0);
         }
         
