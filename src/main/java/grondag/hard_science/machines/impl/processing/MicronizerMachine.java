@@ -10,14 +10,15 @@ import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.matbuffer.BufferManager2;
-import grondag.hard_science.machines.matbuffer.BulkBufferPurpose;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
+import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.ItemResource;
+import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ContainerUsage;
@@ -47,12 +48,6 @@ public class MicronizerMachine extends AbstractSimpleMachine
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
     
-    // these will be populated during construction 
-    // when super constructor calls createBuffer method
-    private ItemContainer itemInput;
-    private ItemContainer itemOutput;
-    private FluidContainer fluidOutput;
-
     private Future<NewProcurementTask<StorageTypeStack>> inputFuture;
     private Future<?> outputFuture;
     
@@ -80,21 +75,16 @@ public class MicronizerMachine extends AbstractSimpleMachine
     @Override
     protected BufferManager2 createBufferManager()
     {
-        this.itemInput = new ItemContainer(this, ContainerUsage.PRIVATE_BUFFER_IN);
-        this.itemInput.setCapacity(64);
-        this.itemInput.setRegulator(new ThroughputRegulator.Tracking());
-        this.itemInput.setContentPredicate(MicronizerRecipe.RESOURCE_PREDICATE);
-        
-        this.itemOutput = new ItemContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT);
-        this.itemOutput.setRegulator(new ThroughputRegulator.Tracking());
-        this.itemOutput.setCapacity(64);
-        // allow inputs to be moved to export if operation is aborted
-        this.itemOutput.setContentPredicate(MicronizerRecipe.RESOURCE_PREDICATE);
-        
-        this.fluidOutput = new FluidContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT, BulkBufferPurpose.PRIMARY_INOUT);
-        this.fluidOutput.setCapacity(BULK_BUFFER_SIZE);
-        
-        return new BufferManager2(this, itemInput, itemOutput, fluidOutput);
+        BufferManager2 result = new BufferManager2(
+                this, 
+                64L, 
+                MicronizerRecipe.RESOURCE_PREDICATE, 
+                64L, 
+                0, 
+                StorageType.FLUID.MATCH_NONE, 
+                BULK_BUFFER_SIZE);
+        result.itemInput().setRegulator(new ThroughputRegulator.Tracking());
+        return result;
     }
 
     @Override
@@ -117,12 +107,13 @@ public class MicronizerMachine extends AbstractSimpleMachine
      */
     private void progressFabrication()
     {
+        final FluidContainer fluidOut = this.getBufferManager().fluidOutput();
         // exit if not processing anything
         if(this.nanoLitersRemaining == 0) return;
         
         // determine max output based on available space in
         // output buffer
-        long capacity = this.fluidOutput.availableCapacityFor(this.outputResource);
+        long capacity = fluidOut.addLocally(this.outputResource, this.nanoLitersPerTick, true);
         
         // exit if output buffer is incompatible or full
         if(capacity == 0) return; 
@@ -138,7 +129,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
             return;
         }
         
-        nlOutput = this.fluidOutput.add(outputResource, nlOutput, false);
+        nlOutput = fluidOut.addLocally(outputResource, nlOutput, false);
         this.nanoLitersRemaining -= nlOutput;
         this.getControlState().progressJob((short) 1);
         
@@ -201,7 +192,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
         // if we don't have anything in item input buffer
         // and no request is pending then
         // then look for something so that we don't idle
-        if(this.inputFuture == null && this.itemInput.isEmpty())
+        if(this.inputFuture == null && this.getBufferManager().itemInput().isEmpty())
         {
             this.inputFuture = MicronizerInputSelector.requestInput(this);
         }
@@ -216,13 +207,15 @@ public class MicronizerMachine extends AbstractSimpleMachine
     
     private void loadInputIfPossible()
     {
+        final ItemContainer itemIn = this.getBufferManager().itemInput();
+        
         /** exit if already processing something */
         if(this.outputResource != null) return;
 
         /** exit if nothing in input buffer */
-        if(this.itemInput.isEmpty()) return;
+        if(itemIn.isEmpty()) return;
         
-        ItemStack stack = itemInput.extractItem(0, 1, false);
+        ItemStack stack = itemIn.extractItem(0, 1, false);
         if(stack == null || stack.isEmpty())
         {
             assert false : "Unable to retrive item input stack from input container";
@@ -241,7 +234,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
             // refuse non inputs.  But if we do, try to clear
             // the input buffer by moving the offending resource
             // to the output buffer.
-            long moved = itemOutput.add(booger, 1, false);
+            long moved = this.getBufferManager().itemOutput().add(booger, 1, false);
             assert moved == 1
                     : "Items lost when trying to clear micronizer buffer.";
             return;
@@ -266,39 +259,40 @@ public class MicronizerMachine extends AbstractSimpleMachine
         // exit if last request isn't done yet
         if(this.outputFuture != null && !this.outputFuture.isDone()) return;
         
+        final FluidContainer fluidOut = this.getBufferManager().fluidOutput();
+        
         // exit if nothing to store
-        if(this.fluidOutput.isEmpty()) return;
-        
-        // exit if output has capacity for at least another tick
-        // and we are still processing the same output
-        if(this.outputResource != null 
-                && this.fluidOutput.availableCapacityFor(outputResource) >= this.nanoLitersPerTick) return;
-        
+        if(fluidOut.isEmpty()) return;
+                
         this.outputFuture = LogisticsService.FLUID_SERVICE.executor.submit(() -> 
         {
             // abort if machine isn't connected to anything
             if(!this.fluidTransport().hasAnyCircuit()) return null;
 
-            // find places to store output
-            ImmutableList<IResourceContainer<StorageTypeFluid>> dumps 
-                = this.getDomain().fluidStorage.findSpaceFor(this.fluidOutput.resource(), this);
-            
-            if(!dumps.isEmpty())
+            for(AbstractResourceWithQuantity<StorageTypeFluid> rwq : fluidOut.findAll())
             {
-                long targetAmount = this.fluidOutput.getQuantityStored(this.fluidOutput.resource());
-                for(IResourceContainer<StorageTypeFluid> store : dumps)
+                // find places to store output
+                ImmutableList<IResourceContainer<StorageTypeFluid>> dumps 
+                    = this.getDomain().fluidStorage.findSpaceFor(rwq.resource(), this);
+                
+                if(!dumps.isEmpty())
                 {
-                    if(targetAmount <= 0) break;
-                    targetAmount -= LogisticsService.FLUID_SERVICE.sendResourceNow(
-                            this.fluidOutput.resource(), 
-                            targetAmount, 
-                            this, 
-                            store.device(), 
-                            false, 
-                            false, 
-                            null);
+                    long targetAmount = rwq.getQuantity();
+                    for(IResourceContainer<StorageTypeFluid> store : dumps)
+                    {
+                        if(targetAmount <= 0) break;
+                        targetAmount -= LogisticsService.FLUID_SERVICE.sendResourceNow(
+                                rwq.resource(), 
+                                targetAmount, 
+                                this, 
+                                store.device(), 
+                                false, 
+                                false, 
+                                null);
+                    }
                 }
             }
+
             return null;
         }, false);
     }

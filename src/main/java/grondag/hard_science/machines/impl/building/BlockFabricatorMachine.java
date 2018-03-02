@@ -16,6 +16,7 @@ import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.persistence.IIdentified;
+import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.PowerContainer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -125,13 +126,20 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     @Override
     protected BufferManager2 createBufferManager()
     {
-        return new BufferManager2(this);
+        return new BufferManager2(
+                this, 
+                64L, 
+                StorageType.ITEM.MATCH_ANY, 
+                64L, 
+                VolumeUnits.KILOLITER.nL * 64L, 
+                StorageType.FLUID.MATCH_ANY, 
+                64L);
     }
 
     @Override
     protected DeviceEnergyManager createEnergyManager()
     {
-        PowerContainer output = new PowerContainer(this, ContainerUsage.PRIVATE_BUFFER_OUT);
+        PowerContainer output = new PowerContainer(this, ContainerUsage.PUBLIC_BUFFER_OUT);
         output.configure(VolumeUnits.LITER.nL, BatteryChemistry.SILICON);
         
         PowerContainer input = new PowerContainer(this, ContainerUsage.PRIVATE_BUFFER_IN);

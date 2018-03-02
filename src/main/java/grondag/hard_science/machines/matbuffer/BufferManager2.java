@@ -1,26 +1,18 @@
 package grondag.hard_science.machines.matbuffer;
 
-import java.util.Map.Entry;
-
-import com.google.common.collect.ImmutableMap;
-
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
-import grondag.hard_science.simulator.resource.FluidResource;
-import grondag.hard_science.simulator.resource.IResource;
-import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.IResourcePredicate;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
-import grondag.hard_science.simulator.storage.ResourceContainer;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.storage.ItemContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.items.IItemHandler;
 
 public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceComponent, ISimulationTickable
@@ -28,68 +20,34 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
     private final IDevice owner;
     private final ItemContainer itemInput;
     private final ItemContainer itemOutput;
-    private final ImmutableMap<BulkBufferPurpose, FluidContainer> fluidInputs;
-    private final ImmutableMap<BulkBufferPurpose, FluidContainer> fluidOutputs;
+    private final FluidContainer fluidInput;
+    private final FluidContainer fluidOutput;
     
-    public BufferManager2(IDevice owner, ResourceContainer<?>... containers)
+    public BufferManager2(
+            IDevice owner,
+            long itemInputSize,
+            IResourcePredicate<StorageTypeStack> itemInputPredicate,
+            long itemOutputSize,
+            long fluidInputSize,
+            IResourcePredicate<StorageTypeFluid> fluidInputPredicate,
+            long fluidOutputSize
+            )
     {
         this.owner = owner;
-        ItemContainer itemInput = null;
-        ItemContainer itemOutput = null;
         
-        ImmutableMap.Builder<BulkBufferPurpose, FluidContainer> fluidInputs = ImmutableMap.builder();
-        ImmutableMap.Builder<BulkBufferPurpose, FluidContainer> fluidOutputs = ImmutableMap.builder();
-
-        for(ResourceContainer<?> c : containers)
-        {
-            switch(c.storageType().enumType)
-            {
-            case FLUID:
-                if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_IN)
-                    fluidInputs.put(((FluidContainer)c).bufferPurpose(), (FluidContainer) c);
-                else if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_OUT)
-                    fluidOutputs.put(((FluidContainer)c).bufferPurpose(), (FluidContainer) c);
-                else
-                    assert false : "Invalid buffer construction";
-                break;
-                
-            case ITEM:
-                if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_IN && itemInput == null)
-                    itemInput = (ItemContainer)c;
-                else if(c.containerUsage() == ContainerUsage.PRIVATE_BUFFER_OUT && itemOutput == null)
-                    itemOutput = (ItemContainer) c;
-                else
-                    assert false : "Invalid buffer construction";
-                break;
-                
-            case PRIVATE:
-                assert false : "Invalid buffer construction";
-                break;
-                
-            case POWER:
-            default:
-                assert false : "Invalid buffer construction";
-                break;
-            
-            }
-        }
+        this.itemInput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN);
+        this.itemInput.setCapacity(itemInputSize);
+        this.itemInput.setContentPredicate(itemInputPredicate);
         
-        if(itemInput == null)
-        {
-            itemInput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN);
-            itemInput.setCapacity(0);
-        }
+        this.itemOutput = new ItemContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT);
+        this.itemOutput.setCapacity(itemOutputSize);
         
-        if(itemOutput == null)
-        {
-            itemOutput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_OUT);
-            itemOutput.setCapacity(0);
-        }
+        this.fluidInput = new FluidContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN);
+        this.fluidInput.setCapacity(fluidInputSize);
+        this.fluidInput.setContentPredicate(fluidInputPredicate);
         
-        this.itemInput = itemInput;
-        this.itemOutput = itemOutput;
-        this.fluidInputs = fluidInputs.build();
-        this.fluidOutputs = fluidOutputs.build();
+        this.fluidOutput = new FluidContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT);
+        this.fluidOutput.setCapacity(fluidOutputSize);
     }
 
     public ItemContainer itemInput() 
@@ -102,14 +60,14 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         return this.itemOutput;
     }
     
-    public ImmutableMap<BulkBufferPurpose, FluidContainer> fluidInputs()
+    public FluidContainer fluidInput()
     {
-        return this.fluidInputs;
+        return this.fluidInput;
     }
     
-    public ImmutableMap<BulkBufferPurpose, FluidContainer> fluidOutputs()
+    public FluidContainer fluidOutput()
     {
-        return this.fluidOutputs;
+        return this.fluidOutput;
     }
     
     @Override
@@ -120,36 +78,12 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
 
         if(tag.hasKey(ModNBTTag.BUFFER_ITEMS_OUT))
             this.itemOutput.deserializeNBT(tag.getCompoundTag(ModNBTTag.BUFFER_ITEMS_OUT));
-        
+
         if(tag.hasKey(ModNBTTag.BUFFER_FLUIDS_IN))
-        {
-            NBTTagList list = tag.getTagList(ModNBTTag.BUFFER_FLUIDS_IN, 10);
-            list.forEach(t -> 
-            {
-                FluidResource r = (FluidResource) StorageType.FLUID.fromNBT((NBTTagCompound) t);
-                FluidContainer c = this.fluidInputs.get(r);
-                if(c == null)
-                    assert false : "Fluid container not found during buffer manager deserialization";
-                else
-                    c.deserializeNBT((NBTTagCompound)t);
-            });
-        }
-        else assert this.fluidInputs.isEmpty() : "Invalid fluid buffer deserialization";
-        
+            this.fluidInput.deserializeNBT(tag.getCompoundTag(ModNBTTag.BUFFER_FLUIDS_IN));
+
         if(tag.hasKey(ModNBTTag.BUFFER_FLUIDS_OUT))
-        {
-            NBTTagList list = tag.getTagList(ModNBTTag.BUFFER_FLUIDS_OUT, 10);
-            list.forEach(t -> 
-            {
-                BulkBufferPurpose p = Useful.safeEnumFromTag((NBTTagCompound)t, ModNBTTag.BUFFER_PURPOSE, BulkBufferPurpose.INVALID);
-                FluidContainer c = this.fluidOutputs.get(p);
-                if(c == null)
-                    assert false : "Fluid container not found during buffer manager deserialization";
-                else
-                    c.deserializeNBT((NBTTagCompound)t);
-            });
-        }
-        else assert this.fluidOutputs.isEmpty() : "Invalid fluid buffer deserialization";
+            this.fluidOutput.deserializeNBT(tag.getCompoundTag(ModNBTTag.BUFFER_FLUIDS_OUT));
     }
 
     @Override
@@ -157,26 +91,8 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
     {
         tag.setTag(ModNBTTag.BUFFER_ITEMS_IN, this.itemInput.serializeNBT());
         tag.setTag(ModNBTTag.BUFFER_ITEMS_OUT, this.itemOutput.serializeNBT());
-        
-        if(!this.fluidInputs.isEmpty())
-        {
-            NBTTagList list = new NBTTagList();
-            for(Entry<BulkBufferPurpose, FluidContainer> e : this.fluidInputs.entrySet())
-            {
-                list.appendTag(e.getValue().serializeNBT());
-            }
-            tag.setTag(ModNBTTag.BUFFER_FLUIDS_IN, list);
-        }
-        
-        if(!this.fluidOutputs.isEmpty())
-        {
-            NBTTagList list = new NBTTagList();
-            for(Entry<BulkBufferPurpose, FluidContainer> e : this.fluidOutputs.entrySet())
-            {
-                list.appendTag(e.getValue().serializeNBT());
-            }
-            tag.setTag(ModNBTTag.BUFFER_FLUIDS_OUT, list);
-        }
+        tag.setTag(ModNBTTag.BUFFER_FLUIDS_IN, this.fluidInput.serializeNBT());
+        tag.setTag(ModNBTTag.BUFFER_FLUIDS_OUT, this.fluidOutput.serializeNBT());
     }
 
     @Override
@@ -253,6 +169,25 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
         else return 0;
     }
 
+    @Override
+    public void onConnect()
+    {
+        IDeviceComponent.super.onConnect();
+        if(this.itemInput != null) this.itemInput.onConnect();
+        if(this.itemOutput != null) this.itemOutput.onConnect();
+        if(this.fluidInput != null) this.fluidInput.onConnect();
+        if(this.fluidOutput != null) this.fluidOutput.onConnect();
+    }
+
+    @Override
+    public void onDisconnect()
+    {
+        IDeviceComponent.super.onDisconnect();
+        if(this.itemInput != null) this.itemInput.onDisconnect();
+        if(this.itemOutput != null) this.itemOutput.onDisconnect();
+        if(this.fluidInput != null) this.fluidInput.onDisconnect();
+        if(this.fluidOutput != null) this.fluidOutput.onDisconnect();
+    }
 
     public long[] serializeToArray()
     {
@@ -321,25 +256,4 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
     {
         return this.owner;
     }
-
-    public FluidContainer getFluidOutput(IResource<StorageTypeFluid> resource)
-    {
-        // TODO This implementation won't perform well on machines with many buffers
-        if(this.fluidOutputs.isEmpty()) return null;
-        for(FluidContainer f : this.fluidOutputs.values())
-        {
-            if(f.getQuantityStored(resource) > 0) return f;
-        }
-        return null;
-    }
-
-    public FluidContainer getFluidInput(IResource<StorageTypeFluid> resource)
-    {
-        // TODO This implementation won't perform well on machines with many buffers
-        if(this.fluidInputs.isEmpty()) return null;
-        for(FluidContainer f : this.fluidInputs.values())
-        {
-            if(f.isResourceAllowed(resource)) return f;
-        }
-        return null;    }
 }

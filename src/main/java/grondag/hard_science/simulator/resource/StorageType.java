@@ -1,7 +1,6 @@
 package grondag.hard_science.simulator.resource;
 
 import java.io.IOException;
-import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,17 +54,24 @@ public abstract class StorageType<T extends StorageType<T>>
     public  final EnumStorageType enumType;
     public final IResource<T> emptyResource;
     public final int ordinal;
-    public final Predicate<IResource<T>> MATCH_ANY;
+    public final IResourcePredicate<T> MATCH_ANY;
+    public final IResourcePredicate<T> MATCH_NONE;
     
     private StorageType(EnumStorageType enumType, IResource<T> emptyResource)
     {
         this.enumType = enumType;
         this.ordinal = enumType.ordinal();
         this.emptyResource = emptyResource;
-        this.MATCH_ANY = new Predicate<IResource<T>>()
+        this.MATCH_ANY = new IResourcePredicate<T>()
         {
             @Override
             public boolean test(IResource<T> t) { return true; }
+        };
+        
+        this.MATCH_NONE = new IResourcePredicate<T>()
+        {
+            @Override
+            public boolean test(IResource<T> t) { return false; }
         };
     }
     @Nullable

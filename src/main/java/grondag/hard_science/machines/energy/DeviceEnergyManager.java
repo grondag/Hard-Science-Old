@@ -137,17 +137,6 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
     
     @Nullable
     public PowerContainer inputContainer() { return this.inputContainer; }
- 
-    /**
-     * True if can provide energy to the device right now. 
-     * Requires that the device have a power input buffer.
-     * Will always be false for generators or power storage
-     * devices that are not expected to consume power locally.
-     */
-    public boolean canProvideEnergy()
-    {
-        return  this.inputContainer != null && this.inputContainer.canProvideEnergy();
-    }
     
     /**
      * Recent energy consumption level by device from input buffer.
@@ -195,39 +184,6 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
         return (this.inputContainer == null ? 0 : this.inputContainer.netWattsLastTick())
                 + (this.outputContainer == null ? 0 : this.outputContainer.netWattsLastTick());
 
-    }
-    
-    /**
-     * True if can accept energy from the device right now. 
-     * Requires that the device have a power output buffer.
-     * Will generally only be true machine with generators.
-     */
-    public boolean canAcceptEnergy()
-    {
-        return this.outputContainer != null && this.outputContainer.canAcceptEnergy();
-    }
-
-    /**
-     * Adds energy from this machine's output buffer if it has one.
-     * Intended to be called during device tick.
-     *
-     * @param maxInput
-     *            Maximum amount of energy to be inserted, in joules.<br>
-     *            Limited by {@link #maxEnergyInputPerTick()}.
-     *            
-     * @param allowPartial
-     *            If false, no energy will be input unless the entire requested amount can be accepted.
-     *            
-     * @param simulate
-     *            If true, result will be simulated and no state change occurs.
-     *            
-     * @return Energy accepted (or that would have been have been accepted, if simulated) in joules.
-     */
-    public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
-    {
-        return this.outputContainer != null && this.outputContainer.canAcceptEnergy()
-            ? this.outputContainer.acceptEnergy(maxInput, allowPartial, simulate)
-            : 0;
     }
    
     /**
@@ -331,7 +287,7 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
             this.generator.generate(this.outputContainer);
                
             needsPowerTick = needsPowerTick || 
-                this.outputContainer.availableCapacity() < this.generator.maxEnergyOutputJoulesPerTick();
+                this.outputContainer.usedCapacity() >= 0;
         }
         
         if(powerTickFuture != null)
@@ -414,13 +370,11 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
     private void emptyOutputIfNeeded()
     {
         if(this.outputContainer == null 
-                || this.outputContainer.containerUsage() != ContainerUsage.PRIVATE_BUFFER_OUT
-                || this.outputContainer.availableCapacity() > this.generator.maxEnergyOutputJoulesPerTick()
+                || this.outputContainer.containerUsage() != ContainerUsage.PUBLIC_BUFFER_OUT
                 || !this.powerTransport().hasAnyCircuit()) 
             return;
         
-        long targetAmount = this.generator.maxEnergyOutputJoulesPerTick() 
-                - this.outputContainer.availableCapacity();
+        long targetAmount = this.outputContainer.usedCapacity();
         
         StorageManager<StorageTypePower> manager = this.getDomain().powerStorage;
         

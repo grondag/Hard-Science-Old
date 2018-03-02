@@ -14,6 +14,7 @@ import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.IResourcePredicate;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -80,7 +81,7 @@ public class MicronizerRecipe
     }
     
     public static final Predicate<ItemStack> STACK_PREDICATE;
-    public static final Predicate<IResource<StorageTypeStack>> RESOURCE_PREDICATE;
+    public static final IResourcePredicate<StorageTypeStack> RESOURCE_PREDICATE;
     
     static
     {
@@ -98,7 +99,7 @@ public class MicronizerRecipe
             }
         };
         
-        RESOURCE_PREDICATE = new Predicate<IResource<StorageTypeStack>>() 
+        RESOURCE_PREDICATE = new IResourcePredicate<StorageTypeStack>() 
         {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override

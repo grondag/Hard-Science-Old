@@ -8,7 +8,6 @@ import grondag.hard_science.machines.impl.logistics.MiddleBusMachine;
 import grondag.hard_science.machines.impl.logistics.PortableTankMachine;
 import grondag.hard_science.machines.impl.logistics.SmartChestMachine;
 import grondag.hard_science.machines.impl.logistics.TopBusMachine;
-import grondag.hard_science.machines.impl.logistics.TransportTestMachine;
 import grondag.hard_science.machines.impl.logistics.WaterPumpMachine;
 import grondag.hard_science.machines.impl.processing.MicronizerMachine;
 import grondag.hard_science.machines.impl.production.PhotoElectricMachine;
@@ -20,7 +19,6 @@ public class ModDevices
 {
     public static void preInit(FMLPreInitializationEvent event) 
     {
-        DeviceManager.register(HardScience.prefixResource("transport_test"), TransportTestMachine.class);
         DeviceManager.register(HardScience.prefixResource("block_fabricator"), BlockFabricatorMachine.class);
         DeviceManager.register(HardScience.prefixResource("smart_chest"), SmartChestMachine.class);
         DeviceManager.register(HardScience.prefixResource("solar_cell"), PhotoElectricMachine.class);

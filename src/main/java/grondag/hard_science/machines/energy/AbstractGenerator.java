@@ -69,9 +69,7 @@ public abstract class AbstractGenerator implements IEnergyComponent
     {
         this.outputLastTick = this.outputThisTick;
         
-        long needed = Math.min(
-                outputContainer.availableCapacity(),
-                this.maxEnergyOutputPerTick);
+        long needed = outputContainer.acceptEnergy(this.maxEnergyOutputPerTick, true, true);
         
         this.outputThisTick = this.generateImplementation(needed, true, false);
                 

@@ -98,7 +98,14 @@ public abstract class AbstractDevice implements IDevice
     @Nullable
     protected BufferManager2 createBufferManager()
     {
-        return new BufferManager2(this);
+        return new BufferManager2(
+                this, 
+                0L, 
+                StorageType.ITEM.MATCH_NONE, 
+                0L, 
+                0L, 
+                StorageType.FLUID.MATCH_NONE, 
+                0L);
     }
     
 
@@ -255,6 +262,7 @@ public abstract class AbstractDevice implements IDevice
         this.blockManager = this.createBlockManager();
         this.blockManager.connect();
         this.energyManager.onConnect();
+        this.bufferManager.onConnect();
         this.isConnected = true;
     }
     
@@ -267,6 +275,7 @@ public abstract class AbstractDevice implements IDevice
             this.blockManager = null;
         }
         this.energyManager.onDisconnect();
+        this.bufferManager.onDisconnect();
         this.isConnected = false;
     }
 
@@ -298,7 +307,7 @@ public abstract class AbstractDevice implements IDevice
             else
             {
                 FluidContainer output 
-                    = this.getBufferManager().getFluidOutput((IResource<StorageTypeFluid>)resource);
+                    = this.getBufferManager().fluidOutput();
                 if(output != null)
                     return output.takeUpTo((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
                 }
@@ -348,7 +357,7 @@ public abstract class AbstractDevice implements IDevice
             else
             {
                 FluidContainer input 
-                    = this.getBufferManager().getFluidInput((IResource<StorageTypeFluid>)resource);
+                    = this.getBufferManager().fluidInput();
                 if(input != null)
                     return input.add((IResource<StorageTypeFluid>)resource, quantity, simulate, (NewProcurementTask<StorageTypeFluid>)request);
             }            

@@ -98,12 +98,25 @@ public class StorageManager<T extends StorageType<T>>
         return this.domain;
     }
 
-    protected synchronized void addStore(IResourceContainer<T> store)
+    protected void addStore(IResourceContainer<T> store)
+    {
+        if(this.confirmServiceThread())
+        {
+            this.addStoreImpl(store);
+        }
+        else
+        {
+            this.storageType.service().executor.execute(() -> 
+            {
+                this.addStoreImpl(store);
+            });
+        }
+    }
+    
+    private void addStoreImpl(IResourceContainer<T> store)
     {
         assert !stores.contains(store)
             : "Storage manager received request to add store it already has.";
-        
-        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
 
         this.stores.add(store);
         this.capacity += store.getCapacity();
@@ -114,10 +127,23 @@ public class StorageManager<T extends StorageType<T>>
         }
     }
     
-    public synchronized void removeStore(IResourceContainer<T> store)
+    protected void removeStore(IResourceContainer<T> store)
     {
-        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
-
+        if(this.confirmServiceThread())
+        {
+            this.removeStoreImpl(store);
+        }
+        else
+        {
+            this.storageType.service().executor.execute(() -> 
+            {
+                this.removeStoreImpl(store);
+            });
+        }
+    }
+    
+    private void removeStoreImpl(IResourceContainer<T> store)
+    {
         assert stores.contains(store)
          : "Storage manager received request to remove store it doesn't have.";
         

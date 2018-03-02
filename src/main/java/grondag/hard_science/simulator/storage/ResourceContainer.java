@@ -390,7 +390,6 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
         if(this.containerUsage().isListed)
         {
             assert this.getDomain() != null : "Null domain on storage connect";
-            assert this.confirmServiceThread() : "Storage connect outside service thread";
             this.storageType().eventFactory().postAfterStorageConnect(this);
         }
     }
@@ -401,7 +400,6 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
         if(this.containerUsage().isListed)
         {
             assert this.getDomain() != null : "Null domain on storage disconnect";
-            assert this.confirmServiceThread() : "Storage disconnect outside service thread";
             this.storageType().eventFactory().postBeforeStorageDisconnect(this);
         }
         IResourceContainer.super.onDisconnect();
@@ -430,6 +428,11 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
         }
     }
 
+    public long addLocally(IResource<T> resource, long howMany, boolean simulate)
+    {
+        return this.addLocally(resource, howMany, simulate, true, null);
+    }
+    
     /**
      * Tries to move contents of private local buffer to
      * public buffer. Called on service thread after every 

@@ -26,22 +26,17 @@ public interface IResourceContainer<T extends StorageType<T>>
      */
     List<AbstractResourceWithQuantity<T>> find(@Nonnull Predicate<IResource<T>> predicate);
     
+    public default List<AbstractResourceWithQuantity<T>> findAll()
+    {
+        return this.find(this.storageType().MATCH_ANY);
+    }
+    
     long getQuantityStored(@Nonnull IResource<T> resource);
 
     default boolean isResourceAllowed(@Nonnull IResource<T> resource)
     {
         return this.getContentPredicate() == null || this.getContentPredicate().test(resource);
     }
-
-    /**
-     * If this is a single-bulkResource container, the bulkResource it 
-     * currently contains or is configured to contain.<p>
-     * 
-     * Null for multi-bulkResource containers, or if the container is
-     * empty and has no configured bulkResource.
-     */
-    @Nullable
-    default IResource<T> resource() { return null; }
     
     default long availableCapacityFor(@Nonnull IResource<T> resource)
     {

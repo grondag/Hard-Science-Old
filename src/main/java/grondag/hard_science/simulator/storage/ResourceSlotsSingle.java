@@ -42,7 +42,7 @@ public class ResourceSlotsSingle<V extends StorageType<V>>
         }
         else
         {
-            assert(this.slot.resource() == resource) : "Resource mismatch for single resource container";
+            assert(this.slot.resource().isResourceEqual(resource)) : "Resource mismatch for single resource container";
             this.slot.changeQuantity(delta);
             if(this.slot.isEmpty()) this.slot = null;
         }
@@ -51,7 +51,8 @@ public class ResourceSlotsSingle<V extends StorageType<V>>
     @Override
     public long getQuantity(IResource<V> resource)
     {
-        return this.slot == null ? 0 : this.slot.getQuantity();
+        return (this.slot == null || !this.slot.resource().isResourceEqual(resource))
+                ? 0 : this.slot.getQuantity();
     }
 
     @Override

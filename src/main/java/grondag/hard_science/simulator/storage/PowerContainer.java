@@ -118,7 +118,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     @Override
     public long acceptEnergy(long maxInput, boolean allowPartial, boolean simulate)
     {
-        return this.add(PowerResource.JOULES, maxInput, simulate, allowPartial, null);
+        return this.addLocally(PowerResource.JOULES, maxInput, simulate, allowPartial, null);
     }
     
     @Override
