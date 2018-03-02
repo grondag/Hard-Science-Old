@@ -4,12 +4,11 @@ import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
-import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.ItemStorageListener;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,38 +43,55 @@ public class MachineStorageContainer extends MachineContainer
     {
         Slot slot = this.inventorySlots.get(index);
 
-        if (slot != null && slot.getHasStack())
+        if (slot == null || !slot.getHasStack()) return ItemStack.EMPTY;
+
+        ItemStack slotStack = slot.getStack();
+        if(slotStack == null || slotStack.isEmpty()) return ItemStack.EMPTY;
+    
+        if(!(playerIn instanceof EntityPlayerMP))
         {
-            ItemStack slotStack = slot.getStack();
+            // on client, always assume entire stack was transfered
+            // server will send corrective update if that was not the case
+            slot.putStack(ItemStack.EMPTY);
+            return ItemStack.EMPTY;
+        }
         
-            if(playerIn instanceof EntityPlayerMP)
+        ItemStorageListener storage = getItemListener((EntityPlayerMP) playerIn);
+        if(storage == null || storage.isDead()) return ItemStack.EMPTY;
+            
+        ItemResourceWithQuantity heldResource = ItemResourceWithQuantity.fromStack(slotStack);
+        int consumed = 0;
+        try
+        {
+            consumed = LogisticsService.ITEM_SERVICE.executor.submit( () ->
             {
-                IResourceContainer<StorageType.StorageTypeStack> storage = ((MachineTileEntity)this.te).machine().itemStorage();
-                if(storage == null) return ItemStack.EMPTY;
-                
-                int consumed = (int) storage.addInteractively(ItemResourceWithQuantity.fromStack(slotStack), false);
-                if(consumed > 0)
-                {
-                    slotStack.shrink(consumed);
-                    if (slotStack.isEmpty())
-                    {
-                        slot.putStack(ItemStack.EMPTY);
-                    } else
-                    {
-                        slot.onSlotChanged();
-                    }
-                }
-                
-                // always update client, in case was unable to transfer all of stack for any reason
-                ((EntityPlayerMP)playerIn).sendSlotContents(this, slot.slotNumber, slot.getStack());
-            }
-            else
+                return (int) storage.add(heldResource.resource(), slotStack.getCount(), false, null);
+            }, true).get();
+        }
+        catch (Exception e)
+        {
+            Log.error("Error in open container item handling", e);
+        }
+        
+        if(consumed > 0)
+        {
+            slotStack.shrink(consumed);
+            if (slotStack.isEmpty())
             {
-                // on client, always assume entire stack was transfered
-                // server will send corrective update if that was not the case
                 slot.putStack(ItemStack.EMPTY);
+            } else
+            {
+                slot.onSlotChanged();
             }
         }
+        
+        // always update client, in case was unable to transfer all of stack for any reason
+        ((EntityPlayerMP)playerIn).sendSlotContents(this, slot.slotNumber, slot.getStack());
+       
+        
+        // Code that calls this is crazy and not clear how the return value 
+        // is used except that it is used to terminate a for loop and
+        // returning an empty stack is one way to ensure it terminates
         return ItemStack.EMPTY;
     }
 

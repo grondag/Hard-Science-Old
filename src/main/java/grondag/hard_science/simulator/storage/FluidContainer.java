@@ -19,9 +19,9 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
      * or a specific fluid resource.  If it is specific fluid
      * resource, this container will only accept that fluid.
      */
-    public FluidContainer(IDevice owner, ContainerUsage usage)
+    public FluidContainer(IDevice owner, ContainerUsage usage, int maxSlots)
     {
-        super(StorageType.FLUID, owner, usage, 1);
+        super(StorageType.FLUID, owner, usage, maxSlots);
         this.setCapacity(VolumeUnits.liters2nL(32000));
     }
 

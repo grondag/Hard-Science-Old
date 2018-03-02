@@ -35,18 +35,18 @@ public class BufferManager2 implements IReadWriteNBT, IItemHandler, IDeviceCompo
     {
         this.owner = owner;
         
-        this.itemInput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN);
+        this.itemInput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN, Integer.MAX_VALUE);
         this.itemInput.setCapacity(itemInputSize);
         this.itemInput.setContentPredicate(itemInputPredicate);
         
-        this.itemOutput = new ItemContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT);
+        this.itemOutput = new ItemContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT, Integer.MAX_VALUE);
         this.itemOutput.setCapacity(itemOutputSize);
         
-        this.fluidInput = new FluidContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN);
+        this.fluidInput = new FluidContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN, Integer.MAX_VALUE);
         this.fluidInput.setCapacity(fluidInputSize);
         this.fluidInput.setContentPredicate(fluidInputPredicate);
         
-        this.fluidOutput = new FluidContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT);
+        this.fluidOutput = new FluidContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT, Integer.MAX_VALUE);
         this.fluidOutput.setCapacity(fluidOutputSize);
     }
 

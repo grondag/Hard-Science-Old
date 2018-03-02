@@ -1,18 +1,23 @@
 package grondag.hard_science.machines.impl.logistics;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
+import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.simulator.resource.IResourcePredicate;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class PortableTankMachine extends AbstractSimpleMachine
+public class TankMachine extends AbstractSimpleMachine
 {
     protected final FluidContainer fluidStorage;
     
-    public PortableTankMachine()
+    public TankMachine(int kL, int maxSlots, IResourcePredicate<StorageTypeFluid> predicate)
     {
         super();
-        this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE);
+        this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE, maxSlots);
+        this.fluidStorage.setCapacity(VolumeUnits.blocks2nL(kL));
+        this.fluidStorage.setContentPredicate(predicate);
     }
     
     @Override

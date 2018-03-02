@@ -277,7 +277,7 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
         if(this.containerUsage().isListed)
         {
             added = this.addImpl(resource, howMany, simulate, allowPartial, request);
-            if(this.isConnected() && this.getDomain() != null)
+            if(added != 0 && this.isConnected() && this.getDomain() != null)
             {
                 assert this.confirmServiceThread() : "storage operation outside service thread";
                 if(!simulate) this.storageType().eventFactory().postStoredUpdate(this, resource, added, request);

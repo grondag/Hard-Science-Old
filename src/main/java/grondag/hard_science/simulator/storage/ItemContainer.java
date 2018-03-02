@@ -20,9 +20,9 @@ import net.minecraftforge.items.IItemHandler;
  */
 public class ItemContainer extends ResourceContainer<StorageTypeStack> implements IItemHandler
 {
-    public ItemContainer(IDevice owner, ContainerUsage usage)
+    public ItemContainer(IDevice owner, ContainerUsage usage, int maxSlots)
     {
-        super(StorageType.ITEM, owner, usage, Integer.MAX_VALUE);
+        super(StorageType.ITEM, owner, usage, maxSlots);
     }
     
     /**

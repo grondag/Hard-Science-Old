@@ -11,14 +11,16 @@ public class SmartChestMachine extends AbstractSimpleMachine
 {
     protected final ItemContainer itemStorage;
     
-    public SmartChestMachine()
+    public SmartChestMachine(boolean dedicated)
     {
         super();
-        this.itemStorage = new ItemContainer(this, ContainerUsage.STORAGE);
+        this.itemStorage = new ItemContainer(this, ContainerUsage.STORAGE, 
+                dedicated ? 1 : Integer.MAX_VALUE);
         this.itemStorage.setContentPredicate( 
                 r -> r != null 
                 && !(((ItemResource)r).getItem() == ModItems.smart_chest 
                         && ((ItemResource)r).hasTagCompound()));
+        this.itemStorage.setCapacity(dedicated ? 4000 : 2000);
     }
 
     @Override

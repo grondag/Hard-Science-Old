@@ -10,6 +10,7 @@ import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.IResourcePredicate;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
@@ -33,16 +34,22 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class ModularTankBlock extends MachineBlock
 {
+    private final int maxSlots;
+    private final IResourcePredicate<StorageTypeFluid> predicate;
+    private final int kLcapacity;
     
-    public ModularTankBlock(String name)
+    public ModularTankBlock(String name, int kL, int maxSlots, IResourcePredicate<StorageTypeFluid> predicate)
     {
         super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_CHANNEL_DOTS));
+        this.kLcapacity = kL;
+        this.maxSlots = maxSlots;
+        this.predicate = predicate;
     }
 
     @Override
     public AbstractMachine createNewMachine()
     {
-        PortableTankMachine result = new PortableTankMachine();
+        TankMachine result = new TankMachine(this.kLcapacity, this.maxSlots, this.predicate);
         return result;
     }
     

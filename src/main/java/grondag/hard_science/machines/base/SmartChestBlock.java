@@ -3,14 +3,18 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import grondag.hard_science.gui.ModGuiHandler.ModGui;
+import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.impl.logistics.SmartChestMachine;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IResourceContainer;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.simulator.transport.endpoint.PortLayout;
+import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -18,19 +22,43 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public abstract class MachineStorageBlock extends MachineContainerBlock
+public class SmartChestBlock extends MachineContainerBlock
 {
-
-    public MachineStorageBlock(String name, int guiID, ModelState modelState)
+    private final boolean dedicated;
+    
+    public SmartChestBlock(String name, boolean dedicated)
     {
-        super(name, guiID, modelState);
+        super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(Textures.DECAL_SKINNY_DIAGNAL_CROSS_BARS, Textures.BORDER_SINGLE_BOLD_LINE));
+        this.dedicated = dedicated;
     }
 
     @Override
+    public TileEntity createNewTileEntity(World worldIn, int meta) 
+    {
+        return new MachineTileEntityTickable();
+    }
+    
+    @SideOnly(Side.CLIENT)
+    @Override
+    public TextureAtlasSprite getSymbolSprite()
+    {
+        return Textures.DECAL_CHEST.getSampleSprite();
+    }
+
+    @Override
+    public PortLayout nominalPortLayout()
+    {
+        return ModPortLayouts.non_fluid_low_carrier_all;
+    }
+    
+    @Override
     public AbstractMachine createNewMachine()
     {
-        return new SmartChestMachine();
+        return new SmartChestMachine(dedicated);
     }
     
     @Override

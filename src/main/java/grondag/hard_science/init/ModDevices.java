@@ -5,7 +5,7 @@ import grondag.hard_science.machines.impl.building.BlockFabricatorMachine;
 import grondag.hard_science.machines.impl.logistics.BottomBusMachine;
 import grondag.hard_science.machines.impl.logistics.ChemicalBatteryMachine;
 import grondag.hard_science.machines.impl.logistics.MiddleBusMachine;
-import grondag.hard_science.machines.impl.logistics.PortableTankMachine;
+import grondag.hard_science.machines.impl.logistics.TankMachine;
 import grondag.hard_science.machines.impl.logistics.SmartChestMachine;
 import grondag.hard_science.machines.impl.logistics.TopBusMachine;
 import grondag.hard_science.machines.impl.logistics.WaterPumpMachine;
@@ -27,7 +27,7 @@ public class ModDevices
         DeviceManager.register(HardScience.prefixResource("middle_bus"), MiddleBusMachine.class);
         DeviceManager.register(HardScience.prefixResource("top_bus"), TopBusMachine.class);
         DeviceManager.register(HardScience.prefixResource("water_pump"), WaterPumpMachine.class);
-        DeviceManager.register(HardScience.prefixResource("portable_tank"), PortableTankMachine.class);
+        DeviceManager.register(HardScience.prefixResource("portable_tank"), TankMachine.class);
         DeviceManager.register(HardScience.prefixResource("chemical_battery"), ChemicalBatteryMachine.class);
         DeviceManager.register(HardScience.prefixResource("micronizer"), MicronizerMachine.class);
     }

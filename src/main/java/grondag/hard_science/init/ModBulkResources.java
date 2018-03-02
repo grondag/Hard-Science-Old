@@ -1,12 +1,9 @@
 package grondag.hard_science.init;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 import grondag.hard_science.matter.Compounds;
 import grondag.hard_science.matter.IComposition;
@@ -18,28 +15,12 @@ import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import net.minecraftforge.fluids.FluidRegistry;
 
-//@Mod.EventBusSubscriber
-//@ObjectHolder(HardScience.MODID)
 public class ModBulkResources
 {
     
-//    public static final BulkResource empty = null;
-//    
-//    @SubscribeEvent
-//    public static void registerResources(RegistryEvent.Register<BulkResource> event) 
-//    {
-//        event.getRegistry().register(new BulkResource(ModRegistries.EMPTY_KEY));
-//    }
-    
     private static Map<String, BulkResource> all = new HashMap<String, BulkResource>();
     
-    private static Set<BulkResource> managed = new HashSet<BulkResource>();
-
-    /**
-     * Unmanaged resources aren't tracked at domain level and
-     * don't have stocking levels.  They never exist outside machine buffers.
-     */
-    private static BulkResource registerUnmanaged(
+    private static BulkResource register(
             String systemName,
             int color,
             String label,
@@ -60,42 +41,10 @@ public class ModBulkResources
             String label,
             IComposition molecule,
             double tempCelsius,
-            double pressureAtm,
-            MatterPhase phase,
-            double density)
-    {
-        BulkResource result = registerUnmanaged(systemName, color, label, molecule, tempCelsius, pressureAtm, phase, density);
-        managed.add(result);
-        return result;
-    }
-    
-    /**
-     * Unmanaged resources aren't tracked at domain level and
-     * don't have stocking levels.  They never exist outside machine buffers.
-     */
-    private static BulkResource registerUnmanaged(
-            String systemName,
-            int color,
-            String label,
-            IComposition molecule,
-            double tempCelsius,
             double pressureAtm)
     {
         BulkResource result = new BulkResource(systemName, color, label, molecule, tempCelsius, pressureAtm);
         all.put(systemName, result);
-        return result;
-    }
-    
-    private static BulkResource register(
-            String systemName,
-            int color,
-            String label,
-            IComposition molecule,
-            double tempCelsius,
-            double pressureAtm)
-    {
-        BulkResource result = registerUnmanaged(systemName, color, label, molecule, tempCelsius, pressureAtm);
-        managed.add(result);
         return result;
     }
     
@@ -181,17 +130,11 @@ public class ModBulkResources
     public final static BulkResource MAGNESIUM_NITRATE = register("magnesium_nitrate", 0xFFFFFFFF, "H12MgN2 O12", Molecules.MAGNESIUM_NITRATE, 20, 1, MatterPhase.SOLID, 2.3000);
     public final static BulkResource SODIUM_CHLORIDE = register("sodium_chloride", 0xFFFFFFFF, "NaCl", Molecules.SODIUM_CHLORIDE, 20, 1, MatterPhase.SOLID, 2.1650);
     public final static BulkResource CALCIUM_FLUORIDE = register("calcium_fluoride", 0xFFFFFFFF, "CaF2", Molecules.CALCIUM_FLUORIDE, 20, 1, MatterPhase.SOLID, 3.1800);
-    
+
     public static Map<String, BulkResource> all()
     {
         if(all instanceof HashMap) all = ImmutableMap.copyOf(all);
         return all;
-    }
-    
-    public static Set<BulkResource> managed()
-    {
-        if(managed instanceof HashSet) managed = ImmutableSet.copyOf(managed);
-        return managed;
     }
     
     public static BulkResource get(String name)
