@@ -10,7 +10,7 @@ import net.minecraftforge.common.config.Config.*;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 
-@LangKey("hard_science.config.general")
+@LangKey("config.general")
 @Config(modid = HardScience.MODID, type = Type.INSTANCE)
 public class Configurator
 {
@@ -38,7 +38,7 @@ public class Configurator
     ////////////////////////////////////////////////////        
     // SUBSTANCES
     ////////////////////////////////////////////////////
-    @LangKey("hard_science.config.substance")
+    @LangKey("config.substance")
     @Comment("Hard Science material properties.")
     public static Substances SUBSTANCES = new Substances();
     
@@ -109,7 +109,7 @@ public class Configurator
     ////////////////////////////////////////////////////        
     // RENDERING
     ////////////////////////////////////////////////////
-    @LangKey("hard_science.config.render")
+    @LangKey("config.render")
     @Comment("Settings for visual appearance.")
     public static Render RENDER = new Render();
     
@@ -198,7 +198,7 @@ public class Configurator
     ////////////////////////////////////////////////////        
     // BLOCKS
     ////////////////////////////////////////////////////
-    @LangKey("hard_science.config.blocks")
+    @LangKey("config.blocks")
     @Comment("Settings for blocks.")
     public static BlockSettings BLOCKS = new BlockSettings();
     
@@ -231,7 +231,7 @@ public class Configurator
     ////////////////////////////////////////////////////        
     // VOLCANO
     ////////////////////////////////////////////////////
-    @LangKey("hard_science.config.volcano")
+    @LangKey("config.volcano")
     @Comment("Settings for Volcano feature.")
     public static Volcano VOLCANO = new Volcano();
     
@@ -433,7 +433,7 @@ public class Configurator
     ////////////////////////////////////////////////////        
     // HYPERSTONE
     ////////////////////////////////////////////////////
-    @LangKey("hard_science.config.hypermaterial")
+    @LangKey("config.hypermaterial")
     @Comment("Settings for hyperdimensional building materials.")
     public static HyperStone HYPERSTONE = new HyperStone();
     
@@ -458,7 +458,7 @@ public class Configurator
     ////////////////////////////////////////////////////        
     // MACHINES
     ////////////////////////////////////////////////////
-    @LangKey("hard_science.config.machines")
+    @LangKey("config.machines")
     @Comment("Settings for machines.")
     public static Machines MACHINES = new Machines();
     
@@ -515,5 +515,104 @@ public class Configurator
         {
             machineKeepAlivePlusLatency = MACHINES.machineKeepaliveIntervalMilliseconds + MACHINES.machineLatencyAllowanceMilliseconds;
         }
+    }
+    
+    ////////////////////////////////////////////////////
+    // PROCESSING
+    ////////////////////////////////////////////////////
+    @LangKey("config.processing")
+    @Comment("Settings for automatic resource processing.")
+    public static Processing PROCESSING = new Processing();
+    
+    public static class Processing
+    {
+        
+        // use something like this to generate strings when needed
+//      ProcessManager.ProcessInfo.writeDefaultCSV(
+//      ModBulkResources.MICRONIZED_STONE.fluidResource(), 
+//      100, 16000, 64000)
+        
+        @Comment({"Default priority, min- and max- stocking levels",
+            "for new domains. Has no effect after a domain is created.",
+            "Listed resources represent outputs of automatic production.",
+            "Resources with higher priority are produced first.",
+            "When resource level drops below minimum, production starts.",
+            "If resource level reaches maximum (because of byproducts),",
+            "production stops unless the resource can be vented/voided.",
+            "Fluid resources are given in liters (equivalent to millibucket).",
+            "Order is priority, minStockLevel, maxStockLevel, resource..."})
+        public String[] resourceDefaults = 
+        {
+            "2000,16000,64000,FLUID,micronized_basalt",
+            "1800,16000,64000,FLUID,micronized_stone",
+            "100,16000,64000,FLUID,co2_gas",
+            "100,16000,64000,FLUID,h2_gas",
+            "100,16000,64000,FLUID,ethene_gas",
+            "100,16000,64000,FLUID,return_air",
+            "100,16000,64000,FLUID,flex_resin",
+            "100,16000,64000,FLUID,h2o_vapor",
+            "100,16000,64000,FLUID,graphite",
+            "100,16000,64000,FLUID,flex_alloy",
+            "100,16000,64000,FLUID,lithium",
+            "100,16000,64000,FLUID,platinum",
+            "100,16000,64000,FLUID,tin",
+            "100,16000,64000,FLUID,dye_cyan",
+            "100,16000,64000,FLUID,raw_mineral_dust",
+            "100,16000,64000,FLUID,zinc",
+            "100,16000,64000,FLUID,potassium_nitrate",
+            "100,16000,64000,FLUID,magnesium_nitrate",
+            "100,16000,64000,FLUID,phosphorus",
+            "100,16000,64000,FLUID,molybdenum",
+            "100,16000,64000,FLUID,tungsten_powder",
+            "100,16000,64000,FLUID,calcium_nitrate",
+            "100,16000,64000,FLUID,dye_yellow",
+            "100,16000,64000,FLUID,ammonia_liquid",
+            "100,16000,64000,FLUID,magnesium",
+            "100,16000,64000,FLUID,water",
+            "100,16000,64000,FLUID,sodium",
+            "100,16000,64000,FLUID,ar_gas",
+            "100,16000,64000,FLUID,mineral_filler",
+            "100,16000,64000,FLUID,fresh_air",
+            "100,16000,64000,FLUID,silver",
+            "100,16000,64000,FLUID,n2_gas",
+            "100,16000,64000,FLUID,ethanol_liquid",
+            "100,16000,64000,FLUID,silicon_nitride",
+            "100,16000,64000,FLUID,hdpe",
+            "100,16000,64000,FLUID,ammonia_gas",
+            "100,16000,64000,FLUID,potassium",
+            "100,16000,64000,FLUID,silica",
+            "100,16000,64000,FLUID,titanium",
+            "100,16000,64000,FLUID,sodium_chloride",
+            "100,16000,64000,FLUID,cobalt",
+            "100,16000,64000,FLUID,aluminum",
+            "100,16000,64000,FLUID,manganese",
+            "100,16000,64000,FLUID,dura_resin",
+            "100,16000,64000,FLUID,calcium_fluoride",
+            "100,16000,64000,FLUID,gold",
+            "100,16000,64000,FLUID,copper",
+            "100,16000,64000,FLUID,dye_magenta",
+            "100,16000,64000,FLUID,nickel",
+            "100,16000,64000,FLUID,magnetite",
+            "100,16000,64000,FLUID,chromium",
+            "100,16000,64000,FLUID,calcium",
+            "100,16000,64000,FLUID,perovskite",
+            "100,16000,64000,FLUID,methane_gas",
+            "100,16000,64000,FLUID,calcium_carbonate",
+            "100,16000,64000,FLUID,sulfer",
+            "100,16000,64000,FLUID,flex_fiber",
+            "100,16000,64000,FLUID,o2_gas",
+            "100,16000,64000,FLUID,super_fuel",
+            "100,16000,64000,FLUID,sodium_nitrate",
+            "100,16000,64000,FLUID,carbon_vapor",
+            "100,16000,64000,FLUID,lead",
+            "100,16000,64000,FLUID,diamond",
+            "100,16000,64000,FLUID,silicon",
+            "100,16000,64000,FLUID,neodymium",
+            "100,16000,64000,FLUID,h2o_fluid",
+            "100,16000,64000,FLUID,iron",
+            "100,16000,64000,FLUID,boron",
+            "100,16000,64000,FLUID,monocalcium_phosphate",
+            "100,16000,64000,FLUID,lithium_nitrate"
+        };
     }
 }

@@ -5,5 +5,5 @@ public enum EnumStorageType
     ITEM,
     FLUID,
     POWER,
-    PRIVATE
+    PRIVATE;
 }

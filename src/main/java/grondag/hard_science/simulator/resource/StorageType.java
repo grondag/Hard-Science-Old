@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
@@ -16,12 +17,16 @@ import grondag.hard_science.simulator.storage.ItemStorageEvent;
 import grondag.hard_science.simulator.storage.PowerStorageEvent;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 
 /**
@@ -96,6 +101,11 @@ public abstract class StorageType<T extends StorageType<T>>
         pBuff.writeVarLong(rwq.quantity);
     }
     
+    public abstract String toCSV(IResource<T> resource);
+    
+    @Nullable
+    public abstract IResource<T> fromCSV(String csv);
+    
     @Nullable
     public abstract NBTTagCompound toNBT(IResource<T> resource);
     
@@ -132,6 +142,26 @@ public abstract class StorageType<T extends StorageType<T>>
         return (IResource<V>) sType.fromNBT(tag);
     }
      
+    public static <V extends StorageType<V>> String toCSVWithType(IResource<V> resource)
+    {
+        return resource.storageType().enumType.name() 
+                + ","
+                + resource.storageType().toCSV(resource);
+    }
+    
+    @Nullable
+    public static IResource<?> fromCSVWithType(String csv)
+    {
+        String[] split = csv.split(",");
+        if(split.length < 2) return null;
+        
+        EnumStorageType sType = EnumStorageType.valueOf(split[0]);
+        if(sType == null) return null;
+        
+        return StorageType.fromEnum(sType)
+                .fromCSV(csv.substring(split[0].length() + 1));
+    }
+    
     /**
      * Materials stored as item stacks. AbstractStorage managers for other storage types that can be encapsulated
      * as item stacks will use the item stack storage manager as a subsystem.
@@ -218,6 +248,46 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             pBuff.writeItemStack(((ItemResource)resource).sampleItemStack());
         }
+
+        @Override
+        public String toCSV(IResource<StorageTypeStack> resource)
+        {
+            ItemStack stack = ((ItemResource)resource).sampleItemStack();
+            String result = stack.getItem().getRegistryName().toString()
+                    + "," + stack.getMetadata();
+            
+            if(stack.hasTagCompound())
+            {
+                result += "," + stack.getTagCompound().toString();
+            }
+            return result;
+        }
+
+        @Override
+        public IResource<StorageTypeStack> fromCSV(String csv)
+        {
+            String[] args = csv.split(",");
+            
+            if (args.length < 2) return null;
+            
+            try
+            {
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(args[0]));
+                if(item == null) return null;
+                int meta = Integer.parseInt(args[1]);
+                ItemStack stack = new ItemStack(item, 1, meta);
+                if(args.length == 3)
+                {
+                    stack.setTagCompound(JsonToNBT.getTagFromJson(args[2]));
+                }
+                return ItemResource.fromStack(stack);
+            }
+            catch(Exception e)
+            {
+                Log.error("Unable to parse Item CSV", e);
+            }
+            return null;
+        }
     }
             
     /**
@@ -294,6 +364,20 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             pBuff.writeString(((FluidResource)resource).getFluid().getName());
         }
+
+        @Override
+        public String toCSV(IResource<StorageTypeFluid> resource)
+        {
+            Fluid fluid = ((FluidResource)resource).getFluid();
+            return FluidRegistry.getFluidName(fluid);
+        }
+
+        @Override
+        public IResource<StorageTypeFluid> fromCSV(String csv)
+        {
+            Fluid fluid = FluidRegistry.getFluid(csv);
+            return new FluidResource(fluid, null);
+        }
     }
     
     
@@ -369,6 +453,18 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             // NOOP - always joules
         }
+
+        @Override
+        public String toCSV(IResource<StorageTypePower> resource)
+        {
+            return "joules";
+        }
+
+        @Override
+        public IResource<StorageTypePower> fromCSV(String csv)
+        {
+            return PowerResource.JOULES;
+        }
     }
    
     /**
@@ -434,6 +530,18 @@ public abstract class StorageType<T extends StorageType<T>>
         public void toBytes(IResource<StorageTypeBulk> resource, PacketBuffer pBuff)
         {
             pBuff.writeString(((BulkResource)resource).systemName());
+        }
+
+        @Override
+        public String toCSV(IResource<StorageTypeBulk> resource)
+        {
+            return "bulk_unsupported";
+        }
+
+        @Override
+        public IResource<StorageTypeBulk> fromCSV(String csv)
+        {
+            return null;
         }
     }
 }
