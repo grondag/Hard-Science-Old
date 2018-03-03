@@ -34,22 +34,26 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class ModularTankBlock extends MachineBlock
 {
-    private final int maxSlots;
+    private final boolean dedicated;
     private final IResourcePredicate<StorageTypeFluid> predicate;
     private final int kLcapacity;
     
-    public ModularTankBlock(String name, int kL, int maxSlots, IResourcePredicate<StorageTypeFluid> predicate)
+    public ModularTankBlock(String name, int kL, boolean dedicated, IResourcePredicate<StorageTypeFluid> predicate)
     {
         super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_CHANNEL_DOTS));
         this.kLcapacity = kL;
-        this.maxSlots = maxSlots;
+        this.dedicated = dedicated;
         this.predicate = predicate;
     }
 
     @Override
     public AbstractMachine createNewMachine()
     {
-        TankMachine result = new TankMachine(this.kLcapacity, this.maxSlots, this.predicate);
+        TankMachine result = dedicated
+                ? new TankMachine.Dedicated()
+                : new TankMachine.Flexible();
+        result.setCapacityInBlocks(this.kLcapacity);
+        result.setContentPredicate(this.predicate);
         return result;
     }
     

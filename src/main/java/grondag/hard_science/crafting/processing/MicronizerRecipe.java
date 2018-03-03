@@ -8,7 +8,9 @@ import org.magicwerk.brownies.collections.Key2List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;
+import grondag.hard_science.external.jei.AbstractRecipeCategory;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
@@ -20,8 +22,10 @@ import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
+import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 
@@ -29,6 +33,8 @@ public class MicronizerRecipe
 {
     public static final long JOULES_PER_STONE_TONNE = MachinePower.JOULES_PER_KWH / 2;
     
+    public static final String JEI_UID = HardScience.prefixName("micronizer");
+
     private static final Key2List<MicronizerRecipe, Ingredient, BulkResource> conversions 
     = new Key2List.Builder<MicronizerRecipe, Ingredient, BulkResource>().
           withKey1Map(MicronizerRecipe::inputIngredeient).
@@ -117,6 +123,27 @@ public class MicronizerRecipe
         };
     }
     
+    /**
+     * Lists all possible inputs and outputs for JEI registration.
+     * Assuming will be called only 1X
+     */ 
+    public static ImmutableList<GenericRecipe> allForJEI()
+    {
+        ImmutableList.Builder<GenericRecipe> builder = ImmutableList.builder();
+        for(Ingredient i : allInputs())
+        {
+            for(ItemStack stack : i.getMatchingStacks())
+            {
+                MicronizerRecipe r = getForInput(stack);
+                if(r != null)
+                {
+                    builder.add(r.displayForStack(stack));
+                }
+            }
+        }
+        return builder.build();
+    }
+    
     private final Ingredient inputResource;
     private final BulkResource outputResource;
     private final double powerFactor;
@@ -178,7 +205,7 @@ public class MicronizerRecipe
                         ItemResource.fromStack(inputStack).withQuantity(inputStack.getCount()),
                         PowerResource.JOULES.withQuantity(this.energyForStack(inputStack))), 
                 ImmutableList.of(
-                        this.outputResource.withQuantity(this.outputForStack(inputStack))), 
+                        this.outputResource.fluidResource().withQuantity(this.outputForStack(inputStack))), 
                 0) {};   
     }
 
@@ -233,6 +260,18 @@ public class MicronizerRecipe
                 volume += Useful.volumeAABB(box);
             }
             return (long) (MathHelper.clamp(volume, 0, 1) * VolumeUnits.KILOLITER.nL);
+        }
+    }
+    
+    public static class Category extends AbstractRecipeCategory<GenericRecipe>
+    {
+        public Category(IGuiHelper guiHelper)
+        {
+            super(
+                    guiHelper, 
+                    1,
+                    JEI_UID,
+                    new ResourceLocation("hard_science", "textures/blocks/linear_marks_128.png"));
         }
     }
 }

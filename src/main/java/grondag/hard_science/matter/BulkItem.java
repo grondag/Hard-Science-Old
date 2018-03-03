@@ -21,6 +21,7 @@ import net.minecraft.world.World;
  * Package sizes for solid material blocks
  * and fluid containers. 
  */
+@Deprecated
 public class BulkItem extends Item
 {
     private static final ListMultimap<BulkResource, BulkItem> resourceMap = ArrayListMultimap.create();

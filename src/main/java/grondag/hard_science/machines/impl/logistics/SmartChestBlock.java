@@ -1,11 +1,15 @@
-package grondag.hard_science.machines.base;
+package grondag.hard_science.machines.impl.logistics;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.hard_science.machines.impl.logistics.SmartChestMachine;
+import grondag.hard_science.machines.base.AbstractMachine;
+import grondag.hard_science.machines.base.MachineBlock;
+import grondag.hard_science.machines.base.MachineContainerBlock;
+import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
@@ -58,7 +62,9 @@ public class SmartChestBlock extends MachineContainerBlock
     @Override
     public AbstractMachine createNewMachine()
     {
-        return new SmartChestMachine(dedicated);
+        return dedicated 
+                ? new SmartChestMachine.Dedicated()
+                : new SmartChestMachine.Flexible();
     }
     
     @Override

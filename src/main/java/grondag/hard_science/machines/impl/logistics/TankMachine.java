@@ -8,16 +8,30 @@ import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class TankMachine extends AbstractSimpleMachine
+public abstract class TankMachine extends AbstractSimpleMachine
 {
     protected final FluidContainer fluidStorage;
     
-    public TankMachine(int kL, int maxSlots, IResourcePredicate<StorageTypeFluid> predicate)
+    protected TankMachine()
     {
         super();
-        this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE, maxSlots);
-        this.fluidStorage.setCapacity(VolumeUnits.blocks2nL(kL));
+        this.fluidStorage = new FluidContainer(this, ContainerUsage.STORAGE, 
+                this.dedicated() ? 1 : Integer.MAX_VALUE);
+    }
+    
+    protected abstract boolean dedicated();
+    
+    public void setContentPredicate(IResourcePredicate<StorageTypeFluid> predicate)
+    {
         this.fluidStorage.setContentPredicate(predicate);
+    }
+    
+    /**
+     * 1 block = 1 MC bucket = 1 kiloliter
+     */
+    public void setCapacityInBlocks(int blocks)
+    {
+        this.fluidStorage.setCapacity(VolumeUnits.blocks2nL(blocks));
     }
     
     @Override
@@ -64,5 +78,17 @@ public class TankMachine extends AbstractSimpleMachine
     public FluidContainer fluidStorage()
     {
         return this.fluidStorage;
+    }
+    
+    public static class Flexible extends TankMachine
+    {
+        @Override
+        protected boolean dedicated() { return false; }
+    }
+    
+    public static class Dedicated extends TankMachine
+    {
+        @Override
+        protected boolean dedicated() { return true; }
     }
 }

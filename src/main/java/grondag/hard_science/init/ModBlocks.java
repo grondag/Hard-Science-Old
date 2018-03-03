@@ -2,12 +2,12 @@ package grondag.hard_science.init;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.machines.base.SmartChestBlock;
 import grondag.hard_science.machines.impl.building.BlockFabricatorBlock;
 import grondag.hard_science.machines.impl.logistics.BottomBusBlock;
 import grondag.hard_science.machines.impl.logistics.ChemicalBatteryBlock;
 import grondag.hard_science.machines.impl.logistics.MiddleBusBlock;
 import grondag.hard_science.machines.impl.logistics.ModularTankBlock;
+import grondag.hard_science.machines.impl.logistics.SmartChestBlock;
 import grondag.hard_science.machines.impl.logistics.TopBusBlock;
 import grondag.hard_science.machines.impl.logistics.WaterPumpBlock;
 import grondag.hard_science.machines.impl.processing.MicronizerBlock;
@@ -69,7 +69,7 @@ public class ModBlocks
     public static final Block extension_bus = null;
     public static final Block intermediate_bus = null;
     public static final Block depleted_fluid = null;
-    public static final Block crushinator = null;
+    public static final Block micronizer = null;
     
 //    public static final Block solar_aggregator = null;
     
@@ -195,13 +195,13 @@ public class ModBlocks
         event.getRegistry().register(new BottomBusBlock("bottom_bus"));
         event.getRegistry().register(new MiddleBusBlock("middle_bus"));
         event.getRegistry().register(new TopBusBlock("top_bus"));
-        event.getRegistry().register(new ModularTankBlock("tank_single_wet", 100, 1, ModFluids.PREDICATE_NORMAL_FLUIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_multi_wet", 50, 50, ModFluids.PREDICATE_NORMAL_FLUIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_single_dry", 100, 1, ModFluids.PREDICATE_BULK_SOLIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_multi_dry", 50, 50, ModFluids.PREDICATE_BULK_SOLIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_single_gas", 100, 1, ModFluids.PREDICATE_LIGHT_PRESSURE));
-        event.getRegistry().register(new ModularTankBlock("tank_multi_gas", 50, 50, ModFluids.PREDICATE_LIGHT_PRESSURE));
-        event.getRegistry().register(new ModularTankBlock("tank_single_pressure", 50, 1, ModFluids.PREDICATE_HIGH_PRESSURE));
+        event.getRegistry().register(new ModularTankBlock("tank_single_wet", 100, true, ModFluids.PREDICATE_NORMAL_FLUIDS));
+        event.getRegistry().register(new ModularTankBlock("tank_multi_wet", 50, false, ModFluids.PREDICATE_NORMAL_FLUIDS));
+        event.getRegistry().register(new ModularTankBlock("tank_single_dry", 100, true, ModFluids.PREDICATE_BULK_SOLIDS));
+        event.getRegistry().register(new ModularTankBlock("tank_multi_dry", 50, false, ModFluids.PREDICATE_BULK_SOLIDS));
+        event.getRegistry().register(new ModularTankBlock("tank_single_gas", 100, true, ModFluids.PREDICATE_LIGHT_PRESSURE));
+        event.getRegistry().register(new ModularTankBlock("tank_multi_gas", 50, false, ModFluids.PREDICATE_LIGHT_PRESSURE));
+        event.getRegistry().register(new ModularTankBlock("tank_single_pressure", 50, true, ModFluids.PREDICATE_HIGH_PRESSURE));
         event.getRegistry().register(new WaterPumpBlock("water_pump"));
         event.getRegistry().register(new ChemicalBatteryBlock("chemical_battery"));
         event.getRegistry().register(new MicronizerBlock("micronizer"));

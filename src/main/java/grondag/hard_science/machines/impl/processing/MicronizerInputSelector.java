@@ -87,6 +87,8 @@ public class MicronizerInputSelector
         List<AbstractResourceWithQuantity<StorageTypeStack>> candidates 
         = domain.itemStorage.findQuantityAvailable(MicronizerRecipe.RESOURCE_PREDICATE);
 
+//        domain.processManager.getMinStockingLevel(resource)
+        
         updateBacklogDepth(domain, candidates);
         return candidates;
 

@@ -141,19 +141,20 @@ public enum VolumeUnits
         return new Volume(quantity);
     }
     
+    /** rounds down when going from smaller to larger */
     public static long convertFromTo(long value, VolumeUnits from, VolumeUnits to)
     {
         return value * from.nL / to.nL;
     }
 
-    public static long nL2Liters(long value)
+    public static double nL2Liters(long value)
     {
         return convertFromTo(value, VolumeUnits.NANOLITER, VolumeUnits.LITER);
     }
     
-    public static long nL2Blocks(long value)
+    public static double nL2Blocks(long value)
     {
-        return convertFromTo(value, VolumeUnits.NANOLITER, VolumeUnits.KILOLITER);
+        return value / (double)VolumeUnits.KILOLITER.nL;
     }
     
     public static long blocks2nL(int kL)

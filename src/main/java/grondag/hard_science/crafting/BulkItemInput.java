@@ -26,6 +26,7 @@ import net.minecraft.util.math.MathHelper;
  * Represents conversion from a non-fluid, non-bulk item to a bulk resource.
  *
  */
+@Deprecated
 public abstract class BulkItemInput
 {
     private static final ListMultimap<BulkResource, BulkItemInput> inputs = ArrayListMultimap.create();

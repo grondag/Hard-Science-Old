@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
+import net.minecraft.block.BlockStoneSlab;
+import net.minecraft.block.BlockStoneSlabNew;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -68,15 +70,43 @@ public class ModRecipes
                 MicronizerRecipe.FixedConverter.FULL_BLOCK);
         
         MicronizerRecipe.add(
-                Ingredient.fromItem(Item.getItemFromBlock(Blocks.STONE_SLAB)), 
+                Ingredient.fromStacks(new ItemStack(
+                        Blocks.STONE_SLAB, 1, 
+                        BlockStoneSlab.EnumType.COBBLESTONE.getMetadata())), 
+                ModBulkResources.MICRONIZED_STONE,
+                0.8,
+                MicronizerRecipe.FixedConverter.HALF_BLOCK);
+        
+        MicronizerRecipe.add(
+                Ingredient.fromStacks(new ItemStack(
+                        Blocks.STONE_SLAB, 1, 
+                        BlockStoneSlab.EnumType.SAND.getMetadata())), 
+                ModBulkResources.MICRONIZED_STONE,
+                0.7,
+                MicronizerRecipe.FixedConverter.HALF_BLOCK);
+        
+        MicronizerRecipe.add(
+                Ingredient.fromStacks(new ItemStack(
+                        Blocks.STONE_SLAB, 1, 
+                        BlockStoneSlab.EnumType.SMOOTHBRICK.getMetadata())), 
                 ModBulkResources.MICRONIZED_STONE,
                 1.0,
                 MicronizerRecipe.FixedConverter.HALF_BLOCK);
         
         MicronizerRecipe.add(
-                Ingredient.fromItem(Item.getItemFromBlock(Blocks.STONE_SLAB2)), 
+                Ingredient.fromStacks(new ItemStack(
+                        Blocks.STONE_SLAB, 1, 
+                        BlockStoneSlab.EnumType.STONE.getMetadata())), 
                 ModBulkResources.MICRONIZED_STONE,
                 1.0,
+                MicronizerRecipe.FixedConverter.HALF_BLOCK);
+        
+        MicronizerRecipe.add(
+                Ingredient.fromStacks(new ItemStack(
+                        Blocks.STONE_SLAB2, 1, 
+                        BlockStoneSlabNew.EnumType.RED_SANDSTONE.getMetadata())), 
+                ModBulkResources.MICRONIZED_STONE,
+                0.7,
                 MicronizerRecipe.FixedConverter.HALF_BLOCK);
         
         MicronizerRecipe.add(

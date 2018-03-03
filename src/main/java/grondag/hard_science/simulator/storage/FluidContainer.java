@@ -119,7 +119,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
             return LogisticsService.FLUID_SERVICE.executor.submit( () ->
             {
                 // Prevent fractional liters.
-                long requested = VolumeUnits.liters2nL(VolumeUnits.nL2Liters(this.availableCapacity()));
+                long requested = VolumeUnits.liters2nL((long) VolumeUnits.nL2Liters(this.availableCapacity()));
                 requested = Math.min(requested, VolumeUnits.liters2nL(stack.amount));
                 long filled = this.add(resourceIn, requested, !doFill, null);
                 

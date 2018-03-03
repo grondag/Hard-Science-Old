@@ -7,22 +7,33 @@ import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.ItemContainer;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class SmartChestMachine extends AbstractSimpleMachine
+public abstract class SmartChestMachine extends AbstractSimpleMachine
 {
     protected final ItemContainer itemStorage;
     
-    public SmartChestMachine(boolean dedicated)
+    protected SmartChestMachine()
     {
         super();
         this.itemStorage = new ItemContainer(this, ContainerUsage.STORAGE, 
-                dedicated ? 1 : Integer.MAX_VALUE);
-        this.itemStorage.setContentPredicate( 
-                r -> r != null 
-                && !(((ItemResource)r).getItem() == ModItems.smart_chest 
-                        && ((ItemResource)r).hasTagCompound()));
-        this.itemStorage.setCapacity(dedicated ? 4000 : 2000);
+                this.dedicated() ? 1 : Integer.MAX_VALUE);
+        this.itemStorage.setContentPredicate( r -> 
+        {
+            if(r == null || !(r instanceof ItemResource)) return false;
+            
+            ItemResource ir = (ItemResource)r;
+            
+            return !ir.hasTagCompound() ||
+                    !(
+                        ir.getItem() == ModItems.smart_chest
+                        || ir.getItem() == ModItems.smart_bin
+                    );
+        });
+               
+        this.itemStorage.setCapacity(this.dedicated() ? 4000 : 2000);
     }
 
+    protected abstract boolean dedicated();
+    
     @Override
     public boolean hasOnOff()
     {
@@ -67,5 +78,17 @@ public class SmartChestMachine extends AbstractSimpleMachine
     public ItemContainer itemStorage()
     {
         return this.itemStorage;
+    }
+    
+    public static class Flexible extends SmartChestMachine
+    {
+        @Override
+        protected boolean dedicated() { return false; }
+    }
+    
+    public static class Dedicated extends SmartChestMachine
+    {
+        @Override
+        protected boolean dedicated() { return true; }
     }
 }
