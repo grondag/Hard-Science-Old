@@ -11,6 +11,7 @@ import grondag.hard_science.superblock.placement.PlacementItemFeature;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -153,6 +154,10 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     
            if (!block.isReplaceable(worldIn, pos))
            {
+               if(currentState.getBlockFaceShape(worldIn, pos, facing) 
+                       == BlockFaceShape.UNDEFINED && !playerIn.isSneaking())
+                   return EnumActionResult.FAIL;
+               
                pos = pos.offset(facing);
            }
     

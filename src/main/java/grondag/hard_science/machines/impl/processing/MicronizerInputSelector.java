@@ -86,7 +86,7 @@ public class MicronizerInputSelector implements IDomainMember
         
         // find all inputs
         List<AbstractResourceWithQuantity<StorageTypeStack>> candidates 
-            = domain.itemStorage.findQuantityAvailable(MicronizerRecipe.INPUT_RESOURCE_PREDICATE);
+            = domain.itemStorage.findEstimatedAvailable(MicronizerRecipe.INPUT_RESOURCE_PREDICATE);
         
         ArrayList<BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>>> allInputs  = new ArrayList<>();
         

@@ -16,6 +16,7 @@ import grondag.hard_science.superblock.placement.BuildManager;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -51,6 +52,15 @@ public class SingleBuilder extends SingleStackBuilder
         }
         else
         {
+            // prevent placement/preview on top of missing faces
+            // unless player is sneaking
+            if(!player.isSneaking())
+            {
+                IBlockState onState = this.player.world.getBlockState(pPos.onPos);
+                if(onState.getBlockFaceShape(this.player.world, pPos.onPos, pPos.onFace) 
+                        == BlockFaceShape.UNDEFINED) return false;
+            }
+            
             if(WorldHelper.isBlockReplaceable(this.player.world, this.pPos.inPos, false))
             {
                 this.outputStack = PlacementHandler.cubicPlacementStack(this);
