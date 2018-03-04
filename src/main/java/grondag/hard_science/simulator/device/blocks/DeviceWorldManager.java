@@ -104,5 +104,9 @@ public class DeviceWorldManager
         }
     }
     
+    public void clear()
+    {
+        this.worldBlocks.clear();
+    }
    
 }

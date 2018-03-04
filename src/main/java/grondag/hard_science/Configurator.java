@@ -540,6 +540,7 @@ public class Configurator
             "If resource level reaches maximum (because of byproducts),",
             "production stops unless the resource can be vented/voided.",
             "Fluid resources are given in liters (equivalent to millibucket).",
+            "Max priority value is 32K, 0 means no production.",
             "Order is priority, minStockLevel, maxStockLevel, resource..."})
         public String[] resourceDefaults = 
         {

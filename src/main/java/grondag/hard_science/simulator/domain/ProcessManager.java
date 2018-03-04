@@ -11,6 +11,7 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.MathHelper;
 
 public class ProcessManager implements IReadWriteNBT, IDomainMember
 {
@@ -18,9 +19,8 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
     
     private final HashMap<IResource<?>, ProcessInfo> infos = new HashMap<>();
     
-    public static class ProcessInfo
+    public class ProcessInfo
     {
-        
         private final IResource<?> resource;
         private long minStockLevel;
         private long maxStockLevel;
@@ -39,45 +39,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
             this.priority = tag.getInteger(ModNBTTag.PROCESS_STOCKING_PRIORITY);
         }
         
-        /**
-         * Used for setting up default config file.
-         * Note that fluid amounts are in liters.
-         */
-        public static String writeDefaultCSV(
-                IResource<?> resource, 
-                int priority,
-                long minStockLevel,
-                long maxStockLevel)
-        {
-            return  priority + "," +
-                    minStockLevel + "," +
-                    maxStockLevel + "," +
-                    StorageType.toCSVWithType(resource);
-        }
-        
-        private static ProcessInfo readDefaultCSV(String csv)
-        {
-            try
-            {
-                String args[] = csv.split(",");
-                if(args.length > 3)
-                {
-                    int myLen = args[0].length() + args[1].length()
-                            + args[2].length() + 3;
-                    IResource<?> res = StorageType.fromCSVWithType(csv.substring(myLen));
-                    ProcessInfo result = new ProcessInfo(res);
-                    result.priority = Integer.parseInt(args[0]);
-                    result.minStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[1]));
-                    result.maxStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[2]));
-                    return result;
-                }
-            }
-            catch(Exception e)
-            {
-                Log.error("Unable to parse resource processing configuration", e);
-            }
-            return null;
-        }
+
         
         private NBTTagCompound toNBT()
         {
@@ -91,8 +53,68 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         public long minStockLevel() { return this.minStockLevel; }
         public long maxStockLevel() { return this.maxStockLevel; }
         public int priority() { return this.priority; }
+        
+        
+        /** max less min, can be zero */
+        public long stockIntervalSize() { return this.maxStockLevel - this.minStockLevel; }
+        
+        /**
+         * Returns the difference between resource level and min stocking level.
+         * Value is not fully reliable because not limited to storage service thread.
+         * Returns 0 if at or above mininum stock level.
+         */
+        public long demand()
+        {
+            if(this.priority == 0 || this.minStockLevel <= 0) return 0;
+            
+            return Math.max(
+                    0, 
+                    this.minStockLevel 
+                        - domain.getStorageManager(resource.storageType())
+                        .getEstimatedAvailable(resource)); 
+        }
     }
     
+    
+    /**
+     * Used for setting up default config file.
+     * Note that fluid amounts are in liters.
+     */
+    public static String writeDefaultCSV(
+            IResource<?> resource, 
+            int priority,
+            long minStockLevel,
+            long maxStockLevel)
+    {
+        return  priority + "," +
+                minStockLevel + "," +
+                maxStockLevel + "," +
+                StorageType.toCSVWithType(resource);
+    }
+    
+    private ProcessInfo readDefaultCSV(String csv)
+    {
+        try
+        {
+            String args[] = csv.split(",");
+            if(args.length > 3)
+            {
+                int myLen = args[0].length() + args[1].length()
+                        + args[2].length() + 3;
+                IResource<?> res = StorageType.fromCSVWithType(csv.substring(myLen));
+                ProcessInfo result = new ProcessInfo(res);
+                result.priority = Math.min(Short.MAX_VALUE, Integer.parseInt(args[0]));
+                result.minStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[1]));
+                result.maxStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[2]));
+                return result;
+            }
+        }
+        catch(Exception e)
+        {
+            Log.error("Unable to parse resource processing configuration", e);
+        }
+        return null;
+    }
     
     ProcessManager(Domain domain)
     {
@@ -101,7 +123,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         //load defaults
         for(String csv : Configurator.PROCESSING.resourceDefaults)
         {
-            ProcessInfo info = ProcessInfo.readDefaultCSV(csv);
+            ProcessInfo info = readDefaultCSV(csv);
             if(info != null) this.infos.put(info.resource, info);
         }
         
@@ -124,6 +146,12 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         this.domain.setDirty();
     }
     
+    public long getMinStockLevel(IResource<?> resource)
+    {
+        ProcessInfo pi = this.infos.get(resource);
+        return pi == null ? 0 : pi.minStockLevel;
+    }
+    
     public void setMaxStockLevel(IResource<?> resource, long level)
     {
         ProcessInfo pi = this.infos.get(resource);
@@ -136,6 +164,12 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         this.domain.setDirty();
     }
     
+    public long getMaxStockLevel(IResource<?> resource)
+    {
+        ProcessInfo pi = this.infos.get(resource);
+        return pi == null ? 0 : pi.maxStockLevel;
+    }
+    
     public void setStockingPriority(IResource<?> resource, int priority)
     {
         ProcessInfo pi = this.infos.get(resource);
@@ -144,8 +178,14 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
             pi = new ProcessInfo(resource);
             this.infos.put(resource, pi);
         }
-        pi.priority = priority;
+        pi.priority = MathHelper.clamp(priority, 0, Short.MAX_VALUE);
         this.domain.setDirty();
+    }
+    
+    public int getStockingPriority(IResource<?> resource)
+    {
+        ProcessInfo pi = this.infos.get(resource);
+        return pi == null ? 0 : pi.priority;
     }
     
     @Override

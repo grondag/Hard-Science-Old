@@ -185,6 +185,12 @@ public class MicronizerRecipe
         return this.converter.apply(inputStack) * inputStack.getCount();
     }
     
+    public int inputQtyForOutputQty(ItemStack inputStack, long outputDemand)
+    {
+        long outputEach = outputForStack(inputStack);
+        return MathHelper.ceil(outputDemand / (double)outputEach);
+    }
+    
     /**
      * Total energy consumption that will be needed 
      * to process the given input stack, in joules.
@@ -197,7 +203,7 @@ public class MicronizerRecipe
                         * this.powerFactor
                         * JOULES_PER_STONE_TONNE);
     }
-    
+
     public GenericRecipe displayForStack(ItemStack inputStack)
     {
         return new GenericRecipe(

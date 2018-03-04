@@ -164,11 +164,21 @@ public class StorageManager<T extends StorageType<T>>
         return stored == null ? 0 : stored.quantityStored();
     }
     
-    public long getQuantityAvailable(IResource<T> resource)
+    public long getQuantityAvailable(IResource<?> resource)
     {
         assert this.confirmServiceThread() : "Storage manager access outside service thread.";
-
-        StorageResourceManager<T> stored = this.slots.getByKey1(resource);
+        return getEstimatedAvailable(resource);
+    }
+    
+    /**
+     * Like {@link #getQuantityAvailable(IResource)} but does not
+     * have to be called on service thread.  Result is not reliable
+     * for transport planning purposes.
+     */
+    public long getEstimatedAvailable(IResource<?> resource)
+    {
+        @SuppressWarnings("unchecked")
+        StorageResourceManager<T> stored = this.slots.getByKey1((IResource<T>) resource);
         return stored == null ? 0 : stored.quantityAvailable();
     }
     
@@ -180,10 +190,13 @@ public class StorageManager<T extends StorageType<T>>
         return stored == null ? 0 : stored.quantityAllocated();
     }
     
-    public List<AbstractResourceWithQuantity<T>> findQuantityAvailable(Predicate<IResource<T>> predicate)
+    /**
+     * Like {@link #findQuantityAvailable(Predicate)} but can be called
+     * from any thread.  Result may not be fully consistent and should
+     * not be used for transport planning.
+     */
+    public List<AbstractResourceWithQuantity<T>> findEstimatedAvailable(Predicate<IResource<T>> predicate)
     {
-        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
-
         ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
         for(StorageResourceManager<T> entry : this.slots)
@@ -195,6 +208,12 @@ public class StorageManager<T extends StorageType<T>>
         }
         
         return builder.build();
+    }
+    
+    public List<AbstractResourceWithQuantity<T>> findQuantityAvailable(Predicate<IResource<T>> predicate)
+    {
+        assert this.confirmServiceThread() : "Storage manager access outside service thread.";
+        return this.findEstimatedAvailable(predicate);
     }
     
     public List<AbstractResourceWithQuantity<T>> findQuantityStored(Predicate<IResource<T>> predicate)

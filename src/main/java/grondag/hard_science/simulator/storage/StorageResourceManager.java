@@ -239,25 +239,25 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
     /**
      * Does not include allocated amounts.
      */
-    public synchronized int quantityAvailable()
+    public synchronized long quantityAvailable()
     {
-        return (int) Math.max(0, this.quantityStored - this.quantityAllocated);
+        return Math.max(0, this.quantityStored - this.quantityAllocated);
     }
     
     /**
      * Includes allocated amounts.
      */
-    public synchronized int quantityStored()
+    public synchronized long quantityStored()
     {
-        return (int) this.quantityStored;
+        return this.quantityStored;
     }
     
     /**
      * Amount of stored resource that is allocated to procurement tasks.
      */
-    public synchronized int quantityAllocated()
+    public synchronized long quantityAllocated()
     {
-        return (int) this.quantityAllocated;
+        return this.quantityAllocated;
     }
     
     /**

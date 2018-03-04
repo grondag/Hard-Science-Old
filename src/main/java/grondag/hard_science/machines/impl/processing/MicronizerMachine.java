@@ -161,7 +161,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
         
         if((Simulator.instance().getTick() & 0x1F) == 0x1F)
         {
-            this.setCurrentBacklog(MicronizerInputSelector.estimatedBacklogDepth(this));
+            this.setCurrentBacklog((int) MicronizerInputSelector.estimatedBacklogDepth(this));
         }
         
         // if we don't have power to do basic control functions

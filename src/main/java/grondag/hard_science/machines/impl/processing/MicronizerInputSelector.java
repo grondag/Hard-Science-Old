@@ -1,20 +1,25 @@
 package grondag.hard_science.machines.impl.processing;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import com.google.common.collect.ImmutableList;
+
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.domain.Domain;
+import grondag.hard_science.simulator.domain.ProcessManager.ProcessInfo;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.fobs.SimpleProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.AbstractObject2LongMap.BasicEntry;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 /**
  * Answers the question:  if I have machine that
@@ -26,92 +31,95 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
  * Process resources that will satisfy the largest number of requests.
  * Don't process a resource if an immediate output has reached max backlog or storage is full.
  *
- * TODO: This is a (mostly) mock implementation
  *
  */
 public class MicronizerInputSelector
 {
-    /**
-     * Stores mole fraction contribution of an input resources to producing
-     * bulk processing outputs.
-     */
-    //    private static final Key2List<Triple<IResource<?>, FluidResource, Double>, IResource<?>, FluidResource> weights 
-    //    = new Key2List.Builder<Triple<IResource<?>, FluidResource, Double>, IResource<?>, FluidResource>().
-    //          withKey1Map(Triple::getLeft).
-    //          withKey2Map(Triple::getMiddle).
-    //          build();
-
-    /** cache the per-domain input count whenver it is looked up */
-    private static final Object2IntOpenHashMap<Domain> backlogs
-    = new Object2IntOpenHashMap<>();
-
-    /**
-     * Last tick in which any backlog estimate was updated
-     */
-    private static int lastTick = 0;
-
-    /**
-     * Domains that have already had backlog estimates updated in the current tick.
-     */
-    private static SimpleUnorderedArrayList<Domain> checkedDomains 
-    = new SimpleUnorderedArrayList<>();
-
-    /**
-     * Do not access directly, use {@link #endProducts()}
-     */
-    //    private static ImmutableList<IResource<?>> endProducts;
-
-    //    static
-    //    {
-    //        // find all crusher inputs
-    //        
-    //        // for each input, identify all managed bulk resources that can be derived
-    ////        endProducts = ImmutableList.of();
-    //        
-    //        // for each derived output, compute the contributing mole fraction of the input
-    //        weights.add(Triple.of(
-    //                ItemResource.fromItem(Item.getItemFromBlock(Blocks.COBBLESTONE)), 
-    //                ModBulkResources.CALCIUM.fluidResource(), 
-    //                0.05));
-    //
-    //    }
+    /** cache the per-domain input count whenever it is looked up */
+    private static final Object2LongOpenHashMap<Domain> backlogs
+    = new Object2LongOpenHashMap<>();
 
 
     /**
-     * Finds best inputs for micronizing.
-     * Items are in order of preference.
-     * Must be called from item storage service thread due to calls it makes.
+     * Finds best inputs for micronizing, and an upper bound
+     * for how much of it should be processed.  Upper bound
+     * because could exist multiple items that satisfy the need.
+     * 
+     * TODO: Use request priority as an input - right now only considers
+     *  domain stocking levels and priorities
      */
     private static List<AbstractResourceWithQuantity<StorageTypeStack>> findBestInputs(Domain domain)
     {
+        // find all inputs
         List<AbstractResourceWithQuantity<StorageTypeStack>> candidates 
         = domain.itemStorage.findQuantityAvailable(MicronizerRecipe.RESOURCE_PREDICATE);
 
-//        domain.processManager.getMinStockingLevel(resource)
+        long totalNeed = 0;
         
-        updateBacklogDepth(domain, candidates);
-        return candidates;
-
+        ArrayList<BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>>> allInputs  = new ArrayList<>();
+        
+        // for each input, see if outputs are needed and prioritize
+        for(AbstractResourceWithQuantity<StorageTypeStack> c : candidates)
+        {
+            ItemResource inputRes = (ItemResource)c.resource();
+            
+            MicronizerRecipe recipe = MicronizerRecipe.getForInput(inputRes);
+            if(recipe == null) continue;
+            
+            ProcessInfo outputInfo = domain.processManager.getInfo(recipe.outputResource().fluidResource());
+            if(outputInfo == null) continue;
+            
+            long outputDemand = outputInfo.demand();
+            if(outputDemand == 0) continue;
+            
+            long outputFactor = outputInfo.minStockLevel() > 0
+                    ? Short.MAX_VALUE - (outputDemand * Short.MAX_VALUE / outputInfo.minStockLevel())
+                    : 0;
+                    
+            int inputDemand = recipe.inputQtyForOutputQty(inputRes.sampleItemStack(), outputDemand);
+            totalNeed += inputDemand;
+            
+            int inputFactor = 0;
+            ProcessInfo inputInfo = domain.processManager.getInfo(inputRes);
+            if(inputInfo != null)
+            {
+                inputFactor = (Short.MAX_VALUE - inputInfo.priority());
+                
+                if(inputInfo.minStockLevel() > 0)
+                {
+                    inputFactor |= (Short.MAX_VALUE
+                        - (inputInfo.demand() * Short.MAX_VALUE / outputInfo.minStockLevel())) 
+                            << 8;
+                }
+            }
+            
+            // rank value components from most significant to least: 
+            //  output priority (inverted), 
+            //  output stocking factor (low = more available)
+            //  input availability/value factor (low = less available/valuable)
+            long ranking = ((Short.MAX_VALUE - outputInfo.priority()) << 24)
+                    | (outputFactor << 16) | inputFactor;
+                    
+            allInputs.add(new BasicEntry<>(inputRes.withQuantity(inputDemand), ranking));
+        }
+        
+        backlogs.put(domain, totalNeed);
+        
+        return allInputs.stream()
+                .sorted(new Comparator<BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>>>()
+                {
+                    @Override
+                    public int compare(BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>> o1, BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>> o2)
+                    {
+                        return Long.compare(o1.getLongValue(), o2.getLongValue());
+                    }
+                })
+                .map(p -> p.getKey())
+                .collect(ImmutableList.toImmutableList());
     }
 
 
-    private static void updateBacklogDepth(Domain domain, List<AbstractResourceWithQuantity<StorageTypeStack>> candidates)
-    {
-        if(Simulator.instance().getTick() != lastTick)
-        {
-            lastTick = Simulator.instance().getTick();
-            checkedDomains.clear();
-        }
-
-        if(checkedDomains.contains(domain)) return;
-
-        int result = 0;
-        for(AbstractResourceWithQuantity<StorageTypeStack> d : candidates)
-        {
-            result += (int)d.getQuantity();
-        }
-        backlogs.put(domain, result);
-    }
+    
 
     /**
      * 
@@ -119,9 +127,9 @@ public class MicronizerInputSelector
      * up with demand in the given domain based on input material
      * available.
      */
-    public static int estimatedBacklogDepth(MicronizerMachine micronizerMachine)
+    public static long estimatedBacklogDepth(MicronizerMachine micronizerMachine)
     {
-        return backlogs.getInt(micronizerMachine.getDomain());
+        return backlogs.getLong(micronizerMachine.getDomain());
     }
 
     public static Future<NewProcurementTask<StorageTypeStack>> requestInput(MicronizerMachine machine)

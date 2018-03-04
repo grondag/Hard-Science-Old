@@ -263,6 +263,7 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
     public void clear()
     {
         this.devices.clear();
+        this.deviceBlocks.clear();
     }
     
     /**
@@ -306,7 +307,7 @@ public class DeviceManager implements IPersistenceNode, ISimulationTickable
                     
                     if (resourcelocation == null)
                     {
-                        throw new RuntimeException(device.getClass() + " is missing a mapping! This is a bug!");
+                        Log.error("Error saving device state because " + device.getClass() + " is missing a mapping");
                     }
                     else
                     {
