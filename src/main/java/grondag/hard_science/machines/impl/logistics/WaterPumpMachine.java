@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.impl.logistics;
 
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
-import grondag.hard_science.machines.matbuffer.BufferManager2;
+import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.StorageType;
 
@@ -24,9 +24,9 @@ public class WaterPumpMachine extends AbstractSimpleMachine
         return true;
     }
 
-    protected BufferManager2 createBufferManager()
+    protected BufferManager createBufferManager()
     {
-        return new BufferManager2(
+        return new BufferManager(
                 this, 
                 0L, 
                 StorageType.ITEM.MATCH_NONE, 

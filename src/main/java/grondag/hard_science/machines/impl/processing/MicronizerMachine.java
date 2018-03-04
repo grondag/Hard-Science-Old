@@ -9,7 +9,7 @@ import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.energy.MachinePower;
-import grondag.hard_science.machines.matbuffer.BufferManager2;
+import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.matter.VolumeUnits;
@@ -73,9 +73,9 @@ public class MicronizerMachine extends AbstractSimpleMachine
     }
     
     @Override
-    protected BufferManager2 createBufferManager()
+    protected BufferManager createBufferManager()
     {
-        BufferManager2 result = new BufferManager2(
+        BufferManager result = new BufferManager(
                 this, 
                 64L, 
                 MicronizerRecipe.RESOURCE_PREDICATE, 

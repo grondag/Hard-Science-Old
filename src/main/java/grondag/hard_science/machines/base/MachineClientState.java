@@ -2,7 +2,7 @@ package grondag.hard_science.machines.base;
 
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.machines.energy.DeviceEnergyInfo;
-import grondag.hard_science.machines.matbuffer.BufferManager2;
+import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
@@ -58,7 +58,7 @@ public class MachineClientState
     /**
      * Used for client rendering - will only be updated as needed.
      */
-    public BufferManager2 bufferManager;
+    public BufferManager bufferManager;
     
     /**
      * Used for client rendering - will only be updated as needed.

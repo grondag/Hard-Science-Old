@@ -222,7 +222,7 @@ public abstract class AbstractMachine extends AbstractDevice
     
 //    protected void restock()
 //    {
-//        BufferManager2 bufferManager = this.getBufferManager();
+//        BufferManager bufferManager = this.getBufferManager();
 //        
 //        if(!bufferManager.canRestockAny() || this.machineTE == null) return;
 //        

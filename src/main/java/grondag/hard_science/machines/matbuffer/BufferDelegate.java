@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.matbuffer;
 
-public class BufferDelegate2
+public class BufferDelegate
 {
     /**
      * Values 0-1.

@@ -4,20 +4,20 @@ import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.matbuffer.BufferDelegate2;
-import grondag.hard_science.machines.matbuffer.BufferManager2;
+import grondag.hard_science.machines.matbuffer.BufferDelegate;
+import grondag.hard_science.machines.matbuffer.BufferManager;
 import net.minecraft.client.Minecraft;
 
 public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGauge, RadialRenderBounds>
 {
     private RadialGaugeSpec spec;
-    private final BufferDelegate2 buffer;
+    private final BufferDelegate buffer;
     
     public MachineBufferGauge(MachineTileEntity tileEntity, RadialGaugeSpec spec)
     {
         super(tileEntity, spec);
         this.spec = spec;
-        BufferManager2 mbm = tileEntity.clientState().bufferManager;
+        BufferManager mbm = tileEntity.clientState().bufferManager;
         if(mbm == null || spec.bufferIndex >= mbm.bufferCount()) 
         {
             Log.warn("Machine buffer gauge GUI could not be initialized.  Bad buffer of buffer index.");

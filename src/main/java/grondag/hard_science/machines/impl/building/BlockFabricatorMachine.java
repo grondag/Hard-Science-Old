@@ -1,17 +1,11 @@
 package grondag.hard_science.machines.impl.building;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.energy.PolyethyleneFuelCell;
-import grondag.hard_science.machines.matbuffer.BufferManager2;
-import grondag.hard_science.machines.matbuffer.VolumetricBufferSpec;
-import grondag.hard_science.machines.matbuffer.VolumetricIngredient;
-import grondag.hard_science.machines.matbuffer.VolumetricIngredientList;
+import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.matter.MatterPackaging;
-import grondag.hard_science.matter.MatterUnits;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
@@ -34,30 +28,8 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
 //    private static final int JOULES_PER_TICK_FABRICATING = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_FABRICATION));
 //    private static final long TICKS_PER_FULL_BLOCK = 40;
 
-    private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.HDPE);
-    
-    private static final VolumetricIngredientList FILLER_INGREDIENTS = new VolumetricIngredientList(
-            MatterPackaging.RAW_MINERAL_DUST,
-            MatterPackaging.DEPLETED_MINERAL_DUST,
-            new VolumetricIngredient("sand", MatterUnits.nL_ONE_BLOCK),
-            new VolumetricIngredient("red_sand", MatterUnits.nL_ONE_BLOCK));
-    
-    private static final VolumetricIngredientList RESIN_A_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.CONSTRUCTION_RESIN_A);
-    
-    private static final VolumetricIngredientList RESIN_B_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.CONSTRUCTION_RESIN_B);
-    
-    private static final VolumetricIngredientList NANOLIGHT_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.NANO_LIGHTS);
-    
-    private static final VolumetricIngredientList CYAN_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.DYE_CYAN);
-    
-    private static final VolumetricIngredientList MAGENTA_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.DYE_MAGENTA);
-    
-    private static final VolumetricIngredientList YELLOW_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.DYE_YELLOW);
-    
-    private static final VolumetricIngredientList TiO2_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.TIO2);
-    
-//    private static final VolumetricIngredientList CARBON_INGREDIENTS = new VolumetricIngredientList(MatterPackaging.CARBON_BLACK);
 
+    // TODO: REMOVE
     // so TESR knows which buffer to render for each gauge
     public static final int BUFFER_INDEX_HDPE = 0;
     public static final int BUFFER_INDEX_FILLER = BUFFER_INDEX_HDPE + 1;
@@ -68,21 +40,6 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     public static final int BUFFER_INDEX_MAGENTA = BUFFER_INDEX_CYAN + 1;
     public static final int BUFFER_INDEX_YELLOW = BUFFER_INDEX_MAGENTA + 1;
     public static final int BUFFER_INDEX_TIO2 = BUFFER_INDEX_YELLOW + 1;
-    
-    public static final VolumetricBufferSpec[] BUFFER_SPECS = new VolumetricBufferSpec[BUFFER_INDEX_TIO2 + 1];
-    
-    static
-    {
-        BUFFER_SPECS[BUFFER_INDEX_HDPE] = new VolumetricBufferSpec(HDPE_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE, "hdpe");
-        BUFFER_SPECS[BUFFER_INDEX_FILLER] = new VolumetricBufferSpec(FILLER_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER, "filler");
-        BUFFER_SPECS[BUFFER_INDEX_RESIN_A] = new VolumetricBufferSpec(RESIN_A_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A, "resin_a");
-        BUFFER_SPECS[BUFFER_INDEX_RESIN_B] = new VolumetricBufferSpec(RESIN_B_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B, "resin_b");
-        BUFFER_SPECS[BUFFER_INDEX_NANOLIGHT] = new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS, "nanolights");
-        BUFFER_SPECS[BUFFER_INDEX_CYAN] = new VolumetricBufferSpec(CYAN_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN, "cyan");
-        BUFFER_SPECS[BUFFER_INDEX_MAGENTA] = new VolumetricBufferSpec(MAGENTA_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA, "magenta");
-        BUFFER_SPECS[BUFFER_INDEX_YELLOW] = new VolumetricBufferSpec(YELLOW_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW, "yellow");
-        BUFFER_SPECS[BUFFER_INDEX_TIO2] = new VolumetricBufferSpec(TiO2_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2, "tio2");
-    }
     
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
@@ -98,20 +55,20 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     BlockFabricationTask task = null;
     
     // Buffer setup - all persisted
-//    private final BufferDelegate2 bufferFiller;
-//    private final BufferDelegate2 bufferResinA;
-//    private final BufferDelegate2 bufferResinB;
-//    private final BufferDelegate2 bufferNanoLights;
-//    private final BufferDelegate2 bufferCyan;
-//    private final BufferDelegate2 bufferMagenta;
-//    private final BufferDelegate2 bufferYellow;
-//    private final BufferDelegate2 bufferTiO2;   
+//    private final BufferDelegate bufferFiller;
+//    private final BufferDelegate bufferResinA;
+//    private final BufferDelegate bufferResinB;
+//    private final BufferDelegate bufferNanoLights;
+//    private final BufferDelegate bufferCyan;
+//    private final BufferDelegate bufferMagenta;
+//    private final BufferDelegate bufferYellow;
+//    private final BufferDelegate bufferTiO2;   
     
     public BlockFabricatorMachine()
     {
         super();
         // note that order has to match array declaration
-//        BufferManager2 bufferManager = this.getBufferManager();
+//        BufferManager bufferManager = this.getBufferManager();
 //        this.bufferFiller = bufferManager.getBuffer(BUFFER_INDEX_FILLER);
 //        this.bufferResinA = bufferManager.getBuffer(BUFFER_INDEX_RESIN_A);
 //        this.bufferResinB = bufferManager.getBuffer(BUFFER_INDEX_RESIN_B);
@@ -124,9 +81,9 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     }
     
     @Override
-    protected BufferManager2 createBufferManager()
+    protected BufferManager createBufferManager()
     {
-        return new BufferManager2(
+        return new BufferManager(
                 this, 
                 64L, 
                 StorageType.ITEM.MATCH_ANY, 

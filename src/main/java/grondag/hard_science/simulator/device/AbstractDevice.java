@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
-import grondag.hard_science.machines.matbuffer.BufferManager2;
+import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
@@ -51,7 +51,7 @@ public abstract class AbstractDevice implements IDevice
      * Null (default) means disabled. 
      */
     @Nullable
-    private BufferManager2 bufferManager = null;
+    private BufferManager bufferManager = null;
     
     /**
      * Energy manager for this device.
@@ -96,9 +96,9 @@ public abstract class AbstractDevice implements IDevice
      * May be used on client to create client-side delegate.
      */
     @Nullable
-    protected BufferManager2 createBufferManager()
+    protected BufferManager createBufferManager()
     {
-        return new BufferManager2(
+        return new BufferManager(
                 this, 
                 0L, 
                 StorageType.ITEM.MATCH_NONE, 
@@ -111,7 +111,7 @@ public abstract class AbstractDevice implements IDevice
 
     @Override
     @Nullable
-    public final BufferManager2 getBufferManager()
+    public final BufferManager getBufferManager()
     {
         return this.bufferManager;
     }
