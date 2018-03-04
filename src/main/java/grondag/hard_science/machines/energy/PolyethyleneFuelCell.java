@@ -76,7 +76,7 @@ public class PolyethyleneFuelCell extends AbstractGenerator
     @Override
     protected long generateImplementation(long maxOutput, boolean allowPartial, boolean simulate)
     {
-        FluidContainer fuelBuffer = this.device().getBufferManager().bufferHDPE();
+        FluidContainer fuelBuffer = this.device().getBufferManager().fluidInput();
         
         if(fuelBuffer == null) return 0;
         
@@ -88,7 +88,7 @@ public class PolyethyleneFuelCell extends AbstractGenerator
         
         if(fuel == 0)
         {
-            if(!simulate) fuelBuffer.blame();
+            if(!simulate) fuelBuffer.blame(ModBulkResources.HDPE.fluidResource());
             return 0;
         }
         

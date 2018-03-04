@@ -49,7 +49,8 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
      * Make this something other than the dummy regulator during
      * constructor if you want limits or accounting.
      */
-    protected ThroughputRegulator regulator = ThroughputRegulator.DUMMY;
+    @SuppressWarnings("unchecked")
+    protected ThroughputRegulator<T> regulator = ThroughputRegulator.DUMMY;
     
     /**
      * All unique resources contained in this container
@@ -154,13 +155,13 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
     }
     
     @Override
-    public ThroughputRegulator getRegulator()
+    public ThroughputRegulator<T> getRegulator()
     {
         return this.regulator;
     }
     
     @Override
-    public void setRegulator(ThroughputRegulator regulator)
+    public void setRegulator(ThroughputRegulator<T> regulator)
     {
         this.regulator = regulator;
     }

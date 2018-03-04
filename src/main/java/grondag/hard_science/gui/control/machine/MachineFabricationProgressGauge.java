@@ -26,7 +26,7 @@ public class MachineFabricationProgressGauge extends AbstractMachineControl<Mach
             key = "machine.fabrication_progress";
         }
         else if(this.tileEntity.clientState().controlState.getMachineState() == MachineState.THINKING 
-                && this.tileEntity.clientState().bufferManager.hasFailureCauseClientSideOnly())
+                && this.tileEntity.clientState().bufferInfo.hasFailureCause())
         {
             key = "machine.fabrication_shortage";
         }

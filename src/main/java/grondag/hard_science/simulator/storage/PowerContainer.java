@@ -30,7 +30,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     
     private void configureRegulator()
     {
-        this.setRegulator( new ThroughputRegulator.Limited(
+        this.setRegulator( new ThroughputRegulator.Limited<>(
                 chemistry.maxChargeJoulesPerTick(this.getCapacity()),
                 chemistry.maxDischargeJoulesPerTick(this.getCapacity())));
     }

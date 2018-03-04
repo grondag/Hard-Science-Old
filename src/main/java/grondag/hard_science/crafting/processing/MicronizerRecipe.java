@@ -19,6 +19,7 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.IResourcePredicate;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.PowerResource;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
@@ -86,12 +87,13 @@ public class MicronizerRecipe
         return conversions.getAllByKey2(output);
     }
     
-    public static final Predicate<ItemStack> STACK_PREDICATE;
-    public static final IResourcePredicate<StorageTypeStack> RESOURCE_PREDICATE;
+    public static final Predicate<ItemStack> INPUT_STACK_PREDICATE;
+    public static final IResourcePredicate<StorageTypeStack> INPUT_RESOURCE_PREDICATE;
+    public static final IResourcePredicate<StorageTypeFluid> OUTPUT_RESOURCE_PREDICATE;
     
     static
     {
-        STACK_PREDICATE = new Predicate<ItemStack>() 
+        INPUT_STACK_PREDICATE = new Predicate<ItemStack>() 
         {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
@@ -105,7 +107,7 @@ public class MicronizerRecipe
             }
         };
         
-        RESOURCE_PREDICATE = new IResourcePredicate<StorageTypeStack>() 
+        INPUT_RESOURCE_PREDICATE = new IResourcePredicate<StorageTypeStack>() 
         {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
@@ -118,6 +120,19 @@ public class MicronizerRecipe
                     if(p.test(stack)) return true;
                 }
                 
+                return false;
+            }
+        };
+        
+        OUTPUT_RESOURCE_PREDICATE = new IResourcePredicate<StorageTypeFluid>() 
+        {
+            @Override
+            public boolean test(IResource<StorageTypeFluid> t)
+            {
+                for(BulkResource b : allOutputs())
+                {
+                    if(b.fluidResource().isResourceEqual(t)) return true;
+                }
                 return false;
             }
         };

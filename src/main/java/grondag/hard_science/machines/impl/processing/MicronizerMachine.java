@@ -11,7 +11,6 @@ import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
@@ -78,12 +77,11 @@ public class MicronizerMachine extends AbstractSimpleMachine
         BufferManager result = new BufferManager(
                 this, 
                 64L, 
-                MicronizerRecipe.RESOURCE_PREDICATE, 
+                MicronizerRecipe.INPUT_RESOURCE_PREDICATE, 
                 64L, 
                 0, 
                 StorageType.FLUID.MATCH_NONE, 
                 BULK_BUFFER_SIZE);
-        result.itemInput().setRegulator(new ThroughputRegulator.Tracking());
         return result;
     }
 
@@ -161,7 +159,8 @@ public class MicronizerMachine extends AbstractSimpleMachine
         
         if((Simulator.instance().getTick() & 0x1F) == 0x1F)
         {
-            this.setCurrentBacklog((int) MicronizerInputSelector.estimatedBacklogDepth(this));
+            this.setCurrentBacklog(this.getDomain().processManager.micronizerInputSelector.estimatedBacklogDepth());
+            this.statusState.setMaxBacklog(this.getDomain().processManager.micronizerInputSelector.maxBacklogDepth());
         }
         
         // if we don't have power to do basic control functions
@@ -194,7 +193,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
         // then look for something so that we don't idle
         if(this.inputFuture == null && this.getBufferManager().itemInput().isEmpty())
         {
-            this.inputFuture = MicronizerInputSelector.requestInput(this);
+            this.inputFuture = this.getDomain().processManager.micronizerInputSelector.requestInput(this);
         }
         
         // do stuff if we can

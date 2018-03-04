@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.energy.DeviceEnergyInfo;
+import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
@@ -19,7 +19,7 @@ public class MachinePowerUsage extends AbstractMachineControl<MachinePowerUsage,
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        DeviceEnergyInfo mps = this.tileEntity.clientState().powerSupplyInfo;
+        ClientEnergyInfo mps = this.tileEntity.clientState().powerSupplyInfo;
         if(mps != null)
         {
             ArrayList<String> list = new ArrayList<String>(3);
@@ -32,7 +32,7 @@ public class MachinePowerUsage extends AbstractMachineControl<MachinePowerUsage,
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        DeviceEnergyInfo mpi = this.tileEntity.clientState().powerSupplyInfo;
+        ClientEnergyInfo mpi = this.tileEntity.clientState().powerSupplyInfo;
         if(mpi != null)
         {
             MachineControlRenderer.renderPower(this.renderBounds, mpi, 0xFF);

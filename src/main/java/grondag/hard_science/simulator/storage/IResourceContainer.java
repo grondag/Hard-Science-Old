@@ -52,29 +52,37 @@ public interface IResourceContainer<T extends StorageType<T>>
      * Implemented for some container types to collect stats
      * and/or limit rate of input/output.
      */
-    ThroughputRegulator getRegulator();
+    ThroughputRegulator<T> getRegulator();
     
     /**
      * Used by some container types to collect stats
      * and/or limit rate of input/output.
      */
-    void setRegulator(ThroughputRegulator regulator);
+    void setRegulator(ThroughputRegulator<T> regulator);
     
     
     /**
      * Convenient access for regulator method.
      */
-    public default void blame()
+    public default void blame(IResource<T> resource)
     {
-        this.getRegulator().blame();
+        this.getRegulator().blame(resource);
     }
     
     /**
      * Convenient access for regulator method.
      */
-    public default void forgive()
+    public default void forgive(IResource<T> resource)
     {
-        this.getRegulator().forgive();
+        this.getRegulator().forgive(resource);
+    }
+    
+    /**
+     * Convenient access for regulator method.
+     */
+    public default void forgiveAll()
+    {
+        this.getRegulator().forgiveAll();
     }
     
     /**

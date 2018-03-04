@@ -2,6 +2,7 @@ package grondag.hard_science.machines.matbuffer;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
@@ -44,6 +45,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
             this.itemInput = new ItemContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN, Integer.MAX_VALUE);
             this.itemInput.setCapacity(itemInputSize);
             this.itemInput.setContentPredicate(itemInputPredicate);
+            this.itemInput.setRegulator(new ThroughputRegulator.Tracking<>());
         }
         
         if(itemOutputSize == 0)
@@ -54,6 +56,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
         {
             this.itemOutput = new ItemContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT, Integer.MAX_VALUE);
             this.itemOutput.setCapacity(itemOutputSize);
+            this.itemOutput.setRegulator(new ThroughputRegulator.Tracking<>());
         }
         
         if(fluidInputSize == 0)
@@ -65,6 +68,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
             this.fluidInput = new FluidContainer(owner, ContainerUsage.PRIVATE_BUFFER_IN, Integer.MAX_VALUE);
             this.fluidInput.setCapacity(fluidInputSize);
             this.fluidInput.setContentPredicate(fluidInputPredicate);
+            this.fluidInput.setRegulator(new ThroughputRegulator.Tracking<>());
         }
         
         if(fluidOutputSize == 0)
@@ -75,6 +79,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
         {
             this.fluidOutput = new FluidContainer(owner, ContainerUsage.PUBLIC_BUFFER_OUT, Integer.MAX_VALUE);
             this.fluidOutput.setCapacity(fluidOutputSize);
+            this.fluidOutput.setRegulator(new ThroughputRegulator.Tracking<>());
         }
     }
 
@@ -223,60 +228,10 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
         if(this.fluidOutput != null) this.fluidOutput.onDisconnect();
     }
 
-    public long[] serializeToArray()
-    {
-        //TODO: stub
-        return new long[0];
-    }
-
-    public boolean hasFailureCauseClientSideOnly()
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Deprecated
-    public BufferDelegate getBuffer(int index)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Deprecated
-    public int bufferCount()
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
     public FluidContainer bufferHDPE()
     {
         //TODO stub
         return null;
-    }
-
-    public void deserializeFromArray(long[] materialBufferData)
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void forgiveAll()
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public boolean canRestockAny()
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean restock(IItemHandler capability)
-    {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     @Override

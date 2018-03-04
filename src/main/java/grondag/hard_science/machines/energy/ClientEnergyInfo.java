@@ -6,7 +6,7 @@ import net.minecraft.network.PacketBuffer;
 /**
  * Snapshot of static energy component descriptive information for display on client.
  */
-public class DeviceEnergyInfo implements IMessagePlus
+public class ClientEnergyInfo implements IMessagePlus
 {
     private float maxGenerationWatts;
     private float maxDeviceDrawWatts;
@@ -22,9 +22,9 @@ public class DeviceEnergyInfo implements IMessagePlus
     private float netStorageWatts;
     private long storedEnergyJoules;
     
-    public DeviceEnergyInfo() { }
+    public ClientEnergyInfo() { }
     
-    public DeviceEnergyInfo(DeviceEnergyManager powerSupply)
+    public ClientEnergyInfo(DeviceEnergyManager powerSupply)
     {
         if(powerSupply.generator() != null)
         {

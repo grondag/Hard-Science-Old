@@ -1,37 +1,34 @@
 package grondag.hard_science.gui.control.machine;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.matbuffer.BufferDelegate;
-import grondag.hard_science.machines.matbuffer.BufferManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.translation.I18n;
 
+@Deprecated
 public class MachineCMYGauge extends AbstractMachineControl<MachineCMYGauge, RadialRenderBounds>
 {
-    private final BufferDelegate cyan;
-    private final BufferDelegate magenta;
-    private final BufferDelegate yellow;
+//    private final BufferDelegate cyan;
+//    private final BufferDelegate magenta;
+//    private final BufferDelegate yellow;
     
     public MachineCMYGauge(MachineTileEntity tileEntity, int cyanIndex, int magentaIndex, int yellowIndex, RadialRenderBounds spec)
     {
         super(tileEntity, spec);
-        BufferManager mbm = tileEntity.clientState().bufferManager;
-        if(mbm == null || cyanIndex >= mbm.bufferCount() || magentaIndex >= mbm.bufferCount() || yellowIndex >= mbm.bufferCount()) 
-        {
-            Log.warn("Machine CMY gauge GUI could not be initialized.  Bad buffer of buffer index.");
-            this.cyan = null;
-            this.magenta= null;
-            this.yellow = null;
-        }
-        else
-        {
-            this.cyan = mbm.getBuffer(cyanIndex);
-            this.magenta = mbm.getBuffer(magentaIndex);
-            this.yellow = mbm.getBuffer(yellowIndex);
-        }
+//        BufferManager mbm = tileEntity.clientState().bufferManager;
+//        if(mbm == null || cyanIndex >= mbm.bufferCount() || magentaIndex >= mbm.bufferCount() || yellowIndex >= mbm.bufferCount()) 
+//        {
+//            Log.warn("Machine CMY gauge GUI could not be initialized.  Bad buffer of buffer index.");
+//            this.cyan = null;
+//            this.magenta= null;
+//            this.yellow = null;
+//        }
+//        else
+//        {
+//            this.cyan = mbm.getBuffer(cyanIndex);
+//            this.magenta = mbm.getBuffer(magentaIndex);
+//            this.yellow = mbm.getBuffer(yellowIndex);
+//        }
     }
     
     @Override
@@ -43,16 +40,16 @@ public class MachineCMYGauge extends AbstractMachineControl<MachineCMYGauge, Rad
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        renderContext.drawLocalizedToolTip(mouseX, mouseY, 
-                I18n.translateToLocal(cyan.tooltipKey()) + String.format(": %,.9fL", cyan.getLevelNanoLiters() / 1000000000.0),
-                I18n.translateToLocal(magenta.tooltipKey()) + String.format(": %,.9fL", magenta.getLevelNanoLiters() / 1000000000.0),
-                I18n.translateToLocal(yellow.tooltipKey()) + String.format(": %,.9fL", yellow.getLevelNanoLiters() / 1000000000.0));
+//        renderContext.drawLocalizedToolTip(mouseX, mouseY, 
+//                I18n.translateToLocal(cyan.tooltipKey()) + String.format(": %,.9fL", cyan.getLevelNanoLiters() / 1000000000.0),
+//                I18n.translateToLocal(magenta.tooltipKey()) + String.format(": %,.9fL", magenta.getLevelNanoLiters() / 1000000000.0),
+//                I18n.translateToLocal(yellow.tooltipKey()) + String.format(": %,.9fL", yellow.getLevelNanoLiters() / 1000000000.0));
     }
 
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderCMY(this.renderBounds, cyan, magenta, yellow, 0xFF);    
+//        MachineControlRenderer.renderCMY(this.renderBounds, cyan, magenta, yellow, 0xFF);    
     }
     
     @Override

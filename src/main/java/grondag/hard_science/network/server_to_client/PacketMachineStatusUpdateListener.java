@@ -1,7 +1,8 @@
 package grondag.hard_science.network.server_to_client;
 
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.energy.DeviceEnergyInfo;
+import grondag.hard_science.machines.energy.ClientEnergyInfo;
+import grondag.hard_science.machines.matbuffer.ClientBufferInfo;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
@@ -13,27 +14,27 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPacket<PacketMachineStatusUpdateListener>
 {
+    private MachineTileEntity te;
+    
     public BlockPos pos;
     public MachineControlState controlState;
-    public long[] materialBufferData;
+    public ClientBufferInfo materialBufferInfo;
     public MachineStatusState statusState;
-    public DeviceEnergyInfo powerSupplyInfo;
+    public ClientEnergyInfo powerSupplyInfo;
     public String machineName;
     
     public PacketMachineStatusUpdateListener() {}
     
     public PacketMachineStatusUpdateListener(MachineTileEntity te)
     {
+        this.te = te;
         this.pos = te.getPos();
         this.controlState = te.machine().getControlState();
         this.statusState = te.machine().getStatusState();
         
-        if(this.controlState.hasMaterialBuffer()) 
-            this.materialBufferData = te.machine().getBufferManager().serializeToArray();
-        
         if(this.controlState.hasPowerSupply())
         {
-            this.powerSupplyInfo = new DeviceEnergyInfo(te.machine().energyManager());
+            this.powerSupplyInfo = new ClientEnergyInfo(te.machine().energyManager());
         }
         
         this.machineName = te.machine().machineName();
@@ -50,16 +51,12 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         
         if(this.controlState.hasMaterialBuffer()) 
         {
-            int count = pBuff.readByte();
-            this.materialBufferData = new long[count];
-            for(int i = 0; i < count; i++)
-            {
-                this.materialBufferData[i] = pBuff.readVarLong();
-            }
+            this.materialBufferInfo = new ClientBufferInfo();
+            this.materialBufferInfo.fromBytes(pBuff);
         }
         if(this.controlState.hasPowerSupply()) 
         {
-            this.powerSupplyInfo = new DeviceEnergyInfo();
+            this.powerSupplyInfo = new ClientEnergyInfo();
             this.powerSupplyInfo.fromBytes(pBuff);
         }
         this.machineName = pBuff.readString(8);
@@ -74,12 +71,7 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
 
         if(this.controlState.hasMaterialBuffer()) 
         {
-            int count = this.materialBufferData.length;
-            pBuff.writeByte(count);
-            for(int i = 0; i < count; i++)
-            {
-                pBuff.writeVarLong(this.materialBufferData[i]);
-            }
+            ClientBufferInfo.toBytes(this.te.machine().getBufferManager(), pBuff);
         }
 
         if(this.controlState.hasPowerSupply())

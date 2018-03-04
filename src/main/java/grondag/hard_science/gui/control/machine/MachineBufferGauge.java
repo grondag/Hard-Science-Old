@@ -1,32 +1,30 @@
 package grondag.hard_science.gui.control.machine;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.matbuffer.BufferDelegate;
-import grondag.hard_science.machines.matbuffer.BufferManager;
 import net.minecraft.client.Minecraft;
 
+@Deprecated
 public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGauge, RadialRenderBounds>
 {
     private RadialGaugeSpec spec;
-    private final BufferDelegate buffer;
+//    private final BufferDelegate buffer;
     
     public MachineBufferGauge(MachineTileEntity tileEntity, RadialGaugeSpec spec)
     {
         super(tileEntity, spec);
         this.spec = spec;
-        BufferManager mbm = tileEntity.clientState().bufferManager;
-        if(mbm == null || spec.bufferIndex >= mbm.bufferCount()) 
-        {
-            Log.warn("Machine buffer gauge GUI could not be initialized.  Bad buffer of buffer index.");
-            this.buffer = null;
-        }
-        else
-        {
-            this.buffer = mbm.getBuffer(spec.bufferIndex);
-        }
+//        BufferManager mbm = tileEntity.clientState().bufferManager;
+//        if(mbm == null || spec.bufferIndex >= mbm.bufferCount()) 
+//        {
+//            Log.warn("Machine buffer gauge GUI could not be initialized.  Bad buffer of buffer index.");
+//            this.buffer = null;
+//        }
+//        else
+//        {
+//            this.buffer = mbm.getBuffer(spec.bufferIndex);
+//        }
     }
     
     @Override
@@ -40,15 +38,15 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        if(this.buffer == null) return;
-        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey(), String.format("%,.9fL", buffer.getLevelNanoLiters() / 1000000000.0));
+//        if(this.buffer == null) return;
+//        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey(), String.format("%,.9fL", buffer.getLevelNanoLiters() / 1000000000.0));
     }
 
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        if(this.buffer == null) return;
-        MachineControlRenderer.renderGauge(this.spec, this.tileEntity, this.buffer, 0xFF);
+//        if(this.buffer == null) return;
+//        MachineControlRenderer.renderGauge(this.spec, this.tileEntity, this.buffer, 0xFF);
     }
 
     @Override

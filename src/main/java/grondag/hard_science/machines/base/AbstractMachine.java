@@ -222,9 +222,9 @@ public abstract class AbstractMachine extends AbstractDevice
     
 //    protected void restock()
 //    {
-//        BufferManager bufferManager = this.getBufferManager();
+//        BufferManager bufferInfo = this.getBufferManager();
 //        
-//        if(!bufferManager.canRestockAny() || this.machineTE == null) return;
+//        if(!bufferInfo.canRestockAny() || this.machineTE == null) return;
 //        
 //        //FIXME: temp hack - should use world from location and check for loaded chunk
 //        World teWorld = machineTE.getWorld();
@@ -240,7 +240,7 @@ public abstract class AbstractMachine extends AbstractDevice
 //                // power some other way to load fuel - seems tedious.
 //                // Assuming this is covered by the "emergency" power supply that uses ambient energy harvesters.
 //                IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-//                if(bufferManager.restock(capability)) this.setDirty();
+//                if(bufferInfo.restock(capability)) this.setDirty();
 //            }
 //        }
 //    }

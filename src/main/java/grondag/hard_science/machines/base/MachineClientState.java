@@ -1,8 +1,8 @@
 package grondag.hard_science.machines.base;
 
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.machines.energy.DeviceEnergyInfo;
-import grondag.hard_science.machines.matbuffer.BufferManager;
+import grondag.hard_science.machines.energy.ClientEnergyInfo;
+import grondag.hard_science.machines.matbuffer.ClientBufferInfo;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
@@ -58,24 +58,24 @@ public class MachineClientState
     /**
      * Used for client rendering - will only be updated as needed.
      */
-    public BufferManager bufferManager;
+    public ClientBufferInfo bufferInfo;
     
     /**
      * Used for client rendering - will only be updated as needed.
      */
-    public DeviceEnergyInfo powerSupplyInfo;
+    public ClientEnergyInfo powerSupplyInfo;
     
     public String machineName = "???";
     
     public MachineClientState(MachineTileEntity mte)
     {
         AbstractMachine tempMachine = mte.createNewMachine();
-        this.bufferManager = tempMachine.getBufferManager();
-        this.powerSupplyInfo = new DeviceEnergyInfo();
+        this.bufferInfo = new ClientBufferInfo();
+        this.powerSupplyInfo = new ClientEnergyInfo();
         this.hasOnOff = tempMachine.hasOnOff();
         this.hasRedstoneControl = tempMachine.hasRedstoneControl();
         
-        //TODO: seems redundant, move to DeviceEnergyInfo?
+        //TODO: seems redundant, move to ClientEnergyInfo?
         this.maxPowerConsumptionWatts = tempMachine.energyManager().maxDeviceDrawWatts();
     }
     
@@ -90,9 +90,9 @@ public class MachineClientState
         this.statusStack = null;
         this.machineName = packet.machineName;
         
-        if(this.bufferManager != null)
+        if(this.controlState.hasMaterialBuffer())
         {
-            this.bufferManager.deserializeFromArray(packet.materialBufferData);
+            this.bufferInfo = packet.materialBufferInfo;
         }
         if(this.controlState.hasPowerSupply())
         {

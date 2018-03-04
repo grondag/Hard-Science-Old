@@ -19,14 +19,11 @@ import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.energy.DeviceEnergyInfo;
+import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;
-import grondag.hard_science.machines.matbuffer.BufferDelegate;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.matter.MatterColors;
-import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.texture.EnhancedSprite;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
@@ -727,7 +724,7 @@ public class MachineControlRenderer
                     Textures.MACHINE_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
 
             if(te.clientState().controlState.getMachineState() == MachineState.THINKING 
-                    && te.clientState().bufferManager.hasFailureCauseClientSideOnly() && MachineControlRenderer.warningLightBlinkOn())
+                    && te.clientState().bufferInfo.hasFailureCause() && MachineControlRenderer.warningLightBlinkOn())
             {
                 MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), 
                         Textures.DECAL_MATERIAL_SHORTAGE.getSampleSprite(), alpha << 24 | 0xFFFF40, Rotation.ROTATE_NONE);
@@ -738,7 +735,7 @@ public class MachineControlRenderer
     
     public static void renderPower(
             RadialRenderBounds bounds, 
-            DeviceEnergyInfo mpi,
+            ClientEnergyInfo mpi,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -749,7 +746,7 @@ public class MachineControlRenderer
             Tessellator tessellator, 
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
-            DeviceEnergyInfo mpi,
+            ClientEnergyInfo mpi,
             final int alpha)
     {
      
@@ -781,7 +778,7 @@ public class MachineControlRenderer
     
     public static void renderFuelCell(
             RadialRenderBounds bounds, 
-            @Nonnull DeviceEnergyInfo mpi,
+            @Nonnull ClientEnergyInfo mpi,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -792,7 +789,7 @@ public class MachineControlRenderer
             Tessellator tessellator, 
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
-            @Nonnull DeviceEnergyInfo mpi,
+            @Nonnull ClientEnergyInfo mpi,
             final int alpha)
     {
        
@@ -819,7 +816,7 @@ public class MachineControlRenderer
     
     public static void renderBattery(
             RadialRenderBounds bounds, 
-            @Nonnull DeviceEnergyInfo mpi,
+            @Nonnull ClientEnergyInfo mpi,
             int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -836,7 +833,7 @@ public class MachineControlRenderer
             Tessellator tessellator, 
             BufferBuilder buffer, 
             RadialRenderBounds bounds, 
-            @Nonnull DeviceEnergyInfo xmpi,
+            @Nonnull ClientEnergyInfo xmpi,
             final int alpha)
     {
         
@@ -915,126 +912,128 @@ public class MachineControlRenderer
         return (CommonProxy.currentTimeMillis() & 0x400) == 0x400;
     }
 
-    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, BufferDelegate materialBuffer, int alpha)
-    {
-        Tessellator tes = Tessellator.getInstance();
-        renderGauge(tes, tes.getBuffer(), spec, te, materialBuffer, alpha);
-    }
+//    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, BufferDelegate materialBuffer, int alpha)
+//    {
+//        Tessellator tes = Tessellator.getInstance();
+//        renderGauge(tes, tes.getBuffer(), spec, te, materialBuffer, alpha);
+//    }
     
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, BufferDelegate materialBuffer, int alpha)
-    {
-        // render marks
-        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, spec, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
-
-        // render level
-        int arcLength = (int)(materialBuffer.fullness() * 270);
-        renderRadialSprite(tessellator, buffer, spec, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
-
-        if(materialBuffer.isFailureCause() && warningLightBlinkOn())
-        {
-            renderSpriteInBounds(tessellator, buffer, spec, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), (alpha << 24) | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
-        }
-        
-        /** Can look away from a machine for five seconds before flow tracking turns off to save CPU */
-        if(CommonProxy.currentTimeMillis() - te.lastInViewMillis() < 5000)
-        {
-            // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
-            final float deltaIn = materialBuffer.getDeltaIn();
-            if(deltaIn > 0.012f)
-            {
-                int deltaLength = Math.round(deltaIn * 135);
-                renderRadialSprite(tessellator, buffer, spec, 225, deltaLength, Textures.MACHINE_GAUGE_INNER, (alpha << 24) | 0x20FF20);
-            }
-            
-            // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
-            final float deltaOut = materialBuffer.getDeltaOut();
-            if(deltaOut > 0.012f)
-            {
-                int deltaLength =  Math.round(deltaOut * 135);
-                renderRadialSprite(tessellator, buffer, spec, 135 - deltaLength, deltaLength, Textures.MACHINE_GAUGE_INNER, (alpha << 24) | 0xFF2020);
-            }
-        }
-        
-        renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, (alpha << 24) | (spec.color & 0xFFFFFF), 
-                spec.rotation);
-
-        renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                new RectRenderBounds(spec.left(), spec.top() + spec.height() * GAUGE_LABEL_TOP, spec.width(), spec.height() * GAUGE_LABEL_HEIGHT),
-                VolumeUnits.formatVolume(materialBuffer.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, (alpha << 24) | 0xFFFFFF);
-
-        // draw text if provided
-        if(spec.formula != null)
-        {
-            RadialRenderBounds inner = spec.innerBounds();
-            // need to scale font pixelWidth to height of the line
-            double height = inner.height * 0.6;
-            double margin = (inner.width - ModModels.FONT_RENDERER_SMALL.getWidthFormula(spec.formula) * height / ModModels.FONT_RENDERER_SMALL.fontHeight) * 0.5;
-            ModModels.FONT_RENDERER_SMALL.drawFormula(inner.left + margin, inner.top + inner.height * 0.15, spec.formula, height, 0.02f, (spec.formulaColor >> 16) & 0xFF, (spec.formulaColor >> 8) & 0xFF, spec.formulaColor & 0xFF, alpha);
-        }
-    }
+//    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, BufferDelegate materialBuffer, int alpha)
+//    {
+//        // render marks
+//        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, spec, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
+//
+//        // render level
+//        int arcLength = (int)(materialBuffer.fullness() * 270);
+//        renderRadialSprite(tessellator, buffer, spec, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
+//
+//        if(materialBuffer.isFailureCause() && warningLightBlinkOn())
+//        {
+//            renderSpriteInBounds(tessellator, buffer, spec, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), (alpha << 24) | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
+//        }
+//        
+//        /** Can look away from a machine for five seconds before flow tracking turns off to save CPU */
+//        if(CommonProxy.currentTimeMillis() - te.lastInViewMillis() < 5000)
+//        {
+//            // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
+//            final float deltaIn = materialBuffer.getDeltaIn();
+//            if(deltaIn > 0.012f)
+//            {
+//                int deltaLength = Math.round(deltaIn * 135);
+//                renderRadialSprite(tessellator, buffer, spec, 225, deltaLength, Textures.MACHINE_GAUGE_INNER, (alpha << 24) | 0x20FF20);
+//            }
+//            
+//            // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
+//            final float deltaOut = materialBuffer.getDeltaOut();
+//            if(deltaOut > 0.012f)
+//            {
+//                int deltaLength =  Math.round(deltaOut * 135);
+//                renderRadialSprite(tessellator, buffer, spec, 135 - deltaLength, deltaLength, Textures.MACHINE_GAUGE_INNER, (alpha << 24) | 0xFF2020);
+//            }
+//        }
+//        
+//        renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, (alpha << 24) | (spec.color & 0xFFFFFF), 
+//                spec.rotation);
+//
+//        renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+//                new RectRenderBounds(spec.left(), spec.top() + spec.height() * GAUGE_LABEL_TOP, spec.width(), spec.height() * GAUGE_LABEL_HEIGHT),
+//                VolumeUnits.formatVolume(materialBuffer.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, (alpha << 24) | 0xFFFFFF);
+//
+//        // draw text if provided
+//        if(spec.formula != null)
+//        {
+//            RadialRenderBounds inner = spec.innerBounds();
+//            // need to scale font pixelWidth to height of the line
+//            double height = inner.height * 0.6;
+//            double margin = (inner.width - ModModels.FONT_RENDERER_SMALL.getWidthFormula(spec.formula) * height / ModModels.FONT_RENDERER_SMALL.fontHeight) * 0.5;
+//            ModModels.FONT_RENDERER_SMALL.drawFormula(inner.left + margin, inner.top + inner.height * 0.15, spec.formula, height, 0.02f, (spec.formulaColor >> 16) & 0xFF, (spec.formulaColor >> 8) & 0xFF, spec.formulaColor & 0xFF, alpha);
+//        }
+//    }
     
-    public static void renderCMY(RadialRenderBounds bounds, BufferDelegate cyan, BufferDelegate magenta, BufferDelegate yellow, int alpha)
-    {
-        Tessellator tes = Tessellator.getInstance();
-        renderCMY(tes, tes.getBuffer(), bounds, cyan, magenta, yellow, alpha);
-    }
+//    @Deprecated
+//    public static void renderCMY(RadialRenderBounds bounds, BufferDelegate cyan, BufferDelegate magenta, BufferDelegate yellow, int alpha)
+//    {
+//        Tessellator tes = Tessellator.getInstance();
+//        renderCMY(tes, tes.getBuffer(), bounds, cyan, magenta, yellow, alpha);
+//    }
     
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderCMY(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, BufferDelegate cyan, BufferDelegate magenta, BufferDelegate yellow, int alpha)
-    {
-        // render marks
-        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
-
-        final int alphaShifted = alpha << 24;
-        
-        // render levels
-        int start = 225;
-        int arcLength = (int)(cyan.fullness() * 90);
-        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | MatterColors.CYAN);
-
-        start += arcLength;
-        arcLength = (int)(magenta.fullness() * 90);
-        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | MatterColors.MAGENTA);
-        
-        start += arcLength;
-        arcLength = (int)(yellow.fullness() * 90);
-        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | MatterColors.YELLOW);
-        
-        if(warningLightBlinkOn() && (cyan.isFailureCause() || magenta.isFailureCause() || yellow.isFailureCause()))
-        {
-            renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), alphaShifted | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
-        }
-        
-        renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), Textures.DECAL_CMY.getSampleSprite(), alphaShifted | 0xFFFFFF, Rotation.ROTATE_NONE);
-
-        int timeCheck = (int) (CommonProxy.currentTimeMillis() >> 10) % 3;
-        
-        if(timeCheck == 0)
-        {
-            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
-                    VolumeUnits.formatVolume(cyan.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, alphaShifted | MatterColors.CYAN);            
-        }
-        else if(timeCheck == 1)
-        {
-            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
-                    VolumeUnits.formatVolume(magenta.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, alphaShifted | MatterColors.MAGENTA);            
-        }
-        else
-        {
-            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
-                    VolumeUnits.formatVolume(yellow.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, alphaShifted | MatterColors.YELLOW);     
-        }
-
-      
-    }
+//    @Deprecated
+//    public static void renderCMY(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, BufferDelegate cyan, BufferDelegate magenta, BufferDelegate yellow, int alpha)
+//    {
+//        // render marks
+//        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
+//
+//        final int alphaShifted = alpha << 24;
+//        
+//        // render levels
+//        int start = 225;
+//        int arcLength = (int)(cyan.fullness() * 90);
+//        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | MatterColors.CYAN);
+//
+//        start += arcLength;
+//        arcLength = (int)(magenta.fullness() * 90);
+//        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | MatterColors.MAGENTA);
+//        
+//        start += arcLength;
+//        arcLength = (int)(yellow.fullness() * 90);
+//        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | MatterColors.YELLOW);
+//        
+//        if(warningLightBlinkOn() && (cyan.isFailureCause() || magenta.isFailureCause() || yellow.isFailureCause()))
+//        {
+//            renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), alphaShifted | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
+//        }
+//        
+//        renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), Textures.DECAL_CMY.getSampleSprite(), alphaShifted | 0xFFFFFF, Rotation.ROTATE_NONE);
+//
+//        int timeCheck = (int) (CommonProxy.currentTimeMillis() >> 10) % 3;
+//        
+//        if(timeCheck == 0)
+//        {
+//            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+//                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
+//                    VolumeUnits.formatVolume(cyan.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, alphaShifted | MatterColors.CYAN);            
+//        }
+//        else if(timeCheck == 1)
+//        {
+//            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+//                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
+//                    VolumeUnits.formatVolume(magenta.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, alphaShifted | MatterColors.MAGENTA);            
+//        }
+//        else
+//        {
+//            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+//                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
+//                    VolumeUnits.formatVolume(yellow.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, alphaShifted | MatterColors.YELLOW);     
+//        }
+//
+//      
+//    }
     
 
     /** 

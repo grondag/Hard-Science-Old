@@ -1,18 +1,24 @@
 package grondag.hard_science.machines.support;
 
+import com.google.common.collect.ImmutableList;
+
+import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.StorageType;
 
 /**
  * Handles constraints and accounting for bulkResource containers.
  * @author grondag
  *
  */
-public abstract class ThroughputRegulator
+public abstract class ThroughputRegulator<T extends StorageType<T>>
 {
     /**
      * Has no internal state, enforces no limits and does no accounting.
      * Use when you don't want to regulate and don't want to check for null.
      */
+    @SuppressWarnings("rawtypes")
     public static final ThroughputRegulator DUMMY = new Dummy();
     /**
      * If this regulator has input constraints, 
@@ -28,7 +34,7 @@ public abstract class ThroughputRegulator
     {
         return requested;
     }
-    
+
     /**
      * If this regulator has output constraints, 
      * limits the requested amount to those constraints
@@ -67,6 +73,7 @@ public abstract class ThroughputRegulator
     /**
      * Has no limits and does no accounting.
      */
+    @SuppressWarnings("rawtypes")
     private static class Dummy extends ThroughputRegulator
     {
         
@@ -77,14 +84,18 @@ public abstract class ThroughputRegulator
         return false;
     }
     
-    public void blame() {};
+    public void blame(IResource<T> resource) {}
     
-    public void forgive() {};
+    public ImmutableList<IResource<T>> blames() { return ImmutableList.of(); }
+    
+    public void forgive(IResource<T> resource) {}
+    
+    public void forgiveAll() {}
 
     /**
      * Has no limits but tracks input/output per tick.
      */
-    public static class Tracking extends ThroughputRegulator
+    public static class Tracking<T extends StorageType<T>> extends ThroughputRegulator<T>
     {
         protected long inputLastTick;
         
@@ -98,7 +109,7 @@ public abstract class ThroughputRegulator
         
         protected int lastTickSeen = Integer.MIN_VALUE;
         
-        protected boolean isFailureCause = false;
+        protected SimpleUnorderedArrayList<IResource<T>> blames = new SimpleUnorderedArrayList<>();
 
         protected synchronized void updateTracking()
         {
@@ -159,26 +170,38 @@ public abstract class ThroughputRegulator
         @Override
         public boolean isFailureCause()
         {
-            return this.isFailureCause;
+            return !this.blames.isEmpty();
         }
 
         @Override
-        public void blame()
+        public void blame(IResource<T> resource)
         {
-            this.isFailureCause = true;
+            this.blames.addIfNotPresent(resource);
+        }
+        
+        @Override
+        public ImmutableList<IResource<T>> blames()
+        { 
+            return ImmutableList.copyOf(this.blames);
         }
 
         @Override
-        public void forgive()
+        public void forgive(IResource<T> resource)
         {
-            this.isFailureCause = false;
+            this.blames.removeIfPresent(resource);
+        }
+        
+        @Override
+        public void forgiveAll()
+        {
+            this.blames.clear();;
         }
     }
     
     /**
      * Has input/output limits and also does accounting
      */
-    public static class Limited extends ThroughputRegulator.Tracking
+    public static class Limited<T extends StorageType<T>> extends ThroughputRegulator.Tracking<T>
     {
         private final long maxInputPerTick;
         

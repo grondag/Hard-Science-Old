@@ -6,6 +6,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.machines.impl.processing.MicronizerInputSelector;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -18,6 +19,8 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
     private final Domain domain;
     
     private final HashMap<IResource<?>, ProcessInfo> infos = new HashMap<>();
+    
+    public final MicronizerInputSelector micronizerInputSelector;
     
     public class ProcessInfo
     {
@@ -119,6 +122,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
     ProcessManager(Domain domain)
     {
         this.domain = domain;
+        this.micronizerInputSelector = new MicronizerInputSelector(domain);
         
         //load defaults
         for(String csv : Configurator.PROCESSING.resourceDefaults)

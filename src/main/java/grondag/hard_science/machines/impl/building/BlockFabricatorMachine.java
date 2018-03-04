@@ -68,15 +68,15 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     {
         super();
         // note that order has to match array declaration
-//        BufferManager bufferManager = this.getBufferManager();
-//        this.bufferFiller = bufferManager.getBuffer(BUFFER_INDEX_FILLER);
-//        this.bufferResinA = bufferManager.getBuffer(BUFFER_INDEX_RESIN_A);
-//        this.bufferResinB = bufferManager.getBuffer(BUFFER_INDEX_RESIN_B);
-//        this.bufferNanoLights = bufferManager.getBuffer(BUFFER_INDEX_NANOLIGHT);
-//        this.bufferCyan = bufferManager.getBuffer(BUFFER_INDEX_CYAN);
-//        this.bufferMagenta = bufferManager.getBuffer(BUFFER_INDEX_MAGENTA);
-//        this.bufferYellow = bufferManager.getBuffer(BUFFER_INDEX_YELLOW);
-//        this.bufferTiO2 = bufferManager.getBuffer(BUFFER_INDEX_TIO2);
+//        BufferManager bufferInfo = this.getBufferManager();
+//        this.bufferFiller = bufferInfo.getBuffer(BUFFER_INDEX_FILLER);
+//        this.bufferResinA = bufferInfo.getBuffer(BUFFER_INDEX_RESIN_A);
+//        this.bufferResinB = bufferInfo.getBuffer(BUFFER_INDEX_RESIN_B);
+//        this.bufferNanoLights = bufferInfo.getBuffer(BUFFER_INDEX_NANOLIGHT);
+//        this.bufferCyan = bufferInfo.getBuffer(BUFFER_INDEX_CYAN);
+//        this.bufferMagenta = bufferInfo.getBuffer(BUFFER_INDEX_MAGENTA);
+//        this.bufferYellow = bufferInfo.getBuffer(BUFFER_INDEX_YELLOW);
+//        this.bufferTiO2 = bufferInfo.getBuffer(BUFFER_INDEX_TIO2);
         this.statusState.setHasBacklog(true);
     }
     
