@@ -96,7 +96,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
             int i = 0;
             for( AbstractResourceWithQuantity<StorageTypeFluid> s : this.slots)
             {
-                result[i] = new TankProps((FluidResource) s.resource());
+                result[i++] = new TankProps((FluidResource) s.resource());
             }
         }
         return result;
