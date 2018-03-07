@@ -1,6 +1,9 @@
 package grondag.hard_science.simulator.resource;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
 import grondag.hard_science.matter.Gas;
@@ -22,6 +25,13 @@ import net.minecraftforge.fluids.FluidRegistry;
 //public class BulkResource extends IForgeRegistryEntry.Impl<BulkResource> implements IResource<StorageTypeBulk>
 public class BulkResource implements IResource<StorageTypeBulk>
 {
+    private static Map<Fluid, BulkResource> fluidLookup = new HashMap<Fluid, BulkResource>();
+
+    public static BulkResource fromFluid(Fluid fluid)
+    {
+        return fluidLookup.get(fluid);
+    }
+    
     private final String systemName;
     public final int color;
     public final String label;
@@ -259,5 +269,6 @@ public class BulkResource implements IResource<StorageTypeBulk>
             FluidRegistry.registerFluid(this.fluid);
         }
         this.resource = new FluidResource(this.fluid, null);
+        fluidLookup.put(this.fluid, this);
     }
 }

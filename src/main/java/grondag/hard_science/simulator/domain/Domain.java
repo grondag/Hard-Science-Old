@@ -18,9 +18,6 @@ import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListenerProvider;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
-import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.FluidStorageManager;
 import grondag.hard_science.simulator.storage.ItemStorageManager;
 import grondag.hard_science.simulator.storage.PowerStorageManager;
@@ -41,9 +38,9 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     boolean isSecurityEnabled;
     
     public final EventBus eventBus = new EventBus();
-    public final StorageManager<StorageTypeStack> itemStorage;
-    public final StorageManager<StorageTypeFluid> fluidStorage;
-    public final StorageManager<StorageTypePower> powerStorage;
+    public final ItemStorageManager itemStorage;
+    public final FluidStorageManager fluidStorage;
+    public final PowerStorageManager powerStorage;
     public final JobManager jobManager;
     public final BuildManager buildManager;
     public final BrokerManager brokerManager;

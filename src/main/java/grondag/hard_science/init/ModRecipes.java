@@ -6,18 +6,19 @@ import java.util.ArrayList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.Log;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
-import net.minecraft.block.BlockStoneSlab;
-import net.minecraft.block.BlockStoneSlabNew;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
+import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.simulator.domain.ProcessManager;
+import grondag.hard_science.simulator.resource.BulkResource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.oredict.OreIngredient;
 
 public class ModRecipes
 {
@@ -33,112 +34,59 @@ public class ModRecipes
         /// MICRONIZER
         ///////////////////////////////////////////////////////////
 
-        MicronizerRecipe.add(
-                new OreIngredient("sand"), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.5,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
-
-        MicronizerRecipe.add(
-                new OreIngredient("gravel"), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.65,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
+        for(String csv : Configurator.PROCESSING.micronizerRecipes)
+        {
+            try
+            {
+                String[] args = csv.split(",");
+                
+                if(args.length != 4)
+                {
+                    Log.warn("Skipping invalid micronizer recipe: " + csv);
+                    continue;
+                }
+                
+                Ingredient ing = ProcessManager.readIngredient(args[0].trim());
+                if(ing == null || ing == Ingredient.EMPTY)
+                {
+                    Log.warn("Skipping invalid micronizer recipe: " + csv);
+                    continue;
+                }
+                
+                Fluid fluid = FluidRegistry.getFluid(args[1].trim());
+                BulkResource br = BulkResource.fromFluid(fluid);
+                if(br == null)
+                {
+                    Log.warn("Skipping invalid micronizer recipe: " + csv);
+                    continue;
+                }
+                
+                double liters = Double.parseDouble(args[2].trim());
+                double energyFactor = Double.parseDouble(args[3].trim());
+                
+                MicronizerRecipe.add(
+                        ing,
+                        BulkResource.fromFluid(fluid),
+                        energyFactor,
+                        new MicronizerRecipe.FixedConverter((long) (liters * VolumeUnits.LITER.nL)));
+            }
+            catch(Exception e)
+            {
+                Log.error("Unable to read micronizer recipe: " + csv, e);
+            }
+        }
         
         MicronizerRecipe.add(
-                new OreIngredient("sandstone"), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.7,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
-        
-        MicronizerRecipe.add(
-                new OreIngredient("cobblestone"), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.8,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
-        
-        MicronizerRecipe.add(
-                new OreIngredient("stone"), 
-                ModBulkResources.MICRONIZED_STONE,
-                1.0,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromItem(Item.getItemFromBlock(Blocks.COBBLESTONE_WALL)), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.8,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromStacks(new ItemStack(
-                        Blocks.STONE_SLAB, 1, 
-                        BlockStoneSlab.EnumType.COBBLESTONE.getMetadata())), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.8,
-                MicronizerRecipe.FixedConverter.HALF_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromStacks(new ItemStack(
-                        Blocks.STONE_SLAB, 1, 
-                        BlockStoneSlab.EnumType.SAND.getMetadata())), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.7,
-                MicronizerRecipe.FixedConverter.HALF_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromStacks(new ItemStack(
-                        Blocks.STONE_SLAB, 1, 
-                        BlockStoneSlab.EnumType.SMOOTHBRICK.getMetadata())), 
-                ModBulkResources.MICRONIZED_STONE,
-                1.0,
-                MicronizerRecipe.FixedConverter.HALF_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromStacks(new ItemStack(
-                        Blocks.STONE_SLAB, 1, 
-                        BlockStoneSlab.EnumType.STONE.getMetadata())), 
-                ModBulkResources.MICRONIZED_STONE,
-                1.0,
-                MicronizerRecipe.FixedConverter.HALF_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromStacks(new ItemStack(
-                        Blocks.STONE_SLAB2, 1, 
-                        BlockStoneSlabNew.EnumType.RED_SANDSTONE.getMetadata())), 
-                ModBulkResources.MICRONIZED_STONE,
-                0.7,
-                MicronizerRecipe.FixedConverter.HALF_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cobble)), 
-                ModBulkResources.MICRONIZED_BASALT,
-                1.0,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cut)), 
-                ModBulkResources.MICRONIZED_BASALT,
-                1.2,
-                MicronizerRecipe.FixedConverter.FULL_BLOCK);
-
-        MicronizerRecipe.add(
-                Ingredient.fromItem(ModItems.basalt_rubble), 
-                ModBulkResources.MICRONIZED_BASALT,
-                1.0,
-                MicronizerRecipe.FixedConverter.NINTH_BLOCK);
-        
-        MicronizerRecipe.add(
-                Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cool_static_height)),
+                ProcessManager.readIngredient("hard_science:basalt_cool_static_height"),
                 ModBulkResources.MICRONIZED_BASALT,
                 1.2,
                 MicronizerRecipe.TerrainConverter.INSTANCE);
                 
         MicronizerRecipe.add(
-                Ingredient.fromItem(Item.getItemFromBlock(ModBlocks.basalt_cool_static_filler)),
+                ProcessManager.readIngredient("hard_science:basalt_cool_static_filler"),
                 ModBulkResources.MICRONIZED_BASALT,
                 1.2,
                 MicronizerRecipe.TerrainConverter.INSTANCE);
-
 
         //TODO: actual recipe
 //        EmergencyFabricatorRecipe.addFab(

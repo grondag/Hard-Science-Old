@@ -42,6 +42,6 @@ public class ChemicalBatteryBlock extends MachineBlock
     @Override
     public PortLayout nominalPortLayout()
     {
-        return ModPortLayouts.power_low_carrier_flex_all;
+        return ModPortLayouts.utb_low_carrier_all;
     }
 }

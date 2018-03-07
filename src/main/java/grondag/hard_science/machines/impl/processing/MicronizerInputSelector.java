@@ -2,7 +2,6 @@ package grondag.hard_science.machines.impl.processing;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -20,11 +19,13 @@ import grondag.hard_science.simulator.fobs.SimpleProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.FluidResource;
+import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import it.unimi.dsi.fastutil.objects.AbstractObject2LongMap.BasicEntry;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.util.math.MathHelper;
 
 /**
@@ -46,15 +47,29 @@ public class MicronizerInputSelector implements IDomainMember
     private int backlogDepth;
     private int nextUpdateTick;
     
-    private HashMap<FluidResource, Demand> demands = new HashMap<>();
-    
-    private ImmutableList<AbstractResourceWithQuantity<StorageTypeStack>> bestInputs;
+    private ImmutableList<IResource<StorageTypeStack>> bestInputs;
     
     public MicronizerInputSelector(Domain domain)
     {
         this.domain = domain;
     }
 
+    /**
+     * Rules for input selection
+     * 
+     * Constraint: Always exclude inputs below defined reserve stocking levels.
+     * Constraint: Always exclude inputs without a defined stocking level.
+     * 
+     * 1) Use inputs that produce the most in-demand output first
+     * 
+     * 2) If inputs produce same output or outputs with same demand level,
+     * use inputs above target stock level first. Pick input with the highest
+     * absolute overstock amount.
+     * 
+     * 3) If all inputs for an output are below target stocking levels,
+     * pick the input most available relative to the target.
+     *      
+     */
     private void updateBacklogIfStale()
     {
         if(Simulator.instance().getTick() < nextUpdateTick) return;
@@ -64,20 +79,22 @@ public class MicronizerInputSelector implements IDomainMember
         long maxDemand = 0;
         long totalDemand = 0;
         
-        this.demands.clear();
+        Object2IntOpenHashMap<FluidResource> demands = new Object2IntOpenHashMap<>();
+        
         for(BulkResource br : MicronizerRecipe.allOutputs())
         {
             ProcessInfo info = this.domain.processManager.getInfo(br.fluidResource());
-            maxDemand += info.minStockLevel();
+            if(info == null) continue;
+            maxDemand += info.targetStockLevel();
             long demand = info.demand();
             if(demand > 0)
             {
                 totalDemand += demand;
-                int priority = (int) (info.minStockLevel() > 0
-                        ? Short.MAX_VALUE - (demand * Short.MAX_VALUE / info.minStockLevel())
-                        : 0);
-                this.demands.put(br.fluidResource(),
-                        new Demand(demand, priority));
+                
+                // Gives a 15-bit showing relative demand level.
+                // Will be most significant bits of ranking value.
+                int demandFactor = (int) (Short.MAX_VALUE * info.demandFactor());
+                demands.put(br.fluidResource(), demandFactor);
             }
         }
         this.maxBacklog = MathHelper.ceil(VolumeUnits.nL2Liters(maxDemand));
@@ -88,7 +105,7 @@ public class MicronizerInputSelector implements IDomainMember
         List<AbstractResourceWithQuantity<StorageTypeStack>> candidates 
             = domain.itemStorage.findEstimatedAvailable(MicronizerRecipe.INPUT_RESOURCE_PREDICATE);
         
-        ArrayList<BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>>> allInputs  = new ArrayList<>();
+        ArrayList<BasicEntry<IResource<StorageTypeStack>>> allInputs  = new ArrayList<>();
         
         // for each input, see if outputs are needed and prioritize
         for(AbstractResourceWithQuantity<StorageTypeStack> c : candidates)
@@ -98,57 +115,32 @@ public class MicronizerInputSelector implements IDomainMember
             MicronizerRecipe recipe = MicronizerRecipe.getForInput(inputRes);
             if(recipe == null) continue;
             
-            Demand demand = this.demands.get(recipe.outputResource().fluidResource());
-            if(demand == null || demand.quantity == 0) continue;
+            long demand = demands.getInt(recipe.outputResource().fluidResource());
+            if(demand == 0) continue;
                     
-            int inputDemand = recipe.inputQtyForOutputQty(inputRes.sampleItemStack(), demand.quantity);
-            
-            int inputFactor = 0;
             ProcessInfo inputInfo = domain.processManager.getInfo(inputRes);
-            if(inputInfo != null)
-            {
-                inputFactor = (Short.MAX_VALUE - inputInfo.priority());
-                
-                if(inputInfo.minStockLevel() > 0)
-                {
-                    inputFactor |= (Short.MAX_VALUE
-                        - (inputInfo.demand() * Short.MAX_VALUE / inputInfo.minStockLevel())) 
-                            << 8;
-                }
-            }
+            if(inputInfo == null) continue;
             
-            // rank value components from most significant to least: 
-            //  output priority (inverted), 
-            //  output stocking factor (low = more available)
-            //  input availability/value factor (low = less available/valuable)
-            long ranking = (demand.priority << 16) | inputFactor;
+            double inputAvailability = inputInfo.availabilityFactor();
+            if(inputAvailability == 0) continue;
+            
+            long ranking = (long)(inputAvailability * 0xFFFFFFFFFFFFL) | (demand << 48);
                     
-            allInputs.add(new BasicEntry<>(inputRes.withQuantity(inputDemand), ranking));
+            allInputs.add(new BasicEntry<>(inputRes, ranking));
         }
         
         this.bestInputs = allInputs.stream()
-                .sorted(new Comparator<BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>>>()
+            .sorted(new Comparator<BasicEntry<IResource<StorageTypeStack>>>()
+            {
+                @Override
+                public int compare(BasicEntry<IResource<StorageTypeStack>> o1, BasicEntry<IResource<StorageTypeStack>> o2)
                 {
-                    @Override
-                    public int compare(BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>> o1, BasicEntry<AbstractResourceWithQuantity<StorageTypeStack>> o2)
-                    {
-                        return Long.compare(o1.getLongValue(), o2.getLongValue());
-                    }
-                })
-                .map(p -> p.getKey())
-                .collect(ImmutableList.toImmutableList());
-    }
-    
-    private static class Demand
-    {
-        private final long quantity;
-        private final int priority;
-        
-        private Demand(long demand, int priority)
-        {
-            this.quantity = demand;
-            this.priority = priority;
-        }
+                    // note reverse order, higher ranking first
+                    return Long.compare(o2.getLongValue(), o1.getLongValue());
+                }
+            })
+            .map(p -> p.getKey())
+            .collect(ImmutableList.toImmutableList());
     }
     
     /**
@@ -159,7 +151,7 @@ public class MicronizerInputSelector implements IDomainMember
      * TODO: Use request priority as an input - right now only considers
      *  domain stocking levels and priorities
      */
-    private List<AbstractResourceWithQuantity<StorageTypeStack>> findBestInputs()
+    private List<IResource<StorageTypeStack>> findBestInputs()
     {
         this.updateBacklogIfStale();
         return this.bestInputs;
@@ -167,9 +159,8 @@ public class MicronizerInputSelector implements IDomainMember
 
     /**
      * 
-     * Estimated number of crusher cycles that need to run to catch
-     * up with quantity in the given domain based on input material
-     * available.
+     * Estimated number of crusher cycles that need to run to 
+       reach target output levels.
      */
     public int estimatedBacklogDepth()
     {
@@ -195,32 +186,32 @@ public class MicronizerInputSelector implements IDomainMember
 
                 // look for output resources that are in quantity
                 // for those in quantity, take the highest priority
-                List<AbstractResourceWithQuantity<StorageTypeStack>> candidates
+                List<IResource<StorageTypeStack>> candidates
                     = findBestInputs();
 
                 NewProcurementTask<StorageTypeStack> result = null;
 
                 if(!candidates.isEmpty())
                 {
-                    for(AbstractResourceWithQuantity<StorageTypeStack> rwq : candidates)
+                    for(IResource<StorageTypeStack> res : candidates)
                     {
                         List<IResourceContainer<StorageTypeStack>> sources = 
-                                machine.getDomain().itemStorage.findSourcesFor(rwq.resource(), machine);
+                                machine.getDomain().itemStorage.findSourcesFor(res, machine);
 
                         if(sources.isEmpty()) continue;
 
                         // skip if machine can't accept this resource
-                        if(machine.getBufferManager().itemInput().availableCapacityFor(rwq.resource()) == 0) continue;
+                        if(machine.getBufferManager().itemInput().availableCapacityFor(res) == 0) continue;
                         
                         IResourceContainer<StorageTypeStack> store = sources.get(0);
 
                         result = new SimpleProcurementTask<>(
-                                machine.getDomain().systemTasks, rwq.resource(), 1);
+                                machine.getDomain().systemTasks, res, 1);
 
-                        if(machine.getDomain().itemStorage.setAllocation(rwq.resource(), result, 1) == 1)
+                        if(machine.getDomain().itemStorage.setAllocation(res, result, 1) == 1)
                         {
                             // already on service thread so send immediately
-                            LogisticsService.ITEM_SERVICE.sendResourceNow(rwq.resource(), 1L, store.device(), machine, false, false, result);
+                            LogisticsService.ITEM_SERVICE.sendResourceNow(res, 1L, store.device(), machine, false, false, result);
                         }
                         
                         // release any outstanding allocation that wasn't transported

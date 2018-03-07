@@ -1,6 +1,9 @@
 package grondag.hard_science.simulator.domain;
 
 import java.util.HashMap;
+import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
@@ -8,113 +11,325 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.impl.processing.MicronizerInputSelector;
 import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.simulator.device.IDevice;
+import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
+import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.IResource;
+import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
+import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.oredict.OreIngredient;
 
 public class ProcessManager implements IReadWriteNBT, IDomainMember
 {
     private final Domain domain;
     
-    private final HashMap<IResource<?>, ProcessInfo> infos = new HashMap<>();
+    private final HashMap<IResource<StorageTypeFluid>, FluidProcessInfo> fluidInfos = new HashMap<>();
+    private final HashMap<String, IngredientProcessInfo> ingredientInfos = new HashMap<>();
     
     public final MicronizerInputSelector micronizerInputSelector;
     
-    public class ProcessInfo
+    public abstract class ProcessInfo
     {
-        private final IResource<?> resource;
-        private long minStockLevel;
-        private long maxStockLevel;
-        private int priority;
+        protected long reserveStockLevel;
+        protected long targetStockLevel;
         
-        private ProcessInfo(IResource<?> resource)
+        public long reserveStockLevel() { return this.reserveStockLevel; }
+        public long targetStockLevel() { return this.targetStockLevel; }
+        
+        protected ProcessInfo() {};
+        
+        protected ProcessInfo(NBTTagCompound tag)
         {
-            this.resource = resource;
+            this.reserveStockLevel = tag.getLong(ModNBTTag.PROCESS_RESERVE_STOCKING_LEVEL);
+            this.targetStockLevel = tag.getLong(ModNBTTag.PROCESS_TARGET_STOCKING_LEVEL);
+            this.normalize();
         }
         
-        private ProcessInfo(NBTTagCompound tag)
+        protected void writeNBT(NBTTagCompound tag)
         {
-            this.resource = StorageType.fromNBTWithType(tag);
-            this.minStockLevel = tag.getLong(ModNBTTag.PROCESS_MIN_STOCKING_LEVEL);
-            this.maxStockLevel = tag.getLong(ModNBTTag.PROCESS_MAX_STOCKING_LEVEL);
-            this.priority = tag.getInteger(ModNBTTag.PROCESS_STOCKING_PRIORITY);
+            tag.setLong(ModNBTTag.PROCESS_RESERVE_STOCKING_LEVEL, reserveStockLevel);
+            tag.setLong(ModNBTTag.PROCESS_TARGET_STOCKING_LEVEL, targetStockLevel);
         }
-        
-
-        
-        private NBTTagCompound toNBT()
-        {
-            NBTTagCompound result = StorageType.toNBTWithType(resource);
-            result.setLong(ModNBTTag.PROCESS_MIN_STOCKING_LEVEL, minStockLevel);
-            result.setInteger(ModNBTTag.PROCESS_STOCKING_PRIORITY, priority);
-            return result;
-        }
-        
-        public IResource<?> resource() { return this.resource; }
-        public long minStockLevel() { return this.minStockLevel; }
-        public long maxStockLevel() { return this.maxStockLevel; }
-        public int priority() { return this.priority; }
-        
-        
-        /** max less min, can be zero */
-        public long stockIntervalSize() { return this.maxStockLevel - this.minStockLevel; }
         
         /**
-         * Returns the difference between resource level and min stocking level.
+         * Scrubs bad/nonesense levels
+         */
+        protected void normalize()
+        {
+            if(this.reserveStockLevel < 0) this.reserveStockLevel = 0;
+            
+            if(this.targetStockLevel < this.reserveStockLevel)
+                this.targetStockLevel = this.reserveStockLevel;
+        }
+        
+        /** target less reserve, can be zero */
+        public long stockIntervalSize() { return this.targetStockLevel - this.reserveStockLevel; }
+        
+        /**
+         * Returns the difference between resource level and target stocking level.
          * Value is not fully reliable because not limited to storage service thread.
-         * Returns 0 if at or above mininum stock level.
+         * Returns 0 if at or above target stock level.
          */
         public long demand()
         {
-            if(this.priority == 0 || this.minStockLevel <= 0) return 0;
+            if(this.targetStockLevel <= 0) return 0;
+            return Math.max(0, this.targetStockLevel - this.onHand()); 
+        }
+        
+        /**
+         * Returns estimate of current available inventory.
+         */
+        public abstract long onHand();
+        
+        /**
+         * Returns 0-1 indicator of demand level, meanings as follows:<br>
+         * 0 to 0.5    Target demand<br>
+         * 0.5 to 1.0  Reserve demand<p>
+         * 
+         * Examples:<br>
+         * 1    Nothing on hand, reserve and target levels defined<br>
+         * 0.75    Half of reserve level met, none of target level satisfied<br>
+         * 0.5 Reserve level met (or no reserve), but none of target level met<br>
+         * 0.25    Reserve level met (or no reserve), half of target level met<br>
+         * 0   All levels met, and/or no level(s) defined<br>
+         */
+        public float demandFactor()
+        {
+            if(this.targetStockLevel == 0) return 0;
             
-            return Math.max(
-                    0, 
-                    this.minStockLevel 
-                        - domain.getStorageManager(resource.storageType())
-                        .getEstimatedAvailable(resource)); 
+            float result = 0;
+            long onHand = this.onHand();
+            
+            if(onHand < this.reserveStockLevel)
+            {
+                result = 0.5f + 0.5f * (1f - (float)onHand / this.reserveStockLevel);
+            }
+            else if(onHand < this.targetStockLevel)
+            {
+                // note that logically target != reserve if we get here
+                if(onHand < targetStockLevel)
+                {
+                    float coverage = onHand - this.reserveStockLevel;
+                    float span = this.targetStockLevel - this.reserveStockLevel;
+                    
+                    result = 0.5f * (1f - coverage/span);
+                }
+            }
+            return result;
+        }
+        
+        /**
+         * Returns 0+ indicator of availability, meanings as follows:<br>
+         * 0  On hand is at or below reserve stocking level<br>
+         * 0 to 1.0  On hand it between reserve stocking level and target stocking level<p>
+         * 2+ On hand is above target stocking level. 2 mean 1 above, 3 is 2 above, etc.
+         */
+        public float availabilityFactor()
+        {
+            long onHand = this.onHand();
+            
+            if(onHand <= this.reserveStockLevel) return 0;
+            
+            if(onHand > this.targetStockLevel) return onHand - this.targetStockLevel + 1;
+            
+            // note that logically reserve and target must 
+            // be different if we get to this point
+            return (onHand - this.reserveStockLevel) / (float) this.stockIntervalSize();
+            
+        }
+        
+        public void setReserveStockLevel(long level)
+        {
+            this.reserveStockLevel = level;
+            this.normalize();
+            domain.setDirty();
+        }
+        
+        public long getReserveStockLevel()
+        {
+            return this.reserveStockLevel;
+        }
+        
+        public void setTargetStockLevel(long level)
+        {
+            this.targetStockLevel = level;
+            this.normalize();
+            domain.setDirty();
+        }
+        
+        public long getTargetStockLevel()
+        {
+            return this.targetStockLevel;
+        }
+
+    }
+    
+    public class FluidProcessInfo extends ProcessInfo
+    {
+        private final IResource<StorageTypeFluid> resource;
+        
+        private FluidProcessInfo(IResource<StorageTypeFluid> resource)
+        {
+            super();
+            this.resource = resource;
+        }
+        
+        private FluidProcessInfo(NBTTagCompound tag)
+        {
+            super(tag);
+            this.resource = StorageType.FLUID.fromNBT(tag);
+        }
+        
+        private NBTTagCompound toNBT()
+        {
+            NBTTagCompound result = StorageType.FLUID.toNBT(resource);
+            super.writeNBT(result);
+            return result;
+        }
+        
+        public IResource<StorageTypeFluid> resource() { return this.resource; }
+        
+        @Override
+        public long onHand()
+        {
+            return domain.fluidStorage.getEstimatedAvailable(resource);
         }
     }
     
-    
-    /**
-     * Used for setting up default config file.
-     * Note that fluid amounts are in liters.
-     */
-    public static String writeDefaultCSV(
-            IResource<?> resource, 
-            int priority,
-            long minStockLevel,
-            long maxStockLevel)
+    public class IngredientProcessInfo extends ProcessInfo
     {
-        return  priority + "," +
-                minStockLevel + "," +
-                maxStockLevel + "," +
-                StorageType.toCSVWithType(resource);
+        private final Ingredient ingredient;
+        private final String ingString;
+        
+        private IngredientProcessInfo(String ingString)
+        {
+            super();
+            this.ingredient = readIngredient(ingString);
+            this.ingString = ingString;
+        }
+        
+        private IngredientProcessInfo(NBTTagCompound tag)
+        {
+            super(tag);
+            this.ingString = tag.getString(ModNBTTag.PROCESS_INGREDIENT);
+            this.ingredient = readIngredient(ingString);
+        }
+        
+        private NBTTagCompound toNBT()
+        {
+            NBTTagCompound result = new NBTTagCompound();
+            result.setString(ModNBTTag.PROCESS_INGREDIENT, this.ingString);
+            super.writeNBT(result);
+            return result;
+        }
+        
+        public Ingredient ingredient() { return this.ingredient; }
+        
+        
+        public long onHand()
+        {
+            List<AbstractResourceWithQuantity<StorageTypeStack>> stocked 
+                = domain.itemStorage.findEstimatedAvailable(this.ingredient);
+            
+            long avail = 0;
+            
+            if(!stocked.isEmpty())
+            {
+                for(AbstractResourceWithQuantity<StorageTypeStack> rwq : stocked)
+                {
+                    avail += rwq.getQuantity();
+                }
+            }
+            return avail; 
+        }
     }
     
-    private ProcessInfo readDefaultCSV(String csv)
+    private FluidProcessInfo readFluidCSV(String csv)
     {
         try
         {
             String args[] = csv.split(",");
-            if(args.length > 3)
+            if(args.length == 3)
             {
-                int myLen = args[0].length() + args[1].length()
-                        + args[2].length() + 3;
-                IResource<?> res = StorageType.fromCSVWithType(csv.substring(myLen));
-                ProcessInfo result = new ProcessInfo(res);
-                result.priority = Math.min(Short.MAX_VALUE, Integer.parseInt(args[0]));
-                result.minStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[1]));
-                result.maxStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[2]));
+                Fluid fluid = FluidRegistry.getFluid(args[0].trim());
+                IResource<StorageTypeFluid> res = new FluidResource(fluid, null);
+                FluidProcessInfo result = new FluidProcessInfo(res);
+                result.reserveStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[1].trim()));
+                result.targetStockLevel = VolumeUnits.liters2nL(Long.parseLong(args[2].trim()));
+                
+                if(result.targetStockLevel < result.reserveStockLevel)
+                    result.targetStockLevel = result.reserveStockLevel;
                 return result;
             }
         }
         catch(Exception e)
         {
-            Log.error("Unable to parse resource processing configuration", e);
+            Log.error("Unable to parse fluid resource processing configuration", e);
+        }
+        return null;
+    }
+    
+    public static Ingredient readIngredient(String ingString)
+    {
+        String itemArgs[] = ingString.split(":");
+        
+        if(itemArgs.length < 2) return null;
+        
+        if(itemArgs[0].equals("ore"))
+        {
+            // oredict
+            return new OreIngredient(itemArgs[1]);
+        }
+        else
+        {
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemArgs[0], itemArgs[1]));
+            if(item == null ) return Ingredient.EMPTY;
+            
+            if(itemArgs.length == 3)
+            {
+                // metadata provided
+                return Ingredient.fromStacks(new ItemStack(
+                      item, 1, 
+                      Integer.parseInt(itemArgs[2])));
+            }
+            else
+            {
+                // no metadata
+                return Ingredient.fromItem(item);
+            }
+        }
+    }
+    
+    private IngredientProcessInfo readItemCSV(String csv)
+    {
+        try
+        {
+            String args[] = csv.split(",");
+            if(args.length == 3)
+            {
+                Ingredient ing = readIngredient(args[0].trim());
+                if(ing == null || ing == Ingredient.EMPTY) return null;
+                
+                IngredientProcessInfo result = new IngredientProcessInfo(args[0]);
+                result.reserveStockLevel = Long.parseLong(args[1].trim());
+                result.targetStockLevel = Long.parseLong(args[2].trim());
+                return result;
+            }
+        }
+        catch(Exception e)
+        {
+            Log.error("Unable to parse item resource processing configuration", e);
         }
         return null;
     }
@@ -125,71 +340,105 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         this.micronizerInputSelector = new MicronizerInputSelector(domain);
         
         //load defaults
-        for(String csv : Configurator.PROCESSING.resourceDefaults)
+        for(String csv : Configurator.PROCESSING.fluidResourceDefaults)
         {
-            ProcessInfo info = readDefaultCSV(csv);
-            if(info != null) this.infos.put(info.resource, info);
+            FluidProcessInfo info = readFluidCSV(csv);
+            if(info != null) 
+            {
+                info.normalize();
+                this.fluidInfos.put(info.resource, info);
+            }
         }
         
-    }
-    
-    public ProcessInfo getInfo(IResource<?> resource)
-    {
-        return this.infos.get(resource);
-    }
-    
-    public void setMinStockLevel(IResource<?> resource, long level)
-    {
-        ProcessInfo pi = this.infos.get(resource);
-        if(pi == null)
+        //load defaults
+        for(String csv : Configurator.PROCESSING.itemResourceDefaults)
         {
-            pi = new ProcessInfo(resource);
-            this.infos.put(resource, pi);
+            IngredientProcessInfo info = readItemCSV(csv);
+            if(info != null && info.ingredient != Ingredient.EMPTY) 
+            {
+                info.normalize();
+                this.ingredientInfos.put(info.ingString, info);
+            }
         }
-        pi.minStockLevel = level;
+    }
+    
+    /**
+     * Will replace if already exists.
+     */
+    public FluidProcessInfo putInfo(FluidResource resource, long reserveLevel, long targetLevel)
+    {
+        FluidProcessInfo result = new FluidProcessInfo(resource);
+        result.reserveStockLevel = reserveLevel;
+        result.targetStockLevel = targetLevel;
+        this.fluidInfos.put(resource, result);
         this.domain.setDirty();
+        return result;
     }
     
-    public long getMinStockLevel(IResource<?> resource)
+    /**
+     * Will replace if already exists.
+     */
+    public IngredientProcessInfo putInfo(String ingredientString, long reserveLevel, long targetLevel)
     {
-        ProcessInfo pi = this.infos.get(resource);
-        return pi == null ? 0 : pi.minStockLevel;
+        IngredientProcessInfo result = new IngredientProcessInfo(ingredientString);
+        result.reserveStockLevel = reserveLevel;
+        result.targetStockLevel = targetLevel;
+        this.ingredientInfos.put(ingredientString, result);
+        this.domain.setDirty();
+        return result;
     }
     
-    public void setMaxStockLevel(IResource<?> resource, long level)
+    public FluidProcessInfo getInfo(FluidResource resource)
     {
-        ProcessInfo pi = this.infos.get(resource);
-        if(pi == null)
+        return this.fluidInfos.get(resource);
+    }
+    
+    /**
+     * For use in control GUI
+     */
+    public ImmutableList<FluidProcessInfo> allFluidInfos()
+    {
+        return ImmutableList.copyOf(this.fluidInfos.values());
+    }
+    
+    /**
+     * Searches for ingredients that match the given item resource
+     * and chooses the one with the highest target levels.
+     */
+    public IngredientProcessInfo getInfo(ItemResource resource)
+    {
+        ItemStack stack = resource.sampleItemStack();
+        
+        IngredientProcessInfo result = null;
+        for(IngredientProcessInfo pi : this.ingredientInfos.values())
         {
-            pi = new ProcessInfo(resource);
-            this.infos.put(resource, pi);
+            if(pi.ingredient.test(stack))
+            {
+                if(result == null 
+                        || pi.targetStockLevel < result.targetStockLevel
+                        || pi.reserveStockLevel < result.reserveStockLevel)
+                {
+                    result = pi;
+                }
+            }
         }
-        pi.maxStockLevel = level;
-        this.domain.setDirty();
+        return result;
     }
     
-    public long getMaxStockLevel(IResource<?> resource)
+    /**
+     * For use in control GUI
+     */
+    public IngredientProcessInfo getInfo(String ingredientString)
     {
-        ProcessInfo pi = this.infos.get(resource);
-        return pi == null ? 0 : pi.maxStockLevel;
+        return this.ingredientInfos.get(ingredientString);
     }
     
-    public void setStockingPriority(IResource<?> resource, int priority)
+    /**
+     * For use in control GUI
+     */
+    public ImmutableList<IngredientProcessInfo> allIngredientInfos()
     {
-        ProcessInfo pi = this.infos.get(resource);
-        if(pi == null)
-        {
-            pi = new ProcessInfo(resource);
-            this.infos.put(resource, pi);
-        }
-        pi.priority = MathHelper.clamp(priority, 0, Short.MAX_VALUE);
-        this.domain.setDirty();
-    }
-    
-    public int getStockingPriority(IResource<?> resource)
-    {
-        ProcessInfo pi = this.infos.get(resource);
-        return pi == null ? 0 : pi.priority;
+        return ImmutableList.copyOf(this.ingredientInfos.values());
     }
     
     @Override
@@ -201,31 +450,73 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        if(!this.infos.containsKey(ModNBTTag.PROCESS_SETTINGS)) return;
-
-        this.infos.clear();
-        
-        NBTTagList tags = tag.getTagList(ModNBTTag.PROCESS_SETTINGS, 10);
-        tags.forEach(t ->
+        if(tag.hasKey(ModNBTTag.PROCESS_FLUID_SETTINGS))
         {
-            ProcessInfo pi = new ProcessInfo((NBTTagCompound)t);
-            this.infos.put(pi.resource, pi);
-        });
+            this.fluidInfos.clear();
+            
+            NBTTagList tags = tag.getTagList(ModNBTTag.PROCESS_FLUID_SETTINGS, 10);
+            if( tags != null && !tags.hasNoTags())
+            {
+                for (int i = 0; i < tags.tagCount(); ++i)
+                {
+                    try
+                    {
+                        FluidProcessInfo pi = new FluidProcessInfo(tags.getCompoundTagAt(i));
+                        if(pi.resource != null)  this.fluidInfos.put(pi.resource, pi);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.error("Unable to read fluid process settings", e);
+                    }
+                }
+            }
+        }
         
-        tag.setTag(ModNBTTag.PROCESS_SETTINGS, tags);
+        if(tag.hasKey(ModNBTTag.PROCESS_INGREDIENT_SETTINGS))
+        {
+            this.ingredientInfos.clear();
+            
+            NBTTagList tags = tag.getTagList(ModNBTTag.PROCESS_INGREDIENT_SETTINGS, 10);
+            if( tags != null && !tags.hasNoTags())
+            {
+                for (int i = 0; i < tags.tagCount(); ++i)
+                {
+                    try
+                    {
+                        IngredientProcessInfo pi = new IngredientProcessInfo(tags.getCompoundTagAt(i));
+                        if(pi.ingredient != null && pi.ingredient != Ingredient.EMPTY)  
+                                this.ingredientInfos.put(pi.ingString, pi);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.error("Unable to read ingredient process settings", e);
+                    }                
+                }   
+            }
+        }
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        if(this.infos.isEmpty()) return;
-        
-        NBTTagList tags = new NBTTagList();
-        for(ProcessInfo pi : this.infos.values())
+        if(!this.fluidInfos.isEmpty())
         {
-            tags.appendTag(pi.toNBT());
+            NBTTagList tags = new NBTTagList();
+            for(FluidProcessInfo pi : this.fluidInfos.values())
+            {
+                tags.appendTag(pi.toNBT());
+            }
+            tag.setTag(ModNBTTag.PROCESS_FLUID_SETTINGS, tags);
         }
-        tag.setTag(ModNBTTag.PROCESS_SETTINGS, tags);
+        
+        if(!this.ingredientInfos.isEmpty())
+        {
+            NBTTagList tags = new NBTTagList();
+            for(IngredientProcessInfo pi : this.ingredientInfos.values())
+            {
+                tags.appendTag(pi.toNBT());
+            }
+            tag.setTag(ModNBTTag.PROCESS_INGREDIENT_SETTINGS, tags);
+        }
     }
-    
 }

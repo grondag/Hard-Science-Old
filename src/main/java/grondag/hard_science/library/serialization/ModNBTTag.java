@@ -192,9 +192,8 @@ public class ModNBTTag
     public static final String RECIPE_ITEM_INPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String RECIPE_FLUID_OUTPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String RECIPE_ITEM_OUTPUTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public static final String PROCESS_MIN_STOCKING_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public static final String PROCESS_STOCKING_PRIORITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public static final String PROCESS_SETTINGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PROCESS_RESERVE_STOCKING_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PROCESS_FLUID_SETTINGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String BUFFER_ITEMS_IN = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String BUFFER_ITEMS_OUT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String BUFFER_FLUIDS_IN = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -203,6 +202,8 @@ public class ModNBTTag
     public static final String BUFFER_PURPOSE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String TASK_DELIVERED_QTY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String PRIVATE_BUFFER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public static final String PROCESS_MAX_STOCKING_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PROCESS_TARGET_STOCKING_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PROCESS_INGREDIENT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String PROCESS_INGREDIENT_SETTINGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
 }

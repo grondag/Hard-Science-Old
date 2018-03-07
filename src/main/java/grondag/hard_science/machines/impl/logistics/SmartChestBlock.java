@@ -56,7 +56,7 @@ public class SmartChestBlock extends MachineContainerBlock
     @Override
     public PortLayout nominalPortLayout()
     {
-        return ModPortLayouts.non_fluid_low_carrier_all;
+        return ModPortLayouts.utb_low_carrier_all;
     }
     
     @Override

@@ -1,5 +1,6 @@
 package grondag.hard_science.crafting.processing;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -65,9 +66,9 @@ public class MicronizerRecipe
         return conversions.getAllKeys1();
     }
     
-    public static List<BulkResource> allOutputs()
+    public static Collection<BulkResource> allOutputs()
     {
-        return conversions.getAllKeys2();
+        return conversions.getDistinctKeys2();
     }
     
     public static MicronizerRecipe getForInput(ItemStack stack)
@@ -236,14 +237,14 @@ public class MicronizerRecipe
      */
     public static class FixedConverter implements Function<ItemStack, Long> 
     {
-        public static final FixedConverter FULL_BLOCK 
-            = new MicronizerRecipe.FixedConverter(VolumeUnits.KILOLITER.nL);
-
-        public static final FixedConverter HALF_BLOCK 
-        = new MicronizerRecipe.FixedConverter(VolumeUnits.KILOLITER.nL / 2);
-        
-        public static final FixedConverter NINTH_BLOCK 
-        = new MicronizerRecipe.FixedConverter(VolumeUnits.KILOLITER.nL / 9);
+//        public static final FixedConverter FULL_BLOCK 
+//            = new MicronizerRecipe.FixedConverter(VolumeUnits.KILOLITER.nL);
+//
+//        public static final FixedConverter HALF_BLOCK 
+//        = new MicronizerRecipe.FixedConverter(VolumeUnits.KILOLITER.nL / 2);
+//        
+//        public static final FixedConverter NINTH_BLOCK 
+//        = new MicronizerRecipe.FixedConverter(VolumeUnits.KILOLITER.nL / 9);
         
         private final long nlPerItem;
         

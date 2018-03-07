@@ -90,6 +90,7 @@ public class MachineTileEntity extends SuperTileEntity
             this.machine = ((MachineBlock)this.getBlockType()).machine(this.world, this.pos);
             if(this.machine != null) this.machine.machineTE = this;
         }
+      
         return this.machine;
     }
 
