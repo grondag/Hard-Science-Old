@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -118,7 +119,7 @@ public class MatterCubeItemModel1 implements IBakedModel
                  matterColor.HCL_L > 0.5f ? 0 : Color.HCL_MAX, 
                  EnumHCLFailureMode.REDUCE_CHROMA);
         
-        new MatterModel.FormulaLeft(matterCube.matter.label, 0xFF000000 | labelColor.RGB_int).addBakedQuads(builder);
+        new MatterModel.FormulaLeft(I18n.translateToLocal("matter.label." + matterCube.matter.systemName().toLowerCase()), 0xFF000000 | labelColor.RGB_int).addBakedQuads(builder);
 
         
         //        for(MatterModel model : matterCube.matter.models)

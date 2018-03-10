@@ -2,6 +2,7 @@ package grondag.hard_science.external.jei;
 
 import javax.annotation.Nonnull;
 
+import grondag.hard_science.crafting.processing.DigesterRecipe;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
 import grondag.hard_science.init.ModBlocks;
 import mezz.jei.api.IJeiRuntime;
@@ -32,7 +33,8 @@ public class HardScienceJEIPlugIn implements IModPlugin
     public void registerCategories(IRecipeCategoryRegistration registry)
     {
         registry.addRecipeCategories(
-                new MicronizerRecipe.Category(registry.getJeiHelpers().getGuiHelper())
+                new MicronizerRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
+                new DigesterRecipe.Category(registry.getJeiHelpers().getGuiHelper())
 
 //                new EmergencyFabricatorRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
 //                new SolarElectrolysisRecipe.Category(registry.getJeiHelpers().getGuiHelper()),
@@ -48,6 +50,9 @@ public class HardScienceJEIPlugIn implements IModPlugin
         
         registry.addRecipes(MicronizerRecipe.allForJEI(), MicronizerRecipe.JEI_UID);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.micronizer), MicronizerRecipe.JEI_UID);
+
+        registry.addRecipes(DigesterRecipe.allForJEI(), DigesterRecipe.JEI_UID);
+        registry.addRecipeCatalyst(new ItemStack(ModBlocks.digester), DigesterRecipe.JEI_UID);
 
         
 //        registry.addRecipes(EmergencyFabricatorRecipe.allRecipes(), EmergencyFabricatorRecipe.UID);

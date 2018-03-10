@@ -45,7 +45,7 @@ public class GenericRecipe implements IHardScienceRecipe
      */
     private RecipeLayout layout;
     
-    protected GenericRecipe(
+    public GenericRecipe(
             Collection<AbstractResourceWithQuantity<?>> inputs,
             Collection<AbstractResourceWithQuantity<?>> outputs,
             int ticksDuration

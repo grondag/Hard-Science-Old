@@ -9,6 +9,7 @@ import grondag.hard_science.machines.impl.logistics.TankMachine;
 import grondag.hard_science.machines.impl.logistics.SmartChestMachine;
 import grondag.hard_science.machines.impl.logistics.TopBusMachine;
 import grondag.hard_science.machines.impl.logistics.WaterPumpMachine;
+import grondag.hard_science.machines.impl.processing.DigesterMachine;
 import grondag.hard_science.machines.impl.processing.MicronizerMachine;
 import grondag.hard_science.machines.impl.production.PhotoElectricMachine;
 import grondag.hard_science.machines.impl.production.SolarCableMachine;
@@ -32,5 +33,6 @@ public class ModDevices
         DeviceManager.register(HardScience.prefixResource("dedicated_tank"), TankMachine.Dedicated.class);
         DeviceManager.register(HardScience.prefixResource("chemical_battery"), ChemicalBatteryMachine.class);
         DeviceManager.register(HardScience.prefixResource("micronizer"), MicronizerMachine.class);
+        DeviceManager.register(HardScience.prefixResource("digester"), DigesterMachine.class);
     }
 }

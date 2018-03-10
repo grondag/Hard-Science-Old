@@ -10,6 +10,7 @@ import grondag.hard_science.machines.impl.logistics.ModularTankBlock;
 import grondag.hard_science.machines.impl.logistics.SmartChestBlock;
 import grondag.hard_science.machines.impl.logistics.TopBusBlock;
 import grondag.hard_science.machines.impl.logistics.WaterPumpBlock;
+import grondag.hard_science.machines.impl.processing.DigesterBlock;
 import grondag.hard_science.machines.impl.processing.MicronizerBlock;
 import grondag.hard_science.machines.impl.production.PhotoElectricBlock;
 import grondag.hard_science.machines.impl.production.SolarCableBlock;
@@ -70,6 +71,7 @@ public class ModBlocks
     public static final Block intermediate_bus = null;
     public static final Block depleted_fluid = null;
     public static final Block micronizer = null;
+    public static final Block digester = null;
     
 //    public static final Block solar_aggregator = null;
     
@@ -205,6 +207,7 @@ public class ModBlocks
         event.getRegistry().register(new WaterPumpBlock("water_pump"));
         event.getRegistry().register(new ChemicalBatteryBlock("chemical_battery"));
         event.getRegistry().register(new MicronizerBlock("micronizer"));
+        event.getRegistry().register(new DigesterBlock("digester"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 

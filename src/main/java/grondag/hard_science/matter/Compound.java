@@ -13,26 +13,42 @@ public class Compound implements IComposition
     
     private final double weight;
     
+    /**
+     * Map contains molecule/fraction pairs.
+     * If the compound fractions don't add up to 1.0,
+     * fractions will be renormalized so that they do.
+     */
     private Compound(Object2DoubleOpenHashMap<Molecule> map)
     {
-        this.molecules = map;
-        double w = 0;
-        
-        Object2DoubleOpenHashMap<Element> els = new Object2DoubleOpenHashMap<Element>();
-
+        // renormalize mol fractions
+        double totalFraction = 0;
+        for(double d : map.values())
+        {
+            totalFraction += d;
+        }
+        this.molecules = new Object2DoubleOpenHashMap<Molecule>();
         for(Entry<Molecule> entry : map.object2DoubleEntrySet())
+        {
+            this.molecules.put(entry.getKey(), entry.getDoubleValue() / totalFraction);
+        }
+        
+        // compute total weight and per-element counts
+        double totalWeight = 0;
+        
+        this.elements = new Object2DoubleOpenHashMap<Element>();
+
+        for(Entry<Molecule> entry : this.molecules.object2DoubleEntrySet())
         {
             Molecule m = entry.getKey();
             double fraction = entry.getDoubleValue();
             
-            w += m.weight() * fraction;
+            totalWeight += m.weight() * fraction;
             for(Element e : entry.getKey().elements())
             {
-                els.addTo(e, m.countOf(e) * fraction);
+                this.elements.addTo(e, m.countOf(e) * fraction);
             }
         }
-        this.weight = w;
-        this.elements = els;
+        this.weight = totalWeight;
     }
     
     public static Builder builder()

@@ -22,7 +22,8 @@ public class ModGuiHandler implements IGuiHandler
         SOLAR_AGGREGATOR, 
         MODULAR_TANK, 
         GLASS_BATTERY,
-        MICRONIZER;
+        MICRONIZER, 
+        DIGESTER;
     }
     
     @Override

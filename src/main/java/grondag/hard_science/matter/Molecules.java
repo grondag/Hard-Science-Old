@@ -36,8 +36,9 @@ public class Molecules
     public static final Molecule LITHIUM = new Molecule("Li", 0.000);
     public static final Molecule GRAPHITE = new Molecule("C", 0.000);
     public static final Molecule ALUMINUM = new Molecule("Al", 0.000);
+    public static final Molecule ALUMINA = new Molecule("Al2 O3", -1675.7);
     public static final Molecule SILICON = new Molecule("Si", 0.000);
-    public static final Molecule SULFER = new Molecule("S", 0.000);
+    public static final Molecule SULFUR = new Molecule("S", 0.000);
     public static final Molecule IRON = new Molecule("Fe", 0.000);
     public static final Molecule COPPER = new Molecule("Cu", 0.000);
     public static final Molecule NICKEL = new Molecule("Ni", 0.000);
@@ -79,11 +80,34 @@ public class Molecules
     public static final Molecule FLEX_ALLOY = new Molecule("Al1777 Cu32 Mg44 Zn146 Mo1", 0.000);
     public static final Molecule SILICON_NITRIDE = new Molecule("Si3 N4", 0.000);
     public static final Molecule MONOCALCIUM_PHOSPHATE = new Molecule("Ca H4 P2 O8", 0.000);
-    public static final Molecule CALCIUM_NITRATE = new Molecule("Ca N2 O6", 0.000);
-    public static final Molecule SODIUM_NITRATE = new Molecule("Na N O3", 0.000);
-    public static final Molecule POTASSIUM_NITRATE = new Molecule("K N O3", 0.000);
-    public static final Molecule LITHIUM_NITRATE = new Molecule("Li N O3", 0.000);
-    public static final Molecule MAGNESIUM_NITRATE = new Molecule("H12 Mg N2 O12", 0.000);
-    public static final Molecule SODIUM_CHLORIDE = new Molecule("Na Cl", 0.000);
-    public static final Molecule CALCIUM_FLUORIDE = new Molecule("Ca F2", 0.000);
+    
+    public static final Molecule CALCIUM_NITRATE = new Molecule("Ca N2 O6", -938.2);
+    public static final Molecule SODIUM_NITRATE = new Molecule("Na N O3", -467);
+    public static final Molecule POTASSIUM_NITRATE = new Molecule("K N O3", -494);
+    public static final Molecule LITHIUM_NITRATE = new Molecule("Li N O3", -482.3);
+    public static final Molecule MAGNESIUM_NITRATE = new Molecule("Mg N2 O6", -790.7);
+    public static final Molecule SODIUM_CHLORIDE = new Molecule("Na Cl", -411.12);
+    public static final Molecule CALCIUM_FLUORIDE = new Molecule("Ca F2", -1228.0);
+    
+    //digester outputs
+    
+    public static final Molecule CUPRIC_OXIDE = new Molecule("Cu O", -156);
+    public static final Molecule LEAD_OXIDE = new Molecule("Pb O", -219.41);
+    public static final Molecule COBALT_OXIDE = new Molecule("Co O", -237.74);
+    public static final Molecule NICKEL_OXIDE = new Molecule("Ni O", -240);
+    public static final Molecule ZINC_OXIDE = new Molecule("Zn O", -348);
+    public static final Molecule MANGANESE_DIOXIDE = new Molecule("Mn O2", -520);
+    public static final Molecule TIN_DIOXIDE = new Molecule("Sn O2", -577.63);
+    public static final Molecule MOLYBDENUM_TRIOXIDE = new Molecule("Mo O3", -745.17);
+    public static final Molecule HEMATITE = new Molecule("Fe2 O3", -824.2);
+    public static final Molecule TUNGSTEN_TRIOXIDE = new Molecule("W O3", -842.91 );
+    public static final Molecule TITANIUM_DIOXIDE = new Molecule("Ti O2", -945);
+    public static final Molecule ZIRCONIUM_DIOXIDE = new Molecule("Zr O2", -1080);
+    public static final Molecule CHROMIUM_OXIDE = new Molecule("Cr2 O3", -1128);
+    public static final Molecule NEODYMIUM_OXIDE = new Molecule("Nd2 O3", -1807.9);
+    
+    public static final Molecule BORIC_ACID = new Molecule("H3 B O3", -1093.99);
+    public static final Molecule PHOSPHORIC_ACID = new Molecule("H3 P O4", -1288);
+    public static final Molecule SELENIUM = new Molecule("Se", 0);
+    
 }

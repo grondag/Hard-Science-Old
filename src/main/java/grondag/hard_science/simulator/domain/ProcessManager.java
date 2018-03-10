@@ -11,7 +11,6 @@ import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.machines.impl.processing.MicronizerInputSelector;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
 import grondag.hard_science.simulator.resource.IResource;

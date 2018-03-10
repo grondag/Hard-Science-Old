@@ -555,6 +555,26 @@ public class Configurator
             "hard_science:basalt_rubble, micronized_basalt, 111.11111, 1.0"
         };
 
+        @Comment({"Recipe configuration for digester.",
+            "Each row lists a bulk resource (which are fluids in game)",
+            "Other inputs, energy usage and outputs are automatically derived",
+            "from the chemical composition of the input resource.",
+            "Air, water and electricityare used to generate nitric acid within the device.",
+            "Some of this is output in the form of nitrates.",
+            "All other reactants/catalysts are recovered/regenerated within the digester."})
+        @RequiresMcRestart
+        public String[] digesterInputs =
+        {
+            "micronized_stone",
+            "micronized_basalt"
+        };
+        
+        @Comment({"Ouput digester analysis debug information to log. Intended for testing."})
+        public boolean enableDigesterAnalysisDebug = true;
+        
+        @Comment({"Output warning message if digester analysis violates physical constraints. "})
+        public boolean enableDigesterRecipeWarnings = true;
+        
         @Comment({"Default reserve and target stocking levels",
             "for new domains. Has no effect after a domain is created.",
             "Listed resources represent inputs or outputs of automatic production.",

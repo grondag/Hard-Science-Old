@@ -34,7 +34,7 @@ public class BulkResource implements IResource<StorageTypeBulk>
     
     private final String systemName;
     public final int color;
-    public final String label;
+//    public final String label;
     private final IComposition composition;
     private final double tempK;
     private final double pressureP;
@@ -51,7 +51,7 @@ public class BulkResource implements IResource<StorageTypeBulk>
     public BulkResource(
             String systemName,
             int color,
-            String label,
+//            String label,
             IComposition composition,
             double tempCelsius,
             double pressureAtm,
@@ -62,7 +62,7 @@ public class BulkResource implements IResource<StorageTypeBulk>
 //        this.setRegistryName(systemName);
         this.systemName = systemName;
         this.color = color;
-        this.label = label;
+//        this.label = label;
         this.composition = composition;
         this.tempK = Temperature.celsiusToKelvin(tempCelsius);
         this.pressureP = Gas.atmToPascals(pressureAtm);
@@ -77,13 +77,12 @@ public class BulkResource implements IResource<StorageTypeBulk>
     public BulkResource(
             String systemName,
             int color,
-            String label,
             IComposition molecule,
             double tempCelsius,
             double pressureAtm
             )
     {
-        this(systemName, color, label, molecule, tempCelsius, pressureAtm, MatterPhase.GAS, 
+        this(systemName, color, molecule, tempCelsius, pressureAtm, MatterPhase.GAS, 
                 Gas.idealGasDensityCA(molecule, tempCelsius, pressureAtm));
 
     }
