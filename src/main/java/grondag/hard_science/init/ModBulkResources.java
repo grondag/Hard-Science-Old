@@ -173,6 +173,11 @@ public class ModBulkResources
     
     public final static String DIGEST_NAME_PREFIX = "digested_";
     
+    public static String digesterOutputNameFor(BulkResource inputResource)
+    {
+        return DIGEST_NAME_PREFIX + inputResource.systemName();
+    }
+    
     static
     {
         // create bulk resources / fluids for all digester outputs
@@ -187,7 +192,7 @@ public class ModBulkResources
             {
                 DigesterAnalysis da = DigesterAnalysis.get(br);
                 register(
-                        DIGEST_NAME_PREFIX + res, 
+                        digesterOutputNameFor(br), 
                         da.residualColor(), 
                         da.residueCompound, 
                         20, 

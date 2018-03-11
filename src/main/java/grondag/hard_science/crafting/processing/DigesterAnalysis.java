@@ -33,6 +33,14 @@ public class DigesterAnalysis
         }
         return result;
     }
+    
+    /**
+     * Max number of output rows for JEI recipe display.
+     */
+    private static int maxOutputRows = 1;
+    
+    public static int maxOuputRowsJEI() { return maxOutputRows; }
+    
     /**
      * Elements that can be included in residual outputs
      */
@@ -378,6 +386,11 @@ public class DigesterAnalysis
         }
 
         outputs = outputBuilder.build();
+        
+        // max jei rows will be max count of all output, plus one for residue output
+        // which isn't include in the output map because it may not be created yet
+        maxOutputRows = Math.max(maxOutputRows, outputs.size() + 1);
+        
         for(Entry<BulkResource, Double> entry : outputs.entrySet())
         {
             massOut += entry.getKey().composition().weight() * entry.getValue();
@@ -454,6 +467,14 @@ public class DigesterAnalysis
                 * ModBulkResources.H2O_FLUID.litersPerMol();
     }
 
+    /**
+     * Note not in liters because don't have reference to output bulk substance
+     */
+    public double residueOutputMolsPerInputLiter()
+    {
+        return this.input.molsPerLiter() * this.residueMols;
+    }
+    
     public double airInputLitersPerInputLiter()
     {
         double airMolsN = this.nitrogenInputMols * 2

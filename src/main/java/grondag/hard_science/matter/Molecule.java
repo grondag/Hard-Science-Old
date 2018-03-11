@@ -1,9 +1,8 @@
 package grondag.hard_science.matter;
 
-import java.util.Scanner;
-
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.Log;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class Molecule implements IComposition
@@ -43,43 +42,66 @@ public class Molecule implements IComposition
         this.formula = forumula;
         this.enthalpyJoules = enthalpyKJ * 1000;
         
-        Scanner scan = new Scanner(formula);
-        double weight = 0;
-        
         Object2IntOpenHashMap<Element> map = new Object2IntOpenHashMap<Element>();
         
-        while(scan.hasNext())
+        char[] chars = formula.toCharArray();
+        
+        double weight = 0;
+        String symbol = "";
+        String nextSymbol = "";
+        String number = "";
+        
+        for(int i = 0; i < chars.length; i++)
         {
-            String n = scan.next();
-            Element e = null;
-            String count = "";
+            boolean doParse = false;
+            char c = chars[i];
+            if(Character.isDigit(c))
+            {
+                number += String.valueOf(c);
+            }
+            else if(Character.isWhitespace(c))
+            {
+                // skip
+            }
+            else if(Character.isUpperCase(c))
+            {
+                if(i == 0)
+                {
+                    // initialize first
+                    symbol = String.valueOf(c);
+                }
+                else
+                {
+                    // start new if this isn't the first
+                    nextSymbol = String.valueOf(c);
+                    doParse = true;
+                }
+            }
+            else
+            {
+                // lower case, add to symbol
+                symbol += String.valueOf(c);
+            }
             
-            if(n.length() > 1)
+            if(doParse || i == (chars.length - 1))
             {
-                String s = n.substring(0, 2);
-                e = Element.all().get(s);
-                if(e != null && n.length() > 2)
+                Element e = Element.all().get(symbol);
+                if(e == null)
                 {
-                    count = n.substring(2);
+                    Log.warn("Chemical formula parse error: %s unrecognized.", symbol);
                 }
-            }
-            if(e == null)
-            {
-                String s = n.substring(0, 1);
-                e = Element.all().get(s);
-                if(e != null && n.length() > 1)
+                else
                 {
-                    count = n.substring(1);
+                    int count = number.length() > 0 ? Integer.parseInt(number) : 1;
+                    map.addTo(e, count);
+                    weight += e.weight * count;
                 }
-            }
-            if(e != null)
-            {
-                int c = count.length() > 0 ? Integer.parseInt(count) : 1;
-                map.addTo(e, c);
-                weight += e.weight * c;
+                symbol = nextSymbol;
+                nextSymbol = "";
+                number = "";
             }
         }
-        scan.close();
+        
         this.weight = weight;
         this.map = map;
     }

@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
+import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.BulkResource;
@@ -22,6 +23,8 @@ import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
@@ -150,7 +153,19 @@ public class DigesterRecipe
         this.waterInputLitersPerInputLiter = digest.waterInputLitersPerInputLiter();
         this.airInputLitersPerInputLiter = digest.airInputLitersPerInputLiter();
         this.joulesPerInputLiter = digest.joulesPerInputLiter();
-        this.outputFactors = digest.outputFactors();
+        
+        // need to add residual to outputs
+        // Analysis can't include it because it may not
+        // exist yet at the time the analysis is constructed.
+        // (Analysis is used earlier to construct the residue compound/fluid.)
+        Object2DoubleMap<Fluid> factors = new Object2DoubleOpenHashMap<>();
+        factors.putAll(digest.outputFactors());
+        BulkResource outputResource = ModBulkResources.get(ModBulkResources.digesterOutputNameFor(inputResource));
+        if(outputResource != null)
+        {
+            factors.put(outputResource.fluid(), digest.residueOutputMolsPerInputLiter() * outputResource.litersPerMol());
+        }
+        this.outputFactors = Object2DoubleMaps.unmodifiable(factors);
     }
     
     public Fluid inputFluid()
@@ -183,15 +198,15 @@ public class DigesterRecipe
         long nL = VolumeUnits.liters2nL(liters);
         
         return new GenericRecipe(
-                ImmutableList.of(
-                        new FluidResource(this.inputFluid, null).withQuantity(nL),
-                        PowerResource.JOULES.withQuantity((long) (this.joulesPerInputLiter * liters))), 
-                
-                this.outputFactors.object2DoubleEntrySet().stream()
-                    .<AbstractResourceWithQuantity<?>>map(e -> new FluidResource(e.getKey(), null).withQuantity((long)(e.getDoubleValue() * nL)))
-                    .collect(ImmutableList.toImmutableList()),
-                
-                0);   
+            ImmutableList.of(
+                    new FluidResource(this.inputFluid, null).withQuantity(nL),
+                    PowerResource.JOULES.withQuantity((long) (this.joulesPerInputLiter * liters))), 
+            
+            this.outputFactors.object2DoubleEntrySet().stream()
+                .<AbstractResourceWithQuantity<?>>map(e -> new FluidResource(e.getKey(), null).withQuantity((long)(e.getDoubleValue() * nL)))
+                .collect(ImmutableList.toImmutableList()),
+            
+            0);   
     }
     
     public static class Category extends AbstractRecipeCategory<GenericRecipe>
@@ -200,7 +215,7 @@ public class DigesterRecipe
         {
             super(
                     guiHelper, 
-                    1,
+                    DigesterAnalysis.maxOuputRowsJEI(),
                     JEI_UID,
                     //TODO: better icon
                     new ResourceLocation("hard_science", "textures/blocks/linear_marks_128.png"));
