@@ -214,9 +214,14 @@ public class BulkResource implements IResource<StorageTypeBulk>
     
     public double molsPerLiter()
     {
-        return this.density / this.gPerMol() * 1000;
-        // g / cm3 / (g / mol)
-        // mol / cm3
+        
+        // d = kg/l
+        // d = (g / 1000)/l
+        // g/l = 1000d
+        // w = g/m
+        // m/g = 1/w
+        // m/l == m/g * g/l = 1000d / w
+        return this.density * 1000 / this.gPerMol();
     }
     
     public double molsPerKL()
@@ -226,11 +231,10 @@ public class BulkResource implements IResource<StorageTypeBulk>
     
     public double litersPerMol()
     {
-        // d = kg/l
-        // l/kg = l/(g/1000) = 1000xl/g = d
-        // l/g = d/1000
-        // g/m * l/g = l/m = g/m * d / 1000
-        return this.gPerMol() * this.density / 1000;
+        // d = kg/l = g/1000/l
+        // l/g = 1/1000/d
+        // g/m * l/g = l/m = g/m / 1000 / d
+        return this.gPerMol() / 1000 / this.density;
     }
     
     public double nlPerMol()

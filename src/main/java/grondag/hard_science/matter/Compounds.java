@@ -36,4 +36,13 @@ public class Compounds
             .add(Molecules.SILICA, 0.6)
             .add(Molecules.CALCIUM_CARBONATE, 0.2)
             .add(Molecules.MAGNETITE, 0.2).build();
+            
+            public static final Compound BASALT = Compound.builder()
+                    .add(Molecules.SILICA, 0.5)
+                    .add(Molecules.MAGNETITE, 0.3)
+                    .build();
+            
+            public static final Compound STONE = Compound.builder()
+                    .add(Molecules.SILICA, 1.0)
+                    .build();
 }

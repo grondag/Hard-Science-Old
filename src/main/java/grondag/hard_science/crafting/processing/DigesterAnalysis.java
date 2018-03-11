@@ -263,8 +263,8 @@ public class DigesterAnalysis
             double aluminum = input.composition().countOf(Element.Al);
             if(aluminum > 0)
             {
-                outputBuilder.put(ModBulkResources.ALUMINA, aluminum);
-                netOxygen -= aluminum * 2;
+                outputBuilder.put(ModBulkResources.ALUMINA, aluminum / 2);
+                netOxygen -= aluminum / 2 * 3;
             }
         }
         
@@ -352,12 +352,17 @@ public class DigesterAnalysis
             if(debug) Log.info("No nitrogen in or out");
         }
         
-        if(netOxygen > 0)
+        if(Math.abs(netOxygen) < 0.000001)
+        {
+            this.oxygenInputMols = 0;
+            if(debug) Log.info("No oxygen in or out");
+        }
+        else if(netOxygen > 0)
         {
             outputBuilder.put(ModBulkResources.O2_GAS, netOxygen /2);
             this.oxygenInputMols = 0;
         }
-        else if(netOxygen < 0)
+        else // netOxygen < 0
         {
             this.oxygenInputMols = -netOxygen / 2;
             massIn += this.oxygenInputMols * Molecules.O2_GAS.weight();
@@ -365,11 +370,7 @@ public class DigesterAnalysis
                     this.oxygenInputMols, this.oxygenInputMols * Molecules.O2_GAS.weight());
             reconIn.addTo(Element.O, this.oxygenInputMols * 2);
         }
-        else 
-        {
-            this.oxygenInputMols = 0;
-            if(debug) Log.info("No oxygen in or out");
-        }
+        
         if(debug) Log.info("Total mass in = " + massIn);
         
         final Object2DoubleOpenHashMap<Element> reconOut = debug ? new Object2DoubleOpenHashMap<>() : null;

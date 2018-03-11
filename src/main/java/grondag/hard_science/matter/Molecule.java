@@ -48,12 +48,10 @@ public class Molecule implements IComposition
         
         double weight = 0;
         String symbol = "";
-        String nextSymbol = "";
         String number = "";
         
         for(int i = 0; i < chars.length; i++)
         {
-            boolean doParse = false;
             char c = chars[i];
             if(Character.isDigit(c))
             {
@@ -65,17 +63,7 @@ public class Molecule implements IComposition
             }
             else if(Character.isUpperCase(c))
             {
-                if(i == 0)
-                {
-                    // initialize first
-                    symbol = String.valueOf(c);
-                }
-                else
-                {
-                    // start new if this isn't the first
-                    nextSymbol = String.valueOf(c);
-                    doParse = true;
-                }
+                symbol = String.valueOf(c);
             }
             else
             {
@@ -83,7 +71,7 @@ public class Molecule implements IComposition
                 symbol += String.valueOf(c);
             }
             
-            if(doParse || i == (chars.length - 1))
+            if(i == (chars.length - 1) || Character.isUpperCase(chars[i + 1]))
             {
                 Element e = Element.all().get(symbol);
                 if(e == null)
@@ -96,8 +84,7 @@ public class Molecule implements IComposition
                     map.addTo(e, count);
                     weight += e.weight * count;
                 }
-                symbol = nextSymbol;
-                nextSymbol = "";
+                symbol = "";
                 number = "";
             }
         }

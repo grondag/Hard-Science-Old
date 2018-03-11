@@ -154,14 +154,14 @@ public class DigesterRecipe
         this.airInputLitersPerInputLiter = digest.airInputLitersPerInputLiter();
         this.joulesPerInputLiter = digest.joulesPerInputLiter();
         
-        // need to add residual to outputs
+        // need to add residual to outputs if there is any
         // Analysis can't include it because it may not
         // exist yet at the time the analysis is constructed.
         // (Analysis is used earlier to construct the residue compound/fluid.)
         Object2DoubleMap<Fluid> factors = new Object2DoubleOpenHashMap<>();
         factors.putAll(digest.outputFactors());
         BulkResource outputResource = ModBulkResources.get(ModBulkResources.digesterOutputNameFor(inputResource));
-        if(outputResource != null)
+        if(outputResource != null && digest.residueOutputMolsPerInputLiter() > 0)
         {
             factors.put(outputResource.fluid(), digest.residueOutputMolsPerInputLiter() * outputResource.litersPerMol());
         }

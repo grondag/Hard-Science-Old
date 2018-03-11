@@ -23,12 +23,12 @@ public class Molecules
 //    public static final Molecule CALCIUM_CARBONATE = new Molecule("Ca C O3", -1207.000);
 //    public static final Molecule MAGNETITE = new Molecule("Fe3 O4", -1118.400);
     
+    public static final Molecule H2O_FLUID = new Molecule("H2O", -285.800);
     public static final Molecule H2_GAS = new Molecule("H2", 0.000);
     public static final Molecule N2_GAS = new Molecule("N2", 0.000);
     public static final Molecule O2_GAS = new Molecule("O2", 0.000);
     public static final Molecule AR_GAS = new Molecule("Ar", 0.000);
     public static final Molecule CO2_GAS = new Molecule("CO2", -393.509);
-    public static final Molecule H2O_FLUID = new Molecule("H2O", -285.800);
     public static final Molecule METHANE_GAS = new Molecule("CH4", -74.900);
     public static final Molecule AMMONIA_GAS = new Molecule("NH3", -45.900);
     public static final Molecule AMMONIA_LIQUID = new Molecule("NH3", -45.900);
