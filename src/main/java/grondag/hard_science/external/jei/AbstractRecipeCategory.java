@@ -30,7 +30,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     private final String localizedName;
     private final IDrawableAnimated arrow;
     private final IDrawable icon;
-    private final RecipeLayout layout;
+    private final IRecipeFormat layout;
     
     
     public AbstractRecipeCategory(
@@ -40,9 +40,9 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
             ResourceLocation iconLocation)
     {
         this.UID = UID;
-        this.layout = new RecipeLayout(maxRows, maxRows);
+        this.layout = new RecipeFormat(maxRows, maxRows);
         icon = guiHelper.createDrawable(iconLocation, 0, 0, 16, 16, 16, 16);
-        this.background = guiHelper.createBlankDrawable(layout.width, layout.height);
+        this.background = guiHelper.createBlankDrawable(layout.width(), layout.height());
         this.localizedName = I18n.format("jei_category." + UID);
         IDrawableStatic arrowDrawable = guiHelper.createDrawable(Constants.RECIPE_GUI_VANILLA, 82, 128, 24, 17);
         this.arrow = guiHelper.createAnimatedDrawable(arrowDrawable, 40, IDrawableAnimated.StartDirection.LEFT, false);
@@ -79,7 +79,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     @Override
     public void drawExtras(Minecraft minecraft)
     {
-        arrow.draw(minecraft, this.layout.centerX - 12, this.layout.centerY - 9);
+        arrow.draw(minecraft, this.layout.centerX() - 12, this.layout.centerY() - 9);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     @Override
     public void setRecipe(IRecipeLayout recipeLayout, T recipe, IIngredients ingredients)
     {
-        RecipeLayout layout = recipe.layout();
+        IRecipeFormat format = recipe.format();
         
         int fluidIndex = 0;
         int itemIndex = 0;
@@ -104,7 +104,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
      
                 for(List<ItemStack> input : itemInputs)
                 {
-                    recipeLayout.getItemStacks().init(itemIndex, true, RecipeLayout.LEFT, layout.inputY[inputIndex]);
+                    recipeLayout.getItemStacks().init(itemIndex, true, format.inputX(inputIndex), format.inputY(inputIndex));
                     recipeLayout.getItemStacks().set(itemIndex, input);
                     itemIndex++;
                     inputIndex++;
@@ -117,7 +117,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
             {
                 for(List<FluidStack> input : fluidInputs)
                 {
-                    recipeLayout.getFluidStacks().init(fluidIndex, true, RecipeLayout.LEFT+1, layout.inputY[inputIndex]+1);
+                    recipeLayout.getFluidStacks().init(fluidIndex, true, format.inputX(inputIndex)+1, format.inputY(inputIndex)+1);
                     recipeLayout.getFluidStacks().set(fluidIndex, input);
                     fluidIndex++;
                     inputIndex++;
@@ -129,7 +129,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
             {
                 for(List<BulkResourceWithQuantity> input : bulkInputs)
                 {
-                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).init(bulkIndex, true, RecipeLayout.LEFT+1, layout.inputY[inputIndex]+1);
+                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).init(bulkIndex, true, format.inputX(inputIndex)+1, format.inputY(inputIndex)+1);
                     recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).set(bulkIndex, input);
                     bulkIndex++;
                     inputIndex++;
@@ -146,7 +146,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
      
                 for(List<ItemStack> output : itemOutputs)
                 {
-                    recipeLayout.getItemStacks().init(itemIndex, false, RecipeLayout.RIGHT, layout.outputY[outputIndex]);
+                    recipeLayout.getItemStacks().init(itemIndex, false, format.outputX(outputIndex), format.outputY(outputIndex));
                     recipeLayout.getItemStacks().set(itemIndex, output);
                     itemIndex++;
                     outputIndex++;
@@ -158,7 +158,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
             {
                 for(List<FluidStack> output : fluidOutputs)
                 {
-                    recipeLayout.getFluidStacks().init(fluidIndex, false, RecipeLayout.RIGHT+1, layout.outputY[outputIndex]+1);
+                    recipeLayout.getFluidStacks().init(fluidIndex, false, format.outputX(outputIndex)+1, format.outputY(outputIndex)+1);
                     recipeLayout.getFluidStacks().set(fluidIndex, output);
                     fluidIndex++;
                     outputIndex++;
@@ -170,7 +170,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
             {
                 for(List<BulkResourceWithQuantity> output : bulkOutputs)
                 {
-                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).init(bulkIndex, false, RecipeLayout.RIGHT+1, layout.outputY[outputIndex]+1);
+                    recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).init(bulkIndex, false, format.outputX(outputIndex)+1, format.outputY(outputIndex)+1);
                     recipeLayout.getIngredientsGroup(BulkResourceWithQuantity.class).set(bulkIndex, output);
                     bulkIndex++;
                     outputIndex++;
