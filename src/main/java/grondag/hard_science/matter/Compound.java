@@ -13,6 +13,8 @@ public class Compound implements IComposition
     
     private final double weight;
     
+//    private final double density;
+    
     /**
      * Map contains molecule/fraction pairs.
      * If the compound fractions don't add up to 1.0,
@@ -35,6 +37,9 @@ public class Compound implements IComposition
         // compute total weight and per-element counts
         double totalWeight = 0;
         
+//        // compute weighted avg density
+//        double avgDensity = 0;
+        
         this.elements = new Object2DoubleOpenHashMap<Element>();
 
         for(Entry<Molecule> entry : this.molecules.object2DoubleEntrySet())
@@ -43,12 +48,15 @@ public class Compound implements IComposition
             double fraction = entry.getDoubleValue();
             
             totalWeight += m.weight() * fraction;
+//            avgDensity += m.density() * fraction;
+            
             for(Element e : entry.getKey().elements())
             {
                 this.elements.addTo(e, m.countOf(e) * fraction);
             }
         }
         this.weight = totalWeight;
+//        this.density = avgDensity;
     }
     
     public static Builder builder()
@@ -71,6 +79,11 @@ public class Compound implements IComposition
         public Compound build()
         {
             return new Compound(map);
+        }
+        
+        public boolean isEmpty()
+        {
+            return map.isEmpty();
         }
     }
 

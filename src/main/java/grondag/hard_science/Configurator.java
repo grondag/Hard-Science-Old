@@ -527,6 +527,61 @@ public class Configurator
     public static class Processing
     {
 
+        @Comment({"Defines chemical composition of micronizer outputs/digester inputs",
+            "Comma separated parameters are... ",
+            "    item ingredient - ore dictionary accepted, metadata optional",
+            "    fluid name - defines the output", 
+            "    liters output - floating point value, 1 block = 1000L",
+            "    energy consumption factor - floating point value",
+            "Energy consumption factor and output volume determine energy usage.",
+            "Harder materials should have a higher energy consumption factor.",
+            "Smooth stone is suggested as the reference value at 1.0."})
+        @RequiresMcRestart
+        public String[] micronizerOutputs =
+        {
+            "# Stone is modeled after approx earth crust composition.",
+            "# Ends up being pretty close to a feldspar mineral, because trace components are small",
+            "stone, 2.8, 0x646973",
+            "Si, 0.282000000",
+            "O, 0.461000000",
+            "Fe, 0.056300000",
+            "Al, 0.082300000",
+            "Ca, 0.041500000",
+            "K, 0.020900000",
+            "Mg, 0.023300000",
+            "Na, 0.023600000",
+            "Ti, 0.005650000",
+            "Mn, 0.000950000",
+            "P, 0.001050000",
+            "Zr, 0.000165000",
+            "S, 0.000350000",
+            "F, 0.000585000",
+            "Nd, 0.000041500",
+            "Cr, 0.000102000",
+            "Cl, 0.000145000",
+            "Ni, 0.000084000",
+            "Zn, 0.000070000",
+            "Cu, 0.000060000",
+            "Pb, 0.000014000",
+            "C, 0.000200000",
+            "Co, 0.000025000",
+            "H, 0.001400000",
+            "Sn, 0.000002300",
+            "N, 0.000019000",
+            "W, 0.000001300",
+            "Li, 0.000020000",
+            "Mo, 0.000001200",
+            "B, 0.000010000",
+            "Ag, 0.000000075",
+            "Au, 0.000000004",
+            "Se, 0.000000050",
+            "Pt, 0.000000005",
+            "",
+            "basalt, 3.7, 0x648090",
+            "SiO2, 0.4",
+            "Fe3O4, 0.6"
+        };
+        
         @Comment({"Recipe configuration for micronizer.",
             "Comma separated parameters are... ",
             "    item ingredient - ore dictionary accepted, metadata optional",
@@ -539,35 +594,35 @@ public class Configurator
         @RequiresMcRestart
         public String[] micronizerRecipes =
         {
-            "ore:sand, micronized_stone, 1000.0, 0.5",
-            "ore:gravel, micronized_stone, 1000.0, 0.65",
-            "ore:sandstone, micronized_stone, 1000.0, 0.7",
-            "ore:cobblestone, micronized_stone, 1000.0, 0.8",
-            "ore:stone, micronized_stone, 1000.0, 1.0",
-            "minecraft:cobblestone_wall, micronized_stone, 1000.0, 0.8",
-            "minecraft:stone_slab:0, micronized_stone, 500.0, 0.8",
-            "minecraft:stone_slab:1, micronized_stone, 500.0, 0.77",
-            "minecraft:stone_slab:3, micronized_stone, 500.0, 1.0",
-            "minecraft:stone_slab:5, micronized_stone, 500.0, 1.0",
-            "minecraft:stone_slab2:0, micronized_stone, 500.0, 0.7",
-            "hard_science:basalt_cobble, micronized_basalt, 1000.0, 1.0",
-            "hard_science:basalt_cut, micronized_basalt, 1000.0, 1.2",
-            "hard_science:basalt_rubble, micronized_basalt, 111.11111, 1.0"
+            "ore:sand, stone, 1000.0, 0.5",
+            "ore:gravel, stone, 1000.0, 0.65",
+            "ore:sandstone, stone, 1000.0, 0.7",
+            "ore:cobblestone, stone, 1000.0, 0.8",
+            "ore:stone, stone, 1000.0, 1.0",
+            "minecraft:cobblestone_wall, stone, 1000.0, 0.8",
+            "minecraft:stone_slab:0, stone, 500.0, 0.8",
+            "minecraft:stone_slab:1, stone, 500.0, 0.77",
+            "minecraft:stone_slab:3, stone, 500.0, 1.0",
+            "minecraft:stone_slab:5, stone, 500.0, 1.0",
+            "minecraft:stone_slab2:0, stone, 500.0, 0.7",
+            "hard_science:basalt_cobble, basalt, 1000.0, 1.0",
+            "hard_science:basalt_cut, basalt, 1000.0, 1.2",
+            "hard_science:basalt_rubble, basalt, 111.11111, 1.0"
         };
 
-        @Comment({"Recipe configuration for digester.",
-            "Each row lists a bulk resource (which are fluids in game)",
-            "Other inputs, energy usage and outputs are automatically derived",
-            "from the chemical composition of the input resource.",
-            "Air, water and electricityare used to generate nitric acid within the device.",
-            "Some of this is output in the form of nitrates.",
-            "All other reactants/catalysts are recovered/regenerated within the digester."})
-        @RequiresMcRestart
-        public String[] digesterInputs =
-        {
-            "micronized_stone",
-            "micronized_basalt"
-        };
+//        @Comment({"Recipe configuration for digester.",
+//            "Each row lists a bulk resource (which are fluids in game)",
+//            "Other inputs, energy usage and outputs are automatically derived",
+//            "from the chemical composition of the input resource.",
+//            "Air, water and electricityare used to generate nitric acid within the device.",
+//            "Some of this is output in the form of nitrates.",
+//            "All other reactants/catalysts are recovered/regenerated within the digester."})
+//        @RequiresMcRestart
+//        public String[] digesterInputs =
+//        {
+//            "micronized_stone",
+//            "micronized_basalt"
+//        };
         
         @Comment({"Ouput digester analysis debug information to log. Intended for testing."})
         public boolean enableDigesterAnalysisDebug = true;

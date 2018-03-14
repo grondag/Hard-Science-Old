@@ -12,4 +12,6 @@ public interface IComposition
     double weight();
 
     ImmutableList<Element> elements();
+
+//    double density();
 }

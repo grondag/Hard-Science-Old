@@ -493,16 +493,4 @@ public class DigesterAnalysis
         //TODO
         return 1000;
     }
-
-    public int residualColor()
-    {
-        // TODO Auto-generated method stub
-        return 0xFFFFFFFF;
-    }
-
-    public double residualDensity()
-    {
-        // TODO Auto-generated method stub
-        return 4.0;
-    }
 }

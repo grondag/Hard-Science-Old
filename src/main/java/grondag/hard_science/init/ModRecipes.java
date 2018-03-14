@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.crafting.processing.DigesterRecipe;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.domain.ProcessManager;
@@ -54,7 +53,7 @@ public class ModRecipes
                     continue;
                 }
                 
-                Fluid fluid = FluidRegistry.getFluid(args[1].trim());
+                Fluid fluid = FluidRegistry.getFluid(ModBulkResources.micronizerOutputName(args[1].trim()));
                 BulkResource br = BulkResource.fromFluid(fluid);
                 if(br == null)
                 {
@@ -88,15 +87,6 @@ public class ModRecipes
                 ModBulkResources.MICRONIZED_BASALT,
                 1.2,
                 MicronizerRecipe.TerrainConverter.INSTANCE);
-        
-        for(String res : Configurator.PROCESSING.digesterInputs)
-        {
-            BulkResource br = ModBulkResources.get(res);
-            if(br == null)
-                Log.warn("Digester recipe not created. Unable to find bulk resource named " + res);
-            else
-                DigesterRecipe.add(br);
-        }
 
         //TODO: actual recipe
 //        EmergencyFabricatorRecipe.addFab(

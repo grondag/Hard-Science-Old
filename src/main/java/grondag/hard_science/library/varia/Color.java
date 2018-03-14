@@ -1,5 +1,7 @@
 package grondag.hard_science.library.varia;
 
+import net.minecraft.util.math.MathHelper;
+
 /**
  * Unique library for color conversion and manipulation.
  * Less complicated than java.awt.color and has conversions it seems to lack.
@@ -284,6 +286,26 @@ public class Color
             this.HCL_C = (float) Math.sqrt( Math.pow(this.LAB_A, 2) + Math.pow(this.LAB_B, 2 ));
 
         }
+    }
+    
+    /**
+     * Makes dark colors lighter, or if negative number input will darken
+     * Range is -100 to +100, but typical values much more narrow
+     */
+    public Color lighten(int howMuch)
+    {
+        float lightness = MathHelper.clamp(this.HCL_L + howMuch, 0, 100);
+        return fromHCL(this.HCL_H, this.HCL_C, lightness, EnumHCLFailureMode.REDUCE_CHROMA);
+    }
+    
+    /**
+     * Makes colors more saturated, or if negative number input desaturated
+     * Range is -100 to +100, but typical values much more narrow
+     */
+    public Color saturate(int howMuch)
+    {
+        float chroma = MathHelper.clamp(this.HCL_C + howMuch, 0, 100);
+        return fromHCL(this.HCL_H, chroma, this.HCL_L, EnumHCLFailureMode.REDUCE_CHROMA);
     }
     
     public static enum EnumHCLFailureMode

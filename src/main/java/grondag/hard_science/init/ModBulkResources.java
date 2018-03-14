@@ -1,6 +1,8 @@
 package grondag.hard_science.init;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
@@ -9,10 +11,13 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.crafting.processing.DigesterAnalysis;
 import grondag.hard_science.crafting.processing.DigesterRecipe;
+import grondag.hard_science.library.varia.Color;
+import grondag.hard_science.matter.Compound;
 import grondag.hard_science.matter.Compounds;
 import grondag.hard_science.matter.IComposition;
 import grondag.hard_science.matter.MatterColors;
 import grondag.hard_science.matter.MatterPhase;
+import grondag.hard_science.matter.Molecule;
 import grondag.hard_science.matter.Molecules;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -171,37 +176,162 @@ public class ModBulkResources
 //        = register("selenium", 0xFFFFFFFF, Molecules.SELENIUM, 20, 1, MatterPhase.SOLID, 3.1800);
     
     
+    public final static String MICRONIZED_NAME_PREFIX = "micronized_";
     public final static String DIGEST_NAME_PREFIX = "digested_";
+ 
+    public static String micronizerOutputName(String baseName)
+    {
+        return MICRONIZED_NAME_PREFIX + baseName;
+    }
+    
+    public static String digesterOutputName(String baseName)
+    {
+        return DIGEST_NAME_PREFIX + baseName;
+    }
     
     public static String digesterOutputNameFor(BulkResource inputResource)
     {
-        return DIGEST_NAME_PREFIX + inputResource.systemName();
+        return inputResource.systemName().replaceAll(MICRONIZED_NAME_PREFIX, DIGEST_NAME_PREFIX);
     }
     
     static
     {
-        // create bulk resources / fluids for all digester outputs
-        for(String res : Configurator.PROCESSING.digesterInputs)
+        Compound.Builder builder = null;
+        String name = "";
+        double density = 0;
+        int color = 0xFFFFFFFF;
+        
+        HashSet<String> usedNames = new HashSet<>();
+        
+        // remove all comments and blank lines
+        // simplifies look-ahead logic for determining 
+        // when next compound starts
+        ArrayList<String> lines = new ArrayList<>(Configurator.PROCESSING.micronizerOutputs.length);
+        for(String line : Configurator.PROCESSING.micronizerOutputs)
         {
-            BulkResource br = all.get(res);
-            if(br == null)
+            String trimmed = line.trim();
+            if(trimmed.isEmpty() || trimmed.startsWith("#")) continue;
+            lines.add(trimmed);
+        }
+        
+        // create bulk resources / fluids for all micronizer & digester outputs
+        int lineCount = lines.size();
+        for(int i = 0; i < lineCount; i++)
+        {
+            String line = lines.get(i);
+            
+            String[] args = line.split(",");
+            
+            if(args.length == 3)
             {
-                Log.warn("Digester recipe output not created. Unable to find bulk resource named " + res);
+                if(usedNames.contains(args[0].trim()))
+                {
+                    Log.warn("Bad micronizer/digester configuration. Resource name not unique.");
+                }
+                else
+                {
+                    builder = Compound.builder();
+                    name = args[0].trim();
+                    try
+                    {
+                        density = Double.parseDouble(args[1].trim());
+                    }
+                    catch(Exception e)
+                    {
+                        Log.error("Unable to parse micronizer input density " + args[1] + ". Using 2.0 as default", e);
+                        density = 2.0;
+                    }
+                    
+                    String colorArg = args[2].trim();
+                    try
+                    {
+                        if(colorArg.toUpperCase().startsWith("0X"))
+                            color = Integer.parseUnsignedInt(colorArg.substring(2), 16);
+                        else
+                            color = Integer.parseInt(colorArg);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.error("Unable to parse micronizer input color " + colorArg + ". Using 0xFFAAAA as default", e);
+                        density = 0xFFAAAA;
+                    }
+                    
+                    usedNames.add(name.trim());
+                }
+            }
+            else if(builder == null)
+            {
+                Log.warn("Bad micronizer/digester configuration. Should start with resource name");
+            }
+            else if(args.length != 2)
+            {
+                Log.warn("Bad micronizer/digester configuration. Components should contain formula and fraction.");
             }
             else
             {
-                DigesterAnalysis da = DigesterAnalysis.get(br);
-                register(
-                        digesterOutputNameFor(br), 
-                        da.residualColor(), 
-                        da.residueCompound, 
-                        20, 
-                        1, 
-                        MatterPhase.SOLID, 
-                        da.residualDensity());
-                DigesterRecipe.add(br);
+                try
+                {
+                    // not using enthalpy for digester, so always 0
+                    Molecule m = new Molecule(args[0].trim(), 0);
+                    double fraction = Double.parseDouble(args[1].trim());
+                    if(fraction <=0)
+                    {
+                        Log.warn("Fraction for digester input must be positive. Line '%s' skipped", line);
+                    }
+                    else if(m.elements().isEmpty())
+                    {
+                        Log.warn("Formula for digester contains no elements. Line '%s' skipped", line);
+                    }
+                    else
+                    {
+                        // fractions in config are given by weight
+                        // but builder expects mol fraction
+                        // so assume config fraction is per 1000g
+                        // and divide by molar weight
+                        builder.add(m, fraction * 1000 / m.weight());
+                    }
+                }
+                catch(Exception e)
+                {
+                    Log.error("Error parsing input '" + line + "' for digester input. Line skiped", e);
+                }
             }
-        }
+            
+            if(builder != null && (i == lineCount -1 || lines.get(i+1).split(",").length == 3))
+            {
+                if(builder.isEmpty())
+                {
+                    Log.warn("Digester input %s has no components. Skipped", name);
+                }
+                else
+                {
+                    Compound c = builder.build();
+                    
+                    BulkResource micronizerOuput = register(
+                            micronizerOutputName(name), 
+                            color, 
+                            c, 
+                            20, 
+                            1, 
+                            MatterPhase.SOLID, 
+                            density);
+                    
+                    DigesterAnalysis da = DigesterAnalysis.get(micronizerOuput);
+                    
+                    register(
+                            digesterOutputName(name), 
+                            Color.fromRGB(color).saturate(1).lighten(-8).RGB_int | 0xFF000000, 
+                            da.residueCompound, 
+                            20, 
+                            1, 
+                            MatterPhase.SOLID, 
+                            density);
+                    
+                    DigesterRecipe.add(micronizerOuput);
+                    
+                }
+            }
+        }            
     }
     
     public static Map<String, BulkResource> all()
