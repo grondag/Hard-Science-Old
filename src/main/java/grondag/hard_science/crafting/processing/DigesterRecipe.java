@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
+import grondag.hard_science.external.jei.RecipeFormat;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -215,7 +216,7 @@ public class DigesterRecipe
         {
             super(
                     guiHelper, 
-                    DigesterAnalysis.maxOuputRowsJEI(),
+                    new RecipeFormat(1, DigesterAnalysis.maxOuputRowsJEI()),
                     JEI_UID,
                     //TODO: better icon
                     new ResourceLocation("hard_science", "textures/blocks/linear_marks_128.png"));

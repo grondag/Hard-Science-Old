@@ -30,19 +30,19 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     private final String localizedName;
     private final IDrawableAnimated arrow;
     private final IDrawable icon;
-    private final IRecipeFormat layout;
+    private final IRecipeFormat format;
     
     
     public AbstractRecipeCategory(
             IGuiHelper guiHelper,
-            int maxRows,
+            IRecipeFormat format,
             String UID, 
             ResourceLocation iconLocation)
     {
         this.UID = UID;
-        this.layout = new RecipeFormat(maxRows, maxRows);
+        this.format = format;
         icon = guiHelper.createDrawable(iconLocation, 0, 0, 16, 16, 16, 16);
-        this.background = guiHelper.createBlankDrawable(layout.width(), layout.height());
+        this.background = guiHelper.createBlankDrawable(format.width(), format.height());
         this.localizedName = I18n.format("jei_category." + UID);
         IDrawableStatic arrowDrawable = guiHelper.createDrawable(Constants.RECIPE_GUI_VANILLA, 82, 128, 24, 17);
         this.arrow = guiHelper.createAnimatedDrawable(arrowDrawable, 40, IDrawableAnimated.StartDirection.LEFT, false);
@@ -79,7 +79,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     @Override
     public void drawExtras(Minecraft minecraft)
     {
-        arrow.draw(minecraft, this.layout.centerX() - 12, this.layout.centerY() - 9);
+        arrow.draw(minecraft, this.format.centerX() - 12, this.format.centerY() - 9);
     }
 
     @Override

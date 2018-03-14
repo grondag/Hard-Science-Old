@@ -8,6 +8,7 @@ import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
+import grondag.hard_science.external.jei.RecipeFormat;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.Compounds;
@@ -106,7 +107,7 @@ public class SolarEtheneRecipe extends GenericRecipe
         {
             super(
                     guiHelper, 
-                    PROCESS.maxSlots(),
+                    new RecipeFormat(PROCESS.maxSlots(), PROCESS.maxSlots()),
                     UID,
                     new ResourceLocation("hard_science", "textures/blocks/two_dots.png"));
         }
