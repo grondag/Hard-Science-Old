@@ -16,7 +16,7 @@ import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.crafting.base.AbstractSingleModelProcess;
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
-import grondag.hard_science.external.jei.RecipeFormat;
+import grondag.hard_science.external.jei.IRecipeFormat;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.BulkResource;
@@ -114,7 +114,8 @@ public class EmergencyFabricatorRecipe extends GenericRecipe
         {
             super(
                     guiHelper, 
-                    new RecipeFormat(4, 4),
+                    IRecipeFormat.DEFAULT_WIDTH,
+                    IRecipeFormat.DEFAULT_ROW_HEIGHT * 4,
                     UID,
                     new ResourceLocation("hard_science", "textures/blocks/linear_marks_128.png"));
         }

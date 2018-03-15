@@ -10,13 +10,10 @@ import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.simulator.resource.BulkResourceWithQuantity;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
-import mezz.jei.api.gui.IDrawableAnimated;
 import mezz.jei.api.gui.IDrawableStatic;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeCategory;
-import mezz.jei.config.Constants;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -28,24 +25,19 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     private final String UID;
     private final IDrawableStatic background;
     private final String localizedName;
-    private final IDrawableAnimated arrow;
     private final IDrawable icon;
-    private final IRecipeFormat format;
-    
     
     public AbstractRecipeCategory(
             IGuiHelper guiHelper,
-            IRecipeFormat format,
+            int maxWidth,
+            int maxHeight,
             String UID, 
             ResourceLocation iconLocation)
     {
         this.UID = UID;
-        this.format = format;
         icon = guiHelper.createDrawable(iconLocation, 0, 0, 16, 16, 16, 16);
-        this.background = guiHelper.createBlankDrawable(format.width(), format.height());
+        this.background = guiHelper.createBlankDrawable(maxWidth, maxHeight);
         this.localizedName = I18n.format("jei_category." + UID);
-        IDrawableStatic arrowDrawable = guiHelper.createDrawable(Constants.RECIPE_GUI_VANILLA, 82, 128, 24, 17);
-        this.arrow = guiHelper.createAnimatedDrawable(arrowDrawable, 40, IDrawableAnimated.StartDirection.LEFT, false);
     }
 
     @Nonnull
@@ -74,12 +66,6 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     public IDrawable getBackground()
     {
         return background;
-    }
-
-    @Override
-    public void drawExtras(Minecraft minecraft)
-    {
-        arrow.draw(minecraft, this.format.centerX() - 12, this.format.centerY() - 9);
     }
 
     @Override

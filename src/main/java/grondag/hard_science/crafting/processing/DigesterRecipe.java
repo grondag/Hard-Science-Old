@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
-import grondag.hard_science.external.jei.RecipeFormat;
+import grondag.hard_science.external.jei.IRecipeFormat;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -207,8 +207,66 @@ public class DigesterRecipe
                 .<AbstractResourceWithQuantity<?>>map(e -> new FluidResource(e.getKey(), null).withQuantity((long)(e.getDoubleValue() * nL)))
                 .collect(ImmutableList.toImmutableList()),
             
-            0);   
+            0)
+            {
+                @Override
+                protected IRecipeFormat createFormat()
+                {
+                    return new Format();
+                }
+                
+                class Format implements IRecipeFormat
+                {
+
+                    @Override
+                    public int centerY()
+                    {
+                        return 64;
+                    }
+
+                    
+                    @Override
+                    public int centerX()
+                    {
+                        return 48;
+                    }
+
+
+                    @Override
+                    public int inputX(int index)
+                    {
+                        return 12;
+                    }
+
+
+                    @Override
+                    public int height()
+                    {
+                        return DEFAULT_ROW_HEIGHT * 4;
+                    }
+
+                    @Override
+                    public int inputY(int index)
+                    {
+                        return 64 - 8;
+                    }
+                    
+                    @Override
+                    public int outputX(int index)
+                    {
+                        return 68 + (index / 4) * 32;
+                    }
+
+                    @Override
+                    public int outputY(int index)
+                    {
+                        return (index % 4) * DEFAULT_ROW_HEIGHT;
+                    }
+                }
+            };   
     }
+    
+    private static final int JEI_WIDTH = 196;
     
     public static class Category extends AbstractRecipeCategory<GenericRecipe>
     {
@@ -216,7 +274,8 @@ public class DigesterRecipe
         {
             super(
                     guiHelper, 
-                    new RecipeFormat(1, DigesterAnalysis.maxOuputRowsJEI()),
+                    JEI_WIDTH,
+                    IRecipeFormat.DEFAULT_ROW_HEIGHT * 4,
                     JEI_UID,
                     //TODO: better icon
                     new ResourceLocation("hard_science", "textures/blocks/linear_marks_128.png"));

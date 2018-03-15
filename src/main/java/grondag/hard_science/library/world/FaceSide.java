@@ -37,7 +37,7 @@ public enum FaceSide
     }
     
     /**
-     * Determines if the given sideFace is TOP, BOTTOM, LEFT or RIGHT
+     * Determines if the given sideFace is TOP, BOTTOM, DEFAULT_LEFT or DEFAULT_RIGHT
      * of onFace.  If none (sideFace on same orthogonalAxis as onFace), return null;
      */
     public static FaceSide lookup(EnumFacing sideFace, EnumFacing onFace)

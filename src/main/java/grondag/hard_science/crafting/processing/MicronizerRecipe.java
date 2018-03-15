@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
-import grondag.hard_science.external.jei.RecipeFormat;
+import grondag.hard_science.external.jei.IRecipeFormat;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
@@ -292,7 +292,8 @@ public class MicronizerRecipe
         {
             super(
                     guiHelper, 
-                    new RecipeFormat(1, 1),
+                    IRecipeFormat.DEFAULT_WIDTH,
+                    IRecipeFormat.DEFAULT_ROW_HEIGHT,
                     JEI_UID,
                     new ResourceLocation("hard_science", "textures/blocks/linear_marks_128.png"));
         }

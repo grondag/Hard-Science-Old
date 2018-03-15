@@ -20,7 +20,11 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType;
+import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
+import mezz.jei.api.gui.IDrawableAnimated;
+import mezz.jei.api.gui.IDrawableStatic;
+import mezz.jei.config.Constants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -339,95 +343,108 @@ public class GenericRecipe implements IHardScienceRecipe
         return this.ticksDuration;
     }
 
-    public IRecipeFormat format()
+    /**
+     * Override this if needs special handling
+     */
+    protected IRecipeFormat createFormat()
+    {
+        return new RecipeFormat(
+                this.itemInputs.size() + this.fluidInputs.size(),
+                this.itemOutputs.size() + this.fluidOutputs.size());
+    }
+    
+    public final IRecipeFormat format()
     {
         if(this.format == null)
         {
-            this.format = new RecipeFormat(
-                    this.itemInputs.size() + this.fluidInputs.size(),
-                    this.itemOutputs.size() + this.fluidOutputs.size());
+            this.format = this.createFormat();
         }
         return this.format;
     }
     
+    private IDrawableAnimated arrow;
+    
     @Override
     public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
     {
-        IDrawable slot = HardScienceJEIPlugIn.registry().getJeiHelpers().getGuiHelper().getSlotDrawable();
-        IRecipeFormat format = this.format();
+       IGuiHelper guiHelper = HardScienceJEIPlugIn.registry().getJeiHelpers().getGuiHelper();
         
-        if(format.inputCount() > 0)
+        IDrawable slot = guiHelper.getSlotDrawable();
+        
+        if(arrow == null)
         {
-            for(int i = 0; i < format.inputCount(); i++)
-            {
-                slot.draw(minecraft, format.inputX(i), format.inputY(i));
-            }
+            IDrawableStatic arrowDrawable = guiHelper.createDrawable(Constants.RECIPE_GUI_VANILLA, 82, 128, 24, 17);
+            arrow = guiHelper.createAnimatedDrawable(arrowDrawable, 40, IDrawableAnimated.StartDirection.LEFT, false);
+        }
+        
+        IRecipeFormat format = this.format();
             
-            int inputIndex = 0;
-            if(!this.itemInputs.isEmpty())
+        arrow.draw(minecraft, this.format.centerX() - 12, this.format.centerY() - 9);
+        
+        int inputIndex = 0;
+        if(!this.itemInputs.isEmpty())
+        {
+            for(ItemResourceWithQuantity rwq : this.itemInputs)
             {
-                for(ItemResourceWithQuantity rwq : this.itemInputs)
-                {
-                    GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer, 
-                            Long.toString(rwq.getQuantity()), 
-                            format.inputX(inputIndex), 
-                            format.inputY(inputIndex) + 20, 
-                            20, 
-                            8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
-                    inputIndex++;
-                }
-            }
-            
-            if(!this.fluidInputs.isEmpty())
-            {
-                for(FluidResourceWithQuantity rwq : this.fluidInputs)
-                {
-                    GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer,
-                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
-                            format.inputX(inputIndex), 
-                            format.inputY(inputIndex) + 20, 
-                            20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
-                    inputIndex++;
-                }
+                slot.draw(minecraft, format.inputX(inputIndex), format.inputY(inputIndex));
+
+                GuiUtil.drawAlignedStringNoShadow(
+                        minecraft.fontRenderer, 
+                        Long.toString(rwq.getQuantity()), 
+                        format.inputX(inputIndex), 
+                        format.inputY(inputIndex) + 20, 
+                        20, 
+                        8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+                inputIndex++;
             }
         }
         
-        if(format.outputCount() > 0)
+        if(!this.fluidInputs.isEmpty())
         {
-            for(int i = 0; i < format.outputCount(); i++)
+            for(FluidResourceWithQuantity rwq : this.fluidInputs)
             {
-                slot.draw(minecraft, format.outputX(i), format.outputY(i));
+                slot.draw(minecraft, format.inputX(inputIndex), format.inputY(inputIndex));
+                
+                GuiUtil.drawAlignedStringNoShadow(
+                        minecraft.fontRenderer,
+                        VolumeUnits.formatVolume(rwq.getQuantity(), false),
+                        format.inputX(inputIndex), 
+                        format.inputY(inputIndex) + 20, 
+                        20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+                inputIndex++;
             }
-            
-            int outputIndex = 0;
-            if(!this.itemOutputs.isEmpty())
+        }
+        
+        int outputIndex = 0;
+        if(!this.itemOutputs.isEmpty())
+        {
+            for(ItemResourceWithQuantity rwq : this.itemOutputs)
             {
-                for(ItemResourceWithQuantity rwq : this.itemOutputs)
-                {
-                    GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer, 
-                            Long.toString(rwq.getQuantity()), 
-                            format.outputX(outputIndex), 
-                            format.outputY(outputIndex) + 20, 
-                            20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
-                    outputIndex++;
-                }
+                slot.draw(minecraft, format.outputX(outputIndex), format.outputY(outputIndex));
+                
+                GuiUtil.drawAlignedStringNoShadow(
+                        minecraft.fontRenderer, 
+                        Long.toString(rwq.getQuantity()), 
+                        format.outputX(outputIndex), 
+                        format.outputY(outputIndex) + 20, 
+                        20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+                outputIndex++;
             }
-            
-            if(!this.fluidOutputs.isEmpty())
+        }
+        
+        if(!this.fluidOutputs.isEmpty())
+        {
+            for(FluidResourceWithQuantity rwq : this.fluidOutputs)
             {
-                for(FluidResourceWithQuantity rwq : this.fluidOutputs)
-                {
-                    GuiUtil.drawAlignedStringNoShadow(
-                            minecraft.fontRenderer,
-                            VolumeUnits.formatVolume(rwq.getQuantity(), false),
-                            format.outputX(outputIndex), 
-                            format.outputY(outputIndex) + 20, 
-                            20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
-                    outputIndex++;
-                }
+                slot.draw(minecraft, format.outputX(outputIndex), format.outputY(outputIndex));
+
+                GuiUtil.drawAlignedStringNoShadow(
+                        minecraft.fontRenderer,
+                        VolumeUnits.formatVolume(rwq.getQuantity(), false),
+                        format.outputX(outputIndex), 
+                        format.outputY(outputIndex) + 20, 
+                        20, 8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+                outputIndex++;
             }
         }
         
@@ -437,11 +454,11 @@ public class GenericRecipe implements IHardScienceRecipe
             GuiUtil.drawAlignedStringNoShadow(
                     minecraft.fontRenderer,
                     MachinePower.formatEnergy(energyInputJoules, false),
-                    0, 
-                    4,
-                    format.width(), 
+                    format.centerX() - 32, 
+                    format.centerY() - 18,
+                    64, 
                     8, 
-                    0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+                    0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM);
 
         }
         
@@ -450,10 +467,10 @@ public class GenericRecipe implements IHardScienceRecipe
             GuiUtil.drawAlignedStringNoShadow(
                     minecraft.fontRenderer,
                     MachinePower.formatEnergy(energyOutputJoules, false),
-                    0, 
-                    format.height() -4,
-                    format.width(), 
-                    8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM);
+                    format.centerX() - 32, 
+                    format.centerY() +  18,
+                    64, 
+                    8, 0xFF000000, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
         }
     }
 
