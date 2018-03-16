@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.CommonProxy;
+import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
@@ -720,7 +720,7 @@ public class MachineControlRenderer
             return;
         else 
         {
-            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, (int)(CommonProxy.currentTimeMillis() & 2047) * 360 / 2048, 30, 
+            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, (int)(WorldInfo.currentTimeMillis() & 2047) * 360 / 2048, 30, 
                     Textures.MACHINE_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
 
             if(te.clientState().controlState.getMachineState() == MachineState.THINKING 
@@ -909,7 +909,7 @@ public class MachineControlRenderer
 
     public static boolean warningLightBlinkOn()
     {
-        return (CommonProxy.currentTimeMillis() & 0x400) == 0x400;
+        return (WorldInfo.currentTimeMillis() & 0x400) == 0x400;
     }
 
 //    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, BufferDelegate materialBuffer, int alpha)

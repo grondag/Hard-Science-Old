@@ -97,8 +97,6 @@ public class ClientEventHandler
     {
         if(event.phase == Phase.START) 
         {
-            CommonProxy.updateCurrentTime();
-            
             Minecraft mc = Minecraft.getMinecraft();
             EntityPlayerSP player = mc.player;
             

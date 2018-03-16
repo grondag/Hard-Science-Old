@@ -2,8 +2,7 @@ package grondag.hard_science.machines.energy;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.hard_science.CommonProxy;
-import grondag.hard_science.LoadedWorldInfo;
+import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.IDevice;
@@ -96,11 +95,11 @@ public class PhotoElectricCell extends AbstractGenerator
         
         if(this.joulesPerTickBrightness == 0) return 0;
         
-        LoadedWorldInfo wi = CommonProxy.loadedWorldInfo(this.device().getLocation().dimensionID());
+        float brightness = WorldInfo.sunBrightnessFactor(this.device().getLocation().dimensionID());
         
-        if(wi == null || wi.sunBrightnessFactor() == 0) return 0;
+        if(brightness == 0) return 0;
         
-        return Math.min(maxOutput, (long) (wi.sunBrightnessFactor() * this.joulesPerTickBrightness));
+        return Math.min(maxOutput, (long) (brightness * this.joulesPerTickBrightness));
     }
 
     @Override

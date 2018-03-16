@@ -4,6 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
 
+import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.domain.Domain;
@@ -166,8 +167,7 @@ public class CommonEventHandler
     {
         if(event.phase == Phase.START) 
         {
-            CommonProxy.updateCurrentTime();
-            CommonProxy.refreshWorldInfos();
+            // noop
         }
         else
         {
@@ -214,7 +214,7 @@ public class CommonEventHandler
         
         if(player.getHeldItemMainhand().getItem() == Items.LAVA_BUCKET && event.getMessage().toLowerCase().contains("volcanos are awesome"))
         {
-            long time = CommonProxy.currentTimeMillis();
+            long time = WorldInfo.currentTimeMillis();
 
             if(event.getUsername() == lastTroubleMaker
                     && player.getPosition().equals(lastAttemptLocation)

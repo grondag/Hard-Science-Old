@@ -129,9 +129,10 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
         WorldTaskManager.sendPacketFromServerThread(packet, player, true);
     }
     
-    public void stopPlayerTracking(EntityPlayerMP player)
+    @SuppressWarnings("unlikely-arg-type")
+	public void stopPlayerTracking(EntityPlayerMP player)
     {
-        PlayerData oldData = playerTracking.get(player);
+		PlayerData oldData = playerTracking.get(player);
         
         if(oldData == null) return;
         

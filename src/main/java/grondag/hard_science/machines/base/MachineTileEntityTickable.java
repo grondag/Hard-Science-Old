@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.base;
 
-import grondag.hard_science.CommonProxy;
+import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
@@ -31,7 +31,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
         private PlayerListener(EntityPlayerMP key)
         {
             super(key);
-            this.goodUntilMillis = CommonProxy.currentTimeMillis() + Configurator.Machines.machineKeepAlivePlusLatency;
+            this.goodUntilMillis = WorldInfo.currentTimeMillis() + Configurator.Machines.machineKeepAlivePlusLatency;
         }
         
         /**
@@ -71,7 +71,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
         {
             PlayerListener previous = this.listeningPlayers.put(listener);
             
-            if(previous == null || previous.goodUntilMillis < CommonProxy.currentTimeMillis())
+            if(previous == null || previous.goodUntilMillis < WorldInfo.currentTimeMillis())
             {
                 if(Configurator.logMachineActivity) 
                     Log.info("MachineTileEntityTickable.addPlayerListener: %s added or reinstated listener", this.machine().machineName());
@@ -121,7 +121,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
         }
         else if(this.isPlayerUpdateNeeded && this.listeningPlayers != null && !this.listeningPlayers.isEmpty())
         {
-            long time = CommonProxy.currentTimeMillis();
+            long time = WorldInfo.currentTimeMillis();
         
             if(time >= this.nextPlayerUpdateMilliseconds)
             {

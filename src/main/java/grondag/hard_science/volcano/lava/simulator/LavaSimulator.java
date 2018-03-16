@@ -2,7 +2,7 @@ package grondag.hard_science.volcano.lava.simulator;
 
 import java.util.Collection;
 
-import grondag.hard_science.CommonProxy;
+import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
@@ -710,7 +710,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     
     public void doStats()
     {
-        long now = CommonProxy.currentTimeMillis();
+        long now = WorldInfo.currentTimeMillis();
 
         if(now >= this.nextStatTime)
         {

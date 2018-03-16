@@ -2,7 +2,7 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.CommonProxy;
+import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
@@ -267,7 +267,7 @@ public class MachineTileEntity extends SuperTileEntity
     @SideOnly(Side.CLIENT)
     public void notifyServerPlayerWatching()
     {
-        long time = CommonProxy.currentTimeMillis();
+        long time = WorldInfo.currentTimeMillis();
         
         // don't send more frequently than needed
         if(time >= this.nextPlayerUpdateMilliseconds)
@@ -389,7 +389,7 @@ public class MachineTileEntity extends SuperTileEntity
     @SideOnly(Side.CLIENT)
     public void notifyInView()
     {
-        this.clientState().lastInViewMillis = CommonProxy.currentTimeMillis();
+        this.clientState().lastInViewMillis = WorldInfo.currentTimeMillis();
     }
 
     public long lastInViewMillis()

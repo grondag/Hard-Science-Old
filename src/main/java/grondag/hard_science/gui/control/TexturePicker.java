@@ -2,12 +2,12 @@ package grondag.hard_science.gui.control;
 
 import java.util.List;
 
-import grondag.hard_science.CommonProxy;
+import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.superblock.texture.TextureRotationType;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.superblock.texture.TextureRotationType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -38,7 +38,7 @@ public class TexturePicker extends TabBar<TexturePallette>
         if(this.renderAlpha) GuiUtil.drawRect(left, top, left + size, top + size, this.baseColor);
 
         Rotation rotation = item.rotation.rotationType() == TextureRotationType.RANDOM 
-                ? Rotation.values()[(int) ((CommonProxy.currentTimeMillis() >> 11) & 3)]
+                ? Rotation.values()[(int) ((WorldInfo.currentTimeMillis() >> 11) & 3)]
                 : item.rotation.rotation;
                 
         TextureAtlasSprite tex = mc.getTextureMapBlocks().getAtlasSprite(item.getSampleTextureName());
