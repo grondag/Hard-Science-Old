@@ -46,8 +46,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.Rotation;
+import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.world.Rotation;
 
 public class QuadHelper
 {

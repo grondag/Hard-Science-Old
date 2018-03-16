@@ -7,6 +7,10 @@ import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 
+import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.world.IExtraStateFactory;
+import grondag.exotic_matter.world.NeighborBlocks;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IMessagePlus;
@@ -17,12 +21,8 @@ import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.LongElement;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.CornerJoinBlockState;
 import grondag.hard_science.library.world.CornerJoinBlockStateSelector;
-import grondag.hard_science.library.world.NeighborBlocks;
-import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.SimpleJoin;
 import grondag.hard_science.library.world.Transform;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -35,6 +35,7 @@ import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -131,6 +132,36 @@ public class ModelStateFactory
 
     public static class ModelState implements IReadWriteNBT, IMessagePlus
     {
+        
+        /**
+         * Use this as factory for model state block tests that DON'T need to refresh from world.
+         */
+        public static final IExtraStateFactory<ModelState> TEST_GETTER_STATIC = new IExtraStateFactory<ModelState>()
+        {
+            @Override
+            public ModelState get(IBlockAccess worldIn, BlockPos pos, IBlockState state)
+            {
+                Block block = state.getBlock();
+                return (block instanceof SuperBlock) 
+                        ? ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, worldIn, pos, false)
+                        : null;
+            }
+        };
+        
+        /**
+         * Use this as factory for model state block tests that DO need to refresh from world.
+         */
+        public static final IExtraStateFactory<ModelState> TEST_GETTER_DYNAMIC = new IExtraStateFactory<ModelState>()
+        {
+            @Override
+            public ModelState get(IBlockAccess worldIn, BlockPos pos, IBlockState state)
+            {
+                Block block = state.getBlock();
+                return (block instanceof SuperBlock) 
+                        ? ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, worldIn, pos, true)
+                        : null;
+            }
+        };
         
         public static final BitPacker STATE_PACKER = new BitPacker();
         
@@ -394,25 +425,25 @@ public class ModelStateFactory
 
                 long b3 = bits3;
 
-                NeighborBlocks neighbors = null;
+                NeighborBlocks<ModelState> neighbors = null;
 
                 if((STATE_FLAG_NEEDS_CORNER_JOIN & stateFlags) == STATE_FLAG_NEEDS_CORNER_JOIN)
                 {
-                    neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(world, state, pos, this));
+                    neighbors = new NeighborBlocks<>(world, pos, TEST_GETTER_STATIC);
+                    NeighborBlocks<ModelState>.NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(world, state, pos, this));
                     b3 = P3B_BLOCK_JOIN.setValue(CornerJoinBlockStateSelector.findIndex(tests), b3);
                 }
                 else if ((STATE_FLAG_NEEDS_SIMPLE_JOIN & stateFlags) == STATE_FLAG_NEEDS_SIMPLE_JOIN)
                 {
-                    neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(world, state, pos, this));
+                    neighbors = new NeighborBlocks<>(world, pos, TEST_GETTER_STATIC);
+                    NeighborBlocks<ModelState>.NeighborTestResults tests = neighbors.getNeighborTestResults(((SuperBlock)state.getBlock()).blockJoinTest(world, state, pos, this));
                     b3 = P3B_BLOCK_JOIN.setValue(SimpleJoin.getIndex(tests), b3);
                 }
 
                 if((STATE_FLAG_NEEDS_MASONRY_JOIN & stateFlags) == STATE_FLAG_NEEDS_MASONRY_JOIN)
                 {
-                    if(neighbors == null) neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults masonryTests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockMasonryMatch((SuperBlock) state.getBlock(), this.getSpecies(), pos));
+                    if(neighbors == null) neighbors = new NeighborBlocks<>(world, pos, TEST_GETTER_STATIC);
+                    NeighborBlocks<ModelState>.NeighborTestResults masonryTests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockMasonryMatch((SuperBlock) state.getBlock(), this.getSpecies(), pos));
                     b3 = P3B_MASONRY_JOIN.setValue(SimpleJoin.getIndex(masonryTests), b3);
                 }
 

@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.world.Rotation;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.matter.MatterModel.Naked;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.FMLCommonHandler;

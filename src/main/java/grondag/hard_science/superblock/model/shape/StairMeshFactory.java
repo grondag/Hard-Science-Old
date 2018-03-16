@@ -6,8 +6,8 @@ import javax.vecmath.Matrix4d;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
 

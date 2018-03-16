@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.exotic_matter.world.BlockCorner;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.world.BlockCorner;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;

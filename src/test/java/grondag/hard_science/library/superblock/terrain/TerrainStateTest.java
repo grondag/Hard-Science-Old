@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import grondag.hard_science.library.world.HorizontalCorner;
-import grondag.hard_science.library.world.HorizontalFace;
+import grondag.exotic_matter.world.HorizontalCorner;
+import grondag.exotic_matter.world.HorizontalFace;
 import grondag.hard_science.superblock.terrain.TerrainState;
 
 public class TerrainStateTest

@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.texture;
 
 
-import static grondag.hard_science.library.world.Rotation.*;
+import static grondag.exotic_matter.world.Rotation.*;
 import static grondag.hard_science.superblock.texture.TextureRotationType.*;
 
 import java.util.List;

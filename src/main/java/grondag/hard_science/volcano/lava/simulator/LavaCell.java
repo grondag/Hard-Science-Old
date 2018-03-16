@@ -7,11 +7,11 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.ComparisonChain;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.terrain.TerrainBlock;
 import grondag.hard_science.superblock.terrain.TerrainState;

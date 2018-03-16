@@ -5,8 +5,8 @@ import static grondag.hard_science.library.concurrency.Danger.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.Useful;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("unused")

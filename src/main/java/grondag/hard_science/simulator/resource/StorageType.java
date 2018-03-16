@@ -5,10 +5,10 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.storage.FluidStorageEvent;

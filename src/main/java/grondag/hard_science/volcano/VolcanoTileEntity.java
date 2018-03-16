@@ -13,11 +13,11 @@ import net.minecraft.util.math.Vec3i;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.varia.BlockSubstance;

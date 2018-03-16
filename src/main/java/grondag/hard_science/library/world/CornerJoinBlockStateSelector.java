@@ -1,6 +1,6 @@
 package grondag.hard_science.library.world;
 
-import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
+import grondag.exotic_matter.world.NeighborBlocks;
 import net.minecraft.util.EnumFacing;
 
 public class CornerJoinBlockStateSelector
@@ -29,7 +29,7 @@ public class CornerJoinBlockStateSelector
         }
     }
     
-    public static int findIndex(NeighborTestResults tests)
+    public static int findIndex(NeighborBlocks<?>.NeighborTestResults tests)
     {
         SimpleJoin baseJoin = new SimpleJoin(tests);
         return BLOCK_JOIN_SELECTOR[baseJoin.getIndex()].getIndexFromNeighbors(tests);
@@ -67,7 +67,7 @@ public class CornerJoinBlockStateSelector
         return count;
     }
     
-    private int getIndexFromNeighbors(NeighborTestResults tests)
+    private int getIndexFromNeighbors(NeighborBlocks<?>.NeighborTestResults tests)
     {
         int index = 0;
         int shift = 1;

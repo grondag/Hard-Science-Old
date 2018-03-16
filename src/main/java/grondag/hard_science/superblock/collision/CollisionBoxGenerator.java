@@ -5,10 +5,11 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
+import grondag.hard_science.library.render.RenderUtil;
 import grondag.hard_science.library.render.Vertex;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.VoxelBitField;
 import grondag.hard_science.library.varia.VoxelBitField.VoxelBox;
 import net.minecraft.util.EnumFacing;
@@ -133,7 +134,7 @@ public class CollisionBoxGenerator
     private static boolean isVoxelPresent(double x, double y, double z, List<RawQuad> quads)
     {
         Vec3d point = new Vec3d((x+0.5)/8.0, (y+0.5)/8.0, (z+0.5)/8.0);
-        return Useful.isPointEnclosed(point, quads);
+        return RenderUtil.isPointEnclosed(point, quads);
     }
     
     

@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.impl.production;
 
+import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.hard_science.library.world.IBlockTest;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
@@ -54,7 +54,7 @@ public class SolarCableBlock extends MachineSimpleBlock
     }
     
     @Override
-    public IBlockTest blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
+    public IBlockTest<ModelState> blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
     {
         return new BlockTests.SuperBlockCableMatch(this.portLayout(worldIn, pos, state), state.getValue(SuperBlock.META));
     }

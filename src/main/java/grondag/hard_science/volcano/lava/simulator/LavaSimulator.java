@@ -2,6 +2,7 @@ package grondag.hard_science.volcano.lava.simulator;
 
 import java.util.Collection;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
@@ -13,7 +14,6 @@ import grondag.hard_science.library.concurrency.PerformanceCollector;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;

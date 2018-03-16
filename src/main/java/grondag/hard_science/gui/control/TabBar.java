@@ -3,9 +3,9 @@ package grondag.hard_science.gui.control;
 import java.util.Collection;
 import java.util.List;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.library.varia.Useful;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;

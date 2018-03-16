@@ -1,12 +1,12 @@
 package grondag.hard_science.superblock.varia;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.Substances.Substance;
 import grondag.hard_science.library.serialization.IMessagePlusImmutable;
 import grondag.hard_science.library.serialization.IReadWriteNBTImmutable;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.ILocalized;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;

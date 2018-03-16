@@ -2,7 +2,7 @@ package grondag.hard_science.library.world;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.library.varia.Useful;
+import grondag.exotic_matter.varia.Useful;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;

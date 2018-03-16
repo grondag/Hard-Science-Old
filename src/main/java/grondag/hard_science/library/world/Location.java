@@ -3,8 +3,9 @@ package grondag.hard_science.library.world;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.Useful;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

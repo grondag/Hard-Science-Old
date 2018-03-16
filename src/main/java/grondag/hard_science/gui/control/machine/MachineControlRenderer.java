@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
@@ -17,7 +18,6 @@ import grondag.hard_science.library.font.RasterFont;
 import grondag.hard_science.library.render.QuadBakery;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.library.varia.HorizontalAlignment;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;

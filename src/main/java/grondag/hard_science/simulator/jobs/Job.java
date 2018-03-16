@@ -2,11 +2,11 @@ package grondag.hard_science.simulator.jobs;
 
 import java.util.Iterator;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;

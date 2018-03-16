@@ -2,10 +2,10 @@ package grondag.hard_science.gui.control;
 
 import java.util.List;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.TextureRotationType;
 import net.minecraft.client.Minecraft;

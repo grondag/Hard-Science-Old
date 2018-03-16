@@ -2,7 +2,7 @@ package grondag.hard_science.feature.volcano.lava.simulator;
 
 import org.junit.Test;
 
-import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer;
 
 public class WorldStateBufferTest

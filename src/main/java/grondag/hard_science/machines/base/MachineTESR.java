@@ -1,11 +1,11 @@
 package grondag.hard_science.machines.base;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;

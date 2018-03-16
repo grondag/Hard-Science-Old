@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.texture;
 
-import grondag.hard_science.library.world.Rotation;
+import grondag.exotic_matter.world.Rotation;
 
 public enum TextureRotationType
 {

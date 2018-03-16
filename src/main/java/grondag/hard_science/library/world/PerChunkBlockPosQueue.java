@@ -1,6 +1,7 @@
 package grondag.hard_science.library.world;
 
-import grondag.hard_science.library.varia.Useful;
+import grondag.exotic_matter.varia.PackedBlockPos;
+import grondag.exotic_matter.varia.Useful;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import net.minecraft.util.math.BlockPos;

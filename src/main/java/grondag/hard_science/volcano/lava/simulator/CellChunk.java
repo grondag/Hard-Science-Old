@@ -2,8 +2,8 @@ package grondag.hard_science.volcano.lava.simulator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.world.PackedBlockPos;
 /**
  * Container for all cells in a world chunk.
  * When a chunk is loaded (or updated) all cells that can exist in the chunk are created.

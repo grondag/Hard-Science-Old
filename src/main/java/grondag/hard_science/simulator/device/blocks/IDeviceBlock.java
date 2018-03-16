@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.device.blocks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.StorageType;

@@ -8,9 +8,9 @@ import javax.vecmath.Matrix4d;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;

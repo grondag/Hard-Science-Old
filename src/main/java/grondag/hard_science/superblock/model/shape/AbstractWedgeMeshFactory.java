@@ -6,7 +6,7 @@ import static grondag.hard_science.superblock.model.state.ModelStateFactory.Mode
 
 import java.util.List;
 
-import grondag.hard_science.library.world.BlockCorner;
+import grondag.exotic_matter.world.BlockCorner;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CollisionBoxDispatcher;
 import grondag.hard_science.superblock.collision.ICollisionHandler;

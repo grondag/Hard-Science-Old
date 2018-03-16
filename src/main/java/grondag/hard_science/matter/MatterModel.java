@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.QuadBakery;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.world.Rotation;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 
 public abstract class MatterModel

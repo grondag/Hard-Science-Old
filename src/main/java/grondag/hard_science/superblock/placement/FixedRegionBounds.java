@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.PackedBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 

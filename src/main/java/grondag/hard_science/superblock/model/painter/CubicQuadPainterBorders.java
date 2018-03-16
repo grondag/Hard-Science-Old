@@ -1,11 +1,11 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.render.FaceQuadInputs;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.world.CornerJoinBlockState;
 import grondag.hard_science.library.world.CornerJoinFaceState;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;

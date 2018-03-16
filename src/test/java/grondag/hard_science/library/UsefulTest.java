@@ -3,8 +3,8 @@ package grondag.hard_science.library;
 import org.junit.Test;
 
 import gnu.trove.list.TLongList;
-import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.exotic_matter.varia.PackedBlockPos;
+import grondag.exotic_matter.varia.Useful;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 

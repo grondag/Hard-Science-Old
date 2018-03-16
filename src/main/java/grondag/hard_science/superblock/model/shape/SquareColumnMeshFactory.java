@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.world.FaceSide;
 import grondag.hard_science.library.render.FaceVertex;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
@@ -15,7 +16,6 @@ import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.library.world.CornerJoinBlockState;
 import grondag.hard_science.library.world.CornerJoinFaceState;
-import grondag.hard_science.library.world.FaceSide;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;

@@ -9,9 +9,9 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4d;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.RenderPass;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;

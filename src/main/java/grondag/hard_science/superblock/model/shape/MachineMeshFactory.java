@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.model.shape;
 
 import java.util.List;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;

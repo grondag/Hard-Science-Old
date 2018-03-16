@@ -4,7 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.exotic_matter.varia.PackedBlockPos;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 

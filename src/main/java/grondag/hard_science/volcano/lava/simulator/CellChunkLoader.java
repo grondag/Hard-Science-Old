@@ -2,7 +2,7 @@ package grondag.hard_science.volcano.lava.simulator;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer.ChunkBuffer;
 import net.minecraft.world.chunk.Chunk;
 /**

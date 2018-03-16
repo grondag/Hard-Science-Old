@@ -6,9 +6,9 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.library.render.CubeInputs;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;

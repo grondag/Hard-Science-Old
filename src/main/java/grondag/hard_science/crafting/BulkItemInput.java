@@ -6,7 +6,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 
-import grondag.hard_science.library.varia.Useful;
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.BulkResource;

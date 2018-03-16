@@ -1,9 +1,9 @@
 package grondag.hard_science;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator.Render.PreviewMode;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.library.render.QuadCache;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
 import grondag.hard_science.network.ModMessages;

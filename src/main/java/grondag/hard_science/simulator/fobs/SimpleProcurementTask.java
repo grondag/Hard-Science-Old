@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.fobs;
 
-import grondag.hard_science.library.varia.Useful;
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.simulator.demand.IProducer;
 import grondag.hard_science.simulator.demand.InventoryProducer;
 import grondag.hard_science.simulator.jobs.RequestStatus;

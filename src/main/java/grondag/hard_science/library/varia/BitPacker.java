@@ -1,5 +1,6 @@
 package grondag.hard_science.library.varia;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
 
 public class BitPacker

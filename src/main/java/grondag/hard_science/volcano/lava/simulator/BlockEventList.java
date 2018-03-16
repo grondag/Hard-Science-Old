@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.concurrency.CountedJob;
@@ -11,7 +12,6 @@ import grondag.hard_science.library.concurrency.CountedJobTask;
 import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCollector;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
-import grondag.hard_science.library.world.PackedBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 

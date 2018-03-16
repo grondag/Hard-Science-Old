@@ -5,13 +5,13 @@ import javax.annotation.Nullable;
 
 import com.mojang.realmsclient.util.Pair;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
+import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
-import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.PackedBlockPos;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;

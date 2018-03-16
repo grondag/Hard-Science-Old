@@ -2,7 +2,10 @@ package grondag.hard_science.library.world;
 
 import java.util.ArrayList;
 
-import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
+import grondag.exotic_matter.world.BlockCorner;
+import grondag.exotic_matter.world.FaceCorner;
+import grondag.exotic_matter.world.FaceSide;
+import grondag.exotic_matter.world.NeighborBlocks;
 import net.minecraft.util.EnumFacing;
 
 /**
@@ -150,7 +153,7 @@ public enum CornerJoinFaceState
         return fjs;
     }
     
-    public static CornerJoinFaceState find(EnumFacing face, NeighborTestResults tests)
+    public static CornerJoinFaceState find(EnumFacing face, NeighborBlocks<?>.NeighborTestResults tests)
     {
         int faceFlags = 0;
         int cornerFlags = 0;

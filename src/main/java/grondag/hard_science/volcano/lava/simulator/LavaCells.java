@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.concurrency.CountedJob;
@@ -13,7 +14,6 @@ import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.Simulator;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;

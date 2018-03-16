@@ -3,13 +3,13 @@ package grondag.hard_science.superblock.model.shape;
 import java.util.ArrayList;
 import java.util.List;
 
+import grondag.exotic_matter.world.HorizontalCorner;
+import grondag.exotic_matter.world.HorizontalFace;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.render.CSGShape;
 import grondag.hard_science.library.render.FaceVertex;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.world.HorizontalCorner;
-import grondag.hard_science.library.world.HorizontalFace;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CollisionBoxDispatcher;
 import grondag.hard_science.superblock.collision.ICollisionHandler;

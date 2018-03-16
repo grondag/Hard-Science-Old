@@ -1,6 +1,6 @@
 package grondag.hard_science.library.render;
 
-import grondag.hard_science.library.world.Rotation;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.util.EnumFacing;

@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.varia;
 
-import grondag.hard_science.library.world.BlockCorner;
-import grondag.hard_science.library.world.FarCorner;
-import grondag.hard_science.library.world.IBlockTest;
+import grondag.exotic_matter.world.BlockCorner;
+import grondag.exotic_matter.world.FarCorner;
+import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -13,7 +13,7 @@ import net.minecraft.world.IBlockAccess;
  * Base class for block tests that don't care about facing.
  *
  */
-public abstract class AbstractNonFaceTest implements IBlockTest
+public abstract class AbstractNonFaceTest implements IBlockTest<ModelState>
 {
     abstract protected boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState);
 

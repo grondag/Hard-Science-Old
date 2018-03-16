@@ -3,7 +3,7 @@ package grondag.hard_science.library.cache;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import grondag.hard_science.library.varia.Useful;
+import grondag.exotic_matter.varia.Useful;
 
 
 public class WideSimpleLoadingCache<V> implements ISimpleLoadingCache

@@ -1,5 +1,7 @@
 package grondag.hard_science.library.render;
 
+import java.util.List;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -8,6 +10,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RenderUtil
 {
+    private static final Vec3d VOXEL_TEST_RAY = new Vec3d(5525, 13123, 7435);
+    public static boolean isPointEnclosed(Vec3d point, List<RawQuad> quads)
+    {
+        int intersectionCount = 0;
+        for(RawQuad quad : quads)
+        {                  
+            if(quad.intersectsWithRay(point, VOXEL_TEST_RAY)) intersectionCount++;
+        }          
+        return (intersectionCount & 0x1) == 1;
+    }
+    
     /**
      * Draws block-aligned grid on sides of AABB if entity can see it from outside
      */

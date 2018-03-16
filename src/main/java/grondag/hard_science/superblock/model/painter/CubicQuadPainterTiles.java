@@ -1,9 +1,9 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Surface;
 import net.minecraft.util.math.MathHelper;

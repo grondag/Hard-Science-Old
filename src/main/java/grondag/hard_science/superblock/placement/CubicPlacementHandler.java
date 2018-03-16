@@ -8,18 +8,17 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.world.BlockCorner;
-import grondag.hard_science.library.world.NeighborBlocks;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
-import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockTests;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
+import grondag.exotic_matter.world.BlockCorner;
+import grondag.exotic_matter.world.NeighborBlocks;
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -217,8 +216,8 @@ public class CubicPlacementHandler extends PlacementHandler
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;
 
-            NeighborBlocks neighbors = new NeighborBlocks(worldIn, posPlaced, false);
-            NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
+            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelState.TEST_GETTER_STATIC);
+            NeighborBlocks<ModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            
             {
@@ -263,8 +262,8 @@ public class CubicPlacementHandler extends PlacementHandler
             }
             
             // try to match an adjacent block
-            NeighborBlocks neighbors = new NeighborBlocks(worldIn, posPlaced, false);
-            NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
+            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelState.TEST_GETTER_STATIC);
+            NeighborBlocks<ModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            
             {

@@ -10,13 +10,13 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
-import grondag.hard_science.library.world.IBlockTest;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -152,7 +152,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Factory for block test that should be used for border/shape joins
      * for this block.  Used in model state refresh from world.
      */
-    public IBlockTest blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
+    public IBlockTest<ModelState> blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
     {
         return new BlockTests.SuperBlockBorderMatch(this, modelState, true);
     }

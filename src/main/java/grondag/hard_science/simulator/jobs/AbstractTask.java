@@ -2,10 +2,10 @@ package grondag.hard_science.simulator.jobs;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;

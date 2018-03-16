@@ -9,11 +9,11 @@ import org.magicwerk.brownies.collections.Key2List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.external.jei.AbstractRecipeCategory;
 import grondag.hard_science.external.jei.IRecipeFormat;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.BulkResource;

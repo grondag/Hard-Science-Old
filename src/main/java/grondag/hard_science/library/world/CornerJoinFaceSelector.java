@@ -1,6 +1,6 @@
 package grondag.hard_science.library.world;
 
-import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
+import grondag.exotic_matter.world.NeighborBlocks;
 import net.minecraft.util.EnumFacing;
 
 public class CornerJoinFaceSelector
@@ -23,7 +23,7 @@ public class CornerJoinFaceSelector
         }
     }
 
-    public int getIndexFromNeighbors(NeighborTestResults tests)
+    public int getIndexFromNeighbors(NeighborBlocks<?>.NeighborTestResults tests)
     {
         return joinIndex[CornerJoinFaceState.find(face, tests).ordinal()];
     }

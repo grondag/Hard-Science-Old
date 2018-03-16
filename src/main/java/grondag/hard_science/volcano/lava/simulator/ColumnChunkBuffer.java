@@ -1,6 +1,6 @@
 package grondag.hard_science.volcano.lava.simulator;
 
-import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer.ChunkBuffer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.Chunk;

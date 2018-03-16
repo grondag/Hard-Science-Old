@@ -1,7 +1,7 @@
 package grondag.hard_science.gui.control.machine;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
-import grondag.hard_science.library.world.Rotation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 public class RadialGaugeSpec extends RadialRenderBounds

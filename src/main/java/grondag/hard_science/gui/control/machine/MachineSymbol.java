@@ -1,8 +1,8 @@
 package grondag.hard_science.gui.control.machine;
 
+import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 

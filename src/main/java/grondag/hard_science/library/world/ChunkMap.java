@@ -5,7 +5,8 @@ import java.util.Iterator;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterators;
 
-import grondag.hard_science.library.varia.Useful;
+import grondag.exotic_matter.varia.PackedBlockPos;
+import grondag.exotic_matter.varia.Useful;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;

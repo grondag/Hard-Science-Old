@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.varia;
 
-import grondag.hard_science.library.world.BlockCorner;
-import grondag.hard_science.library.world.FarCorner;
-import grondag.hard_science.library.world.IBlockTest;
+import grondag.exotic_matter.world.BlockCorner;
+import grondag.exotic_matter.world.FarCorner;
+import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.machines.base.IMachineBlock;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -107,7 +107,7 @@ public class BlockTests
         }
     }
     
-    public static class SuperBlockCableMatch implements IBlockTest
+    public static class SuperBlockCableMatch implements IBlockTest<ModelState>
     {
         private final IPortLayout portLayout;
         private final int channel;

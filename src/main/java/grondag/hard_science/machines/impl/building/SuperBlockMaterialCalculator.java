@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.impl.building;
 
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.library.varia.ColorHelper;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.ColorHelper.CMY;
 import grondag.hard_science.matter.MatterUnits;
 import grondag.hard_science.matter.VolumeUnits;
