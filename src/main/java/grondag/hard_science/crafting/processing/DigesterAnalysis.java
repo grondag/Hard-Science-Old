@@ -1,5 +1,32 @@
 package grondag.hard_science.crafting.processing;
 
+import static grondag.hard_science.matter.Molecules.CALCIUM_SILICATE;
+import static grondag.hard_science.matter.Molecules.CHROMIUM_OXIDE;
+import static grondag.hard_science.matter.Molecules.COBALT_OXIDE;
+import static grondag.hard_science.matter.Molecules.CUPRIC_OXIDE;
+import static grondag.hard_science.matter.Molecules.GOLD;
+import static grondag.hard_science.matter.Molecules.H2O_FLUID;
+import static grondag.hard_science.matter.Molecules.HEMATITE;
+import static grondag.hard_science.matter.Molecules.LEAD_OXIDE;
+import static grondag.hard_science.matter.Molecules.LITHIUM_METASILICATE;
+import static grondag.hard_science.matter.Molecules.MAGNESIUM_SILICATE;
+import static grondag.hard_science.matter.Molecules.MANGANESE_DIOXIDE;
+import static grondag.hard_science.matter.Molecules.MOLYBDENUM_TRIOXIDE;
+import static grondag.hard_science.matter.Molecules.N2_GAS;
+import static grondag.hard_science.matter.Molecules.NEODYMIUM_OXIDE;
+import static grondag.hard_science.matter.Molecules.NICKEL_OXIDE;
+import static grondag.hard_science.matter.Molecules.O2_GAS;
+import static grondag.hard_science.matter.Molecules.PLATINUM;
+import static grondag.hard_science.matter.Molecules.POTASSIUM_METASILICATE;
+import static grondag.hard_science.matter.Molecules.SELENIUM;
+import static grondag.hard_science.matter.Molecules.SILVER;
+import static grondag.hard_science.matter.Molecules.SODIUM_METASILICATE;
+import static grondag.hard_science.matter.Molecules.TIN_DIOXIDE;
+import static grondag.hard_science.matter.Molecules.TITANIUM_DIOXIDE;
+import static grondag.hard_science.matter.Molecules.TUNGSTEN_TRIOXIDE;
+import static grondag.hard_science.matter.Molecules.ZINC_OXIDE;
+import static grondag.hard_science.matter.Molecules.ZIRCONIUM_DIOXIDE;
+
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -12,7 +39,6 @@ import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.matter.Compound;
 import grondag.hard_science.matter.Element;
 import grondag.hard_science.matter.Molecule;
-import grondag.hard_science.matter.Molecules;
 import grondag.hard_science.simulator.resource.BulkResource;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
@@ -46,24 +72,24 @@ public class DigesterAnalysis
      */
     private static final ImmutableMap<Element, Molecule> sludgePermits 
         = ImmutableMap.<Element, Molecule>builder()
-            .put(Element.Fe, Molecules.HEMATITE)
-            .put(Element.Ti, Molecules.TITANIUM_DIOXIDE)
-            .put(Element.Mn, Molecules.MANGANESE_DIOXIDE)
-            .put(Element.Zr, Molecules.ZIRCONIUM_DIOXIDE)
-            .put(Element.Nd, Molecules.NEODYMIUM_OXIDE)
-            .put(Element.Cr, Molecules.CHROMIUM_OXIDE)
-            .put(Element.Ni, Molecules.NICKEL_OXIDE)
-            .put(Element.Zn, Molecules.ZINC_OXIDE)
-            .put(Element.Cu, Molecules.CUPRIC_OXIDE)
-            .put(Element.Pb, Molecules.LEAD_OXIDE)
-            .put(Element.Co, Molecules.COBALT_OXIDE)
-            .put(Element.Sn, Molecules.TIN_DIOXIDE)
-            .put(Element.W, Molecules.TUNGSTEN_TRIOXIDE)
-            .put(Element.Mo, Molecules.MOLYBDENUM_TRIOXIDE)
-            .put(Element.Ag, Molecules.SILVER)
-            .put(Element.Au, Molecules.GOLD)
-            .put(Element.Se, Molecules.SELENIUM)
-            .put(Element.Pt, Molecules.PLATINUM)
+            .put(Element.Fe, HEMATITE)
+            .put(Element.Ti, TITANIUM_DIOXIDE)
+            .put(Element.Mn, MANGANESE_DIOXIDE)
+            .put(Element.Zr, ZIRCONIUM_DIOXIDE)
+            .put(Element.Nd, NEODYMIUM_OXIDE)
+            .put(Element.Cr, CHROMIUM_OXIDE)
+            .put(Element.Ni, NICKEL_OXIDE)
+            .put(Element.Zn, ZINC_OXIDE)
+            .put(Element.Cu, CUPRIC_OXIDE)
+            .put(Element.Pb, LEAD_OXIDE)
+            .put(Element.Co, COBALT_OXIDE)
+            .put(Element.Sn, TIN_DIOXIDE)
+            .put(Element.W, TUNGSTEN_TRIOXIDE)
+            .put(Element.Mo, MOLYBDENUM_TRIOXIDE)
+            .put(Element.Ag, SILVER)
+            .put(Element.Au, GOLD)
+            .put(Element.Se, SELENIUM)
+            .put(Element.Pt, PLATINUM)
             .build();
     
     /**
@@ -120,6 +146,8 @@ public class DigesterAnalysis
         
         double netOxygen = input.composition().countOf(Element.O);
         double netNitrogen = input.composition().countOf(Element.N);
+        double netSilicon = input.composition().countOf(Element.Si);
+        
         double nitrateUsage = 0;
 
         double totalResidueMols = 0;
@@ -176,13 +204,32 @@ public class DigesterAnalysis
             if(calciumFluoride > 0)
             {
                 outputBuilder.put(ModBulkResources.CALCIUM_FLUORIDE, calciumFluoride);
+                calcium -= calciumFluoride;
             }
             
-            if(calcium > calciumFluoride)
+            
+            if(calcium > 0)
             {
-                calcium -= calciumFluoride;
-                outputBuilder.put(ModBulkResources.CALCIUM_NITRATE, calcium);
-                nitrateUsage += calcium * 2;
+                // to reduce bulk prefer silicate if silicon available
+                if(netSilicon > 0)
+                {
+                    double silicate = Math.min(
+                            calcium / CALCIUM_SILICATE.countOf(Element.Ca),
+                            netSilicon / CALCIUM_SILICATE.countOf(Element.Si));
+                    if(silicate > 0)
+                    {
+                        outputBuilder.put(ModBulkResources.CALCIUM_SILICATE, silicate);
+                        calcium -= silicate * CALCIUM_SILICATE.countOf(Element.Ca);
+                        netSilicon -= silicate * CALCIUM_SILICATE.countOf(Element.Si);
+                        netOxygen -= silicate * CALCIUM_SILICATE.countOf(Element.O);
+                    }
+                }
+                
+                if(calcium > 0)
+                {
+                    outputBuilder.put(ModBulkResources.CALCIUM_NITRATE, calcium);
+                    nitrateUsage += calcium * 2;
+                }
             }
         }
         
@@ -201,13 +248,120 @@ public class DigesterAnalysis
             if(sodiumChloride > 0)
             {
                 outputBuilder.put(ModBulkResources.SODIUM_CHLORIDE, sodiumChloride);
+                sodium -= sodiumChloride;
             }
             
-            if(sodium > sodiumChloride)
+            if(sodium > 0)
             {
-                sodium -= sodiumChloride;
-                outputBuilder.put(ModBulkResources.SODIUM_NITRATE, sodium);
-                nitrateUsage += sodium;
+                // to reduce bulk prefer silicate if silicon available
+                if(netSilicon > 0)
+                {
+                    double silicate = Math.min(
+                            sodium / SODIUM_METASILICATE.countOf(Element.Na),
+                            netSilicon / SODIUM_METASILICATE.countOf(Element.Si));
+                    if(silicate > 0)
+                    {
+                        outputBuilder.put(ModBulkResources.SODIUM_METASILICATE, silicate);
+                        sodium -= silicate * SODIUM_METASILICATE.countOf(Element.Na);
+                        netSilicon -= silicate * SODIUM_METASILICATE.countOf(Element.Si);
+                        netOxygen -= silicate * SODIUM_METASILICATE.countOf(Element.O);
+                    }
+                }
+                
+                if(sodium > 0)
+                {
+                    outputBuilder.put(ModBulkResources.SODIUM_NITRATE, sodium);
+                    nitrateUsage += sodium;
+                }
+            }
+        }
+        
+        // To reduce bulk, prefer silicates for reminaing alkali/ne elements
+        // Output nitrates if not enouch silicon remaining.
+        {
+            double potassium = input.composition().countOf(Element.K);
+            if(potassium > 0)
+            {
+                if(netSilicon > 0)
+                {
+                    double silicate = Math.min(
+                            potassium / POTASSIUM_METASILICATE.countOf(Element.K),
+                            netSilicon / POTASSIUM_METASILICATE.countOf(Element.Si));
+                    if(silicate > 0)
+                    {
+                        outputBuilder.put(ModBulkResources.POTASSIUM_METASILICATE, silicate);
+                        potassium -= silicate * POTASSIUM_METASILICATE.countOf(Element.K);
+                        netSilicon -= silicate * POTASSIUM_METASILICATE.countOf(Element.Si);
+                        netOxygen -= silicate * POTASSIUM_METASILICATE.countOf(Element.O);
+                    }
+                }
+                
+                if(potassium > 0)
+                {
+                    outputBuilder.put(ModBulkResources.POTASSIUM_NITRATE, potassium);
+                    nitrateUsage += potassium;
+                }
+            }
+        }
+        
+        {
+            double magnesium = input.composition().countOf(Element.Mg);
+            if(magnesium > 0)
+            {
+                if(netSilicon > 0)
+                {
+                    double silicate = Math.min(
+                            magnesium / MAGNESIUM_SILICATE.countOf(Element.Mg),
+                            netSilicon / MAGNESIUM_SILICATE.countOf(Element.Si));
+                    if(silicate > 0)
+                    {
+                        outputBuilder.put(ModBulkResources.MAGNESIUM_SILICATE, silicate);
+                        magnesium -= silicate * MAGNESIUM_SILICATE.countOf(Element.Mg);
+                        netSilicon -= silicate * MAGNESIUM_SILICATE.countOf(Element.Si);
+                        netOxygen -= silicate * MAGNESIUM_SILICATE.countOf(Element.O);
+                    }
+                }
+                
+                if(magnesium > 0)
+                {
+                    outputBuilder.put(ModBulkResources.MAGNESIUM_NITRATE, magnesium);
+                    nitrateUsage += magnesium * 2;
+                }
+            }
+        }
+        
+        {
+            double lithium = input.composition().countOf(Element.Li);
+            if(lithium > 0)
+            {
+                if(netSilicon > 0)
+                {
+                    double silicate = Math.min(
+                            lithium / LITHIUM_METASILICATE.countOf(Element.Li),
+                            netSilicon / LITHIUM_METASILICATE.countOf(Element.Si));
+                    if(silicate > 0)
+                    {
+                        outputBuilder.put(ModBulkResources.LITHIUM_METASILICATE, silicate);
+                        lithium -= silicate * LITHIUM_METASILICATE.countOf(Element.Li);
+                        netSilicon -= silicate * LITHIUM_METASILICATE.countOf(Element.Si);
+                        netOxygen -= silicate * LITHIUM_METASILICATE.countOf(Element.O);
+                    }
+                }
+
+                if(lithium > 0)
+                {
+                    outputBuilder.put(ModBulkResources.LITHIUM_NITRATE, lithium);
+                    nitrateUsage += lithium;
+                }
+            }
+        }
+
+        // if any silicon remaining, output as silica
+        {
+            if(netSilicon > 0)
+            {
+                outputBuilder.put(ModBulkResources.SILICA, netSilicon);
+                netOxygen -= netSilicon * 2;
             }
         }
         
@@ -251,15 +405,6 @@ public class DigesterAnalysis
         }
 
         {
-            double silicon = input.composition().countOf(Element.Si);
-            if(silicon > 0)
-            {
-                outputBuilder.put(ModBulkResources.SILICA, silicon);
-                netOxygen -= silicon * 2;
-            }
-        }
-        
-        {
             double aluminum = input.composition().countOf(Element.Al);
             if(aluminum > 0)
             {
@@ -268,33 +413,6 @@ public class DigesterAnalysis
             }
         }
         
-        {
-            double potassium = input.composition().countOf(Element.K);
-            if(potassium > 0)
-            {
-                outputBuilder.put(ModBulkResources.POTASSIUM_NITRATE, potassium);
-                nitrateUsage += potassium;
-            }
-        }
-        
-        {
-            double magnesium = input.composition().countOf(Element.Mg);
-            if(magnesium > 0)
-            {
-                outputBuilder.put(ModBulkResources.MAGNESIUM_NITRATE, magnesium);
-                nitrateUsage += magnesium * 2;
-            }
-        }
-        
-        {
-            double lithium = input.composition().countOf(Element.Li);
-            if(lithium > 0)
-            {
-                outputBuilder.put(ModBulkResources.LITHIUM_NITRATE, lithium);
-                nitrateUsage += lithium;
-            }
-        }
-
         double massIn = input.composition().weight();
 
         if(debug) Log.info("Base mass for one mol of input is " + massIn);
@@ -307,11 +425,11 @@ public class DigesterAnalysis
         else if(netWater > 0)
         {
             this.waterInputMols = -netWater;
-            massIn += this.waterInputMols * Molecules.H2O_FLUID.weight();
+            massIn += this.waterInputMols * H2O_FLUID.weight();
             if(debug)
             {
                 Log.info("Water consumption is %f mols with mass %f",
-                    this.waterInputMols, this.waterInputMols * Molecules.H2O_FLUID.weight());
+                    this.waterInputMols, this.waterInputMols * H2O_FLUID.weight());
                 reconIn.addTo(Element.O, this.waterInputMols);
                 reconIn.addTo(Element.H, this.waterInputMols * 2);
             }
@@ -338,11 +456,11 @@ public class DigesterAnalysis
         else if(netNitrogen < 0)
         {
             this.nitrogenInputMols = -netNitrogen / 2;
-            massIn += this.nitrogenInputMols * Molecules.N2_GAS.weight();
+            massIn += this.nitrogenInputMols * N2_GAS.weight();
             if(debug)
             {
                 Log.info("Nitrogen (N2) consumption is %f mols with mass %f",
-                    this.nitrogenInputMols, this.nitrogenInputMols * Molecules.N2_GAS.weight());
+                    this.nitrogenInputMols, this.nitrogenInputMols * N2_GAS.weight());
                 reconIn.addTo(Element.N, this.nitrogenInputMols * 2);
             }
         }
@@ -365,9 +483,9 @@ public class DigesterAnalysis
         else // netOxygen < 0
         {
             this.oxygenInputMols = -netOxygen / 2;
-            massIn += this.oxygenInputMols * Molecules.O2_GAS.weight();
+            massIn += this.oxygenInputMols * O2_GAS.weight();
             if(debug) Log.info("Oxygen (O2) consumption is %f mols with mass %f",
-                    this.oxygenInputMols, this.oxygenInputMols * Molecules.O2_GAS.weight());
+                    this.oxygenInputMols, this.oxygenInputMols * O2_GAS.weight());
             reconIn.addTo(Element.O, this.oxygenInputMols * 2);
         }
         

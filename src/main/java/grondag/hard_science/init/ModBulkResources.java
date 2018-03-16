@@ -136,6 +136,14 @@ public class ModBulkResources
     public final static BulkResource POTASSIUM_NITRATE = register("potassium_nitrate", 0xFFFFFFFF, Molecules.POTASSIUM_NITRATE, 20, 1, MatterPhase.SOLID, 2.1090);
     public final static BulkResource LITHIUM_NITRATE = register("lithium_nitrate", 0xFFFFFFFF, Molecules.LITHIUM_NITRATE, 20, 1, MatterPhase.SOLID, 2.3800);
     public final static BulkResource MAGNESIUM_NITRATE = register("magnesium_nitrate", 0xFFFFFFFF, Molecules.MAGNESIUM_NITRATE, 20, 1, MatterPhase.SOLID, 2.3000);
+    
+    public final static BulkResource CALCIUM_SILICATE = register("calcium_silicate", 0xFFFFFFFF, Molecules.CALCIUM_SILICATE, 20, 1, MatterPhase.SOLID, 2.9);
+    public final static BulkResource SODIUM_METASILICATE = register("sodium_silicate", 0xFFFFFFFF, Molecules.SODIUM_METASILICATE, 20, 1, MatterPhase.SOLID, 2.6);
+    public final static BulkResource POTASSIUM_METASILICATE = register("potassium_silicate", 0xFFFFFFFF, Molecules.POTASSIUM_METASILICATE, 20, 1, MatterPhase.SOLID, 2.7); //density is a guess
+    public final static BulkResource LITHIUM_METASILICATE = register("lithium_silicate", 0xFFFFFFFF, Molecules.LITHIUM_METASILICATE, 20, 1, MatterPhase.SOLID, 2.52);
+    public final static BulkResource MAGNESIUM_SILICATE = register("magnesium_silicate", 0xFFFFFFFF, Molecules.MAGNESIUM_SILICATE, 20, 1, MatterPhase.SOLID, 3.11);
+    
+    
     public final static BulkResource SODIUM_CHLORIDE = register("sodium_chloride", 0xFFFFFFFF, Molecules.SODIUM_CHLORIDE, 20, 1, MatterPhase.SOLID, 2.1650);
     public final static BulkResource CALCIUM_FLUORIDE = register("calcium_fluoride", 0xFFFFFFFF, Molecules.CALCIUM_FLUORIDE, 20, 1, MatterPhase.SOLID, 3.1800);
     public static final BulkResource BORIC_ACID = register("boric_acid", 0xFFFFFFFF, Molecules.BORIC_ACID, 20, 1, MatterPhase.SOLID, 1.435);

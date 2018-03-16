@@ -86,6 +86,14 @@ public class Molecules
     public static final Molecule POTASSIUM_NITRATE = new Molecule("K N O3", -494);
     public static final Molecule LITHIUM_NITRATE = new Molecule("Li N O3", -482.3);
     public static final Molecule MAGNESIUM_NITRATE = new Molecule("Mg N2 O6", -790.7);
+    
+    public static final Molecule CALCIUM_SILICATE = new Molecule("Ca2SiO4", -1630.0);
+    public static final Molecule SODIUM_METASILICATE = new Molecule("Na2SiO3", -1561.43);
+    public static final Molecule POTASSIUM_METASILICATE = new Molecule("K2O3Si", -1522.415);
+    public static final Molecule LITHIUM_METASILICATE = new Molecule("Li2SiO3", -1648.0);
+    public static final Molecule MAGNESIUM_SILICATE = new Molecule("MgO3Si", -1548.0);
+
+    
     public static final Molecule SODIUM_CHLORIDE = new Molecule("Na Cl", -411.12);
     public static final Molecule CALCIUM_FLUORIDE = new Molecule("Ca F2", -1228.0);
     
