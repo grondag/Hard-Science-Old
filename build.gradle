@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
 		
 	    maven {
             name = "forge"
@@ -12,15 +12,25 @@ buildscript {
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
     }
+    
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'org.ajoberstar:gradle-git:0.10.1'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
-version = "0.1"
+import org.ajoberstar.grgit.Grgit
+
+def repo = Grgit.open(project.file('.'))
+project.ext.gitHash = repo.log().find().abbreviatedId
+
+ext.buildnumber = 0
+project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : project.ext.gitHash
+
+version = "MC${minecraft_version}-${mod_version}.${buildnumber}"
 group= "grondag.hard_science" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "hard_science"
 
@@ -32,10 +42,13 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.1.2562"
+    version = "${minecraft_version}-${forge_version}"
     runDir = "run"
     mappings = "snapshot_20171003"
     useDepAts = true
+    
+    replaceIn "Reference.java"
+    replace "@VERSION@", project.version
 }
 
 task deobfJar(type: Jar) {
@@ -61,34 +74,28 @@ reobf {
 
 repositories {
 
-	mavenCentral()
+	maven { // CTM & TOP
+		url "http://maven.tterrag.com/"
+	}
 	
-    maven { url "http://maven.amadornes.com/" }
-        
-    maven { // The repo from which to get waila
-        name "Mobius Repo"
-        url "http://tehnut.info/maven"
-    }
-    
+	maven { // WAILA
+		url "http://mobiusstrip.eu/maven"
+	}
+	
     maven { // JEI
         url "http://dvs1.progwml6.com/files/maven"
     }
     
-    maven { // TOP
-        name 'tterrag maven'
-        url "http://maven.tterrag.com/"
-    }
+    maven { // Multipart
+    		url "http://maven.amadornes.com/"
+	}
     
     maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
     }
     
- //   maven {
- //   	url = "https://repo.adobe.com/nexus/content/repositories/public/"
- //   }
-    
-        maven {
+    maven {
         name = "CoFH Maven"
         url = "http://maven.covers1624.net"
     }
@@ -105,48 +112,17 @@ artifacts {
 }
 
 dependencies {
-
-
-    // you may put jars on which you depend on in ./libs
-    // or you may define them like so..
-    //compile "some.group:artifact:version:classifier"
-    //compile "some.group:artifact:version"
     
     deobfCompile "org.magicwerk:brownies-collections:0.9.13"
     shade "org.magicwerk:brownies-collections:0.9.13"
     
-    // real examples
-    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
-    // except that these dependencies get remapped to your current MCP mappings
-    //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-    //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    deobfCompile "mezz.jei:jei_1.12.2:4.8.5.136"
-    deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.19-11"
-
+	deobfCompile "mezz.jei:jei_1.12.2:${jei_version}"
+    deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-${top_version}"
+	
 	// not currently using these APIs
 	// here to support compatibility testing in dev environment
 	// or because thinking about using the APIs
-    deobfCompile "MCMultiPart2:MCMultiPart:2.3.3"
-    // deobfCompile "mod.chiselsandbits:chiselsandbits:14.0.88" 
-    // deobfCompile "refinedstorage:refinedstorage:1.5.19-1377"
-    
-
-    // deobfCompile "mcp.mobius.waila:Hwyla:1.8.18-B32_1.12:api"
-    // deobfCompile "cofh:RedstoneFlux:1.12-2.0.1.2:universal"
-    // deobfCompile "com.github.mcjty:intwheel:1.1x-1.2.4"
-    // for more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    
-	// https://repo.adobe.com/nexus/content/repositories/public/org/apache/commons/commons-imaging/1.0-R1534292/commons-imaging-1.0-R1534292.jar
-	// deobfCompile "org.apache.commons:commons-imaging:1.0-R1534292"
+    deobfCompile "MCMultiPart2:MCMultiPart:${mcmp_version}"
 }
 
 processResources
