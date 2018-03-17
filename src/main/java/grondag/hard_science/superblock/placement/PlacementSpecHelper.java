@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.placement;
 
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.placement.spec.CSGBuilder;
 import grondag.hard_science.superblock.placement.spec.CuboidBuilder;

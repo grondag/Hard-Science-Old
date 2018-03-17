@@ -14,7 +14,7 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

@@ -23,7 +23,7 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.ItemStack;

@@ -3,7 +3,7 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;

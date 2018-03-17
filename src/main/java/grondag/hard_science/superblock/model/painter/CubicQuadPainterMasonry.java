@@ -7,8 +7,8 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
 import grondag.exotic_matter.world.SimpleJoinFaceState;
 import grondag.hard_science.Log;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
 
 

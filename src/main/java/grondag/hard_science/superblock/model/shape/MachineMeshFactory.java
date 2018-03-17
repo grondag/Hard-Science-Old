@@ -14,7 +14,8 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.shape.machine.CableMeshFactory;
 import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
 import grondag.hard_science.superblock.model.shape.machine.PhotoCellMeshFactory;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -69,7 +70,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     
     protected MachineMeshFactory()
     {
-        super(StateFormat.BLOCK, ModelState.STATE_FLAG_NONE, 
+        super(StateFormat.BLOCK, ModelStateData.STATE_FLAG_NONE, 
                 SURFACE_MAIN, SURFACE_LAMP); 
     }
 

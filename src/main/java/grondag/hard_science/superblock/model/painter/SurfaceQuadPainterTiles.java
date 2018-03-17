@@ -4,8 +4,8 @@ import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TextureRotationType;
 import net.minecraft.util.math.MathHelper;
 

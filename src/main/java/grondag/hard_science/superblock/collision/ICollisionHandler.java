@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.collision;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;

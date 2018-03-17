@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.AxisAlignedBB;
 

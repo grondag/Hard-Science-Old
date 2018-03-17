@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.terrain.TerrainBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
 import grondag.hard_science.superblock.varia.BlockSubstance;

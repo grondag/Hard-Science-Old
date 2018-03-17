@@ -30,7 +30,7 @@ import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.RenderLayout;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

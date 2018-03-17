@@ -12,7 +12,8 @@ import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import grondag.hard_science.superblock.varia.BlockTests;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.exotic_matter.world.BlockCorner;
@@ -217,7 +218,7 @@ public class CubicPlacementHandler extends PlacementHandler
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;
 
-            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelState.TEST_GETTER_STATIC);
+            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
             NeighborBlocks<ModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            
@@ -263,7 +264,7 @@ public class CubicPlacementHandler extends PlacementHandler
             }
             
             // try to match an adjacent block
-            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelState.TEST_GETTER_STATIC);
+            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
             NeighborBlocks<ModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            

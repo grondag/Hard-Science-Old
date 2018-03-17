@@ -1,10 +1,9 @@
 package grondag.hard_science.superblock.model.state;
 
-import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.*;
+import static grondag.hard_science.superblock.model.state.ModelStateData.*;
 
 import grondag.exotic_matter.render.RenderPass;
 import grondag.hard_science.superblock.model.shape.ShapeMeshGenerator;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
 
@@ -99,7 +98,7 @@ public class ModelStateFlagHelper
             
             RenderPassSet rps = RenderPassSet.findByFlags(renderPassFlags);
             
-            result = (int) ModelStateFactory.ModelState.STATE_ENUM_RENDER_PASS_SET.setValue(rps, result);
+            result = (int) STATE_ENUM_RENDER_PASS_SET.setValue(rps, result);
             
             if(isBaseTranslucent || (isLampPresent && isLampTranslucent))
                 result |= STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;
@@ -114,7 +113,7 @@ public class ModelStateFlagHelper
         
         ShapeMeshGenerator mesh = state.getShape().meshFactory();
         
-        int flags = ModelState.STATE_FLAG_IS_POPULATED | mesh.getStateFlags(state);
+        int flags = STATE_FLAG_IS_POPULATED | mesh.getStateFlags(state);
         
         TexturePallette texBase = state.getTexture(PaintLayer.BASE);
         flags |= texBase.stateFlags;
@@ -158,7 +157,7 @@ public class ModelStateFlagHelper
         // turn off this.stateFlags that don't apply to non-block formats if we aren't one
         if(mesh.stateFormat != StateFormat.BLOCK)
         {
-            flags &= ModelState.STATE_FLAG_DISABLE_BLOCK_ONLY;
+            flags &= STATE_FLAG_DISABLE_BLOCK_ONLY;
         }
         
         return flags;

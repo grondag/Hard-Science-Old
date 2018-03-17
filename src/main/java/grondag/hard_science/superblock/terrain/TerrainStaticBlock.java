@@ -7,7 +7,7 @@ import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperStaticBlock;
 import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.Block;

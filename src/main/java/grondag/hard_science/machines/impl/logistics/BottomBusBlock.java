@@ -13,7 +13,7 @@ import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory.MachineShape;
 import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;

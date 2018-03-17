@@ -18,8 +18,9 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CollisionBoxDispatcher;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
+import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.terrain.TerrainState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -71,7 +72,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     protected TerrainMeshFactory()
     {
         super(  StateFormat.FLOW, 
-                ModelState.STATE_FLAG_NEEDS_POS, 
+                ModelStateData.STATE_FLAG_NEEDS_POS, 
                 SURFACE_TOP.surface(), SURFACE_SIDE.surface());
     }
 

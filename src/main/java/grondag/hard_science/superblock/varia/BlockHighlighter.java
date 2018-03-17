@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.varia;
 
 import grondag.exotic_matter.ConfigXM;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;

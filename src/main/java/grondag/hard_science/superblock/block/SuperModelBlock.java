@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;

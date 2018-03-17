@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.model.shape;
 
-import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_HAS_AXIS;
-import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_HAS_AXIS_ROTATION;
-import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_NEEDS_SPECIES;
+import static grondag.hard_science.superblock.model.state.ModelStateData.STATE_FLAG_HAS_AXIS;
+import static grondag.hard_science.superblock.model.state.ModelStateData.STATE_FLAG_HAS_AXIS_ROTATION;
+import static grondag.hard_science.superblock.model.state.ModelStateData.STATE_FLAG_NEEDS_SPECIES;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CollisionBoxDispatcher;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.placement.BlockOrientationType;
 import net.minecraft.block.Block;

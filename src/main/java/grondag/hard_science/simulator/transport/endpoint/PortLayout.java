@@ -5,7 +5,7 @@ import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModRegistries;
 import grondag.hard_science.library.refractory.Transform;
 import grondag.hard_science.library.refractory.Transform.FaceMap;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;

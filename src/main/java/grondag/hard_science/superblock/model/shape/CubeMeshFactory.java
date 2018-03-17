@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.model.shape;
 
-import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_NONE;
+import static grondag.hard_science.superblock.model.state.ModelStateData.STATE_FLAG_NONE;
 
 import java.util.List;
 
@@ -16,8 +16,8 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;

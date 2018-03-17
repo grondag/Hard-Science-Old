@@ -9,7 +9,7 @@ import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterBorders;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterMasonry;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import grondag.hard_science.superblock.texture.TextureRotationType.TextureRotationSetting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
@@ -239,12 +239,12 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             
             if(info.rotation.rotationType() == TextureRotationType.RANDOM)
             {
-                flags |= (ModelState.STATE_FLAG_NEEDS_TEXTURE_ROTATION | ModelState.STATE_FLAG_NEEDS_POS);
+                flags |= (ModelStateData.STATE_FLAG_NEEDS_TEXTURE_ROTATION | ModelStateData.STATE_FLAG_NEEDS_POS);
             }
             
             if(info.textureVersionCount > 1)
             {
-                flags |= ModelState.STATE_FLAG_NEEDS_POS;
+                flags |= ModelStateData.STATE_FLAG_NEEDS_POS;
             }
             this.stateFlags =  flags;
                     

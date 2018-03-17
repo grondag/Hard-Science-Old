@@ -11,7 +11,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.model.state.MetaUsage;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;

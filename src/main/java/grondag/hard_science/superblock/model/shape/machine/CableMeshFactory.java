@@ -14,8 +14,9 @@ import grondag.exotic_matter.world.SimpleJoin;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
+import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.AxisDirection;
@@ -38,7 +39,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     
     public CableMeshFactory(double cableRadius, boolean onGround)
     {
-        super(ModelState.STATE_FLAG_NEEDS_SIMPLE_JOIN | ModelState.STATE_FLAG_NEEDS_SPECIES, 
+        super(ModelStateData.STATE_FLAG_NEEDS_SIMPLE_JOIN | ModelStateData.STATE_FLAG_NEEDS_SPECIES, 
                 MachineMeshFactory.SURFACE_MAIN); 
         
         this.CABLE_RADIUS = cableRadius;

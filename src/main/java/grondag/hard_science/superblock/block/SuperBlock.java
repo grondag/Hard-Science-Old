@@ -23,7 +23,7 @@ import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.MetaUsage;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateProperty;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Translucency;

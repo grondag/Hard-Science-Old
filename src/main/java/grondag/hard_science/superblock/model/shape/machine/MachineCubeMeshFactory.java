@@ -13,7 +13,8 @@ import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +39,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
      */
     public MachineCubeMeshFactory(boolean hasFront)
     {
-        super(hasFront ? ModelState.STATE_FLAG_HAS_AXIS_ROTATION : ModelState.STATE_FLAG_NONE, 
+        super(hasFront ? ModelStateData.STATE_FLAG_HAS_AXIS_ROTATION : ModelStateData.STATE_FLAG_NONE, 
                 MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
         
         this.hasFront = hasFront;

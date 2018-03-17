@@ -6,7 +6,7 @@ import grondag.exotic_matter.render.PerQuadModelRenderer;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

@@ -9,8 +9,9 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
+import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -28,7 +29,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     
     public PhotoCellMeshFactory(float height)
     {
-        super(ModelState.STATE_FLAG_NONE, 
+        super(ModelStateData.STATE_FLAG_NONE, 
                 MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
         this.height = height;
         this.AABB = new AxisAlignedBB(0, 0, 0, 1, height, 1);

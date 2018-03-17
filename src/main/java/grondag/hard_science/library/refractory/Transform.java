@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.client.renderer.block.model.ModelRotation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;

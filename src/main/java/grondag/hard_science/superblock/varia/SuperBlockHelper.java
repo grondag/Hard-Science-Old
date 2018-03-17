@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.varia;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;

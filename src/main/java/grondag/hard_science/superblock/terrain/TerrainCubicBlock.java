@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.terrain;
 
 import java.util.List;
 
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;

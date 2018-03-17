@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.util.EnumFacing;
 
 public class StairMeshFactory extends AbstractWedgeMeshFactory

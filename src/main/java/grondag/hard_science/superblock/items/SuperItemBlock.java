@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.BlockOrientationHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;

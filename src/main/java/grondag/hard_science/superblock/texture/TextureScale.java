@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.texture;
 
-import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.*;
+import static grondag.hard_science.superblock.model.state.ModelStateData.*;
 
 public enum TextureScale
 {

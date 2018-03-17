@@ -4,7 +4,7 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTBase;

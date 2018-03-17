@@ -1,6 +1,5 @@
 package grondag.hard_science.superblock.model.state;
 
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 
 /**

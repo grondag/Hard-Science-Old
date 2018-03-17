@@ -16,7 +16,7 @@ import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.MetaUsage;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;

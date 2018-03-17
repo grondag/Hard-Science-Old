@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.items;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import net.minecraft.item.Item;
 

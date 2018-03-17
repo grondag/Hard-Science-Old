@@ -7,8 +7,8 @@ import grondag.exotic_matter.world.CornerJoinBlockState;
 import grondag.exotic_matter.world.CornerJoinFaceState;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
 
 public class CubicQuadPainterBorders extends CubicQuadPainter

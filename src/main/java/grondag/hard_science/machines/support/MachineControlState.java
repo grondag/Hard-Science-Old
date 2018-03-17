@@ -11,7 +11,7 @@ import grondag.exotic_matter.varia.BitPacker.BitElement.EnumElement;
 import grondag.exotic_matter.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;

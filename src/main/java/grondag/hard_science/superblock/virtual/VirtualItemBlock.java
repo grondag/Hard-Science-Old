@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.virtual;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;

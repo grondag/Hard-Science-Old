@@ -1,7 +1,7 @@
 package grondag.hard_science.volcano.lava;
 
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.volcano.lava.simulator.LavaCell;

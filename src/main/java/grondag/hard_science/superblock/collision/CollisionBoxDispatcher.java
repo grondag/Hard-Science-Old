@@ -4,7 +4,7 @@ import java.util.List;
 
 import grondag.exotic_matter.cache.ObjectSimpleCacheLoader;
 import grondag.exotic_matter.cache.ObjectSimpleLoadingCache;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public class CollisionBoxDispatcher

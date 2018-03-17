@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.model.state;
 
 import net.minecraftforge.common.property.IUnlistedProperty;
 
-public class ModelStateProperty implements IUnlistedProperty<ModelStateFactory.ModelState> {
+public class ModelStateProperty implements IUnlistedProperty<ModelState> {
 
     @Override
     public String getName() {
@@ -10,21 +10,21 @@ public class ModelStateProperty implements IUnlistedProperty<ModelStateFactory.M
     }
 
     @Override
-    public boolean isValid(ModelStateFactory.ModelState value)
+    public boolean isValid(ModelState value)
     {
         return true;
     }
 
     @Override
-    public String valueToString(ModelStateFactory.ModelState value)
+    public String valueToString(ModelState value)
     {
         return value.toString();
     }
 
     @Override
-    public Class<ModelStateFactory.ModelState> getType()
+    public Class<ModelState> getType()
     {
-        return ModelStateFactory.ModelState.class;
+        return ModelState.class;
     }
     
 

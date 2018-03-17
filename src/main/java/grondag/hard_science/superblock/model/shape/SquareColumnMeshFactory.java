@@ -26,7 +26,8 @@ import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.placement.BlockOrientationType;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.superblock.model.state.ModelStateData;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -89,7 +90,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
     {
         super(
                 StateFormat.BLOCK, 
-                ModelState.STATE_FLAG_NEEDS_CORNER_JOIN | ModelState.STATE_FLAG_HAS_AXIS, 
+                ModelStateData.STATE_FLAG_NEEDS_CORNER_JOIN | ModelStateData.STATE_FLAG_HAS_AXIS, 
                 STATE_CUT_COUNT.setValue(3, STATE_ARE_CUTS_ON_EDGE.setValue(true, 0)), 
                 SURFACE_MAIN, SURFACE_LAMP, SURFACE_CUT
         );

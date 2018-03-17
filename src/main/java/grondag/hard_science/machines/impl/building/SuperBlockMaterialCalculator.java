@@ -6,7 +6,7 @@ import grondag.exotic_matter.varia.ColorHelper.CMY;
 import grondag.hard_science.matter.MatterUnits;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.util.math.BlockPos;

@@ -10,7 +10,7 @@ import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;

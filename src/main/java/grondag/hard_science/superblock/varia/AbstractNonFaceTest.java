@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.varia;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.FarCorner;
 import grondag.exotic_matter.world.IBlockTest;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
