@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.collision;
 
 import java.util.List;
 
-import grondag.hard_science.library.cache.ObjectSimpleCacheLoader;
-import grondag.hard_science.library.cache.ObjectSimpleLoadingCache;
+import grondag.exotic_matter.cache.ObjectSimpleCacheLoader;
+import grondag.exotic_matter.cache.ObjectSimpleLoadingCache;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.math.AxisAlignedBB;
 

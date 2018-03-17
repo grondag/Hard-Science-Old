@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
+import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.fobs.NewTask;
 import grondag.hard_science.simulator.fobs.TaskPriority;

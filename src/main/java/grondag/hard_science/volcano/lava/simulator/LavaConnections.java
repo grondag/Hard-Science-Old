@@ -4,11 +4,11 @@ package grondag.hard_science.volcano.lava.simulator;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
+import grondag.exotic_matter.concurrency.CountedJob;
+import grondag.exotic_matter.concurrency.CountedJobTask;
+import grondag.exotic_matter.concurrency.Job;
+import grondag.exotic_matter.concurrency.SimpleConcurrentList;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.library.concurrency.CountedJob;
-import grondag.hard_science.library.concurrency.CountedJobTask;
-import grondag.hard_science.library.concurrency.Job;
-import grondag.hard_science.library.concurrency.SimpleConcurrentList;
 import grondag.hard_science.simulator.Simulator;
 
 @SuppressWarnings("unused")

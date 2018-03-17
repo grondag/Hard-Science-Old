@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Objects;
 
-import grondag.hard_science.library.varia.ItemHelper;
+import grondag.exotic_matter.varia.ItemHelper;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

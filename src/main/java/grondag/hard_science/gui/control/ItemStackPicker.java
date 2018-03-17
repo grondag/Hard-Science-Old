@@ -2,10 +2,10 @@ package grondag.hard_science.gui.control;
 
 import java.util.List;
 
+import grondag.exotic_matter.varia.HorizontalAlignment;
+import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.library.varia.HorizontalAlignment;
-import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;

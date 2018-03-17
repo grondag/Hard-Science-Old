@@ -12,12 +12,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import grondag.hard_science.HardScience;
+import grondag.exotic_matter.concurrency.PerformanceCollector;
+import grondag.exotic_matter.concurrency.PerformanceCounter;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.library.concurrency.PerformanceCollector;
-import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.block.SuperBlock;

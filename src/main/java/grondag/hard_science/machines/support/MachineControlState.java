@@ -2,15 +2,15 @@ package grondag.hard_science.machines.support;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.varia.BitPacker;
 import grondag.exotic_matter.varia.PackedBlockPos;
+import grondag.exotic_matter.varia.BitPacker.BitElement.BooleanElement;
+import grondag.exotic_matter.varia.BitPacker.BitElement.EnumElement;
+import grondag.exotic_matter.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.BitPacker;
-import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
-import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
-import grondag.hard_science.library.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;

@@ -1,8 +1,8 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
-import grondag.hard_science.library.varia.BitPacker;
-import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
-import grondag.hard_science.library.varia.BitPacker.BitElement.IntElement;
+import grondag.exotic_matter.varia.BitPacker;
+import grondag.exotic_matter.varia.BitPacker.BitElement.EnumElement;
+import grondag.exotic_matter.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.simulator.resource.EnumStorageType;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;

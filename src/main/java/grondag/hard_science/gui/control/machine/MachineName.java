@@ -1,9 +1,9 @@
 package grondag.hard_science.gui.control.machine;
 
+import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 

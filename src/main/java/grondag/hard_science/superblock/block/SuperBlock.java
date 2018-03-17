@@ -10,13 +10,13 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.varia.Color;
+import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;

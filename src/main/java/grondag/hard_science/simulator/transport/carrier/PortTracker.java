@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 

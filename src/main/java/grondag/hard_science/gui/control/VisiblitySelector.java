@@ -1,7 +1,7 @@
 package grondag.hard_science.gui.control;
 
-import static grondag.hard_science.library.varia.HorizontalAlignment.*;
-import static grondag.hard_science.library.varia.VerticalAlignment.*;
+import static grondag.exotic_matter.varia.HorizontalAlignment.*;
+import static grondag.exotic_matter.varia.VerticalAlignment.*;
 
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;

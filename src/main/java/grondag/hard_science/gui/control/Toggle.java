@@ -1,9 +1,9 @@
 package grondag.hard_science.gui.control;
 
+import grondag.exotic_matter.varia.HorizontalAlignment;
+import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.library.varia.HorizontalAlignment;
-import grondag.hard_science.library.varia.VerticalAlignment;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.energy;
 
+import grondag.exotic_matter.varia.TimeUnits;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.varia.TimeUnits;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 
 public interface IEnergyComponent extends IReadWriteNBT, IDeviceComponent

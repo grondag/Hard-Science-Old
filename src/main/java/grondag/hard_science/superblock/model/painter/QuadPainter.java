@@ -2,10 +2,10 @@ package grondag.hard_science.superblock.model.painter;
 
 import java.util.List;
 
+import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.render.Vertex;
-import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.PaintLayer;

@@ -8,9 +8,9 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.AbstractIterator;
 
+import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;

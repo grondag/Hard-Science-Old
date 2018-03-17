@@ -1,13 +1,13 @@
 package grondag.hard_science.machines.base;
 
+import grondag.exotic_matter.varia.KeyedTuple;
+import grondag.exotic_matter.varia.SimpleUnorderedArraySet;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
-import grondag.hard_science.superblock.varia.KeyedTuple;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ITickable;
 

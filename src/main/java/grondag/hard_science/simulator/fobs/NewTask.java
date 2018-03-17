@@ -2,10 +2,10 @@ package grondag.hard_science.simulator.fobs;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.jobs.RequestStatus;

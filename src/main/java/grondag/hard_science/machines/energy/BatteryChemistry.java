@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.energy;
 
-import grondag.hard_science.library.varia.TimeUnits;
+import grondag.exotic_matter.varia.TimeUnits;
 import grondag.hard_science.matter.VolumeUnits;
 import net.minecraft.util.math.MathHelper;
 

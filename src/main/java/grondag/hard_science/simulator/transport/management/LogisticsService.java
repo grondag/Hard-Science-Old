@@ -24,9 +24,9 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.concurrency.PrivilegedExecutor;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.concurrency.PrivilegedExecutor;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;

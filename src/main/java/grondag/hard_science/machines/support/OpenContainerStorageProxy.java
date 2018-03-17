@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.concurrency.ConcurrentForwardingList;
+import grondag.exotic_matter.concurrency.ConcurrentForwardingList;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraftforge.fml.relauncher.Side;

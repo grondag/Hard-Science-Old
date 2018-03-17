@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.color;
 
+import grondag.exotic_matter.varia.Color;
+import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import net.minecraft.util.text.translation.I18n;
 
 public class ColorMap

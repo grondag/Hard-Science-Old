@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.model.state;
 
 import java.util.List;
 
-import grondag.hard_science.library.varia.BinaryEnumSet;
+import grondag.exotic_matter.varia.BinaryEnumSet;
 import net.minecraft.util.BlockRenderLayer;
 
 /**

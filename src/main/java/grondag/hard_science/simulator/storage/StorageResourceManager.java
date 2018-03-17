@@ -11,9 +11,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.fobs.INewTaskListener;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;

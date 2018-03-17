@@ -2,13 +2,13 @@ package grondag.hard_science.simulator.device;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.concurrency.CountedJob;
+import grondag.exotic_matter.concurrency.CountedJobTask;
+import grondag.exotic_matter.concurrency.Job;
+import grondag.exotic_matter.concurrency.PerformanceCollector;
+import grondag.exotic_matter.concurrency.SimpleCountedJobBacker;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.concurrency.CountedJob;
-import grondag.hard_science.library.concurrency.CountedJobTask;
-import grondag.hard_science.library.concurrency.Job;
-import grondag.hard_science.library.concurrency.PerformanceCollector;
-import grondag.hard_science.library.concurrency.SimpleCountedJobBacker;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;

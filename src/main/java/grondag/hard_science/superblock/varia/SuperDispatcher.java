@@ -7,10 +7,10 @@ import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.cache.ObjectSimpleCacheLoader;
+import grondag.exotic_matter.cache.ObjectSimpleLoadingCache;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.cache.ObjectSimpleCacheLoader;
-import grondag.hard_science.library.cache.ObjectSimpleLoadingCache;
 import grondag.hard_science.library.render.QuadBakery;
 import grondag.hard_science.library.render.QuadContainer;
 import grondag.hard_science.library.render.QuadHelper;

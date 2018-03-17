@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.transport.management;
 
-import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
+import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.resource.ITypedStorage;

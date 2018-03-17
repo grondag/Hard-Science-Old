@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import grondag.exotic_matter.varia.Color;
+import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 
 public class BlockColorMapProvider
 {

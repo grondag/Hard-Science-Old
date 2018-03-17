@@ -1,7 +1,7 @@
 package grondag.hard_science.matter;
 
-import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
+import grondag.exotic_matter.varia.Color;
+import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 
 public class MatterColors
 {

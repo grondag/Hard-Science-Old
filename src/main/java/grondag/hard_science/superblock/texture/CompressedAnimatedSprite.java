@@ -16,10 +16,10 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import com.sun.imageio.plugins.jpeg.JPEGImageReaderSpi;
 
+import grondag.exotic_matter.concurrency.PerformanceCollector;
+import grondag.exotic_matter.concurrency.PerformanceCounter;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.concurrency.PerformanceCollector;
-import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.render.TextureHelper;
 
 import org.apache.commons.io.IOUtils;

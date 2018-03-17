@@ -6,12 +6,12 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.varia.VoxelBitField;
+import grondag.exotic_matter.varia.VoxelBitField.VoxelBox;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.render.RenderUtil;
 import grondag.hard_science.library.render.Vertex;
-import grondag.hard_science.library.varia.VoxelBitField;
-import grondag.hard_science.library.varia.VoxelBitField.VoxelBox;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;

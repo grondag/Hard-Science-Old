@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.color;
 
-import grondag.hard_science.library.varia.Color;
+import grondag.exotic_matter.varia.Color;
 import net.minecraft.util.text.translation.I18n;
 
 public enum Hue

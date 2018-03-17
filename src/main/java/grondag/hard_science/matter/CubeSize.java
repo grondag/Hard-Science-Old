@@ -5,11 +5,11 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.varia.Color;
+import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

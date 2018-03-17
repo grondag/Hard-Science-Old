@@ -7,11 +7,11 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 
+import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.crafting.processing.DigesterAnalysis;
 import grondag.hard_science.crafting.processing.DigesterRecipe;
-import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.matter.Compound;
 import grondag.hard_science.matter.Compounds;
 import grondag.hard_science.matter.IComposition;
