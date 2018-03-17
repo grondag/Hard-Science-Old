@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import grondag.hard_science.library.render.FaceVertex;
-import grondag.hard_science.library.render.QuadHelper;
-import grondag.hard_science.library.render.RawQuad;
+import grondag.exotic_matter.render.FaceVertex;
+import grondag.exotic_matter.render.QuadHelper;
+import grondag.exotic_matter.render.RawQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 

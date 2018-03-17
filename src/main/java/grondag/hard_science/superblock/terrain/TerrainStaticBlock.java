@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.terrain;
 
 import java.util.List;
 
+import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.Configurator;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperStaticBlock;
 import grondag.hard_science.superblock.model.shape.ModelShape;
@@ -66,7 +66,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
     {
         //see Config.render().enableFaceCullingOnFlowBlocks for explanation
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
-        if(Configurator.RENDER.enableFaceCullingOnFlowBlocks && TerrainBlock.isFlowBlock(neighborState.getBlock()))
+        if(ConfigXM.RENDER.enableFaceCullingOnFlowBlocks && TerrainBlock.isFlowBlock(neighborState.getBlock()))
         {
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
             int otherOcclusionKey = ((SuperBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());

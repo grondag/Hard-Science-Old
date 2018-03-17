@@ -18,13 +18,13 @@ import org.lwjgl.opengl.GL11;
 import com.sun.imageio.plugins.png.PNGImageWriter;
 import com.sun.imageio.plugins.png.PNGImageWriterSpi;
 
-import grondag.hard_science.Configurator;
+import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.render.FaceVertex;
+import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.TextureHelper;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.render.FaceVertex;
-import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.render.TextureHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -292,7 +292,7 @@ public class RasterFont extends TextureAtlasSprite
                 this.fontMap = glyphMapImage;
                 
                 //output font textures for troubleshooting - quick hack, not pretty
-                if(Configurator.RENDER.outputFontTexturesForDebugging)
+                if(ConfigXM.RENDER.outputFontTexturesForDebugging)
                 {
                     File file = new File(fontName + "-" + fontHeight + ".png");
                     if(file.exists()) file.delete();

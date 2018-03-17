@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.model.state;
 
+import grondag.exotic_matter.render.RenderPass;
 import net.minecraft.util.BlockRenderLayer;
 
 /**

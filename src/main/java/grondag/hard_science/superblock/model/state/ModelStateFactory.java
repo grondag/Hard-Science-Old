@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 
+import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.varia.BitPacker;

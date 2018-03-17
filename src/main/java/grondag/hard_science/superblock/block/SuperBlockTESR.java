@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.block;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.render.PerQuadModelRenderer;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.render.PerQuadModelRenderer;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;

@@ -6,6 +6,10 @@ import static grondag.hard_science.superblock.model.state.ModelStateFactory.Mode
 
 import java.util.List;
 
+import grondag.exotic_matter.render.Surface;
+import grondag.exotic_matter.render.SurfaceTopology;
+import grondag.exotic_matter.render.SurfaceType;
+import grondag.exotic_matter.render.Surface.SurfaceInstance;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CollisionBoxDispatcher;
@@ -13,11 +17,7 @@ import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.model.state.Surface;
-import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.placement.BlockOrientationType;
-import grondag.hard_science.superblock.model.state.SurfaceTopology;
-import grondag.hard_science.superblock.model.state.SurfaceType;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;

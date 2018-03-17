@@ -1,5 +1,6 @@
 package grondag.hard_science;
 
+import grondag.exotic_matter.ConfigXM;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.init.ModModels;
@@ -84,7 +85,7 @@ public class ClientProxy extends CommonProxy
         super.preInit(event);
         ModModels.preInit(event);
 
-        if(Configurator.RENDER.debugOutputColorAtlas)
+        if(ConfigXM.RENDER.debugOutputColorAtlas)
         {
             BlockColorMapProvider.writeColorAtlas(event.getModConfigurationDirectory());
         }

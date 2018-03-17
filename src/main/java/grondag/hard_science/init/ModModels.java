@@ -3,7 +3,9 @@ package grondag.hard_science.init;
 import java.io.IOException;
 import java.util.Map;
 
-import grondag.hard_science.Configurator;
+import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.render.CompressedAnimatedSprite;
+import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.library.refractory.RasterFont;
@@ -28,8 +30,6 @@ import grondag.hard_science.superblock.block.SuperModelTileEntityTESR;
 import grondag.hard_science.superblock.block.SuperTileEntityTESR;
 import grondag.hard_science.superblock.items.CraftingItem;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
-import grondag.hard_science.superblock.texture.EnhancedSprite;
 import grondag.hard_science.superblock.texture.TextureLayout;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
@@ -197,7 +197,7 @@ public class ModModels
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
     {
-        if(Configurator.RENDER.enableAnimationStatistics && CompressedAnimatedSprite.perfLoadRead.runCount() > 0)
+        if(ConfigXM.RENDER.enableAnimationStatistics && CompressedAnimatedSprite.perfLoadRead.runCount() > 0)
         {
             CompressedAnimatedSprite.perfCollectorLoad.outputStats();
             CompressedAnimatedSprite.perfCollectorLoad.clearStats();

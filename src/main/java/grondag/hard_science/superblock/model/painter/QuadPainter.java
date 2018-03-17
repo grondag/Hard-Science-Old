@@ -2,15 +2,15 @@ package grondag.hard_science.superblock.model.painter;
 
 import java.util.List;
 
+import grondag.exotic_matter.render.QuadHelper;
+import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.RenderPass;
+import grondag.exotic_matter.render.Surface;
+import grondag.exotic_matter.render.Vertex;
 import grondag.exotic_matter.varia.Color;
-import grondag.hard_science.library.render.QuadHelper;
-import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.render.Vertex;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.RenderPass;
-import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;

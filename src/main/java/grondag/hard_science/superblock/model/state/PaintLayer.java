@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.model.state;
 
+import grondag.exotic_matter.render.SurfaceType;
 import net.minecraft.util.text.translation.I18n;
 
 public enum PaintLayer

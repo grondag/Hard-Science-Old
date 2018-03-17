@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterBorders;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterMasonry;

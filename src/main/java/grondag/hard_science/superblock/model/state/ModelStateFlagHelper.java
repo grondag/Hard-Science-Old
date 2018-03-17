@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.model.state;
 
 import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.*;
 
+import grondag.exotic_matter.render.RenderPass;
 import grondag.hard_science.superblock.model.shape.ShapeMeshGenerator;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;

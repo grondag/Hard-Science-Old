@@ -6,11 +6,11 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.render.CSGShape;
+import grondag.exotic_matter.render.QuadHelper;
+import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
-import grondag.hard_science.library.render.CSGShape;
-import grondag.hard_science.library.render.QuadHelper;
-import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;

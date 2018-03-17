@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.model.state;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
 import grondag.hard_science.Log;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;

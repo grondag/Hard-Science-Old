@@ -5,13 +5,13 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.render.RawQuad;
+import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Surface;
+import grondag.exotic_matter.render.SurfaceType;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.model.state.Surface;
-import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.placement.BlockOrientationType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;

@@ -11,11 +11,11 @@ import java.util.Iterator;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.render.RenderUtil;
 import grondag.exotic_matter.world.CubicBlockRegion;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.ClientProxy;
-import grondag.hard_science.library.render.RenderUtil;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.AbstractTask;

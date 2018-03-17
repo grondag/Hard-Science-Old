@@ -2,9 +2,9 @@ package grondag.hard_science.volcano.lava;
 
 import java.util.List;
 
-import grondag.hard_science.library.render.QuadHelper;
-import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.render.Vertex;
+import grondag.exotic_matter.render.QuadHelper;
+import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Vertex;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;

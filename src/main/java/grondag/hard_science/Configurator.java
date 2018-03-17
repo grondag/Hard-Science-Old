@@ -4,9 +4,13 @@ import java.util.IdentityHashMap;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.Config.*;
+import net.minecraftforge.common.config.Config.Comment;
+import net.minecraftforge.common.config.Config.LangKey;
+import net.minecraftforge.common.config.Config.RangeDouble;
+import net.minecraftforge.common.config.Config.RangeInt;
+import net.minecraftforge.common.config.Config.RequiresMcRestart;
+import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -30,7 +34,6 @@ public class Configurator
 
     public static void recalcDerived()
     {
-        Render.recalcDerived();
         Volcano.recalcDerived();
         Machines.recalcDerived();
     }
@@ -105,95 +108,6 @@ public class Configurator
             }
         }
     }    
-
-    ////////////////////////////////////////////////////        
-    // RENDERING
-    ////////////////////////////////////////////////////
-    @LangKey("config.render")
-    @Comment("Settings for visual appearance.")
-    public static Render RENDER = new Render();
-
-    public static class Render
-    {
-        @Comment("Maxiumum number of quads held in cache for reuse. Higher numbers may result is less memory consuption overall, up to a point.")
-        @RangeInt(min = 0xFFFF, max = 0xFFFFF)
-        public int quadCacheSizeLimit = 524280;
-
-        @RequiresMcRestart
-        @Comment("Collect statistics on quad caching. Used for testing.")
-        public boolean enableQuadCacheStatistics = false;
-
-        @RequiresMcRestart
-        @Comment("Enable animated textures. Set false if animation may be causing memory or performance problems.")
-        public boolean enableAnimatedTextures = true;
-
-        @RequiresMcRestart
-        @Comment("Collect statistics on texture animation. Used for testing.")
-        public boolean enableAnimationStatistics = false;
-
-        @RequiresMcRestart
-        @Comment({"Enable in-memroy texture compression of animated textures if your graphics card supports is.",
-        "Can reduce memory usage by 1GB or more."})
-        public boolean enableAnimatedTextureCompression = false;
-
-        @RequiresMcRestart
-        @Comment("Seconds between output of client-side performance statistics to log, if any are enabled.")
-        @RangeInt(min = 10, max = 600)
-        public int clientStatReportingInterval = 10;
-
-        @Comment({"Shade blocks from this mod with a uniform light vector. Provides a somewhat better appearance for flowing ",
-        "lava blocks (for example) but may appear odd when next to blocks from Vanilla or other mods."})
-        public boolean enableCustomShading = true;
-
-        @Comment({"If true, Dynamic flow block (volcanic lava and basalt) will not render faces occulded by adjacent flow blocks.",
-            " True is harder on CPU and easier on your graphics card/chip.  Experiment if you have FPS problems.",
-        " Probably won't matter on systems with both a fast CPU and fast graphics."})
-        public boolean enableFaceCullingOnFlowBlocks = false;
-
-        @Comment("Minimum lighting on any block face with custom shading. Smaller values give deeper shadows.")
-        @RangeDouble(min = 0, max = 0.9)
-        public float minAmbientLight =0.3F;
-
-        @Comment("X component of ambient light source.")
-        @RangeDouble(min = -1, max = 1)
-        public float normalX = 0.0F;
-
-        @Comment("Y component of ambient light source.")
-        @RangeDouble(min = -1, max = 1)
-        public float normalY = 1.0F;
-
-        @Comment("Z component of ambient light source.")
-        @RangeDouble(min = -1, max = 1)
-        public float normalZ = 0.25F;
-
-        @Comment("Debug Feature: draw block boundaries for non-cubic blocks.")
-        public boolean debugDrawBlockBoundariesForNonCubicBlocks = false;
-
-        @Comment("Rendering for blocks about to be placed.")
-        public PreviewMode previewSetting = PreviewMode.OUTLINE;
-
-        @Comment("Debug Feature: output generated font images that are uploaded to texture map.")
-        public boolean outputFontTexturesForDebugging = false;
-
-        @Comment("Debug Feature: output generated color atlas in config folder to show possible hues.")
-        public boolean debugOutputColorAtlas = false;
-
-        public static float normalLightFactor;
-
-        public static Vec3d lightingNormal;
-
-        private static void recalcDerived()
-        {
-            normalLightFactor = 0.5F * (1F - RENDER.minAmbientLight);
-            lightingNormal = new Vec3d(RENDER.normalX, RENDER.normalY, RENDER.normalZ).normalize();
-        }
-
-        public static enum PreviewMode
-        {
-            NONE,
-            OUTLINE
-        }
-    }
 
     ////////////////////////////////////////////////////        
     // BLOCKS

@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.varia;
 
-import grondag.hard_science.Configurator;
+import grondag.exotic_matter.ConfigXM;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
@@ -66,7 +66,7 @@ public class BlockHighlighter
         }
 
         // Debug Feature: draw outline of block boundaries for non-square blocks
-        if(Configurator.RENDER.debugDrawBlockBoundariesForNonCubicBlocks)
+        if(ConfigXM.RENDER.debugDrawBlockBoundariesForNonCubicBlocks)
         {
             AxisAlignedBB aabb = Block.FULL_BLOCK_AABB.offset(pos.getX(), pos.getY(), pos.getZ());
             if(!isPreview) aabb = aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D);

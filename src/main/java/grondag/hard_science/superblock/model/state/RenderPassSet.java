@@ -1,7 +1,9 @@
 package grondag.hard_science.superblock.model.state;
 
 
-import static grondag.hard_science.superblock.model.state.RenderPass.*;
+import static grondag.exotic_matter.render.RenderPass.*;
+
+import grondag.exotic_matter.render.RenderPass;
 
 public enum RenderPassSet
 {

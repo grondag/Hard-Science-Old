@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.exotic_matter.render.Surface;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TextureScale;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;

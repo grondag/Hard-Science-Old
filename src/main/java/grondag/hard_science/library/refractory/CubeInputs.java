@@ -1,7 +1,9 @@
-package grondag.hard_science.library.render;
+package grondag.hard_science.library.refractory;
 
+import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Vertex;
+import grondag.exotic_matter.render.Surface.SurfaceInstance;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.util.EnumFacing;
 

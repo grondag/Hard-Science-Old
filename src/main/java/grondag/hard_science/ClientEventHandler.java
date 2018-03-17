@@ -1,9 +1,11 @@
 package grondag.hard_science;
 
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.Configurator.Render.PreviewMode;
+import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.ConfigXM.Render.PreviewMode;
+import grondag.exotic_matter.render.CompressedAnimatedSprite;
+import grondag.exotic_matter.render.QuadCache;
 import grondag.hard_science.init.ModKeys;
-import grondag.hard_science.library.render.QuadCache;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
 import grondag.hard_science.network.ModMessages;
@@ -17,7 +19,6 @@ import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.placement.PlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementResult;
-import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
 import grondag.hard_science.superblock.virtual.ExcavationRenderManager;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
@@ -88,7 +89,7 @@ public class ClientEventHandler
     /** used to detect key down/up for modifier keys */
     private static int modifierKeyFlags = 0;
     
-    private static int clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
+    private static int clientStatCounter = ConfigXM.RENDER.clientStatReportingInterval * 20;
     
     private static int cooldown = 0;
     
@@ -134,17 +135,17 @@ public class ClientEventHandler
         }
         else
         {
-            if ((Configurator.RENDER.enableQuadCacheStatistics || Configurator.RENDER.enableAnimationStatistics)
+            if ((ConfigXM.RENDER.enableQuadCacheStatistics || ConfigXM.RENDER.enableAnimationStatistics)
                     && --clientStatCounter == 0) 
             {
-                clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
+                clientStatCounter = ConfigXM.RENDER.clientStatReportingInterval * 20;
                 
-                if(Configurator.RENDER.enableQuadCacheStatistics)
+                if(ConfigXM.RENDER.enableQuadCacheStatistics)
                 {
                     Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
                 }
     
-                if(Configurator.RENDER.enableAnimatedTextures && Configurator.RENDER.enableAnimationStatistics)
+                if(ConfigXM.RENDER.enableAnimatedTextures && ConfigXM.RENDER.enableAnimationStatistics)
                 {
                     CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
                     CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
@@ -259,8 +260,8 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_PREVIEW.isPressed())
             {
-                PreviewMode newMode = Useful.nextEnumValue(Configurator.RENDER.previewSetting);
-                Configurator.RENDER.previewSetting = newMode;
+                PreviewMode newMode = Useful.nextEnumValue(ConfigXM.RENDER.previewSetting);
+                ConfigXM.RENDER.previewSetting = newMode;
                 ConfigManager.sync(HardScience.MODID, Type.INSTANCE);
                 String message = I18n.translateToLocalFormatted("placement.message.preview_set",  I18n.translateToLocal("placement.preview." + newMode.toString().toLowerCase()));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));

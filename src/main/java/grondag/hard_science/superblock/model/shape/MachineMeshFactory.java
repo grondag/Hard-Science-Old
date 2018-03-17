@@ -2,8 +2,12 @@ package grondag.hard_science.superblock.model.shape;
 
 import java.util.List;
 
+import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Surface;
+import grondag.exotic_matter.render.SurfaceTopology;
+import grondag.exotic_matter.render.SurfaceType;
+import grondag.exotic_matter.render.Surface.SurfaceInstance;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
@@ -12,10 +16,6 @@ import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactor
 import grondag.hard_science.superblock.model.shape.machine.PhotoCellMeshFactory;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.model.state.Surface;
-import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
-import grondag.hard_science.superblock.model.state.SurfaceTopology;
-import grondag.hard_science.superblock.model.state.SurfaceType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;

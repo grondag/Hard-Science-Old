@@ -4,8 +4,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.render.RawQuad;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.render.RawQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 
