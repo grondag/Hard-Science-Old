@@ -2,9 +2,9 @@ package grondag.hard_science.superblock.placement.spec;
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.library.world.IBlockRegion;
-import grondag.hard_science.library.world.SingleBlockRegion;
-import grondag.hard_science.library.world.WorldHelper;
+import grondag.exotic_matter.world.IBlockRegion;
+import grondag.exotic_matter.world.SingleBlockRegion;
+import grondag.hard_science.library.refractory.WorldHelperLeftovers;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.IWorldTask;
@@ -61,7 +61,7 @@ public class SingleBuilder extends SingleStackBuilder
                         == BlockFaceShape.UNDEFINED) return false;
             }
             
-            if(WorldHelper.isBlockReplaceable(this.player.world, this.pPos.inPos, false))
+            if(WorldHelperLeftovers.isBlockReplaceable(this.player.world, this.pPos.inPos, false))
             {
                 this.outputStack = PlacementHandler.cubicPlacementStack(this);
                 return true;

@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.hard_science.Log;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.serialization.ModNBTTag;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier

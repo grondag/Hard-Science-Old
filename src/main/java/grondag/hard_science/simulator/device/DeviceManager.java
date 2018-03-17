@@ -9,7 +9,7 @@ import grondag.exotic_matter.concurrency.PerformanceCollector;
 import grondag.exotic_matter.concurrency.SimpleCountedJobBacker;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.blocks.DeviceWorldManager;

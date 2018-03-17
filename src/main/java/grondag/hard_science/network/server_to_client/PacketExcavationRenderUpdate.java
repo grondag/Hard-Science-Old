@@ -1,8 +1,8 @@
 package grondag.hard_science.network.server_to_client;
 
+import grondag.exotic_matter.world.IntegerAABB;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import grondag.hard_science.superblock.virtual.ExcavationRenderEntry;
 import grondag.hard_science.superblock.virtual.ExcavationRenderManager;

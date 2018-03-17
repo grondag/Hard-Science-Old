@@ -4,8 +4,8 @@ import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;

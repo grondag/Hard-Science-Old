@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.base;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.device.blocks.SimpleBlockHandler;
 import grondag.hard_science.simulator.resource.StorageType;

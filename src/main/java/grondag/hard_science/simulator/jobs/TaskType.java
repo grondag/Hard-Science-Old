@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.jobs;
 import java.util.function.Supplier;
 
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.jobs.tasks.BlockProcurementTask;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;

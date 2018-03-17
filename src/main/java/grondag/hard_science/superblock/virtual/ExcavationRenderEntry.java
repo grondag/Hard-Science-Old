@@ -9,9 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
+import grondag.exotic_matter.world.IntegerAABB;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.world.IntegerAABB;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.jobs.AbstractPositionedTask;

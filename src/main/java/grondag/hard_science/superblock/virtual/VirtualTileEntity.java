@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.virtual;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;

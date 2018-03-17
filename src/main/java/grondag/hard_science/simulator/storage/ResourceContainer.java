@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;

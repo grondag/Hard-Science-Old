@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.jobs;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;

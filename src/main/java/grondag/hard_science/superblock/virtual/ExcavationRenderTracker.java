@@ -3,9 +3,9 @@ package grondag.hard_science.superblock.virtual;
 import java.util.HashMap;
 import java.util.Map;
 
+import grondag.exotic_matter.world.WorldMap;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.world.WorldMap;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.domain.DomainManager;

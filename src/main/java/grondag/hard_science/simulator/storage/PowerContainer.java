@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.IEnergyComponent;
 import grondag.hard_science.machines.support.ThroughputRegulator;

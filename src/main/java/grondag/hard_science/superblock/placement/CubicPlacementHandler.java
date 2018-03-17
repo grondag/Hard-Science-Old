@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -19,7 +18,9 @@ import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.NeighborBlocks;
 import grondag.exotic_matter.world.Rotation;
+import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
+import grondag.hard_science.library.refractory.WorldHelperLeftovers;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -68,7 +69,7 @@ public class CubicPlacementHandler extends PlacementHandler
         BlockPos posPlaced = (!VirtualBlock.isVirtualBlock(onBlock) && onBlock.isReplaceable(worldIn, posOn)) ? posOn : posOn.offset(facing);
         
         // abort if target space is occupied
-        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced, !VirtualBlock.isVirtualBlock(stackBlock)))
+        if(!WorldHelperLeftovers.isBlockReplaceable(worldIn, posPlaced, !VirtualBlock.isVirtualBlock(stackBlock)))
         {
             return Collections.emptyList();
         }

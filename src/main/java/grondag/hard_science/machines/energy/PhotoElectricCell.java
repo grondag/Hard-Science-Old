@@ -2,8 +2,8 @@ package grondag.hard_science.machines.energy;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.exotic_matter.world.Location;
 import grondag.exotic_matter.world.WorldInfo;
-import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.jobs.IWorldTask;

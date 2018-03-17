@@ -10,7 +10,7 @@ import grondag.hard_science.external.jei.HardScienceJEIPlugIn;
 import grondag.hard_science.external.jei.IRecipeFormat;
 import grondag.hard_science.external.jei.RecipeFormat;
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;

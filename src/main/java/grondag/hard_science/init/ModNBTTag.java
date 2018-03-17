@@ -1,4 +1,4 @@
-package grondag.hard_science.library.serialization;
+package grondag.hard_science.init;
 
 /**
  * Provides concise and consistent (albeit human-unfriendly) tags for serialization. 
@@ -27,8 +27,6 @@ public class ModNBTTag
     public final static String LAVA_PARTICLE_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String LAVA_PLACEMENT_EVENTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String LAVA_SIMULATOR = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String LOCATION_DIMENSION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String LOCATION_POSITION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_CONTROL_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_JOB_DURATION_TICKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_JOB_REMAINING_TICKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

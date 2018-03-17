@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.varia.BinaryEnumSet;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.Job;

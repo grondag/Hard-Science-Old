@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.jobs.tasks;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.TaskType;

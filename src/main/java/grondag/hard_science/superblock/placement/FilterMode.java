@@ -2,9 +2,9 @@ package grondag.hard_science.superblock.placement;
 
 import grondag.exotic_matter.varia.ILocalized;
 import grondag.exotic_matter.varia.Useful;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.library.serialization.IMessagePlusImmutable;
 import grondag.hard_science.library.serialization.IReadWriteNBTImmutable;
-import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

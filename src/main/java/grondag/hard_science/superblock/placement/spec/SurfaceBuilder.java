@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import grondag.hard_science.library.world.IBlockRegion;
-import grondag.hard_science.library.world.WorldHelper;
+import grondag.exotic_matter.world.IBlockRegion;
+import grondag.hard_science.library.refractory.WorldHelperLeftovers;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
@@ -28,7 +28,7 @@ public class SurfaceBuilder extends SingleStackBuilder
 
         if(this.player.world.isOutsideBuildHeight(this.pPos.inPos)) return false;
 
-        return WorldHelper.isBlockReplaceable(this.player.world, this.pPos.inPos, false);
+        return WorldHelperLeftovers.isBlockReplaceable(this.player.world, this.pPos.inPos, false);
     }
 
     @SideOnly(Side.CLIENT)

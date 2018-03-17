@@ -6,7 +6,7 @@ import java.util.Map;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.BinaryReference;
-import grondag.hard_science.library.font.RasterFont;
+import grondag.hard_science.library.refractory.RasterFont;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;

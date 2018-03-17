@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.resource;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import net.minecraft.nbt.NBTTagCompound;
 

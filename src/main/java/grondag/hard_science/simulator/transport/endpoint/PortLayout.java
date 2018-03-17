@@ -1,10 +1,10 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModRegistries;
-import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.Transform;
-import grondag.hard_science.library.world.Transform.FaceMap;
+import grondag.hard_science.library.refractory.Transform;
+import grondag.hard_science.library.refractory.Transform.FaceMap;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;

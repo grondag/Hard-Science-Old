@@ -4,8 +4,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.Log;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.serialization.ModNBTTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;

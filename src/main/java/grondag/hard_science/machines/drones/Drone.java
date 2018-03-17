@@ -1,8 +1,8 @@
 package grondag.hard_science.machines.drones;
 
+import grondag.exotic_matter.world.Location;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
-import grondag.hard_science.library.serialization.ModNBTTag;
-import grondag.hard_science.library.world.Location;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.device.IDevice;

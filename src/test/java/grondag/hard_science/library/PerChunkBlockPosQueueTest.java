@@ -2,7 +2,7 @@ package grondag.hard_science.library;
 
 import org.junit.Test;
 
-import grondag.hard_science.library.world.PerChunkBlockPosQueue;
+import grondag.exotic_matter.world.PerChunkBlockPosQueue;
 import net.minecraft.util.math.BlockPos;
 
 public class PerChunkBlockPosQueueTest

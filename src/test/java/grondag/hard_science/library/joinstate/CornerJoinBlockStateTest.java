@@ -3,10 +3,10 @@ package grondag.hard_science.library.joinstate;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.world.CornerJoinBlockState;
+import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
 import grondag.exotic_matter.world.NeighborBlocks;
-import grondag.hard_science.library.world.CornerJoinBlockState;
-import grondag.hard_science.library.world.CornerJoinBlockStateSelector;
-import grondag.hard_science.library.world.SimpleJoin;
+import grondag.exotic_matter.world.SimpleJoin;
 
 public class CornerJoinBlockStateTest
 {

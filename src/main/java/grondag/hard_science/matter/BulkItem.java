@@ -7,7 +7,7 @@ import com.google.common.collect.ListMultimap;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.BulkItemInput;
-import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.matter.MassUnits.Mass;
 import grondag.hard_science.simulator.resource.BulkResource;
 import net.minecraft.client.util.ITooltipFlag;

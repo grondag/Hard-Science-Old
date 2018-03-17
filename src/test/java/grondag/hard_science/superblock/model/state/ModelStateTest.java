@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.model.state;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.world.CornerJoinBlockStateSelector;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;

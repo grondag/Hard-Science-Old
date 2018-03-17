@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import grondag.hard_science.library.world.IBlockRegion;
-import grondag.hard_science.library.world.WorldHelper;
+import grondag.exotic_matter.world.IBlockRegion;
+import grondag.hard_science.library.refractory.WorldHelperLeftovers;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
@@ -25,7 +25,7 @@ public class PredicateBuilder extends SingleStackBuilder
     protected boolean doValidate()
     {
         // can't replace air, water, weeds, etc.
-        return !WorldHelper.isBlockReplaceable(this.player.world, this.pPos.onPos, false);
+        return !WorldHelperLeftovers.isBlockReplaceable(this.player.world, this.pPos.onPos, false);
     }
 
     @SideOnly(Side.CLIENT)

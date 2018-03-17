@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.placement.spec;
 
 import java.util.HashSet;
 
+import grondag.exotic_matter.world.CubicBlockRegion;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.library.world.CubicBlockRegion;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.RegionOrientation;

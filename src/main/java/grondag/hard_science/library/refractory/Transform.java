@@ -1,4 +1,4 @@
-package grondag.hard_science.library.world;
+package grondag.hard_science.library.refractory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
