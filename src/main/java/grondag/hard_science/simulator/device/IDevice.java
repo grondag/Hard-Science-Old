@@ -2,11 +2,11 @@ package grondag.hard_science.simulator.device;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.varia.Base32Namer;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.Location.ILocated;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.ISimulationTickable;

@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.support;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
+import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.hard_science.machines.base.MachineTileEntity;
 
 /**

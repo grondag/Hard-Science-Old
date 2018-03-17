@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.resource;
 import java.io.IOException;
 import java.util.Comparator;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
+import grondag.exotic_matter.serialization.IMessagePlus;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 

@@ -1,11 +1,11 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.exotic_matter.serialization.IMessagePlusImmutable;
+import grondag.exotic_matter.serialization.IReadWriteNBTImmutable;
 import grondag.exotic_matter.varia.ILocalized;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.library.serialization.IMessagePlusImmutable;
-import grondag.hard_science.library.serialization.IReadWriteNBTImmutable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.translation.I18n;

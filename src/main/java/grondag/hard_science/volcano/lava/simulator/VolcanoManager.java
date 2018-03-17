@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.world.Location;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.IDirtKeeper;

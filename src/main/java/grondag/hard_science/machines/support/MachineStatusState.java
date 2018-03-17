@@ -1,8 +1,8 @@
 package grondag.hard_science.machines.support;
 
+import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.varia.BitPacker;
 import grondag.exotic_matter.varia.BitPacker.BitElement.BooleanElement;
-import grondag.hard_science.library.serialization.IMessagePlus;
 import net.minecraft.network.PacketBuffer;
 
 

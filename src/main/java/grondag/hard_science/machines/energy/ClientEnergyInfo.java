@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.energy;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
+import grondag.exotic_matter.serialization.IMessagePlus;
 import net.minecraft.network.PacketBuffer;
 
 /**

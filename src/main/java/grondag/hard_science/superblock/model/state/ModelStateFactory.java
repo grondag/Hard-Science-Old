@@ -7,6 +7,8 @@ import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 
+import grondag.exotic_matter.serialization.IMessagePlus;
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.varia.BitPacker;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.varia.BitPacker.BitElement.BooleanElement;
@@ -23,8 +25,6 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.library.refractory.Transform;
-import grondag.hard_science.library.serialization.IMessagePlus;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;

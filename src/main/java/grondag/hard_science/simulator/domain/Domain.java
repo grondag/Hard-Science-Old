@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.demand.BrokerManager;
 import grondag.hard_science.simulator.fobs.TransientTaskContainer;
 import grondag.hard_science.simulator.jobs.JobManager;

@@ -6,8 +6,8 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;

@@ -1,6 +1,6 @@
 package grondag.hard_science.network;
 
-import grondag.hard_science.library.serialization.IMessagePlus;
+import grondag.exotic_matter.serialization.IMessagePlus;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;

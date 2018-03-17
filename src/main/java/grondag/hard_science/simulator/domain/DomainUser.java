@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.domain;
 
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.superblock.placement.Build;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;

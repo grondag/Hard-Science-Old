@@ -2,7 +2,7 @@ package grondag.hard_science.player;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;

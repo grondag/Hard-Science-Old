@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.StoragePacket;
 import grondag.hard_science.simulator.transport.TransportStatus;

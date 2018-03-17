@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.persistence;
 
-import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.IReadWriteNBT;
 
 /**
  * Should be implemented by all top-level nodes that need to be saved to world state.
