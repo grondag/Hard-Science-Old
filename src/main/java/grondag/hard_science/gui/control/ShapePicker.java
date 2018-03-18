@@ -3,7 +3,7 @@ package grondag.hard_science.gui.control;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.superblock.model.shape.ModelShape;
+import grondag.hard_science.superblock.model.state.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
@@ -17,14 +17,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ShapePicker extends TabBar<ModelShape>
+public class ShapePicker extends TabBar<ModelShape<?>>
 {
 
-    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.values().length];
+    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.guiAvailableShapes().size()];
     
     static
     {
-        for(ModelShape shape : ModelShape.GUI_AVAILABLE_SHAPES)
+        for(ModelShape<?> shape : ModelShape.guiAvailableShapes())
         {
             ModelState modelState = new ModelState();
             modelState.setShape(shape);
@@ -36,12 +36,12 @@ public class ShapePicker extends TabBar<ModelShape>
     
     public ShapePicker()
     {
-        super(ModelShape.GUI_AVAILABLE_SHAPES);
+        super(ModelShape.guiAvailableShapes());
         this.setItemsPerRow(8);
     }
 
     @Override
-    protected void drawItem(ModelShape item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
+    protected void drawItem(ModelShape<?> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
         GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, ITEMS[item.ordinal()], left, top, (int)this.actualItemSize());
     }
@@ -58,7 +58,7 @@ public class ShapePicker extends TabBar<ModelShape>
     }
 
     @Override
-    protected void drawToolTip(ModelShape item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    protected void drawToolTip(ModelShape<?> item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         renderContext.drawToolTip(item.localizedName(), mouseX, mouseY);
     }

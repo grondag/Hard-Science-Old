@@ -1,12 +1,12 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import net.minecraft.util.math.MathHelper;
 
 public class CubicQuadPainterTiles extends CubicQuadPainter

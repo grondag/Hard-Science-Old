@@ -6,18 +6,18 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
 import grondag.exotic_matter.render.SurfaceType;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.library.refractory.CubeInputs;
+import grondag.hard_science.moving.CubeInputs;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -25,21 +25,12 @@ import net.minecraft.world.World;
 
 public class CubeMeshFactory extends ShapeMeshGenerator
 {
-    private static ShapeMeshGenerator instance;
-    
-
-    public static ShapeMeshGenerator getShapeMeshFactory()
-    {
-        if(instance == null) instance = new CubeMeshFactory();
-        return instance; 
-    };
-    
     private static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
     
     /** never changes so may as well save it */
     private final List<RawQuad> cachedQuads;
     
-    protected CubeMeshFactory()
+    public CubeMeshFactory()
     {
         super(StateFormat.BLOCK, STATE_FLAG_NONE, SURFACE_MAIN);
         this.cachedQuads = getCubeQuads();

@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.SingleBlockRegion;
-import grondag.hard_science.library.refractory.WorldHelperLeftovers;
+import grondag.hard_science.moving.WorldHelperLeftovers;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.IWorldTask;

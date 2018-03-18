@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.model.painter;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.RenderPass;
@@ -11,7 +12,6 @@ import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;

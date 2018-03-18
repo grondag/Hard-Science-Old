@@ -10,6 +10,11 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.exotic_matter.model.MetaUsage;
+import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.Translucency;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.varia.Color;
 import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.IBlockTest;
@@ -18,15 +23,10 @@ import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
-import grondag.hard_science.superblock.model.state.BlockRenderMode;
-import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateProperty;
-import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;

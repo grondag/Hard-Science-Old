@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import grondag.exotic_matter.world.IBlockRegion;
-import grondag.hard_science.library.refractory.WorldHelperLeftovers;
+import grondag.hard_science.moving.WorldHelperLeftovers;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;

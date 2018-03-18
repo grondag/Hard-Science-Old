@@ -8,9 +8,9 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.model.PaintLayer;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.Substances.Substance;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePalletteInfo;
 

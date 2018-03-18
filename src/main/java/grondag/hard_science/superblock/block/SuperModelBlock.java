@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.model.state.BlockRenderMode;
+import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.SoundType;

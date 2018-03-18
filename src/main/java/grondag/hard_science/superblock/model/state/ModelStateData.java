@@ -1,6 +1,9 @@
 package grondag.hard_science.superblock.model.state;
 
 
+import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.RenderPassSet;
+import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.varia.BitPacker;
 import grondag.exotic_matter.varia.BitPacker.BitElement.BooleanElement;
 import grondag.exotic_matter.varia.BitPacker.BitElement.EnumElement;
@@ -12,7 +15,6 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.Block;
@@ -23,9 +25,8 @@ import net.minecraft.world.IBlockAccess;
 
 public class ModelStateData
 {
-    
     public static final BitPacker PACKER_0 = new BitPacker();
-    public static final EnumElement<ModelShape> P0_SHAPE = PACKER_0.createEnumElement(ModelShape.class);
+    public static final IntElement P0_SHAPE = PACKER_0.createIntElement(ModelShape.MAX_SHAPES);
     public static final IntElement[] P0_PAINT_COLOR = new IntElement[PaintLayer.DYNAMIC_SIZE];
     public static final BooleanElement P0_AXIS_INVERTED = PACKER_0.createBooleanElement();
     public static final EnumElement<EnumFacing.Axis> P0_AXIS = PACKER_0.createEnumElement(EnumFacing.Axis.class);

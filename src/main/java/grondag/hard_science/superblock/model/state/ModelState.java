@@ -19,7 +19,14 @@ import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 
+import grondag.exotic_matter.model.BlockOrientationType;
+import grondag.exotic_matter.model.MetaUsage;
+import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.RenderPassSet;
+import grondag.exotic_matter.model.StateFormat;
+import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.render.RenderPass;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.varia.Useful;
@@ -31,13 +38,10 @@ import grondag.exotic_matter.world.SimpleJoin;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.library.refractory.Transform;
+import grondag.hard_science.moving.Transform;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap;
-import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.placement.BlockOrientationType;
 import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
@@ -289,20 +293,20 @@ public class ModelState implements IReadWriteNBT, IMessagePlus
     //  PACKER 0 ATTRIBUTES (NOT SHAPE-DEPENDENT)
     ////////////////////////////////////////////////////
 
-    public ModelShape getShape()
+    public ModelShape<?> getShape()
     {
-        return ModelStateData.P0_SHAPE.getValue(bits0);
+        return ModelShape.get(ModelStateData.P0_SHAPE.getValue(bits0));
     }
 
     /**
      * Also resets shape-specific bits to default for the given shape.
      * Does nothing if shape is the same as existing.
      */
-    public void setShape(ModelShape shape)
+    public void setShape(ModelShape<?> shape)
     {
-        if(shape != ModelStateData.P0_SHAPE.getValue(bits0))
+        if(shape.ordinal() != ModelStateData.P0_SHAPE.getValue(bits0))
         {
-            bits0 = ModelStateData.P0_SHAPE.setValue(shape, bits0);
+            bits0 = ModelStateData.P0_SHAPE.setValue(shape.ordinal(), bits0);
             bits2 = ModelStateData.P2_STATIC_SHAPE_BITS.setValue(shape.meshFactory().defaultShapeStateBits, bits2);
             invalidateHashCode();
             clearStateFlags();
@@ -805,7 +809,7 @@ public class ModelState implements IReadWriteNBT, IMessagePlus
     /** Convenience method. Same as shape attribute. */
     public MetaUsage metaUsage()
     {
-        return this.getShape().metaUsage;
+        return this.getShape().metaUsage();
     }
 
     /** Convenience method. Same as shape attribute. */
@@ -993,6 +997,9 @@ public class ModelState implements IReadWriteNBT, IMessagePlus
     {
         return new Matrix4d(this.getMatrix4f());
     }
+    
+    
+    //TODO: serialize shape by system name to allow pack/mod changes in same world
     
     @Override
     public void deserializeNBT(NBTTagCompound tag)

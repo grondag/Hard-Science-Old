@@ -2,17 +2,17 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.Translucency;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
+import grondag.hard_science.moving.ModShapes;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
-import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
@@ -69,7 +69,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     protected static ModelState creatBasicMachineModelState(TexturePallette decalTex, TexturePallette borderTex)
     {
         ModelState modelState = new ModelState();
-        modelState.setShape(ModelShape.MACHINE);
+        modelState.setShape(ModShapes.MACHINE);
         modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
 

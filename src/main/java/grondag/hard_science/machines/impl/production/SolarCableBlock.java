@@ -1,9 +1,11 @@
 package grondag.hard_science.machines.impl.production;
 
+import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
+import grondag.hard_science.moving.ModShapes;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -12,9 +14,7 @@ import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory.MachineShape;
-import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
@@ -31,7 +31,7 @@ public class SolarCableBlock extends MachineSimpleBlock
     private static ModelState createDefaulModelState()
     {
         ModelState result = new ModelState();
-        result.setShape(ModelShape.MACHINE);
+        result.setShape(ModShapes.MACHINE);
         MachineMeshFactory.setMachineShape(MachineShape.PHOTOCHEM_CABLE, result);
         
         result.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_SUBTLE);

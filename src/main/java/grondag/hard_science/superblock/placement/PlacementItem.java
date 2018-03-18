@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 
 import com.mojang.realmsclient.util.Pair;
 
+import grondag.exotic_matter.model.MetaUsage;
 import grondag.exotic_matter.varia.BinaryEnumSet;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.Useful;
@@ -15,7 +16,6 @@ import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.virtual.VirtualBlock;

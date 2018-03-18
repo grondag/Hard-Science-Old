@@ -18,12 +18,12 @@ import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRadialRende
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.refractory.RasterFont;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
+import grondag.hard_science.moving.RasterFont;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;

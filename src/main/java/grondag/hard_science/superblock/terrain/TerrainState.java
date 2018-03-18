@@ -3,8 +3,8 @@ package grondag.hard_science.superblock.terrain;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.world.HorizontalCorner;
 import grondag.exotic_matter.world.HorizontalFace;
+import grondag.hard_science.moving.ModShapes;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateData;
 import net.minecraft.block.state.IBlockState;
@@ -438,7 +438,7 @@ public class TerrainState
     
     public static long getBitsFromWorldStatically(ModelState modelState, SuperBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return getBitsFromWorldStatically(modelState.getShape() == ModelShape.TERRAIN_FILLER, state, world, pos);
+        return getBitsFromWorldStatically(modelState.getShape() == ModShapes.TERRAIN_FILLER, state, world, pos);
     }
     
     private static long getBitsFromWorldStatically(boolean isFlowFiller, IBlockState state, IBlockAccess world, BlockPos pos)

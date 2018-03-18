@@ -21,7 +21,7 @@ import grondag.exotic_matter.world.NeighborBlocks;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
-import grondag.hard_science.library.refractory.WorldHelperLeftovers;
+import grondag.hard_science.moving.WorldHelperLeftovers;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

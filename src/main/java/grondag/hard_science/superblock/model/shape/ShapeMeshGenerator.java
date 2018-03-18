@@ -5,15 +5,15 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.model.BlockOrientationType;
+import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceType;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.placement.BlockOrientationType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;

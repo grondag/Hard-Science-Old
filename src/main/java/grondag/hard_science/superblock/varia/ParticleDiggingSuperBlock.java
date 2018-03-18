@@ -2,11 +2,11 @@ package grondag.hard_science.superblock.varia;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.model.PaintLayer;
 import grondag.hard_science.Log;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

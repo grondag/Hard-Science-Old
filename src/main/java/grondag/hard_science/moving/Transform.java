@@ -1,4 +1,4 @@
-package grondag.hard_science.library.refractory;
+package grondag.hard_science.moving;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

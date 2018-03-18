@@ -2,7 +2,9 @@ package grondag.hard_science.superblock.model.shape;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
 import grondag.exotic_matter.render.SurfaceType;
@@ -10,13 +12,11 @@ import grondag.exotic_matter.render.Surface.SurfaceInstance;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.shape.machine.CableMeshFactory;
 import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
 import grondag.hard_science.superblock.model.shape.machine.PhotoCellMeshFactory;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateData;
-import grondag.hard_science.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -47,12 +47,8 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     public static final SurfaceInstance INSTANCE_MAIN = SURFACE_MAIN.unitInstance;
     public static final SurfaceInstance INSTANCE_LAMP = SURFACE_LAMP.unitInstance.withAllowBorders(false);
     
-    private static ShapeMeshGenerator instance;
-
     static
     {
-        instance = new MachineMeshFactory();
-        
         HANDLERS = new ShapeMeshGenerator[MachineShape.values().length];
         
         HANDLERS[MachineShape.BASIC_BOX.ordinal()] = new MachineCubeMeshFactory(true);
@@ -63,12 +59,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
         HANDLERS[MachineShape.PHOTOELECTRIC_CELL.ordinal()] = new PhotoCellMeshFactory(0.15f);
     }
     
-    public static ShapeMeshGenerator getShapeMeshFactory()
-    {
-        return instance; 
-    };
-    
-    protected MachineMeshFactory()
+    public MachineMeshFactory()
     {
         super(StateFormat.BLOCK, ModelStateData.STATE_FLAG_NONE, 
                 SURFACE_MAIN, SURFACE_LAMP); 

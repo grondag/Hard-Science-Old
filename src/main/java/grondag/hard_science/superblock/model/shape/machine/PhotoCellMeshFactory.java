@@ -5,10 +5,10 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateData;

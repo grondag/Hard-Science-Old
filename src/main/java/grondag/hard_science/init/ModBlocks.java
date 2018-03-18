@@ -1,5 +1,6 @@
 package grondag.hard_science.init;
 
+import grondag.exotic_matter.model.PaintLayer;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.impl.building.BlockFabricatorBlock;
@@ -14,15 +15,14 @@ import grondag.hard_science.machines.impl.processing.DigesterBlock;
 import grondag.hard_science.machines.impl.processing.MicronizerBlock;
 import grondag.hard_science.machines.impl.production.PhotoElectricBlock;
 import grondag.hard_science.machines.impl.production.SolarCableBlock;
+import grondag.hard_science.moving.ModShapes;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
-import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.terrain.DepletedFluidBlock;
 import grondag.hard_science.superblock.terrain.TerrainBlockRegistry;
 import grondag.hard_science.superblock.terrain.TerrainCubicBlock;
@@ -84,7 +84,7 @@ public class ModBlocks
         workingModel = new ModelState();
         
         workingModel = new ModelState();
-        workingModel.setShape(ModelShape.CUBE);
+        workingModel.setShape(ModShapes.CUBE);
         workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
         workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
         event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", BlockSubstance.BASALT, workingModel));
@@ -95,7 +95,7 @@ public class ModBlocks
             
             
             workingModel = new ModelState();
-            workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
+            workingModel.setShape(ModShapes.TERRAIN_HEIGHT);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_COOL_ZOOM);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
             workingModel.setTexture(PaintLayer.CUT, Textures.BIGTEX_BASALT_CUT);
@@ -108,7 +108,7 @@ public class ModBlocks
             event.getRegistry().register(staticBasaltHeight);
     
             workingModel = workingModel.clone();
-            workingModel.setShape(ModelShape.TERRAIN_FILLER);
+            workingModel.setShape(ModShapes.TERRAIN_FILLER);
     
             Block dynamicBasaltFiller = new TerrainDynamicBlock("basalt_cool_dynamic_filler", BlockSubstance.BASALT, workingModel.clone(), true);
             Block staticBasaltFiller = new TerrainStaticBlock("basalt_cool_static_filler", BlockSubstance.BASALT, workingModel.clone(), true);
@@ -123,7 +123,7 @@ public class ModBlocks
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerStateTransition(dynamicBasaltFiller, staticBasaltFiller);
             
             workingModel = new ModelState();
-            workingModel.setShape(ModelShape.CUBE);
+            workingModel.setShape(ModShapes.CUBE);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_CUT_ZOOM);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
             Block cubicBasalt  = new TerrainCubicBlock("basalt_cut", BlockSubstance.BASALT, workingModel.clone());
@@ -136,7 +136,7 @@ public class ModBlocks
             
             
             workingModel = new ModelState();
-            workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
+            workingModel.setShape(ModShapes.TERRAIN_HEIGHT);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.RED, Chroma.WHITE, Luminance.BRILLIANT));
             workingModel.setFullBrightness(PaintLayer.BASE, true);
@@ -147,7 +147,7 @@ public class ModBlocks
             Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", BlockSubstance.VOLCANIC_LAVA, workingModel, false);
             
             workingModel = workingModel.clone();
-            workingModel.setShape(ModelShape.TERRAIN_FILLER);
+            workingModel.setShape(ModShapes.TERRAIN_FILLER);
             Block dynamicLavaFiller = new LavaBlock("lava_dynamic_filler", BlockSubstance.VOLCANIC_LAVA, workingModel, true);
     
             event.getRegistry().register(dynamicLavaHeight);
@@ -213,7 +213,7 @@ public class ModBlocks
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
     {
         ModelState model = new ModelState();
-        model.setShape(isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
+        model.setShape(isFiller ? ModShapes.TERRAIN_FILLER : ModShapes.TERRAIN_HEIGHT);
         model.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
         model.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.TORCH, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
         model.setFullBrightness(PaintLayer.BASE, true);

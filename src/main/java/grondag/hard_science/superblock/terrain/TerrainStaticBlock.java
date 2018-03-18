@@ -4,9 +4,9 @@ import java.util.List;
 
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.varia.Useful;
+import grondag.hard_science.moving.ModShapes;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperStaticBlock;
-import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
@@ -35,7 +35,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
         
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();
-        modelState.setShape(this.isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
+        modelState.setShape(this.isFiller ? ModShapes.TERRAIN_FILLER : ModShapes.TERRAIN_HEIGHT);
         this.defaultModelStateBits = modelState.serializeToInts();
     }
     

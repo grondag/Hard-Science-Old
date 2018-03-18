@@ -3,9 +3,11 @@ package grondag.hard_science.superblock.model.shape;
 import java.util.ArrayList;
 import java.util.List;
 
+import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.CSGShape;
 import grondag.exotic_matter.render.FaceVertex;
 import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
 import grondag.exotic_matter.render.SurfaceType;
@@ -17,10 +19,8 @@ import grondag.hard_science.Log;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CollisionBoxDispatcher;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateData;
-import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.terrain.TerrainState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -35,15 +35,6 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 {
     private static final SurfaceInstance SURFACE_TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance.withAllowBorders(false).withIgnoreDepthForRandomization(true);
     private static final SurfaceInstance SURFACE_SIDE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance.withAllowBorders(false);
-    
-    private static ShapeMeshGenerator instance;
- 
-    
-    public static ShapeMeshGenerator getMeshFactory()
-    {
-        if(instance == null) instance = new TerrainMeshFactory();
-        return instance; 
-    }
     
     private static final AxisAlignedBB[] COLLISION_BOUNDS =
     {
@@ -69,7 +60,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         new AxisAlignedBB(0, 0, 0, 1, 1, 1)
     };
     
-    protected TerrainMeshFactory()
+    public TerrainMeshFactory()
     {
         super(  StateFormat.FLOW, 
                 ModelStateData.STATE_FLAG_NEEDS_POS, 

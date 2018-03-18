@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
-import grondag.hard_science.superblock.model.shape.ModelShape;
+import grondag.hard_science.moving.ModShapes;
 import grondag.hard_science.superblock.model.state.ModelState;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import net.minecraft.nbt.NBTTagCompound;
@@ -19,7 +19,7 @@ public class MachineControlStateTest
     {
         ModelState ms = new ModelState();
         ms.setMetaData(7);
-        ms.setShape(ModelShape.COLUMN_SQUARE);
+        ms.setShape(ModShapes.COLUMN_SQUARE);
         
         BlockPos bp = new BlockPos(5, 9, 84);
         

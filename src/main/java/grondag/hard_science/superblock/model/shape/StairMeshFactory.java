@@ -13,19 +13,6 @@ import net.minecraft.util.EnumFacing;
 
 public class StairMeshFactory extends AbstractWedgeMeshFactory
 {
-    private static ShapeMeshGenerator instance;
-    
-    public static ShapeMeshGenerator getShapeMeshFactory()
-    {
-        if(instance == null) instance = new StairMeshFactory();
-        return instance; 
-    }
-    
-    private StairMeshFactory()
-    {
-        super();
-    }
-    
     @Override
     public List<RawQuad> getShapeQuads(ModelState modelState)
     {

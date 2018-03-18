@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.library.refractory.WorldHelperLeftovers;
+import grondag.hard_science.moving.WorldHelperLeftovers;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelState;

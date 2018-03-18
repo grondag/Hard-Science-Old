@@ -1,10 +1,10 @@
 package grondag.hard_science.gui.control;
 
+import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.superblock.model.state.Translucency;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;

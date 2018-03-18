@@ -2,16 +2,19 @@ package grondag.hard_science.superblock.model.state;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.RenderPassSet;
+import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
 import grondag.hard_science.Log;
+import grondag.hard_science.moving.ModShapes;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.MathHelper;
 
 public class ModelStateTest
 {
@@ -19,7 +22,7 @@ public class ModelStateTest
     @Test
     public void test()
     {
-        Log.info("Max shapes within current format: " + MathHelper.smallestEncompassingPowerOfTwo(ModelShape.values().length));
+        Log.info("Max shapes within current format: " + ModelShape.MAX_SHAPES);
         Log.info("bits0 length = "  + ModelStateData.PACKER_0.bitLength());
         Log.info("bits1 length = "  + ModelStateData.PACKER_1.bitLength());
         Log.info("bits2 length = "  + ModelStateData.PACKER_2.bitLength());
@@ -32,7 +35,7 @@ public class ModelStateTest
         
         ModelState state = new ModelState();
         
-        state.setShape(ModelShape.COLUMN_SQUARE);
+        state.setShape(ModShapes.COLUMN_SQUARE);
         state.setStatic(true);
 
         state.setOuterLayerEnabled(true);
@@ -62,7 +65,7 @@ public class ModelStateTest
         assert(state.equals(reloadedState));
         assert(state.hashCode() == reloadedState.hashCode());
         
-        assert(reloadedState.getShape() == ModelShape.COLUMN_SQUARE);
+        assert(reloadedState.getShape() == ModShapes.COLUMN_SQUARE);
         assert(reloadedState.isStatic());
         assert(reloadedState.isOuterLayerEnabled());
         assert(reloadedState.isMiddleLayerEnabled());

@@ -5,9 +5,13 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.model.BlockOrientationType;
+import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.FaceVertex;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.render.SimpleQuadBounds;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
@@ -23,12 +27,8 @@ import grondag.exotic_matter.world.FaceSide;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
-import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.placement.BlockOrientationType;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.ModelStateData;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -47,8 +47,6 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
     private static final BooleanElement STATE_ARE_CUTS_ON_EDGE = STATE_PACKER.createBooleanElement();
     private static final IntElement STATE_CUT_COUNT = STATE_PACKER.createIntElement(MIN_CUTS, MAX_CUTS);
 
-    private static ShapeMeshGenerator instance;
-    
     private static class FaceSpec
     {
         private final int cutCount;
@@ -80,13 +78,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
         }
     }
     
-    public static ShapeMeshGenerator getShapeMeshFactory()
-    {
-        if(instance == null) instance = new SquareColumnMeshFactory();
-        return instance; 
-    };
-    
-    protected SquareColumnMeshFactory()
+    public SquareColumnMeshFactory()
     {
         super(
                 StateFormat.BLOCK, 

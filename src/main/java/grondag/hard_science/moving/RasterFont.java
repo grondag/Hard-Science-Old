@@ -1,4 +1,4 @@
-package grondag.hard_science.library.refractory;
+package grondag.hard_science.moving;
 
 import java.awt.Color;
 import java.awt.Font;

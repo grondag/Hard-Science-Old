@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 import org.lwjgl.input.Mouse;
 
+import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.Translucency;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.gui.control.BrightnessSlider;
 import grondag.hard_science.gui.control.Button;
@@ -32,8 +34,6 @@ import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;

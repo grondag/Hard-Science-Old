@@ -1,4 +1,4 @@
-package grondag.hard_science.library.refractory;
+package grondag.hard_science.moving;
 
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Vertex;

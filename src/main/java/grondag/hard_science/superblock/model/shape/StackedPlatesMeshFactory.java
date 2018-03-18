@@ -8,7 +8,10 @@ import javax.vecmath.Matrix4d;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.model.BlockOrientationType;
+import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
 import grondag.exotic_matter.render.SurfaceType;
@@ -16,10 +19,7 @@ import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.StateFormat;
-import grondag.hard_science.superblock.placement.BlockOrientationType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -28,18 +28,10 @@ import net.minecraft.world.World;
 
 public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
-    private static ShapeMeshGenerator instance;
-    
     private static Surface TOP_AND_BOTTOM = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
     private static Surface SIDES = new Surface(SurfaceType.CUT, SurfaceTopology.CUBIC);
     
-    public static ShapeMeshGenerator getShapeMeshFactory()
-    {
-        if(instance == null) instance = new StackedPlatesMeshFactory();
-        return instance; 
-    }
-    
-    private StackedPlatesMeshFactory()
+    public StackedPlatesMeshFactory()
     {
         super(StateFormat.BLOCK, 
                 STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_HAS_AXIS | STATE_FLAG_HAS_AXIS_ORIENTATION,

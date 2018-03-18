@@ -3,6 +3,7 @@ package grondag.hard_science.superblock.placement;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.model.MetaUsage;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.HorizontalFace;
 import grondag.exotic_matter.world.IBlockRegion;
@@ -10,7 +11,6 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
-import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
