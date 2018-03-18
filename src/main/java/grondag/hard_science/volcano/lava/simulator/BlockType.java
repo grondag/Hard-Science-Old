@@ -1,7 +1,7 @@
 package grondag.hard_science.volcano.lava.simulator;
 
+import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.movetogether.TerrainBlockHelper;
 import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

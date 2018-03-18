@@ -3,8 +3,8 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
-import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

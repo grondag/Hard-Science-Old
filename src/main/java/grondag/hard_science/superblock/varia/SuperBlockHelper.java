@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.varia;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;

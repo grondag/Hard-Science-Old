@@ -1,13 +1,13 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.TextureRotationType;
+import grondag.exotic_matter.model.TextureScale;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.TextureRotationType;
-import grondag.hard_science.movetogether.TextureScale;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;

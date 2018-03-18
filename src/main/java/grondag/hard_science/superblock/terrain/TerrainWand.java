@@ -1,9 +1,9 @@
 package grondag.hard_science.superblock.terrain;
 
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.TerrainBlockHelper;
+import grondag.exotic_matter.model.TerrainState;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.TerrainBlockHelper;
-import grondag.hard_science.movetogether.TerrainState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;

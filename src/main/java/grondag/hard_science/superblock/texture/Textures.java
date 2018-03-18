@@ -1,25 +1,25 @@
 package grondag.hard_science.superblock.texture;
 
 
+import static grondag.exotic_matter.model.TextureRotationType.CONSISTENT;
+import static grondag.exotic_matter.model.TextureRotationType.FIXED;
+import static grondag.exotic_matter.model.TextureRotationType.RANDOM;
 import static grondag.exotic_matter.world.Rotation.ROTATE_180;
 import static grondag.exotic_matter.world.Rotation.ROTATE_270;
 import static grondag.exotic_matter.world.Rotation.ROTATE_90;
 import static grondag.exotic_matter.world.Rotation.ROTATE_NONE;
-import static grondag.hard_science.movetogether.TextureRotationType.CONSISTENT;
-import static grondag.hard_science.movetogether.TextureRotationType.FIXED;
-import static grondag.hard_science.movetogether.TextureRotationType.RANDOM;
 
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.init.SubstanceConfig;
+import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.TextureLayout;
+import grondag.exotic_matter.model.TextureRenderIntent;
+import grondag.exotic_matter.model.TextureScale;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.movetogether.ITexturePalette;
-import grondag.hard_science.movetogether.TextureLayout;
-import grondag.hard_science.movetogether.TextureRenderIntent;
-import grondag.hard_science.movetogether.TextureScale;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePalletteInfo;
 
 public class Textures

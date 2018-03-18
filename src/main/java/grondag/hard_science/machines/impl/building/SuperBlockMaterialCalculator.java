@@ -1,15 +1,15 @@
 package grondag.hard_science.machines.impl.building;
 
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.ColorMap.EnumColorMap;
 import grondag.exotic_matter.varia.ColorHelper;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.varia.ColorHelper.CMY;
 import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.matter.MatterUnits;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
 import net.minecraft.util.math.BlockPos;
 
 public class SuperBlockMaterialCalculator

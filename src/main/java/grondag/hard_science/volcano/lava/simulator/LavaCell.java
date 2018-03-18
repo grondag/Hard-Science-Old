@@ -7,13 +7,13 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.ComparisonChain;
 
+import grondag.exotic_matter.model.TerrainBlockHelper;
+import grondag.exotic_matter.model.TerrainState;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.movetogether.TerrainBlockHelper;
-import grondag.hard_science.movetogether.TerrainState;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.volcano.lava.simulator.LavaConnections.SortBucket;
 import net.minecraft.block.state.IBlockState;

@@ -1,9 +1,9 @@
 package grondag.hard_science.gui;
 
+import grondag.exotic_matter.model.TextureScale;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.movetogether.TextureScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;

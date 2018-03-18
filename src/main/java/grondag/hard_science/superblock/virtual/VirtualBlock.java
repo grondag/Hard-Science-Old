@@ -8,9 +8,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.simulator.domain.DomainManager;

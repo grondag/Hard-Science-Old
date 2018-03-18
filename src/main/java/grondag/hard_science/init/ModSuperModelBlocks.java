@@ -1,8 +1,8 @@
 package grondag.hard_science.init;
 
 import grondag.exotic_matter.model.BlockRenderMode;
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.virtual.VirtualBlock;

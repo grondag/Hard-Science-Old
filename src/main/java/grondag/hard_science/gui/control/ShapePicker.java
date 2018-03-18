@@ -1,11 +1,11 @@
 package grondag.hard_science.gui.control;
 
+import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.ModelShape;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.client.Minecraft;

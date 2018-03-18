@@ -1,11 +1,11 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

@@ -2,11 +2,11 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.MachinePower;
-import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;

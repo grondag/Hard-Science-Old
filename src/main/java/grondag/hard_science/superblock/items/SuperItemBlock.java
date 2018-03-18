@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.items;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.placement.BlockOrientationHandler;

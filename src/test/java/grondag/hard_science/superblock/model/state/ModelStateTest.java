@@ -2,17 +2,17 @@ package grondag.hard_science.superblock.model.state;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.exotic_matter.model.ModShapes;
+import grondag.exotic_matter.model.ModelShape;
+import grondag.exotic_matter.model.ModelStateData;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.RenderPassSet;
 import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
 import grondag.hard_science.Log;
-import grondag.hard_science.movetogether.BlockColorMapProvider;
-import grondag.hard_science.movetogether.ModShapes;
-import grondag.hard_science.movetogether.ModelShape;
-import grondag.hard_science.movetogether.ModelStateData;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockRenderLayer;

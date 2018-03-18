@@ -6,16 +6,16 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.model.ICollisionHandler;
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.ModelStateData;
 import grondag.exotic_matter.render.CSGShape;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
-import grondag.hard_science.movetogether.ICollisionHandler;
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.ModelStateData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.AxisDirection;

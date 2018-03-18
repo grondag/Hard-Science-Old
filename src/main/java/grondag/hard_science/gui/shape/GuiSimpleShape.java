@@ -1,6 +1,6 @@
 package grondag.hard_science.gui.shape;
 
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.ISuperModelState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.moving.WorldHelperLeftovers;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;

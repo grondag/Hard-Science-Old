@@ -1,11 +1,11 @@
 package grondag.hard_science.superblock.varia;
 
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.FarCorner;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.machines.base.IMachineBlock;
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;

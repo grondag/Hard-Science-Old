@@ -2,18 +2,18 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.BlockColorMapProvider;
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.Chroma;
+import grondag.exotic_matter.model.Hue;
+import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.ITexturePalette;
+import grondag.exotic_matter.model.Luminance;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.Translucency;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.movetogether.BlockColorMapProvider;
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.Chroma;
-import grondag.hard_science.movetogether.Hue;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.ITexturePalette;
-import grondag.hard_science.movetogether.Luminance;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;

@@ -6,10 +6,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;

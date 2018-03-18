@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.items;
 
-import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;

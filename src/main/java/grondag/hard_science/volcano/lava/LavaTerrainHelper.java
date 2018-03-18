@@ -6,11 +6,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import gnu.trove.list.TLongList;
+import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.movetogether.TerrainBlockHelper;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

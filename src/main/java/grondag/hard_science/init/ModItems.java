@@ -2,12 +2,12 @@ package grondag.hard_science.init;
 
 import java.util.Map;
 
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.matter.MatterPackaging;
-import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.ExcavationMarker;

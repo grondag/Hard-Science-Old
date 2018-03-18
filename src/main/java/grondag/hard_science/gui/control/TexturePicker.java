@@ -2,12 +2,12 @@ package grondag.hard_science.gui.control;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.ITexturePalette;
+import grondag.exotic_matter.model.TextureRotationType;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.movetogether.ITexturePalette;
-import grondag.hard_science.movetogether.TextureRotationType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;

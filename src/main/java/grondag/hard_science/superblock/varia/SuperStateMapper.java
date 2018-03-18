@@ -4,8 +4,8 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import net.minecraft.block.Block;

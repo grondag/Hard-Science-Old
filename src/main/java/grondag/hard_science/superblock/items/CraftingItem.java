@@ -1,9 +1,9 @@
 package grondag.hard_science.superblock.items;
 
+import grondag.exotic_matter.model.BlockColorMapProvider;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.movetogether.BlockColorMapProvider;
-import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.item.Item;
 
 /**

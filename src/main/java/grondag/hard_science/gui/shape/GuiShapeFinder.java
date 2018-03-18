@@ -1,7 +1,7 @@
 package grondag.hard_science.gui.shape;
 
-import grondag.hard_science.movetogether.ModShapes;
-import grondag.hard_science.movetogether.ModelShape;
+import grondag.exotic_matter.model.ModShapes;
+import grondag.exotic_matter.model.ModelShape;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

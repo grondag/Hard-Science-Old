@@ -1,11 +1,11 @@
 package grondag.hard_science.gui.control;
 
+import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.movetogether.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.init.Blocks;

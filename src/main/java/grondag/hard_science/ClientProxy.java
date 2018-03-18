@@ -1,10 +1,10 @@
 package grondag.hard_science;
 
 import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.movetogether.BlockColorMapProvider;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;

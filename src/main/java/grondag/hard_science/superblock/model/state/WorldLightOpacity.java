@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.model.state;
 
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.ISuperModelState;
 
 /**
  * Less granular representation of block translucency than Translucency.

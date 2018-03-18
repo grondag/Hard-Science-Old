@@ -3,9 +3,9 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import net.minecraft.block.SoundType;

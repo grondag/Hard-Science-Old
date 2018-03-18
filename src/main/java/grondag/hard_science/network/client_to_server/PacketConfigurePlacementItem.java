@@ -1,8 +1,8 @@
 package grondag.hard_science.network.client_to_server;
 
 
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.TargetMode;

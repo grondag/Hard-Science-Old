@@ -2,11 +2,11 @@ package grondag.hard_science.volcano.lava;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.TerrainBlockHelper;
+import grondag.exotic_matter.model.TerrainState;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.movetogether.TerrainBlockHelper;
-import grondag.hard_science.movetogether.TerrainState;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import net.minecraft.block.Block;

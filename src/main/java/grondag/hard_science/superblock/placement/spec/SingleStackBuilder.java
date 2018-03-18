@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import net.minecraft.entity.player.EntityPlayer;

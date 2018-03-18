@@ -13,13 +13,13 @@ import net.minecraft.util.math.Vec3i;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import grondag.hard_science.volcano.lava.simulator.LavaCell;

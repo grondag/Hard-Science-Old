@@ -1,18 +1,18 @@
 package grondag.hard_science.superblock.model.state;
 
-import static grondag.hard_science.movetogether.ModelStateData.STATE_ENUM_RENDER_PASS_SET;
-import static grondag.hard_science.movetogether.ModelStateData.STATE_FLAG_DISABLE_BLOCK_ONLY;
-import static grondag.hard_science.movetogether.ModelStateData.STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;
-import static grondag.hard_science.movetogether.ModelStateData.STATE_FLAG_IS_POPULATED;
+import static grondag.exotic_matter.model.ModelStateData.STATE_ENUM_RENDER_PASS_SET;
+import static grondag.exotic_matter.model.ModelStateData.STATE_FLAG_DISABLE_BLOCK_ONLY;
+import static grondag.exotic_matter.model.ModelStateData.STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;
+import static grondag.exotic_matter.model.ModelStateData.STATE_FLAG_IS_POPULATED;
 
+import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.RenderLayout;
 import grondag.exotic_matter.model.RenderPassSet;
+import grondag.exotic_matter.model.ShapeMeshGenerator;
 import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.RenderPass;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.ITexturePalette;
-import grondag.hard_science.movetogether.ShapeMeshGenerator;
 import grondag.hard_science.superblock.texture.Textures;
 
 /**

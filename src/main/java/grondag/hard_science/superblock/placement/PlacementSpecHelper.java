@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.StateFormat;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.placement.spec.CSGBuilder;
 import grondag.hard_science.superblock.placement.spec.CuboidBuilder;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;

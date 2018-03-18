@@ -2,8 +2,8 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;

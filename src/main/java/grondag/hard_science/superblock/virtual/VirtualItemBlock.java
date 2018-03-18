@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.virtual;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;

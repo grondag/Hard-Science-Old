@@ -1,10 +1,10 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Surface;
 import grondag.hard_science.Log;
-import grondag.hard_science.movetogether.ISuperModelState;
 
 public class SurfaceQuadPainterTorus extends SurfaceQuadPainter
 {

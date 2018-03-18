@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.model.TerrainState;
 import grondag.exotic_matter.world.HorizontalCorner;
 import grondag.exotic_matter.world.HorizontalFace;
-import grondag.hard_science.movetogether.TerrainState;
 
 public class TerrainStateTest
 {

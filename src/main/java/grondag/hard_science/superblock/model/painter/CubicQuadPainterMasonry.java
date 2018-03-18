@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.render.FaceQuadInputs;
 import grondag.exotic_matter.render.RawQuad;
@@ -8,7 +9,6 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
 import grondag.exotic_matter.world.SimpleJoinFaceState;
 import grondag.hard_science.Log;
-import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.util.EnumFacing;
 
 

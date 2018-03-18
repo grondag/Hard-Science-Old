@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.exotic_matter.render.QuadBakery;
 import grondag.exotic_matter.render.TextureHelper;
@@ -23,7 +24,6 @@ import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.movetogether.ITexturePalette;
 import grondag.hard_science.moving.RasterFont;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.superblock.items.SuperItemBlock;

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 
+import grondag.exotic_matter.model.BlockColorMapProvider;
+import grondag.exotic_matter.model.ColorMap.EnumColorMap;
 import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
@@ -19,8 +21,6 @@ import grondag.hard_science.matter.MatterColors;
 import grondag.hard_science.matter.MatterPhase;
 import grondag.hard_science.matter.Molecule;
 import grondag.hard_science.matter.Molecules;
-import grondag.hard_science.movetogether.BlockColorMapProvider;
-import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
 import grondag.hard_science.simulator.resource.BulkResource;
 import net.minecraftforge.fluids.FluidRegistry;
 

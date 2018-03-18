@@ -1,11 +1,11 @@
 package grondag.hard_science.machines.base;
 
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.matbuffer.ClientBufferInfo;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.placement.PlacementItem;

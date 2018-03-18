@@ -1,14 +1,14 @@
 package grondag.hard_science.gui.control;
 
+import grondag.exotic_matter.model.BlockColorMapProvider;
+import grondag.exotic_matter.model.Chroma;
+import grondag.exotic_matter.model.ColorMap;
+import grondag.exotic_matter.model.Hue;
+import grondag.exotic_matter.model.Luminance;
+import grondag.exotic_matter.model.ColorMap.EnumColorMap;
 import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.movetogether.BlockColorMapProvider;
-import grondag.hard_science.movetogether.Chroma;
-import grondag.hard_science.movetogether.ColorMap;
-import grondag.hard_science.movetogether.Hue;
-import grondag.hard_science.movetogether.Luminance;
-import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

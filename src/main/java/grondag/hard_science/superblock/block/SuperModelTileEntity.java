@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.block;
 
+import grondag.exotic_matter.model.BlockSubstance;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.movetogether.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SuperModelTileEntity extends SuperTileEntity

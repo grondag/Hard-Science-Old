@@ -2,17 +2,17 @@ package grondag.hard_science.superblock.model.painter;
 
 import java.util.List;
 
+import grondag.exotic_matter.model.ColorMap;
+import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.ColorMap.EnumColorMap;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.Vertex;
 import grondag.exotic_matter.varia.Color;
-import grondag.hard_science.movetogether.ColorMap;
-import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.ITexturePalette;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.model.pipeline.LightUtil;

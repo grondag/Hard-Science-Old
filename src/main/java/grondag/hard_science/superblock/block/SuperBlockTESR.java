@@ -3,10 +3,10 @@ package grondag.hard_science.superblock.block;
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.render.PerQuadModelRenderer;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

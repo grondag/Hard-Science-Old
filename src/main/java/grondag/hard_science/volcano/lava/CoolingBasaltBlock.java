@@ -3,11 +3,11 @@ package grondag.hard_science.volcano.lava;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.movetogether.BlockSubstance;
-import grondag.hard_science.movetogether.ISuperBlock;
-import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.TerrainBlockHelper;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer;
