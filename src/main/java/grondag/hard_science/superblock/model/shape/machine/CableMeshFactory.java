@@ -15,7 +15,6 @@ import grondag.exotic_matter.world.SimpleJoin;
 import grondag.hard_science.movetogether.ICollisionHandler;
 import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.movetogether.ISuperModelState;
-import grondag.hard_science.movetogether.MachineMeshFactory;
 import grondag.hard_science.movetogether.ModelStateData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;

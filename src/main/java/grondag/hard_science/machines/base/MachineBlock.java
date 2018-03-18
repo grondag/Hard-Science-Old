@@ -14,7 +14,6 @@ import grondag.hard_science.movetogether.Hue;
 import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.movetogether.ITexturePalette;
 import grondag.hard_science.movetogether.Luminance;
-import grondag.hard_science.movetogether.ModShapes;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
@@ -71,7 +70,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     protected static ISuperModelState creatBasicMachineModelState(ITexturePalette decalTex, ITexturePalette borderTex)
     {
         ISuperModelState modelState = new ModelState();
-        modelState.setShape(ModShapes.MACHINE);
+        modelState.setShape(grondag.hard_science.init.ModShapes.MACHINE);
         modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
 

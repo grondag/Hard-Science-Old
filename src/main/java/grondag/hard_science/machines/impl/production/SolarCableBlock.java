@@ -11,10 +11,9 @@ import grondag.hard_science.movetogether.Hue;
 import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.movetogether.Luminance;
-import grondag.hard_science.movetogether.MachineMeshFactory;
-import grondag.hard_science.movetogether.ModShapes;
-import grondag.hard_science.movetogether.MachineMeshFactory.MachineShape;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
+import grondag.hard_science.superblock.model.shape.machine.MachineMeshFactory;
+import grondag.hard_science.superblock.model.shape.machine.MachineMeshFactory.MachineShape;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
@@ -32,7 +31,7 @@ public class SolarCableBlock extends MachineSimpleBlock
     private static ISuperModelState createDefaulModelState()
     {
         ISuperModelState result = new ModelState();
-        result.setShape(ModShapes.MACHINE);
+        result.setShape(grondag.hard_science.init.ModShapes.MACHINE);
         MachineMeshFactory.setMachineShape(MachineShape.PHOTOCHEM_CABLE, result);
         
         result.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_SUBTLE);

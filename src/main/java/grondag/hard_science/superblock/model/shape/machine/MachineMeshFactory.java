@@ -1,4 +1,4 @@
-package grondag.hard_science.movetogether;
+package grondag.hard_science.superblock.model.shape.machine;
 
 import java.util.List;
 
@@ -10,9 +10,11 @@ import grondag.exotic_matter.render.SurfaceTopology;
 import grondag.exotic_matter.render.SurfaceType;
 import grondag.exotic_matter.render.Surface.SurfaceInstance;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.superblock.model.shape.machine.CableMeshFactory;
-import grondag.hard_science.superblock.model.shape.machine.MachineCubeMeshFactory;
-import grondag.hard_science.superblock.model.shape.machine.PhotoCellMeshFactory;
+import grondag.hard_science.movetogether.ICollisionHandler;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ModelStateData;
+import grondag.hard_science.movetogether.ShapeMeshGenerator;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
