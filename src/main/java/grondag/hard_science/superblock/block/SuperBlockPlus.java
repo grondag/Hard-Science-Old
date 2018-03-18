@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.exotic_matter.model.MetaUsage;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -24,7 +24,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
      */
     private static final Object TILE_ENTITY_AD_HOCK_CREATION_LOCK = new Object();
     
-    public SuperBlockPlus(String blockName, Material defaultMaterial, ModelState defaultModelState, BlockRenderMode blockRenderMode)
+    public SuperBlockPlus(String blockName, Material defaultMaterial, ISuperModelState defaultModelState, BlockRenderMode blockRenderMode)
     {
         super(blockName, defaultMaterial, defaultModelState, blockRenderMode);
     }
@@ -56,13 +56,13 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     }
     
     @Override
-    public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    public ISuperModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         TileEntity myTE = world.getTileEntity(pos);
         if(myTE != null && myTE instanceof SuperTileEntity) 
         {
             IBlockState currentState = world.getBlockState(pos);
-            ModelState result = ((SuperTileEntity)myTE).getModelState(currentState, world, pos, refreshFromWorldIfNeeded);
+            ISuperModelState result = ((SuperTileEntity)myTE).getModelState(currentState, world, pos, refreshFromWorldIfNeeded);
             
             // honor passed in species if different
             if(currentState.getValue(META) != state.getValue(META) && result.metaUsage() != MetaUsage.NONE)
@@ -82,7 +82,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
      * Use when absolutely certain given block state is current.
      */
     @Override
-    public ModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    public ISuperModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         TileEntity myTE = world.getTileEntity(pos);
         if(myTE != null && myTE instanceof SuperTileEntity) 
@@ -149,7 +149,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
      * same thread, and so tile entity data always goes along with 
      * block state packet.
      */
-    public void setModelState(World world, BlockPos pos, ModelState modelState)
+    public void setModelState(World world, BlockPos pos, ISuperModelState modelState)
     {
         TileEntity blockTE = world.getTileEntity(pos);
         if (blockTE != null && blockTE instanceof SuperTileEntity) 

@@ -6,6 +6,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.MachinePower;
+import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
@@ -14,7 +15,6 @@ import grondag.hard_science.simulator.domain.Privilege;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.texture.Textures;
 import mcjty.theoneprobe.api.IProbeHitData;
@@ -131,7 +131,7 @@ public interface IMachineBlock
      */
     public default IPortLayout portLayout(IBlockAccess worldIn, BlockPos pos, IBlockState state)
     {
-        return this.nominalPortLayout().localize(((SuperBlock)state.getBlock()).getModelState(worldIn, pos, true));
+        return this.nominalPortLayout().localize(((ISuperBlock)state.getBlock()).getModelState(worldIn, pos, true));
     }
     
     /**
@@ -153,9 +153,9 @@ public interface IMachineBlock
      */
     public default void handleMachinePlacement(AbstractMachine machine, World worldIn, BlockPos pos, IBlockState state)
     {
-        if(machine.hasChannel() && state.getPropertyKeys().contains(SuperBlock.META))
+        if(machine.hasChannel() && state.getPropertyKeys().contains(ISuperBlock.META))
         {
-            machine.setChannel(state.getValue(SuperBlock.META));
+            machine.setChannel(state.getValue(ISuperBlock.META));
         }
     }
     

@@ -4,11 +4,12 @@ import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.varia.ColorHelper;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.varia.ColorHelper.CMY;
+import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.matter.MatterUnits;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
 import net.minecraft.util.math.BlockPos;
 
 public class SuperBlockMaterialCalculator
@@ -23,48 +24,40 @@ public class SuperBlockMaterialCalculator
     public final long TiO2_nL;
     public final BlockSubstance actualSubtance;
     
-    public SuperBlockMaterialCalculator(ModelState modelState, BlockSubstance requestedSubstance, int lightValue)
+    public SuperBlockMaterialCalculator(ISuperModelState modelState, BlockSubstance requestedSubstance, int lightValue)
     {
 
         this.nanoLights_nL = lightValue > 0 || modelState.getRenderPassSet().hasFlatRenderPass ? MatterUnits.nL_NANO_LIGHTS_PER_BLOCK : 0;
         
         final long volume = (long) (Useful.volumeAABB(modelState.collisionBoxes(BlockPos.ORIGIN)) * MatterUnits.nL_ONE_BLOCK);
         
-        switch(requestedSubstance)
+        if(requestedSubstance == ModSubstances.DURAWOOD
+               || requestedSubstance == ModSubstances.FLEXWOOD
+               || requestedSubstance == ModSubstances.HYPERWOOD)
         {
-            case DURAWOOD:
-            case FLEXWOOD:
-            case HYPERWOOD:
-            {
-                this.actualSubtance = BlockSubstance.FLEXWOOD;
-                this.filler_nL = 0;
-                final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * MatterUnits.RESIN_WOOD_FRACTION_BY_VOLUME / 2);
-                this.resinA_nL = halfResinVolume;
-                this.resinB_nL = halfResinVolume;
-                break;
-            }
-            
-            case DURAGLASS:
-            case FLEXIGLASS:
-            case HYPERGLASS:
-            {
-                final long halfResinVolume = (long) ((volume - this.nanoLights_nL) / 2);
-                this.actualSubtance = BlockSubstance.FLEXIGLASS;
-                this.filler_nL = 0;
-                this.resinA_nL = halfResinVolume;
-                this.resinB_nL = halfResinVolume;
-                break;
-            }
-            
-            default:
-            {
-                this.actualSubtance = BlockSubstance.FLEXSTONE;
-                this.filler_nL = volume;
-                final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * MatterUnits.FILLER_VOID_RATIO / 2);
-                this.resinA_nL = halfResinVolume;
-                this.resinB_nL = halfResinVolume;
-                break;
-            }
+            this.actualSubtance = ModSubstances.FLEXWOOD;
+            this.filler_nL = 0;
+            final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * MatterUnits.RESIN_WOOD_FRACTION_BY_VOLUME / 2);
+            this.resinA_nL = halfResinVolume;
+            this.resinB_nL = halfResinVolume;
+        }
+        else if(requestedSubstance == ModSubstances.DURAGLASS
+                || requestedSubstance == ModSubstances.FLEXIGLASS
+                || requestedSubstance == ModSubstances.HYPERGLASS)
+         {
+            final long halfResinVolume = (long) ((volume - this.nanoLights_nL) / 2);
+            this.actualSubtance = ModSubstances.FLEXIGLASS;
+            this.filler_nL = 0;
+            this.resinA_nL = halfResinVolume;
+            this.resinB_nL = halfResinVolume;
+         }
+        else
+        {
+            this.actualSubtance = ModSubstances.FLEXSTONE;
+            this.filler_nL = volume;
+            final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * MatterUnits.FILLER_VOID_RATIO / 2);
+            this.resinA_nL = halfResinVolume;
+            this.resinB_nL = halfResinVolume;
         }
        
         

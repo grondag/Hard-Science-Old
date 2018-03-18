@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import net.minecraft.block.Block;
@@ -31,16 +33,16 @@ public class SuperStateMapper extends DefaultStateMapper
    {
        Map<IBlockState, ModelResourceLocation> mapLocations = Maps.newLinkedHashMap();
 
-       if (block instanceof SuperBlock) {
+       if (block instanceof ISuperBlock) {
            SuperBlock superBlock = (SuperBlock) block;
            for (int i = 0; i < 16; i++) {
-               IBlockState state = superBlock.getDefaultState().withProperty(SuperBlock.META, i);
+               IBlockState state = superBlock.getDefaultState().withProperty(ISuperBlock.META, i);
                    
                if(block instanceof SuperModelBlock)
                {
-                   for(BlockSubstance substance : BlockSubstance.values())
+                   for(BlockSubstance substance : BlockSubstance.all())
                    {
-                       mapLocations.put(state.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal()),
+                       mapLocations.put(state.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal),
                                new ModelResourceLocation(dispatcher.getDelegate(superBlock).getModelResourceString()));
                    }
                }

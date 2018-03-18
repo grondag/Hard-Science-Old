@@ -10,11 +10,11 @@ import javax.annotation.Nullable;
 import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.PlacementItem;
@@ -77,7 +77,7 @@ public class VirtualBlock extends SuperModelBlock
         
         VirtualBlock vBlock = (VirtualBlock)block;
         
-        ModelState modelState = vBlock.getModelState(world, pos, true);
+        ISuperModelState modelState = vBlock.getModelState(world, pos, true);
         if(modelState == null) return null;
         
         TileEntity te = world.getTileEntity(pos);

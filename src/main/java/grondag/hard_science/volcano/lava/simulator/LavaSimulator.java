@@ -14,12 +14,13 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
+import grondag.hard_science.movetogether.TerrainState;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.terrain.TerrainBlock;
-import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.volcano.lava.AgedBlockPos;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.volcano.lava.EntityLavaBlob;
@@ -299,7 +300,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         // ignore fillers
         if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
-            this.lavaBlockPlacementEvents.addEvent(pos, -TerrainBlock.getFlowHeightFromState(state));
+            this.lavaBlockPlacementEvents.addEvent(pos, -TerrainBlockHelper.getFlowHeightFromState(state));
             this.setDirty();
         }
     }
@@ -317,7 +318,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         // ignore fillers - they have no effect on simulation
         if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
-            this.lavaBlockPlacementEvents.addEvent(pos, TerrainBlock.getFlowHeightFromState(state));
+            this.lavaBlockPlacementEvents.addEvent(pos, TerrainBlockHelper.getFlowHeightFromState(state));
             
             // remove blocks placed by player so that simulation can place lava in the appropriate place
             this.itMe = true;
@@ -416,7 +417,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
 //            HardScience.log.info("Cooling lava @" + pos.toString());
             //should not need these any more due to world buffer
 //            this.itMe = true;
-            this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(SuperBlock.META, priorState.getValue(SuperBlock.META)), priorState);
+            this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(ISuperBlock.META, priorState.getValue(ISuperBlock.META)), priorState);
 //            this.itMe = false;
             this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.instance().getTick()));
         }

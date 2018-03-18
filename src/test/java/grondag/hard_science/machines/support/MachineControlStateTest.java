@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
-import grondag.hard_science.moving.ModShapes;
+import grondag.hard_science.movetogether.ModShapes;
 import grondag.hard_science.superblock.model.state.ModelState;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import net.minecraft.nbt.NBTTagCompound;

@@ -1,14 +1,18 @@
 package grondag.hard_science.superblock.model.state;
 
-import static grondag.hard_science.superblock.model.state.ModelStateData.*;
+import static grondag.hard_science.movetogether.ModelStateData.STATE_ENUM_RENDER_PASS_SET;
+import static grondag.hard_science.movetogether.ModelStateData.STATE_FLAG_DISABLE_BLOCK_ONLY;
+import static grondag.hard_science.movetogether.ModelStateData.STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;
+import static grondag.hard_science.movetogether.ModelStateData.STATE_FLAG_IS_POPULATED;
 
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.RenderLayout;
 import grondag.exotic_matter.model.RenderPassSet;
 import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.render.RenderPass;
-import grondag.hard_science.superblock.model.shape.ShapeMeshGenerator;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ITexturePalette;
+import grondag.hard_science.movetogether.ShapeMeshGenerator;
 import grondag.hard_science.superblock.texture.Textures;
 
 /**
@@ -111,7 +115,7 @@ public class ModelStateFlagHelper
         }
     }
     
-    public static int getFlags(ModelState state)
+    public static int getFlags(ISuperModelState state)
     {
         int index = 0;
         
@@ -119,10 +123,10 @@ public class ModelStateFlagHelper
         
         int flags = STATE_FLAG_IS_POPULATED | mesh.getStateFlags(state);
         
-        TexturePallette texBase = state.getTexture(PaintLayer.BASE);
-        flags |= texBase.stateFlags;
+        ITexturePalette texBase = state.getTexture(PaintLayer.BASE);
+        flags |= texBase.stateFlags();
         
-        flags |= state.getTexture(PaintLayer.CUT).stateFlags;
+        flags |= state.getTexture(PaintLayer.CUT).stateFlags();
         
         if(state.isTranslucent(PaintLayer.BASE)) index |= IS_BASE_TRANSLUCENT;
         
@@ -132,18 +136,18 @@ public class ModelStateFlagHelper
         {
             index |= IS_LAMP_PRESENT;
       
-            TexturePallette texLamp = state.getTexture(PaintLayer.LAMP);
-            flags |= texLamp.stateFlags;
+            ITexturePalette texLamp = state.getTexture(PaintLayer.LAMP);
+            flags |= texLamp.stateFlags();
             
             if(state.isTranslucent(PaintLayer.LAMP)) index |= IS_LAMP_TRANSLUCENT;
             if(state.isFullBrightness(PaintLayer.LAMP)) index |= IS_LAMP_LIT;
 
         }
         
-        TexturePallette texOverlay = state.getTexture(PaintLayer.MIDDLE);
+        ITexturePalette texOverlay = state.getTexture(PaintLayer.MIDDLE);
         if(texOverlay != Textures.NONE)
         {
-            flags |= texOverlay.stateFlags;
+            flags |= texOverlay.stateFlags();
             index |= IS_MIDDLE_PRESENT;
             if(state.isFullBrightness(PaintLayer.MIDDLE)) index |= IS_MIDDLE_LIT;
         }
@@ -151,7 +155,7 @@ public class ModelStateFlagHelper
         texOverlay = state.getTexture(PaintLayer.OUTER);
         if(texOverlay != Textures.NONE)
         {
-            flags |= texOverlay.stateFlags;
+            flags |= texOverlay.stateFlags();
             index |= IS_OUTER_PRESENT;
             if(state.isFullBrightness(PaintLayer.OUTER)) index |= IS_OUTER_LIT;
         }

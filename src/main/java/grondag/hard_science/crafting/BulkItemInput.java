@@ -9,12 +9,12 @@ import com.google.common.collect.ListMultimap;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -120,7 +120,7 @@ public abstract class BulkItemInput
             if(!this.ingredient.apply(rwq.toStack())) return 0;
             
             double volume = 0;
-            ModelState modelState = PlacementItem.getStackModelState(rwq.toStack());
+            ISuperModelState modelState = PlacementItem.getStackModelState(rwq.toStack());
             if(modelState == null) return 0;
             for(AxisAlignedBB box : modelState.getShape().meshFactory().collisionHandler().getCollisionBoxes(modelState))
             {

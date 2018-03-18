@@ -19,10 +19,13 @@ import grondag.hard_science.machines.impl.processing.DigesterTESR;
 import grondag.hard_science.machines.impl.processing.DigesterTileEntity;
 import grondag.hard_science.machines.impl.processing.MicronizerTESR;
 import grondag.hard_science.machines.impl.processing.MicronizerTileEntity;
-import grondag.hard_science.matter.MatterCube;
 import grondag.hard_science.matter.BulkItem;
+import grondag.hard_science.matter.MatterCube;
 import grondag.hard_science.matter.MatterCubeItemModel;
 import grondag.hard_science.matter.MatterCubeItemModel1;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ITexturePalette;
+import grondag.hard_science.movetogether.TextureLayout;
 import grondag.hard_science.moving.RasterFont;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
@@ -30,8 +33,6 @@ import grondag.hard_science.superblock.block.SuperModelTileEntityTESR;
 import grondag.hard_science.superblock.block.SuperTileEntityTESR;
 import grondag.hard_science.superblock.items.CraftingItem;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.texture.TextureLayout;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
@@ -144,17 +145,17 @@ public class ModModels
         map.setTextureEntry(FONT_RENDERER_LARGE);
         
         
-        for(TexturePallette p : Textures.REGISTRY)
+        for(ITexturePalette p : Textures.REGISTRY)
         {
             for(String s : p.getTexturesForPrestich())
             {
                 ResourceLocation loc = new ResourceLocation(s);
                 
-                if(p.textureLayout == TextureLayout.BIGTEX_ANIMATED)
+                if(p.textureLayout() == TextureLayout.BIGTEX_ANIMATED)
                 {
                     if(map.getTextureExtry(loc.toString()) == null)
                     {
-                        map.setTextureEntry(new CompressedAnimatedSprite(loc, p.ticksPerFrame));
+                        map.setTextureEntry(new CompressedAnimatedSprite(loc, p.ticksPerFrame()));
                     }
                 }
                 else
@@ -303,7 +304,7 @@ public class ModModels
             if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
             {
                 Block block = entry.getValue();
-                if(block instanceof SuperBlock)
+                if(block instanceof ISuperBlock)
                 {
                     ModelLoader.setCustomStateMapper(block, mapper);
                 }
@@ -383,7 +384,7 @@ public class ModModels
             if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
             {
                 Block block = entry.getValue();
-                if(block instanceof SuperBlock)
+                if(block instanceof ISuperBlock)
                 {
                     // won't work in pre-init because BlockColors/ItemColors aren't instantiated yet
                     // Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block.blockModelHelper.dispatcher, block);

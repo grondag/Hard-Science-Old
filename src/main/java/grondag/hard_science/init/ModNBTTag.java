@@ -9,7 +9,7 @@ package grondag.hard_science.init;
  */
 public class ModNBTTag
 {
-    private static int nextID = 0;
+    public static int nextID = 0;
 
     public final static String ASSIGNED_NUMBERS_AUTHORITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String BASALT_BLOCKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -52,7 +52,6 @@ public class ModNBTTag
     public final static String SIMULATOR = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String STORAGE_CAPACITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String STORAGE_CONTENTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String SUPER_MODEL_SUBSTANCE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String VOLCANO_BUILD_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String VOLCANO_CLEARING_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String VOLCANO_COOLDOWN_TICKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);

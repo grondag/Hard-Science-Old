@@ -18,9 +18,9 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import grondag.hard_science.volcano.lava.simulator.LavaCell;
 import grondag.hard_science.volcano.lava.simulator.LavaCells;
@@ -341,7 +341,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         {
             this.world.setBlockToAir(clearPos);
             if(clearPos.getY() < this.groundLevel && 
-                    !(block instanceof SuperBlock && ((SuperBlock)block).getSubstance(this.world, clearPos) == BlockSubstance.BASALT))
+                    !(block instanceof ISuperBlock && ((ISuperBlock)block).getSubstance(this.world, clearPos) == ModSubstances.BASALT))
             {
                 buildMound();
             }
@@ -429,7 +429,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
 
     private boolean isVolcanoBlock(Block block)
     {
-        if(!(block instanceof SuperBlock)) return false;
+        if(!(block instanceof ISuperBlock)) return false;
         
         return block == ModBlocks.basalt_cool_dynamic_height
                 || block == ModBlocks.basalt_cool_dynamic_filler

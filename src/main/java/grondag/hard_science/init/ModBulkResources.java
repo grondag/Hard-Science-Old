@@ -19,9 +19,9 @@ import grondag.hard_science.matter.MatterColors;
 import grondag.hard_science.matter.MatterPhase;
 import grondag.hard_science.matter.Molecule;
 import grondag.hard_science.matter.Molecules;
+import grondag.hard_science.movetogether.BlockColorMapProvider;
+import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
 import grondag.hard_science.simulator.resource.BulkResource;
-import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import net.minecraftforge.fluids.FluidRegistry;
 
 public class ModBulkResources

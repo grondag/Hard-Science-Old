@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.items;
 
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.BlockColorMapProvider;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.item.Item;
 
 /**
@@ -12,9 +12,9 @@ import net.minecraft.item.Item;
  */
 public class CraftingItem extends Item
 {
-    public final ModelState modelState;
+    public final ISuperModelState modelState;
     
-    public CraftingItem(String name, ModelState modelState)
+    public CraftingItem(String name, ISuperModelState modelState)
     {
         super();
         this.modelState = modelState;

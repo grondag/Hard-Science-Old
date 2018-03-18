@@ -28,15 +28,15 @@ import grondag.hard_science.gui.control.VisiblitySelector;
 import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
+import grondag.hard_science.movetogether.BlockColorMapProvider;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ITexturePalette;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
-import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.texture.Textures;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -81,7 +81,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
     private ItemPreview itemPreview;
 
-    private ModelState modelState = null;
+    private ISuperModelState modelState = null;
 
     private boolean hasUpdates = false;
 
@@ -213,7 +213,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             hasUpdates = true;
         }
 
-        TexturePallette tex = textureTabBar[layer.dynamicIndex].getSelected();
+        ITexturePalette tex = textureTabBar[layer.dynamicIndex].getSelected();
         if(tex != null && modelState.getTexture(layer) != tex)
         {
             modelState.setTexture(layer, tex);
@@ -364,7 +364,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
             {
-                TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<TexturePallette>(), xStart + CONTROL_EXTERNAL_MARGIN, yStart + 100).setVerticalWeight(5);
+                TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<ITexturePalette>(), xStart + CONTROL_EXTERNAL_MARGIN, yStart + 100).setVerticalWeight(5);
                 // only render textures with alpha for layers that will render that way in world
                 t.renderAlpha = PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.MIDDLE || PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.OUTER;
                 textureTabBar[i] = t;
@@ -478,7 +478,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
             t.clear();
             t.addAll(Textures.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
-            TexturePallette tex = modelState.getTexture(layer);
+            ITexturePalette tex = modelState.getTexture(layer);
             t.setSelected(tex == Textures.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
             t.borderColor = modelState.isFullBrightness(layer)

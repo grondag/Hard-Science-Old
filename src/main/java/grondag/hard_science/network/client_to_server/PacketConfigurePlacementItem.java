@@ -1,6 +1,8 @@
 package grondag.hard_science.network.client_to_server;
 
 
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.TargetMode;
@@ -12,7 +14,6 @@ import grondag.hard_science.superblock.placement.BlockOrientationCorner;
 import grondag.hard_science.superblock.placement.BlockOrientationEdge;
 import grondag.hard_science.superblock.placement.BlockOrientationFace;
 import grondag.hard_science.superblock.placement.FilterMode;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -26,7 +27,7 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
 {
     
     private int meta;
-    private ModelState modelState;
+    private ISuperModelState modelState;
     private BlockSubstance blockSubstance;
     private int lightValue;
     private TargetMode mode;
@@ -81,7 +82,7 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
         this.meta = pBuff.readByte();
         this.modelState = new ModelState();
         this.modelState.fromBytes(pBuff);
-        this.blockSubstance = pBuff.readEnumValue(BlockSubstance.class);
+        this.blockSubstance = BlockSubstance.fromBytes(pBuff);
         this.lightValue = pBuff.readByte();
         this.mode = TargetMode.FILL_REGION.fromBytes(pBuff);
         this.axis = BlockOrientationAxis.DYNAMIC.fromBytes(pBuff);
@@ -103,7 +104,7 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
     {
         pBuff.writeByte(this.meta);
         this.modelState.toBytes(pBuff);
-        pBuff.writeEnumValue(this.blockSubstance);
+        this.blockSubstance.toBytes(pBuff);
         pBuff.writeByte(this.lightValue);
         this.mode.toBytes(pBuff);
         this.axis.toBytes(pBuff);

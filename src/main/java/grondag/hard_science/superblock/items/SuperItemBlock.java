@@ -2,9 +2,10 @@ package grondag.hard_science.superblock.items;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.BlockOrientationHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;
@@ -92,7 +93,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-        return ((SuperBlock)this.block).getItemStackDisplayName(stack);
+        return ((ISuperBlock)this.block).getItemStackDisplayName(stack);
     }
     
     @Override
@@ -102,9 +103,9 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     }
 
     @Override
-    public SuperBlock getSuperBlock()
+    public ISuperBlock getSuperBlock()
     {
-        return (SuperBlock) this.block;
+        return (ISuperBlock) this.block;
     }
 
     @Override
@@ -175,7 +176,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
        }
        
    
-       ModelState modelState = PlacementItem.getStackModelState(stackIn);
+       ISuperModelState modelState = PlacementItem.getStackModelState(stackIn);
        if(modelState == null) return EnumActionResult.FAIL;
 
        AxisAlignedBB axisalignedbb = modelState.getShape().meshFactory().collisionHandler()

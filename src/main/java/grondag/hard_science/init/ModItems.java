@@ -7,6 +7,7 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.matter.MatterPackaging;
+import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.ExcavationMarker;
@@ -110,7 +111,7 @@ public class ModItems
                 {
                     itemBlock = new VirtualItemBlock((VirtualBlock)block);
                 }
-                else if(block instanceof SuperBlock)
+                else if(block instanceof ISuperBlock)
                 {
                     itemBlock = new SuperItemBlock((SuperBlock)block);
                 }

@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.varia;
 
 import grondag.exotic_matter.ConfigXM;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
@@ -27,10 +27,10 @@ public class BlockHighlighter
         {
             World world = event.getPlayer().world;
     		IBlockState bs = world.getBlockState(pos);
-    		if (bs != null && bs.getBlock() instanceof SuperBlock) 
+    		if (bs != null && bs.getBlock() instanceof ISuperBlock) 
     		{
-    		    SuperBlock block = (SuperBlock) bs.getBlock();
-    		    ModelState modelState = block.getModelStateAssumeStateIsCurrent(bs, world, pos, true);
+    		    ISuperBlock block = (ISuperBlock) bs.getBlock();
+    		    ISuperModelState modelState = block.getModelStateAssumeStateIsCurrent(bs, world, pos, true);
     		    drawBlockHighlight(modelState, pos, event.getPlayer(), event.getPartialTicks(), false);
 				event.setCanceled(true);
     		}
@@ -43,7 +43,7 @@ public class BlockHighlighter
 	public static final float[] COLOR_PLACEMENT = {1, 0, 1, 1};
 	public static final float[] COLOR_DELETION = {1, 1, 0, 1};
 	
-	public static void drawBlockHighlight(ModelState modelState, BlockPos pos, EntityPlayer player, float partialTicks, boolean isPreview)
+	public static void drawBlockHighlight(ISuperModelState modelState, BlockPos pos, EntityPlayer player, float partialTicks, boolean isPreview)
 	{
 	    double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
 	    double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;

@@ -4,7 +4,7 @@ import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMo
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementPosition;
@@ -108,7 +108,7 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
      * render placement preview. Override with context-dependent
      * version if available.
      */
-    protected ModelState previewModelState()
+    protected ISuperModelState previewModelState()
     {
         return PlacementItem.getStackModelState(this.heldStack);
     }
@@ -139,7 +139,7 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
         
         GlStateManager.disableDepth();
         
-        ModelState placementModelState = this.previewModelState();
+        ISuperModelState placementModelState = this.previewModelState();
         if(placementModelState == null)
         {
             // No model state, draw generic box

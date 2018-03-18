@@ -1,7 +1,7 @@
 package grondag.hard_science.gui.shape;
 
 import grondag.hard_science.gui.control.Panel;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -15,9 +15,9 @@ public abstract class GuiShape extends Panel
     }
     
     /** called before control is displayed and whenever modelstate changes */
-    public abstract void loadSettings(ModelState modelState);
+    public abstract void loadSettings(ISuperModelState modelState);
     
     /** called to detect user changes - return true if model state was changed */
-    public abstract boolean saveSettings(ModelState modelState);
+    public abstract boolean saveSettings(ISuperModelState modelState);
 
 }

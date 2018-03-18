@@ -1,10 +1,10 @@
 package grondag.hard_science.init;
 
 import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -66,7 +66,7 @@ public class ModSuperModelBlocks
         }
     }
     
-    public static SuperModelBlock findAppropriateSuperModelBlock(BlockSubstance substance, ModelState modelState)
+    public static SuperModelBlock findAppropriateSuperModelBlock(BlockSubstance substance, ISuperModelState modelState)
     {
         WorldLightOpacity opacity = WorldLightOpacity.getClosest(substance, modelState);
         BlockRenderMode blockRenderMode = modelState.getRenderPassSet().blockRenderMode;
@@ -75,7 +75,7 @@ public class ModSuperModelBlocks
         return superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][hypermaterIndex][cubeIndex];
     }
     
-    public static VirtualBlock findAppropriateVirtualBlock(ModelState modelState)
+    public static VirtualBlock findAppropriateVirtualBlock(ISuperModelState modelState)
     {
         BlockRenderMode blockRenderMode = modelState.getRenderPassSet().blockRenderMode;
         return virtualBlocks[blockRenderMode.ordinal()];

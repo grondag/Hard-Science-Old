@@ -5,15 +5,16 @@ import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
-import grondag.hard_science.moving.ModShapes;
+import grondag.hard_science.movetogether.BlockColorMapProvider;
+import grondag.hard_science.movetogether.Chroma;
+import grondag.hard_science.movetogether.Hue;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.Luminance;
+import grondag.hard_science.movetogether.MachineMeshFactory;
+import grondag.hard_science.movetogether.ModShapes;
+import grondag.hard_science.movetogether.MachineMeshFactory.MachineShape;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.color.Chroma;
-import grondag.hard_science.superblock.color.Hue;
-import grondag.hard_science.superblock.color.Luminance;
-import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
-import grondag.hard_science.superblock.model.shape.MachineMeshFactory.MachineShape;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
@@ -28,9 +29,9 @@ public class BottomBusBlock extends MachineSimpleBlock
         super(blockName, createDefaulModelState());
     }
 
-    private static ModelState createDefaulModelState()
+    private static ISuperModelState createDefaulModelState()
     {
-        ModelState result = new ModelState();
+        ISuperModelState result = new ModelState();
         result.setShape(ModShapes.MACHINE);
         MachineMeshFactory.setMachineShape(MachineShape.BOTTOM_BUS, result);
         
@@ -54,9 +55,9 @@ public class BottomBusBlock extends MachineSimpleBlock
     }
 
     @Override
-    public IBlockTest<ModelState> blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
+    public IBlockTest<ISuperModelState> blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ISuperModelState modelState)
     {
-        return new BlockTests.SuperBlockCableMatch(this.portLayout(worldIn, pos, state), state.getValue(SuperBlock.META));
+        return new BlockTests.SuperBlockCableMatch(this.portLayout(worldIn, pos, state), state.getValue(ISuperBlock.META));
     }
 
     @Override

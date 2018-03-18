@@ -4,12 +4,12 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.terrain.TerrainBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -23,7 +23,7 @@ public class CoolingBasaltBlock extends TerrainDynamicBlock
     protected TerrainDynamicBlock nextCoolingBlock;
     protected int heatLevel = 0;
 
-    public CoolingBasaltBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
+    public CoolingBasaltBlock(String blockName, BlockSubstance substance, ISuperModelState defaultModelState, boolean isFiller)
     {
         super(blockName, substance, defaultModelState, isFiller);
         this.setTickRandomly(true);
@@ -52,19 +52,19 @@ public class CoolingBasaltBlock extends TerrainDynamicBlock
             {
                 if(this.nextCoolingBlock == ModBlocks.basalt_cool_dynamic_height)
                 {
-                    if( TerrainBlock.shouldBeFullCube(state, worldIn, pos))
+                    if( TerrainBlockHelper.shouldBeFullCube(state, worldIn, pos))
                     {
-                        worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), ModBlocks.basalt_cut.getDefaultState().withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), state);
+                        worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), ModBlocks.basalt_cut.getDefaultState().withProperty(ISuperBlock.META, state.getValue(ISuperBlock.META)), state);
                     }
                     else
                     {
-                        worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), this.nextCoolingBlock.getDefaultState().withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), state);
+                        worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), this.nextCoolingBlock.getDefaultState().withProperty(ISuperBlock.META, state.getValue(ISuperBlock.META)), state);
                     }
                     return CoolingResult.COMPLETE;
                 }
                 else
                 {
-                    worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), this.nextCoolingBlock.getDefaultState().withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), state);
+                    worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), this.nextCoolingBlock.getDefaultState().withProperty(ISuperBlock.META, state.getValue(ISuperBlock.META)), state);
                     return CoolingResult.PARTIAL;
                 }
             }
@@ -85,7 +85,7 @@ public class CoolingBasaltBlock extends TerrainDynamicBlock
      * Occasionally can cool if only three are cooler. */
     public boolean canCool(WorldStateBuffer worldIn, BlockPos pos, IBlockState state)
     {
-        if(TerrainBlock.shouldBeFullCube(state, worldIn, pos)) return true;
+        if(TerrainBlockHelper.shouldBeFullCube(state, worldIn, pos)) return true;
         
         int chances = 0;
         boolean awayFromLava = true;

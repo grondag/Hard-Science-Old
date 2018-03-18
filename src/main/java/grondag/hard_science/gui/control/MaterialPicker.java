@@ -4,7 +4,8 @@ import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.movetogether.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.init.Blocks;
@@ -34,17 +35,17 @@ public class MaterialPicker extends GuiControl<MaterialPicker>
 
     static
     {
-        substances[0][0] = BlockSubstance.FLEXSTONE;
-        substances[0][1] = BlockSubstance.DURASTONE;
-        substances[0][2] = BlockSubstance.HYPERSTONE;
+        substances[0][0] = ModSubstances.FLEXSTONE;
+        substances[0][1] = ModSubstances.DURASTONE;
+        substances[0][2] = ModSubstances.HYPERSTONE;
 
-        substances[1][0] = BlockSubstance.FLEXIGLASS;
-        substances[1][1] = BlockSubstance.DURAGLASS;
-        substances[1][2] = BlockSubstance.HYPERGLASS;
+        substances[1][0] = ModSubstances.FLEXIGLASS;
+        substances[1][1] = ModSubstances.DURAGLASS;
+        substances[1][2] = ModSubstances.HYPERGLASS;
         
-        substances[2][0] = BlockSubstance.FLEXWOOD;
-        substances[2][1] = BlockSubstance.DURAWOOD;
-        substances[2][2] = BlockSubstance.HYPERWOOD;
+        substances[2][0] = ModSubstances.FLEXWOOD;
+        substances[2][1] = ModSubstances.DURAWOOD;
+        substances[2][2] = ModSubstances.HYPERWOOD;
     }
     
     public MaterialPicker()

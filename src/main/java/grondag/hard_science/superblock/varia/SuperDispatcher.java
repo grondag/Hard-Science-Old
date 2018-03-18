@@ -18,19 +18,20 @@ import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.SimpleItemBlockModel;
 import grondag.exotic_matter.render.SparseLayerMapBuilder;
+import grondag.exotic_matter.render.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
-import grondag.exotic_matter.render.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ShapeMeshGenerator;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.CraftingItem;
 import grondag.hard_science.superblock.items.SuperModelItemOverrideList;
 import grondag.hard_science.superblock.model.painter.QuadPainter;
 import grondag.hard_science.superblock.model.painter.QuadPainterFactory;
-import grondag.hard_science.superblock.model.shape.ShapeMeshGenerator;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -62,15 +63,15 @@ public class SuperDispatcher
     public final DispatchDelegate[] delegates;
     
     //custom loading cache is at least 2X faster than guava LoadingCache for our use case
-    private final ObjectSimpleLoadingCache<ModelState, SparseLayerMap> modelCache = new ObjectSimpleLoadingCache<ModelState, SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
-    private final ObjectSimpleLoadingCache<ModelState, SimpleItemBlockModel> itemCache = new ObjectSimpleLoadingCache<ModelState, SimpleItemBlockModel>(new ItemCacheLoader(), 0xFFF);
+    private final ObjectSimpleLoadingCache<ISuperModelState, SparseLayerMap> modelCache = new ObjectSimpleLoadingCache<ISuperModelState, SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
+    private final ObjectSimpleLoadingCache<ISuperModelState, SimpleItemBlockModel> itemCache = new ObjectSimpleLoadingCache<ISuperModelState, SimpleItemBlockModel>(new ItemCacheLoader(), 0xFFF);
     /** contains quads for use by block damage rendering based on shape only and with appropriate UV mapping*/
-    private final ObjectSimpleLoadingCache<ModelState, QuadContainer> damageCache = new ObjectSimpleLoadingCache<ModelState, QuadContainer>(new DamageCacheLoader(), 0x4FF);
+    private final ObjectSimpleLoadingCache<ISuperModelState, QuadContainer> damageCache = new ObjectSimpleLoadingCache<ISuperModelState, QuadContainer>(new DamageCacheLoader(), 0x4FF);
     
-    private class BlockCacheLoader implements ObjectSimpleCacheLoader<ModelState, SparseLayerMap>
+    private class BlockCacheLoader implements ObjectSimpleCacheLoader<ISuperModelState, SparseLayerMap>
     {
 		@Override
-		public SparseLayerMap load(ModelState key) {
+		public SparseLayerMap load(ISuperModelState key) {
 			
 		    Collection<RawQuad> paintedQuads = getFormattedQuads(key, false);
 		    
@@ -103,10 +104,10 @@ public class SuperDispatcher
 		}
     }
     
-    private class ItemCacheLoader implements ObjectSimpleCacheLoader<ModelState, SimpleItemBlockModel>
+    private class ItemCacheLoader implements ObjectSimpleCacheLoader<ISuperModelState, SimpleItemBlockModel>
     {
 		@Override
-		public SimpleItemBlockModel load(ModelState key) 
+		public SimpleItemBlockModel load(ISuperModelState key) 
 		{
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 	    	for(RawQuad quad : getFormattedQuads(key, true))
@@ -131,10 +132,10 @@ public class SuperDispatcher
 		}       
     }
     
-    private class DamageCacheLoader implements ObjectSimpleCacheLoader<ModelState, QuadContainer>
+    private class DamageCacheLoader implements ObjectSimpleCacheLoader<ISuperModelState, QuadContainer>
     {
         @Override
-        public QuadContainer load(ModelState key) 
+        public QuadContainer load(ISuperModelState key) 
         {
             List<RawQuad> quads = key.getShape().meshFactory().getShapeQuads(key);
             if(quads.isEmpty()) return QuadContainer.EMPTY_CONTAINER;
@@ -182,7 +183,7 @@ public class SuperDispatcher
             itemCache.clear();
     }
 
-    public int getOcclusionKey(ModelState modelState, EnumFacing face)
+    public int getOcclusionKey(ISuperModelState modelState, EnumFacing face)
     {
         if(!modelState.getRenderPassSet().renderLayout.containsBlockRenderLayer(BlockRenderLayer.SOLID)) return 0;
 
@@ -202,7 +203,7 @@ public class SuperDispatcher
         return container.getOcclusionHash(face);
     }
     
-    private Collection<RawQuad> getFormattedQuads(ModelState modelState, boolean isItem)
+    private Collection<RawQuad> getFormattedQuads(ISuperModelState modelState, boolean isItem)
     {
         ArrayList<RawQuad> result = new ArrayList<RawQuad>();
          
@@ -255,7 +256,7 @@ public class SuperDispatcher
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
     {
-        ModelState key = stack.getItem() instanceof CraftingItem
+        ISuperModelState key = stack.getItem() instanceof CraftingItem
                 ? ((CraftingItem)stack.getItem()).modelState
                 : PlacementItem.getStackModelState(stack);
         return itemCache.get(key);
@@ -322,7 +323,7 @@ public class SuperDispatcher
         {
             if(state == null) return QuadHelper.EMPTY_QUAD_LIST;
     
-            ModelState modelState = ((IExtendedBlockState)state).getValue(SuperBlock.MODEL_STATE);
+            ISuperModelState modelState = ((IExtendedBlockState)state).getValue(ISuperBlock.MODEL_STATE);
             
             BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
             

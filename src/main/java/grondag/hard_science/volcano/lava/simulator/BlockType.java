@@ -1,7 +1,7 @@
 package grondag.hard_science.volcano.lava.simulator;
 
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.superblock.terrain.TerrainBlock;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
 import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -74,7 +74,7 @@ public enum BlockType
         if(state.getMaterial().isReplaceable()) return BlockType.SPACE;
         
         Block block = state.getBlock();
-        int height = TerrainBlock.getFlowHeightFromState(state);
+        int height = TerrainBlockHelper.getFlowHeightFromState(state);
         if(height == 0)
         {
             return LavaTerrainHelper.canLavaDisplace(state) ? BlockType.SPACE : BlockType.BARRIER;

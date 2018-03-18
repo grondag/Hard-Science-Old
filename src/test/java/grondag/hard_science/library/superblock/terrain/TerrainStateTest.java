@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import grondag.exotic_matter.world.HorizontalCorner;
 import grondag.exotic_matter.world.HorizontalFace;
-import grondag.hard_science.superblock.terrain.TerrainState;
+import grondag.hard_science.movetogether.TerrainState;
 
 public class TerrainStateTest
 {

@@ -15,22 +15,22 @@ import grondag.hard_science.machines.impl.processing.DigesterBlock;
 import grondag.hard_science.machines.impl.processing.MicronizerBlock;
 import grondag.hard_science.machines.impl.production.PhotoElectricBlock;
 import grondag.hard_science.machines.impl.production.SolarCableBlock;
-import grondag.hard_science.moving.ModShapes;
-import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.movetogether.BlockColorMapProvider;
+import grondag.hard_science.movetogether.Chroma;
+import grondag.hard_science.movetogether.Hue;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ITexturePalette;
+import grondag.hard_science.movetogether.Luminance;
+import grondag.hard_science.movetogether.ModShapes;
+import grondag.hard_science.movetogether.TerrainBlockRegistry;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
-import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.color.Chroma;
-import grondag.hard_science.superblock.color.Hue;
-import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.terrain.DepletedFluidBlock;
-import grondag.hard_science.superblock.terrain.TerrainBlockRegistry;
 import grondag.hard_science.superblock.terrain.TerrainCubicBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
 import grondag.hard_science.superblock.terrain.TerrainStaticBlock;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.volcano.VolcanoBlock;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.volcano.lava.LavaBlock;
@@ -79,7 +79,7 @@ public class ModBlocks
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
-        ModelState workingModel;
+        ISuperModelState workingModel;
         
         workingModel = new ModelState();
         
@@ -87,7 +87,7 @@ public class ModBlocks
         workingModel.setShape(ModShapes.CUBE);
         workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
         workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
-        event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", BlockSubstance.BASALT, workingModel));
+        event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", ModSubstances.BASALT, workingModel));
 
         if(Configurator.VOLCANO.enableVolcano)
         {
@@ -101,8 +101,8 @@ public class ModBlocks
             workingModel.setTexture(PaintLayer.CUT, Textures.BIGTEX_BASALT_CUT);
             workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.COLOR_BASALT);
             
-            Block dynamicBasaltHeight = new TerrainDynamicBlock("basalt_cool_dynamic_height", BlockSubstance.BASALT, workingModel.clone(), false);
-            Block staticBasaltHeight = new TerrainStaticBlock("basalt_cool_static_height", BlockSubstance.BASALT, workingModel.clone(), false);
+            Block dynamicBasaltHeight = new TerrainDynamicBlock("basalt_cool_dynamic_height", ModSubstances.BASALT, workingModel.clone(), false);
+            Block staticBasaltHeight = new TerrainStaticBlock("basalt_cool_static_height", ModSubstances.BASALT, workingModel.clone(), false);
     
             event.getRegistry().register(dynamicBasaltHeight);
             event.getRegistry().register(staticBasaltHeight);
@@ -110,8 +110,8 @@ public class ModBlocks
             workingModel = workingModel.clone();
             workingModel.setShape(ModShapes.TERRAIN_FILLER);
     
-            Block dynamicBasaltFiller = new TerrainDynamicBlock("basalt_cool_dynamic_filler", BlockSubstance.BASALT, workingModel.clone(), true);
-            Block staticBasaltFiller = new TerrainStaticBlock("basalt_cool_static_filler", BlockSubstance.BASALT, workingModel.clone(), true);
+            Block dynamicBasaltFiller = new TerrainDynamicBlock("basalt_cool_dynamic_filler", ModSubstances.BASALT, workingModel.clone(), true);
+            Block staticBasaltFiller = new TerrainStaticBlock("basalt_cool_static_filler", ModSubstances.BASALT, workingModel.clone(), true);
     
             event.getRegistry().register(dynamicBasaltFiller);
             event.getRegistry().register(staticBasaltFiller);
@@ -126,7 +126,7 @@ public class ModBlocks
             workingModel.setShape(ModShapes.CUBE);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_CUT_ZOOM);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
-            Block cubicBasalt  = new TerrainCubicBlock("basalt_cut", BlockSubstance.BASALT, workingModel.clone());
+            Block cubicBasalt  = new TerrainCubicBlock("basalt_cut", ModSubstances.BASALT, workingModel.clone());
             event.getRegistry().register(cubicBasalt);
             
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerCubic(dynamicBasaltHeight, cubicBasalt);
@@ -144,11 +144,11 @@ public class ModBlocks
             workingModel.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VERMILLION, Chroma.ULTRA_ACCENT, Luminance.MEDIUM_DARK));
             workingModel.setFullBrightness(PaintLayer.MIDDLE, false);
             
-            Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", BlockSubstance.VOLCANIC_LAVA, workingModel, false);
+            Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", ModSubstances.VOLCANIC_LAVA, workingModel, false);
             
             workingModel = workingModel.clone();
             workingModel.setShape(ModShapes.TERRAIN_FILLER);
-            Block dynamicLavaFiller = new LavaBlock("lava_dynamic_filler", BlockSubstance.VOLCANIC_LAVA, workingModel, true);
+            Block dynamicLavaFiller = new LavaBlock("lava_dynamic_filler", ModSubstances.VOLCANIC_LAVA, workingModel, true);
     
             event.getRegistry().register(dynamicLavaHeight);
             event.getRegistry().register(dynamicLavaFiller);
@@ -210,9 +210,9 @@ public class ModBlocks
         event.getRegistry().register(new DigesterBlock("digester"));
     }
     
-    private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
+    private static Block makeCoolingBasalt(String name, ITexturePalette tex, boolean  isFiller) 
     {
-        ModelState model = new ModelState();
+        ISuperModelState model = new ModelState();
         model.setShape(isFiller ? ModShapes.TERRAIN_FILLER : ModShapes.TERRAIN_HEIGHT);
         model.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
         model.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.TORCH, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
@@ -221,7 +221,7 @@ public class ModBlocks
         model.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         model.setMiddleLayerEnabled(true);
         
-        return new CoolingBasaltBlock(name, BlockSubstance.BASALT, model, isFiller).setAllowSilkHarvest(false);
+        return new CoolingBasaltBlock(name, ModSubstances.BASALT, model, isFiller).setAllowSilkHarvest(false);
     }
     
     public static void init(FMLInitializationEvent event) 
@@ -229,21 +229,21 @@ public class ModBlocks
         if(Configurator.VOLCANO.enableVolcano)
         {
             // these have to be in init so that object holders are populated
-            ((SuperBlock)ModBlocks.basalt_cut).setDropItem(ModItems.basalt_cobble);
+            ((ISuperBlock)ModBlocks.basalt_cut).setDropItem(ModItems.basalt_cobble);
     
-            ((SuperBlock)ModBlocks.basalt_cool_dynamic_height).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_cool_dynamic_filler).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_cool_static_height).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_cool_static_filler).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_cool_dynamic_height).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_cool_dynamic_filler).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_cool_static_height).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_cool_static_filler).setDropItem(ModItems.basalt_rubble);
             
-            ((SuperBlock)ModBlocks.basalt_dynamic_cooling_height).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_dynamic_cooling_filler).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_dynamic_warm_height).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_dynamic_warm_filler).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_dynamic_hot_height).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_dynamic_hot_filler).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_dynamic_very_hot_height).setDropItem(ModItems.basalt_rubble);
-            ((SuperBlock)ModBlocks.basalt_dynamic_very_hot_filler).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_cooling_height).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_cooling_filler).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_warm_height).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_warm_filler).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_hot_height).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_hot_filler).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_very_hot_height).setDropItem(ModItems.basalt_rubble);
+            ((ISuperBlock)ModBlocks.basalt_dynamic_very_hot_filler).setDropItem(ModItems.basalt_rubble);
             
             ((CoolingBasaltBlock)ModBlocks.basalt_dynamic_cooling_height).setCoolingBlockInfo((TerrainDynamicBlock) ModBlocks.basalt_cool_dynamic_height, 1);
             ((CoolingBasaltBlock)ModBlocks.basalt_dynamic_cooling_filler).setCoolingBlockInfo((TerrainDynamicBlock) ModBlocks.basalt_cool_dynamic_filler, 1);

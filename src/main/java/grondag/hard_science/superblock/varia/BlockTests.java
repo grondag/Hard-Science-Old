@@ -4,9 +4,9 @@ import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.FarCorner;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.machines.base.IMachineBlock;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -17,12 +17,12 @@ public class BlockTests
     
     public static class SuperBlockBorderMatch extends AbstractNonFaceTest
     {
-        private final SuperBlock block;
-        private final ModelState matchModelState;
+        private final ISuperBlock block;
+        private final ISuperModelState matchModelState;
         private final boolean isSpeciesPartOfMatch;
         
         /** pass in the info for the block you want to match */
-        public SuperBlockBorderMatch(SuperBlock block, ModelState modelState, boolean isSpeciesPartOfMatch)
+        public SuperBlockBorderMatch(ISuperBlock block, ISuperModelState modelState, boolean isSpeciesPartOfMatch)
         {
             this.block = block;
             this.matchModelState = modelState;
@@ -32,7 +32,7 @@ public class BlockTests
         /** assumes you want to match block at given position */
         public SuperBlockBorderMatch(IBlockAccess world, IBlockState ibs, BlockPos pos, boolean isSpeciesPartOfMatch)
         {
-            this.block = ((SuperBlock)ibs.getBlock());
+            this.block = ((ISuperBlock)ibs.getBlock());
             //last param = false prevents recursion - we don't need the full model state (which depends on this logic)
             this.matchModelState = this.block.getModelStateAssumeStateIsCurrent(ibs, world, pos, false);
             this.isSpeciesPartOfMatch = isSpeciesPartOfMatch;
@@ -42,7 +42,7 @@ public class BlockTests
         public boolean wantsModelState() { return true; }
         
         @Override
-        protected boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState)
+        protected boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ISuperModelState modelState)
         {
             return ibs.getBlock() == this.block 
                     && this.matchModelState.doShapeAndAppearanceMatch(modelState)
@@ -59,12 +59,12 @@ public class BlockTests
     /** returns true if NO border should be displayed */
     public static class SuperBlockMasonryMatch extends AbstractNonFaceTest
     {
-        private final SuperBlock block;
+        private final ISuperBlock block;
         private final int matchSpecies;
         private final BlockPos origin;
         
         /** pass in the info for the block you want to match */
-        public SuperBlockMasonryMatch(SuperBlock block, int matchSpecies, BlockPos pos)
+        public SuperBlockMasonryMatch(ISuperBlock block, int matchSpecies, BlockPos pos)
         {
             this.block = block;
             //last param = false prevents recursion - we don't need the full model state (which depends on this logic)
@@ -82,7 +82,7 @@ public class BlockTests
         }
         
         @Override
-        protected boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState)
+        protected boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ISuperModelState modelState)
         {
             // for masonry blocks, a join indicates that a border IS present
             
@@ -91,7 +91,7 @@ public class BlockTests
                    && matchSpecies == modelState.getSpecies();
             
             // display mortar when against solid superblocks, even if not masonry
-            boolean isSolid = ibs.isOpaqueCube() && ibs.getBlock() instanceof SuperBlock;
+            boolean isSolid = ibs.isOpaqueCube() && ibs.getBlock() instanceof ISuperBlock;
             
             // no mortar between mates or non-solid superblocks
             if(isMate || !isSolid) return false;
@@ -107,7 +107,7 @@ public class BlockTests
         }
     }
     
-    public static class SuperBlockCableMatch implements IBlockTest<ModelState>
+    public static class SuperBlockCableMatch implements IBlockTest<ISuperModelState>
     {
         private final IPortLayout portLayout;
         private final int channel;
@@ -126,7 +126,7 @@ public class BlockTests
             {
                 IPortLayout otherLayout = ((IMachineBlock)ibs.getBlock())
                         .portLayout(world, pos, ibs);
-                int otherChannel = ibs.getValue(SuperBlock.META);
+                int otherChannel = ibs.getValue(ISuperBlock.META);
                 
                 return this.portLayout.couldConnect(face, this.channel, otherLayout, otherChannel);
             }

@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import grondag.hard_science.HardScience;
@@ -19,11 +20,12 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.terrain.TerrainBlock;
 import grondag.hard_science.superblock.terrain.TerrainStaticBlock;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
+import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -347,15 +349,24 @@ public class WorldStateBuffer implements IBlockAccess
         return ((y & 0xFF) << 8) | ((x & 0xF) << 4) | (z & 0xF);
     }
     
+    private static final Predicate<IBlockState> ADJUSTMENT_PREDICATE = new Predicate<IBlockState>()
+    {
+        @Override
+        public boolean test(IBlockState t)
+        {
+            return LavaTerrainHelper.canLavaDisplace(t);
+        }
+    };
+        
     /** returns true an update occured */
     private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
     {
         IBlockState baseState = realWorld.getBlockState(pos);
         if(baseState.getBlock() == ModBlocks.basalt_cut)
         {
-            if( !TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
+            if( !TerrainBlockHelper.shouldBeFullCube(baseState, realWorld, pos))
             {
-                realWorld.setBlockState(pos, ModBlocks.basalt_cool_dynamic_height.getDefaultState().withProperty(SuperBlock.META, baseState.getValue(SuperBlock.META)));
+                realWorld.setBlockState(pos, ModBlocks.basalt_cool_dynamic_height.getDefaultState().withProperty(ISuperBlock.META, baseState.getValue(ISuperBlock.META)));
                 return true;
             }
             else
@@ -365,9 +376,9 @@ public class WorldStateBuffer implements IBlockAccess
         }
         else if(baseState.getBlock() == ModBlocks.basalt_cool_dynamic_height)
         {
-            if(TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
+            if(TerrainBlockHelper.shouldBeFullCube(baseState, realWorld, pos))
             {
-                realWorld.setBlockState(pos, ModBlocks.basalt_cut.getDefaultState().withProperty(SuperBlock.META, baseState.getValue(SuperBlock.META)));
+                realWorld.setBlockState(pos, ModBlocks.basalt_cut.getDefaultState().withProperty(ISuperBlock.META, baseState.getValue(ISuperBlock.META)));
                 return true;
             }
             else
@@ -376,8 +387,7 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        
-        IBlockState newState = TerrainBlock.adjustFillIfNeeded(realWorld, pos);
+        IBlockState newState = TerrainBlockHelper.adjustFillIfNeeded(realWorld, pos, ADJUSTMENT_PREDICATE);
         
         if(newState == null)
         {
@@ -416,11 +426,11 @@ public class WorldStateBuffer implements IBlockAccess
             {
                 // treat transition between small block and air as low priority for world update
                 // helps prevent large number of world block updates due to vertical instability
-                int newHeight = TerrainBlock.getFlowHeightFromState(newState);
+                int newHeight = TerrainBlockHelper.getFlowHeightFromState(newState);
                 return newHeight > 2;
             }
             
-            int oldHeight = TerrainBlock.getFlowHeightFromState(expectedPriorState);
+            int oldHeight = TerrainBlockHelper.getFlowHeightFromState(expectedPriorState);
             if(oldHeight > 0)
             {
                 if(newState.getMaterial() == Material.AIR)
@@ -434,7 +444,7 @@ public class WorldStateBuffer implements IBlockAccess
                     //if old and new are same flow blocks, defer small height changes
                     if(newState.getBlock() == expectedPriorState.getBlock())
                     {
-                        int newHeight = TerrainBlock.getFlowHeightFromState(newState);
+                        int newHeight = TerrainBlockHelper.getFlowHeightFromState(newState);
                         return Math.abs(oldHeight - newHeight) > 2;
                     }
                     else
@@ -711,13 +721,13 @@ public class WorldStateBuffer implements IBlockAccess
                             int x = chunkStartX +  ((i >> 4) & 0xF);
                             int z = chunkStartZ + (i & 0xF);
                             
-                            if(TerrainBlock.isFlowHeight(bsb.newState.getBlock()))
+                            if(TerrainBlockHelper.isFlowHeight(bsb.newState.getBlock()))
                             {
                                 tracker.setAdjustmentNeededAround(x, y, z);
                                 // set to height block so no need to look for filler
                                 tracker.excludeAdjustmentNeededAt(x, y, z);
                             }
-                            else if(TerrainBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
+                            else if(TerrainBlockHelper.isFlowHeight(bsb.expectedPriorState.getBlock()))
                             {
                                 // difference here is simply that we allow fillers in the block being set
                                 tracker.setAdjustmentNeededAround(x, y, z);

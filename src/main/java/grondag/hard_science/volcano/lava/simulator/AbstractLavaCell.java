@@ -3,7 +3,7 @@ package grondag.hard_science.volcano.lava.simulator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.terrain.TerrainState;
+import grondag.hard_science.movetogether.TerrainState;
 
 public abstract class AbstractLavaCell
 {

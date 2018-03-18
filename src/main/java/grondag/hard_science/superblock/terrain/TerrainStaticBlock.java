@@ -4,12 +4,15 @@ import java.util.List;
 
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.moving.ModShapes;
-import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ModShapes;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
+import grondag.hard_science.movetogether.TerrainBlockRegistry;
+import grondag.hard_science.movetogether.TerrainState;
 import grondag.hard_science.superblock.block.SuperStaticBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -27,14 +30,14 @@ public class TerrainStaticBlock extends SuperStaticBlock
 {
     private final boolean isFiller;
     
-    public TerrainStaticBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
+    public TerrainStaticBlock(String blockName, BlockSubstance substance, ISuperModelState defaultModelState, boolean isFiller)
     {
         super(blockName, substance, defaultModelState);
         this.isFiller = isFiller;
         this.metaCount = this.isFiller ? 2 : TerrainState.BLOCK_LEVELS_INT;
         
         // make sure proper shape is set
-        ModelState modelState = defaultModelState.clone();
+        ISuperModelState modelState = defaultModelState.clone();
         modelState.setShape(this.isFiller ? ModShapes.TERRAIN_FILLER : ModShapes.TERRAIN_HEIGHT);
         this.defaultModelStateBits = modelState.serializeToInts();
     }
@@ -47,7 +50,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
     @Override
     public boolean isAssociatedBlock(Block other)
     {
-        return other == TerrainBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
+        return other == TerrainBlockHelper.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
     }
 
     public boolean isFlowFiller()
@@ -66,10 +69,10 @@ public class TerrainStaticBlock extends SuperStaticBlock
     {
         //see Config.render().enableFaceCullingOnFlowBlocks for explanation
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
-        if(ConfigXM.RENDER.enableFaceCullingOnFlowBlocks && TerrainBlock.isFlowBlock(neighborState.getBlock()))
+        if(ConfigXM.RENDER.enableFaceCullingOnFlowBlocks && TerrainBlockHelper.isFlowBlock(neighborState.getBlock()))
         {
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
-            int otherOcclusionKey = ((SuperBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
+            int otherOcclusionKey = ((ISuperBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
             return myOcclusionKey != otherOcclusionKey;
         }
         else
@@ -86,7 +89,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
         for(ItemStack stack : items)
         {
             int meta = stack.getMetadata();
-            ModelState modelState = PlacementItem.getStackModelState(stack);
+            ISuperModelState modelState = PlacementItem.getStackModelState(stack);
             int level = this.isFiller ? TerrainState.BLOCK_LEVELS_INT - 1 : TerrainState.BLOCK_LEVELS_INT - meta;
             int [] quadrants = new int[] {level, level, level, level};
             TerrainState flowState = new TerrainState(level, quadrants, quadrants, 0);
@@ -100,7 +103,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {
         double volume = 0;
-        ModelState modelState = this.getModelStateAssumeStateIsStale(state, world, pos, true);
+        ISuperModelState modelState = this.getModelStateAssumeStateIsStale(state, world, pos, true);
         for(AxisAlignedBB box : modelState.getShape().meshFactory().collisionHandler().getCollisionBoxes(modelState))
         {
             volume += Useful.volumeAABB(box);
@@ -112,13 +115,13 @@ public class TerrainStaticBlock extends SuperStaticBlock
     @Override
     public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
     {
-        return TerrainBlock.isEmpty(worldIn.getBlockState(pos), worldIn, pos);
+        return TerrainBlockHelper.isEmpty(worldIn.getBlockState(pos), worldIn, pos);
     }
 
     @Override
     public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return TerrainBlock.isEmpty(state, world, pos);
+        return TerrainBlockHelper.isEmpty(state, world, pos);
     }
     
     /**
@@ -127,7 +130,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
-        TerrainBlock.freezeNeighbors(world, pos, state);
+        TerrainDynamicBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
     
@@ -138,7 +141,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-        TerrainBlock.freezeNeighbors(worldIn, pos, state);
+        TerrainDynamicBlock.freezeNeighbors(worldIn, pos, state);
     }
 
     /**
@@ -150,7 +153,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
         if(dynamicVersion == null || state.getBlock() != this) return;
 
         world.setBlockState(pos, dynamicVersion.getDefaultState()
-                .withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), 3);
+                .withProperty(ISuperBlock.META, state.getValue(ISuperBlock.META)), 3);
     }
     
     // setting to false drops AO light value
@@ -172,7 +175,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return TerrainBlock.shouldBeFullCube(state, world, pos);
+        return TerrainBlockHelper.shouldBeFullCube(state, world, pos);
     }
     
     public boolean getUseNeighborBrightness(IBlockState state)

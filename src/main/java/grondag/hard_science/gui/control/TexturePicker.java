@@ -6,8 +6,8 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
-import grondag.hard_science.superblock.texture.TextureRotationType;
+import grondag.hard_science.movetogether.ITexturePalette;
+import grondag.hard_science.movetogether.TextureRotationType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -16,20 +16,20 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TexturePicker extends TabBar<TexturePallette>
+public class TexturePicker extends TabBar<ITexturePalette>
 {
     public int borderColor = 0xFFFFFFFF;
     public int baseColor = 0;
     public boolean renderAlpha = true;
     
-    public TexturePicker(List<TexturePallette> items, double left, double top)
+    public TexturePicker(List<ITexturePalette> items, double left, double top)
     {
         super(items);
         this.setItemsPerRow(8);
     }
 
     @Override
-    protected void drawItem(TexturePallette item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
+    protected void drawItem(ITexturePalette item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
 
         int size = this.actualItemPixels();
@@ -37,12 +37,12 @@ public class TexturePicker extends TabBar<TexturePallette>
         // if texture is translucent provide a background
         if(this.renderAlpha) GuiUtil.drawRect(left, top, left + size, top + size, this.baseColor);
 
-        Rotation rotation = item.rotation.rotationType() == TextureRotationType.RANDOM 
+        Rotation rotation = item.rotation().rotationType() == TextureRotationType.RANDOM 
                 ? Rotation.values()[(int) ((WorldInfo.currentTimeMillis() >> 11) & 3)]
-                : item.rotation.rotation;
+                : item.rotation().rotation;
                 
         TextureAtlasSprite tex = mc.getTextureMapBlocks().getAtlasSprite(item.getSampleTextureName());
-        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, size, size, this.borderColor, item.textureScale, rotation, renderAlpha);
+        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, size, size, this.borderColor, item.textureScale(), rotation, renderAlpha);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class TexturePicker extends TabBar<TexturePallette>
     }
 
     @Override
-    protected void drawToolTip(TexturePallette item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    protected void drawToolTip(ITexturePalette item, IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         renderContext.drawToolTip(item.localizedName(), mouseX, mouseY);
     }

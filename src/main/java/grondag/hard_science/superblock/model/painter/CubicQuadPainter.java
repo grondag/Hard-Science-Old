@@ -4,8 +4,8 @@ import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.texture.TextureScale;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.TextureScale;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
@@ -48,7 +48,7 @@ public abstract class CubicQuadPainter extends QuadPainter
     
     protected final Vec3i pos;
 
-    protected CubicQuadPainter(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    protected CubicQuadPainter(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         super(modelState, surface, paintLayer);
         
@@ -59,7 +59,7 @@ public abstract class CubicQuadPainter extends QuadPainter
         int z  = modelState.getPosZ();
         this.pos = new Vec3i(x, y, z);
         
-        int shift = this.texture.textureScale.power;
+        int shift = this.texture.textureScale().power;
         
         int speciesBits = species << 16;
         
@@ -75,21 +75,21 @@ public abstract class CubicQuadPainter extends QuadPainter
     
     protected int textureVersionForFace(EnumFacing face)
     {
-        if(this.texture.textureVersionCount == 0) return 0;
+        if(this.texture.textureVersionCount() == 0) return 0;
         
         switch(face)
         {
         case DOWN:
         case UP:
-            return this.variationHashY & this.texture.textureVersionMask;
+            return this.variationHashY & this.texture.textureVersionMask();
 
         case EAST:
         case WEST:
-            return this.variationHashX & this.texture.textureVersionMask;
+            return this.variationHashX & this.texture.textureVersionMask();
 
         case NORTH:
         case SOUTH:
-            return this.variationHashZ & this.texture.textureVersionMask;
+            return this.variationHashZ & this.texture.textureVersionMask();
             
         default:
             return 0;
@@ -105,34 +105,34 @@ public abstract class CubicQuadPainter extends QuadPainter
      */
     protected Rotation textureRotationForFace(EnumFacing face)
     {
-        switch(this.texture.rotation.rotationType())
+        switch(this.texture.rotation().rotationType())
         {
         case CONSISTENT:
             return this.species == 0 
-                ? this.texture.rotation.rotation
-                : Useful.offsetEnumValue(this.texture.rotation.rotation, MathHelper.hash(this.species) & 3);
+                ? this.texture.rotation().rotation
+                : Useful.offsetEnumValue(this.texture.rotation().rotation, MathHelper.hash(this.species) & 3);
             
         case FIXED:
         default:
-            return this.texture.rotation.rotation;
+            return this.texture.rotation().rotation;
             
         case RANDOM:
             switch(face)
             {
             case DOWN:
             case UP:
-                return Useful.offsetEnumValue(this.texture.rotation.rotation, (this.variationHashY >> 8) & 3);
+                return Useful.offsetEnumValue(this.texture.rotation().rotation, (this.variationHashY >> 8) & 3);
 
             case EAST:
             case WEST:
-                return Useful.offsetEnumValue(this.texture.rotation.rotation, (this.variationHashX >> 8) & 3);
+                return Useful.offsetEnumValue(this.texture.rotation().rotation, (this.variationHashX >> 8) & 3);
 
             case NORTH:
             case SOUTH:
-                return Useful.offsetEnumValue(this.texture.rotation.rotation, (this.variationHashZ >> 8) & 3);
+                return Useful.offsetEnumValue(this.texture.rotation().rotation, (this.variationHashZ >> 8) & 3);
                 
             default:
-                return this.texture.rotation.rotation;
+                return this.texture.rotation().rotation;
             
             }
         }

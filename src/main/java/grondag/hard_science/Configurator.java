@@ -2,6 +2,7 @@ package grondag.hard_science;
 
 import java.util.IdentityHashMap;
 
+import grondag.exotic_matter.init.SubstanceConfig;
 import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
@@ -47,66 +48,29 @@ public class Configurator
 
     public static class Substances
     {
-        public Substance flexstone = new Substance(2, "pickaxe", 1, 10, 1.0);
+        public SubstanceConfig flexstone = new SubstanceConfig(2, "pickaxe", 1, 10, 1.0);
 
-        public Substance durastone = new Substance(4, "pickaxe", 2, 50, 1.15);
+        public SubstanceConfig durastone = new SubstanceConfig(4, "pickaxe", 2, 50, 1.15);
 
-        public Substance hyperstone = new Substance(10, "pickaxe", 3, 200, 1.3);
+        public SubstanceConfig hyperstone = new SubstanceConfig(10, "pickaxe", 3, 200, 1.3);
 
-        public Substance flexiglass = new Substance(2, "pickaxe", 1, 10, 1.0);
+        public SubstanceConfig flexiglass = new SubstanceConfig(2, "pickaxe", 1, 10, 1.0);
 
-        public Substance duraglass = new Substance(4, "pickaxe", 2, 50, 1.15);
+        public SubstanceConfig duraglass = new SubstanceConfig(4, "pickaxe", 2, 50, 1.15);
 
-        public Substance hyperglass = new Substance(10, "pickaxe", 3, 200, 1.3);
+        public SubstanceConfig hyperglass = new SubstanceConfig(10, "pickaxe", 3, 200, 1.3);
 
-        public Substance flexwood = new Substance(2, "axe", 1, 10, 1.0);
+        public SubstanceConfig flexwood = new SubstanceConfig(2, "axe", 1, 10, 1.0);
 
-        public Substance durawood = new Substance(4, "axe", 2, 50, 1.15);
+        public SubstanceConfig durawood = new SubstanceConfig(4, "axe", 2, 50, 1.15);
 
-        public Substance hyperwood = new Substance(10, "axe", 3, 200, 1.3);
+        public SubstanceConfig hyperwood = new SubstanceConfig(10, "axe", 3, 200, 1.3);
 
-        public Substance basalt = new Substance(2, "pickaxe", 1, 10, 1.0);
+        public SubstanceConfig basalt = new SubstanceConfig(2, "pickaxe", 1, 10, 1.0);
 
-        public Substance hdpe = new Substance(2, "axe", 1, 10, 1.0);
+        public SubstanceConfig hdpe = new SubstanceConfig(2, "axe", 1, 10, 1.0);
 
-        public Substance volcanicLava = new Substance(-1, "shovel", 3, 2000, 0.75);
-
-
-        public static class Substance
-        {
-            @RequiresMcRestart
-            @Comment("Material hardness. 2 is typical for things like rock, wood. Anything above 10 is extreme. -1 is unbreakable")
-            @RangeInt(min = -1, max = 2000)
-            public int hardness;
-
-            @RequiresMcRestart
-            @Comment("Tool used to break block. Normal values are pickaxe, shovel and axe")
-            public String harvestTool;
-
-            @RequiresMcRestart
-            @Comment("Level of tool needed to break block. Range 1-3 is normal for vanilla.")
-            @RangeInt(min = 0, max = 10)
-            public int harvestLevel;
-
-            @RequiresMcRestart
-            @Comment("Material explosion resistance")
-            @RangeInt(min = 1, max = 2000)
-            public int resistance;
-
-            @RequiresMcRestart
-            @Comment("Material speed modifier for entities walking on its surface.")
-            @RangeDouble(min = 0.25, max = 2.0)
-            public double walkSpeedFactor;
-
-            public Substance(int hardness, String harvestTool, int harvestLevel, int resistance, double walkSpeedFactor)
-            {
-                this.hardness = hardness;
-                this.harvestTool = harvestTool;
-                this.harvestLevel = harvestLevel;
-                this.resistance = resistance;
-                this.walkSpeedFactor = walkSpeedFactor;
-            }
-        }
+        public SubstanceConfig volcanicLava = new SubstanceConfig(-1, "shovel", 3, 2000, 0.75);
     }    
 
     ////////////////////////////////////////////////////        

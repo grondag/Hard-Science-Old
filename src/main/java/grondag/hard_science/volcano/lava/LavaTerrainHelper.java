@@ -10,7 +10,7 @@ import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.superblock.terrain.TerrainBlock;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -124,7 +124,7 @@ public class LavaTerrainHelper
                 || block == ModBlocks.basalt_cool_dynamic_height
                 || block == ModBlocks.basalt_cool_static_height
                 || block == ModBlocks.basalt_cut
-                || (block instanceof CoolingBasaltBlock && TerrainBlock.isFlowHeight(block))
+                || (block instanceof CoolingBasaltBlock && TerrainBlockHelper.isFlowHeight(block))
                 || LavaTerrainHelper.canLavaDisplace(state);
     }
 
@@ -220,9 +220,9 @@ public class LavaTerrainHelper
     {
         Block block = state.getBlock();
 
-        if (TerrainBlock.isFlowFiller(block)) return true;
+        if (TerrainBlockHelper.isFlowFiller(block)) return true;
 
-        if (TerrainBlock.isFlowHeight(block)) return false;
+        if (TerrainBlockHelper.isFlowHeight(block)) return false;
         
         if(block == Blocks.AIR) return true;
 

@@ -5,9 +5,9 @@ import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.texture.TextureRotationType;
-import grondag.hard_science.superblock.texture.TextureScale;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.TextureRotationType;
+import grondag.hard_science.movetogether.TextureScale;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
@@ -16,11 +16,11 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
 {
     private final boolean allowTexRotation;
     
-    public CubicQuadPainterBigTex(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    public CubicQuadPainterBigTex(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         super(modelState, surface, paintLayer);
         
-        this.allowTexRotation = this.texture.rotation.rotationType() != TextureRotationType.FIXED;
+        this.allowTexRotation = this.texture.rotation().rotationType() != TextureRotationType.FIXED;
     }
 
     @Override
@@ -42,11 +42,12 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
      
         if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("BigTex cubic quad painter received quad without lockUV semantics.  Not expected");
 
-        Vec3i surfaceVec = CubicQuadPainterBigTex.getSurfaceVector(this.pos, quad.getNominalFace(), this.texture.textureScale);
+        Vec3i surfaceVec = CubicQuadPainterBigTex.getSurfaceVector(this.pos, quad.getNominalFace(), this.texture.textureScale());
         
                 
+        TextureScale scale = this.texture.textureScale();
         
-        if(this.texture.textureVersionCount == 1)
+        if(this.texture.textureVersionCount() == 1)
         {
             // no alternates, so do uv flip and offset and rotation based on depth & species only
             
@@ -58,27 +59,28 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             
             // rotation 
             quad.rotation = this.allowTexRotation
-                    ? Useful.offsetEnumValue(texture.rotation.rotation, depthAndSpeciesHash & 3)
-                    : texture.rotation.rotation;
+                    ? Useful.offsetEnumValue(texture.rotation().rotation, depthAndSpeciesHash & 3)
+                    : texture.rotation().rotation;
                     
-            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
+            
+            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, scale);
 
             quad.textureName = this.texture.getTextureName(0);
             
-            int xOffset = (depthAndSpeciesHash >> 2) & this.texture.textureScale.sliceCountMask; 
-            int yOffset = (depthAndSpeciesHash >> 8) & this.texture.textureScale.sliceCountMask; 
+            int xOffset = (depthAndSpeciesHash >> 2) & scale.sliceCountMask; 
+            int yOffset = (depthAndSpeciesHash >> 8) & scale.sliceCountMask; 
             
-            int newX = (surfaceVec.getX() + xOffset) & this.texture.textureScale.sliceCountMask;
-            int newY = (surfaceVec.getY() + yOffset) & this.texture.textureScale.sliceCountMask;
+            int newX = (surfaceVec.getX() + xOffset) & scale.sliceCountMask;
+            int newY = (surfaceVec.getY() + yOffset) & scale.sliceCountMask;
             surfaceVec = new Vec3i(newX, newY, surfaceVec.getZ());
             
             boolean flipU = this.allowTexRotation && (depthAndSpeciesHash & 256) == 0;
             boolean flipV = this.allowTexRotation && (depthAndSpeciesHash & 512) == 0;
 
-            float sliceIncrement = this.texture.textureScale.sliceIncrement;
+            float sliceIncrement = scale.sliceIncrement;
             
-            int x = flipU ? this.texture.textureScale.sliceCount - surfaceVec.getX() : surfaceVec.getX();
-            int y = flipV ? this.texture.textureScale.sliceCount - surfaceVec.getY() : surfaceVec.getY();
+            int x = flipU ? scale.sliceCount - surfaceVec.getX() : surfaceVec.getX();
+            int y = flipV ? scale.sliceCount - surfaceVec.getY() : surfaceVec.getY();
             
             quad.minU = x * sliceIncrement;
             quad.maxU = quad.minU + (flipU ? -sliceIncrement : sliceIncrement);
@@ -98,15 +100,15 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
                     ? 0 
                     : MathHelper.hash(Math.abs(surfaceVec.getZ()) | (quad.surfaceInstance.textureSalt << 8));
 
-            quad.textureName = this.texture.getTextureName((this.textureVersionForFace(quad.getNominalFace()) + depthHash) & this.texture.textureVersionMask);
+            quad.textureName = this.texture.getTextureName((this.textureVersionForFace(quad.getNominalFace()) + depthHash) & this.texture.textureVersionMask());
             
             quad.rotation = this.allowTexRotation
                     ? Useful.offsetEnumValue(this.textureRotationForFace(quad.getNominalFace()), (depthHash >> 16) & 3)
                     : this.textureRotationForFace(quad.getNominalFace());
                     
-            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
+            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, scale);
 
-            float sliceIncrement = this.texture.textureScale.sliceIncrement;
+            float sliceIncrement = scale.sliceIncrement;
             
             quad.minU = surfaceVec.getX() * sliceIncrement;
             quad.maxU = quad.minU + sliceIncrement;

@@ -3,9 +3,9 @@ package grondag.hard_science.simulator.transport.endpoint;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModRegistries;
-import grondag.hard_science.moving.Transform;
-import grondag.hard_science.moving.Transform.FaceMap;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.Transform;
+import grondag.hard_science.movetogether.Transform.FaceMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -24,7 +24,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  * to derive actual channel and facing of the ports. When serialized, the transformed
  * wrapper retains both the underlying layout and this transformation.<p>
  * 
- * See {@link Transform#getFaceMap(ModelState)} for more 
+ * See {@link Transform#getFaceMap(ISuperModelState)} for more 
  * information on model/block orientation.<p>
  * 
  * Block Device implementations should serialize port layout 
@@ -64,7 +64,7 @@ public class PortLayout extends IForgeRegistryEntry.Impl<PortLayout> implements 
         return this.faces[face.ordinal()];
     }
     
-    public IPortLayout localize(ModelState modelState)
+    public IPortLayout localize(ISuperModelState modelState)
     {
         return this.localize(Transform.computeTransformKey(modelState));
     }

@@ -12,8 +12,6 @@ import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.ModelStateData;
 import grondag.hard_science.superblock.varia.BlockTests;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.exotic_matter.world.BlockCorner;
@@ -21,6 +19,9 @@ import grondag.exotic_matter.world.NeighborBlocks;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ModelStateData;
 import grondag.hard_science.moving.WorldHelperLeftovers;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -62,7 +63,7 @@ public class CubicPlacementHandler extends PlacementHandler
         
         SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
-        ModelState stackModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState stackModelState = PlacementItem.getStackModelState(stack);
 
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
@@ -75,12 +76,12 @@ public class CubicPlacementHandler extends PlacementHandler
             return Collections.emptyList();
         }
 
-        ModelState closestModelState = null;
+        ISuperModelState closestModelState = null;
         if(item.isBlockOrientationMatchClosest(stack))
         {
-            if(onBlock instanceof SuperBlock)
+            if(onBlock instanceof ISuperBlock)
             {
-                closestModelState = ((SuperBlock)onBlock).getModelState(worldIn, posOn, true);
+                closestModelState = ((ISuperBlock)onBlock).getModelState(worldIn, posOn, true);
             }
             else
             {
@@ -96,13 +97,13 @@ public class CubicPlacementHandler extends PlacementHandler
                             {
                                 BlockPos testPos = posOn.add(x, y, z);
                                 IBlockState testBlockState = worldIn.getBlockState(testPos);
-                                if(testBlockState.getBlock() instanceof SuperBlock)
+                                if(testBlockState.getBlock() instanceof ISuperBlock)
                                 {
                                     double distSq = location.squareDistanceTo(posOn.getX() + 0.5 + x, posOn.getY() + 0.5 + y, posOn.getZ() + 0.5 + z);
                                     if(distSq < closestDistSq)
                                     {
-                                        SuperBlock testBlock = (SuperBlock)testBlockState.getBlock();
-                                        ModelState testModelState = testBlock.getModelState(worldIn, testPos, true);
+                                        ISuperBlock testBlock = (ISuperBlock)testBlockState.getBlock();
+                                        ISuperModelState testModelState = testBlock.getModelState(worldIn, testPos, true);
                                         if(testModelState.getShape() == stackModelState.getShape())
                                         {
                                             closestDistSq = distSq;
@@ -209,7 +210,7 @@ public class CubicPlacementHandler extends PlacementHandler
     }
 
     
-    private int getSpecies(EntityPlayer player, World worldIn, BlockPos posOn, IBlockState blockStateOn, Block blockOn, BlockPos posPlaced, SuperBlock myBlock, ModelState myModelState)
+    private int getSpecies(EntityPlayer player, World worldIn, BlockPos posOn, IBlockState blockStateOn, Block blockOn, BlockPos posPlaced, ISuperBlock myBlock, ISuperModelState myModelState)
     {
         // If player is sneaking, force no match to adjacent species.
         // If not sneaking, try to match block on which placed, or failing that, any adjacent block it can match.
@@ -218,8 +219,8 @@ public class CubicPlacementHandler extends PlacementHandler
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;
 
-            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
-            NeighborBlocks<ModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
+            NeighborBlocks<ISuperModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
+            NeighborBlocks<ISuperModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            
             {
@@ -258,14 +259,14 @@ public class CubicPlacementHandler extends PlacementHandler
             // try to match block placed on
             if(blockOn == myBlock)
             {
-                ModelState modelStateOn = ((SuperBlock)blockOn).getModelStateAssumeStateIsCurrent(blockStateOn, worldIn, posOn, true);
+                ISuperModelState modelStateOn = ((ISuperBlock)blockOn).getModelStateAssumeStateIsCurrent(blockStateOn, worldIn, posOn, true);
                 if(myModelState.doShapeAndAppearanceMatch(modelStateOn)) return modelStateOn.getSpecies();
 
             }
             
             // try to match an adjacent block
-            NeighborBlocks<ModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
-            NeighborBlocks<ModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
+            NeighborBlocks<ISuperModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
+            NeighborBlocks<ISuperModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            
             {

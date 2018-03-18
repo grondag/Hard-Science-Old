@@ -4,10 +4,10 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ITexturePalette;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleDigging;
@@ -25,7 +25,7 @@ public class ParticleDiggingSuperBlock extends ParticleDigging
     /** multiply resulting UVs by this factor to limit samples within a 1-box area of larger textures */
     protected float uvScale;
     
-    public ParticleDiggingSuperBlock(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, IBlockState state, ModelState modelState)
+    public ParticleDiggingSuperBlock(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, IBlockState state, ISuperModelState modelState)
     {
         super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, state);
         int color = modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
@@ -33,11 +33,11 @@ public class ParticleDiggingSuperBlock extends ParticleDigging
         this.particleGreen = ((color >> 8) & 0xFF) / 255f;
         this.particleBlue = (color & 0xFF) / 255f;
         
-        SuperBlock block = (SuperBlock)state.getBlock();
+        ISuperBlock block = (ISuperBlock)state.getBlock();
         this.particleAlpha = block.isTranslucent(state) ? modelState.getTranslucency().alpha : 1f;
-        TexturePallette tex = modelState.getTexture(PaintLayer.BASE);
+        ITexturePalette tex = modelState.getTexture(PaintLayer.BASE);
         this.particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(tex.getSampleTextureName());
-        this.uvScale = 1f / tex.textureScale.sliceCount;
+        this.uvScale = 1f / tex.textureScale().sliceCount;
     }
 
     protected void multiplyColor(@Nullable BlockPos p_187154_1_)

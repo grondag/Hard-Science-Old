@@ -1,9 +1,9 @@
 package grondag.hard_science.volcano.lava;
 
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.volcano.lava.simulator.LavaCell;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import mcjty.theoneprobe.api.IProbeHitData;
@@ -26,7 +26,7 @@ import net.minecraftforge.fml.common.Optional;
 public class LavaBlock extends TerrainDynamicBlock
 {
 
-    public LavaBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
+    public LavaBlock(String blockName, BlockSubstance substance, ISuperModelState defaultModelState, boolean isFiller)
     {
         super(blockName, substance, defaultModelState, isFiller);
         this.setTickRandomly(true);

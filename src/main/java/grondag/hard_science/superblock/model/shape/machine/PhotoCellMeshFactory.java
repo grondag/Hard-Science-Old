@@ -7,11 +7,11 @@ import com.google.common.collect.ImmutableList;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.ModelStateData;
+import grondag.hard_science.movetogether.ICollisionHandler;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.MachineMeshFactory;
+import grondag.hard_science.movetogether.ModelStateData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -40,7 +40,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<RawQuad> getShapeQuads(ModelState modelState)
+    public List<RawQuad> getShapeQuads(ISuperModelState modelState)
     {
         RawQuad template = new RawQuad();
         template.color = 0xFFFFFFFF;
@@ -75,25 +75,25 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     }
    
     @Override
-    public boolean isCube(ModelState modelState)
+    public boolean isCube(ISuperModelState modelState)
     {
         return false;
     }
 
     @Override
-    public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState)
+    public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, ISuperBlock block, ISuperModelState modelState)
     {
         return false;
     }
 
     @Override
-    public int geometricSkyOcclusion(ModelState modelState)
+    public int geometricSkyOcclusion(ISuperModelState modelState)
     {
         return 255;
     }
 
     @Override
-    public SideShape sideShape(ModelState modelState, EnumFacing side)
+    public SideShape sideShape(ISuperModelState modelState, EnumFacing side)
     {
         return side == EnumFacing.DOWN ? SideShape.SOLID : SideShape.MISSING;
     }
@@ -105,19 +105,19 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     }
 
     @Override
-    public List<AxisAlignedBB> getCollisionBoxes(ModelState modelState)
+    public List<AxisAlignedBB> getCollisionBoxes(ISuperModelState modelState)
     {
         return ImmutableList.of(getCollisionBoundingBox(modelState));
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(ModelState modelState)
+    public AxisAlignedBB getCollisionBoundingBox(ISuperModelState modelState)
     {
         return AABB;
     }
 
     @Override
-    public AxisAlignedBB getRenderBoundingBox(ModelState modelState)
+    public AxisAlignedBB getRenderBoundingBox(ISuperModelState modelState)
     {
         return getCollisionBoundingBox(modelState);
     }

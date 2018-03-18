@@ -4,9 +4,9 @@ import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -55,7 +55,7 @@ public class BlockOrientationHandler
         
         PlacementItem item = (PlacementItem)stack.getItem();
         
-        ModelState modelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState modelState = PlacementItem.getStackModelState(stack);
 
         if(modelState.hasAxis())
         {
@@ -77,15 +77,15 @@ public class BlockOrientationHandler
     private static void applyClosestOrientation(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
         // find closest instance, starting with block placed on
-        ModelState outputModelState = PlacementItem.getStackModelState(stack);
-        ModelState closestModelState = null;
+        ISuperModelState outputModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState closestModelState = null;
         World world = player.world;
         IBlockState onBlockState = world.getBlockState(pPos.onPos);
         Block onBlock = onBlockState.getBlock();
 
-        if(onBlock instanceof SuperBlock)
+        if(onBlock instanceof ISuperBlock)
         {
-            closestModelState = ((SuperBlock)onBlock).getModelState(world, pPos.onPos, true);
+            closestModelState = ((ISuperBlock)onBlock).getModelState(world, pPos.onPos, true);
 
             //can't use onBlock as reference if is of a different type
             if(closestModelState.getShape() != outputModelState.getShape()) closestModelState = null;
@@ -110,7 +110,7 @@ public class BlockOrientationHandler
                         {
                             BlockPos testPos = pPos.onPos.add(x, y, z);
                             IBlockState testBlockState = world.getBlockState(testPos);
-                            if(testBlockState.getBlock() instanceof SuperBlock)
+                            if(testBlockState.getBlock() instanceof ISuperBlock)
                             {
                                 double distSq = location.squareDistanceTo(
                                         pPos.onPos.getX() + 0.5 + x, 
@@ -118,8 +118,8 @@ public class BlockOrientationHandler
                                         pPos.onPos.getZ() + 0.5 + z);
                                 if(distSq < closestDistSq)
                                 {
-                                    SuperBlock testBlock = (SuperBlock)testBlockState.getBlock();
-                                    ModelState testModelState = testBlock.getModelState(world, testPos, true);
+                                    ISuperBlock testBlock = (ISuperBlock)testBlockState.getBlock();
+                                    ISuperModelState testModelState = testBlock.getModelState(world, testPos, true);
                                     if(testModelState.getShape() == outputModelState.getShape())
                                     {
                                         closestDistSq = distSq;
@@ -161,7 +161,7 @@ public class BlockOrientationHandler
     /** handle hit-sensitive placement for stairs, wedges */
     public static void applyDynamicOrientation(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
-        ModelState outputModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState outputModelState = PlacementItem.getStackModelState(stack);
 
         boolean isRotationDone = false;
 

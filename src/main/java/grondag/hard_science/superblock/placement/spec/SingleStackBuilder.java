@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,7 +21,7 @@ public abstract class SingleStackBuilder extends PlacementSpecBuilder
         super(placedStack, player, pPos);
     }
     
-    protected ModelState previewModelState()
+    protected ISuperModelState previewModelState()
     {
         return this.outputStack == null ? super.previewModelState() : PlacementItem.getStackModelState(this.outputStack);
     }

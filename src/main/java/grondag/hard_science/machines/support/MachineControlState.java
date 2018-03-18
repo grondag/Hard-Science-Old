@@ -11,8 +11,9 @@ import grondag.exotic_matter.varia.BitPacker.BitElement.EnumElement;
 import grondag.exotic_matter.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -116,7 +117,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     private static BooleanElement PACKED_HAS_MODELSTATE = PACKER.createBooleanElement();
     private static IntElement PACKED_META = PACKER.createIntElement(16);
     private static IntElement PACKED_LIGHT_VALUE = PACKER.createIntElement(16);
-    private static EnumElement<BlockSubstance> PACKED_SUBSTANCE = PACKER.createEnumElement(BlockSubstance.class);
+    private static IntElement PACKED_SUBSTANCE = PACKER.createIntElement(BlockSubstance.MAX_SUBSTANCES);
     private static EnumElement<MachineState> PACKED_MACHINE_STATAE = PACKER.createEnumElement(MachineState.class);
     private static BooleanElement PACKED_HAS_JOB_TICKS = PACKER.createBooleanElement();
     private static BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
@@ -135,7 +136,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     }
     
     private long bits = DEFAULT_BITS;
-    private ModelState modelState;
+    private ISuperModelState modelState;
     private short jobDurationTicks = 0;
     private short jobRemainingTicks = 0;
     private BlockPos targetPos = null;
@@ -158,8 +159,8 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     public boolean hasModelState() { return PACKED_HAS_MODELSTATE.getValue(bits); }
     private void updateModelStateStatus() { bits = PACKED_HAS_MODELSTATE.setValue(this.modelState != null, bits); }
     
-    public ModelState getModelState() { return this.modelState; }
-    public void setModelState( ModelState value)
+    public ISuperModelState getModelState() { return this.modelState; }
+    public void setModelState( ISuperModelState value)
     {
         this.modelState = value; 
         this.updateModelStateStatus();
@@ -193,8 +194,8 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
      * While values are always non-null, they are not always valid.  
      * Check that a modelState or other related attribute also exists
      */
-    public @Nonnull BlockSubstance getSubstance() { return PACKED_SUBSTANCE.getValue(bits); }
-    public void setSubstance(@Nonnull BlockSubstance value) { bits = PACKED_SUBSTANCE.setValue(value, bits); }
+    public @Nonnull BlockSubstance getSubstance() { return BlockSubstance.get(PACKED_SUBSTANCE.getValue(bits)); }
+    public void setSubstance(@Nonnull BlockSubstance value) { bits = PACKED_SUBSTANCE.setValue(value.ordinal, bits); }
     
     /** intended for block fabricators, but usage determined by machine. */
     public int getLightValue() { return PACKED_LIGHT_VALUE.getValue(bits); }

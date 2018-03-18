@@ -16,6 +16,7 @@ import grondag.hard_science.external.jei.AbstractRecipeCategory;
 import grondag.hard_science.external.jei.IRecipeFormat;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.IResourcePredicate;
@@ -23,7 +24,6 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.ItemStack;
@@ -276,7 +276,7 @@ public class MicronizerRecipe
         public Long apply(ItemStack stack)
         {
             double volume = 0;
-            ModelState modelState = PlacementItem.getStackModelState(stack);
+            ISuperModelState modelState = PlacementItem.getStackModelState(stack);
             if(modelState == null) return 0L;
             for(AxisAlignedBB box : modelState.getShape().meshFactory().collisionHandler().getCollisionBoxes(modelState))
             {

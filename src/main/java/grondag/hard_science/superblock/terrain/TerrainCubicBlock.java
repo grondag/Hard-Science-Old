@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.terrain;
 
 import java.util.List;
 
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 public class TerrainCubicBlock extends TerrainDynamicBlock
 {
 
-    public TerrainCubicBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
+    public TerrainCubicBlock(String blockName, BlockSubstance substance, ISuperModelState defaultModelState)
     {
         super(blockName, substance, defaultModelState, false);
      }

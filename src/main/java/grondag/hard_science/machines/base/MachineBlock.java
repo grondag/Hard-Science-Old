@@ -6,17 +6,19 @@ import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.Translucency;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
-import grondag.hard_science.moving.ModShapes;
+import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.movetogether.BlockColorMapProvider;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.Chroma;
+import grondag.hard_science.movetogether.Hue;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ITexturePalette;
+import grondag.hard_science.movetogether.Luminance;
+import grondag.hard_science.movetogether.ModShapes;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
-import grondag.hard_science.superblock.color.BlockColorMapProvider;
-import grondag.hard_science.superblock.color.Chroma;
-import grondag.hard_science.superblock.color.Hue;
-import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
@@ -58,7 +60,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     
     public final int guiID;
     
-    public MachineBlock(String name, int guiID, ModelState modelState)
+    public MachineBlock(String name, int guiID, ISuperModelState modelState)
     {
         super(name, MACHINE_MATERIAL, modelState, modelState.getRenderPassSet().blockRenderMode);
         this.guiID = guiID;
@@ -66,9 +68,9 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
         this.setHardness(1);
     }
     
-    protected static ModelState creatBasicMachineModelState(TexturePallette decalTex, TexturePallette borderTex)
+    protected static ISuperModelState creatBasicMachineModelState(ITexturePalette decalTex, ITexturePalette borderTex)
     {
-        ModelState modelState = new ModelState();
+        ISuperModelState modelState = new ModelState();
         modelState.setShape(ModShapes.MACHINE);
         modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
@@ -264,7 +266,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return BlockSubstance.MACHINE;
+        return ModSubstances.MACHINE;
     }
 
     @Override

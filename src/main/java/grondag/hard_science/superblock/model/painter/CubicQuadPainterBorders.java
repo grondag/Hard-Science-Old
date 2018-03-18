@@ -8,7 +8,7 @@ import grondag.exotic_matter.world.CornerJoinBlockState;
 import grondag.exotic_matter.world.CornerJoinFaceState;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.util.EnumFacing;
 
 public class CubicQuadPainterBorders extends CubicQuadPainter
@@ -42,7 +42,7 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
     
     protected final CornerJoinBlockState bjs;
     
-    public CubicQuadPainterBorders(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    public CubicQuadPainterBorders(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         super(modelState, surface, paintLayer);
         this.bjs = modelState.getCornerJoin();
@@ -64,7 +64,7 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
             return null;
         
         // don't render the "no border" texture unless this is a tile of some kind
-        if(inputs == NO_BORDER && !this.texture.renderNoBorderAsTile)
+        if(inputs == NO_BORDER && !this.texture.renderNoBorderAsTile())
             return null;
         
         quad.rotation = inputs.rotation;

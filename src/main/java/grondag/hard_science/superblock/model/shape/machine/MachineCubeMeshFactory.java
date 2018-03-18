@@ -8,13 +8,13 @@ import com.google.common.collect.ImmutableList;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.moving.CubeInputs;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.collision.CubeCollisionHandler;
-import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.model.shape.MachineMeshFactory;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.ModelStateData;
+import grondag.hard_science.movetogether.CubeCollisionHandler;
+import grondag.hard_science.movetogether.CubeInputs;
+import grondag.hard_science.movetogether.ICollisionHandler;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.MachineMeshFactory;
+import grondag.hard_science.movetogether.ModelStateData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -63,7 +63,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<RawQuad> getShapeQuads(ModelState modelState)
+    public List<RawQuad> getShapeQuads(ISuperModelState modelState)
     {
         if(this.hasFront)
         {
@@ -121,13 +121,13 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     
 
     @Override
-    public boolean isCube(ModelState modelState)
+    public boolean isCube(ISuperModelState modelState)
     {
         return true;
     }
 
     @Override
-    public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState)
+    public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, ISuperBlock block, ISuperModelState modelState)
     {
         return false;
         
@@ -137,7 +137,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     }
 
     @Override
-    public int geometricSkyOcclusion(ModelState modelState)
+    public int geometricSkyOcclusion(ISuperModelState modelState)
     {
         return 255;
     }
@@ -149,7 +149,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     }
 
     @Override
-    public SideShape sideShape(ModelState modelState, EnumFacing side)
+    public SideShape sideShape(ISuperModelState modelState, EnumFacing side)
     {
         return SideShape.SOLID;
     }

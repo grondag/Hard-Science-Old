@@ -4,6 +4,8 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.model.state.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -64,7 +66,7 @@ public class SuperTileEntity extends TileEntity
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
     
-    protected ModelState modelState = new ModelState();
+    protected ISuperModelState modelState = new ModelState();
   
     //  public IExtendedBlockState exBlockState;
     private boolean isModelStateCacheDirty = true;
@@ -217,11 +219,11 @@ public class SuperTileEntity extends TileEntity
         return super.writeToNBT(compound);
     }
 
-    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    public ISuperModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     { 
         if(this.modelState == null)
         {
-            this.modelState = ((SuperBlock)state.getBlock()).getDefaultModelState();
+            this.modelState = ((ISuperBlock)state.getBlock()).getDefaultModelState();
             this.isModelStateCacheDirty = true;
             
             // necessary for species
@@ -241,7 +243,7 @@ public class SuperTileEntity extends TileEntity
     /**
      * Use this version when you don't have world state handy
      */
-    public ModelState getModelState()
+    public ISuperModelState getModelState()
     {
         if(!(this.modelState == null || this.isModelStateCacheDirty)) 
         {
@@ -254,12 +256,12 @@ public class SuperTileEntity extends TileEntity
     }
     
     /** intended for use in TESR - don't refresh unless missing because should be up to date from getExtendedState called before this */
-    public ModelState getCachedModelState()
+    public ISuperModelState getCachedModelState()
     {
         return this.modelState == null ? this.getModelState(this.world.getBlockState(this.pos), world, pos, true) : this.modelState;
     }
     
-    public void setModelState(ModelState modelState) 
+    public void setModelState(ISuperModelState modelState) 
     { 
         // if making existing appearance static, don't need to refresh on client side
         boolean needsClientRefresh = this.world != null

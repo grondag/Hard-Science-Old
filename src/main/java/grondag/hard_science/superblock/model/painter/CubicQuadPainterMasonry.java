@@ -8,7 +8,7 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
 import grondag.exotic_matter.world.SimpleJoinFaceState;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.util.EnumFacing;
 
 
@@ -21,7 +21,7 @@ public class CubicQuadPainterMasonry extends CubicQuadPainter
 
     protected final SimpleJoin bjs;
     
-    public CubicQuadPainterMasonry(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    public CubicQuadPainterMasonry(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         super(modelState, surface, paintLayer);
         this.bjs = modelState.getMasonryJoin();

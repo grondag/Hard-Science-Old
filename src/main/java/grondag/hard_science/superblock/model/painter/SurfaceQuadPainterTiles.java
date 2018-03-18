@@ -5,8 +5,8 @@ import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.texture.TextureRotationType;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.TextureRotationType;
 import net.minecraft.util.math.MathHelper;
 
 /**
@@ -28,7 +28,7 @@ import net.minecraft.util.math.MathHelper;
  */
 public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
 {
-    public SurfaceQuadPainterTiles(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    public SurfaceQuadPainterTiles(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         super(modelState, surface, paintLayer);
     }
@@ -38,7 +38,7 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
     {
         if(Log.DEBUG_MODE && quad.lockUV) Log.warn("Tiled surface quad painter received quad with lockUV semantics.  Not expected");
         
-        int sliceCount = this.texture.textureScale.sliceCount;
+        int sliceCount = this.texture.textureScale().sliceCount;
         
         float maxU = Math.max(quad.maxU, quad.minU);
         int uOrdinal = ((Math.round(maxU) - 1) / sliceCount);
@@ -64,19 +64,19 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
         // uv coordinates should now be in range 0 to sliceCount
         // so just need to scale so that max values are 16.0
         
-        double uvScale = 16.0 / this.texture.textureScale.sliceCount;
+        double uvScale = 16.0 / this.texture.textureScale().sliceCount;
         quad.scaleQuadUV(uvScale, uvScale);
        
        int hash = MathHelper.hash(uOrdinal | (vOrdinal << 8));
         
-        int textureVersion = this.texture.textureVersionMask & (hash >> 4);
+        int textureVersion = this.texture.textureVersionMask() & (hash >> 4);
         quad.textureName = this.texture.getTextureName(textureVersion);
                 
         //FIXME - doubt that the rest of this still works at all after
         //lockUV and texture rotation were refactored.
 
-        int rotationOrdinal = this.texture.rotation.rotation.ordinal();
-        if(this.texture.rotation.rotationType() == TextureRotationType.RANDOM)
+        int rotationOrdinal = this.texture.rotation().rotation.ordinal();
+        if(this.texture.rotation().rotationType() == TextureRotationType.RANDOM)
         {
             rotationOrdinal = (rotationOrdinal + hash) & 3;
         }

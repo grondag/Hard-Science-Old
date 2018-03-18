@@ -9,9 +9,9 @@ import grondag.exotic_matter.world.HorizontalFace;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
 import grondag.hard_science.superblock.varia.SuperBlockHelper;
@@ -402,7 +402,7 @@ public abstract class PlacementHandler
 
         ItemStack stack = specBuilder.placedStack().copy();
         PlacementPosition pPos = specBuilder.placementPosition();
-        ModelState modelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState modelState = PlacementItem.getStackModelState(stack);
         if(modelState != null && modelState.hasSpecies())
         {
             int species = speciesForPlacement(specBuilder.player(), pPos.onPos, pPos.onFace, stack, specBuilder.region());
@@ -438,7 +438,7 @@ public abstract class PlacementHandler
 
         boolean shouldBreak = mode != SpeciesMode.MATCH_MOST;
 
-        ModelState  withModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState  withModelState = PlacementItem.getStackModelState(stack);
         if(withModelState == null || !withModelState.hasSpecies()) return 0;
 
         World world = player.world;

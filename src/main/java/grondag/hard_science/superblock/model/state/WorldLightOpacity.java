@@ -1,6 +1,7 @@
 package grondag.hard_science.superblock.model.state;
 
-import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 
 /**
  * Less granular representation of block translucency than Translucency.
@@ -33,7 +34,7 @@ public enum WorldLightOpacity
         this.opacity = opacity;
     }
     
-    public static WorldLightOpacity getClosest(BlockSubstance substance, ModelState modelState)
+    public static WorldLightOpacity getClosest(BlockSubstance substance, ISuperModelState modelState)
     {
         int substanceOpacity = substance.isTranslucent ? modelState.getTranslucency().blockLightOpacity : 255;
         int blockOpacity = modelState.geometricSkyOcclusion();

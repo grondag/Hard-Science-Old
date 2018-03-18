@@ -5,8 +5,8 @@ import org.lwjgl.opengl.GL11;
 import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.exotic_matter.render.PerQuadModelRenderer;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -77,7 +77,7 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         }
     }
     
-    protected void renderBlockInner(SuperTileEntity te, SuperBlock block, boolean translucent, BufferBuilder buffer)
+    protected void renderBlockInner(SuperTileEntity te, ISuperBlock block, boolean translucent, BufferBuilder buffer)
     {
       
         this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -98,8 +98,8 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         
       
         World world = te.getWorld();
-        ModelState modelState = te.getCachedModelState();
-        IBlockState state = ((IExtendedBlockState)world.getBlockState(te.getPos())).withProperty(SuperBlock.MODEL_STATE,  modelState);
+        ISuperModelState modelState = te.getCachedModelState();
+        IBlockState state = ((IExtendedBlockState)world.getBlockState(te.getPos())).withProperty(ISuperBlock.MODEL_STATE,  modelState);
         
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
        

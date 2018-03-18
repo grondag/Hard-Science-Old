@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.block;
 
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -13,12 +13,12 @@ public class SuperStaticBlock extends SuperBlockPlus
     private final boolean isGeometryFullCube;
     private final WorldLightOpacity worldLightOpacity;
     
-    public SuperStaticBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
+    public SuperStaticBlock(String blockName, BlockSubstance substance, ISuperModelState defaultModelState)
     {
         super(blockName, substance.material, defaultModelState, null);
         
         // make sure proper shape is set
-        ModelState modelState = defaultModelState.clone();
+        ISuperModelState modelState = defaultModelState.clone();
         modelState.setStatic(true);
         this.defaultModelStateBits = modelState.serializeToInts();
         this.isGeometryFullCube = defaultModelState.isCube();

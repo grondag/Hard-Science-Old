@@ -2,8 +2,8 @@ package grondag.hard_science.gui.shape;
 
 import grondag.hard_science.gui.control.Slider;
 import grondag.hard_science.gui.control.Toggle;
-import grondag.hard_science.superblock.model.shape.SquareColumnMeshFactory;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.SquareColumnMeshFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
@@ -28,14 +28,14 @@ public class GuiSquareColumn extends GuiShape
     }
 
     @Override
-    public void loadSettings(ModelState modelState)
+    public void loadSettings(ISuperModelState modelState)
     {
         this.areCutsOnEdge.setOn(SquareColumnMeshFactory.areCutsOnEdge(modelState));
         this.cutCount.setSelectedIndex(SquareColumnMeshFactory.getCutCount(modelState) - SquareColumnMeshFactory.MIN_CUTS);
     }
 
     @Override
-    public boolean saveSettings(ModelState modelState)
+    public boolean saveSettings(ISuperModelState modelState)
     {
         boolean hadUpdate = false;
         

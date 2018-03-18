@@ -2,20 +2,20 @@ package grondag.hard_science.superblock.model.painter;
 
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.render.Surface;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.texture.TextureScale;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ITexturePalette;
+import grondag.hard_science.movetogether.TextureScale;
 
 public class QuadPainterFactory
 {
-    public static QuadPainter getPainterForSurface(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    public static QuadPainter getPainterForSurface(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
-        TexturePallette texture = modelState.getTexture(paintLayer);
+        ITexturePalette texture = modelState.getTexture(paintLayer);
         
         switch(surface.topology)
         {
         case CYLINDRICAL:
-            switch(texture.textureLayout)
+            switch(texture.textureLayout())
             {
             case BIGTEX:
             case BIGTEX_ANIMATED:
@@ -33,7 +33,7 @@ public class QuadPainterFactory
             }
             
         case TILED:
-            switch(texture.textureLayout)
+            switch(texture.textureLayout())
             {
             case BIGTEX:
             case BIGTEX_ANIMATED:
@@ -51,7 +51,7 @@ public class QuadPainterFactory
             }
             
         case TOROIDAL:
-            switch(texture.textureLayout)
+            switch(texture.textureLayout())
             {
             case BIGTEX:
             case BIGTEX_ANIMATED:
@@ -69,12 +69,12 @@ public class QuadPainterFactory
             }
 
         case CUBIC:
-            switch(texture.textureLayout)
+            switch(texture.textureLayout())
             {
             case BIGTEX:
             case BIGTEX_ANIMATED:
             case SPLIT_X_8:
-                return(texture.textureScale == TextureScale.SINGLE)
+                return(texture.textureScale() == TextureScale.SINGLE)
                         ? new CubicQuadPainterTiles(modelState, surface, paintLayer)
                         : new CubicQuadPainterBigTex(modelState, surface, paintLayer);
                 

@@ -1,6 +1,6 @@
 package grondag.hard_science.superblock.items;
 
-import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.movetogether.ISuperBlock;
 import grondag.hard_science.superblock.placement.FilterMode;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementItemFeature;
@@ -48,7 +48,7 @@ public class ExcavationMarker extends Item implements PlacementItem
     }
 
     @Override
-    public SuperBlock getSuperBlock()
+    public ISuperBlock getSuperBlock()
     {
         return null;
     }

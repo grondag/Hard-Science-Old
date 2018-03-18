@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.varia;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -16,12 +16,12 @@ public class SuperBlockHelper
     /**
      * returns null if not a superblock at the position
      */
-    public static ModelState getModelStateIfAvailable(IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    public static ISuperModelState getModelStateIfAvailable(IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         IBlockState state = world.getBlockState(pos);
-        if(state.getBlock() instanceof SuperBlock)
+        if(state.getBlock() instanceof ISuperBlock)
         {
-            return ((SuperBlock)state.getBlock()).getModelStateAssumeStateIsCurrent(state, world, pos, refreshFromWorldIfNeeded);
+            return ((ISuperBlock)state.getBlock()).getModelStateAssumeStateIsCurrent(state, world, pos, refreshFromWorldIfNeeded);
         }
         return null;
     }
@@ -30,7 +30,7 @@ public class SuperBlockHelper
      * Returns species at position if it could join with the given block/modelState
      * Returns -1 if no superblock at position or if join not possible.
      */
-    public static int getJoinableSpecies(IBlockAccess world, BlockPos pos, @Nullable IBlockState withBlockState, @Nullable ModelState withModelState)
+    public static int getJoinableSpecies(IBlockAccess world, BlockPos pos, @Nullable IBlockState withBlockState, @Nullable ISuperModelState withModelState)
     {
         if(withBlockState == null || withModelState == null) return -1;
         
@@ -39,7 +39,7 @@ public class SuperBlockHelper
         IBlockState state = world.getBlockState(pos);
         if(state.getBlock() == withBlockState.getBlock())
         {
-            ModelState mState = getModelStateIfAvailable(world, pos, false);
+            ISuperModelState mState = getModelStateIfAvailable(world, pos, false);
             if(mState == null) return -1;
             
             if(mState.doShapeAndAppearanceMatch(withModelState)) return mState.getSpecies();

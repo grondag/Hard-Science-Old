@@ -7,37 +7,42 @@ import java.util.List;
 
 import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.exotic_matter.world.Rotation;
+import grondag.hard_science.movetogether.ITexturePalette;
+import grondag.hard_science.movetogether.ModelStateData;
+import grondag.hard_science.movetogether.TextureLayout;
+import grondag.hard_science.movetogether.TextureRenderIntent;
+import grondag.hard_science.movetogether.TextureRotationType;
+import grondag.hard_science.movetogether.TextureScale;
+import grondag.hard_science.movetogether.TextureRotationType.TextureRotationSetting;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterBorders;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterMasonry;
-import grondag.hard_science.superblock.model.state.ModelStateData;
-import grondag.hard_science.superblock.texture.TextureRotationType.TextureRotationSetting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry.TexturePallette>
+public class TexturePalletteRegistry implements Iterable<ITexturePalette>
 {
     
-    private static final TexturePallette[] ARRAY_TEMPLATE = new TexturePallette[0];
+    private static final ITexturePalette[] ARRAY_TEMPLATE = new TexturePallette[0];
     
-    private final ArrayList<TexturePallette> texturePallettes = new ArrayList<TexturePallette>();
+    private final ArrayList<ITexturePalette> texturePallettes = new ArrayList<ITexturePalette>();
     
     private int nextOrdinal = 0;
     
-    public TexturePallette addTexturePallette(String textureBaseName, TexturePalletteInfo info)
+    public ITexturePalette addTexturePallette(String textureBaseName, TexturePalletteInfo info)
     {
-        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, info);
+        ITexturePalette result = new TexturePallette(nextOrdinal++, textureBaseName, info);
         texturePallettes.add(result);
         return result;
     }
     
-    public TexturePallette addZoomedPallete(TexturePallette source)
+    public ITexturePalette addZoomedPallete(ITexturePalette source)
     {
-        TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, 
+        ITexturePalette result = new TexturePallette(nextOrdinal++, source.textureBaseName(), 
                 new TexturePalletteInfo(source)
-                    .withZoomLevel(source.zoomLevel + 1)
-                    .withScale(source.textureScale.zoom()));
+                    .withZoomLevel(source.zoomLevel() + 1)
+                    .withScale(source.textureScale().zoom()));
         texturePallettes.add(result);
         return result;
     }
@@ -48,11 +53,11 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
 
     public boolean contains(Object o) { return texturePallettes.contains(o); }
    
-    public Iterator<TexturePallette> iterator() { return texturePallettes.iterator(); }
+    public Iterator<ITexturePalette> iterator() { return texturePallettes.iterator(); }
    
-    public TexturePallette[] toArray() { return texturePallettes.toArray(ARRAY_TEMPLATE); }
+    public ITexturePalette[] toArray() { return texturePallettes.toArray(ARRAY_TEMPLATE); }
    
-    public TexturePallette get(int index) { return texturePallettes.get(index); }
+    public ITexturePalette get(int index) { return texturePallettes.get(index); }
     
     public static class TexturePalletteInfo
     {
@@ -73,17 +78,17 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             
         }
         
-        public TexturePalletteInfo(TexturePallette source)
+        public TexturePalletteInfo(ITexturePalette source)
         {
-            this.textureVersionCount = source.textureVersionCount;
-            this.textureScale = source.textureScale;
-            this.layout = source.textureLayout;
-            this.rotation = source.rotation;
-            this.renderIntent = source.renderIntent;
-            this.textureGroupFlags = source.textureGroupFlags;
-            this.zoomLevel = source.zoomLevel;
-            this.ticksPerFrame = source.ticksPerFrame;
-            this.renderNoBorderAsTile = source.renderNoBorderAsTile;
+            this.textureVersionCount = source.textureVersionCount();
+            this.textureScale = source.textureScale();
+            this.layout = source.textureLayout();
+            this.rotation = source.rotation();
+            this.renderIntent = source.renderIntent();
+            this.textureGroupFlags = source.textureGroupFlags();
+            this.zoomLevel = source.zoomLevel();
+            this.ticksPerFrame = source.ticksPerFrame();
+            this.renderNoBorderAsTile = source.renderNoBorderAsTile();
         }
 
         /**
@@ -165,58 +170,58 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         }
     }
     
-    public class TexturePallette
+    public class TexturePallette implements ITexturePalette
     {
-        public final String textureBaseName;
+        private final String textureBaseName;
         
         /** number of texture versions must be a power of 2 */
-        public final int textureVersionCount;
+        private final int textureVersionCount;
         
-        public final TextureScale textureScale;
-        public final TextureLayout textureLayout;
+        private final TextureScale textureScale;
+        private final TextureLayout textureLayout;
         
         /** 
          * Used to display appropriate label for texture.
          * 0 = no zoom, 1 = 2x zoom, 2 = 4x zoom
          */
-        public final int zoomLevel;
+        private final int zoomLevel;
         
         /**
          * Masks the version number provided by consumers - alternators that
          * drive number generation may support larger number of values. 
          * Implies number of texture versions must be a power of 2 
          */
-        public final int textureVersionMask;
+        private final int textureVersionMask;
         
         /** Governs default rendering rotation for texture and what rotations are allowed. */
-        public final TextureRotationSetting rotation;
+        private final TextureRotationSetting rotation;
         
         /** 
          * Determines layer that should be used for rendering this texture.
          */
-        public final TextureRenderIntent renderIntent;
+        private final TextureRenderIntent renderIntent;
         
         /**
          * Globally unique id
          */
-        public final int ordinal;
+        private final int ordinal;
         
         /**
          * Used by modelstate to know which world state must be retrieved to drive this texture
          * (rotation and block version)
          */
-        public final int stateFlags;
+        private final int stateFlags;
         
-        public final int textureGroupFlags;
+        private final int textureGroupFlags;
         
         /**
          * Number of ticks each frame should be rendered on the screen
          * before progressing to the next frame.
          */
-        public final int ticksPerFrame;
+        private final int ticksPerFrame;
 
         /** for border-layout textures, controls if "no border" texture is rendered */
-        public final boolean renderNoBorderAsTile;
+        private final boolean renderNoBorderAsTile;
 
         protected TexturePallette(int ordinal, String textureBaseName, TexturePalletteInfo info)
         {
@@ -250,9 +255,10 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
                     
         }
         
-        /**
-         * Identifies all textures needed for texture stitch.
+        /* (non-Javadoc)
+         * @see grondag.hard_science.superblock.texture.ITexturePallette#getTexturesForPrestich()
          */
+        @Override
         public List<String> getTexturesForPrestich()
         {
             if(this.textureBaseName == null) return Collections.emptyList();
@@ -316,10 +322,10 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             return "hard_science:blocks/" + textureBaseName;
         }
         
-        /** 
-         * Used by dispatcher as nominal particle texture.
-         * More important usage is by GUI texture picker.
+        /* (non-Javadoc)
+         * @see grondag.hard_science.superblock.texture.ITexturePallette#getSampleTextureName()
          */
+        @Override
         public String getSampleTextureName() 
         { 
             if(textureBaseName == null) return "";
@@ -345,9 +351,10 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         @SideOnly(Side.CLIENT)
         private EnhancedSprite sampleSprite;
         
-        /**
-         * For use by TESR and GUI to conveniently and quickly access default sprite
+        /* (non-Javadoc)
+         * @see grondag.hard_science.superblock.texture.ITexturePallette#getSampleSprite()
          */
+        @Override
         @SideOnly(Side.CLIENT)
         public EnhancedSprite getSampleSprite()
         {
@@ -360,6 +367,10 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             return result;
         }
         
+        /* (non-Javadoc)
+         * @see grondag.hard_science.superblock.texture.ITexturePallette#getTextureName(int)
+         */
+        @Override
         public String getTextureName(int version)
         {
             return buildTextureName(version & this.textureVersionMask);
@@ -374,6 +385,10 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
                     : buildTextureName_X_8(version);
         }
         
+        /* (non-Javadoc)
+         * @see grondag.hard_science.superblock.texture.ITexturePallette#getTextureName(int, int)
+         */
+        @Override
         public String getTextureName(int version, int index)
         {
             return buildTextureName(version & this.textureVersionMask, index);
@@ -395,6 +410,10 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             }
         }
         
+        /* (non-Javadoc)
+         * @see grondag.hard_science.superblock.texture.ITexturePallette#localizedName()
+         */
+        @Override
         @SuppressWarnings("deprecation")
         public String localizedName()
         {
@@ -409,5 +428,58 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
                     return texName;
             }
         }
+        
+        public String textureBaseName() { return this.textureBaseName; }
+        
+        /** number of texture versions must be a power of 2 */
+        public int textureVersionCount() { return this.textureVersionCount; }
+        
+        public TextureScale textureScale() { return this.textureScale; }
+        public TextureLayout textureLayout() { return this.textureLayout; }
+        
+        /** 
+         * Used to display appropriate label for texture.
+         * 0 = no zoom, 1 = 2x zoom, 2 = 4x zoom
+         */
+        public int zoomLevel() { return this.zoomLevel; }
+        
+        /**
+         * Masks the version number provided by consumers - alternators that
+         * drive number generation may support larger number of values. 
+         * Implies number of texture versions must be a power of 2 
+         */
+        public int textureVersionMask() { return this.textureVersionMask; }
+        
+        /** Governs default rendering rotation for texture and what rotations are allowed. */
+        public TextureRotationSetting rotation() { return this.rotation; }
+        
+        /** 
+         * Determines layer that should be used for rendering this texture.
+         */
+        public TextureRenderIntent renderIntent() { return this.renderIntent; }
+        
+        /**
+         * Globally unique id
+         */
+        public int ordinal() { return this.ordinal; }
+        
+        /**
+         * Used by modelstate to know which world state must be retrieved to drive this texture
+         * (rotation and block version)
+         */
+        public int stateFlags() { return this.stateFlags; }
+        
+        public int textureGroupFlags() { return this.textureGroupFlags; }
+        
+        /**
+         * Number of ticks each frame should be rendered on the screen
+         * before progressing to the next frame.
+         */
+        public int ticksPerFrame() { return this.ticksPerFrame; }
+
+        /** for border-layout textures, controls if "no border" texture is rendered */
+        public boolean renderNoBorderAsTile() { return this.renderNoBorderAsTile; }
+        
+        
     }
 }

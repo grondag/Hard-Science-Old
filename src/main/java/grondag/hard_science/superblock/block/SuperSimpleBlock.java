@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.block;
 
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -18,7 +18,7 @@ public class SuperSimpleBlock extends SuperBlock
     private final boolean isGeometryFullCube;
     private final WorldLightOpacity worldLightOpacity;
     
-    public SuperSimpleBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
+    public SuperSimpleBlock(String blockName, BlockSubstance substance, ISuperModelState defaultModelState)
     {
         super(blockName, substance.material, defaultModelState, null);
         this.substance = substance;

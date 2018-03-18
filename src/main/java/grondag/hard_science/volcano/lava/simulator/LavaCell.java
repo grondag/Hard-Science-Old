@@ -12,9 +12,9 @@ import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
+import grondag.hard_science.movetogether.TerrainState;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.terrain.TerrainBlock;
-import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.volcano.lava.simulator.LavaConnections.SortBucket;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -1864,13 +1864,13 @@ public class LavaCell extends AbstractLavaCell
                 {
                     
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), currentVisible - currentSurfaceY * TerrainState.BLOCK_LEVELS_INT),
+                            TerrainBlockHelper.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), currentVisible - currentSurfaceY * TerrainState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else if(hasLava && y < currentSurfaceY)
                 {
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), TerrainState.BLOCK_LEVELS_INT),
+                            TerrainBlockHelper.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), TerrainState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else

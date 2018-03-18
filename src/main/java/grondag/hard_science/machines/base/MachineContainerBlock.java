@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.base;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public abstract class MachineContainerBlock extends MachineBlock
 {
 
-    public MachineContainerBlock(String name, int guiID, ModelState modelState)
+    public MachineContainerBlock(String name, int guiID, ISuperModelState modelState)
     {
         super(name, guiID, modelState);
     }

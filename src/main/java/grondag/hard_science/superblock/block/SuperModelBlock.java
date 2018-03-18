@@ -2,10 +2,12 @@ package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.exotic_matter.model.BlockRenderMode;
+import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -33,7 +35,7 @@ import net.minecraftforge.common.property.IUnlistedProperty;
  * depending on the combination of attributes needed.<br><br>
  * 
  * The choice of which block to deploy is made by the item/creative stack that places the block
- * by calling {@link grondag.hard_science.init.ModSuperModelBlocks#findAppropriateSuperModelBlock(BlockSubstance substance, ModelState modelState)} <br><br>
+ * by calling {@link grondag.hard_science.init.ModSuperModelBlocks#findAppropriateSuperModelBlock(BlockSubstance substance, ISuperModelState modelState)} <br><br>
  * 
  * The specific dimensions by which the block instances vary are:  {@link #getRenderModeSet()}, {@link #worldLightOpacity}, Block.fullBlock and {@link #isHypermatter()}.
  * 
@@ -45,7 +47,7 @@ public class SuperModelBlock extends SuperBlockPlus
      * Ordinal of the substance for this block. Set during getActualState
      * so that harvest/tool methods can have access to location-dependent substance information.
      */
-    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.values().length - 1);
+    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.MAX_SUBSTANCES - 1);
     
     protected final WorldLightOpacity worldLightOpacity;
     
@@ -98,7 +100,7 @@ public class SuperModelBlock extends SuperBlockPlus
     {
         // Add substance for tool methods
         return super.getActualState(state, worldIn, pos)
-                .withProperty(SUBSTANCE, this.getSubstance(state, worldIn, pos).ordinal());
+                .withProperty(SUBSTANCE, this.getSubstance(state, worldIn, pos).ordinal);
     }
     
     /** 
@@ -109,7 +111,8 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     public int getHarvestLevel(IBlockState state)
     {
-        return BlockSubstance.values()[state.getValue(SUBSTANCE)].harvestLevel;
+        BlockSubstance s = BlockSubstance.get(state.getValue(SUBSTANCE));
+        return s == null ? 0 : s.harvestLevel;
     }
     
     /** 
@@ -120,7 +123,8 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     @Nullable public String getHarvestTool(IBlockState state)
     {
-        return BlockSubstance.values()[state.getValue(SUBSTANCE)].harvestTool;
+        BlockSubstance s = BlockSubstance.get(state.getValue(SUBSTANCE));
+        return s == null ? null : s.harvestTool;
     }
     
    
@@ -188,7 +192,7 @@ public class SuperModelBlock extends SuperBlockPlus
     {
         TileEntity myTE = world.getTileEntity(pos);
         return myTE == null || !(myTE instanceof SuperModelTileEntity)
-                ? BlockSubstance.FLEXSTONE
+                ? ModSubstances.FLEXSTONE
                 : ((SuperModelTileEntity)myTE).getSubstance();
     }
     

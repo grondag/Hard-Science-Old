@@ -20,16 +20,18 @@ import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ColorMap;
+import grondag.hard_science.movetogether.ICollisionHandler;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.collision.ICollisionHandler;
-import grondag.hard_science.superblock.color.ColorMap;
-import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
+import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.ModelStateProperty;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.varia.BlockTests;
 import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
@@ -40,7 +42,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -87,22 +88,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Optional.InterfaceList({
     @Optional.Interface(iface = "mcjty.theoneprobe.api.IProbeInfoAccessor", modid = "theoneprobe")})
-public abstract class SuperBlock extends Block implements IProbeInfoAccessor
+public abstract class SuperBlock extends Block implements IProbeInfoAccessor, ISuperBlock
 {
 
-    /**
-     * Used for multiple purposes depending on the type of block. Thus the generic name.
-     * Didn't find the block state property abstraction layer particularly useful for my purposes.
-     */
-    public static final PropertyInteger META = PropertyInteger.create("meta", 0, 15);
-
-    /**
-     * Contains state passed from getExtendedState to handleBlockState. Using a custom unlisted property because we need large int values and the vanilla implementation enumerates
-     * all allowed values into a hashmap... Plus this hides the implementation from the block.
-     */
-    public static final ModelStateProperty MODEL_STATE = new ModelStateProperty();
-
-     /** non-null if this drops something other than itself */
+    /** non-null if this drops something other than itself */
     private Item dropItem;
 
     /** Allow silk harvest. Defaults true. Use setAllowSilk to change */
@@ -124,7 +113,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      */
     private List<ItemStack> subItems;
     
-    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState, BlockRenderMode blockRenderMode)
+    public SuperBlock(String blockName, Material defaultMaterial, ISuperModelState defaultModelState, BlockRenderMode blockRenderMode)
     {
         super(defaultMaterial);
         setCreativeTab(HardScience.tabMod);
@@ -152,7 +141,8 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Factory for block test that should be used for border/shape joins
      * for this block.  Used in model state refresh from world.
      */
-    public IBlockTest<ModelState> blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ModelState modelState)
+    @Override
+    public IBlockTest<ISuperModelState> blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ISuperModelState modelState)
     {
         return new BlockTests.SuperBlockBorderMatch(this, modelState, true);
     }
@@ -161,7 +151,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
     {       
-        ModelState modelState = this.getModelState(worldIn, pos, true);
+        ISuperModelState modelState = this.getModelState(worldIn, pos, true);
         ICollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
 
         AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
@@ -188,7 +178,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
             if(blockState.getBlock() instanceof SuperBlock)
             {
                 // if the block at given position is somehow also a SuperBlock, call particle handler for it
-                ((SuperBlock)(blockState.getBlock())).addDestroyEffects(world, pos, manager);
+                ((ISuperBlock)(blockState.getBlock())).addDestroyEffects(world, pos, manager);
             }
             else
             {
@@ -197,7 +187,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
             }
         }
         
-        ModelState modelState = this.getModelStateAssumeStateIsCurrent(world.getBlockState(pos), world, pos, false);
+        ISuperModelState modelState = this.getModelStateAssumeStateIsCurrent(world.getBlockState(pos), world, pos, false);
 
         for (int j = 0; j < 4; ++j)
         {
@@ -227,7 +217,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
             if(blockState.getBlock() instanceof SuperBlock)
             {
                 // if the block at given position is somehow also a SuperBlock, call particle handler for it
-                ((SuperBlock)(blockState.getBlock())).addHitEffects(blockState, world, target, manager);
+                ((ISuperBlock)(blockState.getBlock())).addHitEffects(blockState, world, target, manager);
             }
             else
             {
@@ -237,7 +227,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         }
         
         BlockPos pos = target.getBlockPos();
-        ModelState modelState = this.getModelState(world, pos, false);
+        ISuperModelState modelState = this.getModelState(world, pos, false);
         
         EnumFacing side = target.sideHit;
 
@@ -295,7 +285,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         super.addInformation(stack, world, tooltip, advanced);
         tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
         
-        ModelState modelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState modelState = PlacementItem.getStackModelState(stack);
         
         if(modelState != null)
         {
@@ -336,7 +326,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     @Optional.Method(modid = "theoneprobe")
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        ModelState modelState = this.getModelStateAssumeStateIsStale(blockState, world, data.getPos(), true);
+        ISuperModelState modelState = this.getModelStateAssumeStateIsStale(blockState, world, data.getPos(), true);
         
         if(modelState != null)
         {
@@ -379,7 +369,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         
         if(Configurator.BLOCKS.probeInfoLevel == ProbeInfoLevel.DEBUG)
         {
-            probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
+            probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(ISuperBlock.META));
 
             
             probeInfo.text(I18n.translateToLocal("label.full_block") + ": " + this.fullBlock);
@@ -556,14 +546,14 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     @Override
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        ModelState modelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
+        ISuperModelState modelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
         return !modelState.hasTranslucentGeometry() && modelState.sideShape(face).occludesOpposite;
     }
     
     @Override
     public PathNodeType getAiPathNodeType(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        if(this.getSubstance(state, world, pos) == BlockSubstance.VOLCANIC_LAVA) 
+        if(this.getSubstance(state, world, pos) == ModSubstances.VOLCANIC_LAVA) 
             return PathNodeType.LAVA;
         
         if(this.isBurning(world, pos))
@@ -577,7 +567,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     {
         if(this.getSubstance(state, world, pos).isTranslucent)
         {
-            ModelState modelState = this.getModelStateAssumeStateIsStale(state, world, pos, false);
+            ISuperModelState modelState = this.getModelStateAssumeStateIsStale(state, world, pos, false);
             if(modelState != null)
             {
                 ColorMap colorMap = modelState.getColorMap(PaintLayer.BASE);
@@ -618,7 +608,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
+        ISuperModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
@@ -633,7 +623,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
+        ISuperModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
@@ -649,7 +639,8 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Returns an instance of the default model state for this block.
      * Because model states are mutable, every call returns a new instance.
      */
-    public ModelState getDefaultModelState()
+    @Override
+    public ISuperModelState getDefaultModelState()
     {
         return new ModelState(this.defaultModelStateBits);
     }
@@ -700,7 +691,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     @Override
     public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        return this.getSubstance(world, pos) == BlockSubstance.FLEXWOOD ? 1 : 0;
+        return this.getSubstance(world, pos) == ModSubstances.FLEXWOOD ? 1 : 0;
     }
 
     @Override
@@ -725,6 +716,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         return super.getItemDropped(state, rand, fortune);
     }
 
+    @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
         return this.getLocalizedName(); 
@@ -773,6 +765,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     /**
      * Number of supported meta values for this block.
      */
+    @Override
     public int getMetaCount()
     {
         return this.metaCount;
@@ -794,7 +787,8 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * 
      * 
      */
-    public ModelState getModelState(IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    @Override
+    public ISuperModelState getModelState(IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         return getModelStateAssumeStateIsCurrent(world.getBlockState(pos), world, pos, refreshFromWorldIfNeeded);
     }
@@ -814,10 +808,11 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * on other components of model state (orthogonalAxis, for example) and those changes may not be detected
      * by path finding.
      */
-    public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    @Override
+    public ISuperModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         
-        ModelState result = this.getDefaultModelState();
+        ISuperModelState result = this.getDefaultModelState();
         if(refreshFromWorldIfNeeded)
         {
             result.refreshFromWorld(state, world, pos);
@@ -833,12 +828,14 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     /** 
      * Use when absolutely certain given block state is current.
      */
-    public ModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    @Override
+    public ISuperModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         // for mundane (non-TE) blocks don't need to worry about state being persisted, logic is same for old and current states
         return getModelStateAssumeStateIsStale(state, world, pos, refreshFromWorldIfNeeded);
     }
  
+    @Override
     @SideOnly(Side.CLIENT)
     public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
@@ -860,13 +857,15 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Used by NiceBlockHighligher to know if custom hit box rendering is needed. Actual event handling is in that class. 
      * Won't be called unless custom collision handler is available.
      */
+    @Override
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state)
     {
-        ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
+        ISuperModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         return modelState.collisionBoxes(pos);
         
     }
 
+    @Override
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         ItemStack result = this.getSubItems().get(this.damageDropped(state));
@@ -893,6 +892,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         items.addAll(getSubItems());
     }
 
+    @Override
     public final List<ItemStack> getSubItems()
     {
         if(this.subItems == null)
@@ -920,7 +920,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         for(int i = 0; i < this.metaCount; i++)
         {
             ItemStack stack = new ItemStack(this, 1, i);
-            ModelState modelState = this.getDefaultModelState();
+            ISuperModelState modelState = this.getDefaultModelState();
             if(modelState.metaUsage() != MetaUsage.NONE || i > 0)
             {
                 modelState.setMetaData(i);
@@ -934,8 +934,10 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     /**
      * Controls material-dependent properties
      */
+    @Override
     public abstract BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos);
 
+    @Override
     public BlockSubstance getSubstance(IBlockAccess world, BlockPos pos)
     {
         return this.getSubstance(world.getBlockState(pos), world, pos);
@@ -1025,6 +1027,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
         return this.isGeometryFullCube(state) && this.worldLightOpacity(state) == WorldLightOpacity.SOLID;
     }
   
+    @Override
     public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing face)
     {
         return this.getModelState(world, pos, true).sideShape(face) == SideShape.SOLID
@@ -1034,13 +1037,13 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     @Override
     public boolean isBurning(IBlockAccess world, BlockPos pos)
     {
-        return this.getSubstance(world, pos) == BlockSubstance.VOLCANIC_LAVA;
+        return this.getSubstance(world, pos) == ModSubstances.VOLCANIC_LAVA;
     }
 
     @Override
     public boolean isFlammable(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        return this.getSubstance(world, pos) == BlockSubstance.FLEXWOOD;
+        return this.getSubstance(world, pos) == ModSubstances.FLEXWOOD;
     }
 
     /** 
@@ -1048,6 +1051,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Avoids performance hit of casting to the IFlowBlock Interface.
      * (Based on performance profile results.)
      */
+    @Override
     public boolean isFlowFiller()
     {
         return false;
@@ -1058,6 +1062,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Avoids performance hit of casting to the IFlowBlock Interface.
      * (Based on performance profile results.)
      */
+    @Override
     public boolean isFlowHeight()
     {
         return false;
@@ -1102,13 +1107,16 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * Only addresses geometry - does this block fully occupy a 1x1x1 cube?
      * True if so. False otherwise.
      */
+    @Override
     public abstract boolean isGeometryFullCube(IBlockState state);
     
+    @Override
     public abstract boolean isHypermatter();
     
     /**
      * Only true for virtual blocks.  Prevents "instanceof" checking.
      */
+    @Override
     public boolean isVirtual() { return false; }
    
     /**
@@ -1172,6 +1180,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
      * World-aware version called from getDrops because logic may need more than metadata.
      * Other versions (not overriden) should not be called.
      */
+    @Override
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {
         return 1;
@@ -1220,6 +1229,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
 //        return this.getModelStateAssumeStateIsCurrent(blockState, world, pos, true).rotateBlock(blockState, world, pos, axis, this);
     }
 
+    @Override
     public SuperBlock setAllowSilkHarvest(boolean allow)
     {
         this.allowSilkHarvest = allow;
@@ -1229,7 +1239,8 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
     /**
      * Sets a drop other than this block if desired.
      */
-    public SuperBlock setDropItem(Item dropItem)
+    @Override
+    public ISuperBlock setDropItem(Item dropItem)
     {
         this.dropItem = dropItem;
         return this;
@@ -1247,12 +1258,12 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor
             Block block = otherBlockState.getBlock();
             if(block instanceof SuperBlock)
             {
-                SuperBlock sBlock = (SuperBlock)block;
+                ISuperBlock sBlock = (ISuperBlock)block;
                 // only match with blocks with same "virtuality" as this one
                 if(this.isVirtual() == sBlock.isVirtual() && sBlock.getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
                 {
-                    ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
-                    ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
+                    ISuperModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
+                    ISuperModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
                     // for transparent blocks, want blocks with same apperance and species to join
                     return (myModelState.hasSpecies() && myModelState.getSpecies() != otherModelState.getSpecies())
                             || !myModelState.doShapeAndAppearanceMatch(otherModelState);

@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement;
 
 import grondag.exotic_matter.model.StateFormat;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.placement.spec.CSGBuilder;
 import grondag.hard_science.superblock.placement.spec.CuboidBuilder;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
@@ -50,7 +50,7 @@ public class PlacementSpecHelper
             case COMPLETE_REGION:
             case FILL_REGION:
             case HOLLOW_REGION:
-                ModelState modelState = PlacementItem.getStackModelState(placedStack);
+                ISuperModelState modelState = PlacementItem.getStackModelState(placedStack);
                 if(modelState != null && modelState.getShape().meshFactory().stateFormat == StateFormat.MULTIBLOCK)
                 {
                     return new CSGBuilder(placedStack, player, pPos);

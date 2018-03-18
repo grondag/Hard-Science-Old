@@ -5,9 +5,9 @@ import java.util.List;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.movetogether.TerrainBlockHelper;
+import grondag.hard_science.movetogether.TerrainState;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.superblock.terrain.TerrainBlock;
-import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
@@ -348,7 +348,7 @@ public class EntityLavaBlob extends Entity
         int i5 = MathHelper.floor(this.posZ);
         BlockPos blockpos = new BlockPos(j4, l4, i5);
         IBlockState iblockstate = this.world.getBlockState(blockpos);
-        this.onGround = this.collidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || TerrainBlock.isFlowFiller(iblockstate.getBlock());
+        this.onGround = this.collidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || TerrainBlockHelper.isFlowFiller(iblockstate.getBlock());
 
         //this is very crude, but if we are vertically collided but not resting on top of the ground
         //re-center on our block pos so that we have a better chance to fall down
@@ -423,7 +423,7 @@ public class EntityLavaBlob extends Entity
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
                     IBlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos);
                     if(!(state.getMaterial() == Material.AIR || state.getMaterial().isLiquid()) 
-                             && LavaTerrainHelper.canLavaDisplace(state) && !TerrainBlock.isFlowFiller(state.getBlock()))
+                             && LavaTerrainHelper.canLavaDisplace(state) && !TerrainBlockHelper.isFlowFiller(state.getBlock()))
                     {
                         this.world.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }

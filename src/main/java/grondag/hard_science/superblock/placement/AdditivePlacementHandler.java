@@ -6,10 +6,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.moving.WorldHelperLeftovers;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
 import net.minecraft.block.state.IBlockState;
@@ -52,14 +53,14 @@ public class AdditivePlacementHandler extends PlacementHandler
             return CubicPlacementHandler.INSTANCE.getPlacementResults(playerIn, worldIn, posOn, hand, facing, hitX, hitY, hitZ, stack);
 
         final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).getBlock();
-        final ModelState stackModelState = PlacementItem.getStackModelState(stack);
+        final ISuperModelState stackModelState = PlacementItem.getStackModelState(stack);
 
         final IBlockState onBlockState = worldIn.getBlockState(posOn);
 
-        if(onBlockState.getBlock() instanceof SuperBlock)
+        if(onBlockState.getBlock() instanceof ISuperBlock)
         {
-            final SuperBlock onBlock = (SuperBlock) onBlockState.getBlock();
-            final ModelState onModelState = onBlock.getModelStateAssumeStateIsCurrent(onBlockState, worldIn, posOn, true);
+            final ISuperBlock onBlock = (ISuperBlock) onBlockState.getBlock();
+            final ISuperModelState onModelState = onBlock.getModelStateAssumeStateIsCurrent(onBlockState, worldIn, posOn, true);
 
             if(onBlock == stackBlock 
                     && onModelState != null
@@ -87,10 +88,10 @@ public class AdditivePlacementHandler extends PlacementHandler
         // is there an additive block against the face we clicked?
         final BlockPos facePos = posOn.offset(facing);
         final IBlockState faceBlockState = worldIn.getBlockState(facePos);
-        if(faceBlockState.getBlock() instanceof SuperBlock)
+        if(faceBlockState.getBlock() instanceof ISuperBlock)
         {
-            final SuperBlock faceBlock = (SuperBlock) faceBlockState.getBlock();
-            final ModelState faceModelState = faceBlock.getModelStateAssumeStateIsCurrent(faceBlockState, worldIn, facePos, true);
+            final ISuperBlock faceBlock = (ISuperBlock) faceBlockState.getBlock();
+            final ISuperModelState faceModelState = faceBlock.getModelStateAssumeStateIsCurrent(faceBlockState, worldIn, facePos, true);
 
             if((    faceBlock == stackBlock 
                     && faceModelState.getShape() == stackModelState.getShape())
@@ -107,7 +108,7 @@ public class AdditivePlacementHandler extends PlacementHandler
     }
 
 
-    private List<Pair<BlockPos, ItemStack>> addToBlockAtPosition(IBlockAccess worldIn, ItemStack stack, ModelState stackModelState, ModelState onModelState, BlockPos posOn)
+    private List<Pair<BlockPos, ItemStack>> addToBlockAtPosition(IBlockAccess worldIn, ItemStack stack, ISuperModelState stackModelState, ISuperModelState onModelState, BlockPos posOn)
     {
         int totalMeta = (onModelState.getMetaData() + stackModelState.getMetaData() + 1);
         ArrayList<Pair<BlockPos, ItemStack>> result = new ArrayList<Pair<BlockPos, ItemStack>>(2);
@@ -116,7 +117,7 @@ public class AdditivePlacementHandler extends PlacementHandler
         if(onModelState.getMetaData() < 0xF)
         {
             int targetMeta = Math.min(totalMeta, 0xF);
-            ModelState modelState = onModelState.clone();
+            ISuperModelState modelState = onModelState.clone();
             ItemStack newStack = stack.copy();
             newStack.setItemDamage(targetMeta);
             modelState.setMetaData(targetMeta);
@@ -130,7 +131,7 @@ public class AdditivePlacementHandler extends PlacementHandler
             EnumFacing addFace = EnumFacing.UP;
             
             int targetMeta = totalMeta & 0xF;
-            ModelState modelState = onModelState.clone();
+            ISuperModelState modelState = onModelState.clone();
             if(modelState.hasAxis())
             {
                 modelState.setAxis(onModelState.getAxis());

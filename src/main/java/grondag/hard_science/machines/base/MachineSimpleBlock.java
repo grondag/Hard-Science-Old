@@ -2,9 +2,9 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
+import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
@@ -22,9 +22,9 @@ import net.minecraft.world.WorldServer;
 
 public abstract class MachineSimpleBlock extends SuperSimpleBlock implements IMachineBlock
 {
-    protected MachineSimpleBlock(String blockName, ModelState defaultModelState)
+    protected MachineSimpleBlock(String blockName, ISuperModelState defaultModelState)
     {
-        super(blockName, BlockSubstance.MACHINE, defaultModelState);
+        super(blockName, ModSubstances.MACHINE, defaultModelState);
         this.metaCount = 1;
         this.setHarvestLevel(null, 0);
         this.setHardness(1);

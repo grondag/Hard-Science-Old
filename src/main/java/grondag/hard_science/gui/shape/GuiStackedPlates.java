@@ -2,7 +2,7 @@ package grondag.hard_science.gui.shape;
 
 import grondag.hard_science.gui.control.Slider;
 import grondag.hard_science.gui.control.Toggle;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ISuperModelState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
@@ -28,13 +28,13 @@ public class GuiStackedPlates extends GuiShape
         this.add(thickness);
     }
     
-    private boolean isSlab(ModelState modelState)
+    private boolean isSlab(ISuperModelState modelState)
     {
         return modelState.getMetaData() == 7;
     }
 
     @Override
-    public void loadSettings(ModelState modelState)
+    public void loadSettings(ISuperModelState modelState)
     {
         this.isSlab.setOn(isSlab(modelState));
         this.thickness.setSelectedIndex(modelState.getMetaData());
@@ -42,7 +42,7 @@ public class GuiStackedPlates extends GuiShape
     }
 
     @Override
-    public boolean saveSettings(ModelState modelState)
+    public boolean saveSettings(ISuperModelState modelState)
     {
         int t = this.thickness.getSelectedIndex();
         if(t  != modelState.getMetaData())

@@ -13,11 +13,12 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.movetogether.BlockSubstance;
+import grondag.hard_science.movetogether.ISuperBlock;
+import grondag.hard_science.movetogether.ISuperModelState;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -76,22 +77,22 @@ public interface PlacementItem
         return isPlacementItem(stack) ? (PlacementItem)stack.getItem() : null;
     }
     
-    public static ModelState getStackModelState(ItemStack stack)
+    public static ISuperModelState getStackModelState(ItemStack stack)
     {
-        ModelState stackState = ModelState.deserializeFromNBTIfPresent(stack.getTagCompound());
+        ISuperModelState stackState = ModelState.deserializeFromNBTIfPresent(stack.getTagCompound());
         
         //WAILA or other mods might create a stack with no NBT
         if(stackState != null) return stackState;
         
         if(stack.getItem() instanceof SuperItemBlock)
         {
-            return ((SuperBlock)((SuperItemBlock)stack.getItem()).getBlock()).getDefaultModelState();
+            return ((ISuperBlock)((SuperItemBlock)stack.getItem()).getBlock()).getDefaultModelState();
         }
         
         return null;
     }
     
-    public static void setStackModelState(ItemStack stack, ModelState modelState)
+    public static void setStackModelState(ItemStack stack, ISuperModelState modelState)
     {
         NBTTagCompound tag = stack.getTagCompound();
         if(modelState == null)
@@ -129,7 +130,7 @@ public interface PlacementItem
     
     public static BlockSubstance getStackSubstance(ItemStack stack)
     {
-        return BlockSubstance.FLEXSTONE.deserializeNBT(stack.getTagCompound());
+        return BlockSubstance.deserializeNBT(stack.getTagCompound());
     }
     
     /////////////////////////////////////////////////////
@@ -141,7 +142,7 @@ public interface PlacementItem
      * if it is an ItemBlock.  Could be null if it isn't an item block.
      * @return
      */
-    public SuperBlock getSuperBlock();
+    public ISuperBlock getSuperBlock();
     
     /** True if item places air blocks or carves empty space in CSG blocks */
     public boolean isExcavator(ItemStack placedStack);
@@ -621,10 +622,10 @@ public interface PlacementItem
         
         if(item instanceof SuperItemBlock)
         {
-            ModelState modelState = getStackModelState(stack);
+            ISuperModelState modelState = getStackModelState(stack);
             if(modelState == null) return null;
 
-            SuperBlock targetBlock = ((SuperBlock)((SuperItemBlock)stack.getItem()).getBlock());
+            ISuperBlock targetBlock = ((ISuperBlock)((SuperItemBlock)stack.getItem()).getBlock());
             
             if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
             {

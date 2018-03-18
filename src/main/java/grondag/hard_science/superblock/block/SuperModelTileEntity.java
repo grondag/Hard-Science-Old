@@ -1,7 +1,8 @@
 package grondag.hard_science.superblock.block;
 
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.movetogether.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SuperModelTileEntity extends SuperTileEntity
@@ -18,7 +19,7 @@ public class SuperModelTileEntity extends SuperTileEntity
     /** non-zero if block emits light */
     private byte lightValue = 0;
 
-    private BlockSubstance substance = BlockSubstance.FLEXSTONE;
+    private BlockSubstance substance = ModSubstances.FLEXSTONE;
     
     @Override
     public void writeModNBT(NBTTagCompound compound)
@@ -32,7 +33,7 @@ public class SuperModelTileEntity extends SuperTileEntity
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        this.substance = BlockSubstance.FLEXSTONE.deserializeNBT(compound);
+        this.substance = BlockSubstance.deserializeNBT(compound);
         this.lightValue = compound == null ? 0 : compound.getByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE);
     }
 

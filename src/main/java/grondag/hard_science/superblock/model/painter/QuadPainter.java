@@ -9,11 +9,11 @@ import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.Vertex;
 import grondag.exotic_matter.varia.Color;
-import grondag.hard_science.superblock.color.ColorMap;
-import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
-import grondag.hard_science.superblock.model.state.ModelState;
+import grondag.hard_science.movetogether.ColorMap;
+import grondag.hard_science.movetogether.ColorMap.EnumColorMap;
+import grondag.hard_science.movetogether.ISuperModelState;
+import grondag.hard_science.movetogether.ITexturePalette;
 import grondag.hard_science.superblock.texture.Textures;
-import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
@@ -40,7 +40,7 @@ public abstract class QuadPainter
      */
     protected final boolean isFullBrightnessIntended;
     
-    protected final TexturePallette texture;
+    protected final ITexturePalette texture;
     public final Surface surface;
     public final PaintLayer paintLayer;
     /** Do bitwise OR with color value to get correct alpha for rendering */
@@ -55,7 +55,7 @@ public abstract class QuadPainter
      */
     protected abstract RawQuad paintQuad(RawQuad quad);
     
-    public QuadPainter(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    public QuadPainter(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         this.surface = surface;
         this.paintLayer = paintLayer;
@@ -75,7 +75,7 @@ public abstract class QuadPainter
             this.lampRenderPass = null;
         }
         
-        TexturePallette tex = modelState.getTexture(paintLayer);
+        ITexturePalette tex = modelState.getTexture(paintLayer);
         this.texture = tex == Textures.NONE ? modelState.getTexture(PaintLayer.BASE) : tex;
         this.translucencyArgb = modelState.isTranslucent(paintLayer) ? modelState.getTranslucency().alphaARGB : 0xFF000000;
     }
@@ -209,7 +209,7 @@ public abstract class QuadPainter
         }
     }
 
-    public static QuadPainter makeNullQuadPainter(ModelState modelState, Surface surface, PaintLayer paintLayer)
+    public static QuadPainter makeNullQuadPainter(ISuperModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         return NullQuadPainter.INSTANCE;
     }
