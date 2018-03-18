@@ -283,7 +283,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
             if(this.hasModelState())
             {
                 if(this.modelState == null) this.modelState = new ModelState();
-                this.modelState.deserializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE);
+                this.modelState.deserializeNBT(tag.getCompoundTag(ModNBTTag.MACHINE_MODEL_STATE));
             }
             if(this.hasTargetPos())
             {
@@ -307,7 +307,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         tag.setLong(ModNBTTag.MACHINE_CONTROL_STATE, this.bits);
         if(this.hasModelState())
         {
-            this.modelState.serializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE);
+            tag.setTag(ModNBTTag.MACHINE_MODEL_STATE, this.modelState.serializeNBT());
         }
         if(this.hasTargetPos())
         {

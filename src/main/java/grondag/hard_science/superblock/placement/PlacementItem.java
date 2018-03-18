@@ -9,6 +9,7 @@ import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.BinaryEnumSet;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.Useful;
@@ -46,6 +47,8 @@ public interface PlacementItem
     // STATIC MEMBERS
     /////////////////////////////////////////////////////
     
+    public final static String NBT_MODEL_STATE = NBTDictionary.claim("stackModelState");
+    
     public static BinaryEnumSet<PlacementItemFeature> BENUMSET_FEATURES = new BinaryEnumSet<PlacementItemFeature>(PlacementItemFeature.class);
     
     /**
@@ -79,7 +82,9 @@ public interface PlacementItem
     
     public static ISuperModelState getStackModelState(ItemStack stack)
     {
-        ISuperModelState stackState = ModelState.deserializeFromNBTIfPresent(stack.getTagCompound());
+        ISuperModelState stackState = stack.hasTagCompound()
+                ? ModelState.deserializeFromNBTIfPresent(stack.getTagCompound().getCompoundTag(NBT_MODEL_STATE))
+                : null;
         
         //WAILA or other mods might create a stack with no NBT
         if(stackState != null) return stackState;
@@ -97,7 +102,7 @@ public interface PlacementItem
         NBTTagCompound tag = stack.getTagCompound();
         if(modelState == null)
         {
-            if(tag != null) tag.removeTag(ModNBTTag.MODEL_STATE);
+            if(tag != null) tag.removeTag(NBT_MODEL_STATE);
             return;
         }
         
@@ -107,7 +112,7 @@ public interface PlacementItem
             stack.setTagCompound(tag);
         }
         
-        modelState.serializeNBT(tag);
+        tag.setTag(NBT_MODEL_STATE, modelState.serializeNBT());
     }
     
     public static void setStackLightValue(ItemStack stack, int lightValue)
@@ -200,7 +205,10 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return EnumFacing.Axis.Y;
 
-        switch(getStackModelState(stack).orientationType())
+        ISuperModelState modelState = getStackModelState(stack);
+        if(modelState == null) return EnumFacing.Axis.Y;
+        
+        switch(modelState.orientationType())
         {
         case AXIS:
             return this.getBlockOrientationAxis(stack).axis;

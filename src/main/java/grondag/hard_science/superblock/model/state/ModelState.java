@@ -36,8 +36,7 @@ import grondag.exotic_matter.model.Transform;
 import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.render.SideShape;
-import grondag.exotic_matter.serialization.IMessagePlus;
-import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.CornerJoinBlockState;
 import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
@@ -46,7 +45,6 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
@@ -59,9 +57,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
+public class ModelState implements ISuperModelState
 {
-
+    private static final String NBT_MODEL_BITS = NBTDictionary.claim("modelState");
+    private static final String NBT_SHAPE = NBTDictionary.claim("texture");
+    
     private boolean isStatic;
     private long bits0;
     private long bits1;
@@ -94,9 +94,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return new ModelState(bits0, bits1, bits2, bits3);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#serializeToInts()
-     */
     @Override
     public int[] serializeToInts() 
     {
@@ -129,24 +126,15 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         this.bits3 = ((long)bits[6]) << 32 | (bits[7] & 0xffffffffL);    
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getBits0()
-     */
     @Override
     public long getBits0() {return this.bits0;}
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getBits1()
-     */
+
     @Override
     public long getBits1() {return this.bits1;}
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getBits2()
-     */
+
     @Override
     public long getBits2() {return this.bits2;}
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getBits3()
-     */
+
     @Override
     public long getBits3() {return this.bits3;}
 
@@ -166,15 +154,9 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isStatic()
-     */
     @Override
     public boolean isStatic() { return this.isStatic; }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setStatic(boolean)
-     */
     @Override
     public void setStatic(boolean isStatic) { this.isStatic = isStatic; }
 
@@ -200,9 +182,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#equalsIncludeStatic(java.lang.Object)
-     */
     @Override
     public boolean equalsIncludeStatic(Object obj)
     {
@@ -226,9 +205,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         if(this.hashCode != -1) this.hashCode = -1;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hashCode()
-     */
     @Override
     public int hashCode()
     {
@@ -239,9 +215,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return hashCode;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#refreshFromWorld(net.minecraft.block.state.IBlockState, net.minecraft.world.IBlockAccess, net.minecraft.util.math.BlockPos)
-     */
     @Override
     public ISuperModelState refreshFromWorld(IBlockState state, IBlockAccess world, BlockPos pos)
     {
@@ -331,18 +304,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     //  PACKER 0 ATTRIBUTES (NOT SHAPE-DEPENDENT)
     ////////////////////////////////////////////////////
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getShape()
-     */
     @Override
     public ModelShape<?> getShape()
     {
         return ModelShape.get(ModelStateData.P0_SHAPE.getValue(bits0));
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setShape(grondag.hard_science.superblock.model.state.ModelShape)
-     */
     @Override
     public void setShape(ModelShape<?> shape)
     {
@@ -355,18 +322,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getColorMap(grondag.exotic_matter.model.PaintLayer)
-     */
     @Override
     public ColorMap getColorMap(PaintLayer layer)
     {
         return BlockColorMapProvider.INSTANCE.getColorMap(ModelStateData.P0_PAINT_COLOR[layer.dynamicIndex].getValue(bits0));
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setColorMap(grondag.exotic_matter.model.PaintLayer, grondag.hard_science.superblock.color.ColorMap)
-     */
     @Override
     public void setColorMap(PaintLayer layer, ColorMap map)
     {
@@ -374,27 +335,18 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#orientationType()
-     */
     @Override
     public BlockOrientationType orientationType()
     { 
         return getShape().meshFactory().orientationType(this);
     } 
     
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getAxis()
-     */
     @Override
     public EnumFacing.Axis getAxis()
     {
         return ModelStateData.P0_AXIS.getValue(bits0);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setAxis(net.minecraft.util.EnumFacing.Axis)
-     */
     @Override
     public void setAxis(EnumFacing.Axis axis)
     {
@@ -402,18 +354,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isAxisInverted()
-     */
     @Override
     public boolean isAxisInverted()
     {
         return ModelStateData.P0_AXIS_INVERTED.getValue(bits0);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setAxisInverted(boolean)
-     */
     @Override
     public void setAxisInverted(boolean isInverted)
     {
@@ -421,18 +367,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isTranslucent(grondag.exotic_matter.model.PaintLayer)
-     */
     @Override
     public boolean isTranslucent(PaintLayer layer)
     {
         return ModelStateData.P0_IS_TRANSLUCENT[layer.dynamicIndex].getValue(bits0);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setTranslucent(grondag.exotic_matter.model.PaintLayer, boolean)
-     */
     @Override
     public void setTranslucent(PaintLayer layer, boolean isTranslucent)
     {
@@ -441,18 +381,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isMiddleLayerEnabled()
-     */
     @Override
     public boolean isMiddleLayerEnabled()
     {
         return this.getTexture(PaintLayer.MIDDLE) != Textures.NONE;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setMiddleLayerEnabled(boolean)
-     */
     @Override
     public void setMiddleLayerEnabled(boolean isEnabled)
     {
@@ -466,18 +400,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isOuterLayerEnabled()
-     */
     @Override
     public boolean isOuterLayerEnabled()
     {
         return this.getTexture(PaintLayer.OUTER) != Textures.NONE;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setOuterLayerEnabled(boolean)
-     */
     @Override
     public void setOuterLayerEnabled(boolean isEnabled)
     {
@@ -491,18 +419,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }
     }
 
-     /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getTranslucency()
-     */
     @Override
     public Translucency getTranslucency()
     {
         return ModelStateData.P0_TRANSLUCENCY.getValue(bits0);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setTranslucency(grondag.exotic_matter.model.Translucency)
-     */
     @Override
     public void setTranslucency(Translucency translucency)
     {
@@ -514,18 +436,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     //  PACKER 1 ATTRIBUTES (NOT SHAPE-DEPENDENT)
     ////////////////////////////////////////////////////
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getTexture(grondag.exotic_matter.model.PaintLayer)
-     */
     @Override
     public ITexturePalette getTexture(PaintLayer layer)
     {
         return Textures.REGISTRY.get(ModelStateData.P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setTexture(grondag.exotic_matter.model.PaintLayer, grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette)
-     */
     @Override
     public void setTexture(PaintLayer layer, ITexturePalette tex)
     {
@@ -534,18 +450,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         clearStateFlags();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isFullBrightness(grondag.exotic_matter.model.PaintLayer)
-     */
     @Override
     public boolean isFullBrightness(PaintLayer layer)
     {
         return ModelStateData.P1_PAINT_LIGHT[layer.dynamicIndex].getValue(bits1);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setFullBrightness(grondag.exotic_matter.model.PaintLayer, boolean)
-     */
     @Override
     public void setFullBrightness(PaintLayer layer, boolean isFullBrightness)
     {
@@ -558,18 +468,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     //  PACKER 2 ATTRIBUTES  (NOT SHAPE-DEPENDENT)
     ////////////////////////////////////////////////////
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getPosX()
-     */
     @Override
     public int getPosX()
     {
         return ModelStateData.P2_POS_X.getValue(bits2);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setPosX(int)
-     */
     @Override
     public void setPosX(int index)
     {
@@ -577,18 +481,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getPosY()
-     */
     @Override
     public int getPosY()
     {
         return ModelStateData.P2_POS_Y.getValue(bits2);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setPosY(int)
-     */
     @Override
     public void setPosY(int index)
     {
@@ -596,18 +494,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getPosZ()
-     */
     @Override
     public int getPosZ()
     {
         return ModelStateData.P2_POS_Z.getValue(bits2);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setPosZ(int)
-     */
     @Override
     public void setPosZ(int index)
     {
@@ -615,18 +507,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getStaticShapeBits()
-     */
     @Override
     public long getStaticShapeBits()
     {
         return ModelStateData.P2_STATIC_SHAPE_BITS.getValue(bits2);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setStaticShapeBits(long)
-     */        
     @Override
     public void setStaticShapeBits(long bits)
     {
@@ -638,9 +524,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     //  PACKER 3 ATTRIBUTES  (BLOCK FORMAT)
     ////////////////////////////////////////////////////
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getSpecies()
-     */
     @Override
     public int getSpecies()
     {
@@ -652,9 +535,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return this.hasSpecies() ? ModelStateData.P3B_SPECIES.getValue(bits3) : 0;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setSpecies(int)
-     */
     @Override
     public void setSpecies(int species)
     {
@@ -670,9 +550,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getCornerJoin()
-     */
     @Override
     public CornerJoinBlockState getCornerJoin()
     {
@@ -686,9 +563,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return CornerJoinBlockStateSelector.getJoinState(MathHelper.clamp(ModelStateData.P3B_BLOCK_JOIN.getValue(bits3), 0, CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT - 1));
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setCornerJoin(grondag.exotic_matter.world.CornerJoinBlockState)
-     */
     @Override
     public void setCornerJoin(CornerJoinBlockState join)
     {
@@ -703,9 +577,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getSimpleJoin()
-     */
     @Override
     public SimpleJoin getSimpleJoin()
     {
@@ -721,9 +592,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
                         : getCornerJoin().simpleJoin;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setSimpleJoin(grondag.exotic_matter.world.SimpleJoin)
-     */
     @Override
     public void setSimpleJoin(SimpleJoin join)
     {
@@ -747,9 +615,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getMasonryJoin()
-     */
     @Override
     public SimpleJoin getMasonryJoin()
     {
@@ -760,9 +625,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return new SimpleJoin(ModelStateData.P3B_MASONRY_JOIN.getValue(bits3));
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setMasonryJoin(grondag.exotic_matter.world.SimpleJoin)
-     */
     @Override
     public void setMasonryJoin(SimpleJoin join)
     {
@@ -786,18 +648,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         invalidateHashCode();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getAxisRotation()
-     */
     @Override
     public Rotation getAxisRotation()
     {
         return ModelStateData.P3B_AXIS_ROTATION.getValue(bits3);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setAxisRotation(grondag.exotic_matter.world.Rotation)
-     */
     @Override
     public void setAxisRotation(Rotation rotation)
     {
@@ -822,9 +678,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     //  PACKER 3 ATTRIBUTES  (MULTI-BLOCK FORMAT)
     ////////////////////////////////////////////////////
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getMultiBlockBits()
-     */
     @Override
     public long getMultiBlockBits()
     {
@@ -834,9 +687,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return bits3;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setMultiBlockBits(long)
-     */
     @Override
     public void setMultiBlockBits(long bits)
     {
@@ -851,9 +701,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     //  PACKER 3 ATTRIBUTES  (FLOWING TERRAIN FORMAT)
     ////////////////////////////////////////////////////
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getTerrainState()
-     */
     @Override
     public TerrainState getTerrainState()
     {
@@ -863,9 +710,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return new TerrainState(ModelStateData.P3F_FLOW_JOIN.getValue(bits3));
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setTerrainState(grondag.hard_science.superblock.terrain.TerrainState)
-     */
     @Override
     public void setTerrainState(TerrainState flowState)
     {
@@ -881,9 +725,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     //  SHAPE/STATE-DEPENDENT CONVENIENCE METHODS
     ////////////////////////////////////////////////////
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getRenderPass(grondag.exotic_matter.model.PaintLayer)
-     */
     @Override
     public RenderPass getRenderPass(PaintLayer layer)
     {
@@ -911,9 +752,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getRenderPassSet()
-     */
     @Override
     public RenderPassSet getRenderPassSet()
     {
@@ -921,9 +759,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
        return STATE_ENUM_RENDER_PASS_SET.getValue(this.stateFlags);
     }
     
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasAxis()
-     */
     @Override
     public boolean hasAxis()
     {
@@ -931,9 +766,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return (this.stateFlags & STATE_FLAG_HAS_AXIS) == STATE_FLAG_HAS_AXIS;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasAxisOrientation()
-     */
     @Override
     public boolean hasAxisOrientation()
     {
@@ -941,18 +773,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return (this.stateFlags & STATE_FLAG_HAS_AXIS_ORIENTATION) == STATE_FLAG_HAS_AXIS_ORIENTATION;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasLampSurface()
-     */
     @Override
     public boolean hasLampSurface()
     {
         return this.getShape().meshFactory().hasLampSurface(this);
     }
     
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasTranslucentGeometry()
-     */
     @Override
     public boolean hasTranslucentGeometry()
     {
@@ -960,9 +786,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return (this.stateFlags & STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY) == STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasAxisRotation()
-     */
     @Override
     public boolean hasAxisRotation()
     {
@@ -970,9 +793,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return (this.stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == STATE_FLAG_HAS_AXIS_ROTATION;
     }
     
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasMasonryJoin()
-     */
     @Override
     public boolean hasMasonryJoin()
     {
@@ -980,9 +800,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return (this.stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == STATE_FLAG_NEEDS_MASONRY_JOIN;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasTextureRotation()
-     */
     @Override
     public boolean hasTextureRotation()
     {
@@ -990,9 +807,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return (this.stateFlags & STATE_FLAG_NEEDS_TEXTURE_ROTATION) == STATE_FLAG_NEEDS_TEXTURE_ROTATION;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#hasSpecies()
-     */
     @Override
     public boolean hasSpecies()
     {
@@ -1000,18 +814,12 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#metaUsage()
-     */
     @Override
     public MetaUsage metaUsage()
     {
         return this.getShape().metaUsage();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isAxisOrthogonalToPlacementFace()
-     */
     @Override
     public boolean isAxisOrthogonalToPlacementFace() 
     {
@@ -1019,9 +827,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     }
 
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getMetaData()
-     */
     @Override
     public int getMetaData()
     {
@@ -1040,9 +845,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }            
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#setMetaData(int)
-     */
     @Override
     public void setMetaData(int meta)
     {
@@ -1062,53 +864,36 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         }            
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isAdditive()
-     */
     @Override
     public boolean isAdditive()
     {
         return this.getShape().meshFactory().isAdditive();
     }
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#sideShape(net.minecraft.util.EnumFacing)
-     */
+    
     @Override
     public SideShape sideShape(EnumFacing side)
     {
         return getShape().meshFactory().sideShape(this, side);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#isCube()
-     */
     @Override
     public boolean isCube()
     {
         return getShape().meshFactory().isCube(this);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#rotateBlock(net.minecraft.block.state.IBlockState, net.minecraft.world.World, net.minecraft.util.math.BlockPos, net.minecraft.util.EnumFacing, grondag.hard_science.superblock.block.SuperBlock)
-     */
     @Override
     public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, ISuperBlock block)
     {
         return getShape().meshFactory().rotateBlock(blockState, world, pos, axis, block, this);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#geometricSkyOcclusion()
-     */
     @Override
     public int geometricSkyOcclusion()
     {
         return getShape().meshFactory().geometricSkyOcclusion(this);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#doShapeAndAppearanceMatch(grondag.hard_science.superblock.model.state.ModelState)
-     */
     @Override
     public boolean doShapeAndAppearanceMatch(ISuperModelState other)
     {
@@ -1117,9 +902,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
                 && (this.bits2 & ModelStateData.P2_APPEARANCE_COMPARISON_MASK) == (other.getBits2() & ModelStateData.P2_APPEARANCE_COMPARISON_MASK);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#doesAppearanceMatch(grondag.hard_science.superblock.model.state.ModelState)
-     */
     @Override
     public boolean doesAppearanceMatch(ISuperModelState other)
     {
@@ -1127,9 +909,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
                 && (this.bits1 & ModelStateData.P1_APPEARANCE_COMPARISON_MASK) == (other.getBits1() & ModelStateData.P1_APPEARANCE_COMPARISON_MASK);
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#geometricState()
-     */
     @Override
     public ISuperModelState geometricState()
     {
@@ -1166,9 +945,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#collisionBoxes(net.minecraft.util.math.BlockPos)
-     */
     @Override
     public List<AxisAlignedBB> collisionBoxes(BlockPos offset)
     {
@@ -1177,7 +953,7 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
 
     public static @Nullable ModelState deserializeFromNBTIfPresent(NBTTagCompound tag)
     {
-        if(tag != null && tag.hasKey(ModNBTTag.MODEL_STATE))
+        if(tag != null && tag.hasKey(NBT_MODEL_BITS))
         {
             ModelState result = new ModelState();
             result.deserializeNBT(tag);
@@ -1186,27 +962,18 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         return null;
     }
     
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#rotateFace(net.minecraft.util.EnumFacing)
-     */
     @Override
     public EnumFacing rotateFace(EnumFacing face)
     {
         return Transform.rotateFace(this, face);
     }
     
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getMatrix4f()
-     */
     @Override
     public Matrix4f getMatrix4f()
     {
         return Transform.getMatrix4f(this);
     }
     
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#getMatrix4d()
-     */
     @Override
     public Matrix4d getMatrix4d()
     {
@@ -1214,54 +981,34 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
     }
     
     
-    //TODO: serialize shape by system name to allow pack/mod changes in same world
-    
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#deserializeNBT(net.minecraft.nbt.NBTTagCompound)
-     */
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.deserializeNBT(tag, ModNBTTag.MODEL_STATE);
-    }
-    
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#deserializeNBT(net.minecraft.nbt.NBTTagCompound, java.lang.String)
-     */
-    @Override
-    public void deserializeNBT(NBTTagCompound tag, String tagName)
-    {
-        int[] stateBits = tag.getIntArray(tagName);
+        int[] stateBits = tag.getIntArray(NBT_MODEL_BITS);
         if(stateBits == null || stateBits.length != 8)
         {
             Log.warn("Bad or missing data encounter during ModelState NBT deserialization.");
             return;
         }
         this.deserializeFromInts(stateBits);
+        
+        // shape is serialized by name because registered shapes can change if mods/config change
+        ModelShape<?> shape = ModelShape.get(tag.getString(NBT_SHAPE));
+        if(shape != null) this.setShape(shape);
+        
         this.clearStateFlags();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#serializeNBT(net.minecraft.nbt.NBTTagCompound)
-     */
+
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        this.serializeNBT(tag, ModNBTTag.MODEL_STATE);
+        tag.setIntArray(NBT_MODEL_BITS, this.serializeToInts());
+        
+        // shape is serialized by name because registered shapes can change if mods/config change
+        tag.setString(NBT_SHAPE, this.getShape().systemName());
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#serializeNBT(net.minecraft.nbt.NBTTagCompound, java.lang.String)
-     */
-    @Override
-    public void serializeNBT(NBTTagCompound tag, String tagName)
-    {
-        tag.setIntArray(tagName, this.serializeToInts());
-    }
-
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#fromBytes(net.minecraft.network.PacketBuffer)
-     */
     @Override
     public void fromBytes(PacketBuffer pBuff)
     {
@@ -1271,9 +1018,6 @@ public class ModelState implements ISuperModelState, IReadWriteNBT, IMessagePlus
         this.bits3 = pBuff.readLong();
     }
 
-    /* (non-Javadoc)
-     * @see grondag.hard_science.superblock.model.state.ISuperModelState#toBytes(net.minecraft.network.PacketBuffer)
-     */
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
