@@ -17,23 +17,6 @@ public class ModTextures
 {
     
     //======================================================================
-    //  TILES - REGULAR
-    //======================================================================
-    public static final ITexturePalette BLOCK_COBBLE = TexturePaletteRegistry.addTexturePallette("cobble", "cobble", 
-            new TexturePaletteSpec().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
-            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.STATIC_TILES));
-    public static final ITexturePalette BLOCK_COBBLE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BLOCK_COBBLE);
-   
-    public static final ITexturePalette BLOCK_NOISE_STRONG = TexturePaletteRegistry.addTexturePallette("noise_strong", "noise_strong", new TexturePaletteSpec(BLOCK_COBBLE));
-    public static final ITexturePalette BLOCK_NOISE_STRONG_ZOOM = TexturePaletteRegistry.addZoomedPallete(BLOCK_NOISE_STRONG);
-    
-    public static final ITexturePalette BLOCK_NOISE_MODERATE = TexturePaletteRegistry.addTexturePallette("noise_moderate", "noise_moderate", new TexturePaletteSpec(BLOCK_COBBLE));
-    public static final ITexturePalette BLOCK_NOISE_MODERATE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BLOCK_NOISE_MODERATE);
-    
-    public static final ITexturePalette BLOCK_NOISE_SUBTLE = TexturePaletteRegistry.addTexturePallette("noise_subtle", "noise_subtle", new TexturePaletteSpec(BLOCK_COBBLE));
-    public static final ITexturePalette BLOCK_NOISE_SUBTLE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BLOCK_NOISE_SUBTLE);
-    
-    //======================================================================
     //  BORDERS
     //======================================================================
     

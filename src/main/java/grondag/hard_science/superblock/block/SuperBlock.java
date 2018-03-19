@@ -19,22 +19,22 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
+import grondag.exotic_matter.model.ModelState;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.Translucency;
+import grondag.exotic_matter.model.WorldLightOpacity;
 import grondag.exotic_matter.model.ColorMap.EnumColorMap;
+import grondag.exotic_matter.model.varia.ParticleDiggingSuperBlock;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.varia.Color;
+import grondag.exotic_matter.varia.SuperBlockBorderMatch;
 import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.superblock.model.state.ModelState;
-import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.varia.BlockTests;
-import grondag.hard_science.superblock.varia.ParticleDiggingSuperBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
@@ -145,7 +145,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
     @Override
     public IBlockTest<ISuperModelState> blockJoinTest(IBlockAccess worldIn, IBlockState state, BlockPos pos, ISuperModelState modelState)
     {
-        return new BlockTests.SuperBlockBorderMatch(this, modelState, true);
+        return new SuperBlockBorderMatch(this, modelState, true);
     }
     
     @Override

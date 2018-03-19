@@ -12,11 +12,11 @@ import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.varia.BlockTests;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
+import grondag.exotic_matter.varia.SuperBlockBorderMatch;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.NeighborBlocks;
 import grondag.exotic_matter.world.Rotation;
@@ -220,7 +220,7 @@ public class CubicPlacementHandler extends PlacementHandler
             int speciesInUseFlags = 0;
 
             NeighborBlocks<ISuperModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
-            NeighborBlocks<ISuperModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
+            NeighborBlocks<ISuperModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            
             {
@@ -266,7 +266,7 @@ public class CubicPlacementHandler extends PlacementHandler
             
             // try to match an adjacent block
             NeighborBlocks<ISuperModelState> neighbors = new NeighborBlocks<>(worldIn, posPlaced, ModelStateData.TEST_GETTER_STATIC);
-            NeighborBlocks<ISuperModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, myModelState, false));
+            NeighborBlocks<ISuperModelState>.NeighborTestResults results = neighbors.getNeighborTestResults(new SuperBlockBorderMatch(myBlock, myModelState, false));
             
             for(EnumFacing face : EnumFacing.VALUES)            
             {

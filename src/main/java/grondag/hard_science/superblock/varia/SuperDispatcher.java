@@ -15,6 +15,8 @@ import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.RenderLayout;
 import grondag.exotic_matter.model.ShapeMeshGenerator;
+import grondag.exotic_matter.model.painter.QuadPainter;
+import grondag.exotic_matter.model.painter.QuadPainterFactory;
 import grondag.exotic_matter.render.QuadBakery;
 import grondag.exotic_matter.render.QuadContainer;
 import grondag.exotic_matter.render.QuadHelper;
@@ -26,12 +28,9 @@ import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.CraftingItem;
 import grondag.hard_science.superblock.items.SuperModelItemOverrideList;
-import grondag.hard_science.superblock.model.painter.QuadPainter;
-import grondag.hard_science.superblock.model.painter.QuadPainterFactory;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -142,7 +141,7 @@ public class SuperDispatcher
             for(RawQuad q : quads)
             {
                 // arbitrary choice - just needs to be a simple non-null texture
-                q.textureName = ModTextures.BLOCK_COBBLE.getSampleTextureName();
+                q.textureName = grondag.exotic_matter.init.ModTextures.BLOCK_COBBLE.getSampleTextureName();
              
                 // Need to scale UV on non-cubic surfaces to be within a 1 block boundary.
                 // This causes breaking textures to be scaled to normal size.

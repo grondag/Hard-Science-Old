@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.block;
 
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
-import grondag.hard_science.superblock.model.state.WorldLightOpacity;
+import grondag.exotic_matter.model.WorldLightOpacity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;

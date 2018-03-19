@@ -8,6 +8,7 @@ import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.Luminance;
 import grondag.exotic_matter.model.ModShapes;
+import grondag.exotic_matter.model.ModelState;
 import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.TerrainBlockRegistry;
 import grondag.hard_science.Configurator;
@@ -25,7 +26,6 @@ import grondag.hard_science.machines.impl.processing.MicronizerBlock;
 import grondag.hard_science.machines.impl.production.PhotoElectricBlock;
 import grondag.hard_science.machines.impl.production.SolarCableBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
-import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.terrain.DepletedFluidBlock;
 import grondag.hard_science.superblock.terrain.TerrainCubicBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
@@ -84,7 +84,7 @@ public class ModBlocks
         
         workingModel = new ModelState();
         workingModel.setShape(ModShapes.CUBE);
-        workingModel.setTexture(PaintLayer.BASE, ModTextures.BLOCK_COBBLE);
+        workingModel.setTexture(PaintLayer.BASE, grondag.exotic_matter.init.ModTextures.BLOCK_COBBLE);
         workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
         event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", ModSubstances.BASALT, workingModel));
 
