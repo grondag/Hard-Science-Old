@@ -13,6 +13,7 @@ import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.model.ColorMap.EnumColorMap;
 import grondag.hard_science.Configurator;
@@ -36,7 +37,6 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -477,9 +477,9 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             TexturePicker t = textureTabBar[layer.dynamicIndex];
 
             t.clear();
-            t.addAll(Textures.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
+            t.addAll(TexturePaletteRegistry.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
             ITexturePalette tex = modelState.getTexture(layer);
-            t.setSelected(tex == Textures.NONE ? null : modelState.getTexture(layer));
+            t.setSelected(tex == TexturePaletteRegistry.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
             t.borderColor = modelState.isFullBrightness(layer)
                     ? modelState.getColorMap(layer).getColor(EnumColorMap.LAMP)

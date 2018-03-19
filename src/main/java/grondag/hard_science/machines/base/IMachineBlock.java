@@ -6,6 +6,7 @@ import grondag.exotic_matter.model.ISuperBlock;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
@@ -16,7 +17,6 @@ import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.texture.Textures;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
@@ -237,6 +237,6 @@ public interface IMachineBlock
     @SideOnly(Side.CLIENT)
     public default TextureAtlasSprite getSymbolSprite()
     {
-        return Textures.DECAL_LARGE_SQUARE.getSampleSprite();
+        return ModTextures.DECAL_LARGE_SQUARE.getSampleSprite();
     }
 }

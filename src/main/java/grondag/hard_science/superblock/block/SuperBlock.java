@@ -10,6 +10,8 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.ConfigXM.BlockSettings.ProbeInfoLevel;
 import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ColorMap;
@@ -25,7 +27,6 @@ import grondag.exotic_matter.varia.Color;
 import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModSubstances;
@@ -291,16 +292,16 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
         {
             tooltip.add(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
             tooltip.add(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
-            tooltip.add(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
+            tooltip.add(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).displayName());
             if(modelState.isOuterLayerEnabled())
             {
                 tooltip.add(I18n.translateToLocal("label.outer_color") + ": " + modelState.getColorMap(PaintLayer.OUTER).localizedName());
-                tooltip.add(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).localizedName());
+                tooltip.add(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).displayName());
             }
             if(modelState.isMiddleLayerEnabled())
             {
                 tooltip.add(I18n.translateToLocal("label.middle_color") + ": " + modelState.getColorMap(PaintLayer.MIDDLE).localizedName());
-                tooltip.add(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).localizedName());
+                tooltip.add(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).displayName());
             }
             if(modelState.hasSpecies()) 
             {
@@ -332,23 +333,23 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
         {
             probeInfo.text(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
             probeInfo.text(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
-            probeInfo.text(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
+            probeInfo.text(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).displayName());
             if(modelState.isOuterLayerEnabled())
             {
                 probeInfo.text(I18n.translateToLocal("label.outer_color") + ": " + modelState.getColorMap(PaintLayer.OUTER).localizedName());
-                probeInfo.text(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).displayName());
             }
             if(modelState.isMiddleLayerEnabled())
             {
                 probeInfo.text(I18n.translateToLocal("label.middle_color") + ": " + modelState.getColorMap(PaintLayer.MIDDLE).localizedName());
-                probeInfo.text(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).displayName());
             }
             if(modelState.hasSpecies()) 
             {
                 probeInfo.text(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
             }
             
-            if(Configurator.BLOCKS.probeInfoLevel != ProbeInfoLevel.BASIC)
+            if(ConfigXM.BLOCKS.probeInfoLevel != ProbeInfoLevel.BASIC)
             {
                 if(modelState.hasAxis())
                 {
@@ -367,7 +368,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
         }
         probeInfo.text(I18n.translateToLocal("label.material") + ": " + this.getSubstance(blockState, world, data.getPos()).localizedName());
         
-        if(Configurator.BLOCKS.probeInfoLevel == ProbeInfoLevel.DEBUG)
+        if(ConfigXM.BLOCKS.probeInfoLevel == ProbeInfoLevel.DEBUG)
         {
             probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(ISuperBlock.META));
 

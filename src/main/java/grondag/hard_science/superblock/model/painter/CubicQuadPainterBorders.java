@@ -37,8 +37,6 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
      */
     private final static FaceQuadInputs NO_BORDER = new FaceQuadInputs(TEXTURE_JOIN_ALL_NO_CORNERS, Rotation.ROTATE_NONE, false, false);
     
-    public final static int TEXTURE_COUNT = 14;
-    public final static int TEXTURE_BLOCK_SIZE = 16;
     
     protected final CornerJoinBlockState bjs;
     

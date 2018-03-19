@@ -14,9 +14,6 @@ import net.minecraft.util.EnumFacing;
 
 public class CubicQuadPainterMasonry extends CubicQuadPainter
 {
-    public static int TEXTURE_COUNT = Textures.values().length;
-    public static int TEXTURE_BLOCK_SIZE = 8;
-    
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][SimpleJoinFaceState.values().length];
 
     protected final SimpleJoin bjs;

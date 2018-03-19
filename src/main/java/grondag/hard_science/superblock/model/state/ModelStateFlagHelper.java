@@ -12,8 +12,8 @@ import grondag.exotic_matter.model.RenderLayout;
 import grondag.exotic_matter.model.RenderPassSet;
 import grondag.exotic_matter.model.ShapeMeshGenerator;
 import grondag.exotic_matter.model.StateFormat;
+import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.render.RenderPass;
-import grondag.hard_science.superblock.texture.Textures;
 
 /**
  * Populates state flags for a given model state.
@@ -145,7 +145,7 @@ public class ModelStateFlagHelper
         }
         
         ITexturePalette texOverlay = state.getTexture(PaintLayer.MIDDLE);
-        if(texOverlay != Textures.NONE)
+        if(texOverlay != TexturePaletteRegistry.NONE)
         {
             flags |= texOverlay.stateFlags();
             index |= IS_MIDDLE_PRESENT;
@@ -153,7 +153,7 @@ public class ModelStateFlagHelper
         }
 
         texOverlay = state.getTexture(PaintLayer.OUTER);
-        if(texOverlay != Textures.NONE)
+        if(texOverlay != TexturePaletteRegistry.NONE)
         {
             flags |= texOverlay.stateFlags();
             index |= IS_OUTER_PRESENT;

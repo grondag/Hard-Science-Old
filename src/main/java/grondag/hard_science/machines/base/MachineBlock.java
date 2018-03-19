@@ -14,10 +14,10 @@ import grondag.exotic_matter.model.Translucency;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.model.state.ModelState;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.texture.Textures;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
@@ -71,10 +71,10 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     {
         ISuperModelState modelState = new ModelState();
         modelState.setShape(grondag.hard_science.init.ModShapes.MACHINE);
-        modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
+        modelState.setTexture(PaintLayer.BASE, ModTextures.BLOCK_NOISE_MODERATE);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
 
-        modelState.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
+        modelState.setTexture(PaintLayer.LAMP, ModTextures.BLOCK_NOISE_SUBTLE);
         modelState.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.PURE_NETURAL, Luminance.EXTRA_DARK));
         
         if(decalTex != null)

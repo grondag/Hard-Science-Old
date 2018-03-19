@@ -19,6 +19,7 @@ import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRadialRende
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;
@@ -27,7 +28,6 @@ import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.moving.RasterFont;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -721,14 +721,14 @@ public class MachineControlRenderer
         else 
         {
             MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, (int)(WorldInfo.currentTimeMillis() & 2047) * 360 / 2048, 30, 
-                    Textures.MACHINE_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
+                    ModTextures.MACHINE_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
 
             if(te.clientState().controlState.getMachineState() == MachineState.THINKING 
                     && te.clientState().bufferInfo.hasFailureCause() && MachineControlRenderer.warningLightBlinkOn())
             {
                 MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), 
-                        Textures.DECAL_MATERIAL_SHORTAGE.getSampleSprite(), alpha << 24 | 0xFFFF40, Rotation.ROTATE_NONE);
-                MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), alpha << 24 | 0xFFFF40, Rotation.ROTATE_NONE);
+                        ModTextures.DECAL_MATERIAL_SHORTAGE.getSampleSprite(), alpha << 24 | 0xFFFF40, Rotation.ROTATE_NONE);
+                MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, ModTextures.MACHINE_GAUGE_INNER.getSampleSprite(), alpha << 24 | 0xFFFF40, Rotation.ROTATE_NONE);
             }
         }
     }
@@ -757,18 +757,18 @@ public class MachineControlRenderer
             final int alphaShifted = alpha << 24;
             
             // render marks
-            MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
+            MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, ModTextures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
             // render level
             int arcLength = (int)(mpi.deviceDrawWatts() * 270 / mpi.maxDeviceDrawWatts());
-            renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | 0xFFFFBF);
+            renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, ModTextures.MACHINE_GAUGE_MAIN, alphaShifted | 0xFFFFBF);
 
             if(mpi.isFailureCause() && warningLightBlinkOn())
             {
-                renderSpriteInBounds(tessellator, buffer, bounds,Textures.MACHINE_GAUGE_INNER.getSampleSprite(), alphaShifted | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
+                renderSpriteInBounds(tessellator, buffer, bounds,ModTextures.MACHINE_GAUGE_INNER.getSampleSprite(), alphaShifted | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
             }
             
-            renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), Textures.DECAL_ELECTRICITY.getSampleSprite(), alphaShifted | ModModels.COLOR_POWER, Rotation.ROTATE_NONE); 
+            renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), ModTextures.DECAL_ELECTRICITY.getSampleSprite(), alphaShifted | ModModels.COLOR_POWER, Rotation.ROTATE_NONE); 
 
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
                     new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.77, bounds.width(), bounds.height() * 0.25),
@@ -796,7 +796,7 @@ public class MachineControlRenderer
         final int alphaShifted = alpha << 24;
         
         // render marks
-        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), alphaShifted | 0xFFFFFF, Rotation.ROTATE_NONE);
+        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, ModTextures.MACHINE_GAGUE_MARKS.getSampleSprite(), alphaShifted | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         float output = mpi.generationWatts();
         
@@ -804,9 +804,9 @@ public class MachineControlRenderer
         {
             // render level
             int arcLength = (int)(output * 270 / mpi.maxGenerationWatts());
-            renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, alphaShifted | ModModels.COLOR_FUEL_CELL);
+            renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, ModTextures.MACHINE_GAUGE_MAIN, alphaShifted | ModModels.COLOR_FUEL_CELL);
         }
-        renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), Textures.DECAL_FLAME.getSampleSprite(), alphaShifted | ModModels.COLOR_FUEL_CELL, Rotation.ROTATE_NONE); 
+        renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), ModTextures.DECAL_FLAME.getSampleSprite(), alphaShifted | ModModels.COLOR_FUEL_CELL, Rotation.ROTATE_NONE); 
 
         renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
                 new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
@@ -838,13 +838,13 @@ public class MachineControlRenderer
     {
         
         // render background
-        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_POWER_BACKGROUND.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
+        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, ModTextures.MACHINE_POWER_BACKGROUND.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         // render in/out level
         if(xmpi.netStorageWatts() > 0 && xmpi.maxChargeWatts() > 0)
         {
             int arcLength = Math.min(180, (int)(xmpi.netStorageWatts() * 180 / xmpi.maxChargeWatts()));
-            renderRadialSprite(tessellator, buffer, bounds, 270, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
+            renderRadialSprite(tessellator, buffer, bounds, 270, arcLength, ModTextures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
                     MachinePower.formatPower(Math.round(xmpi.netStorageWatts()), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
@@ -852,7 +852,7 @@ public class MachineControlRenderer
         else if(xmpi.netStorageWatts() < 0 && xmpi.maxDischargeWatts() > 0)
         {
             int arcLength = (int)(-xmpi.netStorageWatts() * 180 / xmpi.maxDischargeWatts());
-            renderRadialSprite(tessellator, buffer, bounds, 450 - arcLength, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
+            renderRadialSprite(tessellator, buffer, bounds, 450 - arcLength, arcLength, ModTextures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
                     MachinePower.formatPower((long) -xmpi.netStorageWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
@@ -862,7 +862,7 @@ public class MachineControlRenderer
         long j = xmpi.storedEnergyJoules();
         if(j > 0)
         {
-            EnhancedSprite sprite = Textures.MACHINE_POWER_FOREGROUND.getSampleSprite();
+            EnhancedSprite sprite = ModTextures.MACHINE_POWER_FOREGROUND.getSampleSprite();
             
             buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);   
             double right = POWER_LEFT + POWER_WIDTH * j / xmpi.maxStoredEnergyJoules();
@@ -894,7 +894,7 @@ public class MachineControlRenderer
             duration = statusState.getMaxBacklog();
             remaining = statusState.getCurrentBacklog();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, Textures.MACHINE_GAUGE_MAIN, alpha << 24 | 0x40FF40);
+            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, ModTextures.MACHINE_GAUGE_MAIN, alpha << 24 | 0x40FF40);
         }
 
         MachineControlState controlState = te.clientState().controlState;
@@ -903,7 +903,7 @@ public class MachineControlRenderer
             duration = controlState.getJobDurationTicks();
             remaining = controlState.getJobRemainingTicks();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, Textures.MACHINE_GAUGE_INNER, alpha << 24 | 0x40FFFF);
+            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, ModTextures.MACHINE_GAUGE_INNER, alpha << 24 | 0x40FFFF);
         }
     }
 
@@ -1211,7 +1211,7 @@ public class MachineControlRenderer
         if(!mte.clientState().isRedstoneControlEnabled()) 
         {
             MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, boundsRedstone, 
-                    Textures.DECAL_NO.getSampleSprite(), (displayAlpha << 24) | ModModels.COLOR_NO, Rotation.ROTATE_NONE);
+                    ModTextures.DECAL_NO.getSampleSprite(), (displayAlpha << 24) | ModModels.COLOR_NO, Rotation.ROTATE_NONE);
         }
     }
 }

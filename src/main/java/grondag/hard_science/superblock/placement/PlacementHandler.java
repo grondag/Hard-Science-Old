@@ -3,12 +3,12 @@ package grondag.hard_science.superblock.placement;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.HorizontalFace;
 import grondag.exotic_matter.world.IBlockRegion;
-import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
@@ -471,14 +471,14 @@ public abstract class PlacementHandler
         {
             int adjacentSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
             if(adjacentSpecies >= 0 && adjacentSpecies <= 15) adjacentCount[adjacentSpecies]++;
-            if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
+            if(checkCount++ >= ConfigXM.BLOCKS.maxPlacementCheckCount) break;
         }
         
         for(BlockPos pos : region.surfacePositions())
         {
             int interiorSpecies = SuperBlockHelper.getJoinableSpecies(world, pos, withBlockState, withModelState);
             if(interiorSpecies >= 0 && interiorSpecies <= 15) surfaceCount[interiorSpecies]++;
-            if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
+            if(checkCount++ >= ConfigXM.BLOCKS.maxPlacementCheckCount) break;
         }
 
         if(shouldBreak)

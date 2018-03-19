@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -14,7 +15,6 @@ import grondag.hard_science.simulator.resource.IResourcePredicate;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.storage.FluidContainer;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,7 +40,7 @@ public class ModularTankBlock extends MachineBlock
     
     public ModularTankBlock(String name, int kL, boolean dedicated, IResourcePredicate<StorageTypeFluid> predicate)
     {
-        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_CHANNEL_DOTS));
+        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_CHANNEL_DOTS));
         this.kLcapacity = kL;
         this.dedicated = dedicated;
         this.predicate = predicate;
@@ -66,7 +66,7 @@ public class ModularTankBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return Textures.DECAL_DRIP.getSampleSprite();
+        return ModTextures.DECAL_DRIP.getSampleSprite();
     }
     
     @Override

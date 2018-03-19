@@ -3,17 +3,17 @@ package grondag.hard_science.superblock.model.painter;
 import java.util.List;
 
 import grondag.exotic_matter.model.ColorMap;
+import grondag.exotic_matter.model.ColorMap.EnumColorMap;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.PaintLayer;
-import grondag.exotic_matter.model.ColorMap.EnumColorMap;
+import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.Vertex;
 import grondag.exotic_matter.varia.Color;
-import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
@@ -76,7 +76,7 @@ public abstract class QuadPainter
         }
         
         ITexturePalette tex = modelState.getTexture(paintLayer);
-        this.texture = tex == Textures.NONE ? modelState.getTexture(PaintLayer.BASE) : tex;
+        this.texture = tex == TexturePaletteRegistry.NONE ? modelState.getTexture(PaintLayer.BASE) : tex;
         this.translucencyArgb = modelState.isTranslucent(paintLayer) ? modelState.getTranslucency().alphaARGB : 0xFF000000;
     }
     

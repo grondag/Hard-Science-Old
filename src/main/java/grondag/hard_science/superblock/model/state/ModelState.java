@@ -13,12 +13,14 @@ import static grondag.exotic_matter.model.ModelStateData.STATE_FLAG_NEEDS_SPECIE
 import static grondag.exotic_matter.model.ModelStateData.STATE_FLAG_NEEDS_TEXTURE_ROTATION;
 import static grondag.exotic_matter.model.ModelStateData.TEST_GETTER_STATIC;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 
+import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.BlockOrientationType;
 import grondag.exotic_matter.model.ColorMap;
@@ -32,6 +34,7 @@ import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.RenderPassSet;
 import grondag.exotic_matter.model.StateFormat;
 import grondag.exotic_matter.model.TerrainState;
+import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.model.Transform;
 import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.render.RenderPass;
@@ -43,9 +46,8 @@ import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
 import grondag.exotic_matter.world.NeighborBlocks;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
-import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.texture.Textures;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -384,38 +386,38 @@ public class ModelState implements ISuperModelState
     @Override
     public boolean isMiddleLayerEnabled()
     {
-        return this.getTexture(PaintLayer.MIDDLE) != Textures.NONE;
+        return this.getTexture(PaintLayer.MIDDLE) != TexturePaletteRegistry.NONE;
     }
 
     @Override
     public void setMiddleLayerEnabled(boolean isEnabled)
     {
-        if(isEnabled && this.getTexture(PaintLayer.MIDDLE) == Textures.NONE)
+        if(isEnabled && this.getTexture(PaintLayer.MIDDLE) == TexturePaletteRegistry.NONE)
         {
-            this.setTexture(PaintLayer.MIDDLE, Textures.BLOCK_NOISE_STRONG);
+            this.setTexture(PaintLayer.MIDDLE, ModTextures.BLOCK_NOISE_STRONG);
         }
-        else if(!isEnabled && this.getTexture(PaintLayer.MIDDLE) != Textures.NONE)
+        else if(!isEnabled && this.getTexture(PaintLayer.MIDDLE) != TexturePaletteRegistry.NONE)
         {
-            this.setTexture(PaintLayer.MIDDLE, Textures.NONE);
+            this.setTexture(PaintLayer.MIDDLE, TexturePaletteRegistry.NONE);
         }
     }
 
     @Override
     public boolean isOuterLayerEnabled()
     {
-        return this.getTexture(PaintLayer.OUTER) != Textures.NONE;
+        return this.getTexture(PaintLayer.OUTER) != TexturePaletteRegistry.NONE;
     }
 
     @Override
     public void setOuterLayerEnabled(boolean isEnabled)
     {
-        if(isEnabled && this.getTexture(PaintLayer.OUTER) == Textures.NONE)
+        if(isEnabled && this.getTexture(PaintLayer.OUTER) == TexturePaletteRegistry.NONE)
         {
-            this.setTexture(PaintLayer.OUTER, Textures.BLOCK_NOISE_STRONG);
+            this.setTexture(PaintLayer.OUTER, ModTextures.BLOCK_NOISE_STRONG);
         }
-        else if(!isEnabled && this.getTexture(PaintLayer.OUTER) != Textures.NONE)
+        else if(!isEnabled && this.getTexture(PaintLayer.OUTER) != TexturePaletteRegistry.NONE)
         {
-            this.setTexture(PaintLayer.OUTER, Textures.NONE);
+            this.setTexture(PaintLayer.OUTER, TexturePaletteRegistry.NONE);
         }
     }
 
@@ -439,7 +441,7 @@ public class ModelState implements ISuperModelState
     @Override
     public ITexturePalette getTexture(PaintLayer layer)
     {
-        return Textures.REGISTRY.get(ModelStateData.P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
+        return TexturePaletteRegistry.get(ModelStateData.P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
     }
 
     @Override
@@ -529,7 +531,7 @@ public class ModelState implements ISuperModelState
     {
         this.populateStateFlagsIfNeeded();
 
-        if(Configurator.BLOCKS.debugModelState && !this.hasSpecies())
+        if(ConfigXM.BLOCKS.debugModelState && !this.hasSpecies())
             Log.warn("getSpecies on model state does not apply for shape");
 
         return this.hasSpecies() ? ModelStateData.P3B_SPECIES.getValue(bits3) : 0;
@@ -540,7 +542,7 @@ public class ModelState implements ISuperModelState
     {
         this.populateStateFlagsIfNeeded();
 
-        if(Configurator.BLOCKS.debugModelState && !this.hasSpecies())
+        if(ConfigXM.BLOCKS.debugModelState && !this.hasSpecies())
             Log.warn("setSpecies on model state does not apply for shape");
 
         if(this.hasSpecies())
@@ -553,7 +555,7 @@ public class ModelState implements ISuperModelState
     @Override
     public CornerJoinBlockState getCornerJoin()
     {
-        if(Configurator.BLOCKS.debugModelState)
+        if(ConfigXM.BLOCKS.debugModelState)
         {
             populateStateFlagsIfNeeded();
             if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
@@ -566,7 +568,7 @@ public class ModelState implements ISuperModelState
     @Override
     public void setCornerJoin(CornerJoinBlockState join)
     {
-        if(Configurator.BLOCKS.debugModelState)
+        if(ConfigXM.BLOCKS.debugModelState)
         {
             populateStateFlagsIfNeeded();
             if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
@@ -580,7 +582,7 @@ public class ModelState implements ISuperModelState
     @Override
     public SimpleJoin getSimpleJoin()
     {
-        if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+        if(ConfigXM.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
             Log.warn("getSimpleJoin on model state does not apply for shape");
 
 
@@ -595,7 +597,7 @@ public class ModelState implements ISuperModelState
     @Override
     public void setSimpleJoin(SimpleJoin join)
     {
-        if(Configurator.BLOCKS.debugModelState)
+        if(ConfigXM.BLOCKS.debugModelState)
         {
             if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
             {
@@ -618,7 +620,7 @@ public class ModelState implements ISuperModelState
     @Override
     public SimpleJoin getMasonryJoin()
     {
-        if(Configurator.BLOCKS.debugModelState && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
+        if(ConfigXM.BLOCKS.debugModelState && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
             Log.warn("getMasonryJoin on model state does not apply for shape");
 
         populateStateFlagsIfNeeded();
@@ -628,7 +630,7 @@ public class ModelState implements ISuperModelState
     @Override
     public void setMasonryJoin(SimpleJoin join)
     {
-        if(Configurator.BLOCKS.debugModelState)
+        if(ConfigXM.BLOCKS.debugModelState)
         {
             populateStateFlagsIfNeeded();
             if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
@@ -660,13 +662,13 @@ public class ModelState implements ISuperModelState
         populateStateFlagsIfNeeded();
         if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
         {
-            if(Configurator.BLOCKS.debugModelState) Log.warn("Ignored setAxisRotation on model state that does not apply for shape");
+            if(ConfigXM.BLOCKS.debugModelState) Log.warn("Ignored setAxisRotation on model state that does not apply for shape");
             return;
         }
 
         if((stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == 0)
         {
-            if(Configurator.BLOCKS.debugModelState) Log.warn("Ignored setAxisRotation on model state for which it does not apply");
+            if(ConfigXM.BLOCKS.debugModelState) Log.warn("Ignored setAxisRotation on model state for which it does not apply");
             return;
         }
 
@@ -681,7 +683,7 @@ public class ModelState implements ISuperModelState
     @Override
     public long getMultiBlockBits()
     {
-        if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+        if(ConfigXM.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
             Log.warn("getMultiBlockBits on model state does not apply for shape");
 
         return bits3;
@@ -690,7 +692,7 @@ public class ModelState implements ISuperModelState
     @Override
     public void setMultiBlockBits(long bits)
     {
-        if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+        if(ConfigXM.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
             Log.warn("setMultiBlockBits on model state does not apply for shape");
 
         bits3 = bits;
@@ -704,7 +706,7 @@ public class ModelState implements ISuperModelState
     @Override
     public TerrainState getTerrainState()
     {
-        if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+        if(ConfigXM.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
             Log.warn("getTerrainState on model state does not apply for shape");
 
         return new TerrainState(ModelStateData.P3F_FLOW_JOIN.getValue(bits3));
@@ -713,7 +715,7 @@ public class ModelState implements ISuperModelState
     @Override
     public void setTerrainState(TerrainState flowState)
     {
-        if(Configurator.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+        if(ConfigXM.BLOCKS.debugModelState && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
             Log.warn("setTerrainState on model state does not apply for shape");
 
         bits3 = ModelStateData.P3F_FLOW_JOIN.setValue(flowState.getStateKey(), bits3);
@@ -840,7 +842,7 @@ public class ModelState implements ISuperModelState
 
         case NONE:
         default:
-            if(Configurator.BLOCKS.debugModelState) Log.warn("ModelState.getMetaData called for inappropriate shape");
+            if(ConfigXM.BLOCKS.debugModelState) Log.warn("ModelState.getMetaData called for inappropriate shape");
             return 0;
         }            
     }
@@ -996,9 +998,23 @@ public class ModelState implements ISuperModelState
         ModelShape<?> shape = ModelShape.get(tag.getString(NBT_SHAPE));
         if(shape != null) this.setShape(shape);
         
+        // textures serialized by name because registered textures can change if mods/config change
+        Arrays.stream(PaintLayer.values()).forEach(l -> deserializeTexture(tag, l));
+        
         this.clearStateFlags();
     }
 
+    /**
+     * Reads tag and applies to this model state if present.
+     * If no tag, does nothing, leaving this instance unchanged.
+     */
+    private void deserializeTexture(NBTTagCompound tag, PaintLayer layer)
+    {
+        if(tag.hasKey(layer.tagName))
+        {
+            this.setTexture(layer, TexturePaletteRegistry.get(tag.getString(layer.tagName)));
+        }
+    }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
@@ -1007,6 +1023,22 @@ public class ModelState implements ISuperModelState
         
         // shape is serialized by name because registered shapes can change if mods/config change
         tag.setString(NBT_SHAPE, this.getShape().systemName());
+        
+        // textures serialized by name because registered textures can change if mods/config change
+        Arrays.stream(PaintLayer.values()).forEach(l -> serializeTexture(tag, l));
+    }
+    
+    /**
+     * Saves tag if this model state has a non-zero texture in the given layer.
+     * Otherwise does nothing.
+     */
+    private void serializeTexture(NBTTagCompound tag, PaintLayer layer)
+    {
+        ITexturePalette tex = this.getTexture(layer);
+        if(tex != TexturePaletteRegistry.NONE)
+        {
+            tag.setString(layer.tagName, tex.systemName());
+        }
     }
 
     @Override

@@ -2,10 +2,10 @@ package grondag.hard_science.machines.impl.processing;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
@@ -16,7 +16,7 @@ public class DigesterBlock extends MachineBlock
 {
     public DigesterBlock(String name)
     {
-        super(name, ModGui.DIGESTER.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_CAUTION));
+        super(name, ModGui.DIGESTER.ordinal(), MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_CAUTION));
     }
 
     @Override
@@ -35,7 +35,7 @@ public class DigesterBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return Textures.DECAL_BIG_DIAMOND.getSampleSprite();
+        return ModTextures.DECAL_BIG_DIAMOND.getSampleSprite();
     }
 
     @Override

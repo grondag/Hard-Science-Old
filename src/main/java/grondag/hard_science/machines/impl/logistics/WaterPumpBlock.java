@@ -2,11 +2,11 @@ package grondag.hard_science.machines.impl.logistics;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
@@ -16,7 +16,7 @@ public class WaterPumpBlock extends MachineBlock
 {
     public WaterPumpBlock(String name)
     {
-        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_CHANNEL_DOTS));
+        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_CHANNEL_DOTS));
     }
 
     @Override
@@ -34,7 +34,7 @@ public class WaterPumpBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return Textures.DECAL_DRIP.getSampleSprite();
+        return ModTextures.DECAL_DRIP.getSampleSprite();
     }
 
     @Override

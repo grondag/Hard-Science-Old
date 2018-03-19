@@ -2,8 +2,8 @@ package grondag.hard_science.superblock.placement.spec;
 
 import java.util.HashSet;
 
+import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.world.CubicBlockRegion;
-import grondag.hard_science.Configurator;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementPosition;
 import grondag.hard_science.superblock.placement.RegionOrientation;
@@ -77,7 +77,7 @@ abstract class VolumetricBuilder extends SingleStackBuilder
                     set.add(pos.toImmutable());
                     if(foundCount++ == 16) break;
                 }
-                if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
+                if(checkCount++ >= ConfigXM.BLOCKS.maxPlacementCheckCount) break;
             }
         }
         else
@@ -96,7 +96,7 @@ abstract class VolumetricBuilder extends SingleStackBuilder
                     set.add(pos.toImmutable());
                     if(foundCount++ == 16) break;
                 }
-                if(checkCount++ >= Configurator.BLOCKS.maxPlacementCheckCount) break;
+                if(checkCount++ >= ConfigXM.BLOCKS.maxPlacementCheckCount) break;
             }
         }
         region.exclude(set);

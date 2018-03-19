@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
+import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineContainerBlock;
@@ -16,7 +17,6 @@ import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
@@ -36,7 +36,7 @@ public class SmartChestBlock extends MachineContainerBlock
     
     public SmartChestBlock(String name, boolean dedicated)
     {
-        super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(Textures.DECAL_SKINNY_DIAGNAL_CROSS_BARS, Textures.BORDER_SINGLE_BOLD_LINE));
+        super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(ModTextures.DECAL_SKINNY_DIAGNAL_CROSS_BARS, ModTextures.BORDER_SINGLE_BOLD_LINE));
         this.dedicated = dedicated;
     }
 
@@ -50,7 +50,7 @@ public class SmartChestBlock extends MachineContainerBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return Textures.DECAL_CHEST.getSampleSprite();
+        return ModTextures.DECAL_CHEST.getSampleSprite();
     }
 
     @Override

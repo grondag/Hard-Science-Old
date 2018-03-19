@@ -7,6 +7,7 @@ import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.TextureLayout;
+import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.render.CompressedAnimatedSprite;
 import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.hard_science.HardScience;
@@ -33,7 +34,6 @@ import grondag.hard_science.superblock.block.SuperModelTileEntityTESR;
 import grondag.hard_science.superblock.block.SuperTileEntityTESR;
 import grondag.hard_science.superblock.items.CraftingItem;
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
@@ -144,30 +144,6 @@ public class ModModels
         FONT_RENDERER_LARGE = new RasterFont(FONT_NAME_LARGE, FONT_SIZE_LARGE, 2);
         map.setTextureEntry(FONT_RENDERER_LARGE);
         
-        
-        for(ITexturePalette p : Textures.REGISTRY)
-        {
-            for(String s : p.getTexturesForPrestich())
-            {
-                ResourceLocation loc = new ResourceLocation(s);
-                
-                if(p.textureLayout() == TextureLayout.BIGTEX_ANIMATED)
-                {
-                    if(map.getTextureExtry(loc.toString()) == null)
-                    {
-                        map.setTextureEntry(new CompressedAnimatedSprite(loc, p.ticksPerFrame()));
-                    }
-                }
-                else
-                {
-                    if(map.getTextureExtry(loc.toString()) == null)
-                    {
-                        map.setTextureEntry(new EnhancedSprite(loc.toString()));
-                    }
-                    map.registerSprite(loc);
-                }
-            }
-        }
     }
     
     public static TextureManager TEX_MANAGER;
@@ -214,8 +190,8 @@ public class ModModels
         CompressedAnimatedSprite.tearDown();
         
         TEX_MACHINE_ON_OFF = new BinaryReference<TextureAtlasSprite>(
-                Textures.MACHINE_POWER_ON.getSampleSprite(),
-                Textures.MACHINE_POWER_OFF.getSampleSprite());
+                ModTextures.MACHINE_POWER_ON.getSampleSprite(),
+                ModTextures.MACHINE_POWER_OFF.getSampleSprite());
         
 //        TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
 //        TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");

@@ -73,38 +73,6 @@ public class Configurator
         public SubstanceConfig volcanicLava = new SubstanceConfig(-1, "shovel", 3, 2000, 0.75);
     }    
 
-    ////////////////////////////////////////////////////        
-    // BLOCKS
-    ////////////////////////////////////////////////////
-    @LangKey("config.blocks")
-    @Comment("Settings for blocks.")
-    public static BlockSettings BLOCKS = new BlockSettings();
-
-    public static class BlockSettings
-    {
-        @Comment("Allow user selection of hidden textures in SuperModel Block GUI. Generally only useful for testing.")
-        public boolean showHiddenTextures = false;
-
-        @Comment("Controls how much detail should be shown if The One Probe is enabled.")
-        public ProbeInfoLevel probeInfoLevel = ProbeInfoLevel.BASIC;
-
-        public static enum ProbeInfoLevel
-        {
-            BASIC,
-            EXTRA,
-            DEBUG
-        }
-
-        @Comment("Set true to enable tracing output for block model state.  Can spam the log quite a bit, so leave false unless having problems.")
-        public boolean debugModelState = true;
-
-        @Comment({"Maximum number of block states checked before placing virtual blocks.",
-            " Try smaller values if placing large multi-block regions is causing FPS problems.",
-            " With smaller values, species (connected textures) may not be selected properly ",
-        " for large multi-block placements."})
-        @RangeInt(min = 16, max = 4096)
-        public int maxPlacementCheckCount = 512;
-    }
 
     ////////////////////////////////////////////////////        
     // VOLCANO
