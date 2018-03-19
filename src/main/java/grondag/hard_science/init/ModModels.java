@@ -5,11 +5,7 @@ import java.util.Map;
 
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.model.ISuperBlock;
-import grondag.exotic_matter.model.ITexturePalette;
-import grondag.exotic_matter.model.TextureLayout;
-import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.render.CompressedAnimatedSprite;
-import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.machines.base.MachineTESR;

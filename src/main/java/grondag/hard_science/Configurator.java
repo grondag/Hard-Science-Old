@@ -3,6 +3,7 @@ package grondag.hard_science;
 import java.util.IdentityHashMap;
 
 import grondag.exotic_matter.init.SubstanceConfig;
+import grondag.exotic_matter.model.BlockHarvestTool;
 import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
@@ -48,29 +49,29 @@ public class Configurator
 
     public static class Substances
     {
-        public SubstanceConfig flexstone = new SubstanceConfig(2, "pickaxe", 1, 10, 1.0);
+        public SubstanceConfig flexstone = new SubstanceConfig(2, BlockHarvestTool.PICK, 1, 10, 1.0);
 
-        public SubstanceConfig durastone = new SubstanceConfig(4, "pickaxe", 2, 50, 1.15);
+        public SubstanceConfig durastone = new SubstanceConfig(4, BlockHarvestTool.PICK, 2, 50, 1.15);
 
-        public SubstanceConfig hyperstone = new SubstanceConfig(10, "pickaxe", 3, 200, 1.3);
+        public SubstanceConfig hyperstone = new SubstanceConfig(10, BlockHarvestTool.PICK, 3, 200, 1.3);
 
-        public SubstanceConfig flexiglass = new SubstanceConfig(2, "pickaxe", 1, 10, 1.0);
+        public SubstanceConfig flexiglass = new SubstanceConfig(2, BlockHarvestTool.PICK, 1, 10, 1.0);
 
-        public SubstanceConfig duraglass = new SubstanceConfig(4, "pickaxe", 2, 50, 1.15);
+        public SubstanceConfig duraglass = new SubstanceConfig(4, BlockHarvestTool.PICK, 2, 50, 1.15);
 
-        public SubstanceConfig hyperglass = new SubstanceConfig(10, "pickaxe", 3, 200, 1.3);
+        public SubstanceConfig hyperglass = new SubstanceConfig(10, BlockHarvestTool.PICK, 3, 200, 1.3);
 
-        public SubstanceConfig flexwood = new SubstanceConfig(2, "axe", 1, 10, 1.0);
+        public SubstanceConfig flexwood = new SubstanceConfig(2, BlockHarvestTool.AXE, 1, 10, 1.0);
 
-        public SubstanceConfig durawood = new SubstanceConfig(4, "axe", 2, 50, 1.15);
+        public SubstanceConfig durawood = new SubstanceConfig(4, BlockHarvestTool.AXE, 2, 50, 1.15);
 
-        public SubstanceConfig hyperwood = new SubstanceConfig(10, "axe", 3, 200, 1.3);
+        public SubstanceConfig hyperwood = new SubstanceConfig(10, BlockHarvestTool.AXE, 3, 200, 1.3);
 
-        public SubstanceConfig basalt = new SubstanceConfig(2, "pickaxe", 1, 10, 1.0);
+        public SubstanceConfig basalt = new SubstanceConfig(2, BlockHarvestTool.PICK, 1, 10, 1.0);
 
-        public SubstanceConfig hdpe = new SubstanceConfig(2, "axe", 1, 10, 1.0);
+        public SubstanceConfig hdpe = new SubstanceConfig(2, BlockHarvestTool.AXE, 1, 10, 1.0);
 
-        public SubstanceConfig volcanicLava = new SubstanceConfig(-1, "shovel", 3, 2000, 0.75);
+        public SubstanceConfig volcanicLava = new SubstanceConfig(-1, BlockHarvestTool.SHOVEL, 3, 2000, 0.75);
     }    
 
 

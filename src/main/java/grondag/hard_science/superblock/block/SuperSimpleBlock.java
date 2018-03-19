@@ -24,7 +24,7 @@ public class SuperSimpleBlock extends SuperBlock
         this.substance = substance;
         this.blockHardness = substance.hardness;
         this.blockResistance = substance.resistance;
-        this.setHarvestLevel(substance.harvestTool, substance.harvestLevel);
+        this.setHarvestLevel(substance.harvestTool.toolString, substance.harvestLevel);
         
         this.isGeometryFullCube = defaultModelState.isCube();
         this.worldLightOpacity = WorldLightOpacity.getClosest(substance, defaultModelState);

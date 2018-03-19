@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.model.BlockHarvestTool;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
@@ -40,10 +40,13 @@ public class SuperStateMapper extends DefaultStateMapper
                    
                if(block instanceof SuperModelBlock)
                {
-                   for(BlockSubstance substance : BlockSubstance.all())
+                   for(BlockHarvestTool tool : BlockHarvestTool.values())
                    {
-                       mapLocations.put(state.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal),
-                               new ModelResourceLocation(dispatcher.getDelegate(superBlock).getModelResourceString()));
+                       for(int l = 0; l <= SuperModelBlock.MAX_HARVEST_LEVEL; l++)
+                       {
+                           mapLocations.put(state.withProperty(SuperModelBlock.HARVEST_TOOL, tool).withProperty(SuperModelBlock.HARVEST_LEVEL, l),
+                                   new ModelResourceLocation(dispatcher.getDelegate(superBlock).getModelResourceString()));
+                       }
                    }
                }
                else

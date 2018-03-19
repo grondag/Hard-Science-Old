@@ -27,7 +27,7 @@ public class SuperStaticBlock extends SuperBlockPlus
         this.substance = substance;
         this.blockHardness = substance.hardness;
         this.blockResistance = substance.resistance;
-        this.setHarvestLevel(substance.harvestTool, substance.harvestLevel);
+        this.setHarvestLevel(substance.harvestTool.toolString, substance.harvestLevel);
     }
     
     @Override

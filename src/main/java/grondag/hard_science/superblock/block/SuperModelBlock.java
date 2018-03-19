@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.model.BlockHarvestTool;
 import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
@@ -11,6 +12,7 @@ import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -47,7 +49,23 @@ public class SuperModelBlock extends SuperBlockPlus
      * Ordinal of the substance for this block. Set during getActualState
      * so that harvest/tool methods can have access to location-dependent substance information.
      */
-    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.MAX_SUBSTANCES - 1);
+//    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.MAX_SUBSTANCES - 1);
+    
+    /**
+     * Harvest tool for this block based on block substance. Set during getActualState
+     * so that harvest/tool methods can have access to location-dependent substance information.
+     */
+    public static final PropertyEnum<BlockHarvestTool> HARVEST_TOOL = PropertyEnum.create("harvest_tool", BlockHarvestTool.class);
+    
+    /**
+     * Higher than vanilla to allow for modded hardnesses.  Value is inclusive.
+     */
+    public static final int MAX_HARVEST_LEVEL = 7;
+    /**
+     * Harvest tool for this block based on block substance. Set during getActualState
+     * so that harvest/tool methods can have access to location-dependent substance information.
+     */
+    public static final PropertyInteger HARVEST_LEVEL = PropertyInteger.create("harvest_level", 0, MAX_HARVEST_LEVEL);
     
     protected final WorldLightOpacity worldLightOpacity;
     
@@ -83,7 +101,7 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[] { META, SUBSTANCE }, new IUnlistedProperty[] { MODEL_STATE });
+        return new ExtendedBlockState(this, new IProperty[] { META, HARVEST_TOOL, HARVEST_LEVEL }, new IUnlistedProperty[] { MODEL_STATE });
     }
     
     @Override
@@ -98,9 +116,11 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
+        BlockSubstance substance = this.getSubstance(state, worldIn, pos);
         // Add substance for tool methods
         return super.getActualState(state, worldIn, pos)
-                .withProperty(SUBSTANCE, this.getSubstance(state, worldIn, pos).ordinal);
+                .withProperty(HARVEST_TOOL, substance.harvestTool)
+                .withProperty(HARVEST_LEVEL, substance.harvestLevel);
     }
     
     /** 
@@ -111,8 +131,8 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     public int getHarvestLevel(IBlockState state)
     {
-        BlockSubstance s = BlockSubstance.get(state.getValue(SUBSTANCE));
-        return s == null ? 0 : s.harvestLevel;
+        Integer l = state.getValue(HARVEST_LEVEL);
+        return l == null ? 0 : l;
     }
     
     /** 
@@ -123,8 +143,8 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     @Nullable public String getHarvestTool(IBlockState state)
     {
-        BlockSubstance s = BlockSubstance.get(state.getValue(SUBSTANCE));
-        return s == null ? null : s.harvestTool;
+        BlockHarvestTool tool = state.getValue(HARVEST_TOOL);
+        return tool == null ? null : tool.toolString;
     }
     
    
