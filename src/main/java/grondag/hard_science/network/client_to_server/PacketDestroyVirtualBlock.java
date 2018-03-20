@@ -1,7 +1,7 @@
 package grondag.hard_science.network.client_to_server;
 
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.hard_science.network.AbstractPlayerToServerPacket;
-import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -28,7 +28,7 @@ public class PacketDestroyVirtualBlock extends AbstractPlayerToServerPacket<Pack
     protected void handle(PacketDestroyVirtualBlock message, EntityPlayerMP player)
     {
         World world = player.getEntityWorld();
-        if(world.isBlockLoaded(message.blockPos) && VirtualBlock.isVirtualBlock(world.getBlockState(message.blockPos).getBlock()))
+        if(world.isBlockLoaded(message.blockPos) && ISuperBlock.isVirtualBlock(world.getBlockState(message.blockPos).getBlock()))
         {
             world.setBlockToAir(message.blockPos);
         }

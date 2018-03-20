@@ -8,7 +8,7 @@ import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

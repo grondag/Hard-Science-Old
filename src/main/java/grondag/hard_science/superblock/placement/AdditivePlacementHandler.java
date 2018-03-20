@@ -8,17 +8,17 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
-import grondag.hard_science.moving.WorldHelperLeftovers;
+import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.virtual.VirtualBlock;
+import grondag.hard_science.superblock.block.SuperItemBlock;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumFacing.AxisDirection;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -77,7 +77,7 @@ public class AdditivePlacementHandler extends PlacementHandler
                     
                     // confirm have space to add - the ItemStack handler will allow us to get 
                     // here if the adjacent position contains another additive block
-                    if(onModelState.getMetaData() < 0xF || WorldHelperLeftovers.isBlockReplaceable(worldIn, posOn.offset(facing), !VirtualBlock.isVirtualBlock(stackBlock)))
+                    if(onModelState.getMetaData() < 0xF || WorldHelper.isBlockReplaceable(worldIn, posOn.offset(facing), !ISuperBlock.isVirtualBlock(stackBlock)))
                     {
                         return addToBlockAtPosition(worldIn, stack, stackModelState, onModelState, posOn);
                     }
@@ -147,7 +147,7 @@ public class AdditivePlacementHandler extends PlacementHandler
                 }
             }
 
-            if(WorldHelperLeftovers.isBlockReplaceable(worldIn, posOn.offset(addFace), stack.getItem() instanceof VirtualItemBlock))
+            if(WorldHelper.isBlockReplaceable(worldIn, posOn.offset(addFace), stack.getItem() instanceof VirtualItemBlock))
             {
                 ItemStack newStack = stack.copy();
                 newStack.setItemDamage(targetMeta);

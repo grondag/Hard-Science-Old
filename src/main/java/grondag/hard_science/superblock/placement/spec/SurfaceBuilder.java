@@ -1,10 +1,10 @@
 package grondag.hard_science.superblock.placement.spec;
 
+import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.world.IBlockRegion;
-import grondag.hard_science.moving.WorldHelperLeftovers;
+import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.simulator.jobs.IWorldTask;
-import grondag.hard_science.superblock.placement.PlacementPosition;
-import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
+import grondag.hard_science.superblock.block.PlacementPosition;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,7 +28,7 @@ public class SurfaceBuilder extends SingleStackBuilder
 
         if(this.player.world.isOutsideBuildHeight(this.pPos.inPos)) return false;
 
-        return WorldHelperLeftovers.isBlockReplaceable(this.player.world, this.pPos.inPos, false);
+        return WorldHelper.isBlockReplaceable(this.player.world, this.pPos.inPos, false);
     }
 
     @SideOnly(Side.CLIENT)

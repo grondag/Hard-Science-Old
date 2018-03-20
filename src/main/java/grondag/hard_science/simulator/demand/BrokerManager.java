@@ -8,8 +8,8 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.superblock.block.SuperItemBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 
 public class BrokerManager implements IDomainMember
 {

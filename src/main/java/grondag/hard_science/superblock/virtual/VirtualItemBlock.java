@@ -1,12 +1,12 @@
 package grondag.hard_science.superblock.virtual;
 
 import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.placement.FilterMode;
+import grondag.exotic_matter.placement.PlacementItemFeature;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.placement.FilterMode;
-import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementItemFeature;
+import grondag.hard_science.superblock.block.SuperItemBlock;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;

@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.machines.base.MachineBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.block.SuperItemBlock;
 import net.minecraft.item.ItemStack;
 
 public class MachineItemBlock extends SuperItemBlock

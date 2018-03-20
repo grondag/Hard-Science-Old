@@ -12,7 +12,7 @@ import grondag.exotic_matter.model.TerrainBlockRegistry;
 import grondag.exotic_matter.model.TerrainState;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.superblock.block.SuperStaticBlock;
-import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;

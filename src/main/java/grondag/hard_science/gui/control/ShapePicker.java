@@ -7,7 +7,7 @@ import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

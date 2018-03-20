@@ -1,8 +1,7 @@
-package grondag.hard_science.superblock.items;
+package grondag.hard_science.superblock.block;
 
 import com.google.common.collect.Lists;
 
-import grondag.hard_science.superblock.varia.SuperDispatcher;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;

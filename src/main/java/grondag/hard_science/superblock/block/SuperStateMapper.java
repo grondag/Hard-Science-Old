@@ -1,4 +1,4 @@
-package grondag.hard_science.superblock.varia;
+package grondag.hard_science.superblock.block;
 
 import java.util.Map;
 
@@ -6,8 +6,6 @@ import com.google.common.collect.Maps;
 
 import grondag.exotic_matter.model.BlockHarvestTool;
 import grondag.exotic_matter.model.ISuperBlock;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.block.SuperModelBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -21,11 +19,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class SuperStateMapper extends DefaultStateMapper 
 {
-    private final SuperDispatcher dispatcher;
+    public static final SuperStateMapper INSTANCE = new SuperStateMapper();
     
-    public SuperStateMapper(SuperDispatcher dispatcher)
+    private SuperStateMapper()
     {
-        this.dispatcher = dispatcher;
     }
 
    @Override
@@ -45,14 +42,14 @@ public class SuperStateMapper extends DefaultStateMapper
                        for(int l = 0; l <= SuperModelBlock.MAX_HARVEST_LEVEL; l++)
                        {
                            mapLocations.put(state.withProperty(SuperModelBlock.HARVEST_TOOL, tool).withProperty(SuperModelBlock.HARVEST_LEVEL, l),
-                                   new ModelResourceLocation(dispatcher.getDelegate(superBlock).getModelResourceString()));
+                                   new ModelResourceLocation(SuperDispatcher.INSTANCE.getDelegate(superBlock).getModelResourceString()));
                        }
                    }
                }
                else
                {
                    mapLocations.put(state,
-                           new ModelResourceLocation(dispatcher.getDelegate(superBlock).getModelResourceString()));
+                           new ModelResourceLocation(SuperDispatcher.INSTANCE.getDelegate(superBlock).getModelResourceString()));
                }
            }
        }

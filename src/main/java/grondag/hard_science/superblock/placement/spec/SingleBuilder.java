@@ -2,20 +2,20 @@ package grondag.hard_science.superblock.placement.spec;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.SingleBlockRegion;
-import grondag.hard_science.moving.WorldHelperLeftovers;
+import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
+import grondag.hard_science.superblock.block.PlacementPosition;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.BuildManager;
 import grondag.hard_science.superblock.placement.PlacementHandler;
-import grondag.hard_science.superblock.placement.PlacementPosition;
-import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -61,7 +61,7 @@ public class SingleBuilder extends SingleStackBuilder
                         == BlockFaceShape.UNDEFINED) return false;
             }
             
-            if(WorldHelperLeftovers.isBlockReplaceable(this.player.world, this.pPos.inPos, false))
+            if(WorldHelper.isBlockReplaceable(this.player.world, this.pPos.inPos, false))
             {
                 this.outputStack = PlacementHandler.cubicPlacementStack(this);
                 return true;

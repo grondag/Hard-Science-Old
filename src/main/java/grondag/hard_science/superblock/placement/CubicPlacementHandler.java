@@ -8,11 +8,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.player.ModPlayerCaps;
-import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
@@ -22,14 +17,18 @@ import grondag.exotic_matter.world.NeighborBlocks;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
-import grondag.hard_science.moving.WorldHelperLeftovers;
+import grondag.hard_science.player.ModPlayerCaps;
+import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
+import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.block.SuperItemBlock;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumFacing.AxisDirection;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -68,10 +67,10 @@ public class CubicPlacementHandler extends PlacementHandler
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
-        BlockPos posPlaced = (!VirtualBlock.isVirtualBlock(onBlock) && onBlock.isReplaceable(worldIn, posOn)) ? posOn : posOn.offset(facing);
+        BlockPos posPlaced = (!ISuperBlock.isVirtualBlock(onBlock) && onBlock.isReplaceable(worldIn, posOn)) ? posOn : posOn.offset(facing);
         
         // abort if target space is occupied
-        if(!WorldHelperLeftovers.isBlockReplaceable(worldIn, posPlaced, !VirtualBlock.isVirtualBlock(stackBlock)))
+        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced, !ISuperBlock.isVirtualBlock(stackBlock)))
         {
             return Collections.emptyList();
         }

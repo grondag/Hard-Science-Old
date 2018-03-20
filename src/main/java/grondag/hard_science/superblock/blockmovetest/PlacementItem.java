@@ -1,4 +1,4 @@
-package grondag.hard_science.superblock.placement;
+package grondag.hard_science.superblock.blockmovetest;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -10,17 +10,27 @@ import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
 import grondag.exotic_matter.model.ModelState;
+import grondag.exotic_matter.placement.BlockOrientationAxis;
+import grondag.exotic_matter.placement.BlockOrientationCorner;
+import grondag.exotic_matter.placement.BlockOrientationEdge;
+import grondag.exotic_matter.placement.BlockOrientationFace;
+import grondag.exotic_matter.placement.FilterMode;
+import grondag.exotic_matter.placement.PlacementItemFeature;
+import grondag.exotic_matter.placement.RegionOrientation;
+import grondag.exotic_matter.placement.SpeciesMode;
+import grondag.exotic_matter.placement.TargetMode;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.BinaryEnumSet;
+import grondag.exotic_matter.varia.FixedRegionBounds;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModSuperModelBlocks;
+import grondag.hard_science.superblock.block.SuperItemBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.virtual.VirtualBlock;
+import grondag.hard_science.superblock.placement.PlacementHandler;
+import grondag.hard_science.superblock.placement.PlacementResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -48,6 +58,11 @@ public interface PlacementItem
     /////////////////////////////////////////////////////
     
     public final static String NBT_MODEL_STATE = NBTDictionary.claim("stackModelState");
+    public final static String NBT_REGION_FLOATING_RANGE = NBTDictionary.claim("floatingRegionRange");
+    public final static String NBT_REGION_SIZE = NBTDictionary.claim("regionSize");
+    public final static String NBT_FIXED_REGION_ENABLED = NBTDictionary.claim("fixedRegionOn");
+    public final static String NBT_FIXED_REGION_SELECT_POS = NBTDictionary.claim("fixedRegionPos");
+    public final static String NBT_SUPERMODEL_LIGHT_VALUE = NBTDictionary.claim("smLight");
     
     public static BinaryEnumSet<PlacementItemFeature> BENUMSET_FEATURES = new BinaryEnumSet<PlacementItemFeature>(PlacementItemFeature.class);
     
@@ -118,14 +133,14 @@ public interface PlacementItem
     public static void setStackLightValue(ItemStack stack, int lightValue)
     {
         // important that the tag used here matches that used in tile entity
-        Useful.getOrCreateTagCompound(stack).setByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE, (byte)lightValue);
+        Useful.getOrCreateTagCompound(stack).setByte(NBT_SUPERMODEL_LIGHT_VALUE, (byte)lightValue);
     }
     
     public static byte getStackLightValue(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
         // important that the tag used here matches that used in tile entity
-        return tag == null ? 0 : tag.getByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE);
+        return tag == null ? 0 : tag.getByte(NBT_SUPERMODEL_LIGHT_VALUE);
     }
 
     public static void setStackSubstance(ItemStack stack, BlockSubstance substance)
@@ -712,14 +727,14 @@ public interface PlacementItem
     {
         if(!this.isFixedRegionSupported(stack)) return false;
         
-        return Useful.getOrCreateTagCompound(stack).getBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED);
+        return Useful.getOrCreateTagCompound(stack).getBoolean(NBT_FIXED_REGION_ENABLED);
     }
     
     public default void setFixedRegionEnabled(ItemStack stack, boolean isFixedRegion)
     {
         if(!this.isFixedRegionSupported(stack)) return;
         
-        Useful.getOrCreateTagCompound(stack).setBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED, isFixedRegion);
+        Useful.getOrCreateTagCompound(stack).setBoolean(NBT_FIXED_REGION_ENABLED, isFixedRegion);
     }
 
     public default FixedRegionBounds getFixedRegion(ItemStack stack)
@@ -751,7 +766,7 @@ public interface PlacementItem
         
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         
-        tag.setLong(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS, PackedBlockPos.pack(pos, isCenter ? 1 : 0));
+        tag.setLong(NBT_FIXED_REGION_SELECT_POS, PackedBlockPos.pack(pos, isCenter ? 1 : 0));
         
         TargetMode currentMode = getTargetMode(stack);
         // assume user wants to fill a region  and
@@ -763,7 +778,7 @@ public interface PlacementItem
     {
         if(!this.isFixedRegionSupported(stack) || !this.isFixedRegionEnabled(stack)) return false;
         
-        return Useful.getOrCreateTagCompound(stack).hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+        return Useful.getOrCreateTagCompound(stack).hasKey(NBT_FIXED_REGION_SELECT_POS);
     }
     
     public default void fixedRegionCancel(ItemStack stack)
@@ -771,11 +786,11 @@ public interface PlacementItem
         if(!this.isFixedRegionSupported(stack)) return;
         
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        tag.removeTag(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+        tag.removeTag(NBT_FIXED_REGION_SELECT_POS);
         
         //disable fixed region if we don't have one
         if(!FixedRegionBounds.isPresentInTag(tag))
-            tag.setBoolean(ModNBTTag.PLACEMENT_FIXED_REGION_ENABLED, false);
+            tag.setBoolean(NBT_FIXED_REGION_ENABLED, false);
     }
     
     /**
@@ -790,9 +805,9 @@ public interface PlacementItem
         
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
         
-        if(tag.hasKey(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS))
+        if(tag.hasKey(NBT_FIXED_REGION_SELECT_POS))
         {
-            long packed = tag.getLong(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+            long packed = tag.getLong(NBT_FIXED_REGION_SELECT_POS);
             return Pair.of(PackedBlockPos.unpack(packed), PackedBlockPos.getExtra(packed) == 1);
         }
         else
@@ -812,7 +827,7 @@ public interface PlacementItem
         
         if(fromPos == null) return;
 
-        tag.removeTag(ModNBTTag.PLACEMENT_FIXED_REGION_SELECT_POS);
+        tag.removeTag(NBT_FIXED_REGION_SELECT_POS);
         
         setFixedRegion(new FixedRegionBounds(fromPos.first(), fromPos.second(), pos, isCenter), stack);
         
@@ -856,9 +871,9 @@ public interface PlacementItem
     public default BlockPos getRegionSize(ItemStack stack, boolean applyRegionRotation)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null || !tag.hasKey(ModNBTTag.PLACEMENT_REGION_SIZE)) return new BlockPos(1, 1, 1);
+        if(tag == null || !tag.hasKey(NBT_REGION_SIZE)) return new BlockPos(1, 1, 1);
         
-        BlockPos result = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_SIZE));
+        BlockPos result = BlockPos.fromLong(tag.getLong(NBT_REGION_SIZE));
         
         return applyRegionRotation ? getRegionOrientation(stack).rotatedRegionPos(result) : result;
     }
@@ -872,7 +887,7 @@ public interface PlacementItem
         if(!this.isRegionSizeSupported(stack)) return;
         
         NBTTagCompound tag = stack.getTagCompound();
-        tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, pos.toLong());
+        tag.setLong(NBT_REGION_SIZE, pos.toLong());
     }
     
     /**
@@ -885,14 +900,14 @@ public interface PlacementItem
         if(!this.isRegionSizeSupported(stack)) return false;
         
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        BlockPos oldPos = BlockPos.fromLong(tag.getLong(ModNBTTag.PLACEMENT_REGION_SIZE));
+        BlockPos oldPos = BlockPos.fromLong(tag.getLong(NBT_REGION_SIZE));
        
         BlockPos newPos = new BlockPos(
                 MathHelper.clamp(oldPos.getX() + dx, 1, 9),
                 MathHelper.clamp(oldPos.getY() + dy, 1, 9),
                 MathHelper.clamp(oldPos.getZ() + dz, 1, this.isExcavator(stack) ? 64 : 9)
                 );
-        tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, newPos.toLong());
+        tag.setLong(NBT_REGION_SIZE, newPos.toLong());
         
         if(newPos.getX() == 1 && newPos.getY() == 1 && newPos.getZ() == 1)
         {
@@ -922,11 +937,11 @@ public interface PlacementItem
 //        NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
 //        if(selectedPos == null)
 //        {
-//            tag.removeTag(ModNBTTag.PLACEMENT_REGION_SIZE);
+//            tag.removeTag(NBT_REGION_SIZE);
 //        }
 //        else
 //        {
-//            tag.setLong(ModNBTTag.PLACEMENT_REGION_SIZE, selectedPos.toLong());
+//            tag.setLong(NBT_REGION_SIZE, selectedPos.toLong());
 //        }
 //    }
     
@@ -963,7 +978,7 @@ public interface PlacementItem
         
         // subtract because external values jump from 0 to 2
         if(range > 0) range--;
-        Useful.getOrCreateTagCompound(stack).setByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE, (byte)range);
+        Useful.getOrCreateTagCompound(stack).setByte(NBT_REGION_FLOATING_RANGE, (byte)range);
     }
     
     /**
@@ -974,7 +989,7 @@ public interface PlacementItem
         if(!this.isSelectionRangeSupported(stack)) return 0;
 
         NBTTagCompound tag = stack.getTagCompound();
-        int range = tag == null ? 0 : MathHelper.clamp(tag.getByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE), 0, 4);
+        int range = tag == null ? 0 : MathHelper.clamp(tag.getByte(NBT_REGION_FLOATING_RANGE), 0, 4);
         return range == 0 ? 0 : range + 1;
     }
     
@@ -986,10 +1001,10 @@ public interface PlacementItem
         if(!this.isSelectionRangeSupported(stack)) return false;
 
         NBTTagCompound tag = Useful.getOrCreateTagCompound(stack);
-        int range = tag.getByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE) + (reverse ? -1 : 1);
+        int range = tag.getByte(NBT_REGION_FLOATING_RANGE) + (reverse ? -1 : 1);
         if(range > 4) range = 0;
         if(range < 0) range = 4;
-        tag.setByte(ModNBTTag.PLACEMENT_REGION_FLOATING_RANGE, (byte)range);
+        tag.setByte(NBT_REGION_FLOATING_RANGE, (byte)range);
         return true;
     }
     
@@ -1073,7 +1088,7 @@ public interface PlacementItem
             //if trying to place a block but too close, is annoying to get GUI
             //so only display if clicking on air
             if (blockpos != null 
-                    && !VirtualBlock.isVirtualBlock(world.getBlockState(blockpos).getBlock())
+                    && !ISuperBlock.isVirtualBlock(world.getBlockState(blockpos).getBlock())
                     && world.getBlockState(blockpos).getMaterial().isReplaceable()
                     && this.isVirtual(stackIn))
             {

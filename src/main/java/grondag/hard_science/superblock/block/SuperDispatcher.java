@@ -1,4 +1,4 @@
-package grondag.hard_science.superblock.varia;
+package grondag.hard_science.superblock.block;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +17,7 @@ import grondag.exotic_matter.model.RenderLayout;
 import grondag.exotic_matter.model.ShapeMeshGenerator;
 import grondag.exotic_matter.model.painter.QuadPainter;
 import grondag.exotic_matter.model.painter.QuadPainterFactory;
+import grondag.exotic_matter.model.varia.CraftingItem;
 import grondag.exotic_matter.render.QuadBakery;
 import grondag.exotic_matter.render.QuadContainer;
 import grondag.exotic_matter.render.QuadHelper;
@@ -28,10 +29,7 @@ import grondag.exotic_matter.render.Surface;
 import grondag.exotic_matter.render.SurfaceTopology;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.items.CraftingItem;
-import grondag.hard_science.superblock.items.SuperModelItemOverrideList;
-import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -56,7 +54,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class SuperDispatcher
 {
+    public static final SuperDispatcher INSTANCE = new SuperDispatcher();
     public static final String RESOURCE_BASE_NAME = "super_dispatcher";
+
     private final SparseLayerMapBuilder[] layerMapBuilders;
     
     public final DispatchDelegate[] delegates;
@@ -159,7 +159,7 @@ public class SuperDispatcher
         }       
     }
     
-    public SuperDispatcher()
+    private SuperDispatcher()
     {
         this.layerMapBuilders = new SparseLayerMapBuilder[RenderLayout.BENUMSET_BLOCK_RENDER_LAYER.combinationCount()];
 

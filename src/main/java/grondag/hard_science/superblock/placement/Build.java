@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.placement;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
@@ -210,7 +211,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
                 {
                     BlockPos pos = BlockPos.fromLong(iterator.nextLong());
                     IBlockState blockState = world.getBlockState(pos);
-                    if(VirtualBlock.isVirtualBlock(blockState.getBlock()))
+                    if(ISuperBlock.isVirtualBlock(blockState.getBlock()))
                     {
                         ItemStack stack = VirtualBlock.getSuperModelStack(world, blockState, pos);
                         if(stack == null)

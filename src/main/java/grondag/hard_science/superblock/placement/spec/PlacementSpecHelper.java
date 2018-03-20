@@ -1,13 +1,10 @@
-package grondag.hard_science.superblock.placement;
+package grondag.hard_science.superblock.placement.spec;
 
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.StateFormat;
-import grondag.hard_science.superblock.placement.spec.CSGBuilder;
-import grondag.hard_science.superblock.placement.spec.CuboidBuilder;
-import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
-import grondag.hard_science.superblock.placement.spec.PredicateBuilder;
-import grondag.hard_science.superblock.placement.spec.SingleBuilder;
-import grondag.hard_science.superblock.placement.spec.SurfaceBuilder;
+import grondag.hard_science.superblock.block.BlockOrientationHandler;
+import grondag.hard_science.superblock.block.PlacementPosition;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;

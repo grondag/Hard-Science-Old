@@ -33,16 +33,6 @@ public class ModNBTTag
     public final static String MACHINE_MODEL_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_STORED_ENERGY_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_TARGET_BLOCKPOS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String TARGET_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_ORIENTATION_AXIS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_ORIENTATION_FACE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_ORIENTATION_EDGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_ORIENTATION_CORNER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_FIXED_REGION_START_POS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_REGION_SIZE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_REGION_FLOATING_RANGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_REGION_ORIENTATION = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String PLACEMENT_SPECIES_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String RESOURCE_QUANTITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String RESOURCE_IDENTITY= "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SERVER_SIDE_ONLY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -90,9 +80,8 @@ public class ModNBTTag
     public static final String MACHINE_BATTERY_MAX_STORED_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String MACHINE_BATTERY_CHEMISTRY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String SUPER_MODEL_LIGHT_VALUE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+//    public static final String SUPER_MODEL_LIGHT_VALUE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     
-    public final static String PLACEMENT_FILTER_MODE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_DELETE_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     
     public final static String DOMAIN_JOB_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -110,9 +99,9 @@ public class ModNBTTag
 
     public static final String PLACEMENT_FIXED_REGION_END_POS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String PLACEMENT_FIXED_REGION_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+//    public static final String PLACEMENT_FIXED_REGION_ENABLED = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String PLACEMENT_FIXED_REGION_SELECT_POS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+//    public static final String PLACEMENT_FIXED_REGION_SELECT_POS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String PLACEMENT_PLAYER_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 

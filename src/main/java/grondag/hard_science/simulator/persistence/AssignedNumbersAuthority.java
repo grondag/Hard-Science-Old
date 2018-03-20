@@ -7,6 +7,10 @@ import javax.annotation.Nullable;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.persistence.IDirtKeeper;
+import grondag.exotic_matter.simulator.persistence.IDirtListener;
+import grondag.exotic_matter.simulator.persistence.IDirtNotifier;
+import grondag.exotic_matter.simulator.persistence.NullDirtListener;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
 import net.minecraft.nbt.NBTTagCompound;

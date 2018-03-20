@@ -5,6 +5,7 @@ import java.util.Map;
 
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.model.varia.CraftingItem;
 import grondag.exotic_matter.render.CompressedAnimatedSprite;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.BinaryReference;
@@ -26,14 +27,13 @@ import grondag.hard_science.matter.MatterCubeItemModel1;
 import grondag.hard_science.moving.RasterFont;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
+import grondag.hard_science.superblock.block.SuperDispatcher;
+import grondag.hard_science.superblock.block.SuperItemBlock;
+import grondag.hard_science.superblock.block.SuperModelLoader;
 import grondag.hard_science.superblock.block.SuperModelTileEntityTESR;
+import grondag.hard_science.superblock.block.SuperStateMapper;
 import grondag.hard_science.superblock.block.SuperTileEntityTESR;
-import grondag.hard_science.superblock.items.CraftingItem;
-import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.varia.SuperDispatcher;
-import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
-import grondag.hard_science.superblock.varia.SuperModelLoader;
-import grondag.hard_science.superblock.varia.SuperStateMapper;
+import grondag.hard_science.superblock.block.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.superblock.virtual.VirtualTESR;
 import grondag.hard_science.superblock.virtual.VirtualTileEntityTESR;
 import net.minecraft.block.Block;
@@ -67,9 +67,6 @@ import net.minecraftforge.registries.IForgeRegistry;
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class ModModels
 {
-    public static final SuperDispatcher MODEL_DISPATCH = new SuperDispatcher();
-
-    
     @SubscribeEvent()
     public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
     {
@@ -78,9 +75,9 @@ public class ModModels
         // NiceHues.INSTANCE.writeColorAtlas(event.getModConfigurationDirectory());
         // }
         
-        ModModels.MODEL_DISPATCH.clear();
+        SuperDispatcher.INSTANCE.clear();
      
-        for(DispatchDelegate delegate : ModModels.MODEL_DISPATCH.delegates)
+        for(DispatchDelegate delegate : SuperDispatcher.INSTANCE.delegates)
         {
             event.getModelRegistry().putObject(new ModelResourceLocation(delegate.getModelResourceString()), delegate);
         }
@@ -101,7 +98,7 @@ public class ModModels
                     for (ItemStack stack : block.getSubItems())
                     {
                         event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
-                                ModModels.MODEL_DISPATCH.getDelegate(block));
+                                SuperDispatcher.INSTANCE.getDelegate(block));
                     }
                 }
                 else if(item instanceof MatterCube)
@@ -117,7 +114,7 @@ public class ModModels
                 else if(item instanceof CraftingItem)
                 {
                     event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
-                            ModModels.MODEL_DISPATCH.getItemDelegate());
+                            SuperDispatcher.INSTANCE.getItemDelegate());
                 }
                 else
                 {
@@ -267,19 +264,16 @@ public class ModModels
     @SubscribeEvent
     public static void modelRegistryEvent(ModelRegistryEvent event)
     {
-       final SuperStateMapper mapper = new SuperStateMapper(MODEL_DISPATCH);
         
+        // TODO: move to library mod
         IForgeRegistry<Block> blockReg = GameRegistry.findRegistry(Block.class);
     
         for(Map.Entry<ResourceLocation, Block> entry: blockReg.getEntries())
         {
-            if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
+            Block block = entry.getValue();
+            if(block instanceof ISuperBlock)
             {
-                Block block = entry.getValue();
-                if(block instanceof ISuperBlock)
-                {
-                    ModelLoader.setCustomStateMapper(block, mapper);
-                }
+                ModelLoader.setCustomStateMapper(block, SuperStateMapper.INSTANCE);
             }
         }
           
@@ -296,7 +290,7 @@ public class ModModels
                     SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
                     for (ItemStack stack : block.getSubItems())
                     {
-                        String variantName = ModModels.MODEL_DISPATCH.getDelegate(block).getModelResourceString() + "." + stack.getMetadata();
+                        String variantName = SuperDispatcher.INSTANCE.getDelegate(block).getModelResourceString() + "." + stack.getMetadata();
                         ModelBakery.registerItemVariants(item, new ResourceLocation(variantName));
                         ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
                     }
@@ -340,9 +334,10 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(DigesterTileEntity.class, DigesterTESR.INSTANCE);
     }
     
+    // TODO: move to library mod
     public static void preInit(FMLPreInitializationEvent event) 
     {
-        ModelLoaderRegistry.registerLoader(new SuperModelLoader());
+        ModelLoaderRegistry.registerLoader(SuperModelLoader.INSTANCE);
         //ModelLoaderRegistry.registerLoader(HSObjModelLoader.INSTANCE);
         //OBJLoader.INSTANCE.addDomain(HardScience.MODID);
     }

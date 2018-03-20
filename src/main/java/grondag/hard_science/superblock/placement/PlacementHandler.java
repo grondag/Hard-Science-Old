@@ -4,18 +4,26 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
 import grondag.exotic_matter.model.varia.SuperBlockHelper;
+import grondag.exotic_matter.placement.OffsetPosition;
+import grondag.exotic_matter.placement.PlacementEvent;
+import grondag.exotic_matter.placement.SpeciesMode;
+import grondag.exotic_matter.placement.TargetMode;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.HorizontalFace;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.hard_science.Log;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
+import grondag.hard_science.superblock.block.BlockOrientationHandler;
+import grondag.hard_science.superblock.block.PlacementPosition;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
+import grondag.hard_science.superblock.placement.spec.PlacementSpecHelper;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
-import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.hard_science.superblock.virtual.VirtualTileEntity;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -119,7 +127,7 @@ public abstract class PlacementHandler
 
                 // if block out of range there will be no "placed on" position
                 if(onPos.distanceSq(onPos) > Useful.squared(mc.playerController.getBlockReachDistance() + 1)
-                        && !VirtualBlock.isVirtuallySolid(onPos, player))
+                        && !ISuperBlock.isVirtuallySolidBlock(onPos, player))
                 {
                     onPos = null;
                 }

@@ -1,15 +1,15 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.OBSTRUCTED;
+import static grondag.exotic_matter.placement.PlacementPreviewRenderMode.OBSTRUCTED;
 
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.model.ISuperModelState;
-import grondag.hard_science.superblock.placement.FilterMode;
-import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementPosition;
-import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
-import grondag.hard_science.superblock.placement.TargetMode;
+import grondag.exotic_matter.placement.FilterMode;
+import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
+import grondag.exotic_matter.placement.TargetMode;
+import grondag.hard_science.superblock.block.PlacementPosition;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;

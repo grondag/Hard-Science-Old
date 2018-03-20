@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.persistence.IDirtListener;
+import grondag.exotic_matter.simulator.persistence.NullDirtListener;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.Domain;
@@ -19,9 +21,7 @@ import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.jobs.tasks.PerpetualTask;
 import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IIdentified;
-import grondag.hard_science.simulator.persistence.NullDirtListener;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;

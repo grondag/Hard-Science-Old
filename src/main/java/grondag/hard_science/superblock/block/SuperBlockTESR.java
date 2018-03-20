@@ -6,8 +6,7 @@ import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.render.PerQuadModelRenderer;
-import grondag.hard_science.init.ModModels;
-import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
+import grondag.hard_science.superblock.block.SuperDispatcher.DispatchDelegate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -37,7 +36,7 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         buffer.pos(x, y, z).color(0xFF, 0xFF, 0xFF, 0xFF).tex(u, v).lightmap(skyLight, blockLight).endVertex();
     }
 
-    private final DispatchDelegate tesrDelegate = ModModels.MODEL_DISPATCH.delegates[BlockRenderMode.TESR.ordinal()];
+    private final DispatchDelegate tesrDelegate = SuperDispatcher.INSTANCE.delegates[BlockRenderMode.TESR.ordinal()];
     
     @Override
     public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)

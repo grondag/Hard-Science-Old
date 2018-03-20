@@ -34,7 +34,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.superblock.placement.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
@@ -840,7 +840,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
     @SideOnly(Side.CLIENT)
     public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
-        return grondag.hard_science.init.ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelStateAssumeStateIsCurrent(state, world, pos, true), side);
+        return grondag.hard_science.superblock.block.SuperDispatcher.INSTANCE.getOcclusionKey(this.getModelStateAssumeStateIsCurrent(state, world, pos, true), side);
     }
 
     @Override

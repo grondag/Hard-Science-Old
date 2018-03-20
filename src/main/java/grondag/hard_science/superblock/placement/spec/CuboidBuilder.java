@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.placement.spec;
 
-import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.OBSTRUCTED;
-import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.PLACE;
-import static grondag.hard_science.superblock.placement.PlacementPreviewRenderMode.SELECT;
+import static grondag.exotic_matter.placement.PlacementPreviewRenderMode.OBSTRUCTED;
+import static grondag.exotic_matter.placement.PlacementPreviewRenderMode.PLACE;
+import static grondag.exotic_matter.placement.PlacementPreviewRenderMode.SELECT;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -11,7 +11,10 @@ import java.util.Iterator;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.placement.OffsetPosition;
+import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.render.RenderUtil;
+import grondag.exotic_matter.varia.FixedRegionBounds;
 import grondag.exotic_matter.world.CubicBlockRegion;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.WorldHelper;
@@ -23,13 +26,10 @@ import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
+import grondag.hard_science.superblock.block.PlacementPosition;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.BuildManager;
-import grondag.hard_science.superblock.placement.FixedRegionBounds;
-import grondag.hard_science.superblock.placement.OffsetPosition;
 import grondag.hard_science.superblock.placement.PlacementHandler;
-import grondag.hard_science.superblock.placement.PlacementPosition;
-import grondag.hard_science.superblock.placement.PlacementPreviewRenderMode;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;

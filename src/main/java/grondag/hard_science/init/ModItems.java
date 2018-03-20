@@ -8,10 +8,9 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.matter.MatterPackaging;
+import grondag.hard_science.superblock.block.ExcavationMarker;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.items.BlockAdjuster;
-import grondag.hard_science.superblock.items.ExcavationMarker;
-import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.block.SuperItemBlock;
 import grondag.hard_science.superblock.terrain.TerrainWand;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
@@ -71,8 +70,7 @@ public class ModItems
             itemReg.register(new TerrainWand().setCreativeTab(HardScience.tabMod));
         }
         
-        itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
-        itemReg.register(new ExcavationMarker().setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ExcavationMarker("excavation_marker").setCreativeTab(HardScience.tabMod));
         
 //        itemReg.register(new BulkItem("gold_10g", ModBulkResources.GOLD, MassUnits.GRAM.withQuantity(10)));
 //        itemReg.register(new BulkItem("gold_1kg", ModBulkResources.GOLD, MassUnits.KILOGRAM.withQuantity(1)));

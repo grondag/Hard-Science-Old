@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.simulator.persistence.IPersistenceNode;
 import grondag.exotic_matter.varia.BinaryEnumSet;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
@@ -18,7 +19,6 @@ import grondag.hard_science.simulator.persistence.AssignedNumber;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority;
 import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
 import grondag.hard_science.simulator.persistence.IIdentified;
-import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayerMP;

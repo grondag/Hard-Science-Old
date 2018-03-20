@@ -1,7 +1,8 @@
-package grondag.hard_science.superblock.placement;
+package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;

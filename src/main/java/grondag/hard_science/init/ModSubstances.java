@@ -1,6 +1,8 @@
 package grondag.hard_science.init;
 
+import grondag.exotic_matter.init.SubstanceConfig;
 import grondag.exotic_matter.model.BlockColorMapProvider;
+import grondag.exotic_matter.model.BlockHarvestTool;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.Chroma;
 import grondag.exotic_matter.model.Hue;
@@ -13,7 +15,7 @@ import net.minecraft.block.material.Material;
 public class ModSubstances
 {
 
-    public static BlockSubstance  MACHINE = BlockSubstance.create("machine", Configurator.SUBSTANCES.durastone,  MachineBlock.MACHINE_MATERIAL, SoundType.METAL, 
+    public static BlockSubstance  MACHINE = BlockSubstance.create("machine", new SubstanceConfig(1, BlockHarvestTool.ANY, 0, 100, 1.0),  MachineBlock.MACHINE_MATERIAL, SoundType.METAL, 
     BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT).ordinal);
     public static BlockSubstance BASALT = BlockSubstance.create("basalt", Configurator.SUBSTANCES.basalt, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal);
     //can't use lava as material here - confuses the lava fluid renderer

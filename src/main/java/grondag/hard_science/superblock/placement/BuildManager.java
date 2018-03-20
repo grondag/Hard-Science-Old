@@ -8,14 +8,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.persistence.IDirtListener;
+import grondag.exotic_matter.simulator.persistence.NullDirtListener;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.domain.Privilege;
 import grondag.hard_science.simulator.domain.DomainUser;
-import grondag.hard_science.simulator.persistence.IDirtListener;
-import grondag.hard_science.simulator.persistence.NullDirtListener;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

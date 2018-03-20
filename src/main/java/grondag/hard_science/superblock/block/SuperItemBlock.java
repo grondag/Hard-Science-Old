@@ -1,15 +1,11 @@
-package grondag.hard_science.superblock.items;
+package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
-import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.placement.BlockOrientationHandler;
-import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementItemFeature;
-import grondag.hard_science.superblock.placement.PlacementPosition;
+import grondag.exotic_matter.placement.PlacementItemFeature;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.BlockFaceShape;

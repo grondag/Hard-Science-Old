@@ -1,16 +1,11 @@
 package grondag.hard_science.superblock.block;
 
 import grondag.exotic_matter.model.BlockSubstance;
-import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SuperModelTileEntity extends SuperTileEntity
 {
-    ////////////////////////////////////////////////////////////////////////
-    //  STATIC MEMBERS
-    ////////////////////////////////////////////////////////////////////////
-
     
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
@@ -19,14 +14,14 @@ public class SuperModelTileEntity extends SuperTileEntity
     /** non-zero if block emits light */
     private byte lightValue = 0;
 
-    private BlockSubstance substance = ModSubstances.FLEXSTONE;
+    private BlockSubstance substance = BlockSubstance.DEFAULT;
     
     @Override
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
         if(this.substance != null) this.substance.serializeNBT(compound);
-        compound.setByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE, (byte)this.lightValue);
+        compound.setByte(PlacementItem.NBT_SUPERMODEL_LIGHT_VALUE, (byte)this.lightValue);
     }
 
     @Override
@@ -34,7 +29,7 @@ public class SuperModelTileEntity extends SuperTileEntity
     {
         super.readModNBT(compound);
         this.substance = BlockSubstance.deserializeNBT(compound);
-        this.lightValue = compound == null ? 0 : compound.getByte(ModNBTTag.SUPER_MODEL_LIGHT_VALUE);
+        this.lightValue = compound == null ? 0 : compound.getByte(PlacementItem.NBT_SUPERMODEL_LIGHT_VALUE);
     }
 
     public byte getLightValue()

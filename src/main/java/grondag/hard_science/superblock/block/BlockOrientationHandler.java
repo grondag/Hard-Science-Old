@@ -1,12 +1,11 @@
-package grondag.hard_science.superblock.placement;
+package grondag.hard_science.superblock.block;
 
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
-import grondag.hard_science.Log;
-import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -177,7 +176,7 @@ public class BlockOrientationHandler
 
             if(corner == null)
             {
-                Log.warn("Unable to find block corner from placement. This is very strange but probably harmless.");
+                assert false : "Unable to find block corner from placement. This is very strange but probably harmless.";
             }
             else
             {

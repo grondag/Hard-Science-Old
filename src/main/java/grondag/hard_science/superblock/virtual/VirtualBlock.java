@@ -16,8 +16,8 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.superblock.block.SuperModelBlock;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import grondag.hard_science.superblock.placement.Build;
-import grondag.hard_science.superblock.placement.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -48,22 +48,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class VirtualBlock extends SuperModelBlock
 {
-    public static boolean isVirtualBlock(Block block)
-    {
-        return block instanceof VirtualBlock;
-    }
-    
-    /**
-     * True if block at the given position is actually solid (not replaceable)
-     * or is virtual and visible to the given player.
-     */
-    public static boolean isVirtuallySolid(BlockPos pos, EntityPlayer player)
-    {
-        //TODO: check for player visibility
-        IBlockState blockState = player.world.getBlockState(pos);
-        return !blockState.getMaterial().isReplaceable() 
-                || (VirtualBlock.isVirtualBlock(blockState.getBlock()));
-    }
     
     /**
      * Retrieves item stack that can be used to place a super block in place of
@@ -451,6 +435,14 @@ public class VirtualBlock extends SuperModelBlock
     @Override
     public boolean isVirtual() { return true; }
     
+    
+    @Override
+    public boolean isVirtuallySolid(BlockPos pos, EntityPlayer player)
+    {
+        //TODO: check for player visibility
+        return true;
+    }
+
     @Override
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {

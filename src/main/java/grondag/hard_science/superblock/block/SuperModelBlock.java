@@ -45,11 +45,6 @@ import net.minecraftforge.common.property.IUnlistedProperty;
  */
 public class SuperModelBlock extends SuperBlockPlus  
 {
-    /**
-     * Ordinal of the substance for this block. Set during getActualState
-     * so that harvest/tool methods can have access to location-dependent substance information.
-     */
-//    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.MAX_SUBSTANCES - 1);
     
     /**
      * Harvest tool for this block based on block substance. Set during getActualState

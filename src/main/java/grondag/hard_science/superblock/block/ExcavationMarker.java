@@ -1,11 +1,11 @@
-package grondag.hard_science.superblock.items;
+package grondag.hard_science.superblock.block;
 
 import grondag.exotic_matter.model.ISuperBlock;
-import grondag.hard_science.superblock.placement.FilterMode;
-import grondag.hard_science.superblock.placement.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementItemFeature;
-import grondag.hard_science.superblock.placement.RegionOrientation;
-import grondag.hard_science.superblock.placement.TargetMode;
+import grondag.exotic_matter.placement.FilterMode;
+import grondag.exotic_matter.placement.PlacementItemFeature;
+import grondag.exotic_matter.placement.RegionOrientation;
+import grondag.exotic_matter.placement.TargetMode;
+import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -17,9 +17,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
- *  Virtual tool crafted using the tablet, marks real-world blocks for removal. 
+ *  Base class for generic tool to mark real-world blocks for removal. 
  *  Has several selection modes.
     All actions are immediately submitted as jobs.
+    Re-skin within mods to match theme of mod and add features if appropriate.
  */
 public class ExcavationMarker extends Item implements PlacementItem
 {
@@ -28,10 +29,10 @@ public class ExcavationMarker extends Item implements PlacementItem
             PlacementItemFeature.REGION_SIZE,
             PlacementItemFeature.FILTER_MODE);
     
-    public ExcavationMarker()
+    public ExcavationMarker(String name)
     {
-        setRegistryName("excavation_marker"); 
-        setUnlocalizedName("excavation_marker");
+        setRegistryName(name); 
+        setUnlocalizedName(name);
         this.setMaxStackSize(1);
     }
     
