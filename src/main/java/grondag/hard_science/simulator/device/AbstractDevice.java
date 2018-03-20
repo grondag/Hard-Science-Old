@@ -119,6 +119,7 @@ public abstract class AbstractDevice implements IDevice
     /** 
      * If this machine has an energy manager provider, gives access.  Null if not.
      */
+    @Override
     public final DeviceEnergyManager energyManager()
     {
         return this.energyManager;

@@ -4,6 +4,8 @@ import static grondag.exotic_matter.varia.HorizontalAlignment.*;
 import static grondag.exotic_matter.varia.VerticalAlignment.*;
 import static grondag.hard_science.gui.control.GuiControl.*;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.gui.GuiUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -33,7 +35,7 @@ public class Button extends GuiButton
     }
     
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
+    public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         if (this.visible)
         {

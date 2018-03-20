@@ -143,6 +143,7 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
         }
     }
 
+    @Override
     public IDevice device()
     {
         return this.owner;
@@ -271,7 +272,7 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
     }
 
     @Override
-    public long add(IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
+    public long add(@Nonnull IResource<T> resource, long howMany, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         long added;
         
@@ -324,7 +325,7 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
     }
 
     @Override
-    public long takeUpTo(IResource<T> resource, long limit, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
+    public long takeUpTo(@Nonnull IResource<T> resource, long limit, boolean simulate, boolean allowPartial, NewProcurementTask<T> request)
     {
         long taken;
         

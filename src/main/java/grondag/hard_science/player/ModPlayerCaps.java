@@ -1,5 +1,6 @@
 package grondag.hard_science.player;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
@@ -34,7 +35,7 @@ public class ModPlayerCaps implements ICapabilityProvider, IReadWriteNBT
     private int modifierKeyFlags;
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(@Nonnull Capability<?> capability, EnumFacing facing)
     {
         return capability == CAP_INSTANCE;
     }
@@ -42,7 +43,7 @@ public class ModPlayerCaps implements ICapabilityProvider, IReadWriteNBT
     @SuppressWarnings("unchecked")
     @Override
     @Nullable
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    public <T> T getCapability(@Nonnull Capability<T> capability, EnumFacing facing)
     {
         return capability == CAP_INSTANCE ? (T) this : null;
     }

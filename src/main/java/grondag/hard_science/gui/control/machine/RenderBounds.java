@@ -79,11 +79,13 @@ public interface RenderBounds<T extends RenderBounds<T>>
             super(left, top, size);
         }
         
+        @Override
         public RectRenderBounds offset(double x, double y)
         {
             return new RectRenderBounds(this.left + x, this.top + y, this.width, this.height);
         }
     
+        @Override
         public RectRenderBounds scale(double left, double top, double width, double height)
         {
             return new RectRenderBounds(left, top, width, height);

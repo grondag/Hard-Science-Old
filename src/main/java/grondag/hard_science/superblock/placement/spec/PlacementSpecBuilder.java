@@ -81,6 +81,7 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
         return isValid;
     }
     
+    @Override
     public boolean isExcavation()
     {
         return this.isExcavation;

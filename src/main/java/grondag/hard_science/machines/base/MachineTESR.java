@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Configurator;
@@ -22,7 +24,7 @@ public class MachineTESR extends SuperBlockTESR
     public static MachineTESR INSTANCE = new MachineTESR();
     
     @Override
-    public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
+    public void render(@Nonnull SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         /**
          * To see the control face, player has to be in front of it.

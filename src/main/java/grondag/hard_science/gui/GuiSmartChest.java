@@ -3,6 +3,8 @@ package grondag.hard_science.gui;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 import org.lwjgl.input.Mouse;
 
 import grondag.hard_science.gui.control.Button;
@@ -175,7 +177,7 @@ public class GuiSmartChest extends AbstractContainerGui<MachineTileEntity>
     }
     
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException
+    protected void actionPerformed(@Nonnull GuiButton button) throws IOException
     {
         if(button.id == BUTTON_ID_SORT)
         {

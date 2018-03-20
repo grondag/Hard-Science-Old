@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.block;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.ISuperBlock;
@@ -40,7 +41,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
      * We do all of our "can we put there here" checks in that method, so we always return true.
      */
     @Override
-    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side, EntityPlayer player, ItemStack stack)
+    public boolean canPlaceBlockOnSide(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumFacing side, @Nonnull EntityPlayer player, @Nonnull ItemStack stack)
     {
         return true;
     }
@@ -81,13 +82,13 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
      */
     @Nullable
     @Override
-    public final NBTTagCompound getNBTShareTag(ItemStack stack)
+    public final NBTTagCompound getNBTShareTag(@Nonnull ItemStack stack)
     {
         return SuperTileEntity.withoutServerTag(super.getNBTShareTag(stack));
     }
     
     @Override
-    public String getItemStackDisplayName(ItemStack stack)
+    public String getItemStackDisplayName(@Nonnull ItemStack stack)
     {
         return ((ISuperBlock)this.block).getItemStackDisplayName(stack);
     }
@@ -119,7 +120,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     * @param side The side the player (or machine) right-clicked on.
     */
    @Override
-   public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
+   public boolean placeBlockAt(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull IBlockState newState)
    { 
        // world.setBlockState returns false if the state was already the requested state
        // this is OK normally, but if we need to update the TileEntity it is the opposite of OK
@@ -134,13 +135,13 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
    }
 
    @Override
-   public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+   public ActionResult<ItemStack> onItemRightClick(@Nonnull World world, @Nonnull EntityPlayer player, @Nonnull EnumHand hand)
    {
        return new ActionResult<ItemStack>(EnumActionResult.PASS, player.getHeldItem(hand));
    }
    
    @Override
-   public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+   public EnumActionResult onItemUse(@Nonnull EntityPlayer playerIn, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ)
    {
        ItemStack stackIn = playerIn.getHeldItem(hand);
 

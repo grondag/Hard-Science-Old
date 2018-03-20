@@ -2,6 +2,8 @@ package grondag.hard_science.superblock.terrain;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
 import net.minecraft.block.state.IBlockState;
@@ -22,27 +24,31 @@ public class TerrainCubicBlock extends TerrainDynamicBlock
    
     //allow mined blocks to stack - consistent with appearance of a full-height block
     @Override
-    public int damageDropped(IBlockState state)
+    public int damageDropped(@Nonnull IBlockState state)
     {
         return 0;
     }
 
     //allow mined blocks to stack - don't put an NBT on them
+    @Override
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(state));
     }
     
+    @Override
     protected List<ItemStack> createSubItems()
     {
         return this.defaultSubItems();
     }
     
+    @Override
     public boolean isFlowFiller()
     {
         return false;
     }
 
+    @Override
     public boolean isFlowHeight()
     {
         return true;
@@ -55,6 +61,7 @@ public class TerrainCubicBlock extends TerrainDynamicBlock
         return !neighborState.doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
     }
 
+    @Override
     public void makeStatic(IBlockState state, World world, BlockPos pos)
     {
         // already effectively static
@@ -73,7 +80,7 @@ public class TerrainCubicBlock extends TerrainDynamicBlock
     }
 
     @Override
-    public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos)
+    public boolean isAir(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return false;
     }

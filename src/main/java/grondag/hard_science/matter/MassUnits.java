@@ -21,92 +21,121 @@ public enum MassUnits
     private static final Function<?, ?> FORMAT_NANOGRAMS[] = 
     {
                 // 0 digits- should never get
-                new Function<String, String>() { public String apply(String t) { return "ng"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "ng"; }},
                 
                 // 1 digit
-                new Function<String, String>() { public String apply(String t) { return t + "ng"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "ng"; }},
                 
                 // 2  digits
-                new Function<String, String>() { public String apply(String t) { return t + "ng"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "ng"; }},
                 
                 // 3  digits
-                new Function<String, String>() { public String apply(String t) { return t + "ng"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "ng"; }},
                 
                 
                 // 4  digits
-                new Function<String, String>() { public String apply(String t) { return t + "ng"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "ng"; }},
                 
                 // 5  digits
-                new Function<String, String>() { public String apply(String t) { return "0.0" + t.substring(0, 1) + "mg"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "0.0" + t.substring(0, 1) + "mg"; }},
                 
                 // 6  digits
-                new Function<String, String>() { public String apply(String t) { return "0." + t.substring(0, 2) + "mg"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "0." + t.substring(0, 2) + "mg"; }},
                 
                 // 7  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "mg"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "mg"); }},
                 
                 // 8  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "mg"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "mg"); }},
                 
                 // 9  digits
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "mg"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "mg"; }},
                 
                 // 10  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "g"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "g"); }},
                 
                 // 11  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "g"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "g"); }},
                 
                 // 12  digits
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "g"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "g"; }},
                 
                 // 13  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "kg"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "kg"); }},
                 
                 // 14  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "kg"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "kg"); }},
                 
                 // 15  digits
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "kg"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "kg"; }},
 
                 // 16  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "t"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "t"); }},
                 
                 // 17  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "t"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "t"); }},
                 
                 // 18  digits
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "t"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "t"; }},
 
                 // 19  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "kt"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "kt"); }},
                 
                 // 20  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "kt"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "kt"); }},
                 
                 // 21  digits
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "kt"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "kt"; }},
                 
                 // 22  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "mt"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "mt"); }},
                 
                 // 23  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "mt"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "mt"); }},
                 
                 // 24  digits
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "mt"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "mt"; }},
                 
                 // 25  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "gt"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "gt"); }},
                 
                 // 26  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "gt"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal2_1Suffix(t, "gt"); }},
                 
                 // 27  digits
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "gt"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "gt"; }},
 
                 // 28  digits
-                new Function<String, String>() { public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "tt"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return MachinePower.insertDecimal1_2Suffix(t, "tt"); }},
         };
     
     private MassUnits(String symbol, long ng)

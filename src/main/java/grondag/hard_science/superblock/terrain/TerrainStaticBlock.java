@@ -2,6 +2,8 @@ package grondag.hard_science.superblock.terrain;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
@@ -53,11 +55,13 @@ public class TerrainStaticBlock extends SuperStaticBlock
         return other == TerrainBlockHelper.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
     }
 
+    @Override
     public boolean isFlowFiller()
     {
         return isFiller;
     }
 
+    @Override
     public boolean isFlowHeight()
     {
         return !isFiller;
@@ -119,7 +123,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
     }
 
     @Override
-    public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos)
+    public boolean isAir(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return TerrainBlockHelper.isEmpty(state, world, pos);
     }
@@ -128,7 +132,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
      * Prevent neighboring dynamic blocks from updating geometry by making them static.
      */
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
+    public boolean removedByPlayer(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player, boolean willHarvest)
     {
         TerrainDynamicBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
@@ -138,7 +142,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
      * Prevent neighboring dynamic blocks from updating geometry by making them static.
      */
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack)
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
         TerrainDynamicBlock.freezeNeighbors(worldIn, pos, state);
@@ -178,6 +182,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
         return TerrainBlockHelper.shouldBeFullCube(state, world, pos);
     }
     
+    @Override
     public boolean getUseNeighborBrightness(IBlockState state)
     {
         return true;

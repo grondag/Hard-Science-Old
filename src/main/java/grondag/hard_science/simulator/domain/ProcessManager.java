@@ -236,6 +236,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         public Ingredient ingredient() { return this.ingredient; }
         
         
+        @Override
         public long onHand()
         {
             List<AbstractResourceWithQuantity<StorageTypeStack>> stocked 

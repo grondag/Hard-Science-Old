@@ -1,5 +1,7 @@
 package grondag.hard_science.volcano.lava;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.simulator.Simulator;
@@ -39,32 +41,32 @@ public class LavaBlock extends TerrainDynamicBlock
     }
 
     @Override
-    public boolean canDropFromExplosion(Explosion explosionIn)
+    public boolean canDropFromExplosion(@Nonnull Explosion explosionIn)
     {
         return false;
     }
 
     @Override
-    public boolean canHarvestBlock(IBlockAccess world, BlockPos pos, EntityPlayer player)
+    public boolean canHarvestBlock(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player)
     {
         return false;
     }
 
     @Override
-    public boolean canSilkHarvest(World world, BlockPos pos, IBlockState state, EntityPlayer player)
+    public boolean canSilkHarvest(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player)
     {
         return false;
     }
 
     @Override
-    public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity)
+    public boolean canEntityDestroy(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull Entity entity)
     {
         return false;
     }
     
     @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(@Nonnull IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull Block blockIn, @Nonnull BlockPos fromPos)
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         handleFallingBlocks(worldIn, pos, state);
@@ -72,7 +74,7 @@ public class LavaBlock extends TerrainDynamicBlock
     }
 
     @Override
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    public void onBlockAdded(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
     {
         super.onBlockAdded(worldIn, pos, state);
         handleFallingBlocks(worldIn, pos, state);
@@ -80,7 +82,7 @@ public class LavaBlock extends TerrainDynamicBlock
     }
     
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
     {
         super.breakBlock(worldIn, pos, state);
         if(this.isFlowHeight()) Simulator.instance().lavaSimulator().unregisterDestroyedLava(worldIn, pos, state);

@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.block;
 
+import javax.annotation.Nonnull;
+
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.model.BlockRenderMode;
@@ -39,7 +41,7 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
     private final DispatchDelegate tesrDelegate = SuperDispatcher.INSTANCE.delegates[BlockRenderMode.TESR.ordinal()];
     
     @Override
-    public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
+    public void render(@Nonnull SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         if(te != null)
         {

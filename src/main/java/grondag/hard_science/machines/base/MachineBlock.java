@@ -2,6 +2,8 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.Chroma;
@@ -93,14 +95,14 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     }
     
     @Override
-    public int damageDropped(IBlockState state)
+    public int damageDropped(@Nonnull IBlockState state)
     {
         // don't want species to "stick" with machines - is purely cosmetic
         return 0;
     }
     
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void neighborChanged(@Nonnull IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull Block blockIn, @Nonnull BlockPos fromPos)
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         TileEntity myTE = worldIn.getTileEntity(pos);
@@ -111,7 +113,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) 
+    public boolean onBlockActivated(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ) 
     {
         // for simple blocks without a container, activation is client-only
         if (world.isRemote && this.guiID >= 0) 
@@ -132,7 +134,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
      * {@inheritDoc}
      */
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
     {
         this.handleBreakBlock(worldIn, pos, state);
         super.breakBlock(worldIn, pos, state);
@@ -160,7 +162,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     }
     
     @Override
-    public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
+    public void onBlockClicked(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EntityPlayer playerIn)
     {
         if (worldIn.isRemote) return;
 
@@ -212,19 +214,19 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     }
     
     @Override
-    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
+    public boolean addDestroyEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull ParticleManager manager)
     {
         return true;
     }
 
     @Override
-    public boolean addHitEffects(IBlockState blockState, World world, RayTraceResult target, ParticleManager manager)
+    public boolean addHitEffects(@Nonnull IBlockState blockState, @Nonnull World world, @Nonnull RayTraceResult target, @Nonnull ParticleManager manager)
     {
         return true;
     }
 
     @Override
-    public boolean addLandingEffects(IBlockState state, WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity,
+    public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity,
             int numberOfParticles)
     {
         return true;
@@ -246,7 +248,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
      * {@inheritDoc}
      */
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack)
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
         this.handleOnBlockPlacedBy(worldIn, pos, state, placer, stack);
@@ -292,7 +294,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
 //    }
 
     @Override
-    public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(@Nonnull ItemStack stack, World world, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag advanced)
     {
         //NOOP for now on machines - don't want all the stuff we get for normal superblocks
     }

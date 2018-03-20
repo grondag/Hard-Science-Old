@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.machines.support.ContainerLayout;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -65,7 +67,7 @@ public abstract class MachineContainer extends Container
     
 
     @Override
-    public boolean canInteractWith(EntityPlayer playerIn)
+    public boolean canInteractWith(@Nonnull EntityPlayer playerIn)
     {
         return te.canInteractWith(playerIn);
     }

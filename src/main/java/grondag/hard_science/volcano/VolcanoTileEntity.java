@@ -13,6 +13,8 @@ import net.minecraft.util.math.Vec3i;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator;
@@ -465,7 +467,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tagCompound) 
+    public void readFromNBT(@Nonnull NBTTagCompound tagCompound) 
     {
         super.readFromNBT(tagCompound);
 
@@ -480,7 +482,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound) 
+    public NBTTagCompound writeToNBT(@Nonnull NBTTagCompound tagCompound) 
     {        
         tagCompound.setInteger(ModNBTTag.VOLCANO_STAGE, this.stage.ordinal());
         tagCompound.setInteger(ModNBTTag.VOLCANO_LEVEL, this.level);

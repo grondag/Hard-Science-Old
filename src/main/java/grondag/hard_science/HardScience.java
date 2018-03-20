@@ -1,5 +1,7 @@
 package grondag.hard_science;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.init.ModItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
@@ -36,7 +38,7 @@ public class HardScience
 	{
 		@Override
 		@SideOnly(Side.CLIENT)
-		public ItemStack getTabIconItem() 
+		public @Nonnull ItemStack getTabIconItem() 
 		{
 			return ModItems.basalt_cobble.getDefaultInstance();
 		}

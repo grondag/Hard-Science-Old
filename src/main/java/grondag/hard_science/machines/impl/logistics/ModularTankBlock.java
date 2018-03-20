@@ -2,6 +2,8 @@ package grondag.hard_science.machines.impl.logistics;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModTextures;
@@ -58,7 +60,7 @@ public class ModularTankBlock extends MachineBlock
     }
     
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta)
+    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return new MachineTileEntityTickable();
     }
@@ -70,7 +72,7 @@ public class ModularTankBlock extends MachineBlock
     }
     
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) 
+    public boolean onBlockActivated(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ) 
     {
         // allow fluid handling logic to happen
         if(!world.isRemote && player.getHeldItem(hand).hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null))

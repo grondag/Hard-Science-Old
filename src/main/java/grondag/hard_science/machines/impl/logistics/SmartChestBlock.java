@@ -3,6 +3,8 @@ package grondag.hard_science.machines.impl.logistics;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModTextures;
@@ -41,7 +43,7 @@ public class SmartChestBlock extends MachineContainerBlock
     }
 
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) 
+    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta) 
     {
         return new MachineTileEntityTickable();
     }

@@ -24,13 +24,13 @@ public class HardScienceJEIPlugIn implements IModPlugin
     public static IModRegistry registry() { return registry; }
     
     @Override
-    public void onRuntimeAvailable(IJeiRuntime jeiRuntime)
+    public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime)
     {
         runtime = jeiRuntime;
     }
 
     @Override
-    public void registerCategories(IRecipeCategoryRegistration registry)
+    public void registerCategories(@Nonnull IRecipeCategoryRegistration registry)
     {
         registry.addRecipeCategories(
                 new MicronizerRecipe.Category(registry.getJeiHelpers().getGuiHelper()),

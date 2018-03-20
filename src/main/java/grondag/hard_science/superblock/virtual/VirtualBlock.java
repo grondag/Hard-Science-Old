@@ -87,7 +87,7 @@ public class VirtualBlock extends SuperModelBlock
     }
     
     @Override
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
+    public void addCollisionBoxToList(@Nonnull IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull AxisAlignedBB entityBox, @Nonnull List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
     {
         if(HardScience.proxy.allowCollisionWithVirtualBlocks(worldIn) && entityIn == null)
@@ -101,14 +101,14 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public boolean addHitEffects(IBlockState blockState, World world, RayTraceResult target, ParticleManager manager)
+    public boolean addHitEffects(@Nonnull IBlockState blockState, @Nonnull World world, @Nonnull RayTraceResult target, @Nonnull ParticleManager manager)
     {
         // no hit effects for virtual blocks
         return true;
     }
 
     @Override
-    public boolean addLandingEffects(IBlockState state, WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity,
+    public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity,
             int numberOfParticles)
     {
         // no landing effects for virtual blocks
@@ -116,49 +116,49 @@ public class VirtualBlock extends SuperModelBlock
     }
     
     @Override
-    public boolean canBeConnectedTo(IBlockAccess world, BlockPos pos, EnumFacing facing)
+    public boolean canBeConnectedTo(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EnumFacing facing)
     {
          return false;
     }
     
     @Override
-    public boolean canBeReplacedByLeaves(IBlockState state, IBlockAccess world, BlockPos pos)
+    public boolean canBeReplacedByLeaves(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
        return true;
     }
 
     @Override
-    public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
+    public boolean canConnectRedstone(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, EnumFacing side)
     {
         return false;
     }
 
     @Override
-    public boolean canCreatureSpawn(IBlockState state, IBlockAccess world, BlockPos pos, SpawnPlacementType type)
+    public boolean canCreatureSpawn(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull SpawnPlacementType type)
     {
         return false;
     }
 
     @Override
-    public boolean canDropFromExplosion(Explosion explosionIn)
+    public boolean canDropFromExplosion(@Nonnull Explosion explosionIn)
     {
         return false;
     }
 
     @Override
-    public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity)
+    public boolean canEntityDestroy(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull Entity entity)
     {
        return false;
     }
 
     @Override
-    public boolean canEntitySpawn(IBlockState state, Entity entityIn)
+    public boolean canEntitySpawn(@Nonnull IBlockState state, @Nonnull Entity entityIn)
     {
         return false;
     }
     
     @Override
-    public boolean canPlaceTorchOnTop(IBlockState state, IBlockAccess world, BlockPos pos)
+    public boolean canPlaceTorchOnTop(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return false;
     }
@@ -170,13 +170,13 @@ public class VirtualBlock extends SuperModelBlock
     }
     
     @Override
-    public boolean canSilkHarvest(World world, BlockPos pos, IBlockState state, EntityPlayer player)
+    public boolean canSilkHarvest(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player)
     {
         return false;
     }
     
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta)
+    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return this.blockRenderMode == BlockRenderMode.TESR 
                 ? new VirtualTileEntityTESR()
@@ -184,7 +184,7 @@ public class VirtualBlock extends SuperModelBlock
     }
     
     @Override
-    public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
+    public boolean doesSideBlockRendering(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
         if(this.isVisible(state, world, pos))
         {
@@ -217,13 +217,13 @@ public class VirtualBlock extends SuperModelBlock
 //    }
     
     @Override
-    public PathNodeType getAiPathNodeType(IBlockState state, IBlockAccess world, BlockPos pos)
+    public PathNodeType getAiPathNodeType(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return PathNodeType.OPEN;
     }
 
     @Override
-    public float[] getBeaconColorMultiplier(IBlockState state, World world, BlockPos pos, BlockPos beaconPos)
+    public float[] getBeaconColorMultiplier(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull BlockPos beaconPos)
     {
         return null;
     }
@@ -235,49 +235,49 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos)
+    public float getBlockHardness(@Nonnull IBlockState blockState, @Nonnull World worldIn, @Nonnull BlockPos pos)
     {
         return 0;
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public AxisAlignedBB getCollisionBoundingBox(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
     {
         return Block.NULL_AABB;
     }
 
     @Override
-    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    public List<ItemStack> getDrops(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull IBlockState state, int fortune)
     {
         return Collections.emptyList();
     }
 
     @Override
-    public float getExplosionResistance(Entity exploder)
+    public float getExplosionResistance(@Nonnull Entity exploder)
     {
         return 0;
     }
 
     @Override
-    public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion)
+    public float getExplosionResistance(@Nonnull World world, @Nonnull BlockPos pos, Entity exploder, @Nonnull Explosion explosion)
     {
         return 0;
     }
 
     @Override
-    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
+    public int getFlammability(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
         return 0;
     }
 
     @Override
-    public int getHarvestLevel(IBlockState state)
+    public int getHarvestLevel(@Nonnull IBlockState state)
     {
         return 0;
     }
 
     @Override
-    public String getHarvestTool(IBlockState state)
+    public String getHarvestTool(@Nonnull IBlockState state)
     {
         return null;
     }
@@ -301,20 +301,20 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
+    public int getLightValue(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return 0;
     }
 
     @Override
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public MapColor getMapColor(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
     {
         return MapColor.AIR;
     }
 
     /** Can't report AIR on client side or right click doesn't work to place blocks. */
     @Override
-    public Material getMaterial(IBlockState state)
+    public Material getMaterial(@Nonnull IBlockState state)
     {
         return  HardScience.proxy.allowCollisionWithVirtualBlocks(null) ? Material.STRUCTURE_VOID : Material.AIR;
     }
@@ -386,7 +386,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public boolean isNormalCube(IBlockState state)
+    public boolean isNormalCube(@Nonnull IBlockState state)
     {
         return false;
     }
@@ -409,7 +409,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
+    public boolean isPassable(@Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
     {
         return true;
     }
@@ -474,7 +474,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
+    public boolean removedByPlayer(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player, boolean willHarvest)
     {
         if(world.isRemote)
         {
@@ -505,14 +505,14 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public void onBlockExploded(World world, BlockPos pos, Explosion explosion)
+    public void onBlockExploded(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull Explosion explosion)
     {
         // not affected by explosions, because not really there
         // probably won't be called anyway, because material is air
     }
     
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
     {
         super.breakBlock(worldIn, pos, state);
         

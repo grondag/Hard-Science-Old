@@ -2,6 +2,8 @@ package grondag.hard_science.volcano.lava;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
 import grondag.hard_science.Log;
@@ -113,7 +115,7 @@ public class EntityLavaBlob extends Entity
     }
 
     @Override
-    public void notifyDataManagerChange(DataParameter<?> key)
+    public void notifyDataManagerChange(@Nonnull DataParameter<?> key)
     {
         super.notifyDataManagerChange(key);
 
@@ -201,7 +203,7 @@ public class EntityLavaBlob extends Entity
     }
     
     @Override
-    public boolean isEntityInvulnerable(DamageSource source)
+    public boolean isEntityInvulnerable(@Nonnull DamageSource source)
     {
         // Volcanic lava don't care
         return true;
@@ -294,7 +296,7 @@ public class EntityLavaBlob extends Entity
      * Tries to move the entity towards the specified location.
      */
     @Override
-    public void move(MoverType type, double x, double y, double z)
+    public void move(@Nonnull MoverType type, double x, double y, double z)
     {
         this.world.profiler.startSection("move");
 
@@ -480,7 +482,7 @@ public class EntityLavaBlob extends Entity
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound compound)
+    protected void readEntityFromNBT(@Nonnull NBTTagCompound compound)
     {
         this.cachedAmount = compound.getInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT);
         this.dataManager.set(FLUID_AMOUNT, cachedAmount);
@@ -488,7 +490,7 @@ public class EntityLavaBlob extends Entity
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound compound)
+    protected void writeEntityToNBT(@Nonnull NBTTagCompound compound)
     {
         compound.setInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
     }

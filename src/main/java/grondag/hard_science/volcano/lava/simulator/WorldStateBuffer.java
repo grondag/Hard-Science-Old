@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.HardScience;
 import grondag.exotic_matter.concurrency.PerformanceCollector;
 import grondag.exotic_matter.concurrency.PerformanceCounter;
@@ -77,7 +79,8 @@ public class WorldStateBuffer implements IBlockAccess
         this.perfStateApplication = PerformanceCounter.create(enablePerfCounting, "World State Application", perfCollector);
     }
     
-    public IBlockState getBlockState(BlockPos pos)
+    @Override
+    public IBlockState getBlockState(@Nonnull BlockPos pos)
     {
         return this.getBlockState(pos.getX(), pos.getY(), pos.getZ());
     }
@@ -247,7 +250,7 @@ public class WorldStateBuffer implements IBlockAccess
     public int stateSetCount() { return this.stateSetCount; }
     
     @Override
-    public boolean isAirBlock(BlockPos pos)
+    public boolean isAirBlock(@Nonnull BlockPos pos)
     {
         return this.getBlockState(pos).getBlock().isAir(this.getBlockState(pos), this, pos);
     }
@@ -255,25 +258,25 @@ public class WorldStateBuffer implements IBlockAccess
     // FOLLOWING ARE UNSUPPORTED
     
     @Override
-    public TileEntity getTileEntity(BlockPos pos)
+    public TileEntity getTileEntity(@Nonnull BlockPos pos)
     {
         return this.realWorld.getTileEntity(pos);
     }
 
     @Override
-    public int getCombinedLight(BlockPos pos, int lightValue)
+    public int getCombinedLight(@Nonnull BlockPos pos, int lightValue)
     {
         return this.realWorld.getCombinedLight(pos, lightValue);
     }
 
     @Override
-    public Biome getBiome(BlockPos pos)
+    public Biome getBiome(@Nonnull BlockPos pos)
     {
         return this.realWorld.getBiome(pos);
     }
 
     @Override
-    public int getStrongPower(BlockPos pos, EnumFacing direction)
+    public int getStrongPower(@Nonnull BlockPos pos, @Nonnull EnumFacing direction)
     {
         return this.realWorld.getStrongPower(pos);
     }
@@ -285,7 +288,7 @@ public class WorldStateBuffer implements IBlockAccess
     }
 
     @Override
-    public boolean isSideSolid(BlockPos pos, EnumFacing side, boolean _default)
+    public boolean isSideSolid(@Nonnull BlockPos pos, @Nonnull EnumFacing side, boolean _default)
     {
         return this.realWorld.isSideSolid(pos, side, _default);
     }

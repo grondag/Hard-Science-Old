@@ -167,9 +167,9 @@ public class DigesterAnalysis
                 reconIn.put(e, count);
             }
 
-            Molecule residue = sludgePermits.get(e);
-            if(residue != null)
+            if(sludgePermits.containsKey(e))
             {
+                Molecule residue = sludgePermits.get(e);
                 double residueMols = count / residue.countOf(e);
                 totalResidueMols += residueMols;
                 residueBuilder.add(residue, residueMols);
@@ -178,10 +178,13 @@ public class DigesterAnalysis
                 if(debug) Log.info("Residue includes %f mols of %s as %f mols of %s",
                         count, e.symbol, residueMols, residue.formula);
             }
-            else if(!digested.contains(e))
+            else
             {
-                if(debug || Configurator.PROCESSING.enableDigesterRecipeWarnings)
-                    Log.warn("Unsupported element " + e.symbol + "found in digester input. Content will be discarded.");
+                if(!digested.contains(e))
+                {
+                    if(debug || Configurator.PROCESSING.enableDigesterRecipeWarnings)
+                        Log.warn("Unsupported element " + e.symbol + "found in digester input. Content will be discarded.");
+                }
             }
         }
         this.residueCompound = residueBuilder.build();

@@ -46,6 +46,7 @@ public class Toggle extends GuiControl<Toggle>
         this.labelWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(this.label);
     }
 
+    @Override
     protected boolean isMouseOver(int mouseX, int mouseY)
     {
         return !(mouseX < this.left || mouseX > this.left + this.labelHeight + CONTROL_INTERNAL_MARGIN + this.labelWidth

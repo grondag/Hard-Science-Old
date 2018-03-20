@@ -11,7 +11,7 @@ import grondag.exotic_matter.concurrency.SimpleConcurrentList;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
-import grondag.exotic_matter.simulator.persistence.IPersistenceNode;
+import grondag.exotic_matter.simulator.persistence.ISimulationNode;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
@@ -40,7 +40,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
-public class LavaSimulator implements IPersistenceNode, ISimulationTickable
+public class LavaSimulator implements ISimulationNode, ISimulationTickable
 {
     public final PerformanceCollector perfCollectorAllTick = new PerformanceCollector("Lava Simulator Whole tick");
     public final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Lava Simulator On tick");
@@ -447,6 +447,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         }
     }
     
+    @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
 
@@ -525,6 +526,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
      * All tasks the require direct MC world access go here.
      * Any mutating world access should be single threaded.
      */
+    @Override
     public void doOnTick()
     {
         this.doStats();
@@ -586,6 +588,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     private int[] flowTotals = new int[8];
     private int[] flowCounts = new int[8];
     
+    @Override
     public void doOffTick()
     {
        if(Configurator.VOLCANO.enablePerformanceLogging) perfOffTick.startRun();

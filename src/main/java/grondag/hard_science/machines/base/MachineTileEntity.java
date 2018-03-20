@@ -1,5 +1,6 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.world.WorldInfo;
@@ -139,7 +140,7 @@ public class MachineTileEntity extends SuperTileEntity
     }
 
     @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate)
+    public boolean shouldRefresh(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState oldState, @Nonnull IBlockState newSate)
     {
         return true;
     }
@@ -412,7 +413,7 @@ public class MachineTileEntity extends SuperTileEntity
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    public <T> T getCapability(@Nonnull Capability<T> capability, EnumFacing facing)
     {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
                 && this.machine().hasItemStorage())
@@ -428,7 +429,7 @@ public class MachineTileEntity extends SuperTileEntity
     }
     
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(@Nonnull Capability<?> capability, EnumFacing facing)
     {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && this.machine() != null)
         {

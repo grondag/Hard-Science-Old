@@ -465,30 +465,46 @@ public class MachineControlRenderer
     // segments start at top right and work around to top left
     private static final DoubleUnaryOperator[] SEGMENT_FUNC_X = 
         {
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0.5 + Math.tan(value) / 2.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0.5 + Math.tan(value) / 2.0; }},
 
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 1.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 1.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 1.0 - Math.tan(value) / 2.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 1.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 1.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 1.0 - Math.tan(value) / 2.0; }},
 
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0.5 - Math.tan(value) / 2.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return Math.tan(value) / 2.0; }}
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0.5 - Math.tan(value) / 2.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return Math.tan(value) / 2.0; }}
         };
 
     private static final DoubleUnaryOperator[] SEGMENT_FUNC_Y = 
         {
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0.0; }},
 
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return Math.tan(value) / 2.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0.5 + Math.tan(value) / 2.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 1.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 1.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return Math.tan(value) / 2.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0.5 + Math.tan(value) / 2.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 1.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 1.0; }},
 
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 1.0 - Math.tan(value) / 2.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0.5 - Math.tan(value) / 2.0; }},
-                new DoubleUnaryOperator() { public double applyAsDouble(double value) { return 0; }}
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 1.0 - Math.tan(value) / 2.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0.5 - Math.tan(value) / 2.0; }},
+                new DoubleUnaryOperator() { @Override
+                public double applyAsDouble(double value) { return 0; }}
         };
 
     /** 

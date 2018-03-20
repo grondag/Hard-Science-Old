@@ -51,6 +51,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
             }
         }
         
+        @Override
         public synchronized IIdentified get(int index)
         {
             return super.get(index);
@@ -115,7 +116,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     public synchronized void deserializeNBT(NBTTagCompound tag)
     {
         int input[] = tag.getIntArray(ModNBTTag.ASSIGNED_NUMBERS_AUTHORITY);
-        if(input == null)
+        if(input.length == 0)
         {
             this.clear();
         }

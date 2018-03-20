@@ -2,6 +2,8 @@ package grondag.hard_science.simulator.storage;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.Log;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -82,7 +84,7 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
     * {@inheritDoc}
     */
    @Override
-   public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+   public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate)
    {
        if(slot < 0) return stack;
        

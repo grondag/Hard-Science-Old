@@ -2,6 +2,8 @@ package grondag.hard_science.volcano.lava;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.render.Vertex;
@@ -32,7 +34,8 @@ public class RenderLavaBlob extends Render<EntityLavaBlob>
 
     private static final List<RawQuad> quads = QuadHelper.makeIcosahedron(new Vec3d(0,0,0), 0.5, new RawQuad());
 
-    public void doRender(EntityLavaBlob entity, double x, double y, double z, float entityYaw, float partialTicks)
+    @Override
+    public void doRender(@Nonnull EntityLavaBlob entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
         GlStateManager.pushMatrix();
         GlStateManager.disableLighting();
@@ -69,7 +72,8 @@ public class RenderLavaBlob extends Render<EntityLavaBlob>
     /**
      * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
      */
-    protected ResourceLocation getEntityTexture(EntityLavaBlob entity)
+    @Override
+    protected ResourceLocation getEntityTexture(@Nonnull EntityLavaBlob entity)
     {
         return TEXTURE;
     }

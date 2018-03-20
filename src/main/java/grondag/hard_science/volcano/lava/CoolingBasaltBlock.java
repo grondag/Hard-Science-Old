@@ -3,6 +3,8 @@ package grondag.hard_science.volcano.lava;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
@@ -126,7 +128,7 @@ public class CoolingBasaltBlock extends TerrainDynamicBlock
     }
 
     @Override
-    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
+    public void randomTick(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Random random)
     {
         // Gather orphaned blocks
         Simulator.instance().lavaSimulator().registerCoolingBlock(worldIn, pos);

@@ -1,5 +1,7 @@
 package grondag.hard_science.volcano.lava;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.HardScience;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,7 +26,7 @@ public class LavaBlobItem extends Item
 
         
         @Override
-        public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand)
+        public ActionResult<ItemStack> onItemRightClick(@Nonnull World worldIn, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand)
         {
             ItemStack stack = playerIn.getHeldItem(hand);
             

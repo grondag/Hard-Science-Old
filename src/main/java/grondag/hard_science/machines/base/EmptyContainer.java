@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.machines.support.ContainerLayout;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -21,21 +23,24 @@ public class EmptyContainer extends MachineContainer
         this.addPlayerSlots(playerInventory, layout);
     }
 
+    @Override
     protected void addPlayerSlots(IInventory playerInventory,ContainerLayout layout)
     {
         // NOOP
     
     }
 
+    @Override
     protected  void addMachineSlots() {};
     
 
     @Override
-    public boolean canInteractWith(EntityPlayer playerIn)
+    public boolean canInteractWith(@Nonnull EntityPlayer playerIn)
     {
         return te.canInteractWith(playerIn);
     }
 
+    @Override
     public MachineTileEntity tileEntity()
     {
         return this.te;

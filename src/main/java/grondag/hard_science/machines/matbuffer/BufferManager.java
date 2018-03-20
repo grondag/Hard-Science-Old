@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.matbuffer;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.support.ThroughputRegulator;
@@ -166,7 +168,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
     }
 
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate)
     {
         if(slot < inSlots())
         {

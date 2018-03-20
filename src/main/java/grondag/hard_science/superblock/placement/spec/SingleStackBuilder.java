@@ -21,6 +21,7 @@ public abstract class SingleStackBuilder extends PlacementSpecBuilder
         super(placedStack, player, pPos);
     }
     
+    @Override
     protected ISuperModelState previewModelState()
     {
         return this.outputStack == null ? super.previewModelState() : PlacementItem.getStackModelState(this.outputStack);

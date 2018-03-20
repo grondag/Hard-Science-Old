@@ -13,18 +13,21 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
 {
     public static final ItemStorageEvent INSTANCE = new ItemStorageEvent();
     
+    @Override
     public void postBeforeStorageDisconnect(IResourceContainer<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new BeforeItemStorageDisconnect(storage));
     }
     
+    @Override
     public void postAfterStorageConnect(IResourceContainer<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterItemStorageConnect(storage));
     }
     
+    @Override
     public void postStoredUpdate(
             IResourceContainer<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
@@ -40,6 +43,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
                     request));
     }
     
+    @Override
     public void postAvailableUpdate(
             IResourceContainer<StorageTypeStack> storage, 
             IResource<StorageTypeStack> resource, 
@@ -55,6 +59,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
                     request));
     }
     
+    @Override
     public void postCapacityChange(IResourceContainer<StorageTypeStack> storage, long delta)
     {
         if(storage.getDomain() == null) return;

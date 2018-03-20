@@ -59,6 +59,7 @@ public class PortLayout extends IForgeRegistryEntry.Impl<PortLayout> implements 
         this.faces[EnumFacing.SOUTH.ordinal()] = south;
     }
 
+    @Override
     public PortFace getFace(EnumFacing face)
     {
         return this.faces[face.ordinal()];

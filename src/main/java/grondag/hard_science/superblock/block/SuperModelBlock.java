@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.block;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.BlockHarvestTool;
@@ -86,7 +87,7 @@ public class SuperModelBlock extends SuperBlockPlus
      }
 
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta)
+    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return this.blockRenderMode == BlockRenderMode.TESR 
                 ? new SuperModelTileEntityTESR()
@@ -100,7 +101,7 @@ public class SuperModelBlock extends SuperBlockPlus
     }
     
     @Override
-    public int damageDropped(IBlockState state)
+    public int damageDropped(@Nonnull IBlockState state)
     {
         // don't want species to "stick" with SuperModelblocks - so they can restack
         // species will be set again on placement anyway
@@ -109,7 +110,7 @@ public class SuperModelBlock extends SuperBlockPlus
     
     @SuppressWarnings("deprecation")
     @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public IBlockState getActualState(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
     {
         BlockSubstance substance = this.getSubstance(state, worldIn, pos);
         // Add substance for tool methods
@@ -124,7 +125,7 @@ public class SuperModelBlock extends SuperBlockPlus
      * to set {@link #SUBSTANCE} property
      */
     @Override
-    public int getHarvestLevel(IBlockState state)
+    public int getHarvestLevel(@Nonnull IBlockState state)
     {
         Integer l = state.getValue(HARVEST_LEVEL);
         return l == null ? 0 : l;
@@ -136,7 +137,7 @@ public class SuperModelBlock extends SuperBlockPlus
      * to set {@link #SUBSTANCE} property
      */
     @Override
-    @Nullable public String getHarvestTool(IBlockState state)
+    @Nullable public String getHarvestTool(@Nonnull IBlockState state)
     {
         BlockHarvestTool tool = state.getValue(HARVEST_TOOL);
         return tool == null ? null : tool.toolString;
@@ -144,19 +145,19 @@ public class SuperModelBlock extends SuperBlockPlus
     
    
     @Override
-    public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos)
+    public float getBlockHardness(@Nonnull IBlockState blockState, @Nonnull World worldIn, @Nonnull BlockPos pos)
     {
         return this.getSubstance(blockState, worldIn, pos).hardness;
     }
 
     @Override
-    public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion)
+    public float getExplosionResistance(@Nonnull World world, @Nonnull BlockPos pos, Entity exploder, @Nonnull Explosion explosion)
     {
         return this.getSubstance(world, pos).resistance;
     }
 
     @Override
-    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, Entity entity)
+    public SoundType getSoundType(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, Entity entity)
     {
         return this.getSubstance(state, world, pos).soundType;
     }
@@ -178,7 +179,7 @@ public class SuperModelBlock extends SuperBlockPlus
      * 
      */
     @Override
-    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
+    public int getLightValue(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         TileEntity myTE = world.getTileEntity(pos);
         return myTE == null || !(myTE instanceof SuperModelTileEntity)

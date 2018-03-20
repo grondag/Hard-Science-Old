@@ -3,6 +3,8 @@ package grondag.hard_science.crafting.base;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.crafting.base.SingleParameterModel.Result;
 import grondag.hard_science.crafting.base.SingleParameterModel.ResultBuilder;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -20,7 +22,7 @@ public abstract class AbstractSingleModelProcess<R extends IHardScienceRecipe> e
     protected abstract R makeRecipe(AbstractSingleModelProcess<R> abstractSingleModelProcess, Result result, int ticksDuration);
     
     @Override
-    public R configureFromOutputs(List<AbstractResourceWithQuantity<?>> minOutputs)
+    public R configureFromOutputs(@Nonnull List<AbstractResourceWithQuantity<?>> minOutputs)
     {
         assert this.allOutputs().containsAll(
                 minOutputs.stream().map(p -> p.resource()).collect(Collectors.toList()))
@@ -39,7 +41,7 @@ public abstract class AbstractSingleModelProcess<R extends IHardScienceRecipe> e
     }
 
     @Override
-    public R configureFromInputs(List<AbstractResourceWithQuantity<?>> maxInputs)
+    public R configureFromInputs(@Nonnull List<AbstractResourceWithQuantity<?>> maxInputs)
     {
         assert this.allInputs().containsAll(
                 maxInputs.stream().map(p -> p.resource()).collect(Collectors.toList()))

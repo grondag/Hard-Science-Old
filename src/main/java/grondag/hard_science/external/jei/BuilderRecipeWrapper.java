@@ -3,6 +3,8 @@ package grondag.hard_science.external.jei;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.crafting.BuilderRecipe;
@@ -48,7 +50,7 @@ public class BuilderRecipeWrapper implements IRecipeWrapper
     }
     
     @Override
-    public void getIngredients(IIngredients ingredients)
+    public void getIngredients(@Nonnull IIngredients ingredients)
     {
         ingredients.setInputLists(ItemStack.class, this.itemInputs);
         ingredients.setInputLists(FluidStack.class, this.fluidInputs);

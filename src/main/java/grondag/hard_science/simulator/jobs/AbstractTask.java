@@ -289,6 +289,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         this.setDirty();
     }
 
+    @Override
     public synchronized void onAntecedentTerminated(ITask antecedent)
     {
         assert this.status == RequestStatus.NEW || this.status == RequestStatus.WAITING
@@ -306,6 +307,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
         }
     }
     
+    @Override
     public synchronized void backTrack(ITask antecedent)
     {
         assert !antecedent.getStatus().isTerminated 

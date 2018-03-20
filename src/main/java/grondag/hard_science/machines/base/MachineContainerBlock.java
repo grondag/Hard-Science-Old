@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.HardScience;
 import net.minecraft.block.state.IBlockState;
@@ -19,7 +21,7 @@ public abstract class MachineContainerBlock extends MachineBlock
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) 
+    public boolean onBlockActivated(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ) 
     {
         // this is main difference for container blocks - activation happens server-side 
         if (world.isRemote || this.guiID < 0) {

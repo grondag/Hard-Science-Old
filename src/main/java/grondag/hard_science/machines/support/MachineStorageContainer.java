@@ -2,6 +2,7 @@ package grondag.hard_science.machines.support;
 
 import java.util.HashMap;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.Log;
@@ -39,7 +40,7 @@ public class MachineStorageContainer extends MachineContainer
     }
     
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
+    public ItemStack transferStackInSlot(@Nonnull EntityPlayer playerIn, int index)
     {
         Slot slot = this.inventorySlots.get(index);
 
@@ -96,7 +97,7 @@ public class MachineStorageContainer extends MachineContainer
     }
 
     @Override
-    public void addListener(IContainerListener listener)
+    public void addListener(@Nonnull IContainerListener listener)
     {
         super.addListener(listener);
         if(listener instanceof EntityPlayerMP && this.te != null)
@@ -120,7 +121,7 @@ public class MachineStorageContainer extends MachineContainer
     }
 
     @Override
-    public void onContainerClosed(EntityPlayer playerIn)
+    public void onContainerClosed(@Nonnull EntityPlayer playerIn)
     {
         ItemStorageListener oldListener = this.storageListeners.remove(playerIn);
         if(oldListener != null) oldListener.die();

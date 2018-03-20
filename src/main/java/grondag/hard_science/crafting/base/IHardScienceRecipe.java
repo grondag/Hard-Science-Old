@@ -1,5 +1,7 @@
 package grondag.hard_science.crafting.base;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.matter.VolumeUnits;
@@ -80,7 +82,7 @@ public interface IHardScienceRecipe extends IRecipeWrapper
     }
 
     @Override
-    public default void getIngredients(IIngredients ingredients)
+    public default void getIngredients(@Nonnull IIngredients ingredients)
     {
         if(!this.fluidInputs().isEmpty())
         {

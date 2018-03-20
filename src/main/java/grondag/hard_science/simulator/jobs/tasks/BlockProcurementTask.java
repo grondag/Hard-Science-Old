@@ -32,7 +32,7 @@ public class BlockProcurementTask extends AbstractPositionedStackTask
     }
     
     @Override
-    public boolean initialize(Job job)
+    public boolean initialize(@Nonnull Job job)
     {
         //TODO: for now always assuming have to fabricate
         BlockFabricationTask fabTask = new BlockFabricationTask(this);

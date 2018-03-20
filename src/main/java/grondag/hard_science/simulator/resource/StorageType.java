@@ -155,11 +155,16 @@ public abstract class StorageType<T extends StorageType<T>>
         String[] split = csv.split(",");
         if(split.length < 2) return null;
         
-        EnumStorageType sType = EnumStorageType.valueOf(split[0]);
-        if(sType == null) return null;
-        
-        return StorageType.fromEnum(sType)
-                .fromCSV(csv.substring(split[0].length() + 1));
+        try
+        {
+            EnumStorageType sType = EnumStorageType.valueOf(split[0]);
+            return StorageType.fromEnum(sType)
+                    .fromCSV(csv.substring(split[0].length() + 1)); 
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
     }
     
     /**

@@ -116,6 +116,7 @@ public class SingleBuilder extends SingleStackBuilder
         }
     }
 
+    @Override
     public IWorldTask worldTask(EntityPlayerMP player)
     {
         if(this.isExcavation)

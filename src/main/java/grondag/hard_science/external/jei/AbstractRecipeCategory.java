@@ -75,7 +75,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     }
 
     @Override
-    public void setRecipe(IRecipeLayout recipeLayout, T recipe, IIngredients ingredients)
+    public void setRecipe(@Nonnull IRecipeLayout recipeLayout, @Nonnull T recipe, @Nonnull IIngredients ingredients)
     {
         IRecipeFormat format = recipe.format();
         

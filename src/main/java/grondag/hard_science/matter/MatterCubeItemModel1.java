@@ -2,6 +2,7 @@ package grondag.hard_science.matter;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
@@ -189,7 +190,7 @@ public class MatterCubeItemModel1 implements IBakedModel
     }
     
     @Override
-    public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
+    public Pair<? extends IBakedModel, Matrix4f> handlePerspective(@Nonnull TransformType cameraTransformType) {
         return handlePerspective(this, this.transforms, cameraTransformType);
 
     }

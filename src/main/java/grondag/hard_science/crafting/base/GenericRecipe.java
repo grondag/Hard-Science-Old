@@ -2,6 +2,8 @@ package grondag.hard_science.crafting.base;
 
 import java.util.Collection;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.varia.HorizontalAlignment;
@@ -250,7 +252,8 @@ public class GenericRecipe implements IHardScienceRecipe
             ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
             for(int i = 0; i < size; i++)
             {
-                builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromBytesWithQty(pBuff));
+                FluidResourceWithQuantity fwq = (FluidResourceWithQuantity)StorageType.FLUID.fromBytesWithQty(pBuff);
+                if(fwq != null) builder.add(fwq);
             }
             this.fluidInputs = builder.build();
         }
@@ -265,7 +268,8 @@ public class GenericRecipe implements IHardScienceRecipe
             ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
             for(int i = 0; i < size; i++)
             {
-                builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromBytesWithQty(pBuff));
+                ItemResourceWithQuantity iwq = (ItemResourceWithQuantity)StorageType.ITEM.fromBytesWithQty(pBuff);
+                if(iwq != null) builder.add(iwq);
             }
             this.itemInputs = builder.build();
         }
@@ -280,7 +284,8 @@ public class GenericRecipe implements IHardScienceRecipe
             ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
             for(int i = 0; i < size; i++)
             {
-                builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromBytesWithQty(pBuff));
+                FluidResourceWithQuantity fwq = (FluidResourceWithQuantity)StorageType.FLUID.fromBytesWithQty(pBuff);
+                if(fwq != null) builder.add(fwq);
             }
             this.fluidOutputs = builder.build();
         }
@@ -295,7 +300,8 @@ public class GenericRecipe implements IHardScienceRecipe
             ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
             for(int i = 0; i < size; i++)
             {
-                builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromBytesWithQty(pBuff));
+                ItemResourceWithQuantity iwq = (ItemResourceWithQuantity)StorageType.ITEM.fromBytesWithQty(pBuff);
+                if(iwq != null) builder.add(iwq);
             }
             this.itemOutputs = builder.build();
         }
@@ -365,7 +371,7 @@ public class GenericRecipe implements IHardScienceRecipe
     private IDrawableAnimated arrow;
     
     @Override
-    public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
+    public void drawInfo(@Nonnull Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
     {
        IGuiHelper guiHelper = HardScienceJEIPlugIn.registry().getJeiHelpers().getGuiHelper();
         

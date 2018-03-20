@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.block;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.PlacementItemFeature;
@@ -37,13 +39,13 @@ public class ExcavationMarker extends Item implements PlacementItem
     }
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(@Nonnull World worldIn, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand)
     {
         return PlacementItem.super.onItemRightClick(worldIn, playerIn, hand);
     }    
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(@Nonnull EntityPlayer playerIn, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         return PlacementItem.super.onItemUse(playerIn, worldIn, pos, hand, facing, hitZ, hitZ, hitZ);
     }

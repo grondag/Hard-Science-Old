@@ -24,6 +24,7 @@ public class WaterPumpMachine extends AbstractSimpleMachine
         return true;
     }
 
+    @Override
     protected BufferManager createBufferManager()
     {
         return new BufferManager(

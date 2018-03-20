@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.block;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.BlockRenderMode;
@@ -30,7 +31,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     }
 
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta)
+    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return this.blockRenderMode == BlockRenderMode.TESR 
                 ? new SuperTileEntityTESR()
@@ -134,7 +135,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
      * SuperModelBlock: Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.
      */
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) 
+    public boolean removedByPlayer(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player, boolean willHarvest) 
     {
         if (willHarvest) {
             return true;
@@ -159,7 +160,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     }
 
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack)
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
         

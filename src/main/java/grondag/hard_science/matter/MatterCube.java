@@ -2,6 +2,8 @@ package grondag.hard_science.matter;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.HardScience;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
@@ -31,13 +33,13 @@ public class MatterCube extends Item
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack)
+    public String getItemStackDisplayName(@Nonnull ItemStack stack)
     {
         return I18n.translateToLocal("matter." + this.matter.name().toLowerCase()).trim();
     }
     
     @Override
-    public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn)
+    public void addInformation(@Nonnull ItemStack stack, World worldIn, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag flagIn)
     {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(this.cubeSize.toolTip());

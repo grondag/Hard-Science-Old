@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.terrain;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
@@ -43,7 +45,7 @@ public class TerrainWand extends Item
     
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(@Nonnull World worldIn, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand)
     {
         ItemStack stack = playerIn.getHeldItem(hand);
         
@@ -91,7 +93,7 @@ public class TerrainWand extends Item
 
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(@Nonnull EntityPlayer playerIn, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         if(worldIn.isRemote) return EnumActionResult.SUCCESS;
         

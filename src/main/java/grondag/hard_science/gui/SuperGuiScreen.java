@@ -7,6 +7,8 @@ import static grondag.hard_science.gui.control.GuiControl.CONTROL_INTERNAL_MARGI
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.annotation.Nonnull;
+
 import org.lwjgl.input.Mouse;
 
 import grondag.exotic_matter.model.BlockColorMapProvider;
@@ -290,7 +292,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
     //    }
 
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException
+    protected void actionPerformed(@Nonnull GuiButton button) throws IOException
     {
         if(hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {

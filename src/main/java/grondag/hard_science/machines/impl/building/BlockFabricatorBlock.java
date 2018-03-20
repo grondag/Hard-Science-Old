@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.impl.building;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModTextures;
@@ -26,7 +28,7 @@ public class BlockFabricatorBlock extends MachineBlock
     }
     
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta)
+    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return new BlockFabricatorTileEntity();
     }

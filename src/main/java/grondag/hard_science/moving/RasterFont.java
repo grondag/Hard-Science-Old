@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
 import javax.imageio.stream.FileImageOutputStream;
 
 import org.lwjgl.opengl.GL11;
@@ -41,6 +42,7 @@ import net.minecraft.util.ResourceLocation;
  * Enables basic text rendering on blocks and items.
  */
 
+@SuppressWarnings("restriction")
 public class RasterFont extends TextureAtlasSprite
 {
     public class GlyphInfo
@@ -578,13 +580,13 @@ public class RasterFont extends TextureAtlasSprite
     }
  
     @Override
-    public boolean hasCustomLoader(IResourceManager manager, ResourceLocation location)
+    public boolean hasCustomLoader(@Nonnull IResourceManager manager, @Nonnull ResourceLocation location)
     {
         return true;
     }
 
     @Override
-    public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
+    public boolean load(@Nonnull IResourceManager manager, @Nonnull ResourceLocation location, @Nonnull Function<ResourceLocation, TextureAtlasSprite> textureGetter)
     {
         BufferedImage bufferedimage = this.fontMap;
         this.fontMap = null;
@@ -603,7 +605,7 @@ public class RasterFont extends TextureAtlasSprite
     }
 
     @Override
-    public void loadSpriteFrames(IResource resource, int mipmaplevels) throws IOException
+    public void loadSpriteFrames(@Nonnull IResource resource, int mipmaplevels) throws IOException
     {
         //noop - all done in load
     }

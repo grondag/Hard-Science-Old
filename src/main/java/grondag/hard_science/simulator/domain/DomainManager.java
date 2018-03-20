@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.exotic_matter.simulator.persistence.IPersistenceNode;
+import grondag.exotic_matter.simulator.persistence.ISimulationNode;
 import grondag.exotic_matter.varia.BinaryEnumSet;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
@@ -25,7 +25,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class DomainManager implements IPersistenceNode
+public class DomainManager implements ISimulationNode
 {  
     public static final DomainManager RAW_INSTANCE_DO_NOT_USE = new DomainManager();
     

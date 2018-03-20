@@ -49,6 +49,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
         return this.resource;
     }
 
+    @Override
     public long getQuantity()
     {
         return this.quantity;

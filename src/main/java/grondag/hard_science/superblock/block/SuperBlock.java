@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -149,7 +150,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
     }
     
     @Override
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
+    public void addCollisionBoxToList(@Nonnull IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull AxisAlignedBB entityBox, @Nonnull List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
     {       
         ISuperModelState modelState = this.getModelState(worldIn, pos, true);
@@ -170,7 +171,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
 
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
+    public boolean addDestroyEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull ParticleManager manager)
     {
         IBlockState blockState = world.getBlockState(pos);
         if(blockState.getBlock() != this)
@@ -210,7 +211,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
 
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean addHitEffects(IBlockState blockState, World world, RayTraceResult target, ParticleManager manager)
+    public boolean addHitEffects(@Nonnull IBlockState blockState, @Nonnull World world, @Nonnull RayTraceResult target, @Nonnull ParticleManager manager)
     {
         if(blockState.getBlock() != this)
         {
@@ -281,7 +282,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag advanced)
     {
         super.addInformation(stack, world, tooltip, advanced);
         tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
@@ -313,7 +314,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
 
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean addLandingEffects(IBlockState state, WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity,
+    public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity,
             int numberOfParticles)
     {
         // This is server-side, so to get matching particle color/texture I'd have to create a custom particle type similar to ParticleBlockDust,
@@ -401,13 +402,13 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * Always false for that reason.
      */
     @Override
-    public boolean canBeConnectedTo(IBlockAccess world, BlockPos pos, EnumFacing facing)
+    public boolean canBeConnectedTo(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EnumFacing facing)
     {
         return false;
     }
 
     @Override
-    public boolean canBeReplacedByLeaves(IBlockState state, IBlockAccess world, BlockPos pos)
+    public boolean canBeReplacedByLeaves(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return false;
     }
@@ -422,7 +423,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
 //    }
 
     @Override
-    public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
+    public boolean canConnectRedstone(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, EnumFacing side)
     {
         return false;
     }
@@ -432,7 +433,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * Mobs can't spawn on hypermatter.
      */
     @Override
-    public boolean canCreatureSpawn(IBlockState state, IBlockAccess world, BlockPos pos, SpawnPlacementType type)
+    public boolean canCreatureSpawn(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull SpawnPlacementType type)
     {
         return !this.isHypermatter() && super.canCreatureSpawn(state, world, pos, type);
     }
@@ -443,13 +444,13 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * If it does blow up somehow it shouldn't drop as a block.
      */
     @Override
-    public boolean canDropFromExplosion(Explosion explosionIn)
+    public boolean canDropFromExplosion(@Nonnull Explosion explosionIn)
     {
         return !this.isHypermatter();
     }
 
     @Override
-    public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity)
+    public boolean canEntityDestroy(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull Entity entity)
     {
         return super.canEntityDestroy(state, world, pos, entity);
     }
@@ -462,13 +463,13 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * All superblocks allow spawning unless made of hypermatter.
      */
     @Override
-    public boolean canEntitySpawn(IBlockState state, Entity entityIn)
+    public boolean canEntitySpawn(@Nonnull IBlockState state, @Nonnull Entity entityIn)
     {
         return super.canEntitySpawn(state, entityIn) && Configurator.HYPERSTONE.allowMobSpawning || !this.isHypermatter() ;
     }
 
     @Override
-    public boolean canPlaceTorchOnTop(IBlockState state, IBlockAccess world, BlockPos pos)
+    public boolean canPlaceTorchOnTop(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return this.getModelStateAssumeStateIsStale(state, world, pos, true).sideShape(EnumFacing.UP).holdsTorch;
     }
@@ -488,7 +489,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * get render depth perfectly aligned that way.  TESR will also render normal block layers.
      */
     @Override
-    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
+    public boolean canRenderInLayer(@Nonnull IBlockState state, @Nonnull BlockRenderLayer layer)
     {
         return this.blockRenderMode != BlockRenderMode.TESR && this.blockRenderMode.renderLayout.containsBlockRenderLayer(layer);
     }
@@ -500,13 +501,13 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
     }
 
     @Override
-    public boolean canSilkHarvest(World world, BlockPos pos, IBlockState state, EntityPlayer player)
+    public boolean canSilkHarvest(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player)
     {
         return this.canSilkHarvest();
     }
 
     @Override
-    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
+    public RayTraceResult collisionRayTrace(@Nonnull IBlockState blockState, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull Vec3d start, @Nonnull Vec3d end)
     {
         ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
         
@@ -539,20 +540,20 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
     }
 
     @Override
-    public int damageDropped(IBlockState state)
+    public int damageDropped(@Nonnull IBlockState state)
     {
         return state.getValue(META);
     }
    
     @Override
-    public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
+    public boolean doesSideBlockRendering(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
         ISuperModelState modelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
         return !modelState.hasTranslucentGeometry() && modelState.sideShape(face).occludesOpposite;
     }
     
     @Override
-    public PathNodeType getAiPathNodeType(IBlockState state, IBlockAccess world, BlockPos pos)
+    public PathNodeType getAiPathNodeType(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         if(this.getSubstance(state, world, pos) == ModSubstances.VOLCANIC_LAVA) 
             return PathNodeType.LAVA;
@@ -564,7 +565,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
     }
 
     @Override
-    public float[] getBeaconColorMultiplier(IBlockState state, World world, BlockPos pos, BlockPos beaconPos)
+    public float[] getBeaconColorMultiplier(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull BlockPos beaconPos)
     {
         if(this.getSubstance(state, world, pos).isTranslucent)
         {
@@ -607,7 +608,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * In most cases is same as collision bounding box.
      */
     @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
     {
         ISuperModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
@@ -622,7 +623,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public AxisAlignedBB getCollisionBoundingBox(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
     {
         ISuperModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
@@ -651,7 +652,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * Also don't use fortune for our drops.
      */
     @Override
-    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    public List<ItemStack> getDrops(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull IBlockState state, int fortune)
     {
         if(this.dropItem == null)
         {
@@ -673,7 +674,7 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * Determines which model should be displayed via MODEL_STATE. 
      */
     @Override
-    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
+    public IBlockState getExtendedState(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return ((IExtendedBlockState)state)
                 .withProperty(MODEL_STATE, getModelStateAssumeStateIsCurrent(state, world, pos, true));
@@ -683,20 +684,20 @@ public abstract class SuperBlock extends Block implements IProbeInfoAccessor, IS
      * Would always return 0 anyway because we aren't in the list of encouragements that the Fire block maintains.
      */
     @Override
-    public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face)
+    public int getFireSpreadSpeed(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
         return 0;
     }
 
     /** lowest-tier wood has a small chance of burning */
     @Override
-    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
+    public int getFlammability(@Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull EnumFacing face)
     {
         return this.getSubstance(world, pos) == ModSubstances.FLEXWOOD ? 1 : 0;
     }
 
     @Override
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
+    public ItemStack getItem(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
     {
         //Do not trust the state passed in, because nobody should be calling this method anyway.
         IBlockState goodState = worldIn.getBlockState(pos);

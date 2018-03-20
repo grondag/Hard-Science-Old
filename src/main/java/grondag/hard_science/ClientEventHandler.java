@@ -177,13 +177,16 @@ public class ClientEventHandler
                     if(blockState.getBlock() instanceof SuperModelBlock)
                     {
                         SuperModelTileEntity smte = (SuperModelTileEntity)mc.player.world.getTileEntity(mc.objectMouseOver.getBlockPos());
-                        PlacementItem.setStackModelState(stack, smte.getModelState());
-                        PlacementItem.setStackLightValue(stack, smte.getLightValue());
-                        PlacementItem.setStackSubstance(stack, smte.getSubstance());
-                        ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
-                        
-                        // prevent vanilla pick block 
-                        KeyBinding.unPressAllKeys();
+                        if(smte != null)
+                        {
+                            PlacementItem.setStackModelState(stack, smte.getModelState());
+                            PlacementItem.setStackLightValue(stack, smte.getLightValue());
+                            PlacementItem.setStackSubstance(stack, smte.getSubstance());
+                            ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                            
+                            // prevent vanilla pick block 
+                            KeyBinding.unPressAllKeys();
+                        }
                     }
                 }
             }

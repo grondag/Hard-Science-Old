@@ -2,6 +2,8 @@ package grondag.hard_science.superblock.terrain;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
@@ -53,11 +55,13 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         return other == TerrainBlockHelper.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
     }
 
+    @Override
     public boolean isFlowFiller()
     {
         return isFiller;
     }
 
+    @Override
     public boolean isFlowHeight()
     {
         return !isFiller;
@@ -134,13 +138,13 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
     }
 
     @Override
-    public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos)
+    public boolean isAir(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return TerrainBlockHelper.isEmpty(state, world, pos);
     }
 
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
+    public boolean removedByPlayer(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player, boolean willHarvest)
     {
         TerrainDynamicBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
@@ -168,6 +172,7 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         return TerrainBlockHelper.shouldBeFullCube(state, world, pos);
     }
     
+    @Override
     public boolean getUseNeighborBrightness(IBlockState state)
     {
         return true;

@@ -2,6 +2,8 @@ package grondag.hard_science.machines.base;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
@@ -32,31 +34,32 @@ public abstract class MachineSimpleBlock extends SuperSimpleBlock implements IMa
 
     //allow mined blocks to stack
     @Override
-    public int damageDropped(IBlockState state)
+    public int damageDropped(@Nonnull IBlockState state)
     {
         return 0;
     }
 
     //allow mined blocks to stack
+    @Override
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return this.getSubItems().get(0);
     }
     
     @Override
-    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
+    public boolean addDestroyEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull ParticleManager manager)
     {
         return true;
     }
 
     @Override
-    public boolean addHitEffects(IBlockState blockState, World world, RayTraceResult target, ParticleManager manager)
+    public boolean addHitEffects(@Nonnull IBlockState blockState, @Nonnull World world, @Nonnull RayTraceResult target, @Nonnull ParticleManager manager)
     {
         return true;
     }
 
     @Override
-    public boolean addLandingEffects(IBlockState state, WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity,
+    public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity,
             int numberOfParticles)
     {
         return true;
@@ -69,7 +72,7 @@ public abstract class MachineSimpleBlock extends SuperSimpleBlock implements IMa
     }
     
     @Override
-    public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag advanced)
+    public void addInformation(@Nonnull ItemStack stack, World world, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag advanced)
     {
         //NOOP for now on machines - don't want all the stuff we get for normal superblocks
     }
@@ -81,14 +84,14 @@ public abstract class MachineSimpleBlock extends SuperSimpleBlock implements IMa
     }
     
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack)
     {
         this.handleOnBlockPlacedBy(worldIn, pos, state, placer, stack);
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
     }
     
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
     {
         this.handleBreakBlock(worldIn, pos, state);
         super.breakBlock(worldIn, pos, state);

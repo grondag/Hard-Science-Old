@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.block;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -22,7 +24,7 @@ public class SuperModelItemOverrideList extends ItemOverrideList
 	}
 
 	@Override
-	public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
+	public IBakedModel handleItemState(@Nonnull IBakedModel originalModel, @Nonnull ItemStack stack, World world, EntityLivingBase entity)
 	{
 		return dispatcher.handleItemState(originalModel, stack, world, entity);
 	}

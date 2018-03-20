@@ -13,11 +13,16 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public enum TaskType
 {
-    NO_OPERATION(new Supplier<AbstractTask>() { public AbstractTask get() {return null; }}),
-    EXCAVATION(new Supplier<AbstractTask>() { public AbstractTask get() {return new ExcavationTask(); }}),
-    BLOCK_FABRICATION(new Supplier<AbstractTask>() { public AbstractTask get() {return new BlockFabricationTask(); }}),
-    PLACEMENT(new Supplier<AbstractTask>() { public AbstractTask get() {return new PlacementTask(); }}),
-    BLOCK_PROCUREMENT(new Supplier<AbstractTask>() { public AbstractTask get() {return new BlockProcurementTask(); }}), 
+    NO_OPERATION(new Supplier<AbstractTask>() { @Override
+    public AbstractTask get() {return null; }}),
+    EXCAVATION(new Supplier<AbstractTask>() { @Override
+    public AbstractTask get() {return new ExcavationTask(); }}),
+    BLOCK_FABRICATION(new Supplier<AbstractTask>() { @Override
+    public AbstractTask get() {return new BlockFabricationTask(); }}),
+    PLACEMENT(new Supplier<AbstractTask>() { @Override
+    public AbstractTask get() {return new PlacementTask(); }}),
+    BLOCK_PROCUREMENT(new Supplier<AbstractTask>() { @Override
+    public AbstractTask get() {return new BlockProcurementTask(); }}), 
 //    SIMPLE_PROCUREMENT(new Supplier<AbstractTask>()
 //    { 
 //        @SuppressWarnings("rawtypes")
@@ -28,7 +33,8 @@ public enum TaskType
 //        @SuppressWarnings("rawtypes")
 //        public AbstractTask get() {return new DeliveryTask(); }
 //    }), 
-    PERPETUAL(new Supplier<AbstractTask>() { public AbstractTask get() {return new PerpetualTask(); }}), 
+    PERPETUAL(new Supplier<AbstractTask>() { @Override
+    public AbstractTask get() {return new PerpetualTask(); }}), 
     ;
     
     private final Supplier<AbstractTask> supplier;

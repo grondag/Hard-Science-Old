@@ -198,7 +198,7 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     }
 
     @Override
-    public <T extends StorageType<T>> Iterable<Port<T>> getConnectablePorts(Port<T> fromPort, EnumFacing actualFace)
+    public <T extends StorageType<T>> Iterable<Port<T>> getConnectablePorts(@Nonnull Port<T> fromPort, EnumFacing actualFace)
     {
         return this.portManager(fromPort.storageType())
                 .getConnectablePorts(fromPort, actualFace);

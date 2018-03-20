@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.block;
 
+import javax.annotation.Nonnull;
+
 import grondag.exotic_matter.ExoticMatter;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -14,7 +16,7 @@ public class SuperModelLoader implements ICustomModelLoader
     private SuperModelLoader() {};
     
     @Override
-    public void onResourceManagerReload(IResourceManager resourceManager)
+    public void onResourceManagerReload(@Nonnull IResourceManager resourceManager)
     {
         SuperDispatcher.INSTANCE.clear();
     }
@@ -24,13 +26,13 @@ public class SuperModelLoader implements ICustomModelLoader
      * block is not used be or known to the dispatcher.  Thus, the only mod we need to check for is the library mod.
      */
     @Override
-    public boolean accepts(ResourceLocation modelLocation)
+    public boolean accepts(@Nonnull ResourceLocation modelLocation)
     {
         return modelLocation.getResourceDomain().equals(ExoticMatter.MODID) && modelLocation.getResourcePath().contains(SuperDispatcher.RESOURCE_BASE_NAME);
     }
 
     @Override
-    public IModel loadModel(ResourceLocation modelLocation) throws Exception
+    public IModel loadModel(@Nonnull ResourceLocation modelLocation) throws Exception
     {
         return SuperDispatcher.INSTANCE.getDelegate(modelLocation.getResourcePath());
     }

@@ -1,5 +1,7 @@
 package grondag.hard_science.external.jei;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.HardScience;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
@@ -50,7 +52,7 @@ public class BuilderRecipeCategory implements IRecipeCategory<BuilderRecipeWrapp
 
 
     @Override
-    public void setRecipe(IRecipeLayout recipeLayout, BuilderRecipeWrapper recipeWrapper, IIngredients ingredients)
+    public void setRecipe(@Nonnull IRecipeLayout recipeLayout, @Nonnull BuilderRecipeWrapper recipeWrapper, @Nonnull IIngredients ingredients)
     {
         // TODO
     }

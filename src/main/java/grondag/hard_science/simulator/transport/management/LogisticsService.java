@@ -79,6 +79,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     /**
      * Check in logic that should only run within this service.
      */
+    @Override
     public boolean confirmServiceThread()
     {
         return executor.isRunningOn();

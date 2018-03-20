@@ -87,7 +87,7 @@ public class SuperTileEntity extends TileEntity
     }
     
     @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
+    public boolean shouldRefresh(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState oldState, @Nonnull IBlockState newSate) 
     {
         if(oldState.getBlock() == newSate.getBlock())
         {
@@ -177,13 +177,13 @@ public class SuperTileEntity extends TileEntity
      * Process packet sent to client for TE synch after block/chunk is loaded.
      */
     @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) 
+    public void onDataPacket(@Nonnull NetworkManager net, @Nonnull SPacketUpdateTileEntity pkt) 
     {
         handleUpdateTag(pkt.getNbtCompound());
     }
 
     @Override
-    public final void readFromNBT(NBTTagCompound compound)
+    public final void readFromNBT(@Nonnull NBTTagCompound compound)
     {
         super.readFromNBT(compound);
         this.readModNBT(compound);
@@ -213,7 +213,7 @@ public class SuperTileEntity extends TileEntity
     
 
     @Override
-    public final NBTTagCompound writeToNBT(NBTTagCompound compound)
+    public final NBTTagCompound writeToNBT(@Nonnull NBTTagCompound compound)
     {
         this.writeModNBT(compound);
         return super.writeToNBT(compound);

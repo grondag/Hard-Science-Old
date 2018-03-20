@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.cache.ObjectSimpleCacheLoader;
@@ -391,7 +393,7 @@ public class SuperDispatcher
         }
 
         @Override
-        public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
+        public IBakedModel bake(@Nonnull IModelState state, @Nonnull VertexFormat format, @Nonnull Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
         {
             return this;
         }

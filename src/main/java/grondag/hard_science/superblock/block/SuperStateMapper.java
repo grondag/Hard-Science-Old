@@ -2,6 +2,8 @@ package grondag.hard_science.superblock.block;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.Maps;
 
 import grondag.exotic_matter.model.BlockHarvestTool;
@@ -26,7 +28,7 @@ public class SuperStateMapper extends DefaultStateMapper
     }
 
    @Override
-   public Map<IBlockState, ModelResourceLocation> putStateModelLocations(Block block) 
+   public Map<IBlockState, ModelResourceLocation> putStateModelLocations(@Nonnull Block block) 
    {
        Map<IBlockState, ModelResourceLocation> mapLocations = Maps.newLinkedHashMap();
 

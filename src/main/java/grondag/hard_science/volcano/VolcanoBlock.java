@@ -2,6 +2,8 @@ package grondag.hard_science.volcano;
 
 import java.util.Random;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.HardScience;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -25,14 +27,14 @@ public class VolcanoBlock extends Block implements ITileEntityProvider {
 
 
 	@Override
-	public int quantityDropped(Random random) {
+	public int quantityDropped(@Nonnull Random random) {
 		return 0;
 	}
 
 
 
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta)
+    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return new VolcanoTileEntity();
     }

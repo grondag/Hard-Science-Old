@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.Lists;
 
-import grondag.exotic_matter.simulator.persistence.IPersistenceNode;
+import grondag.exotic_matter.simulator.persistence.ISimulationNode;
 import grondag.exotic_matter.simulator.persistence.PersistenceManager;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
@@ -51,7 +51,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
  * will observe that the machines are running very quickly.
  * 
  */
-public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLoadingCallback
+public class Simulator  implements ISimulationNode, ForgeChunkManager.OrderedLoadingCallback
 {
     /**
      * Only use if need a reference before it starts.

@@ -13,18 +13,21 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
 {
     public static final PowerStorageEvent INSTANCE = new PowerStorageEvent();
     
+    @Override
     public void postBeforeStorageDisconnect(IResourceContainer<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new BeforePowerStorageDisconnect(storage));
     }
     
+    @Override
     public void postAfterStorageConnect(IResourceContainer<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
         storage.getDomain().eventBus.post(new AfterPowerStorageConnect(storage));
     }
     
+    @Override
     public void postStoredUpdate(
             IResourceContainer<StorageTypePower> storage, 
             IResource<StorageTypePower> resource, 
@@ -40,6 +43,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
                     request));
     }
     
+    @Override
     public void postAvailableUpdate(
             IResourceContainer<StorageTypePower> storage, 
             IResource<StorageTypePower> resource, 
@@ -55,6 +59,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
                     request));
     }
     
+    @Override
     public void postCapacityChange(IResourceContainer<StorageTypePower> storage, long delta)
     {
         if(storage.getDomain() == null) return;

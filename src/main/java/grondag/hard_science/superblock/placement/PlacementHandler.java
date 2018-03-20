@@ -449,8 +449,9 @@ public abstract class PlacementHandler
         ISuperModelState  withModelState = PlacementItem.getStackModelState(stack);
         if(withModelState == null || !withModelState.hasSpecies()) return 0;
 
+        if(player.world == null) return 0;
+        
         World world = player.world;
-        if(world == null) return 0;
 
         IBlockState withBlockState = item.getPlacementBlockStateFromStack(stack);
 

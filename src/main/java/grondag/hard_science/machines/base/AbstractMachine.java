@@ -204,6 +204,7 @@ public abstract class AbstractMachine extends AbstractDevice
         }
     }
     
+    @Override
     public boolean isOn()
     {
         if(!this.hasOnOff()) return false;

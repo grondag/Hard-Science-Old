@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.jobs.tasks;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.ITask;
 import grondag.hard_science.simulator.jobs.ITaskListener;
@@ -31,7 +33,7 @@ public class PerpetualTask extends AbstractTask
     }
 
     @Override
-    public synchronized boolean initialize(Job job)
+    public synchronized boolean initialize(@Nonnull Job job)
     {
         this.job = job;
         this.status = RequestStatus.WAITING;

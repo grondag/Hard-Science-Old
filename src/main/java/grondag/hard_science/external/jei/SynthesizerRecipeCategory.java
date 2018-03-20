@@ -56,7 +56,7 @@ public class SynthesizerRecipeCategory implements IRecipeCategory<SynthesizerRec
 
 
     @Override
-    public void setRecipe(IRecipeLayout recipeLayout, SynthesizerRecipeWrapper recipeWrapper, IIngredients ingredients)
+    public void setRecipe(@Nonnull IRecipeLayout recipeLayout, @Nonnull SynthesizerRecipeWrapper recipeWrapper, @Nonnull IIngredients ingredients)
     {
         recipeLayout.getFluidStacks();
     }

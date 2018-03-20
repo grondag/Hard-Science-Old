@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
  */
 public interface IResource<V extends StorageType<V>> extends IResourcePredicate<V>, ITypedStorage<V>
 {
+    @Override
     public V storageType();
     public String displayName();
     public AbstractResourceWithQuantity<V> withQuantity(long quantity);

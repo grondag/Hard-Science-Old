@@ -2,6 +2,8 @@ package grondag.hard_science.matter;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -89,13 +91,13 @@ public class BulkItem extends Item
     }
     
     @Override
-    public int getDamage(ItemStack stack)
+    public int getDamage(@Nonnull ItemStack stack)
     {
         return (int) (1000000 * (this.maxNanoLiters - this.getNanoLiters(stack)) / this.maxNanoLiters);
     }
 
     @Override
-    public int getRGBDurabilityForDisplay(ItemStack stack)
+    public int getRGBDurabilityForDisplay(@Nonnull ItemStack stack)
     {
         return 0x80FFFF;
 //        return super.getRGBDurabilityForDisplay(stack);
@@ -103,13 +105,13 @@ public class BulkItem extends Item
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack)
+    public String getItemStackDisplayName(@Nonnull ItemStack stack)
     {
         return I18n.translateToLocal("matter." + this.matter.systemName().toLowerCase()).trim();
     }
     
     @Override
-    public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn)
+    public void addInformation(@Nonnull ItemStack stack, World worldIn, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag flagIn)
     {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         if(this.matter.phase() == MatterPhase.SOLID)
@@ -120,7 +122,7 @@ public class BulkItem extends Item
     }
 
     @Override
-    public boolean showDurabilityBar(ItemStack stack)
+    public boolean showDurabilityBar(@Nonnull ItemStack stack)
     {
         return true;
     }

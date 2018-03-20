@@ -214,155 +214,213 @@ public class MachinePower
     private static final Function<?, ?> FORMAT_JOULES[] = 
     {
             // 0 digits- should never get
-            new Function<String, String>() { public String apply(String t) { return t + "J"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t + "J"; }},
             
             // 1 digit
-            new Function<String, String>() { public String apply(String t) { return t + "J"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t + "J"; }},
             
             // 2  digits
-            new Function<String, String>() { public String apply(String t) { return t + "J"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t + "J"; }},
             
             // 3  digits
-            new Function<String, String>() { public String apply(String t) { return t + "J"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t + "J"; }},
             
             // 4  digits - kJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "kJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "kJ"); }},
             
             // 5  digits - kJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "kJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "kJ"); }},
             
             // 6  digits - kJ
-            new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "kJ"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t.substring(0, 3) + "kJ"; }},
             
             // 7  digits - MJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "MJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "MJ"); }},
             
             // 8  digits - MJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "MJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "MJ"); }},
             
             // 9  digits - MJ
-            new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "MJ"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t.substring(0, 3) + "MJ"; }},
             
             // 10  digits - GJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "GJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "GJ"); }},
             
             // 11  digits - GJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "GJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "GJ"); }},
             
             // 12  digits - GJ
-            new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "GJ"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t.substring(0, 3) + "GJ"; }},
             
             // 13  digits - TJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "TJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "TJ"); }},
             
             // 14  digits - TJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "TJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "TJ"); }},
             
             // 15  digits - TJ
-            new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "TJ"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t.substring(0, 3) + "TJ"; }},
 
             // 16  digits - PJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "PJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "PJ"); }},
             
             // 17  digits - PJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "PJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "PJ"); }},
             
             // 18  digits - PJ
-            new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "PJ"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t.substring(0, 3) + "PJ"; }},
 
             // 19  digits - EJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "EJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "EJ"); }},
             
             // 20  digits - EJ
-            new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "EJ"); }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "EJ"); }},
             
             // 21  digits - EJ
-            new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "EJ"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return t.substring(0, 3) + "EJ"; }},
             
-            new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-            new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-            new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-            new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-            new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-            new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-            new Function<String, String>() { public String apply(String t) { return "WOW"; }}
+            new Function<String, String>() { @Override
+            public String apply(String t) { return "WOW"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return "WOW"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return "WOW"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return "WOW"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return "WOW"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return "WOW"; }},
+            new Function<String, String>() { @Override
+            public String apply(String t) { return "WOW"; }}
     };
     
     private static final Function<?, ?> FORMAT_WATTS[] = 
         {
                 // 0 digits- should never get
-                new Function<String, String>() { public String apply(String t) { return t + "W"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "W"; }},
                 
                 // 1 digit
-                new Function<String, String>() { public String apply(String t) { return t + "W"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "W"; }},
                 
                 // 2  digits
-                new Function<String, String>() { public String apply(String t) { return t + "W"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "W"; }},
                 
                 // 3  digits
-                new Function<String, String>() { public String apply(String t) { return t + "W"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t + "W"; }},
                 
                 // 4  digits - kJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "kW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "kW"); }},
                 
                 // 5  digits - kJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "kW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "kW"); }},
                 
                 // 6  digits - kJ
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "kW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "kW"; }},
                 
                 // 7  digits - MJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "MW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "MW"); }},
                 
                 // 8  digits - MJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "MW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "MW"); }},
                 
                 // 9  digits - MJ
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "MW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "MW"; }},
                 
                 // 10  digits - GJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "GW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "GW"); }},
                 
                 // 11  digits - GJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "GW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "GW"); }},
                 
                 // 12  digits - GJ
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "GW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "GW"; }},
                 
                 // 13  digits - TJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "TW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "TW"); }},
                 
                 // 14  digits - TJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "TW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "TW"); }},
                 
                 // 15  digits - TJ
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "TW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "TW"; }},
 
                 // 16  digits - PJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "PW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "PW"); }},
                 
                 // 17  digits - PJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "PW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "PW"); }},
                 
                 // 18  digits - PJ
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "PW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "PW"; }},
 
                 // 19  digits - EJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal1_2Suffix(t, "EW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "EW"); }},
                 
                 // 20  digits - EJ
-                new Function<String, String>() { public String apply(String t) { return insertDecimal2_1Suffix(t, "EW"); }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "EW"); }},
                 
                 // 21  digits - EJ
-                new Function<String, String>() { public String apply(String t) { return t.substring(0, 3) + "EW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return t.substring(0, 3) + "EW"; }},
                 
-                new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-                new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-                new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-                new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-                new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-                new Function<String, String>() { public String apply(String t) { return "WOW"; }},
-                new Function<String, String>() { public String apply(String t) { return "WOW"; }}
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "WOW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "WOW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "WOW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "WOW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "WOW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "WOW"; }},
+                new Function<String, String>() { @Override
+                public String apply(String t) { return "WOW"; }}
         };
     
     public static String insertDecimal1_2Suffix(String inString, String withSuffix)
