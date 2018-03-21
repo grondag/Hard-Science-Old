@@ -7,12 +7,12 @@ import grondag.exotic_matter.concurrency.CountedJobTask;
 import grondag.exotic_matter.concurrency.Job;
 import grondag.exotic_matter.concurrency.PerformanceCollector;
 import grondag.exotic_matter.concurrency.SimpleCountedJobBacker;
+import grondag.exotic_matter.simulator.ISimulationTickable;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.persistence.ISimulationNode;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.ISimulationTickable;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.device.blocks.DeviceWorldManager;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlock;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -28,18 +28,25 @@ public class DeviceManager implements ISimulationNode, ISimulationTickable
     ///////////////////////////////////////////////////////////
     //  STATIC MEMBERS
     ///////////////////////////////////////////////////////////
+    
+    /**
+     * A bit ugly but covenient.  Set to null when any 
+     * instance is created, retrieved lazily from Simulator.
+     */
+    private static DeviceManager instance;
+    
+    public static DeviceManager instance()
+    {
+        if(instance == null)
+        {
+            instance = Simulator.instance().getNode(DeviceManager.class);
+        }
+        return instance;
+    }
 
-    public static final DeviceManager RAW_INSTANCE_DO_NOT_USE = new DeviceManager();
- 
     private static final int BATCH_SIZE = 100;
     
     private static final RegistryNamespaced < ResourceLocation, Class <? extends IDevice >> REGISTRY = new RegistryNamespaced < ResourceLocation, Class <? extends IDevice >> ();
-
-    public static DeviceManager instance()
-    {
-        Simulator.loadSimulatorIfNotLoaded();
-        return RAW_INSTANCE_DO_NOT_USE;
-    }
     
     public static void register(String id, Class <? extends IDevice > clazz)
     {
@@ -127,13 +134,14 @@ public class DeviceManager implements ISimulationNode, ISimulationTickable
     }
     
     ///////////////////////////////////////////////////////////
-    //  RAW_INSTANCE_DO_NOT_USE MEMBERS
+    //  INSTANCE MEMBERS
     ///////////////////////////////////////////////////////////
     
     private final Int2ObjectOpenHashMap<IDevice> devices =
             new Int2ObjectOpenHashMap<IDevice>();
     
     private final DeviceWorldManager deviceBlocks = new DeviceWorldManager();
+    
     
     private SimpleCountedJobBacker onTickJobBacker = new SimpleCountedJobBacker()
     {
@@ -179,8 +187,11 @@ public class DeviceManager implements ISimulationNode, ISimulationTickable
         }
     };
     
-    private DeviceManager()
+    public DeviceManager()
     {
+        // force refresh of singleton access method
+        instance = null;
+        
         // on-tick jobs
         this.onTickJob = new CountedJob<IDevice>(this.onTickJobBacker, this.onTickTask, BATCH_SIZE, 
                 Configurator.MACHINES.enablePerformanceLogging, "Machine on-tick update processing", this.perfCollectorOnTick);    
@@ -191,6 +202,7 @@ public class DeviceManager implements ISimulationNode, ISimulationTickable
 
     }
     
+    @Override
     public void afterDeserialization()
     {
         for(IDevice device : this.devices.values())
@@ -269,6 +281,7 @@ public class DeviceManager implements ISimulationNode, ISimulationTickable
     /**
      * Called by simulator at shutdown
      */
+    @Override
     public void unload()
     {
         this.clear();

@@ -143,7 +143,7 @@ public class CellChunk
 
                     if(entryCell != null && entryCell.isValidationNeeded())
                     {
-                        columnBuffer.loadFromWorldStateBuffer(this.cells.sim.worldBuffer, this.xStart + x, this.zStart + z);
+                        columnBuffer.loadFromWorldStateBuffer(this.cells.sim.worldBuffer(), this.xStart + x, this.zStart + z);
                         entryCell = builder.updateCellStack(cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z);
                         entryCell.setValidationNeeded(false);
                         this.setEntryCell(x, z, entryCell);

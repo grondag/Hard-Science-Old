@@ -4,6 +4,7 @@ import java.util.concurrent.Future;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.energy.BatteryChemistry;
@@ -12,7 +13,6 @@ import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;

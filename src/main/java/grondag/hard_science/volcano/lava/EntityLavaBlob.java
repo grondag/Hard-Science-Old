@@ -6,10 +6,10 @@ import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
@@ -267,10 +267,9 @@ public class EntityLavaBlob extends Entity
     {
         if(!this.world.isRemote )
         {
-//            HardScience.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
-            Simulator.instance().lavaSimulator().addLava(this.getPosition(), this.getFluidAmount());
+            LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
+            if(sim != null) sim.addLava(this.getPosition(), this.getFluidAmount());
         }
-        //            this.world.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
         this.setDead();
     }
 

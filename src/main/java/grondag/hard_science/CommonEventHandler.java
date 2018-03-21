@@ -4,9 +4,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.TaskType;
@@ -109,7 +109,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.instance().lavaSimulator();
+            LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -139,7 +139,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.instance().lavaSimulator();
+            LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -149,7 +149,7 @@ public class CommonEventHandler
     {
         if(event.getWorld().isRemote) return;
         
-        LavaSimulator sim = Simulator.instance().lavaSimulator();
+        LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
         if(sim != null)
         {
             for(BlockSnapshot snap : event.getReplacedBlockSnapshots())

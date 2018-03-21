@@ -10,11 +10,11 @@ import grondag.exotic_matter.concurrency.CountedJobTask;
 import grondag.exotic_matter.concurrency.Job;
 import grondag.exotic_matter.concurrency.PerformanceCounter;
 import grondag.exotic_matter.concurrency.SimpleConcurrentList;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.Simulator;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
@@ -114,7 +114,7 @@ public class LavaCells
         {
             if(operand.needsFullLoadOrValidation())
             {
-                sim.cellChunkLoader.queueChunks(sim.worldBuffer, operand.packedChunkPos);
+                sim.cellChunkLoader.queueChunks(sim.worldBuffer(), operand.packedChunkPos);
             }
             else 
             {
@@ -478,9 +478,9 @@ public class LavaCells
             
             // Raw retention should be mostly current, but compute for any cells
             // that were awaiting computation at last world save.
-            this.sim.worldBuffer.isMCWorldAccessAppropriate = true;
+            this.sim.worldBuffer().isMCWorldAccessAppropriate = true;
             this.updateRetentionJob.runOn(Simulator.SIMULATION_POOL);
-            this.sim.worldBuffer.isMCWorldAccessAppropriate = false;
+            this.sim.worldBuffer().isMCWorldAccessAppropriate = false;
             
             // Smoothed retention will need to be computed for all cells, but can be parallel.
             this.updateSmoothedRetentionJob.runOn(Simulator.SIMULATION_POOL);

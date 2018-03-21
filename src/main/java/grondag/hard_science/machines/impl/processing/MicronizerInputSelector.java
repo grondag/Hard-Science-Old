@@ -8,9 +8,9 @@ import java.util.concurrent.Future;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.domain.ProcessManager.ProcessInfo;

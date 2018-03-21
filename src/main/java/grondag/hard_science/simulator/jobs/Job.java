@@ -3,6 +3,9 @@ package grondag.hard_science.simulator.jobs;
 import java.util.Iterator;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.persistence.AssignedNumber;
+import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
@@ -10,8 +13,6 @@ import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayer;
@@ -92,7 +93,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     {
         this.priority = priority;
         this.userName = player == null ? SYSTEM_USER_NAME : player.getName();
-        DomainManager.instance().assignedNumbersAuthority().register(this);
+        Simulator.instance().assignedNumbersAuthority().register(this);
         this.isSystemJob = false;
     }
     
@@ -106,7 +107,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         this.isSystemJob = true;
         this.priority = priority;
         this.userName = SYSTEM_USER_NAME;
-        DomainManager.instance().assignedNumbersAuthority().register(this);
+        Simulator.instance().assignedNumbersAuthority().register(this);
     }
     
     /**
@@ -413,7 +414,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         this.buildID = tag.getInteger(ModNBTTag.BUILD_ID);
         this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
         
-        DomainManager.instance().assignedNumbersAuthority().register(this);
+        Simulator.instance().assignedNumbersAuthority().register(this);
         
         int readyCount = 0;
         NBTTagList nbtTasks = tag.getTagList(ModNBTTag.REQUEST_CHILDREN, 10);

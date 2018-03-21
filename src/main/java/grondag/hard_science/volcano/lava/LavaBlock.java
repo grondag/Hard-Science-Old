@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
-import grondag.hard_science.simulator.Simulator;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
 import grondag.hard_science.volcano.lava.simulator.LavaCell;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
@@ -70,7 +70,8 @@ public class LavaBlock extends TerrainDynamicBlock
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         handleFallingBlocks(worldIn, pos, state);
-        Simulator.instance().lavaSimulator().notifyBlockChange(worldIn, fromPos);
+        LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
+        if(sim != null) sim.notifyBlockChange(worldIn, fromPos);
     }
 
     @Override
@@ -78,14 +79,16 @@ public class LavaBlock extends TerrainDynamicBlock
     {
         super.onBlockAdded(worldIn, pos, state);
         handleFallingBlocks(worldIn, pos, state);
-        Simulator.instance().lavaSimulator().registerPlacedLava(worldIn, pos, state);
+        LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
+        if(sim != null) sim.registerPlacedLava(worldIn, pos, state);
     }
     
     @Override
     public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
     {
         super.breakBlock(worldIn, pos, state);
-        if(this.isFlowHeight()) Simulator.instance().lavaSimulator().unregisterDestroyedLava(worldIn, pos, state);
+        LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
+        if(sim != null) sim.unregisterDestroyedLava(worldIn, pos, state);
     }
     
     private void handleFallingBlocks(World worldIn, BlockPos pos, IBlockState state)
@@ -119,9 +122,9 @@ public class LavaBlock extends TerrainDynamicBlock
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
         super.addProbeInfo(mode, probeInfo, player, world, blockState, data);
-        if(Simulator.instance().lavaSimulator() instanceof LavaSimulator)
+        LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
+        if(sim != null) 
         {
-            LavaSimulator sim = (LavaSimulator)Simulator.instance().lavaSimulator();
             BlockPos pos = data.getPos();  
             LavaCell cell = sim.cells.getCellIfExists(pos.getX(), pos.getY(), pos.getZ());
             if(cell == null)

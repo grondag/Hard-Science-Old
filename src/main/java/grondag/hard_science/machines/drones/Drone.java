@@ -1,6 +1,8 @@
 package grondag.hard_science.machines.drones;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.persistence.AssignedNumber;
+import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.world.Location;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
@@ -9,8 +11,6 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import net.minecraft.nbt.NBTTagCompound;
 

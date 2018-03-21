@@ -8,8 +8,8 @@ import grondag.exotic_matter.concurrency.CountedJob;
 import grondag.exotic_matter.concurrency.CountedJobTask;
 import grondag.exotic_matter.concurrency.Job;
 import grondag.exotic_matter.concurrency.SimpleConcurrentList;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.simulator.Simulator;
 
 @SuppressWarnings("unused")
 public class LavaConnections

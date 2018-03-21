@@ -4,8 +4,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.volcano.lava.simulator.LavaConnections.SortBucket;
 
 public class LavaConnection

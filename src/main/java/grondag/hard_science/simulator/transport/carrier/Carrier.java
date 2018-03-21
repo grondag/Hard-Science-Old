@@ -5,9 +5,9 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableSet;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;

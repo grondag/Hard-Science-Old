@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.ISimulationTickable;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.persistence.IDirtKeeper;
 import grondag.exotic_matter.simulator.persistence.ISimulationNode;
 import grondag.exotic_matter.world.Location;
@@ -13,8 +15,6 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.ISimulationTickable;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.volcano.VolcanoTileEntity.VolcanoStage;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -415,5 +415,19 @@ public class VolcanoManager implements ISimulationTickable, ISimulationNode
     public String tagName()
     {
         return ModNBTTag.VOLCANO_MANAGER;
+    }
+
+    @Override
+    public void unload()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void afterDeserialization()
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

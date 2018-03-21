@@ -3,9 +3,9 @@ package grondag.hard_science.machines.matbuffer;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.support.ThroughputRegulator;
-import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.IResourcePredicate;

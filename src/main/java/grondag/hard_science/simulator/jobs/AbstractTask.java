@@ -3,14 +3,15 @@ package grondag.hard_science.simulator.jobs;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.persistence.AssignedNumber;
+import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomainMember, ITask
@@ -241,7 +242,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
      */
     protected synchronized void onLoaded()
     {
-        DomainManager.instance().assignedNumbersAuthority().register(this);
+        Simulator.instance().assignedNumbersAuthority().register(this);
     }
     
     protected synchronized void notifyConsequentsTerminated()

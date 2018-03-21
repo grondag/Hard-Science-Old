@@ -2,6 +2,7 @@ package grondag.hard_science.simulator.device;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.world.Location;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
@@ -10,7 +11,6 @@ import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;

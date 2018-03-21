@@ -12,7 +12,10 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IDirtListener;
+import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.simulator.persistence.NullDirtListener;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.init.ModNBTTag;
@@ -20,8 +23,6 @@ import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.jobs.tasks.PerpetualTask;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -256,9 +257,9 @@ public class JobManager implements IReadWriteNBT, IDomainMember
                 // clean up id registry
                 for(AbstractTask task : job)
                 {
-                    DomainManager.instance().assignedNumbersAuthority().unregister(task);
+                    Simulator.instance().assignedNumbersAuthority().unregister(task);
                 }
-                DomainManager.instance().assignedNumbersAuthority().unregister(job);
+                Simulator.instance().assignedNumbersAuthority().unregister(job);
             }
         });
     }
@@ -376,6 +377,6 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     public int getQueueDepth(TaskType blockFabrication)
     {
         // TODO Not a real implementation
-        return this.domain.domainManager().assignedNumbersAuthority().getIndex(AssignedNumber.TASK).size();
+        return  Simulator.instance().assignedNumbersAuthority().getIndex(AssignedNumber.TASK).size();
     }
 }

@@ -6,8 +6,8 @@ import java.util.concurrent.Future;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.ComponentRegistry;
 import grondag.hard_science.simulator.device.IDevice;

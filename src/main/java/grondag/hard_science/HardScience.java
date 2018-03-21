@@ -2,7 +2,12 @@ package grondag.hard_science;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.init.ModItems;
+import grondag.hard_science.simulator.device.DeviceManager;
+import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
+import grondag.hard_science.volcano.lava.simulator.VolcanoManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -53,6 +58,15 @@ public class HardScience
     static
     {
         FluidRegistry.enableUniversalBucket();
+        
+        //TODO move these where they should go
+        Simulator.register(DeviceManager.class);
+        Simulator.register(DomainManager.class);
+        if(Configurator.VOLCANO.enableVolcano)
+        {
+            Simulator.register(VolcanoManager.class);
+            Simulator.register(LavaSimulator.class);
+        }
     }
     
 	@EventHandler

@@ -8,17 +8,16 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.persistence.AssignedNumber;
+import grondag.exotic_matter.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
+import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.simulator.persistence.ISimulationNode;
 import grondag.exotic_matter.varia.BinaryEnumSet;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.Job;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority;
-import grondag.hard_science.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -27,15 +26,26 @@ import net.minecraft.nbt.NBTTagList;
 
 public class DomainManager implements ISimulationNode
 {  
-    public static final DomainManager RAW_INSTANCE_DO_NOT_USE = new DomainManager();
+    /**
+     * A bit ugly but covenient.  Set to null when any 
+     * instance is created, retrieved lazily from Simulator.
+     */
+    private static DomainManager instance;
+    
+    public static DomainManager instance()
+    {
+        if(instance == null)
+        {
+            instance = Simulator.instance().getNode(DomainManager.class);
+        }
+        return instance;
+    }
     
     private boolean isDeserializationInProgress = false;
     
     boolean isDirty = false;
     
     private boolean isLoaded = false;
-    
-    private final AssignedNumbersAuthority assignedNumbersAuthority;
 
     private Domain defaultDomain;
 
@@ -53,33 +63,26 @@ public class DomainManager implements ISimulationNode
     /**
      * If isNew=true then won't wait for a deserialize to become loaded.
      */
-    private DomainManager() 
+    public DomainManager() 
     {
-        this.assignedNumbersAuthority = new AssignedNumbersAuthority();
-        this.assignedNumbersAuthority.setDirtKeeper(this);
+        // force refresh of singleton reference
+        instance = null;
+
     }
    
-    public static DomainManager instance()
-    {
-        Simulator.loadSimulatorIfNotLoaded();
-        return RAW_INSTANCE_DO_NOT_USE;
-    }
-    
     /**
      * Called at shutdown
      */
+    @Override
     public void unload()
     {
-        this.assignedNumbersAuthority.clear();
         this.playerActiveDomains.clear();
         this.playerIntrinsicDomains.clear();
         this.defaultDomain = null;
         this.isLoaded = false;
     }
     
-    /**
-     * Called by simulator if starting new world/simulation.
-     */
+    @Override
     public void loadNew()
     {
         this.unload();
@@ -101,7 +104,7 @@ public class DomainManager implements ISimulationNode
                 this.defaultDomain.setSecurityEnabled(false);
                 this.defaultDomain.setId(IIdentified.DEFAULT_ID);
                 this.defaultDomain.setName("Public");;
-                this.assignedNumbersAuthority.register(defaultDomain);
+                Simulator.instance().assignedNumbersAuthority().register(defaultDomain);
             }
         }
         return this.defaultDomain;
@@ -113,7 +116,7 @@ public class DomainManager implements ISimulationNode
     {
         this.checkLoaded();
         ImmutableList.Builder<Domain> builder = ImmutableList.builder();
-        for (IIdentified domain : this.assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN).valueCollection())
+        for (IIdentified domain : Simulator.instance().assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN).valueCollection())
         {
             builder.add((Domain)domain);
         }
@@ -130,7 +133,7 @@ public class DomainManager implements ISimulationNode
     {
         this.checkLoaded();
         Domain result = new Domain(this);
-        this.assignedNumbersAuthority.register(result);
+        Simulator.instance().assignedNumbersAuthority().register(result);
         result.name = "Domain " + result.id;
         this.isDirty = true;
         return result;
@@ -142,7 +145,7 @@ public class DomainManager implements ISimulationNode
     public synchronized void removeDomain(Domain domain)
     {
         this.checkLoaded();
-        this.assignedNumbersAuthority().unregister(domain);
+        Simulator.instance().assignedNumbersAuthority().unregister(domain);
         this.isDirty = true;
     }
     
@@ -164,8 +167,6 @@ public class DomainManager implements ISimulationNode
         this.isDeserializationInProgress = true;
         
         this.unload();
-        
-        this.assignedNumbersAuthority.deserializeNBT(tag);
 
         // need to do this before loading domains, otherwise they will cause complaints
         this.isLoaded = true;
@@ -178,7 +179,7 @@ public class DomainManager implements ISimulationNode
             for (int i = 0; i < nbtDomains.tagCount(); ++i)
             {
                 Domain domain = new Domain(this, nbtDomains.getCompoundTagAt(i));
-                this.assignedNumbersAuthority().register(domain);
+                Simulator.instance().assignedNumbersAuthority().register(domain);
             }   
         }
         
@@ -208,11 +209,9 @@ public class DomainManager implements ISimulationNode
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        this.assignedNumbersAuthority.serializeNBT(tag);
-        
         NBTTagList nbtDomains = new NBTTagList();
         
-        IdentifiedIndex domains = this.assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN);
+        IdentifiedIndex domains = Simulator.instance().assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN);
         
         if(!domains.isEmpty())
         {
@@ -250,8 +249,6 @@ public class DomainManager implements ISimulationNode
         return ModNBTTag.DOMAIN_MANAGER;
     }
 
-    public AssignedNumbersAuthority assignedNumbersAuthority() { return this.assignedNumbersAuthority; }
-    
     private boolean checkLoaded()
     {
         if(!this.isLoaded)
@@ -335,30 +332,28 @@ public class DomainManager implements ISimulationNode
     // convenience object lookup methods
     public static Domain domainFromId(int id)
     {
-        return (Domain) instance().assignedNumbersAuthority().get(id, AssignedNumber.DOMAIN);
+        return (Domain)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.DOMAIN);
     }
     
     public static Job jobFromId(int id)
     {
-        return (Job) instance().assignedNumbersAuthority().get(id, AssignedNumber.JOB);
+        return (Job)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.JOB);
     }
     
     public static AbstractTask taskFromId(int id)
     {
-        return (AbstractTask) instance().assignedNumbersAuthority().get(id, AssignedNumber.TASK);
+        return (AbstractTask)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.TASK);
     }
     
     public static Build buildFromId(int id)
     {
-        return (Build) instance().assignedNumbersAuthority().get(id, AssignedNumber.BUILD);
+        return (Build)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.BUILD);
     }
     
-    /**
-     * Called after all deserialization is complete during simulation reload.
-     */
+    @Override
     public void afterDeserialization()
     {
-        IdentifiedIndex domains = this.assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN);
+        IdentifiedIndex domains =  Simulator.instance().assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN);
         
         if(!domains.isEmpty())
         {

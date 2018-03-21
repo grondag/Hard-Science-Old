@@ -9,12 +9,12 @@ import com.google.common.collect.ComparisonChain;
 
 import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.volcano.lava.simulator.LavaConnections.SortBucket;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -1528,7 +1528,7 @@ public class LavaCell extends AbstractLavaCell
     {
         int depth = this.isBottomFlow() 
                 ? this.getFlowFloorRawRetentionDepth()
-                : (int)(locator.cellChunk.cells.sim.terrainHelper
+                : (int)(locator.cellChunk.cells.sim.terrainHelper()
                         .computeIdealBaseFlowHeight(PackedBlockPos.pack(this.x(), this.floorY(), this.z()))
                         * LavaSimulator.FLUID_UNITS_PER_BLOCK);
                 
@@ -1859,17 +1859,17 @@ public class LavaCell extends AbstractLavaCell
             
             for(int y = bottomY; y <= topY; y++)
             {
-                IBlockState priorState = sim.worldBuffer.getBlockState(this.locator.x, y, this.locator.z);
+                IBlockState priorState = sim.worldBuffer().getBlockState(this.locator.x, y, this.locator.z);
                 if(hasLava && y == currentSurfaceY)
                 {
                     
-                    sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
+                    sim.worldBuffer().setBlockState(this.locator.x, y, this.locator.z, 
                             TerrainBlockHelper.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), currentVisible - currentSurfaceY * TerrainState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else if(hasLava && y < currentSurfaceY)
                 {
-                    sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
+                    sim.worldBuffer().setBlockState(this.locator.x, y, this.locator.z, 
                             TerrainBlockHelper.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), TerrainState.BLOCK_LEVELS_INT),
                             priorState);
                 }
@@ -1878,7 +1878,7 @@ public class LavaCell extends AbstractLavaCell
                     // don't want to clear non-air blocks if they did not contain lava - let falling particles do that
                     if(priorState.getBlock() == ModBlocks.lava_dynamic_height)
                     {
-                        sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, Blocks.AIR.getDefaultState(), priorState);
+                        sim.worldBuffer().setBlockState(this.locator.x, y, this.locator.z, Blocks.AIR.getDefaultState(), priorState);
                     }
                 }
             }

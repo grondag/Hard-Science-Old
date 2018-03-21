@@ -1,5 +1,24 @@
 package grondag.hard_science.volcano;
 
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+
+import javax.annotation.Nonnull;
+
+import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.varia.Useful;
+import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
+import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModNBTTag;
+import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.volcano.lava.LavaTerrainHelper;
+import grondag.hard_science.volcano.lava.simulator.LavaCell;
+import grondag.hard_science.volcano.lava.simulator.LavaCells;
+import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
+import grondag.hard_science.volcano.lava.simulator.VolcanoManager;
+import grondag.hard_science.volcano.lava.simulator.VolcanoManager.VolcanoNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -9,25 +28,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-
-import java.util.ArrayList;
-import java.util.concurrent.ThreadLocalRandom;
-
-import javax.annotation.Nonnull;
-
-import grondag.exotic_matter.model.ISuperBlock;
-import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
-import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.volcano.lava.LavaTerrainHelper;
-import grondag.hard_science.volcano.lava.simulator.LavaCell;
-import grondag.hard_science.volcano.lava.simulator.LavaCells;
-import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
-import grondag.hard_science.volcano.lava.simulator.VolcanoManager.VolcanoNode;
 
 
 /**
@@ -69,7 +69,9 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     private int lavaCounter = 0;
     private int lavaCooldownTicks = 0;
 
-
+    /** Lava simulator reference - captured in first update */
+    private LavaSimulator lavaSim;
+    
     /** simulation delegate */
     private VolcanoNode             node;
 
@@ -124,14 +126,18 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
 //        }
 //    }
 
+    /**
+     * True if was unable to access simulation elements and should be inactive for rest of lifetime.
+     */
+    private boolean isBroken = false;
+    
     @Override
     public void update() 
     {
         boolean isNodeUpdateNeeded = false;
-
         
-        if(this.world.isRemote) return;
-
+        if(this.isBroken || this.world.isRemote) return;
+        
         if(this.node == null)
         {
             if(!Simulator.instance().isRunning()) return;
@@ -143,22 +149,38 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
                 this.groundLevel = Useful.getAvgHeight(this.world, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
                 
-            this.node = Simulator.instance().volcanoManager().findNode(this.pos, this.world.provider.getDimension());
+            this.lavaSim = Simulator.instance().getNode(LavaSimulator.class);
+            VolcanoManager volcanoSim = Simulator.instance().getNode(VolcanoManager.class);
             
-            if(node == null)
+            if(this.lavaSim == null)
             {
-                Log.info("Setting up new Volcano Node @" + this.pos.toString());
-                this.node = Simulator.instance().volcanoManager().createNode(this.pos,this.world.provider.getDimension());
-                this.stage = VolcanoStage.DORMANT;
+                Log.warn("Volcano tile entity unable to retrieve instance for lava simulator.  Volcano will not function.");
+                this.isBroken = true;
+            }
+            else if(volcanoSim == null)
+            {
+                Log.warn("Volcano tile entity unable to retrieve instance for volcano simulator.  Volcano will not function.");
+                this.isBroken = true;
             }
             else
             {
-                Log.info("Found Volcano Node @" + this.pos.toString());
-                this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
+                this.node = volcanoSim.findNode(this.pos, this.world.provider.getDimension());
+                
+                if(node == null)
+                {
+                    Log.info("Setting up new Volcano Node @" + this.pos.toString());
+                    this.node = volcanoSim.createNode(this.pos,this.world.provider.getDimension());
+                    this.stage = VolcanoStage.DORMANT;
+                }
+                else
+                {
+                    Log.info("Found Volcano Node @" + this.pos.toString());
+                    this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
+                }
+    
+                // no need to markDirty here - will be prompted by isNodeUpdateNeeded
+                isNodeUpdateNeeded = true;
             }
-
-            // no need to markDirty here - will be prompted by isNodeUpdateNeeded
-            isNodeUpdateNeeded = true;
             
         }
 
@@ -224,7 +246,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         }
         
         // if have too many blocks, switch to cooling mode
-        if(Simulator.instance().lavaSimulator().loadFactor() > 1)
+        if(this.lavaSim.loadFactor() > 1)
         {
             this.clearingLevel = CLEARING_LEVEL_RESTART;
             return VolcanoStage.COOLING;
@@ -266,7 +288,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
      */
     private VolcanoStage doCooling()
     {
-        if(Simulator.instance().lavaSimulator().loadFactor() > Configurator.VOLCANO.cooldownTargetLoadFactor)
+        if(this.lavaSim.loadFactor() > Configurator.VOLCANO.cooldownTargetLoadFactor)
         {
             this.lavaCooldownTicks = 0;
             return VolcanoStage.COOLING;
@@ -284,7 +306,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     private VolcanoStage doFlowing()
     {
         
-        if(Simulator.instance().lavaSimulator().loadFactor() > 1)
+        if(this.lavaSim.loadFactor() > 1)
         {
             this.wasBoreFlowEnabled = false;
             setBoreFlowEnabled(false);
@@ -305,7 +327,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
 
     private void setBoreFlowEnabled(boolean enabled)
     {
-        LavaCells cells = Simulator.instance().lavaSimulator().cells;
+        LavaCells cells = this.lavaSim.cells;
         for(int i = 0; i < BORE_OFFSETS.size(); i++)
         {
             Vec3i offset = BORE_OFFSETS.get(i);
@@ -334,7 +356,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         
         if(block == ModBlocks.lava_dynamic_height)
         {
-            LavaCell cell = Simulator.instance().lavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+            LavaCell cell = this.lavaSim.cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
             if(cell != null) cell.setCoolingDisabled(true);
             return;
         }
@@ -348,11 +370,11 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
                 buildMound();
             }
         }
-        LavaCell cell = Simulator.instance().lavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+        LavaCell cell = this.lavaSim.cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
         if(cell == null) 
         {
             // force cell creation
-            Simulator.instance().lavaSimulator().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
+            this.lavaSim.addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
         }
         else
         {

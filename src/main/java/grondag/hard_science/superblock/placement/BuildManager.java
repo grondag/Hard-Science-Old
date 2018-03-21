@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.persistence.IDirtListener;
 import grondag.exotic_matter.simulator.persistence.NullDirtListener;
 import grondag.hard_science.init.ModNBTTag;
@@ -80,7 +81,7 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     {
         Build result = new Build(this, dimensionID);
         this.builds.put(result.getId(), result);
-        domain.domainManager().assignedNumbersAuthority().register(result);
+        Simulator.instance().assignedNumbersAuthority().register(result);
         return result;
     }
     

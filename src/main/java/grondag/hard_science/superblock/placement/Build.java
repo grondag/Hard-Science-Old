@@ -4,6 +4,9 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.persistence.AssignedNumber;
+import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.Domain;
@@ -15,8 +18,6 @@ import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import grondag.hard_science.simulator.jobs.tasks.BlockProcurementTask;
 import grondag.hard_science.simulator.jobs.tasks.PlacementTask;
-import grondag.hard_science.simulator.persistence.AssignedNumber;
-import grondag.hard_science.simulator.persistence.IIdentified;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -270,7 +271,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
-        DomainManager.instance().assignedNumbersAuthority().register(this);
+        Simulator.instance().assignedNumbersAuthority().register(this);
         this.jobID = tag.getInteger(ModNBTTag.BUILD_JOB_ID);
         this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
         if(tag.hasKey(ModNBTTag.BUILD_POSITIONS))

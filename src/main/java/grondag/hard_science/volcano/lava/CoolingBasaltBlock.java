@@ -9,9 +9,10 @@ import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.TerrainBlockHelper;
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
+import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.volcano.lava.simulator.WorldStateBuffer;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -131,7 +132,8 @@ public class CoolingBasaltBlock extends TerrainDynamicBlock
     public void randomTick(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Random random)
     {
         // Gather orphaned blocks
-        Simulator.instance().lavaSimulator().registerCoolingBlock(worldIn, pos);
+        LavaSimulator sim = Simulator.instance().getNode(LavaSimulator.class);
+        if(sim != null) sim.registerCoolingBlock(worldIn, pos);
     }
     
     

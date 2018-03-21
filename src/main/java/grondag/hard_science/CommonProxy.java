@@ -1,5 +1,6 @@
 package grondag.hard_science;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.varia.Base32Namer;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModComponents;
@@ -8,7 +9,6 @@ import grondag.hard_science.init.ModEntities;
 import grondag.hard_science.init.ModRecipes;
 import grondag.hard_science.init.ModTileEntities;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;

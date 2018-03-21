@@ -11,7 +11,6 @@ public class ModNBTTag
 {
     public static int nextID = 0;
 
-    public final static String ASSIGNED_NUMBERS_AUTHORITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String BASALT_BLOCKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_USER_FLAGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_USER_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -36,9 +35,6 @@ public class ModNBTTag
     public final static String RESOURCE_QUANTITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String RESOURCE_IDENTITY= "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String SERVER_SIDE_ONLY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String SIMULATION_LAST_TICK = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String SIMULATION_WORLD_TICK_OFFSET = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String SIMULATOR = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String STORAGE_CAPACITY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String STORAGE_CONTENTS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String VOLCANO_BUILD_LEVEL = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
