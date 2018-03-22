@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.drones;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.world.Location;
@@ -8,7 +9,6 @@ import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
@@ -23,7 +23,7 @@ public class Drone implements IDevice, IReadWriteNBT
     private int domainID = IIdentified.UNASSIGNED_ID;
     
     /** don't reference directly */
-    private Domain domain = null;
+    private IDomain domain = null;
     
     @Override
     public int getIdRaw()
@@ -45,7 +45,7 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         if(this.domain == null && this.domainID != IIdentified.UNASSIGNED_ID)
         {

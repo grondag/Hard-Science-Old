@@ -12,8 +12,6 @@ public class ModNBTTag
     public static int nextID = 0;
 
     public final static String BASALT_BLOCKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMAIN_USER_FLAGS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String DOMAIN_USER_NAME = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_ITEM_STORAGE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_MANAGER_DOMAINS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String DOMAIN_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -109,11 +107,11 @@ public class ModNBTTag
 
     public static final String JOB_HELD_FLAG = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String BUILD_MANAGER_BUILDS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+//    public static final String BUILD_MANAGER_BUILDS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String BUILD_POSITIONS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
-    public static final String DOMAIN_BUILD_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+//    public static final String DOMAIN_BUILD_MANAGER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 
     public static final String BUILD_JOB_ID = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 

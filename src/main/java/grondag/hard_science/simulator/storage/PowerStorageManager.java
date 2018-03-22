@@ -2,7 +2,6 @@ package grondag.hard_science.simulator.storage;
 
 import com.google.common.eventbus.Subscribe;
 
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.storage.PowerStorageEvent.AfterPowerStorageConnect;
@@ -15,10 +14,9 @@ import grondag.hard_science.simulator.storage.PowerStorageEvent.PowerStoredUpdat
  */
 public class PowerStorageManager extends StorageManager<StorageTypePower>
 {
-    public PowerStorageManager(Domain domain)
+    public PowerStorageManager()
     {
-        super(StorageType.POWER, domain);
-        this.domain.eventBus.register(this);
+        super(StorageType.POWER);
     }
 
     @Subscribe

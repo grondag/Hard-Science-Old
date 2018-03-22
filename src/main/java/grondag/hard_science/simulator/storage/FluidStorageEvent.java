@@ -17,14 +17,14 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
     public void postBeforeStorageDisconnect(IResourceContainer<StorageTypeFluid> storage)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new BeforeFluidStorageDisconnect(storage));
+        storage.getDomain().eventBus().post(new BeforeFluidStorageDisconnect(storage));
     }
     
     @Override
     public void postAfterStorageConnect(IResourceContainer<StorageTypeFluid> storage)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new AfterFluidStorageConnect(storage));
+        storage.getDomain().eventBus().post(new AfterFluidStorageConnect(storage));
     }
     
     @Override
@@ -36,7 +36,7 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
     {
         if(storage.getDomain() == null) return;
         
-            storage.getDomain().eventBus.post(new FluidStoredUpdate(
+            storage.getDomain().eventBus().post(new FluidStoredUpdate(
                     storage,
                     resource,
                     delta,
@@ -52,7 +52,7 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
     {
         if(storage.getDomain() == null) return;
         
-            storage.getDomain().eventBus.post(new FluidAvailableUpdate(
+            storage.getDomain().eventBus().post(new FluidAvailableUpdate(
                     storage,
                     resource,
                     delta,
@@ -63,7 +63,7 @@ public class FluidStorageEvent implements IStorageEventFactory<StorageTypeFluid>
     public void postCapacityChange(IResourceContainer<StorageTypeFluid> storage, long delta)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new FluidCapacityChange(storage, delta));
+        storage.getDomain().eventBus().post(new FluidCapacityChange(storage, delta));
     }
     
     public static class BeforeFluidStorageDisconnect extends StorageNotification<StorageTypeFluid>

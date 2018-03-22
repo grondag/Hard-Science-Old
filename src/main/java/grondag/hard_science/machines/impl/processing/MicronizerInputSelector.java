@@ -9,13 +9,15 @@ import java.util.concurrent.Future;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.domain.IDomainMember;
+import grondag.hard_science.simulator.domain.ProcessManager;
 import grondag.hard_science.simulator.domain.ProcessManager.ProcessInfo;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.fobs.SimpleProcurementTask;
+import grondag.hard_science.simulator.fobs.TransientTaskContainer;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.BulkResource;
 import grondag.hard_science.simulator.resource.FluidResource;
@@ -23,6 +25,7 @@ import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.IResourceContainer;
+import grondag.hard_science.simulator.storage.ItemStorageManager;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import it.unimi.dsi.fastutil.objects.AbstractObject2LongMap.BasicEntry;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -42,16 +45,16 @@ import net.minecraft.util.math.MathHelper;
  */
 public class MicronizerInputSelector implements IDomainMember
 {
-    private final Domain domain;
+    private final ProcessManager owner;
     private int maxBacklog;
     private int backlogDepth;
     private int nextUpdateTick;
     
     private ImmutableList<IResource<StorageTypeStack>> bestInputs;
     
-    public MicronizerInputSelector(Domain domain)
+    public MicronizerInputSelector(ProcessManager owner)
     {
-        this.domain = domain;
+        this.owner = owner;
     }
 
     /**
@@ -83,7 +86,7 @@ public class MicronizerInputSelector implements IDomainMember
         
         for(BulkResource br : MicronizerRecipe.allOutputs())
         {
-            ProcessInfo info = this.domain.processManager.getInfo(br.fluidResource());
+            ProcessInfo info = this.owner.getInfo(br.fluidResource());
             if(info == null) continue;
             maxDemand += info.targetStockLevel();
             long demand = info.demand();
@@ -103,7 +106,7 @@ public class MicronizerInputSelector implements IDomainMember
         
         // find all inputs
         List<AbstractResourceWithQuantity<StorageTypeStack>> candidates 
-            = domain.itemStorage.findEstimatedAvailable(MicronizerRecipe.INPUT_RESOURCE_PREDICATE);
+            = this.owner.getDomain().getCapability(ItemStorageManager.class).findEstimatedAvailable(MicronizerRecipe.INPUT_RESOURCE_PREDICATE);
         
         ArrayList<BasicEntry<IResource<StorageTypeStack>>> allInputs  = new ArrayList<>();
         
@@ -118,7 +121,7 @@ public class MicronizerInputSelector implements IDomainMember
             long demand = demands.getInt(recipe.outputResource().fluidResource());
             if(demand == 0) continue;
                     
-            ProcessInfo inputInfo = domain.processManager.getInfo(inputRes);
+            ProcessInfo inputInfo = this.owner.getInfo(inputRes);
             if(inputInfo == null) continue;
             
             double inputAvailability = inputInfo.availabilityFactor();
@@ -193,10 +196,11 @@ public class MicronizerInputSelector implements IDomainMember
 
                 if(!candidates.isEmpty())
                 {
+                    ItemStorageManager ism = machine.getDomain().getCapability(ItemStorageManager.class);
+                    
                     for(IResource<StorageTypeStack> res : candidates)
                     {
-                        List<IResourceContainer<StorageTypeStack>> sources = 
-                                machine.getDomain().itemStorage.findSourcesFor(res, machine);
+                        List<IResourceContainer<StorageTypeStack>> sources = ism.findSourcesFor(res, machine);
 
                         if(sources.isEmpty()) continue;
 
@@ -206,9 +210,9 @@ public class MicronizerInputSelector implements IDomainMember
                         IResourceContainer<StorageTypeStack> store = sources.get(0);
 
                         result = new SimpleProcurementTask<>(
-                                machine.getDomain().systemTasks, res, 1);
+                                machine.getDomain().getCapability(TransientTaskContainer.class), res, 1);
 
-                        if(machine.getDomain().itemStorage.setAllocation(res, result, 1) == 1)
+                        if(ism.setAllocation(res, result, 1) == 1)
                         {
                             // already on service thread so send immediately
                             LogisticsService.ITEM_SERVICE.sendResourceNow(res, 1L, store.device(), machine, false, false, result);
@@ -226,8 +230,8 @@ public class MicronizerInputSelector implements IDomainMember
 
 
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
-        return this.domain;
+        return this.owner.getDomain();
     }
 }

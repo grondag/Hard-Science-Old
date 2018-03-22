@@ -39,5 +39,4 @@ public class PowerResource extends AbstractResource<StorageType.StorageTypePower
     {
         return other == this;
     }
-
 }

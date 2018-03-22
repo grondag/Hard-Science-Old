@@ -3,11 +3,11 @@ package grondag.hard_science.simulator.fobs;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.jobs.RequestStatus;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -103,7 +103,7 @@ public abstract class NewTask implements IReadWriteNBT, IDomainMember //, IIdent
     }
 
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         return this.container.getDomain();
     }

@@ -11,25 +11,24 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainCapability;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
-import grondag.exotic_matter.simulator.persistence.IDirtListener;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.exotic_matter.simulator.persistence.NullDirtListener;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.jobs.tasks.PerpetualTask;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class JobManager implements IReadWriteNBT, IDomainMember
+public class JobManager implements IDomainCapability
 {
     private static final int PROCESS_JOB_ID = IIdentified.FIRST_SYSTEM_ID;
+    private static final String NBT_SELF = NBTDictionary.claim("jobMgr");
+    private static final String NBT_CHILDREN = NBTDictionary.claim("jobChildren");
     
     /**
      * Lazily created / retrieved.  Task holder for automated resource processing.
@@ -53,9 +52,8 @@ public class JobManager implements IReadWriteNBT, IDomainMember
         });
     
     
-    protected Domain domain;
+    protected IDomain domain;
     
-    protected IDirtListener dirtListener = NullDirtListener.INSTANCE;
     /**
      * Job are containers that hold all of our tasks. <br>
      * Jobs manage task serialization and hold shared state like userName and priority. <br>
@@ -71,11 +69,6 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     @SuppressWarnings("unchecked")
     private final LinkedList<Job>[] backlogJobs = new LinkedList[RequestPriority.values().length];
     
-    public JobManager(Domain domain)
-    {
-        this.domain = domain;
-        this.dirtListener = domain == null ? NullDirtListener.INSTANCE : domain.getDirtListener();
-    }
     
     /**
      * Retrieves task holder for automated resource processing.
@@ -316,7 +309,7 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        NBTTagList nbtJobs = tag.getTagList(ModNBTTag.REQUEST_CHILDREN, 10);
+        NBTTagList nbtJobs = tag.getTagList(NBT_CHILDREN, 10);
         if( nbtJobs != null && !nbtJobs.hasNoTags())
         {
             for(NBTBase subTag : nbtJobs)
@@ -334,6 +327,7 @@ public class JobManager implements IReadWriteNBT, IDomainMember
      * Called after all domain deserialization is complete.  
      * Hook for tasks to handle actions that may require other objects to be deserialized start.
      */
+    @Override
     public void afterDeserialization()
     {
         if(!this.jobs.isEmpty())
@@ -356,19 +350,20 @@ public class JobManager implements IReadWriteNBT, IDomainMember
             {
                 nbtJobs.appendTag(j.serializeNBT());
             }
-            tag.setTag(ModNBTTag.REQUEST_CHILDREN, nbtJobs);
+            tag.setTag(NBT_CHILDREN, nbtJobs);
         }        
     }
     
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         return this.domain;
     }
     
-    protected void setDirty()
+    @Override
+    public void setDirty()
     {
-        this.dirtListener.setDirty();
+        if(this.domain != null) this.domain.setDirty();
     }
 
     /**
@@ -378,5 +373,17 @@ public class JobManager implements IReadWriteNBT, IDomainMember
     {
         // TODO Not a real implementation
         return  Simulator.instance().assignedNumbersAuthority().getIndex(AssignedNumber.TASK).size();
+    }
+
+    @Override
+    public String tagName()
+    {
+        return NBT_SELF;
+    }
+
+    @Override
+    public void setDomain(IDomain domain)
+    {
+        this.domain = domain;
     }
 }

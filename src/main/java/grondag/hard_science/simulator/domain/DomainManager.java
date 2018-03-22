@@ -9,11 +9,13 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.DomainUser;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.AssignedNumbersAuthority.IdentifiedIndex;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.exotic_matter.simulator.persistence.ISimulationNode;
-import grondag.exotic_matter.varia.BinaryEnumSet;
+import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.jobs.AbstractTask;
@@ -24,11 +26,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class DomainManager implements ISimulationNode
+public class DomainManager implements ISimulationTopNode
 {  
     /**
-     * A bit ugly but covenient.  Set to null when any 
+     * A bit ugly but convenient.  Set to null when any 
      * instance is created, retrieved lazily from Simulator.
+     * 
+     * TODO do this in a better way, is asking for trouble
      */
     private static DomainManager instance;
     
@@ -47,18 +51,18 @@ public class DomainManager implements ISimulationNode
     
     private boolean isLoaded = false;
 
-    private Domain defaultDomain;
+    private IDomain defaultDomain;
 
     /** 
      * Each player has a domain that is automatically created for them
      * and which they always own.  This will be their initially active domain.
      */
-    private HashMap<String, Domain> playerIntrinsicDomains = new HashMap<String, Domain>();
+    private HashMap<String, IDomain> playerIntrinsicDomains = new HashMap<>();
     
     /** 
      * Each player has a currently active domain. This will initially be their intrinsic domain.
      */
-    private HashMap<String, Domain> playerActiveDomains = new HashMap<String, Domain>();
+    private HashMap<String, IDomain> playerActiveDomains = new HashMap<>();
     
     /**
      * If isNew=true then won't wait for a deserialize to become loaded.
@@ -92,7 +96,7 @@ public class DomainManager implements ISimulationNode
     /**
      * Domain for unmanaged objects.  
      */
-    public Domain defaultDomain()
+    public IDomain defaultDomain()
     {
         this.checkLoaded();
         if(this.defaultDomain == null)
@@ -110,12 +114,10 @@ public class DomainManager implements ISimulationNode
         return this.defaultDomain;
     }
     
-    public static final BinaryEnumSet<Privilege> PRIVILEGE_FLAG_SET = new BinaryEnumSet<Privilege>(Privilege.class);
-    
-    public List<Domain> getAllDomains()
+    public List<IDomain> getAllDomains()
     {
         this.checkLoaded();
-        ImmutableList.Builder<Domain> builder = ImmutableList.builder();
+        ImmutableList.Builder<IDomain> builder = ImmutableList.builder();
         for (IIdentified domain : Simulator.instance().assignedNumbersAuthority().getIndex(AssignedNumber.DOMAIN).valueCollection())
         {
             builder.add((Domain)domain);
@@ -123,13 +125,13 @@ public class DomainManager implements ISimulationNode
         return builder.build();
     }
 
-    public Domain getDomain(int id)
+    public IDomain getDomain(int id)
     {
         this.checkLoaded();
         return domainFromId(id);
     }
     
-    public synchronized Domain createDomain()
+    public synchronized IDomain createDomain()
     {
         this.checkLoaded();
         Domain result = new Domain(this);
@@ -142,7 +144,7 @@ public class DomainManager implements ISimulationNode
     /**
      * Does NOT destroy any of the contained objects in the domain!
      */
-    public synchronized void removeDomain(Domain domain)
+    public synchronized void removeDomain(IDomain domain)
     {
         this.checkLoaded();
         Simulator.instance().assignedNumbersAuthority().unregister(domain);
@@ -188,7 +190,7 @@ public class DomainManager implements ISimulationNode
         {
             for(String playerName : nbtPlayerDomains.getKeySet())
             {
-                Domain d = domainFromId(nbtPlayerDomains.getInteger(playerName));
+                IDomain d = domainFromId(nbtPlayerDomains.getInteger(playerName));
                 if(d != null) this.playerIntrinsicDomains.put(playerName, d);
             }
         }
@@ -198,7 +200,7 @@ public class DomainManager implements ISimulationNode
         {
             for(String playerName : nbtActiveDomains.getKeySet())
             {
-                Domain d = domainFromId(nbtActiveDomains.getInteger(playerName));
+                IDomain d = domainFromId(nbtActiveDomains.getInteger(playerName));
                 if(d != null) this.playerActiveDomains.put(playerName, d);
             }
         }
@@ -225,7 +227,7 @@ public class DomainManager implements ISimulationNode
         if(!this.playerIntrinsicDomains.isEmpty())
         {
             NBTTagCompound nbtPlayerDomains = new NBTTagCompound();
-            for(Entry<String, Domain> entry : this.playerIntrinsicDomains.entrySet())
+            for(Entry<String, IDomain> entry : this.playerIntrinsicDomains.entrySet())
             {
                 nbtPlayerDomains.setInteger(entry.getKey(), entry.getValue().getId());
             }
@@ -235,7 +237,7 @@ public class DomainManager implements ISimulationNode
         if(!this.playerActiveDomains.isEmpty())
         {
             NBTTagCompound nbtActiveDomains = new NBTTagCompound();
-            for(Entry<String, Domain> entry : this.playerActiveDomains.entrySet())
+            for(Entry<String, IDomain> entry : this.playerActiveDomains.entrySet())
             {
                 nbtActiveDomains.setInteger(entry.getKey(), entry.getValue().getId());
             }
@@ -264,9 +266,9 @@ public class DomainManager implements ISimulationNode
      * has never specified, will be the player's intrinsic domain.
      */
     @Nonnull
-    public Domain getActiveDomain(EntityPlayerMP player)
+    public IDomain getActiveDomain(EntityPlayerMP player)
     {
-        Domain result = this.playerActiveDomains.get(player.getName());
+        IDomain result = this.playerActiveDomains.get(player.getName());
         if(result == null)
         {
             synchronized(this.playerActiveDomains)
@@ -285,11 +287,11 @@ public class DomainManager implements ISimulationNode
     /**
      * Set the player's currently active domain. 
      */
-    public void setActiveDomain(EntityPlayerMP player, Domain domain)
+    public void setActiveDomain(EntityPlayerMP player, IDomain domain)
     {
         synchronized(this.playerActiveDomains)
         {
-            Domain result = this.playerActiveDomains.put(player.getName(), domain);
+            IDomain result = this.playerActiveDomains.put(player.getName(), domain);
             if(result == null || result != domain )
             {
                 ExcavationRenderTracker.INSTANCE.updatePlayerTracking(player);
@@ -301,9 +303,9 @@ public class DomainManager implements ISimulationNode
      * The player's private, default domain. Created if does not already exist.
      */
     @Nonnull
-    public Domain getIntrinsicDomain(EntityPlayerMP player)
+    public IDomain getIntrinsicDomain(EntityPlayerMP player)
     {
-        Domain result = this.playerIntrinsicDomains.get(player.getName());
+        IDomain result = this.playerIntrinsicDomains.get(player.getName());
         if(result == null)
         {
             synchronized(this.playerIntrinsicDomains)
@@ -330,7 +332,7 @@ public class DomainManager implements ISimulationNode
     }
     
     // convenience object lookup methods
-    public static Domain domainFromId(int id)
+    public static IDomain domainFromId(int id)
     {
         return (Domain)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.DOMAIN);
     }

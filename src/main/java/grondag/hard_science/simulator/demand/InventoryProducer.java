@@ -35,7 +35,7 @@ public class InventoryProducer<V extends StorageType<V>>
     {
         this.broker = broker;
         this.resource = broker.resource();
-        this.storageManager = broker.brokerManager.getDomain().getStorageManager(resource.storageType());
+        this.storageManager = broker.brokerManager.getDomain().getCapability(resource.storageType().domainCapability());
         storageManager.registerResourceListener(broker.resource(), this);
     }
     

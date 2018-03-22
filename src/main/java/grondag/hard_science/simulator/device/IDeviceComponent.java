@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.device;
 
-import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.domain.IDomainMember;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
@@ -15,7 +15,7 @@ public interface IDeviceComponent extends IDomainMember
      * Shorthand for {@link #device()#getDomain()}
      */
     @Override
-    public default Domain getDomain()
+    public default IDomain getDomain()
     {
         return this.device().getDomain();
     }

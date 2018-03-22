@@ -13,7 +13,7 @@ import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
 import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.exotic_matter.simulator.Simulator;
-import grondag.exotic_matter.simulator.persistence.ISimulationNode;
+import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
@@ -41,7 +41,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
-public class LavaSimulator implements ISimulationNode, ISimulationTickable
+public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
 {
     public final PerformanceCollector perfCollectorAllTick = new PerformanceCollector("Lava Simulator Whole tick");
     public final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Lava Simulator On tick");

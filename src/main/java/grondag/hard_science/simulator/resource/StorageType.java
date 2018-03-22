@@ -12,9 +12,13 @@ import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.storage.FluidStorageEvent;
+import grondag.hard_science.simulator.storage.FluidStorageManager;
 import grondag.hard_science.simulator.storage.IStorageEventFactory;
 import grondag.hard_science.simulator.storage.ItemStorageEvent;
+import grondag.hard_science.simulator.storage.ItemStorageManager;
 import grondag.hard_science.simulator.storage.PowerStorageEvent;
+import grondag.hard_science.simulator.storage.PowerStorageManager;
+import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.item.Item;
@@ -79,6 +83,9 @@ public abstract class StorageType<T extends StorageType<T>>
             public boolean test(IResource<T> t) { return false; }
         };
     }
+    
+    public abstract Class<? extends StorageManager<T>> domainCapability();
+    
     @Nullable
     public abstract IResource<T> fromBytes(PacketBuffer pBuff);
     
@@ -178,6 +185,12 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             super(EnumStorageType.ITEM, 
             new ItemResource(ItemStack.EMPTY.getItem(), ItemStack.EMPTY.getMetadata(), null, null));
+        }
+        
+        @Override
+        public Class<? extends StorageManager<StorageTypeStack>> domainCapability()
+        {
+            return ItemStorageManager.class;
         }
         
         /**
@@ -305,6 +318,12 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             super(EnumStorageType.FLUID, new FluidResource(null, null));
         }
+        
+        @Override
+        public Class<? extends StorageManager<StorageTypeFluid>> domainCapability()
+        {
+            return FluidStorageManager.class;
+        }
 
         @Override
         public IResource<StorageTypeFluid> fromNBT(NBTTagCompound nbt)
@@ -399,6 +418,12 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
+        public Class<? extends StorageManager<StorageTypePower>> domainCapability()
+        {
+            return PowerStorageManager.class;
+        }
+        
+        @Override
         public IResource<StorageTypePower> fromNBT(NBTTagCompound nbt)
         {
             return PowerResource.JOULES;
@@ -483,7 +508,14 @@ public abstract class StorageType<T extends StorageType<T>>
         {
             super(EnumStorageType.PRIVATE, ModBulkResources.FRESH_AIR);
         }
-
+        
+        @Override
+        public Class<? extends StorageManager<StorageTypeBulk>> domainCapability()
+        {
+            // no capability for bulk
+            return null;
+        }
+        
         @Override
         public IResource<StorageTypeBulk> fromNBT(NBTTagCompound nbt)
         {

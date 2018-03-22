@@ -1,6 +1,8 @@
 package grondag.hard_science.simulator.domain;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -8,44 +10,37 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 
+import grondag.exotic_matter.Log;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.simulator.domain.DomainUser;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainCapability;
+import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IDirtListener;
 import grondag.exotic_matter.simulator.persistence.IDirtListenerProvider;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.demand.BrokerManager;
-import grondag.hard_science.simulator.fobs.TransientTaskContainer;
-import grondag.hard_science.simulator.jobs.JobManager;
-import grondag.hard_science.simulator.resource.StorageType;
-import grondag.hard_science.simulator.storage.FluidStorageManager;
-import grondag.hard_science.simulator.storage.ItemStorageManager;
-import grondag.hard_science.simulator.storage.PowerStorageManager;
-import grondag.hard_science.simulator.storage.StorageManager;
-import grondag.hard_science.superblock.placement.BuildManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
+public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified, IDomain
 {
-    /**
-     * 
-     */
+    private static final HashSet<Class<? extends IDomainCapability>> capabilityTypes = new HashSet<>();
+    
+    public static void registerCapability(Class<? extends IDomainCapability> capabilityType)
+    {
+        capabilityTypes.add(capabilityType);
+    }
+    
     private final DomainManager domainManager;
     int id;
     String name;
     boolean isSecurityEnabled;
-    
-    public final EventBus eventBus = new EventBus();
-    public final ItemStorageManager itemStorage;
-    public final FluidStorageManager fluidStorage;
-    public final PowerStorageManager powerStorage;
-    public final JobManager jobManager;
-    public final BuildManager buildManager;
-    public final BrokerManager brokerManager;
-    public final ProcessManager processManager;
-    public final TransientTaskContainer systemTasks;
+    private final IdentityHashMap<Class<? extends IDomainCapability>, IDomainCapability> capabilities = new IdentityHashMap<>();
+
+    private final EventBus eventBus = new EventBus();
     
     private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
     
@@ -53,14 +48,25 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     Domain (DomainManager domainManager)
     {
         this.domainManager = domainManager;    
-        this.itemStorage = new ItemStorageManager(this);
-        this.fluidStorage = new FluidStorageManager(this);
-        this.powerStorage = new PowerStorageManager(this);
-        this.jobManager = new JobManager(this);
-        this.buildManager = new BuildManager(this);
-        this.brokerManager = new BrokerManager(this);
-        this.processManager = new ProcessManager(this);
-        this.systemTasks = new TransientTaskContainer(this);
+        
+        this.capabilities.clear();
+        if(!capabilityTypes.isEmpty())
+        {
+            for(Class<? extends IDomainCapability> capType : capabilityTypes)
+            {
+                try
+                {
+                    IDomainCapability cap;
+                    cap = capType.newInstance();
+                    cap.setDomain(this);
+                    this.capabilities.put(capType, cap);
+                }
+                catch (Exception e)
+                {
+                    Log.error("Unable to create domain capability", e);
+                }
+            }
+        }
     }
     
     Domain (DomainManager domainManager, NBTTagCompound tag)
@@ -69,52 +75,40 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         this.deserializeNBT(tag);
     }
     
-    public void afterDeserialization()
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V extends IDomainCapability> V getCapability(Class<V> capability)
     {
-        this.jobManager.afterDeserialization();
+        return (V) this.capabilities.get(capability);
     }
     
+    @Override
+    public EventBus eventBus()
+    {
+        return this.eventBus;
+    }
+    
+    @Override
     public List<DomainUser> getAllUsers()
     {
         return ImmutableList.copyOf(users.values());
     }
     
-    @SuppressWarnings("unchecked")
-    public <V extends StorageType<V>> StorageManager<V> getStorageManager(StorageType<V> storeType)
-    {
-        switch(storeType.enumType)
-        {
-        case FLUID:
-            return (StorageManager<V>) this.fluidStorage;
-            
-        case ITEM:
-            return (StorageManager<V>) this.itemStorage;
-            
-        case POWER:
-            return (StorageManager<V>) this.powerStorage;
-            
-        case PRIVATE:
-            assert false : "Unsupported private storage type reference";
-            return null;
-            
-        default:
-            assert false : "Unhandled enum mapping";
-            return null;
-        
-        }
-    }
+    @Override
     @Nullable
     public DomainUser findPlayer(EntityPlayer player)
     {
         return this.findUser(player.getName());
     }
     
+    @Override
     @Nullable
     public DomainUser findUser(String userName)
     {
         return this.users.get(userName);
     }
     
+    @Override
     public boolean hasPrivilege(EntityPlayer player, Privilege privilege)
     {
         DomainUser user = findPlayer(player);
@@ -124,6 +118,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     /** 
      * Will return existing user if already exists.
      */
+    @Override
     public synchronized DomainUser addPlayer(EntityPlayer player)
     {
         return this.addUser(player.getName());
@@ -132,6 +127,7 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     /** 
      * Will return existing user if already exists.
      */
+    @Override
     public synchronized DomainUser addUser(String userName)
     {
         DomainUser result = this.findUser(userName);
@@ -162,28 +158,33 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
         return AssignedNumber.DOMAIN;
     }
     
+    @Override
     public String getName()
     {
         return name;
     }
     
+    @Override
     public void setName(String name)
     {
         this.name = name;
         this.domainManager.isDirty = true;
     }
 
+    @Override
     public boolean isSecurityEnabled()
     {
         return isSecurityEnabled;
     }
 
+    @Override
     public void setSecurityEnabled(boolean isSecurityEnabled)
     {
         this.isSecurityEnabled = isSecurityEnabled;
         this.domainManager.isDirty = true;
     }
     
+    @Override
     public void setDirty()
     {
         this.domainManager.isDirty = true;
@@ -206,10 +207,6 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
             }
         }
         tag.setTag(ModNBTTag.DOMAIN_USERS, nbtUsers);
-        
-        tag.setTag(ModNBTTag.DOMAIN_JOB_MANAGER, this.jobManager.serializeNBT());
-        tag.setTag(ModNBTTag.DOMAIN_BUILD_MANAGER, this.buildManager.serializeNBT());
-        this.processManager.serializeNBT(tag);
     }
 
     @Override
@@ -228,10 +225,6 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
                 this.users.put(user.userName, user);
             }   
         }
-        
-        this.jobManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_JOB_MANAGER));
-        this.buildManager.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMAIN_BUILD_MANAGER));
-        this.processManager.deserializeNBT(tag);
     }
     
     public DomainManager domainManager()
@@ -244,4 +237,24 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     {
         return this.domainManager;
     }
+    
+    @Override
+    public void afterDeserialization()
+    {
+        this.capabilities.values().forEach(c -> c.afterDeserialization());
+    }
+
+    @Override
+    public void unload()
+    {
+        this.capabilities.values().forEach(c -> c.unload());
+    }
+
+    @Override
+    public void loadNew()
+    {
+        this.capabilities.values().forEach(c -> c.loadNew());
+    }
+    
+    
 }

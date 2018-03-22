@@ -21,7 +21,7 @@ public class JobTest
     @Test
     public void test() throws InterruptedException, ExecutionException
     {
-        JobManager jm = new JobManager(null);
+        JobManager jm = new JobManager();
         
         ExcavationTask e1 = new ExcavationTask();
         ExcavationTask e2 = new ExcavationTask();

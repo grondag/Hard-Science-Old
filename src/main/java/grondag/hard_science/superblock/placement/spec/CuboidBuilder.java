@@ -14,16 +14,17 @@ import org.lwjgl.opengl.GL11;
 import grondag.exotic_matter.placement.OffsetPosition;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.render.RenderUtil;
+import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.varia.FixedRegionBounds;
 import grondag.exotic_matter.world.CubicBlockRegion;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.ClientProxy;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
+import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.block.PlacementPosition;
@@ -311,7 +312,7 @@ public class CuboidBuilder extends VolumetricBuilder
             {
 //                private CuboidPlacementSpec spec = (CuboidPlacementSpec) buildSpec();
                 private Job job = new Job(RequestPriority.MEDIUM, player);
-                Domain domain = DomainManager.instance().getActiveDomain(player);
+                IDomain domain = DomainManager.instance().getActiveDomain(player);
 
                 /**
                  * Block positions to be checked. Will initially contain
@@ -402,7 +403,7 @@ public class CuboidBuilder extends VolumetricBuilder
                     {
                         // when done, finalize entries list and submit job
                         this.checked.clear();
-                        if(domain != null) domain.jobManager.addJob(job);
+                        if(domain != null) domain.getCapability(JobManager.class).addJob(job);
                     }
 
                     return opCount;

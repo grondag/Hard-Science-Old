@@ -2,10 +2,10 @@ package grondag.hard_science.simulator.base;
 
 import org.junit.Test;
 
-import grondag.hard_science.simulator.domain.Domain;
+import grondag.exotic_matter.simulator.domain.DomainUser;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.domain.Privilege;
-import grondag.hard_science.simulator.domain.DomainUser;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class DomainManagerTest
@@ -17,7 +17,7 @@ public class DomainManagerTest
         DomainManager dm = DomainManager.instance();
         dm.loadNew();
         
-        Domain d1 = dm.createDomain();
+        IDomain d1 = dm.createDomain();
         d1.setName("start");
         d1.setSecurityEnabled(true);
         
@@ -31,7 +31,7 @@ public class DomainManagerTest
         sally.grantPrivilege(Privilege.ADMIN, true);
         assert(dm.isSaveDirty());
         
-        Domain d2 = dm.createDomain();
+        IDomain d2 = dm.createDomain();
         d2.setName("second");
         d2.setSecurityEnabled(false);
         

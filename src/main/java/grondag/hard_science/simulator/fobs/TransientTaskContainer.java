@@ -1,6 +1,8 @@
 package grondag.hard_science.simulator.fobs;
 
-import grondag.hard_science.simulator.domain.Domain;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainCapability;
+import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * Container for classes that aren't serialized or prioritized.
@@ -8,17 +10,12 @@ import grondag.hard_science.simulator.domain.Domain;
  * This container does not keep references to its tasks and
  * provides no way to retrieve tasks associated with it.
  */
-public class TransientTaskContainer implements ITaskContainer
+public class TransientTaskContainer implements ITaskContainer, IDomainCapability
 {
-    private final Domain domain;
+    private IDomain domain;
 
-    public TransientTaskContainer(Domain domain)
-    {
-        this.domain = domain;
-    }
-    
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         return this.domain;
     }
@@ -28,5 +25,41 @@ public class TransientTaskContainer implements ITaskContainer
     {
         return TaskPriority.NONE;
     }
-    
+
+    @Override
+    public void deserializeNBT(NBTTagCompound tag)
+    {
+        //NOOP - no persisted state
+    }
+
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        //NOOP - no persisted state
+    }
+
+    @Override
+    public void setDirty()
+    {
+        //NOOP - no persisted state
+    }
+
+    @Override
+    public String tagName()
+    {
+        assert false : "Attempt to serialize Transient Task Container";
+        return "";
+    }
+
+    @Override
+    public void setDomain(IDomain domain)
+    {
+        this.domain = domain;
+    }
+
+    @Override
+    public boolean isSerializationDisabled()
+    {
+        return true;
+    }
 }

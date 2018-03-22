@@ -5,15 +5,16 @@ import javax.annotation.Nullable;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
+import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import grondag.hard_science.simulator.jobs.tasks.BlockProcurementTask;
@@ -245,7 +246,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
 
             private void complete()
             {
-                buildManager.domain.jobManager.addJob(job);
+                buildManager.domain.getCapability(JobManager.class).addJob(job);
                 Build.this.jobID = job.getId();
                 buildManager.setDirty();
                 this.isDone = true;
@@ -262,7 +263,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
 
 
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         return this.buildManager.getDomain();
     }

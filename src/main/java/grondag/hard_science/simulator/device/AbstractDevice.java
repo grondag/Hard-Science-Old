@@ -2,13 +2,13 @@ package grondag.hard_science.simulator.device;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.world.Location;
 import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
@@ -35,7 +35,7 @@ public abstract class AbstractDevice implements IDevice
     private int domainID = IIdentified.UNASSIGNED_ID;
     
     /** do not access directly - lazy lookup after deserialization */
-    private Domain domain = null;
+    private IDomain domain = null;
     
     /**
      * Initialized during just before super connect, set null after super disconnect
@@ -202,7 +202,7 @@ public abstract class AbstractDevice implements IDevice
 
     @Nullable
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         if(this.domain == null)
         {
@@ -218,7 +218,7 @@ public abstract class AbstractDevice implements IDevice
      * static while connected to transport network. If domain
      * is to be changed, disconnect, make the change, and reconnect.
      */
-    public void setDomain(@Nullable Domain domain)
+    public void setDomain(@Nullable IDomain domain)
     {
         if(this.isConnected) 
             throw new UnsupportedOperationException("Attempt to change device domain while connected.");

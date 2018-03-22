@@ -8,7 +8,7 @@ public class NullJobManager extends JobManager
     public static final NullJobManager INSTANCE = new NullJobManager();
     private NullJobManager()
     {
-        super(null);
+        super();
     }
     
     @Override
@@ -42,7 +42,7 @@ public class NullJobManager extends JobManager
     }
     
     @Override
-    protected void setDirty()
+    public void setDirty()
     {
         // NOOP
     };

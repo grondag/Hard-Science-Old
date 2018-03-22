@@ -19,6 +19,7 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.PowerContainer;
+import grondag.hard_science.simulator.storage.PowerStorageManager;
 import grondag.hard_science.simulator.storage.StorageManager;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
 import net.minecraft.nbt.NBTTagCompound;
@@ -319,7 +320,7 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
         if(this.inputContainer == null || this.inputContainer.availableCapacity() == 0)
             return;
         
-        StorageManager<StorageTypePower> manager = this.getDomain().powerStorage;
+        StorageManager<StorageTypePower> manager = this.getDomain().getCapability(PowerStorageManager.class);
             
         // try local first
         if(this.outputContainer != null)
@@ -376,7 +377,7 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
         
         long targetAmount = this.outputContainer.usedCapacity();
         
-        StorageManager<StorageTypePower> manager = this.getDomain().powerStorage;
+        StorageManager<StorageTypePower> manager = this.getDomain().getCapability(PowerStorageManager.class);
         
         // try to empty output container if it is an output buffer
         // that is close to being full

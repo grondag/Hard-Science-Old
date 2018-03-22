@@ -12,15 +12,17 @@ import org.magicwerk.brownies.collections.Key1List;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainCapability;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.management.LogisticsService;
+import net.minecraft.nbt.NBTTagCompound;
 
 /**
 * Responsibilities:
@@ -33,11 +35,11 @@ import grondag.hard_science.simulator.transport.management.LogisticsService;
 * Not responsible for optimizing storage.
 */
 public class StorageManager<T extends StorageType<T>> 
-    implements ITypedStorage<T>, IDomainMember, ISizedContainer, IStorageAccess<T>
+    implements ITypedStorage<T>, IDomainMember, ISizedContainer, IStorageAccess<T>, IDomainCapability
 {
     protected final HashSet<IResourceContainer<T>> stores = new HashSet<IResourceContainer<T>>();
     
-    protected Domain domain;
+    protected IDomain domain;
     protected final T storageType;
        
     /**
@@ -57,11 +59,10 @@ public class StorageManager<T extends StorageType<T>>
      */
     protected boolean hasEmptySlots = false;
     
-    public StorageManager(T storageType, Domain domain)
+    public StorageManager(T storageType)
     {
         super();
         this.storageType = storageType;
-        this.domain = domain;
     }
 
     @Override
@@ -93,7 +94,7 @@ public class StorageManager<T extends StorageType<T>>
     }
 
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         return this.domain;
     }
@@ -445,6 +446,47 @@ public class StorageManager<T extends StorageType<T>>
             summary.unregisterResourceListener(listener);
             if(summary.isEmpty()) this.hasEmptySlots = true;
         }
+    }
+
+    @Override
+    public void deserializeNBT(NBTTagCompound tag)
+    {
+        // NOOP - storage state is saved with the devices
+        // manager state reconstructed a run time
+    }
+
+    @Override
+    public void serializeNBT(NBTTagCompound tag)
+    {
+        // NOOP - storage state is saved with the devices
+        // manager state reconstructed a run time
+    }
+
+    @Override
+    public void setDirty()
+    {
+        // NOOP - storage state is saved with the devices
+        // manager state reconstructed a run time        // NOOP - storage state is saved with the devices
+    }
+
+    @Override
+    public String tagName()
+    {
+        assert false : "Possible attempt to serialize Storage Manager.  Storage manger does not support serialization.";
+        return "";
+    }
+
+    @Override
+    public void setDomain(IDomain domain)
+    {
+        this.domain = domain;
+        domain.eventBus().register(this);
+    }
+
+    @Override
+    public boolean isSerializationDisabled()
+    {
+        return true;
     }
 
 }

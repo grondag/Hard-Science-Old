@@ -17,14 +17,14 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     public void postBeforeStorageDisconnect(IResourceContainer<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new BeforePowerStorageDisconnect(storage));
+        storage.getDomain().eventBus().post(new BeforePowerStorageDisconnect(storage));
     }
     
     @Override
     public void postAfterStorageConnect(IResourceContainer<StorageTypePower> storage)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new AfterPowerStorageConnect(storage));
+        storage.getDomain().eventBus().post(new AfterPowerStorageConnect(storage));
     }
     
     @Override
@@ -36,7 +36,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     {
         if(storage.getDomain() == null) return;
         
-            storage.getDomain().eventBus.post(new PowerStoredUpdate(
+            storage.getDomain().eventBus().post(new PowerStoredUpdate(
                     storage,
                     resource,
                     delta,
@@ -52,7 +52,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     {
         if(storage.getDomain() == null) return;
         
-            storage.getDomain().eventBus.post(new PowerAvailableUpdate(
+            storage.getDomain().eventBus().post(new PowerAvailableUpdate(
                     storage,
                     resource,
                     delta,
@@ -63,7 +63,7 @@ public class PowerStorageEvent implements IStorageEventFactory<StorageTypePower>
     public void postCapacityChange(IResourceContainer<StorageTypePower> storage, long delta)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new PowerCapacityChange(storage, delta));
+        storage.getDomain().eventBus().post(new PowerCapacityChange(storage, delta));
     }
     
     public static class BeforePowerStorageDisconnect extends StorageNotification<StorageTypePower>

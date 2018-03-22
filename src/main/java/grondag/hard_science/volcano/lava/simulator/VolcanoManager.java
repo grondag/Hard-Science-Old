@@ -9,7 +9,7 @@ import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.persistence.IDirtKeeper;
-import grondag.exotic_matter.simulator.persistence.ISimulationNode;
+import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
 import grondag.exotic_matter.world.Location;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
@@ -25,7 +25,7 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
-public class VolcanoManager implements ISimulationTickable, ISimulationNode
+public class VolcanoManager implements ISimulationTickable, ISimulationTopNode
 {
     private HashMap<Location, VolcanoNode> nodes = new HashMap<Location, VolcanoNode>();
     

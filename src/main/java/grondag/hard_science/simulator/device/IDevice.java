@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.simulator.ISimulationTickable;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.Base32Namer;
@@ -13,7 +14,6 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
-import grondag.hard_science.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;

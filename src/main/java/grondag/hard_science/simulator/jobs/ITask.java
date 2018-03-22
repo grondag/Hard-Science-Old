@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.jobs;
 
-import grondag.hard_science.simulator.domain.Domain;
+import grondag.exotic_matter.simulator.domain.IDomain;
 
 /**
  * Exists to allow interfaces that subclass tasks
@@ -57,7 +57,7 @@ public interface ITask
 
     void removeListener(ITaskListener listener);
 
-    Domain getDomain();
+    IDomain getDomain();
     
     public int getId();
     

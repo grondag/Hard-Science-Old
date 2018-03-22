@@ -20,14 +20,13 @@ import net.minecraft.item.crafting.Ingredient;
 /**
  * Main purpose is to hold type-specific event handlers.
  */
-public class ItemStorageManager extends StorageManager<StorageTypeStack>
+public class ItemStorageManager extends StorageManager<StorageTypeStack> 
 {
     public ItemStorageManager(Domain domain)
     {
-        super(StorageType.ITEM, domain);
-        this.domain.eventBus.register(this);
+        super(StorageType.ITEM);
     }
-
+    
     @Subscribe
     public void afterStorageConnect(AfterItemStorageConnect event)
     {

@@ -9,7 +9,7 @@ import grondag.exotic_matter.concurrency.PerformanceCollector;
 import grondag.exotic_matter.concurrency.SimpleCountedJobBacker;
 import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.exotic_matter.simulator.Simulator;
-import grondag.exotic_matter.simulator.persistence.ISimulationNode;
+import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModNBTTag;
@@ -23,7 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.world.World;
 
-public class DeviceManager implements ISimulationNode, ISimulationTickable
+public class DeviceManager implements ISimulationTopNode, ISimulationTickable
 {
     ///////////////////////////////////////////////////////////
     //  STATIC MEMBERS

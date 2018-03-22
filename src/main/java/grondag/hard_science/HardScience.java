@@ -3,9 +3,19 @@ package grondag.hard_science;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.DomainUser;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.simulator.device.DeviceManager;
+import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.domain.ProcessManager;
+import grondag.hard_science.simulator.fobs.TransientTaskContainer;
+import grondag.hard_science.simulator.jobs.JobManager;
+import grondag.hard_science.simulator.storage.FluidStorageManager;
+import grondag.hard_science.simulator.storage.ItemStorageManager;
+import grondag.hard_science.simulator.storage.PowerStorageManager;
+import grondag.hard_science.superblock.placement.BuildCapability;
+import grondag.hard_science.superblock.placement.BuildManager;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.volcano.lava.simulator.VolcanoManager;
 import net.minecraft.creativetab.CreativeTabs;
@@ -67,6 +77,17 @@ public class HardScience
             Simulator.register(VolcanoManager.class);
             Simulator.register(LavaSimulator.class);
         }
+        
+        DomainUser.registerCapability(BuildCapability.class);
+        
+        Domain.registerCapability(ItemStorageManager.class);
+        Domain.registerCapability(FluidStorageManager.class);
+        Domain.registerCapability(PowerStorageManager.class);
+        Domain.registerCapability(BuildManager.class);
+        Domain.registerCapability(JobManager.class);
+        Domain.registerCapability(TransientTaskContainer.class);
+        Domain.registerCapability(ProcessManager.class);
+        
     }
     
 	@EventHandler

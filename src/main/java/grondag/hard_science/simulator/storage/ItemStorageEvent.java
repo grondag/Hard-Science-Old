@@ -17,14 +17,14 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     public void postBeforeStorageDisconnect(IResourceContainer<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new BeforeItemStorageDisconnect(storage));
+        storage.getDomain().eventBus().post(new BeforeItemStorageDisconnect(storage));
     }
     
     @Override
     public void postAfterStorageConnect(IResourceContainer<StorageTypeStack> storage)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new AfterItemStorageConnect(storage));
+        storage.getDomain().eventBus().post(new AfterItemStorageConnect(storage));
     }
     
     @Override
@@ -36,7 +36,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     {
         if(storage.getDomain() == null) return;
         
-            storage.getDomain().eventBus.post(new ItemStoredUpdate(
+            storage.getDomain().eventBus().post(new ItemStoredUpdate(
                     storage,
                     resource,
                     delta,
@@ -52,7 +52,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     {
         if(storage.getDomain() == null) return;
         
-            storage.getDomain().eventBus.post(new ItemAvailableUpdate(
+            storage.getDomain().eventBus().post(new ItemAvailableUpdate(
                     storage,
                     resource,
                     delta,
@@ -63,7 +63,7 @@ public class ItemStorageEvent implements IStorageEventFactory<StorageTypeStack>
     public void postCapacityChange(IResourceContainer<StorageTypeStack> storage, long delta)
     {
         if(storage.getDomain() == null) return;
-        storage.getDomain().eventBus.post(new ItemCapacityChange(storage, delta));
+        storage.getDomain().eventBus().post(new ItemCapacityChange(storage, delta));
     }
     
     public static class BeforeItemStorageDisconnect extends StorageNotification<StorageTypeStack>

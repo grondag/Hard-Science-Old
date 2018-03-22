@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.fobs;
 
-import grondag.hard_science.simulator.domain.IDomainMember;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 
 /**
  * Interface for classes that are containers for tasks.

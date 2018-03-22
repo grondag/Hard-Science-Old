@@ -7,16 +7,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
-import grondag.exotic_matter.simulator.persistence.IDirtListener;
-import grondag.exotic_matter.simulator.persistence.NullDirtListener;
-import grondag.hard_science.init.ModNBTTag;
-import grondag.hard_science.simulator.domain.Domain;
+import grondag.exotic_matter.simulator.domain.DomainUser;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainCapability;
+import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.hard_science.simulator.domain.DomainManager;
-import grondag.hard_science.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.domain.Privilege;
-import grondag.hard_science.simulator.domain.DomainUser;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -27,8 +24,12 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
 
-public class BuildManager implements IReadWriteNBT, IDomainMember
+public class BuildManager implements IDomainCapability
 {
+    private static final String NBT_SELF = NBTDictionary.claim("buildMgr");
+    private static final String NBT_BUILDS = NBTDictionary.claim("buildData");
+
+
     /**
      * For use by builds and job tasks related to construction that do not
      * require world access and which don't have in-world machines to service them.
@@ -47,13 +48,6 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
                 }
             });
     
-    
-    public BuildManager(Domain domain)
-    {
-        this.domain = domain;
-        this.dirtListener = domain == null ? NullDirtListener.INSTANCE : domain.getDirtListener();
-    }
-
     /**
      * Convenience method - retrieves active build for given player
      * in the player's current dimension.
@@ -63,13 +57,13 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     public static Build getActiveBuildForPlayer(EntityPlayerMP player)
     {
         DomainUser user = DomainManager.instance().getActiveDomain(player).findPlayer(player);
-        return user == null || !user.hasPrivilege(Privilege.CONSTRUCTION_EDIT) ? null : user.getActiveBuild(player.world.provider.getDimension());
+        if(user == null || !user.hasPrivilege(Privilege.CONSTRUCTION_EDIT)) return null;
+        BuildCapability cap = user.getCapability(BuildCapability.class);
+        return cap == null ? null : cap.getActiveBuild(player.world.provider.getDimension());
     }
     
-    protected Domain domain;
+    protected IDomain domain;
 
-    protected IDirtListener dirtListener = NullDirtListener.INSTANCE;
-    
     private Int2ObjectMap<Build> builds =Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<Build>());
     
     public Build newBuild(World inWorld)
@@ -86,20 +80,21 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
     }
     
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         return this.domain;
     }
     
-    void setDirty()
+    @Override
+    public void setDirty()
     {
-        this.dirtListener.setDirty();
+        if(this.domain != null) this.domain.setDirty();
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        NBTTagList nbtBuilds = tag.getTagList(ModNBTTag.BUILD_MANAGER_BUILDS, 10);
+        NBTTagList nbtBuilds = tag.getTagList(NBT_BUILDS, 10);
         if( nbtBuilds != null && !nbtBuilds.hasNoTags())
         {
             for(NBTBase subTag : nbtBuilds)
@@ -124,8 +119,21 @@ public class BuildManager implements IReadWriteNBT, IDomainMember
             {
                 nbtJobs.appendTag(b.serializeNBT());
             }
-            tag.setTag(ModNBTTag.BUILD_MANAGER_BUILDS, nbtJobs);
+            tag.setTag(NBT_BUILDS, nbtJobs);
         }        
+    }
+
+    @Override
+    public String tagName()
+    {
+        return NBT_SELF;
+    }
+
+
+    @Override
+    public void setDomain(IDomain domain)
+    {
+        this.domain = domain;
     }
  
 }

@@ -3,13 +3,14 @@ package grondag.hard_science.superblock.placement.spec;
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
+import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.SingleBlockRegion;
 import grondag.exotic_matter.world.WorldHelper;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
+import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.block.PlacementPosition;
@@ -152,10 +153,10 @@ public class SingleBuilder extends SingleStackBuilder
                         Job job = new Job(RequestPriority.MEDIUM, player);
                         job.setDimensionID(world.provider.getDimension());
                         job.addTask(new ExcavationTask(pos));
-                        Domain domain = DomainManager.instance().getActiveDomain(player);
+                        IDomain domain = DomainManager.instance().getActiveDomain(player);
                         if(domain != null)
                         {
-                            domain.jobManager.addJob(job);
+                            domain.getCapability(JobManager.class).addJob(job);
                         }
                     }
                     return 2;

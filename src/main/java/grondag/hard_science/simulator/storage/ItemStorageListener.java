@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.eventbus.Subscribe;
 
+import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.domain.Domain;
@@ -66,7 +67,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      * Domain if we are in domain mode, and last
      * known domain of storage in other modes.
      */
-    private Domain domain;
+    private IDomain domain;
     
     protected final Container container;
     protected final EntityPlayerMP player;
@@ -154,6 +155,8 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      */
     public void initialize()
     {
+        ItemStorageManager ism = this.domain.getCapability(ItemStorageManager.class);
+        
         HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map = new HashMap<IResource<StorageTypeStack>, ItemResourceDelegate>();
         switch(this.mode)
         {
@@ -162,7 +165,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             break;
             
         case CONNECTED:
-            for(IResourceContainer<StorageTypeStack> store : this.domain.itemStorage.stores())
+            for(IResourceContainer<StorageTypeStack> store : ism.stores())
             {
                 ItemContainer itemStore = (ItemContainer)store;
                 if(itemStore.isOn() && LogisticsService.ITEM_SERVICE.areDevicesConnected(this.storage.device(), itemStore.device(), null))
@@ -174,8 +177,8 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             break;
             
         case DOMAIN:
-            this.totalCapacity = this.domain.itemStorage.getCapacity();
-            for(AbstractResourceWithQuantity<StorageTypeStack> rwq : this.domain.itemStorage.findQuantityStored(StorageType.ITEM.MATCH_ANY))
+            this.totalCapacity = ism.getCapacity();
+            for(AbstractResourceWithQuantity<StorageTypeStack> rwq : ism.findQuantityStored(StorageType.ITEM.MATCH_ANY))
             {
                 map.put(rwq.resource(), this.changeQuantity(rwq.resource(), rwq.getQuantity()));
             }
@@ -185,7 +188,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             assert false : "Missing enum mapping";
             return;
         }
-        this.domain.eventBus.register(this);
+        this.domain.eventBus().register(this);
         ModMessages.INSTANCE.sendTo(
                 new PacketOpenContainerItemStorageRefresh(
                         ImmutableList.copyOf(map.values()), this.totalCapacity, true), player);
@@ -432,7 +435,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     {
         if(!this.isDead)
         {
-            this.domain.eventBus.unregister(this);
+            this.domain.eventBus().unregister(this);
             this.slots.clear();
             this.totalCapacity = 0;
             this.isDead = true;
@@ -477,7 +480,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     public ImmutableList<IResourceContainer<StorageTypeStack>> getLocations(IResource<StorageTypeStack> resource)
     {
         return this.mode == Mode.DOMAIN
-                ? this.domain.itemStorage.getLocations(resource)
+                ? this.domain.getCapability(ItemStorageManager.class).getLocations(resource)
                 : IStorageAccess.super.getLocations(resource);
     }
 

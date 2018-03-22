@@ -5,10 +5,11 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
+import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainCapability;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.impl.processing.MicronizerInputSelector;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -18,6 +19,8 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
+import grondag.hard_science.simulator.storage.FluidStorageManager;
+import grondag.hard_science.simulator.storage.ItemStorageManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
@@ -29,9 +32,17 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreIngredient;
 
-public class ProcessManager implements IReadWriteNBT, IDomainMember
+public class ProcessManager implements IDomainCapability
 {
-    private final Domain domain;
+    
+    private static final String NBT_SELF = NBTDictionary.claim("processMgr");
+    private static final String NBT_FLUID_SETTINGS = NBTDictionary.claim("processFluids");
+    private static final String NBT_INGREDIENT_SETTINGS = NBTDictionary.claim("processIngredients");
+    private static final String NBT_TARGET_LEVEL= NBTDictionary.claim("targetLevel");
+    private static final String NBT_RESERVE_LEVEL= NBTDictionary.claim("reserveLevel");
+    private static final String NBT_PROCESS_INGREDIENT = NBTDictionary.claim("procIng");
+    
+    private IDomain domain;
     
     private final HashMap<IResource<StorageTypeFluid>, FluidProcessInfo> fluidInfos = new HashMap<>();
     private final HashMap<String, IngredientProcessInfo> ingredientInfos = new HashMap<>();
@@ -50,15 +61,15 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         
         protected ProcessInfo(NBTTagCompound tag)
         {
-            this.reserveStockLevel = tag.getLong(ModNBTTag.PROCESS_RESERVE_STOCKING_LEVEL);
-            this.targetStockLevel = tag.getLong(ModNBTTag.PROCESS_TARGET_STOCKING_LEVEL);
+            this.targetStockLevel = tag.getLong(NBT_TARGET_LEVEL);
+            this.reserveStockLevel = tag.getLong(NBT_RESERVE_LEVEL);
             this.normalize();
         }
         
         protected void writeNBT(NBTTagCompound tag)
         {
-            tag.setLong(ModNBTTag.PROCESS_RESERVE_STOCKING_LEVEL, reserveStockLevel);
-            tag.setLong(ModNBTTag.PROCESS_TARGET_STOCKING_LEVEL, targetStockLevel);
+            tag.setLong(NBT_TARGET_LEVEL, targetStockLevel);
+            tag.setLong(NBT_RESERVE_LEVEL, reserveStockLevel);
         }
         
         /**
@@ -202,7 +213,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         @Override
         public long onHand()
         {
-            return domain.fluidStorage.getEstimatedAvailable(resource);
+            return domain.getCapability(FluidStorageManager.class).getEstimatedAvailable(resource);
         }
     }
     
@@ -221,14 +232,14 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         private IngredientProcessInfo(NBTTagCompound tag)
         {
             super(tag);
-            this.ingString = tag.getString(ModNBTTag.PROCESS_INGREDIENT);
+            this.ingString = tag.getString(NBT_PROCESS_INGREDIENT);
             this.ingredient = readIngredient(ingString);
         }
         
         private NBTTagCompound toNBT()
         {
             NBTTagCompound result = new NBTTagCompound();
-            result.setString(ModNBTTag.PROCESS_INGREDIENT, this.ingString);
+            result.setString(NBT_PROCESS_INGREDIENT, this.ingString);
             super.writeNBT(result);
             return result;
         }
@@ -240,7 +251,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         public long onHand()
         {
             List<AbstractResourceWithQuantity<StorageTypeStack>> stocked 
-                = domain.itemStorage.findEstimatedAvailable(this.ingredient);
+                = domain.getCapability(ItemStorageManager.class).findEstimatedAvailable(this.ingredient);
             
             long avail = 0;
             
@@ -334,10 +345,9 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         return null;
     }
     
-    ProcessManager(Domain domain)
+    ProcessManager()
     {
-        this.domain = domain;
-        this.micronizerInputSelector = new MicronizerInputSelector(domain);
+        this.micronizerInputSelector = new MicronizerInputSelector(this);
         
         //load defaults
         for(String csv : Configurator.PROCESSING.fluidResourceDefaults)
@@ -371,7 +381,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         result.reserveStockLevel = reserveLevel;
         result.targetStockLevel = targetLevel;
         this.fluidInfos.put(resource, result);
-        this.domain.setDirty();
+        this.setDirty();
         return result;
     }
     
@@ -384,7 +394,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
         result.reserveStockLevel = reserveLevel;
         result.targetStockLevel = targetLevel;
         this.ingredientInfos.put(ingredientString, result);
-        this.domain.setDirty();
+        this.setDirty();
         return result;
     }
     
@@ -442,7 +452,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
     }
     
     @Override
-    public Domain getDomain()
+    public IDomain getDomain()
     {
         return this.domain;
     }
@@ -450,11 +460,11 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        if(tag.hasKey(ModNBTTag.PROCESS_FLUID_SETTINGS))
+        if(tag.hasKey(NBT_FLUID_SETTINGS))
         {
             this.fluidInfos.clear();
             
-            NBTTagList tags = tag.getTagList(ModNBTTag.PROCESS_FLUID_SETTINGS, 10);
+            NBTTagList tags = tag.getTagList(NBT_FLUID_SETTINGS, 10);
             if( tags != null && !tags.hasNoTags())
             {
                 for (int i = 0; i < tags.tagCount(); ++i)
@@ -472,11 +482,11 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
             }
         }
         
-        if(tag.hasKey(ModNBTTag.PROCESS_INGREDIENT_SETTINGS))
+        if(tag.hasKey(NBT_INGREDIENT_SETTINGS))
         {
             this.ingredientInfos.clear();
             
-            NBTTagList tags = tag.getTagList(ModNBTTag.PROCESS_INGREDIENT_SETTINGS, 10);
+            NBTTagList tags = tag.getTagList(NBT_INGREDIENT_SETTINGS, 10);
             if( tags != null && !tags.hasNoTags())
             {
                 for (int i = 0; i < tags.tagCount(); ++i)
@@ -506,7 +516,7 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
             {
                 tags.appendTag(pi.toNBT());
             }
-            tag.setTag(ModNBTTag.PROCESS_FLUID_SETTINGS, tags);
+            tag.setTag(NBT_FLUID_SETTINGS, tags);
         }
         
         if(!this.ingredientInfos.isEmpty())
@@ -516,7 +526,25 @@ public class ProcessManager implements IReadWriteNBT, IDomainMember
             {
                 tags.appendTag(pi.toNBT());
             }
-            tag.setTag(ModNBTTag.PROCESS_INGREDIENT_SETTINGS, tags);
+            tag.setTag(NBT_INGREDIENT_SETTINGS, tags);
         }
+    }
+
+    @Override
+    public void setDirty()
+    {
+        if(this.domain != null) this.domain.setDirty();
+    }
+
+    @Override
+    public String tagName()
+    {
+        return NBT_SELF;
+    }
+
+    @Override
+    public void setDomain(IDomain domain)
+    {
+        this.domain = domain;
     }
 }

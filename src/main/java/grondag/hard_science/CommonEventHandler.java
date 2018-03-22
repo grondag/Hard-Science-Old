@@ -5,10 +5,11 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.google.gson.Gson;
 
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
@@ -178,13 +179,15 @@ public class CommonEventHandler
             
             // TODO: remove
             // Temporary drone service
-            for(Domain domain : DomainManager.instance().getAllDomains())
+            for(IDomain domain : DomainManager.instance().getAllDomains())
             {
+                JobManager jm = domain.getCapability(JobManager.class);
+                
                 try
                 {
                     for(int i = 0; i < 1; i++)
                     {
-                        ExcavationTask task = (ExcavationTask) domain.jobManager.claimReadyWork(TaskType.EXCAVATION, null).get();
+                        ExcavationTask task = (ExcavationTask) jm.claimReadyWork(TaskType.EXCAVATION, null).get();
                         if(task == null) break;
                         
                         World world = task.job().world();

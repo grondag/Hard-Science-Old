@@ -13,6 +13,7 @@ import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.matter.VolumeUnits;
+import grondag.hard_science.simulator.domain.ProcessManager;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.FluidResource;
@@ -22,6 +23,7 @@ import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.simulator.storage.ContainerUsage;
 import grondag.hard_science.simulator.storage.FluidContainer;
+import grondag.hard_science.simulator.storage.FluidStorageManager;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.ItemContainer;
 import grondag.hard_science.simulator.storage.PowerContainer;
@@ -159,8 +161,9 @@ public class MicronizerMachine extends AbstractSimpleMachine
         
         if((Simulator.instance().getTick() & 0x1F) == 0x1F)
         {
-            this.setCurrentBacklog(this.getDomain().processManager.micronizerInputSelector.estimatedBacklogDepth());
-            this.statusState.setMaxBacklog(this.getDomain().processManager.micronizerInputSelector.maxBacklogDepth());
+            ProcessManager pm = this.getDomain().getCapability(ProcessManager.class);
+            this.setCurrentBacklog(pm.micronizerInputSelector.estimatedBacklogDepth());
+            this.statusState.setMaxBacklog(pm.micronizerInputSelector.maxBacklogDepth());
         }
         
         // if we don't have power to do basic control functions
@@ -193,7 +196,7 @@ public class MicronizerMachine extends AbstractSimpleMachine
         // then look for something so that we don't idle
         if(this.inputFuture == null && this.getBufferManager().itemInput().isEmpty())
         {
-            this.inputFuture = this.getDomain().processManager.micronizerInputSelector.requestInput(this);
+            this.inputFuture = this.getDomain().getCapability(ProcessManager.class).micronizerInputSelector.requestInput(this);
         }
         
         // do stuff if we can
@@ -268,11 +271,12 @@ public class MicronizerMachine extends AbstractSimpleMachine
             // abort if machine isn't connected to anything
             if(!this.fluidTransport().hasAnyCircuit()) return null;
 
+            FluidStorageManager fsm = this.getDomain().getCapability(FluidStorageManager.class);
+            
             for(AbstractResourceWithQuantity<StorageTypeFluid> rwq : fluidOut.findAll())
             {
                 // find places to store output
-                ImmutableList<IResourceContainer<StorageTypeFluid>> dumps 
-                    = this.getDomain().fluidStorage.findSpaceFor(rwq.resource(), this);
+                ImmutableList<IResourceContainer<StorageTypeFluid>> dumps = fsm.findSpaceFor(rwq.resource(), this);
                 
                 if(!dumps.isEmpty())
                 {
