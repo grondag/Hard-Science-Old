@@ -5,13 +5,13 @@ import javax.annotation.Nonnull;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.simulator.domain.DomainManager;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomainMember, ITask
@@ -382,12 +382,12 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
                         
                         if(ant == this.id)
                         {
-                            ITask conReq = DomainManager.taskFromId(con);
+                            ITask conReq = ITask.taskFromId(con);
                             if(conReq != null) this.consequents.add(conReq);
                         }
                         else if(con == this.id)
                         {
-                            ITask antReq = DomainManager.taskFromId(ant);
+                            ITask antReq = ITask.taskFromId(ant);
                             if(antReq != null) this.antecedents.add(antReq);
                         }
                         

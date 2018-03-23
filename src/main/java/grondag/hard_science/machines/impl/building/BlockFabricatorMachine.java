@@ -8,7 +8,7 @@ import grondag.hard_science.machines.energy.PolyethyleneFuelCell;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.matter.VolumeUnits;
-import grondag.hard_science.simulator.domain.DomainManager;
+import grondag.hard_science.simulator.jobs.ITask;
 import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.storage.ContainerUsage;
@@ -113,7 +113,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     {
         if(this.task == null && this.taskID != IIdentified.UNASSIGNED_ID)
         {
-            this.task = (BlockFabricationTask) DomainManager.taskFromId(this.taskID);
+            this.task = (BlockFabricationTask) ITask.taskFromId(this.taskID);
         }
         return this.task;
     }

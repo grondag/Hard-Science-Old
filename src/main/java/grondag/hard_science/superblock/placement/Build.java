@@ -11,7 +11,6 @@ import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.hard_science.Log;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.JobManager;
@@ -158,7 +157,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     {
         if(this.job == null && this.jobID != IIdentified.UNASSIGNED_ID)
         {
-            this.job = DomainManager.jobFromId(this.jobID);
+            this.job = Job.jobFromId(this.jobID);
         }
         return this.job;
     }
@@ -346,5 +345,10 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     public boolean isEmpty()
     {
         return this.positions.isEmpty();
+    }
+
+    public static Build buildFromId(int id)
+    {
+        return (Build)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.BUILD);
     }
 }

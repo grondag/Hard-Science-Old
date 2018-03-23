@@ -5,10 +5,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.google.gson.Gson;
 
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.jobs.WorldTaskManager;

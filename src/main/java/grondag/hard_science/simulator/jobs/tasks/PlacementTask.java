@@ -3,8 +3,8 @@ package grondag.hard_science.simulator.jobs.tasks;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.serialization.NBTDictionary;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.AbstractTask;
+import grondag.hard_science.simulator.jobs.ITask;
 import grondag.hard_science.simulator.jobs.TaskType;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -64,7 +64,7 @@ public class PlacementTask extends AbstractTask
     {
         if(this.procurementTask == null)
         {
-            this.procurementTask = (BlockProcurementTask) DomainManager.taskFromId(procurementTaskID);
+            this.procurementTask = (BlockProcurementTask) ITask.taskFromId(procurementTaskID);
         }
         return this.procurementTask;
     }

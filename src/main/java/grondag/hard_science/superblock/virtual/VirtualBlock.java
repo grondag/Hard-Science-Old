@@ -14,7 +14,6 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import grondag.hard_science.superblock.placement.Build;
@@ -522,7 +521,7 @@ public class VirtualBlock extends SuperModelBlock
             TileEntity te = worldIn.getTileEntity(pos);
             if(te != null && te instanceof VirtualTileEntity)
             {
-                Build build = DomainManager.buildFromId(((VirtualTileEntity)te).buildID());
+                Build build = Build.buildFromId(((VirtualTileEntity)te).buildID());
                 
                 if(build != null && build.isOpen())
                 {

@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.Subscribe;
 
-import grondag.hard_science.simulator.domain.Domain;
+import grondag.exotic_matter.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;

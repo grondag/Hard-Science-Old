@@ -2,8 +2,8 @@ package grondag.hard_science.simulator.demand;
 
 import java.util.HashMap;
 
+import grondag.exotic_matter.simulator.domain.Domain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;

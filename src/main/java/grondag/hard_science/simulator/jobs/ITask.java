@@ -1,6 +1,8 @@
 package grondag.hard_science.simulator.jobs;
 
+import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 
 /**
  * Exists to allow interfaces that subclass tasks
@@ -62,4 +64,9 @@ public interface ITask
     public int getId();
     
     public void onAntecedentTerminated(ITask antecedent);
+
+    static ITask taskFromId(int id)
+    {
+        return (ITask)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.TASK);
+    }
 }

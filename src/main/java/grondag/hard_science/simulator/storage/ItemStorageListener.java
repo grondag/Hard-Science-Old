@@ -14,10 +14,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.eventbus.Subscribe;
 
+import grondag.exotic_matter.simulator.domain.Domain;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
-import grondag.hard_science.simulator.domain.Domain;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.IResource;

@@ -3,11 +3,11 @@ package grondag.hard_science.superblock.placement.spec;
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
+import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.SingleBlockRegion;
 import grondag.exotic_matter.world.WorldHelper;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.JobManager;

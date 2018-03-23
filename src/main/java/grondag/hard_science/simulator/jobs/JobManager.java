@@ -18,7 +18,6 @@ import grondag.exotic_matter.simulator.domain.IDomainCapability;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.tasks.PerpetualTask;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -82,7 +81,7 @@ public class JobManager implements IDomainCapability
             {
                 if(this.processJob == null)
                 {
-                    this.processJob = DomainManager.jobFromId(PROCESS_JOB_ID);
+                    this.processJob = Job.jobFromId(PROCESS_JOB_ID);
                     if(this.processJob == null)
                     {
                         this.processJob = Job.createSystemJob(RequestPriority.MEDIUM, PROCESS_JOB_ID);

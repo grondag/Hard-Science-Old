@@ -3,17 +3,21 @@ package grondag.hard_science.superblock.virtual;
 import java.util.HashMap;
 import java.util.Map;
 
+import grondag.exotic_matter.simulator.domain.DomainChangeEvent;
+import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.world.WorldMap;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+@Mod.EventBusSubscriber
 public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<ExcavationRenderEntry>>
 {
     /**
@@ -70,6 +74,15 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
                 entry.removeListener(pd.player);
                 WorldTaskManager.sendPacketFromServerThread(packet, pd.player, false);
             }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onDomainChanged(DomainChangeEvent event) 
+    {
+        if(event.getEntityPlayer() instanceof EntityPlayerMP)
+        {
+            INSTANCE.updatePlayerTracking((EntityPlayerMP) event.getEntityPlayer());
         }
     }
     

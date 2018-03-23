@@ -3,6 +3,7 @@ package grondag.hard_science.machines.base;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.hard_science.Configurator;
@@ -11,7 +12,6 @@ import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;

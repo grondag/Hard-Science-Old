@@ -12,7 +12,6 @@ import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayer;
@@ -590,7 +589,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     
     public Build getBuild()
     {
-        return DomainManager.buildFromId(buildID);
+        return Build.buildFromId(buildID);
     }
 
     public int getDimensionID()
@@ -618,5 +617,10 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
             this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(this.dimensionID);
         }
         return this.world;
+    }
+
+    public static Job jobFromId(int id)
+    {
+        return (Job)  Simulator.instance().assignedNumbersAuthority().get(id, AssignedNumber.JOB);
     }
 }

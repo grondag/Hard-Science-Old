@@ -3,11 +3,11 @@ package grondag.hard_science;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.domain.Domain;
+import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.DomainUser;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.simulator.device.DeviceManager;
-import grondag.hard_science.simulator.domain.Domain;
-import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.domain.ProcessManager;
 import grondag.hard_science.simulator.fobs.TransientTaskContainer;
 import grondag.hard_science.simulator.jobs.JobManager;
