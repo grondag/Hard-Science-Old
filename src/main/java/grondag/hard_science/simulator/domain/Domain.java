@@ -12,6 +12,7 @@ import com.google.common.eventbus.EventBus;
 
 import grondag.exotic_matter.Log;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.DomainUser;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainCapability;
@@ -20,13 +21,16 @@ import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IDirtListener;
 import grondag.exotic_matter.simulator.persistence.IDirtListenerProvider;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.hard_science.init.ModNBTTag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
 public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified, IDomain
 {
+    private static final String NBT_DOMAIN_SECURITY_ENABLED = NBTDictionary.claim("domSecOn");
+    private static final String NBT_DOMAIN_NAME = NBTDictionary.claim("domName");
+    private static final String NBT_DOMAIN_USERS = NBTDictionary.claim("domUsers");
+    
     private static final HashSet<Class<? extends IDomainCapability>> capabilityTypes = new HashSet<>();
     
     public static void registerCapability(Class<? extends IDomainCapability> capabilityType)
@@ -194,8 +198,8 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     public void serializeNBT(NBTTagCompound tag)
     {
         this.serializeID(tag);
-        tag.setBoolean(ModNBTTag.DOMAIN_SECURITY_ENABLED, this.isSecurityEnabled);
-        tag.setString(ModNBTTag.DOMAIN_NAME, this.name);
+        tag.setBoolean(NBT_DOMAIN_SECURITY_ENABLED, this.isSecurityEnabled);
+        tag.setString(NBT_DOMAIN_NAME, this.name);
         
         NBTTagList nbtUsers = new NBTTagList();
         
@@ -206,17 +210,17 @@ public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
                 nbtUsers.appendTag(user.serializeNBT());
             }
         }
-        tag.setTag(ModNBTTag.DOMAIN_USERS, nbtUsers);
+        tag.setTag(NBT_DOMAIN_USERS, nbtUsers);
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
-        this.isSecurityEnabled = tag.getBoolean(ModNBTTag.DOMAIN_SECURITY_ENABLED);
-        this.name = tag.getString(ModNBTTag.DOMAIN_NAME);
+        this.isSecurityEnabled = tag.getBoolean(NBT_DOMAIN_SECURITY_ENABLED);
+        this.name = tag.getString(NBT_DOMAIN_NAME);
         
-        NBTTagList nbtUsers = tag.getTagList(ModNBTTag.DOMAIN_USERS, 10);
+        NBTTagList nbtUsers = tag.getTagList(NBT_DOMAIN_USERS, 10);
         if( nbtUsers != null && !nbtUsers.hasNoTags())
         {
             for (int i = 0; i < nbtUsers.tagCount(); ++i)

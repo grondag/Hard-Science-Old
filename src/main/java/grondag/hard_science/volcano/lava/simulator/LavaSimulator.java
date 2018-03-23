@@ -11,6 +11,7 @@ import grondag.exotic_matter.concurrency.SimpleConcurrentList;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
@@ -19,7 +20,6 @@ import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.volcano.lava.AgedBlockPos;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
@@ -43,13 +43,12 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
 {
-    public final PerformanceCollector perfCollectorAllTick = new PerformanceCollector("Lava Simulator Whole tick");
-    public final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Lava Simulator On tick");
-    public final PerformanceCollector perfCollectorOffTick = new PerformanceCollector("Lava Simulator Off tick");
-    private PerformanceCounter perfOnTick = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "On-Tick", perfCollectorAllTick);
-    private PerformanceCounter perfOffTick = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Off-Tick", perfCollectorAllTick);
-    private PerformanceCounter perfParticles = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Particle Spawning", perfCollectorOnTick);
+    private static final String NBT_BASALT_BLOCKS = NBTDictionary.claim("basaltBlocks");
+    private static final String NBT_LAVA_ADD_EVENTS = NBTDictionary.claim("lavaAddEvents");
+    private static final String NBT_LAVA_PLACEMENT_EVENTS = NBTDictionary.claim("lavaPlaceEvents");
+    private static final String NBT_LAVA_SIMULATOR = NBTDictionary.claim("lavaSim");
     
+
     public static final byte LEVELS_PER_BLOCK = TerrainState.BLOCK_LEVELS_INT;
     public static final byte LEVELS_PER_QUARTER_BLOCK = TerrainState.BLOCK_LEVELS_INT / 4;
     public static final byte LEVELS_PER_HALF_BLOCK = TerrainState.BLOCK_LEVELS_INT / 2;
@@ -68,6 +67,13 @@ public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
     public static final int MIN_FLOW_UNITS = 10;
     public static final int MIN_FLOW_UNITS_X2 = 10;
     protected static final int BLOCK_COOLING_DELAY_TICKS = 20;
+    
+    public final PerformanceCollector perfCollectorAllTick = new PerformanceCollector("Lava Simulator Whole tick");
+    public final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Lava Simulator On tick");
+    public final PerformanceCollector perfCollectorOffTick = new PerformanceCollector("Lava Simulator Off tick");
+    private PerformanceCounter perfOnTick = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "On-Tick", perfCollectorAllTick);
+    private PerformanceCounter perfOffTick = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Off-Tick", perfCollectorAllTick);
+    private PerformanceCounter perfParticles = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Particle Spawning", perfCollectorOnTick);
 
     private final WorldStateBuffer worldBuffer;
     private final LavaTerrainHelper terrainHelper;
@@ -195,7 +201,7 @@ public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
         }
     };
     
-    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, ModNBTTag.LAVA_PLACEMENT_EVENTS, placementHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, NBT_LAVA_PLACEMENT_EVENTS, placementHandler, this.perfCollectorOffTick);
     
     private final BlockEventHandler lavaAddEventHandler = new BlockEventHandler()
     {
@@ -217,7 +223,7 @@ public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
         }
     };
     
-    private final BlockEventList lavaAddEvents = new BlockEventList(10, ModNBTTag.LAVA_ADD_EVENTS, lavaAddEventHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaAddEvents = new BlockEventList(10, NBT_LAVA_ADD_EVENTS, lavaAddEventHandler, this.perfCollectorOffTick);
     
             
     /** incremented each step, multiple times per tick */
@@ -447,7 +453,7 @@ public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
                 saveData[i++] = (int) ((apos.packedBlockPos >> 32) & 0xFFFFFFFF);
                 saveData[i++] = apos.getTick();
             }       
-            nbt.setIntArray(ModNBTTag.BASALT_BLOCKS, saveData);
+            nbt.setIntArray(NBT_BASALT_BLOCKS, saveData);
         }
     }
     
@@ -465,7 +471,7 @@ public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
         
         
         // LOAD BASALT BLOCKS
-        int[] saveData = nbt.getIntArray(ModNBTTag.BASALT_BLOCKS);
+        int[] saveData = nbt.getIntArray(NBT_BASALT_BLOCKS);
 
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
@@ -844,7 +850,7 @@ public class LavaSimulator implements ISimulationTopNode, ISimulationTickable
     @Override
     public String tagName()
     {
-        return ModNBTTag.LAVA_SIMULATOR;
+        return NBT_LAVA_SIMULATOR;
     }
 
 

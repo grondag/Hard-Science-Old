@@ -3,13 +3,15 @@ package grondag.hard_science.simulator.fobs;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.jobs.RequestStatus;
 import net.minecraft.nbt.NBTTagCompound;
+
+//TODO: need to consolidate this with old task implementation or clean up
 
 public abstract class NewTask implements IReadWriteNBT, IDomainMember //, IIdentified//, 
 {
@@ -78,18 +80,20 @@ public abstract class NewTask implements IReadWriteNBT, IDomainMember //, IIdent
 //        return AssignedNumber.TASK;
 //    }
     
+    private final static String NBT_TASK_STATUS = NBTDictionary.claim("taskStatus");
+    
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
 //        this.deserializeID(tag);
-        this.status = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_STATUS, RequestStatus.NEW);
+        this.status = Useful.safeEnumFromTag(tag, NBT_TASK_STATUS, RequestStatus.NEW);
     }
 
     @Override
     public synchronized void serializeNBT(NBTTagCompound tag)
     {
 //        this.serializeID(tag);
-        Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_STATUS, this.status);
+        Useful.saveEnumToTag(tag, NBT_TASK_STATUS, this.status);
     }
     
     public void cancel()

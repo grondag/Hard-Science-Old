@@ -10,11 +10,11 @@ import grondag.exotic_matter.concurrency.CountedJobTask;
 import grondag.exotic_matter.concurrency.Job;
 import grondag.exotic_matter.concurrency.PerformanceCounter;
 import grondag.exotic_matter.concurrency.SimpleConcurrentList;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,11 +22,13 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class LavaCells
 {
+    private final static String NBT_LAVA_CELLS = NBTDictionary.claim("lavaCells");
+    private final static int CAPACITY_INCREMENT = 0x10000;
+
     private final SimpleConcurrentList<LavaCell> cellList;
     
     private final Long2ObjectOpenHashMap<CellChunk> cellChunks = new Long2ObjectOpenHashMap<CellChunk>();
     
-    private final static int CAPACITY_INCREMENT = 0x10000;
     
     /** 
      * Reference to the simulation in which this cells collection lives.
@@ -398,8 +400,6 @@ public class LavaCells
         }
     }
     
- 
-    
     public void writeNBT(NBTTagCompound nbt)
     {
       
@@ -420,7 +420,7 @@ public class LavaCells
         if(Configurator.VOLCANO.enablePerformanceLogging)
             Log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
-        nbt.setIntArray(ModNBTTag.LAVA_CELLS, Arrays.copyOfRange(saveData, 0, i));
+        nbt.setIntArray(NBT_LAVA_CELLS, Arrays.copyOfRange(saveData, 0, i));
     }
     
     public void readNBT(LavaSimulator sim, NBTTagCompound nbt)
@@ -428,7 +428,7 @@ public class LavaCells
         this.cellChunks.clear();
         
         // LOAD LAVA CELLS
-        int[] saveData = nbt.getIntArray(ModNBTTag.LAVA_CELLS);
+        int[] saveData = nbt.getIntArray(NBT_LAVA_CELLS);
         
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)

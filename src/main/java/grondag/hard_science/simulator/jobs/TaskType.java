@@ -2,8 +2,8 @@ package grondag.hard_science.simulator.jobs;
 
 import java.util.function.Supplier;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.jobs.tasks.BlockProcurementTask;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
@@ -44,16 +44,18 @@ public enum TaskType
         this.supplier = supplier;
     }
     
+    private static final String NBT_REQUEST_TYPE = NBTDictionary.claim("reqType");
+    
     public static NBTTagCompound serializeTask(AbstractTask task)
     {
         NBTTagCompound result = task.serializeNBT();
-        Useful.saveEnumToTag(result, ModNBTTag.REQUEST_TYPE, task.requestType());
+        Useful.saveEnumToTag(result, NBT_REQUEST_TYPE, task.requestType());
         return result;
     }
     
     public static AbstractTask deserializeTask(NBTTagCompound tag, Job job)
     {
-        AbstractTask result = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_TYPE, TaskType.NO_OPERATION).supplier.get();
+        AbstractTask result = Useful.safeEnumFromTag(tag, NBT_REQUEST_TYPE, TaskType.NO_OPERATION).supplier.get();
         if(result != null)
         {
             result.job = job;

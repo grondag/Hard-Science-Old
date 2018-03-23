@@ -7,13 +7,13 @@ import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelState;
 import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.BitPacker;
-import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.BitPacker.BitElement.BooleanElement;
 import grondag.exotic_matter.varia.BitPacker.BitElement.EnumElement;
 import grondag.exotic_matter.varia.BitPacker.BitElement.IntElement;
+import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.crafting.base.GenericRecipe;
-import grondag.hard_science.init.ModNBTTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -273,26 +273,32 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     // Serialization Stuff                                              //
     //////////////////////////////////////////////////////////////////////
 
+    private final static String NBT_MACHINE_CONTROL_STATE = NBTDictionary.claim("devCtrlState");
+    private final static String NBT_MACHINE_MODEL_STATE = NBTDictionary.claim("devMdlState");
+    private final static String NBT_MACHINE_TARGET_BLOCKPOS = NBTDictionary.claim("devTargetPos");
+    private final static String NBT_MACHINE_JOB_DURATION_TICKS = NBTDictionary.claim("devDurTicks");
+    private final static String NBT_MACHINE_JOB_REMAINING_TICKS = NBTDictionary.claim("devRemTicks");
+    
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        if(tag.hasKey(ModNBTTag.MACHINE_CONTROL_STATE))
+        if(tag.hasKey(NBT_MACHINE_CONTROL_STATE))
         {
-            this.bits = tag.getLong(ModNBTTag.MACHINE_CONTROL_STATE);
+            this.bits = tag.getLong(NBT_MACHINE_CONTROL_STATE);
             
             if(this.hasModelState())
             {
                 if(this.modelState == null) this.modelState = new ModelState();
-                this.modelState.deserializeNBT(tag.getCompoundTag(ModNBTTag.MACHINE_MODEL_STATE));
+                this.modelState.deserializeNBT(tag.getCompoundTag(NBT_MACHINE_MODEL_STATE));
             }
             if(this.hasTargetPos())
             {
-                this.targetPos = PackedBlockPos.unpack(tag.getLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS));
+                this.targetPos = PackedBlockPos.unpack(tag.getLong(NBT_MACHINE_TARGET_BLOCKPOS));
             }
             if(this.hasJobTicks())
             {
-                this.jobDurationTicks = tag.getShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS);
-                this.jobRemainingTicks = tag.getShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS);
+                this.jobDurationTicks = tag.getShort(NBT_MACHINE_JOB_DURATION_TICKS);
+                this.jobRemainingTicks = tag.getShort(NBT_MACHINE_JOB_REMAINING_TICKS);
             }
             if(this.hasRecipe())
             {
@@ -304,19 +310,19 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        tag.setLong(ModNBTTag.MACHINE_CONTROL_STATE, this.bits);
+        tag.setLong(NBT_MACHINE_CONTROL_STATE, this.bits);
         if(this.hasModelState())
         {
-            tag.setTag(ModNBTTag.MACHINE_MODEL_STATE, this.modelState.serializeNBT());
+            tag.setTag(NBT_MACHINE_MODEL_STATE, this.modelState.serializeNBT());
         }
         if(this.hasTargetPos())
         {
-            tag.setLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS, PackedBlockPos.pack(this.targetPos));
+            tag.setLong(NBT_MACHINE_TARGET_BLOCKPOS, PackedBlockPos.pack(this.targetPos));
         }
         if(this.hasJobTicks())
         {
-            tag.setShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS, this.jobDurationTicks);
-            tag.setShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS, this.jobRemainingTicks);
+            tag.setShort(NBT_MACHINE_JOB_DURATION_TICKS, this.jobDurationTicks);
+            tag.setShort(NBT_MACHINE_JOB_REMAINING_TICKS, this.jobRemainingTicks);
         }
         if(this.hasRecipe())
         {

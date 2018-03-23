@@ -1,6 +1,6 @@
 package grondag.hard_science.machines.base;
 
-import grondag.hard_science.init.ModNBTTag;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.device.blocks.SimpleBlockHandler;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -19,6 +19,8 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public abstract class AbstractSimpleMachine extends AbstractMachine
 {
+    private static final String NBT_PORT_LAYOUT = NBTDictionary.claim("portLayout");
+    
     private IPortLayout portLayout;
     
     public void setPortLayout(IPortLayout portLayout)
@@ -56,13 +58,13 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
     public void serializeNBT(NBTTagCompound tag)
     {
         super.serializeNBT(tag);
-        tag.setTag(ModNBTTag.DEVICE_PORT_LAYOUT, PortLayout.toNBT(this.portLayout));
+        tag.setTag(NBT_PORT_LAYOUT, PortLayout.toNBT(this.portLayout));
     }
     
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
-        this.portLayout = PortLayout.fromNBT(tag.getCompoundTag(ModNBTTag.DEVICE_PORT_LAYOUT));
+        this.portLayout = PortLayout.fromNBT(tag.getCompoundTag(NBT_PORT_LAYOUT));
     }
 }

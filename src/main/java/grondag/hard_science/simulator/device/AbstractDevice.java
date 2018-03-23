@@ -2,10 +2,10 @@ package grondag.hard_science.simulator.device;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.world.Location;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
@@ -22,6 +22,9 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractDevice implements IDevice
 {
+    private static final String NBT_DOMAIN_ID = NBTDictionary.claim("devDomID");
+    private static final String NBT_CHANNEL= NBTDictionary.claim("devChan");
+    
     private int id;
     private Location location;
     
@@ -227,6 +230,7 @@ public abstract class AbstractDevice implements IDevice
         this.domain = domain;
         this.setDirty();
     }
+
     
     @Override
     public void deserializeNBT(NBTTagCompound tag)
@@ -238,8 +242,8 @@ public abstract class AbstractDevice implements IDevice
         assert this.domain == null
                 : "Non-null domain during device deserialization.";
         
-        this.domainID = tag.getInteger(ModNBTTag.DOMAIN_ID);
-        this.channel = tag.getInteger(ModNBTTag.DEVICE_CHANNEL);
+        this.domainID = tag.getInteger(NBT_DOMAIN_ID);
+        this.channel = tag.getInteger(NBT_CHANNEL);
         if(this.bufferManager != null) this.bufferManager.deserializeNBT(tag);
         this.energyManager.deserializeNBT(tag);
 
@@ -250,8 +254,8 @@ public abstract class AbstractDevice implements IDevice
     {
         this.serializeID(tag);
         Location.saveToNBT(location, tag);
-        tag.setInteger(ModNBTTag.DOMAIN_ID, this.domainID);
-        tag.setInteger(ModNBTTag.DEVICE_CHANNEL, this.channel);
+        tag.setInteger(NBT_DOMAIN_ID, this.domainID);
+        tag.setInteger(NBT_CHANNEL, this.channel);
         if(this.bufferManager != null) this.bufferManager.serializeNBT(tag);
         this.energyManager.serializeNBT(tag);
 

@@ -7,9 +7,9 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.BulkItemInput;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.matter.MassUnits.Mass;
 import grondag.hard_science.simulator.resource.BulkResource;
 import net.minecraft.client.util.ITooltipFlag;
@@ -26,6 +26,8 @@ import net.minecraft.world.World;
 @Deprecated
 public class BulkItem extends Item
 {
+    private static final String NBT_BULK_ITEM_NL = NBTDictionary.claim("bulkItemNL");
+
     private static final ListMultimap<BulkResource, BulkItem> resourceMap = ArrayListMultimap.create();
     
     public static List<BulkItem> itemsForResource(BulkResource resource)
@@ -63,7 +65,7 @@ public class BulkItem extends Item
     {
         if(stack.getItem() != this) return 0;
         return stack.hasTagCompound()
-                ? stack.getTagCompound().getLong(ModNBTTag.BULK_ITEM_NL)
+                ? stack.getTagCompound().getLong(NBT_BULK_ITEM_NL)
                 : this.maxNanoLiters;
     }
     
@@ -76,7 +78,7 @@ public class BulkItem extends Item
             tag = new NBTTagCompound();
             stack.setTagCompound(tag);
         }
-        tag.setLong(ModNBTTag.BULK_ITEM_NL, nl);
+        tag.setLong(NBT_BULK_ITEM_NL, nl);
     }
     
     public long getNanoGrams(ItemStack stack)

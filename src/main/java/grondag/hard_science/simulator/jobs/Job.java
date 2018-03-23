@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.jobs;
 import java.util.Iterator;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
@@ -11,7 +12,6 @@ import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
@@ -28,6 +28,14 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
  */
 public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, IDomainMember
 {
+    private static final String NBT_REQUEST_PRIORITY = NBTDictionary.claim("jobPriority");
+    private static final String NBT_REQUEST_USER_NAME = NBTDictionary.claim("jobUser");
+    private static final String NBT_REQUEST_STATUS = NBTDictionary.claim("jobStatus");
+    private static final String NBT_JOB_HELD_FLAG = NBTDictionary.claim("jobIsHeld");
+    private static final String NBT_BUILD_ID = NBTDictionary.claim("jobBuildID");
+    private static final String NBT_BUILD_DIMENSION_ID = NBTDictionary.claim("jobDimID");
+    private static final String NBT_REQUEST_CHILDREN = NBTDictionary.claim("jobChildren");
+    
     public static final String SYSTEM_USER_NAME = "system";
     
     public static Job createSystemJob(RequestPriority priority, int systemJobID)
@@ -407,17 +415,17 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
         this.tasks.clear();
         
         this.deserializeID(tag);
-        this.priority = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_PRIORITY, RequestPriority.CRITICAL);
-        this.userName = tag.getString(ModNBTTag.REQUEST_USER_NAME);
-        this.status = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_STATUS, RequestStatus.NEW);
-        this.isHeld = tag.getBoolean(ModNBTTag.JOB_HELD_FLAG);
-        this.buildID = tag.getInteger(ModNBTTag.BUILD_ID);
-        this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
+        this.priority = Useful.safeEnumFromTag(tag, NBT_REQUEST_PRIORITY, RequestPriority.CRITICAL);
+        this.userName = tag.getString(NBT_REQUEST_USER_NAME);
+        this.status = Useful.safeEnumFromTag(tag, NBT_REQUEST_STATUS, RequestStatus.NEW);
+        this.isHeld = tag.getBoolean(NBT_JOB_HELD_FLAG);
+        this.buildID = tag.getInteger(NBT_BUILD_ID);
+        this.dimensionID = tag.getInteger(NBT_BUILD_DIMENSION_ID);
         
         Simulator.instance().assignedNumbersAuthority().register(this);
         
         int readyCount = 0;
-        NBTTagList nbtTasks = tag.getTagList(ModNBTTag.REQUEST_CHILDREN, 10);
+        NBTTagList nbtTasks = tag.getTagList(NBT_REQUEST_CHILDREN, 10);
         if( nbtTasks != null && !nbtTasks.hasNoTags())
         {
             for(NBTBase subTag : nbtTasks)
@@ -464,12 +472,12 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     public void serializeNBT(NBTTagCompound tag)
     {
         this.serializeID(tag);
-        Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_PRIORITY, this.priority);
-        tag.setString(ModNBTTag.REQUEST_USER_NAME, this.userName);
-        Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_STATUS, this.status);
-        tag.setBoolean(ModNBTTag.JOB_HELD_FLAG, this.isHeld);
-        tag.setInteger(ModNBTTag.BUILD_ID, this.buildID);
-        tag.setInteger(ModNBTTag.BUILD_DIMENSION_ID, this.dimensionID);
+        Useful.saveEnumToTag(tag, NBT_REQUEST_PRIORITY, this.priority);
+        tag.setString(NBT_REQUEST_USER_NAME, this.userName);
+        Useful.saveEnumToTag(tag, NBT_REQUEST_STATUS, this.status);
+        tag.setBoolean(NBT_JOB_HELD_FLAG, this.isHeld);
+        tag.setInteger(NBT_BUILD_ID, this.buildID);
+        tag.setInteger(NBT_BUILD_DIMENSION_ID, this.dimensionID);
         
         if(!this.tasks.isEmpty())
         {
@@ -479,7 +487,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
             {
                 nbtTasks.appendTag(TaskType.serializeTask(t));
             }
-            tag.setTag(ModNBTTag.REQUEST_CHILDREN, nbtTasks);
+            tag.setTag(NBT_REQUEST_CHILDREN, nbtTasks);
         }
     }
 

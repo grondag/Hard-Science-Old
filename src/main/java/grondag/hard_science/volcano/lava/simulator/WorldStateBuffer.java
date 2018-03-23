@@ -14,24 +14,22 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.HardScience;
 import grondag.exotic_matter.concurrency.PerformanceCollector;
 import grondag.exotic_matter.concurrency.PerformanceCounter;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.TerrainBlockHelper;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.superblock.terrain.TerrainStaticBlock;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -293,12 +291,14 @@ public class WorldStateBuffer implements IBlockAccess
         return this.realWorld.isSideSolid(pos, side, _default);
     }
     
+    private static final String NBT_WORLD_STATE_BUFFER = NBTDictionary.claim("worldStateBuff");
+    
     public void readFromNBT(NBTTagCompound nbt)
     {
         this.chunks.clear();
         this.usedBuffers.clear();
 
-        int[] saveData = nbt.getIntArray(ModNBTTag.WORLD_STATE_BUFFER);
+        int[] saveData = nbt.getIntArray(NBT_WORLD_STATE_BUFFER);
 
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
@@ -343,7 +343,7 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        nbt.setIntArray(ModNBTTag.WORLD_STATE_BUFFER, saveData);
+        nbt.setIntArray(NBT_WORLD_STATE_BUFFER, saveData);
 
     }
     

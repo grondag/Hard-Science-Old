@@ -3,10 +3,10 @@ package grondag.hard_science.machines.base;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
@@ -36,7 +36,8 @@ import net.minecraftforge.items.IItemHandler;
 
 public class MachineTileEntity extends SuperTileEntity
 {
-    
+    public static final String NBT_DEVICE_STATE = NBTDictionary.claim("devState");
+
     private AbstractMachine machine = null;
     
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
@@ -223,7 +224,6 @@ public class MachineTileEntity extends SuperTileEntity
                 : this.world.isRemote;
     }
     
-    
     /**
      * Writes the machine state for use in {@link #restoreMachineFromStack(ItemStack, Domain)}.
      * Stores it in server-side tag so that large states don't get sent to client.<p>
@@ -241,7 +241,7 @@ public class MachineTileEntity extends SuperTileEntity
             if(this.machine() != null)
             {
                 SuperTileEntity.getServerTag(compound)
-                    .setTag(ModNBTTag.MACHINE_STATE, this.machine().serializeNBT());
+                    .setTag(NBT_DEVICE_STATE, this.machine().serializeNBT());
             }
         }
     }

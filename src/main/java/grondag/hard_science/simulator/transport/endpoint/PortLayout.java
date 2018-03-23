@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.transport.endpoint;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.Transform;
 import grondag.exotic_matter.model.Transform.FaceMap;
-import grondag.hard_science.init.ModNBTTag;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModRegistries;
 import net.minecraft.nbt.NBTTagCompound;
@@ -34,6 +34,9 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  */
 public class PortLayout extends IForgeRegistryEntry.Impl<PortLayout> implements IPortLayout
 {
+    private static final String NBT_PORT_LAYOUT_NAME = NBTDictionary.claim("plName");
+    private static final String NBT_PORT_LAYOUT_FACEMAP = NBTDictionary.claim("plFaceMap");
+    
     /**
      * Cache localized instances. 
      */
@@ -81,18 +84,17 @@ public class PortLayout extends IForgeRegistryEntry.Impl<PortLayout> implements 
         return local;
     }
     
-
     public static IPortLayout fromNBT(NBTTagCompound nbt)
     {
-        if(nbt == null || !nbt.hasKey(ModNBTTag.PORT_LAYOUT_NAME))
+        if(nbt == null || !nbt.hasKey(NBT_PORT_LAYOUT_NAME))
             return ModPortLayouts.empty;
                 
         PortLayout result = ModRegistries.portLayoutRegistry.getValue(
-                new ResourceLocation(nbt.getString(ModNBTTag.PORT_LAYOUT_NAME)));
+                new ResourceLocation(nbt.getString(NBT_PORT_LAYOUT_NAME)));
         
-        if(nbt.hasKey(ModNBTTag.PORT_LAYOUT_FACEMAP))
+        if(nbt.hasKey(NBT_PORT_LAYOUT_FACEMAP))
         {
-            int index = nbt.getInteger(ModNBTTag.PORT_LAYOUT_FACEMAP);
+            int index = nbt.getInteger(NBT_PORT_LAYOUT_FACEMAP);
             return result.localize(index);
         }
         else return result;
@@ -101,10 +103,10 @@ public class PortLayout extends IForgeRegistryEntry.Impl<PortLayout> implements 
     public static NBTTagCompound toNBT(IPortLayout layout)
     {
         NBTTagCompound result = new NBTTagCompound();
-        result.setString(ModNBTTag.PORT_LAYOUT_NAME, layout.getRegistryName().toString());
+        result.setString(NBT_PORT_LAYOUT_NAME, layout.getRegistryName().toString());
         if(layout instanceof Localized)
         {
-            result.setInteger(ModNBTTag.PORT_LAYOUT_FACEMAP, ((Localized)layout).faceMap.index);
+            result.setInteger(NBT_PORT_LAYOUT_FACEMAP, ((Localized)layout).faceMap.index);
         }
         return result;
     }

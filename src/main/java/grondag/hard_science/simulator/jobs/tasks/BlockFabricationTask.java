@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.jobs.tasks;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.init.ModNBTTag;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.TaskType;
@@ -10,6 +10,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class BlockFabricationTask extends AbstractTask
 {
+    private static final String NBT_PROCUREMENT_TASK_ID = NBTDictionary.claim("procTaskID");
+
     private int procurementTaskID;
     
     /** 
@@ -45,14 +47,14 @@ public class BlockFabricationTask extends AbstractTask
     public void deserializeNBT(NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
-        this.procurementTaskID = tag.getInteger(ModNBTTag.PROCUREMENT_TASK_ID);
+        this.procurementTaskID = tag.getInteger(NBT_PROCUREMENT_TASK_ID);
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
         super.serializeNBT(tag);
-        tag.setInteger(ModNBTTag.PROCUREMENT_TASK_ID, this.procurementTaskID);
+        tag.setInteger(NBT_PROCUREMENT_TASK_ID, this.procurementTaskID);
     }
     
     public BlockProcurementTask procurementTask()

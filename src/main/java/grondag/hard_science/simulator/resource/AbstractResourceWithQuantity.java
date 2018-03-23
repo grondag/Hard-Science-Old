@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.resource;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.init.ModNBTTag;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.simulator.storage.IResourceContainer;
 import grondag.hard_science.simulator.storage.StorageWithResourceAndQuantity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,6 +10,9 @@ import net.minecraft.nbt.NBTTagCompound;
 public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> 
 implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
 {
+    protected static final String NBT_RESOURCE_QUANTITY = NBTDictionary.claim("resQty");
+    protected static final String NBT_RESOURCE_IDENTITY = NBTDictionary.claim("resID");
+    
     private IResource<V> resource;
     protected long quantity;
   
@@ -27,8 +30,8 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     
     public AbstractResourceWithQuantity(NBTTagCompound tag)
     {
-        this.quantity = tag.getLong(ModNBTTag.RESOURCE_QUANTITY);
-        this.resource = this.storageType().fromNBT(tag.getCompoundTag(ModNBTTag.RESOURCE_IDENTITY));
+        this.quantity = tag.getLong(NBT_RESOURCE_QUANTITY);
+        this.resource = this.storageType().fromNBT(tag.getCompoundTag(NBT_RESOURCE_IDENTITY));
     }
     
     public final ItemResourceDelegate toDelegate(int handle)
@@ -39,8 +42,8 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     public NBTTagCompound toNBT()
     {
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setTag(ModNBTTag.RESOURCE_IDENTITY, this.storageType().toNBT(this.resource));
-        tag.setLong(ModNBTTag.RESOURCE_QUANTITY, this.quantity);
+        tag.setTag(NBT_RESOURCE_IDENTITY, this.storageType().toNBT(this.resource));
+        tag.setLong(NBT_RESOURCE_QUANTITY, this.quantity);
         return tag;
     }
 

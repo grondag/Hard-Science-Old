@@ -6,8 +6,8 @@ import java.util.concurrent.Future;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.ISimulationTickable;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.demand.IProcurementRequest;
 import grondag.hard_science.simulator.device.ComponentRegistry;
 import grondag.hard_science.simulator.device.IDevice;
@@ -72,6 +72,10 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISimulationTickable
 {
+    private static final String NBT_MACHINE_GENERATOR = NBTDictionary.claim("generator");
+    private static final String NBT_ENERGY_OUTPUT_BUFFER = NBTDictionary.claim("energyOutput");
+    private static final String NBT_ENERGY_INPUT_BUFFER = NBTDictionary.claim("energyInput");
+    
     private final IDevice owner;
     private AbstractGenerator generator;
     
@@ -232,25 +236,25 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
     {
         this.isFailureCause = isFailureCause;
     }
-
+    
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.generator = tag.hasKey(ModNBTTag.MACHINE_GENERATOR) 
+        this.generator = tag.hasKey(NBT_MACHINE_GENERATOR) 
                 ? (AbstractGenerator)ComponentRegistry.fromNBT(
-                        this.device(), tag.getCompoundTag(ModNBTTag.MACHINE_GENERATOR))
+                        this.device(), tag.getCompoundTag(NBT_MACHINE_GENERATOR))
                 : null;
                         
-        if(this.outputContainer != null) this.outputContainer.deserializeNBT(tag.getCompoundTag(ModNBTTag.ENERGY_OUTPUT_BUFFER));
-        if(this.inputContainer != null) this.inputContainer.deserializeNBT(tag.getCompoundTag(ModNBTTag.ENERGY_INPUT_BUFFER));
+        if(this.outputContainer != null) this.outputContainer.deserializeNBT(tag.getCompoundTag(NBT_ENERGY_OUTPUT_BUFFER));
+        if(this.inputContainer != null) this.inputContainer.deserializeNBT(tag.getCompoundTag(NBT_ENERGY_INPUT_BUFFER));
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        if(this.generator != null) tag.setTag(ModNBTTag.MACHINE_GENERATOR, ComponentRegistry.toNBT(this.generator));
-        if(this.outputContainer != null) tag.setTag(ModNBTTag.ENERGY_OUTPUT_BUFFER, this.outputContainer.serializeNBT());
-        if(this.inputContainer != null) tag.setTag(ModNBTTag.ENERGY_INPUT_BUFFER, this.inputContainer.serializeNBT());
+        if(this.generator != null) tag.setTag(NBT_MACHINE_GENERATOR, ComponentRegistry.toNBT(this.generator));
+        if(this.outputContainer != null) tag.setTag(NBT_ENERGY_OUTPUT_BUFFER, this.outputContainer.serializeNBT());
+        if(this.inputContainer != null) tag.setTag(NBT_ENERGY_INPUT_BUFFER, this.inputContainer.serializeNBT());
     }
 
     @Override

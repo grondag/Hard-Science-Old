@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.IEnergyComponent;
 import grondag.hard_science.machines.support.ThroughputRegulator;
@@ -13,6 +13,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class PowerContainer extends ResourceContainer<StorageTypePower> implements IEnergyComponent
 {
+    private static final String NBT_MACHINE_BATTERY_CHEMISTRY = NBTDictionary.claim("devBattChem");
+    
     private BatteryChemistry chemistry;
     
     public PowerContainer(IDevice owner, ContainerUsage usage)
@@ -46,7 +48,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     {
         //NB: super saves capacity, contents
         super.serializeNBT(tag);
-        tag.setInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY, this.chemistry.ordinal());
+        tag.setInteger(NBT_MACHINE_BATTERY_CHEMISTRY, this.chemistry.ordinal());
     }
     
     @Override
@@ -54,7 +56,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     {
         //NB: super saves capacity, contents
         super.deserializeNBT(tag);
-        this.chemistry = Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.SILICON);
+        this.chemistry = Useful.safeEnumFromOrdinal(tag.getInteger(NBT_MACHINE_BATTERY_CHEMISTRY), BatteryChemistry.SILICON);
         this.configureRegulator();
     }
 

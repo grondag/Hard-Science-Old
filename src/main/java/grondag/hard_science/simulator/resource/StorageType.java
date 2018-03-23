@@ -5,10 +5,10 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBulkResources;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.storage.FluidStorageEvent;
@@ -39,6 +39,9 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
  */
 public abstract class StorageType<T extends StorageType<T>>
 {
+    private static final String NBT_RESOURCE_IDENTITY = NBTDictionary.claim("resID");
+    private static final String NBT_RESOURCE_TYPE = NBTDictionary.claim("resType");
+
     public static StorageType<?> fromEnum(EnumStorageType e)
     {
         switch(e)
@@ -137,7 +140,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static <V extends StorageType<V>> NBTTagCompound toNBTWithType(IResource<V> resource)
     {
         NBTTagCompound result = resource.storageType().toNBT(resource);
-        Useful.saveEnumToTag(result, ModNBTTag.RESOURCE_TYPE, resource.storageType().enumType);
+        Useful.saveEnumToTag(result, NBT_RESOURCE_TYPE, resource.storageType().enumType);
         return result;
     }
     
@@ -145,7 +148,7 @@ public abstract class StorageType<T extends StorageType<T>>
     public static <V extends StorageType<V>> IResource<V> fromNBTWithType(NBTTagCompound tag)
     {
         StorageType<?> sType = StorageType
-                .fromEnum(Useful.safeEnumFromTag(tag, ModNBTTag.RESOURCE_TYPE, EnumStorageType.ITEM));
+                .fromEnum(Useful.safeEnumFromTag(tag, NBT_RESOURCE_TYPE, EnumStorageType.ITEM));
         return (IResource<V>) sType.fromNBT(tag);
     }
      
@@ -519,9 +522,9 @@ public abstract class StorageType<T extends StorageType<T>>
         @Override
         public IResource<StorageTypeBulk> fromNBT(NBTTagCompound nbt)
         {
-            return nbt != null && nbt.hasKey(ModNBTTag.RESOURCE_IDENTITY)
-//                ? ModRegistries.bulkResourceRegistry.getValue(new ResourceLocation(nbt.getString(ModNBTTag.RESOURCE_IDENTITY)))
-                    ? ModBulkResources.get(nbt.getString(ModNBTTag.RESOURCE_IDENTITY))
+            return nbt != null && nbt.hasKey(NBT_RESOURCE_IDENTITY)
+//                ? ModRegistries.bulkResourceRegistry.getValue(new ResourceLocation(nbt.getString(NBT_RESOURCE_IDENTITY)))
+                    ? ModBulkResources.get(nbt.getString(NBT_RESOURCE_IDENTITY))
                     : this.emptyResource;
         }
 
@@ -529,7 +532,7 @@ public abstract class StorageType<T extends StorageType<T>>
         public NBTTagCompound toNBT(IResource<StorageTypeBulk> resource)
         {
             NBTTagCompound result = new NBTTagCompound();
-            result.setString(ModNBTTag.RESOURCE_IDENTITY, ((BulkResource)resource).systemName());
+            result.setString(NBT_RESOURCE_IDENTITY, ((BulkResource)resource).systemName());
             return result;
         }
 

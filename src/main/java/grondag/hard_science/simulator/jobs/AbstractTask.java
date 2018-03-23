@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.jobs;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
@@ -10,12 +11,14 @@ import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.DomainManager;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomainMember, ITask
 {
+    private static final String NBT_REQUEST_STATUS = NBTDictionary.claim("reqStatus");
+    private static final String NBT_REQUEST_DEPENDENCIES = NBTDictionary.claim("reqDep");
+    
     protected Job job = NullJob.INSTANCE;
     private int id = IIdentified.UNASSIGNED_ID;
     protected RequestStatus status = RequestStatus.NEW;
@@ -394,13 +397,13 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
             }
         }
     }
-
+    
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
-        this.status = Useful.safeEnumFromTag(tag, ModNBTTag.REQUEST_STATUS, RequestStatus.NEW);
-        this.dependencyData = tag.getIntArray(ModNBTTag.REQUEST_DEPENDENCIES);
+        this.status = Useful.safeEnumFromTag(tag, NBT_REQUEST_STATUS, RequestStatus.NEW);
+        this.dependencyData = tag.getIntArray(NBT_REQUEST_DEPENDENCIES);
         
         // discard depData if empty or not an even number (latter implies corrupt data)
         if(this.dependencyData.length == 0 || (this.dependencyData.length & 0x1) == 0x1) this.dependencyData = null;
@@ -410,7 +413,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     public synchronized void serializeNBT(NBTTagCompound tag)
     {
         this.serializeID(tag);
-        Useful.saveEnumToTag(tag, ModNBTTag.REQUEST_STATUS, this.status);
+        Useful.saveEnumToTag(tag, NBT_REQUEST_STATUS, this.status);
         
         SimpleUnorderedArrayList<ITask> antecedents = this.antecedents();
         SimpleUnorderedArrayList<ITask> consequents = this.consequents();
@@ -439,7 +442,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
                 }
             }
             
-            tag.setIntArray(ModNBTTag.REQUEST_DEPENDENCIES, depData);
+            tag.setIntArray(NBT_REQUEST_DEPENDENCIES, depData);
         }
     }
     

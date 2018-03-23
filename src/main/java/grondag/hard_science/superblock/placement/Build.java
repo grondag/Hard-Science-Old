@@ -4,13 +4,13 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.domain.DomainManager;
 import grondag.hard_science.simulator.jobs.IWorldTask;
 import grondag.hard_science.simulator.jobs.Job;
@@ -32,6 +32,10 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class Build implements IReadWriteNBT, IDomainMember, IIdentified
 {
+    private static final String NBT_BUILD_JOB_ID = NBTDictionary.claim("buildJobID");
+    private static final String NBT_BUILD_DIMENSION_ID = NBTDictionary.claim("buildDimID");
+    private static final String NBT_BUILD_POSITIONS = NBTDictionary.claim("buildPos");
+    
     private final BuildManager buildManager;
 
     private int id = IIdentified.UNASSIGNED_ID;
@@ -267,17 +271,17 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     {
         return this.buildManager.getDomain();
     }
-
+    
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
         Simulator.instance().assignedNumbersAuthority().register(this);
-        this.jobID = tag.getInteger(ModNBTTag.BUILD_JOB_ID);
-        this.dimensionID = tag.getInteger(ModNBTTag.BUILD_DIMENSION_ID);
-        if(tag.hasKey(ModNBTTag.BUILD_POSITIONS))
+        this.jobID = tag.getInteger(NBT_BUILD_JOB_ID);
+        this.dimensionID = tag.getInteger(NBT_BUILD_DIMENSION_ID);
+        if(tag.hasKey(NBT_BUILD_POSITIONS))
         {
-            int[] posData = tag.getIntArray(ModNBTTag.BUILD_POSITIONS);
+            int[] posData = tag.getIntArray(NBT_BUILD_POSITIONS);
             if(posData != null && posData.length > 0 && (posData.length & 1) == 0)
             {
                 int i = 0;
@@ -293,8 +297,8 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     public void serializeNBT(NBTTagCompound tag)
     {
         this.serializeID(tag);
-        tag.setInteger(ModNBTTag.BUILD_JOB_ID, this.jobID);
-        tag.setInteger(ModNBTTag.BUILD_DIMENSION_ID,  this.dimensionID);
+        tag.setInteger(NBT_BUILD_JOB_ID, this.jobID);
+        tag.setInteger(NBT_BUILD_DIMENSION_ID,  this.dimensionID);
         synchronized(this.positions)
         {
             if(!this.positions.isEmpty())
@@ -306,7 +310,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
                     posData[i++] = (int)(pos >> 32);
                     posData[i++] = (int)pos;
                 }
-                tag.setIntArray(ModNBTTag.BUILD_POSITIONS, posData);
+                tag.setIntArray(NBT_BUILD_POSITIONS, posData);
             }
         }
     }

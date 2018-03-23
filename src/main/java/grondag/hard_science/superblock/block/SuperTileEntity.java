@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelState;
-import grondag.hard_science.init.ModNBTTag;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTBase;
@@ -29,7 +29,7 @@ public class SuperTileEntity extends TileEntity
     /**
      * Anything stored in this tag will not be sent to clients.
      */
-    public static final String NBT_SERVER_SIDE_TAG = ModNBTTag.SERVER_SIDE_ONLY;
+    public static final String NBT_SERVER_SIDE_TAG = NBTDictionary.claim("serverOnly");
     
     /** Returns server-side tag if one is present, creating it if not. */
     public static @Nonnull NBTTagCompound getServerTag(@Nonnull NBTTagCompound fromTag)

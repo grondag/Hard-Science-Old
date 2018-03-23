@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.init.ModNBTTag;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
@@ -83,12 +83,14 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
         return this.storageType;
     }
 
-
+    private static final String NBT_STORAGE_CAPACITY = NBTDictionary.claim("storeSize");
+    private static final String NBT_STORAGE_CONTENTS = NBTDictionary.claim("storeContent");
+    private static final String NBT_PRIVATE_BUFFER = NBTDictionary.claim("storBuff");
 
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
-        nbt.setLong(ModNBTTag.STORAGE_CAPACITY, this.capacity);
+        nbt.setLong(NBT_STORAGE_CAPACITY, this.capacity);
         if(!this.slots.isEmpty())
         {
             NBTTagList nbtContents = new NBTTagList();
@@ -97,24 +99,24 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
             {
                 nbtContents.appendTag(rwq.toNBT());
             }
-            nbt.setTag(ModNBTTag.STORAGE_CONTENTS, nbtContents);
+            nbt.setTag(NBT_STORAGE_CONTENTS, nbtContents);
         }
         
         // serialize sub-buffer for output buffers
         if(this.localSlots != null && !this.localSlots.isEmpty())
         {
-            nbt.setTag(ModNBTTag.PRIVATE_BUFFER, this.localSlots.serializeNBT());
+            nbt.setTag(NBT_PRIVATE_BUFFER, this.localSlots.serializeNBT());
         }
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
-        this.capacity = nbt.getLong(ModNBTTag.STORAGE_CAPACITY);
+        this.capacity = nbt.getLong(NBT_STORAGE_CAPACITY);
         this.slots.clear();
         this.used = 0;
 
-        NBTTagList nbtContents = nbt.getTagList(ModNBTTag.STORAGE_CONTENTS, 10);
+        NBTTagList nbtContents = nbt.getTagList(NBT_STORAGE_CONTENTS, 10);
         if( nbtContents != null && !nbtContents.hasNoTags())
         {
             for (int i = 0; i < nbtContents.tagCount(); ++i)
@@ -129,9 +131,9 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
         }
         
         // load sub-buffer for output buffers
-        if(localSlots != null && nbt.hasKey(ModNBTTag.PRIVATE_BUFFER))
+        if(localSlots != null && nbt.hasKey(NBT_PRIVATE_BUFFER))
         {
-            this.localSlots.deserializeNBT(nbt.getCompoundTag(ModNBTTag.PRIVATE_BUFFER));
+            this.localSlots.deserializeNBT(nbt.getCompoundTag(NBT_PRIVATE_BUFFER));
             // if we crashed or ended before local buffer 
             // got moved to public buffer, move the contents
             // now.  If there isn't enough space, they will simply

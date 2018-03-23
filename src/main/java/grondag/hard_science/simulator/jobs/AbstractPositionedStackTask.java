@@ -2,7 +2,7 @@ package grondag.hard_science.simulator.jobs;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.init.ModNBTTag;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
  */
 public abstract class AbstractPositionedStackTask extends AbstractPositionedTask
 {
+    private static final String NBT_TASK_STACK = NBTDictionary.claim("taskStack");
 
     private ItemStack stack;
     
@@ -45,13 +46,13 @@ public abstract class AbstractPositionedStackTask extends AbstractPositionedTask
     public void deserializeNBT(NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
-        this.stack = new ItemStack(tag.getCompoundTag(ModNBTTag.TASK_STACK));
+        this.stack = new ItemStack(tag.getCompoundTag(NBT_TASK_STACK));
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
         super.serializeNBT(tag);
-        tag.setTag(ModNBTTag.TASK_STACK, stack.serializeNBT());
+        tag.setTag(NBT_TASK_STACK, stack.serializeNBT());
     }
 }

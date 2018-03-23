@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.DomainUser;
 import grondag.exotic_matter.simulator.domain.IDomain;
@@ -17,7 +18,6 @@ import grondag.exotic_matter.simulator.persistence.AssignedNumbersAuthority.Iden
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.superblock.placement.Build;
@@ -28,6 +28,11 @@ import net.minecraft.nbt.NBTTagList;
 
 public class DomainManager implements ISimulationTopNode
 {  
+    private static final String NBT_DOMAIN_MANAGER = NBTDictionary.claim("domMgr");
+    private static final String NBT_DOMAIN_MANAGER_DOMAINS = NBTDictionary.claim("domMgrAll");
+    private static final String NBT_DOMAIN_PLAYER_DOMAINS = NBTDictionary.claim("domMgrPlayer");
+    private static final String NBT_DOMAIN_ACTIVE_DOMAINS = NBTDictionary.claim("domMgrActive");
+    
     /**
      * A bit ugly but convenient.  Set to null when any 
      * instance is created, retrieved lazily from Simulator.
@@ -162,7 +167,7 @@ public class DomainManager implements ISimulationTopNode
     {
         this.isDirty = isDirty;
     }
-
+    
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
@@ -175,7 +180,7 @@ public class DomainManager implements ISimulationTopNode
         
         if(tag == null) return;
         
-        NBTTagList nbtDomains = tag.getTagList(ModNBTTag.DOMAIN_MANAGER_DOMAINS, 10);
+        NBTTagList nbtDomains = tag.getTagList(NBT_DOMAIN_MANAGER_DOMAINS, 10);
         if( nbtDomains != null && !nbtDomains.hasNoTags())
         {
             for (int i = 0; i < nbtDomains.tagCount(); ++i)
@@ -185,7 +190,7 @@ public class DomainManager implements ISimulationTopNode
             }   
         }
         
-        NBTTagCompound nbtPlayerDomains = tag.getCompoundTag(ModNBTTag.DOMAIN_PLAYER_DOMAINS);
+        NBTTagCompound nbtPlayerDomains = tag.getCompoundTag(NBT_DOMAIN_PLAYER_DOMAINS);
         if(nbtPlayerDomains != null && !nbtPlayerDomains.hasNoTags())
         {
             for(String playerName : nbtPlayerDomains.getKeySet())
@@ -195,7 +200,7 @@ public class DomainManager implements ISimulationTopNode
             }
         }
         
-        NBTTagCompound nbtActiveDomains = tag.getCompoundTag(ModNBTTag.DOMAIN_ACTIVE_DOMAINS);
+        NBTTagCompound nbtActiveDomains = tag.getCompoundTag(NBT_DOMAIN_ACTIVE_DOMAINS);
         if(nbtActiveDomains != null && !nbtActiveDomains.hasNoTags())
         {
             for(String playerName : nbtActiveDomains.getKeySet())
@@ -222,7 +227,7 @@ public class DomainManager implements ISimulationTopNode
                 nbtDomains.appendTag(((Domain)domain).serializeNBT());
             }
         }
-        tag.setTag(ModNBTTag.DOMAIN_MANAGER_DOMAINS, nbtDomains);
+        tag.setTag(NBT_DOMAIN_MANAGER_DOMAINS, nbtDomains);
         
         if(!this.playerIntrinsicDomains.isEmpty())
         {
@@ -231,7 +236,7 @@ public class DomainManager implements ISimulationTopNode
             {
                 nbtPlayerDomains.setInteger(entry.getKey(), entry.getValue().getId());
             }
-            tag.setTag(ModNBTTag.DOMAIN_PLAYER_DOMAINS, nbtPlayerDomains);
+            tag.setTag(NBT_DOMAIN_PLAYER_DOMAINS, nbtPlayerDomains);
         }
         
         if(!this.playerActiveDomains.isEmpty())
@@ -241,14 +246,14 @@ public class DomainManager implements ISimulationTopNode
             {
                 nbtActiveDomains.setInteger(entry.getKey(), entry.getValue().getId());
             }
-            tag.setTag(ModNBTTag.DOMAIN_ACTIVE_DOMAINS, nbtActiveDomains);
+            tag.setTag(NBT_DOMAIN_ACTIVE_DOMAINS, nbtActiveDomains);
         }
     }
 
     @Override
     public String tagName()
     {
-        return ModNBTTag.DOMAIN_MANAGER;
+        return NBT_DOMAIN_MANAGER;
     }
 
     private boolean checkLoaded()

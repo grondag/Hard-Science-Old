@@ -1,11 +1,11 @@
 package grondag.hard_science.machines.drones;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.world.Location;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.simulator.device.IDevice;
@@ -16,6 +16,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class Drone implements IDevice, IReadWriteNBT
 {
+    private static final String NBT_DOMAIN_ID = NBTDictionary.claim("droneDomID");
+
     private int id = IIdentified.UNASSIGNED_ID;
     
     private Location location;
@@ -67,13 +69,12 @@ public class Drone implements IDevice, IReadWriteNBT
         this.setDirty();
     }
 
-
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         this.deserializeID(tag);
         this.deserializeLocation(tag);
-        this.domainID = tag.getInteger(ModNBTTag.DOMAIN_ID);
+        this.domainID = tag.getInteger(NBT_DOMAIN_ID);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class Drone implements IDevice, IReadWriteNBT
     {
         this.serializeID(tag);
         this.serializeLocation(tag);
-        tag.setInteger(ModNBTTag.DOMAIN_ID, this.domainID);
+        tag.setInteger(NBT_DOMAIN_ID, this.domainID);
     }
 
     @Override

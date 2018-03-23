@@ -6,12 +6,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.volcano.lava.LavaTerrainHelper;
 import grondag.hard_science.volcano.lava.simulator.LavaCell;
@@ -487,33 +487,42 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
             this.world.markChunkDirty(this.pos, this);
         }
     }
+    
+    private static final String NBT_VOLCANO_STAGE = NBTDictionary.claim("vteStage");
+    private static final String NBT_VOLCANO_LEVEL = NBTDictionary.claim("vteLevel");
+    private static final String NBT_VOLCANO_BUILD_LEVEL = NBTDictionary.claim("vteBuildLev");
+    private static final String NBT_VOLCANO_GROUND_LEVEL = NBTDictionary.claim("vteGroundLev");
+    private static final String NBT_VOLCANO_TICKS_ACTIVE = NBTDictionary.claim("vteActiveTicks");
+    private static final String NBT_VOLCANO_CLEARING_LEVEL = NBTDictionary.claim("vteClearLev");
+    private static final String NBT_VOLCANO_LAVA_COUNTER = NBTDictionary.claim("vteLavaCount");
+    private static final String NBT_VOLCANO_COOLDOWN_TICKS = NBTDictionary.claim("vteCooldownTicks");
 
     @Override
     public void readFromNBT(@Nonnull NBTTagCompound tagCompound) 
     {
         super.readFromNBT(tagCompound);
 
-        this.stage = VolcanoStage.values()[tagCompound.getInteger(ModNBTTag.VOLCANO_STAGE)];
-        this.level = tagCompound.getInteger(ModNBTTag.VOLCANO_LEVEL);
-        this.buildLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_BUILD_LEVEL);
-        this.groundLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_GROUND_LEVEL);
-        this.ticksActive = tagCompound.getInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE);
-        this.clearingLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL);
-        this.lavaCounter = tagCompound.getInteger(ModNBTTag.VOLCANO_LAVA_COUNTER);
-        this.lavaCooldownTicks = tagCompound.getInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS);
+        this.stage = VolcanoStage.values()[tagCompound.getInteger(NBT_VOLCANO_STAGE)];
+        this.level = tagCompound.getInteger(NBT_VOLCANO_LEVEL);
+        this.buildLevel = tagCompound.getInteger(NBT_VOLCANO_BUILD_LEVEL);
+        this.groundLevel = tagCompound.getInteger(NBT_VOLCANO_GROUND_LEVEL);
+        this.ticksActive = tagCompound.getInteger(NBT_VOLCANO_TICKS_ACTIVE);
+        this.clearingLevel = tagCompound.getInteger(NBT_VOLCANO_CLEARING_LEVEL);
+        this.lavaCounter = tagCompound.getInteger(NBT_VOLCANO_LAVA_COUNTER);
+        this.lavaCooldownTicks = tagCompound.getInteger(NBT_VOLCANO_COOLDOWN_TICKS);
     }
 
     @Override
     public NBTTagCompound writeToNBT(@Nonnull NBTTagCompound tagCompound) 
     {        
-        tagCompound.setInteger(ModNBTTag.VOLCANO_STAGE, this.stage.ordinal());
-        tagCompound.setInteger(ModNBTTag.VOLCANO_LEVEL, this.level);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_BUILD_LEVEL, this.buildLevel);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_GROUND_LEVEL, this.groundLevel);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE, this.ticksActive);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL, this.clearingLevel);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_LAVA_COUNTER, this.lavaCounter);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS, lavaCooldownTicks);
+        tagCompound.setInteger(NBT_VOLCANO_STAGE, this.stage.ordinal());
+        tagCompound.setInteger(NBT_VOLCANO_LEVEL, this.level);
+        tagCompound.setInteger(NBT_VOLCANO_BUILD_LEVEL, this.buildLevel);
+        tagCompound.setInteger(NBT_VOLCANO_GROUND_LEVEL, this.groundLevel);
+        tagCompound.setInteger(NBT_VOLCANO_TICKS_ACTIVE, this.ticksActive);
+        tagCompound.setInteger(NBT_VOLCANO_CLEARING_LEVEL, this.clearingLevel);
+        tagCompound.setInteger(NBT_VOLCANO_LAVA_COUNTER, this.lavaCounter);
+        tagCompound.setInteger(NBT_VOLCANO_COOLDOWN_TICKS, lavaCooldownTicks);
         return super.writeToNBT(tagCompound);
     }
 

@@ -2,7 +2,6 @@ package grondag.hard_science.simulator.resource;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -20,14 +19,14 @@ public class PowerResourceWithQuantity extends AbstractResourceWithQuantity<Stor
     
     public PowerResourceWithQuantity(NBTTagCompound tag)
     {
-        super(PowerResource.JOULES, tag.getLong(ModNBTTag.RESOURCE_QUANTITY));
+        super(PowerResource.JOULES, tag.getLong(NBT_RESOURCE_QUANTITY));
     }
     
     @Override
     public NBTTagCompound toNBT()
     {
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setLong(ModNBTTag.RESOURCE_QUANTITY, this.quantity);
+        tag.setLong(NBT_RESOURCE_QUANTITY, this.quantity);
         return tag;
     }
     

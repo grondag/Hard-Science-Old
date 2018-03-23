@@ -1,9 +1,9 @@
 package grondag.hard_science.machines.energy;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.TimeUnits;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.init.ModBulkResources;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.matter.CubeSize;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
@@ -13,6 +13,10 @@ import net.minecraft.util.math.MathHelper;
 
 public class PolyethyleneFuelCell extends AbstractGenerator
 {
+    private static final String NBT_MACHINE_FUEL_CELL_PLATE_SIZE = NBTDictionary.claim("fcPlateSize");
+    private static final String NBT_MACHINE_FUEL_CELL_PLATE_COUNT = NBTDictionary.claim("fcPlateCount");
+    private static final String NBT_MACHINE_FUEL_CELL_HAS_THERMAL_CAPTURE = NBTDictionary.claim("fcHasThermal");
+    
     public static PolyethyleneFuelCell basic_1kw(IDevice owner)
     {
         return new PolyethyleneFuelCell(owner, CubeSize.FIVE, 1, false);
@@ -104,22 +108,22 @@ public class PolyethyleneFuelCell extends AbstractGenerator
         }
         return energy;
     }   
-
+    
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        tag.setInteger(ModNBTTag.MACHINE_FUEL_CELL_PLATE_SIZE, this.plateSize.ordinal());
-        tag.setInteger(ModNBTTag.MACHINE_FUEL_CELL_PLATE_COUNT, this.plateQuantity);
-        tag.setBoolean(ModNBTTag.MACHINE_FUEL_CELL_HAS_THERMAL_CAPTURE, this.cellType == PolyethyleneFuelCellType.ADVANCED);
+        tag.setInteger(NBT_MACHINE_FUEL_CELL_PLATE_SIZE, this.plateSize.ordinal());
+        tag.setInteger(NBT_MACHINE_FUEL_CELL_PLATE_COUNT, this.plateQuantity);
+        tag.setBoolean(NBT_MACHINE_FUEL_CELL_HAS_THERMAL_CAPTURE, this.cellType == PolyethyleneFuelCellType.ADVANCED);
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
         setup(
-                Useful.safeEnumFromOrdinal(tag.getInteger(ModNBTTag.MACHINE_FUEL_CELL_PLATE_SIZE), CubeSize.THREE),
-                Math.max(1, tag.getInteger(ModNBTTag.MACHINE_FUEL_CELL_PLATE_COUNT)),
-                tag.getBoolean(ModNBTTag.MACHINE_FUEL_CELL_HAS_THERMAL_CAPTURE)
+                Useful.safeEnumFromOrdinal(tag.getInteger(NBT_MACHINE_FUEL_CELL_PLATE_SIZE), CubeSize.THREE),
+                Math.max(1, tag.getInteger(NBT_MACHINE_FUEL_CELL_PLATE_COUNT)),
+                tag.getBoolean(NBT_MACHINE_FUEL_CELL_HAS_THERMAL_CAPTURE)
         );        
     }
     

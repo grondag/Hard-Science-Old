@@ -7,7 +7,6 @@ import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.simulator.device.DeviceManager;
@@ -83,9 +82,9 @@ public interface IMachineBlock
         if(stack.hasTagCompound())
         {
             NBTTagCompound serverTag = SuperTileEntity.getServerTag(stack.getTagCompound());
-            if(serverTag.hasKey(ModNBTTag.MACHINE_STATE))
+            if(serverTag.hasKey(MachineTileEntity.NBT_DEVICE_STATE))
             {
-                machine.deserializeNBT(serverTag.getCompoundTag(ModNBTTag.MACHINE_STATE));
+                machine.deserializeNBT(serverTag.getCompoundTag(MachineTileEntity.NBT_DEVICE_STATE));
             }
         }
         

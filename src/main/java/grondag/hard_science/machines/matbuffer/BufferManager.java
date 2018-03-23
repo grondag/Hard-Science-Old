@@ -3,8 +3,8 @@ package grondag.hard_science.machines.matbuffer;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.ISimulationTickable;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
@@ -20,6 +20,11 @@ import net.minecraftforge.items.IItemHandler;
 
 public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceComponent, ISimulationTickable
 {
+    private static final String NBT_BUFFER_ITEMS_IN = NBTDictionary.claim("buffItemsIn");
+    private static final String NBT_BUFFER_ITEMS_OUT = NBTDictionary.claim("buffItemsOut");
+    private static final String NBT_BUFFER_FLUIDS_IN = NBTDictionary.claim("buffFluidsIn");
+    private static final String NBT_BUFFER_FLUIDS_OUT = NBTDictionary.claim("buffFluidsOut");
+    
     private final IDevice owner;
     private final ItemContainer itemInput;
     private final ItemContainer itemOutput;
@@ -108,30 +113,30 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        if(this.itemInput != null && tag.hasKey(ModNBTTag.BUFFER_ITEMS_IN))
-            this.itemInput.deserializeNBT(tag.getCompoundTag(ModNBTTag.BUFFER_ITEMS_IN));
+        if(this.itemInput != null && tag.hasKey(NBT_BUFFER_ITEMS_IN))
+            this.itemInput.deserializeNBT(tag.getCompoundTag(NBT_BUFFER_ITEMS_IN));
 
-        if(this.itemOutput != null && tag.hasKey(ModNBTTag.BUFFER_ITEMS_OUT))
-            this.itemOutput.deserializeNBT(tag.getCompoundTag(ModNBTTag.BUFFER_ITEMS_OUT));
+        if(this.itemOutput != null && tag.hasKey(NBT_BUFFER_ITEMS_OUT))
+            this.itemOutput.deserializeNBT(tag.getCompoundTag(NBT_BUFFER_ITEMS_OUT));
 
-        if(this.fluidInput != null && tag.hasKey(ModNBTTag.BUFFER_FLUIDS_IN))
-            this.fluidInput.deserializeNBT(tag.getCompoundTag(ModNBTTag.BUFFER_FLUIDS_IN));
+        if(this.fluidInput != null && tag.hasKey(NBT_BUFFER_FLUIDS_IN))
+            this.fluidInput.deserializeNBT(tag.getCompoundTag(NBT_BUFFER_FLUIDS_IN));
 
-        if(this.fluidOutput != null && tag.hasKey(ModNBTTag.BUFFER_FLUIDS_OUT))
-            this.fluidOutput.deserializeNBT(tag.getCompoundTag(ModNBTTag.BUFFER_FLUIDS_OUT));
+        if(this.fluidOutput != null && tag.hasKey(NBT_BUFFER_FLUIDS_OUT))
+            this.fluidOutput.deserializeNBT(tag.getCompoundTag(NBT_BUFFER_FLUIDS_OUT));
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
         if(this.itemInput != null)
-            tag.setTag(ModNBTTag.BUFFER_ITEMS_IN, this.itemInput.serializeNBT());
+            tag.setTag(NBT_BUFFER_ITEMS_IN, this.itemInput.serializeNBT());
         if(this.itemOutput != null)
-            tag.setTag(ModNBTTag.BUFFER_ITEMS_OUT, this.itemOutput.serializeNBT());
+            tag.setTag(NBT_BUFFER_ITEMS_OUT, this.itemOutput.serializeNBT());
         if(this.fluidInput != null)
-            tag.setTag(ModNBTTag.BUFFER_FLUIDS_IN, this.fluidInput.serializeNBT());
+            tag.setTag(NBT_BUFFER_FLUIDS_IN, this.fluidInput.serializeNBT());
         if(this.fluidOutput != null)
-            tag.setTag(ModNBTTag.BUFFER_FLUIDS_OUT, this.fluidOutput.serializeNBT());
+            tag.setTag(NBT_BUFFER_FLUIDS_OUT, this.fluidOutput.serializeNBT());
     }
 
     @Override

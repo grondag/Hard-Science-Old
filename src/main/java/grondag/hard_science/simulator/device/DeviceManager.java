@@ -7,12 +7,12 @@ import grondag.exotic_matter.concurrency.CountedJobTask;
 import grondag.exotic_matter.concurrency.Job;
 import grondag.exotic_matter.concurrency.PerformanceCollector;
 import grondag.exotic_matter.concurrency.SimpleCountedJobBacker;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.simulator.device.blocks.DeviceWorldManager;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlock;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -28,6 +28,10 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     ///////////////////////////////////////////////////////////
     //  STATIC MEMBERS
     ///////////////////////////////////////////////////////////
+    
+    private static final String NBT_DEVICE_MANAGER_DEVICES = NBTDictionary.claim("dmDevices");
+    private static final String NBT_DEVICE_MANAGER_SELF = NBTDictionary.claim("devMgr");
+    private static final String NBT_DEVICE_MANAGER_DEVICE_TYPE = NBTDictionary.claim("dmDevType");
     
     /**
      * A bit ugly but covenient.  Set to null when any 
@@ -64,7 +68,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     public static IDevice create(NBTTagCompound compound)
     {
         IDevice device = null;
-        String s = compound.getString(ModNBTTag.DEVICE_TYPE);
+        String s = compound.getString(NBT_DEVICE_MANAGER_DEVICE_TYPE);
         Class <? extends IDevice > oclass = null;
 
         try
@@ -292,7 +296,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     {
         if(tag == null) return;
         
-        NBTTagList nbtDevices = tag.getTagList(ModNBTTag.DEVICE_MANAGER_DEVICES, 10);
+        NBTTagList nbtDevices = tag.getTagList(NBT_DEVICE_MANAGER_DEVICES, 10);
         if( nbtDevices != null && !nbtDevices.hasNoTags())
         {
             for (int i = 0; i < nbtDevices.tagCount(); ++i)
@@ -325,19 +329,19 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
                     else
                     {
                         NBTTagCompound deviceTag = device.serializeNBT();
-                        deviceTag.setString(ModNBTTag.DEVICE_TYPE, resourcelocation.toString());
+                        deviceTag.setString(NBT_DEVICE_MANAGER_DEVICE_TYPE, resourcelocation.toString());
                         nbtDevices.appendTag(deviceTag);
                     }
                 }
             }
         }
-        tag.setTag(ModNBTTag.DEVICE_MANAGER_DEVICES, nbtDevices);        
+        tag.setTag(NBT_DEVICE_MANAGER_DEVICES, nbtDevices);        
     }
 
     @Override
     public String tagName()
     {
-        return ModNBTTag.DEVICE_MANAGER;
+        return NBT_DEVICE_MANAGER_SELF;
     }
 
     @Override

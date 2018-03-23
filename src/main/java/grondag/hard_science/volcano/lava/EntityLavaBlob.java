@@ -6,10 +6,10 @@ import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainState;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
@@ -37,6 +37,8 @@ import net.minecraft.world.World;
 
 public class EntityLavaBlob extends Entity
 {
+    private static final String NBT_LAVA_PARTICLE_AMOUNT = NBTDictionary.claim("lavaPartAmt");
+    
     private static int nextParticleID;
 
     public final int id;
@@ -483,7 +485,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void readEntityFromNBT(@Nonnull NBTTagCompound compound)
     {
-        this.cachedAmount = compound.getInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT);
+        this.cachedAmount = compound.getInteger(NBT_LAVA_PARTICLE_AMOUNT);
         this.dataManager.set(FLUID_AMOUNT, cachedAmount);
         this.updateAmountDependentData();
     }
@@ -491,7 +493,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void writeEntityToNBT(@Nonnull NBTTagCompound compound)
     {
-        compound.setInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
+        compound.setInteger(NBT_LAVA_PARTICLE_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
     }
 
     @Override

@@ -6,13 +6,13 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.hard_science.external.jei.HardScienceJEIPlugIn;
 import grondag.hard_science.external.jei.IRecipeFormat;
 import grondag.hard_science.external.jei.RecipeFormat;
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -34,6 +34,14 @@ import net.minecraft.network.PacketBuffer;
 
 public class GenericRecipe implements IHardScienceRecipe
 {
+    private static final String NBT_RECIPE_INPUT_JOULES = NBTDictionary.claim("rcpInJ");
+    private static final String NBT_RECIPE_OUTPUT_JOULES = NBTDictionary.claim("rcpOutJ");
+    private static final String NBT_RECIPE_TICKS_DURATION = NBTDictionary.claim("rcpTicks");
+    private static final String NBT_RECIPE_FLUID_INPUTS = NBTDictionary.claim("rcpInFluid");
+    private static final String NBT_RECIPE_ITEM_INPUTS = NBTDictionary.claim("rcpInItem");
+    private static final String NBT_RECIPE_FLUID_OUTPUTS = NBTDictionary.claim("rcpOutFluid");
+    private static final String NBT_RECIPE_ITEM_OUTPUTS = NBTDictionary.claim("rcpOutItem");
+    
     public static final GenericRecipe EMPTY_RECIPE = new GenericRecipe(
             ImmutableList.of(), 
             ImmutableList.of(), 
@@ -195,40 +203,40 @@ public class GenericRecipe implements IHardScienceRecipe
     
     public GenericRecipe(NBTTagCompound tag)
     {
-        this.energyInputJoules = tag.getLong(ModNBTTag.RECIPE_INPUT_JOULES);
-        this.energyOutputJoules = tag.getLong(ModNBTTag.RECIPE_OUTPUT_JOULES);
-        this.ticksDuration = tag.getInteger(ModNBTTag.RECIPE_TICKS_DURATION);
+        this.energyInputJoules = tag.getLong(NBT_RECIPE_INPUT_JOULES);
+        this.energyOutputJoules = tag.getLong(NBT_RECIPE_OUTPUT_JOULES);
+        this.ticksDuration = tag.getInteger(NBT_RECIPE_TICKS_DURATION);
 
-        if(tag.hasKey(ModNBTTag.RECIPE_FLUID_INPUTS))
+        if(tag.hasKey(NBT_RECIPE_FLUID_INPUTS))
         {
-            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_FLUID_INPUTS, 10);
+            NBTTagList list = tag.getTagList(NBT_RECIPE_FLUID_INPUTS, 10);
             ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
             list.forEach(t -> builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromNBTWithQty((NBTTagCompound) t)));
             this.fluidInputs = builder.build();
         }
         else this.fluidInputs = ImmutableList.of();
        
-        if(tag.hasKey(ModNBTTag.RECIPE_ITEM_INPUTS))
+        if(tag.hasKey(NBT_RECIPE_ITEM_INPUTS))
         {
-            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_ITEM_INPUTS, 10);
+            NBTTagList list = tag.getTagList(NBT_RECIPE_ITEM_INPUTS, 10);
             ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
             list.forEach(t -> builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromNBTWithQty((NBTTagCompound) t)));
             this.itemInputs = builder.build();
         }
         else this.itemInputs = ImmutableList.of();
         
-        if(tag.hasKey(ModNBTTag.RECIPE_FLUID_OUTPUTS))
+        if(tag.hasKey(NBT_RECIPE_FLUID_OUTPUTS))
         {
-            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_FLUID_OUTPUTS, 10);
+            NBTTagList list = tag.getTagList(NBT_RECIPE_FLUID_OUTPUTS, 10);
             ImmutableList.Builder<FluidResourceWithQuantity> builder = ImmutableList.builder();
             list.forEach(t -> builder.add((FluidResourceWithQuantity) StorageType.FLUID.fromNBTWithQty((NBTTagCompound) t)));
             this.fluidOutputs = builder.build();
         }
         else this.fluidOutputs = ImmutableList.of();
        
-        if(tag.hasKey(ModNBTTag.RECIPE_ITEM_OUTPUTS))
+        if(tag.hasKey(NBT_RECIPE_ITEM_OUTPUTS))
         {
-            NBTTagList list = tag.getTagList(ModNBTTag.RECIPE_ITEM_OUTPUTS, 10);
+            NBTTagList list = tag.getTagList(NBT_RECIPE_ITEM_OUTPUTS, 10);
             ImmutableList.Builder<ItemResourceWithQuantity> builder = ImmutableList.builder();
             list.forEach(t -> builder.add((ItemResourceWithQuantity) StorageType.ITEM.fromNBTWithQty((NBTTagCompound) t)));
             this.itemOutputs = builder.build();
@@ -482,36 +490,36 @@ public class GenericRecipe implements IHardScienceRecipe
 
     public void serializeNBT(NBTTagCompound tag)
     {
-        tag.setLong(ModNBTTag.RECIPE_INPUT_JOULES, energyInputJoules);
-        tag.setLong(ModNBTTag.RECIPE_OUTPUT_JOULES, energyOutputJoules);
-        tag.setInteger(ModNBTTag.RECIPE_TICKS_DURATION, ticksDuration);
+        tag.setLong(NBT_RECIPE_INPUT_JOULES, energyInputJoules);
+        tag.setLong(NBT_RECIPE_OUTPUT_JOULES, energyOutputJoules);
+        tag.setInteger(NBT_RECIPE_TICKS_DURATION, ticksDuration);
 
         if(!this.fluidInputs.isEmpty())
         {
             NBTTagList list = new NBTTagList();
             this.fluidInputs.stream().forEach(r -> list.appendTag(r.toNBT()));
-            tag.setTag(ModNBTTag.RECIPE_FLUID_INPUTS, list);
+            tag.setTag(NBT_RECIPE_FLUID_INPUTS, list);
         }
        
         if(!this.itemInputs.isEmpty())
         {
             NBTTagList list = new NBTTagList();
             this.itemInputs.stream().forEach(r -> list.appendTag(r.toNBT()));
-            tag.setTag(ModNBTTag.RECIPE_ITEM_INPUTS, list);
+            tag.setTag(NBT_RECIPE_ITEM_INPUTS, list);
         }
         
         if(!this.fluidOutputs.isEmpty())
         {
             NBTTagList list = new NBTTagList();
             this.fluidOutputs.stream().forEach(r -> list.appendTag(r.toNBT()));
-            tag.setTag(ModNBTTag.RECIPE_FLUID_OUTPUTS, list);
+            tag.setTag(NBT_RECIPE_FLUID_OUTPUTS, list);
         }
        
         if(!this.itemOutputs.isEmpty())
         {
             NBTTagList list = new NBTTagList();
             this.itemOutputs.stream().forEach(r -> list.appendTag(r.toNBT()));
-            tag.setTag(ModNBTTag.RECIPE_ITEM_OUTPUTS, list);
+            tag.setTag(NBT_RECIPE_ITEM_OUTPUTS, list);
         }
     }
 

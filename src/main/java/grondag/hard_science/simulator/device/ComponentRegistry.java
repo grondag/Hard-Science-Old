@@ -4,14 +4,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.Log;
-import grondag.hard_science.init.ModNBTTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
 
 public class ComponentRegistry
 {
+    private static final String NBT_BDEVICE_COMPONENT_TYPE = NBTDictionary.claim("devCompType");
+
     public static final ComponentRegistry INSTANCE = new ComponentRegistry();
     
     private static final RegistryNamespaced < ResourceLocation, Class <? extends IDeviceComponent >> REGISTRY = new RegistryNamespaced < ResourceLocation, Class <? extends IDeviceComponent >> ();
@@ -31,11 +33,11 @@ public class ComponentRegistry
     {
         return REGISTRY.getNameForObject(clazz);
     }
-    
+
     @Nullable
     public static IDeviceComponent fromNBT(IDevice owner, NBTTagCompound tag)
     {
-        String componentName = tag.getString(ModNBTTag.DEVICE_COMPONENT_TYPE);
+        String componentName = tag.getString(NBT_BDEVICE_COMPONENT_TYPE);
         IDeviceComponent result = create(owner, new ResourceLocation(componentName));
         if(result != null && result instanceof IReadWriteNBT)
         {
@@ -53,7 +55,7 @@ public class ComponentRegistry
         
         if (resourcelocation != null)
         {
-            result.setString(ModNBTTag.DEVICE_COMPONENT_TYPE, resourcelocation.toString());
+            result.setString(NBT_BDEVICE_COMPONENT_TYPE, resourcelocation.toString());
         }
         
         if(component instanceof IReadWriteNBT)

@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.virtual;
 
+import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.hard_science.init.ModNBTTag;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.placement.Build;
 import net.minecraft.nbt.NBTTagCompound;
@@ -100,12 +100,15 @@ public class VirtualTileEntity extends SuperModelTileEntity
         return true;
     }
 
+    private static final String NBT_DOMAIN_ID = NBTDictionary.claim("vtDomID");
+    private static final String NBT_BUILD_ID = NBTDictionary.claim("vtBuildID");
+    
     @Override
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
-        compound.setInteger(ModNBTTag.DOMAIN_ID, this.domainID);
-        compound.setInteger(ModNBTTag.BUILD_ID, this.buildID);
+        compound.setInteger(NBT_DOMAIN_ID, this.domainID);
+        compound.setInteger(NBT_BUILD_ID, this.buildID);
     }
 
     @Override
@@ -113,12 +116,12 @@ public class VirtualTileEntity extends SuperModelTileEntity
     {
         super.readModNBT(compound);
         
-        this.domainID = compound.hasKey(ModNBTTag.DOMAIN_ID) 
-                ? compound.getInteger(ModNBTTag.DOMAIN_ID) 
+        this.domainID = compound.hasKey(NBT_DOMAIN_ID) 
+                ? compound.getInteger(NBT_DOMAIN_ID) 
                 : IIdentified.UNASSIGNED_ID;
                 
-        this.buildID = compound.hasKey(ModNBTTag.BUILD_ID) 
-                ? compound.getInteger(ModNBTTag.BUILD_ID) 
+        this.buildID = compound.hasKey(NBT_BUILD_ID) 
+                ? compound.getInteger(NBT_BUILD_ID) 
                 : IIdentified.UNASSIGNED_ID;          
     }
     
