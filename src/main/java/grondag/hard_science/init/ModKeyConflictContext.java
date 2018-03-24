@@ -1,6 +1,6 @@
 package grondag.hard_science.init;
 
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.settings.IKeyConflictContext;

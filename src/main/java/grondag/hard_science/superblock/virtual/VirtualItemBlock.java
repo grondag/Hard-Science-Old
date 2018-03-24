@@ -4,11 +4,12 @@ import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.PlacementItemFeature;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.ModGuiHandler;
-import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -19,7 +20,6 @@ public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
     public static final int FEATURE_FLAGS = PlacementItem.BENUMSET_FEATURES.getFlagsForIncludedValues(
             PlacementItemFeature.FIXED_REGION,
             PlacementItemFeature.REGION_SIZE,
-            PlacementItemFeature.GUI,
             PlacementItemFeature.REGION_ORIENTATION,
             PlacementItemFeature.SELECTION_RANGE,
             PlacementItemFeature.SPECIES_MODE,
@@ -40,9 +40,16 @@ public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
     }
     
     @Override
-    public int guiOrdinal()
+    public boolean isGuiSupported(ItemStack stack)
     {
-        return ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal();
+        return true;
+    }
+    
+    @Override
+    public void displayGui(EntityPlayer player)
+    {
+        if(!(PlacementItem.getHeldPlacementItem(player).getItem() == this)) return;
+        player.openGui(HardScience.INSTANCE,  ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
     }
     
     @Override
@@ -72,7 +79,7 @@ public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
             ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
             if(modelState == null) return null;
 
-            VirtualBlock targetBlock = ModSuperModelBlocks.findAppropriateVirtualBlock(modelState);
+            VirtualBlock targetBlock = VirtualBlock.findAppropriateVirtualBlock(modelState);
             
             return targetBlock.getStateFromMeta(stack.getMetadata());
         }

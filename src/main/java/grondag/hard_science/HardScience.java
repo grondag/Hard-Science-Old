@@ -14,7 +14,6 @@ import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketSimpleAction;
-import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
@@ -102,7 +101,6 @@ public class HardScience
         
         // Packets handled on Server side, sent from Client
         PacketHandler.registerMessage(PacketConfigurePlacementItem.class, PacketConfigurePlacementItem.class, Side.SERVER);
-        PacketHandler.registerMessage(PacketUpdateModifierKeys.class, PacketUpdateModifierKeys.class, Side.SERVER);
         PacketHandler.registerMessage(PacketDestroyVirtualBlock.class, PacketDestroyVirtualBlock.class, Side.SERVER);
         PacketHandler.registerMessage(PacketOpenContainerStorageInteraction.class, PacketOpenContainerStorageInteraction.class, Side.SERVER);
         PacketHandler.registerMessage(PacketMachineStatusAddListener.class, PacketMachineStatusAddListener.class, Side.SERVER);

@@ -14,7 +14,6 @@ import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.WorldLightOpacity;
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.superblock.placement.Build;
 import net.minecraft.block.Block;
@@ -42,6 +41,7 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -69,7 +69,7 @@ public class VirtualBlock extends SuperModelBlock
         
         modelState.setStatic(true);
         
-        SuperModelBlock smb = ModSuperModelBlocks.findAppropriateSuperModelBlock(vte.getSubstance(), modelState);
+        SuperModelBlock smb = SuperModelBlock.findAppropriateSuperModelBlock(vte.getSubstance(), modelState);
         
         ItemStack result = smb.getSubItems().get(vBlock.getMetaFromState(blockState)).copy();
         
@@ -78,6 +78,30 @@ public class VirtualBlock extends SuperModelBlock
         SuperBlockStackHelper.setStackSubstance(result, vte.getSubstance());
         
         return result;
+    }
+
+    /**
+     * Virtual blocks only vary by render mode
+     */
+    public static final VirtualBlock[] virtualBlocks = new VirtualBlock[BlockRenderMode.values().length];
+    
+    public static VirtualBlock findAppropriateVirtualBlock(ISuperModelState modelState)
+    {
+        BlockRenderMode blockRenderMode = modelState.getRenderPassSet().blockRenderMode;
+        return virtualBlocks[blockRenderMode.ordinal()];
+    }
+
+    public static void registerVirtualBlocks(Register<Block> event)
+    {
+        int virualBlockIndex = 0;
+        
+        for(BlockRenderMode blockRenderMode : BlockRenderMode.values())
+        {
+            VirtualBlock.virtualBlocks[blockRenderMode.ordinal()]
+                    = (VirtualBlock) new VirtualBlock("virtual_block" + virualBlockIndex++, blockRenderMode)
+                        .setUnlocalizedName("virtual_block").setCreativeTab(HardScience.tabMod); //all virtual blocks have same display name
+            event.getRegistry().register(VirtualBlock.virtualBlocks[blockRenderMode.ordinal()]);
+        }        
     }
     
     public VirtualBlock(String blockName, BlockRenderMode renderMode)

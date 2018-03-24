@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.jobs;
 
+import grondag.exotic_matter.simulator.job.RequestPriority;
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**

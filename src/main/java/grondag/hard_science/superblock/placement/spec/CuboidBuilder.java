@@ -12,11 +12,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.placement.OffsetPosition;
+import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.render.RenderUtil;
 import grondag.exotic_matter.simulator.IWorldTask;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.job.RequestPriority;
 import grondag.exotic_matter.varia.FixedRegionBounds;
 import grondag.exotic_matter.world.CubicBlockRegion;
 import grondag.exotic_matter.world.IBlockRegion;
@@ -25,10 +27,7 @@ import grondag.exotic_matter.ClientProxy;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.JobManager;
-import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
-import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
-import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.BuildManager;
 import net.minecraft.block.state.IBlockState;
@@ -81,7 +80,7 @@ public class CuboidBuilder extends VolumetricBuilder
     {
         if(this.isSelectionInProgress) 
         {
-            this.region = new CubicBlockRegion(pPos.inPos, this.placementItem.fixedRegionSelectionPos(this.placedStack()).first(), false);
+            this.region = new CubicBlockRegion(pPos.inPos, this.placementItem.fixedRegionSelectionPos(this.placedStack()).getLeft(), false);
             return true;
         }
 

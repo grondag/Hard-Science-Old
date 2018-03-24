@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.jobs.tasks;
 
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.hard_science.simulator.jobs.AbstractPositionedTask;
-import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.jobs.TaskType;
 import net.minecraft.util.math.BlockPos;
 

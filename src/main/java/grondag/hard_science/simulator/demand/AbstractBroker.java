@@ -6,11 +6,11 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.fobs.NewTask;
 import grondag.hard_science.simulator.fobs.TaskPriority;
-import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.resource.StorageType;
 
 public class AbstractBroker<V extends StorageType<V>> implements IBroker<V>

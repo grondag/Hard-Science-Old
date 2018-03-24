@@ -5,11 +5,11 @@ import java.util.concurrent.Future;
 
 import org.junit.Test;
 
+import grondag.exotic_matter.simulator.job.RequestPriority;
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.JobManager;
-import grondag.hard_science.simulator.jobs.RequestPriority;
-import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.jobs.tasks.BlockFabricationTask;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;

@@ -1,9 +1,9 @@
 package grondag.hard_science.simulator.fobs;
 
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.simulator.demand.IProducer;
 import grondag.hard_science.simulator.demand.InventoryProducer;
-import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 

@@ -8,6 +8,8 @@ import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
+import grondag.exotic_matter.simulator.job.RequestPriority;
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;

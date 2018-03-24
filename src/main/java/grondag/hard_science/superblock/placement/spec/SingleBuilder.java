@@ -2,19 +2,18 @@ package grondag.hard_science.superblock.placement.spec;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.simulator.IWorldTask;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.job.RequestPriority;
 import grondag.exotic_matter.world.IBlockRegion;
 import grondag.exotic_matter.world.SingleBlockRegion;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.JobManager;
-import grondag.hard_science.simulator.jobs.RequestPriority;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
-import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
-import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.BuildManager;
 import net.minecraft.block.state.BlockFaceShape;

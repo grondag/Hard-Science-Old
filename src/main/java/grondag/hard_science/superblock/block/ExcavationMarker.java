@@ -7,7 +7,7 @@ import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.PlacementItemFeature;
 import grondag.exotic_matter.placement.RegionOrientation;
 import grondag.exotic_matter.placement.TargetMode;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -54,13 +54,6 @@ public class ExcavationMarker extends Item implements PlacementItem
     public ISuperBlock getSuperBlock()
     {
         return null;
-    }
-
-    @Override
-    public int guiOrdinal()
-    {
-        // TODO enable feature
-        return 0;
     }
     
     @Override

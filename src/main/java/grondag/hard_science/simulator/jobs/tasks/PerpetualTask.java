@@ -2,11 +2,11 @@ package grondag.hard_science.simulator.jobs.tasks;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.ITask;
 import grondag.hard_science.simulator.jobs.ITaskListener;
 import grondag.hard_science.simulator.jobs.Job;
-import grondag.hard_science.simulator.jobs.RequestStatus;
 import grondag.hard_science.simulator.jobs.TaskType;
 
 /**

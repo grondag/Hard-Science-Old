@@ -9,9 +9,9 @@ import grondag.exotic_matter.block.SuperTileEntity;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.PlacementItemFeature;
-import grondag.hard_science.superblock.blockmovetest.BlockOrientationHandler;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
-import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
+import grondag.exotic_matter.placement.PlacementPosition;
+import grondag.hard_science.superblock.placement.spec.BlockOrientationHandler;
+import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.BlockFaceShape;
@@ -195,8 +195,10 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
        ItemStack placedStack = stackIn.copy();
        if(!modelState.isStatic())
        {
+           PlacementItem item = (PlacementItem)placedStack.getItem();
+           
            BlockOrientationHandler.applyDynamicOrientation(placedStack, playerIn, 
-                   new PlacementPosition(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), placedStack));
+                   new PlacementPosition(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), item.getFloatingSelectionRange(placedStack), item.isExcavator(placedStack)));
        }
        
        if (placeBlockAt(placedStack, playerIn, worldIn, pos, facing, hitX, hitY, hitZ, placedState))

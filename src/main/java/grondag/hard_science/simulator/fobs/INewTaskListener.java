@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.fobs;
 
-import grondag.hard_science.simulator.jobs.RequestStatus;
+import grondag.exotic_matter.simulator.job.RequestStatus;
 
 public interface INewTaskListener
 {

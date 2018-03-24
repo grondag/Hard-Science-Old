@@ -3,11 +3,10 @@ package grondag.hard_science.superblock.placement.spec;
 import java.util.HashSet;
 
 import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.RegionOrientation;
 import grondag.exotic_matter.placement.TargetMode;
 import grondag.exotic_matter.world.CubicBlockRegion;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
-import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;

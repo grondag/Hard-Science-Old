@@ -34,12 +34,10 @@ import grondag.hard_science.matter.MatterCubeItemModel;
 import grondag.hard_science.matter.MatterCubeItemModel1;
 import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketSimpleAction;
-import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
-import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
-import grondag.hard_science.superblock.blockmovetest.PlacementResult;
+import grondag.hard_science.superblock.placement.spec.PlacementHandler;
+import grondag.hard_science.superblock.placement.spec.PlacementItem;
+import grondag.hard_science.superblock.placement.spec.PlacementResult;
 import grondag.hard_science.superblock.virtual.ExcavationRenderManager;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
 import grondag.hard_science.superblock.virtual.VirtualTESR;
@@ -47,7 +45,6 @@ import grondag.hard_science.superblock.virtual.VirtualTileEntityTESR;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.settings.KeyBinding;
@@ -98,9 +95,6 @@ public class ClientEventHandler
         ExcavationRenderManager.render(event.getContext(), event.getPartialTicks());
     }
 
-    /** used to detect key down/up for modifier keys */
-    private static int modifierKeyFlags = 0;
-    
     private static int clientStatCounter = ConfigXM.RENDER.clientStatReportingInterval * 20;
     
     private static int cooldown = 0;
@@ -123,16 +117,6 @@ public class ClientEventHandler
                 }
             }
            
-       
-            int keyFlags = (GuiScreen.isCtrlKeyDown() ? ModPlayerCaps.ModifierKey.CTRL_KEY.flag : 0) 
-                     | (GuiScreen.isAltKeyDown() ? ModPlayerCaps.ModifierKey.ALT_KEY.flag : 0);
-                    
-            if(keyFlags != modifierKeyFlags)
-            {
-                modifierKeyFlags = keyFlags;
-                ModPlayerCaps.setPlacementModifierFlags(Minecraft.getMinecraft().player, keyFlags);
-                PacketHandler.CHANNEL.sendToServer(new PacketUpdateModifierKeys(keyFlags));
-            }
             
             //FIXME: remove or cleanup
             if(cooldown == 0)

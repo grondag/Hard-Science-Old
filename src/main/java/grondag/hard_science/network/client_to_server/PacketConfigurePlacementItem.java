@@ -14,7 +14,7 @@ import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.RegionOrientation;
 import grondag.exotic_matter.placement.SpeciesMode;
 import grondag.exotic_matter.placement.TargetMode;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;

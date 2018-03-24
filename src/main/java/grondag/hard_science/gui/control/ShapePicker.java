@@ -1,13 +1,13 @@
 package grondag.hard_science.gui.control;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelShape;
 import grondag.exotic_matter.model.ModelState;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.init.ModSuperModelBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -29,7 +29,7 @@ public class ShapePicker extends TabBar<ModelShape<?>>
         {
             ISuperModelState modelState = new ModelState();
             modelState.setShape(shape);
-            ItemStack stack = ModSuperModelBlocks.findAppropriateSuperModelBlock(ModSubstances.FLEXSTONE, modelState).getSubItems().get(0).copy();
+            ItemStack stack = SuperModelBlock.findAppropriateSuperModelBlock(ModSubstances.FLEXSTONE, modelState).getSubItems().get(0).copy();
             SuperBlockStackHelper.setStackModelState(stack, modelState);
             ITEMS[shape.ordinal()] = stack;
         }

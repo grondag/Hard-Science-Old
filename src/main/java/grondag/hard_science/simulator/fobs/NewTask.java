@@ -6,9 +6,9 @@ import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
+import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.simulator.jobs.RequestStatus;
 import net.minecraft.nbt.NBTTagCompound;
 
 //TODO: need to consolidate this with old task implementation or clean up

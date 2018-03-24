@@ -13,16 +13,16 @@ import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
+import grondag.exotic_matter.player.ModifierKeys;
+import grondag.exotic_matter.player.ModifierKeys.ModifierKey;
 import grondag.exotic_matter.varia.SuperBlockBorderMatch;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.NeighborBlocks;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
-import grondag.hard_science.player.ModPlayerCaps;
-import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
 import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
+import grondag.hard_science.superblock.placement.spec.PlacementHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -214,7 +214,7 @@ public class CubicPlacementHandler extends PlacementHandler
     {
         // If player is sneaking, force no match to adjacent species.
         // If not sneaking, try to match block on which placed, or failing that, any adjacent block it can match.
-        if(ModPlayerCaps.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
+        if(ModifierKeys.isModifierKeyPressed(player, ModifierKey.ALT_KEY))
         {
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;

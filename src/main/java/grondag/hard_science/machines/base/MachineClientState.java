@@ -3,7 +3,6 @@ package grondag.hard_science.machines.base;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.ISuperModelState;
-import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.matbuffer.ClientBufferInfo;
 import grondag.hard_science.machines.support.MachineControlState;
@@ -129,7 +128,7 @@ public class MachineClientState
             ISuperModelState modelState = controlState.getModelState();
             if(modelState == null) return null;
             
-            SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(controlState.getSubstance(), controlState.getModelState());
+            SuperModelBlock newBlock = SuperModelBlock.findAppropriateSuperModelBlock(controlState.getSubstance(), controlState.getModelState());
             result = newBlock.getSubItems().get(0);
             SuperBlockStackHelper.setStackLightValue(result, controlState.getLightValue());
             SuperBlockStackHelper.setStackSubstance(result, controlState.getSubstance());

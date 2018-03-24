@@ -13,13 +13,15 @@ import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
-import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
-import grondag.hard_science.superblock.blockmovetest.PlacementResult;
+import grondag.hard_science.superblock.placement.spec.PlacementHandler;
+import grondag.hard_science.superblock.placement.spec.PlacementItem;
+import grondag.hard_science.superblock.placement.spec.PlacementResult;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
+import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.hard_science.volcano.lava.LavaBlock;
 import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
 import jline.internal.Log;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -33,6 +35,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -52,6 +55,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 @Mod.EventBusSubscriber
 public class CommonEventHandler 
 {
+    
+    @SubscribeEvent
+    public static void registerBlocks(RegistryEvent.Register<Block> event) 
+    {
+        VirtualBlock.registerVirtualBlocks(event);
+    }
+    
     private static final String[] DENIALS;
     
     static

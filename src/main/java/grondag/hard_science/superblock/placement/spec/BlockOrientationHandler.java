@@ -1,8 +1,9 @@
-package grondag.hard_science.superblock.blockmovetest;
+package grondag.hard_science.superblock.placement.spec;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;

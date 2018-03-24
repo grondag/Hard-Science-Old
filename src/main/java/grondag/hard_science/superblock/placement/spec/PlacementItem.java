@@ -1,9 +1,9 @@
-package grondag.hard_science.superblock.blockmovetest;
+package grondag.hard_science.superblock.placement.spec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.mojang.realmsclient.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
@@ -16,19 +16,21 @@ import grondag.exotic_matter.placement.BlockOrientationCorner;
 import grondag.exotic_matter.placement.BlockOrientationEdge;
 import grondag.exotic_matter.placement.BlockOrientationFace;
 import grondag.exotic_matter.placement.FilterMode;
+import grondag.exotic_matter.placement.IPlacementSpecBuilder;
+import grondag.exotic_matter.placement.PlacementEvent;
 import grondag.exotic_matter.placement.PlacementItemFeature;
+import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.RegionOrientation;
 import grondag.exotic_matter.placement.SpeciesMode;
 import grondag.exotic_matter.placement.TargetMode;
+import grondag.exotic_matter.player.ModifierKeys;
+import grondag.exotic_matter.player.ModifierKeys.ModifierKey;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.BinaryEnumSet;
 import grondag.exotic_matter.varia.FixedRegionBounds;
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.HardScience;
-import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.superblock.block.SuperItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -122,21 +124,14 @@ public interface PlacementItem
         return 0xFFFFFFFF;
     }
     
-    /** won't be called unless gui feature is supported */
-    public default int guiOrdinal()
-    {
-        return 0;
-    }
-    
     public default boolean isGuiSupported(ItemStack stack)
     {
-        return BENUMSET_FEATURES.isFlagSetForValue(PlacementItemFeature.GUI, this.featureFlags(stack));
+        return false;
     }
     
     public default void displayGui(EntityPlayer player)
     {
-        if(!isGuiSupported(PlacementItem.getHeldPlacementItem(player))) return;
-        player.openGui(HardScience.INSTANCE, this.guiOrdinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+        // noop
     }
     
     public default boolean isBlockOrientationSupported(ItemStack stack)
@@ -582,18 +577,18 @@ public interface PlacementItem
         // handle this here by substituting a stack different than what we received
         Item item = stack.getItem();
         
-        if(item instanceof SuperItemBlock)
+        if(item instanceof PlacementItem)
         {
             ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
             if(modelState == null) return null;
 
-            ISuperBlock targetBlock = ((ISuperBlock)((SuperItemBlock)stack.getItem()).getBlock());
+            ISuperBlock targetBlock = ((ISuperBlock)((ItemBlock)stack.getItem()).getBlock());
             
             if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
             {
                 BlockSubstance substance = SuperBlockStackHelper.getStackSubstance(stack);
                 if(substance == null) return null;
-                targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
+                targetBlock = SuperModelBlock.findAppropriateSuperModelBlock(substance, modelState);
             }
             
             int meta = modelState.metaUsage() == MetaUsage.NONE 
@@ -768,7 +763,7 @@ public interface PlacementItem
 
         tag.removeTag(NBT_FIXED_REGION_SELECT_POS);
         
-        setFixedRegion(new FixedRegionBounds(fromPos.first(), fromPos.second(), pos, isCenter), stack);
+        setFixedRegion(new FixedRegionBounds(fromPos.getLeft(), fromPos.getRight(), pos, isCenter), stack);
         
         setFixedRegionEnabled(stack,true);
 
@@ -982,7 +977,7 @@ public interface PlacementItem
         ItemStack stackIn = playerIn.getHeldItem(hand);
         if (stackIn.isEmpty() || stackIn.getItem() != this) return EnumActionResult.FAIL;
         
-        PlacementResult result = PlacementHandler.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn, this);
+        PlacementResult result = PlacementItem.doRightClickBlock(playerIn, pos, facing, new Vec3d(hitX, hitY, hitZ), stackIn, this);
         
         result.apply(stackIn, playerIn);
         
@@ -1012,7 +1007,7 @@ public interface PlacementItem
         
         if (stackIn.isEmpty() || stackIn.getItem() != this) return new ActionResult<>(EnumActionResult.PASS, stackIn);
         
-        PlacementResult result = PlacementHandler.doRightClickBlock(player, null, null, null, stackIn, this);
+        PlacementResult result = PlacementItem.doRightClickBlock(player, null, null, null, stackIn, this);
         
         if(!result.shouldInputEventsContinue()) 
         {
@@ -1037,5 +1032,83 @@ public interface PlacementItem
         }
         
         return new ActionResult<>(EnumActionResult.PASS, player.getHeldItem(hand));
+    }
+
+    /**
+     * Determines outcome when player right clicks on the face of a block.
+     *  if no hit block is known or if floating selection is known to be enabled, pass onPos, onFace, and hitVec = null instead.
+     * DOES NOT UPDATE STATE.
+     */
+    static PlacementResult doRightClickBlock(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, @Nonnull ItemStack stack, @Nonnull PlacementItem item)
+    {
+        PlacementPosition pPos = new PlacementPosition(player, onPos, onFace, hitVec, item.getFloatingSelectionRange(stack), item.isExcavator(stack));
+    
+        // if not position, then either need to be using floating selection 
+        // or a fixed region (for preview only - see logic below) if not enabled
+        if(onPos == null && !item.isFloatingSelectionEnabled(stack)) 
+        {
+            // don't force player to be in placement range to see big region selections
+            // but note this doesn't work for selection in progress
+            if(item.isFixedRegionEnabled(stack) && !item.isFixedRegionSelectionInProgress(stack))
+            {
+                return new PlacementResult(
+                        pPos.inPos, 
+                        PlacementEvent.NO_OPERATION_CONTINUE,
+                        PlacementSpecHelper.placementBuilder(player, pPos, stack));
+            }
+            else return PlacementResult.EMPTY_RESULT_CONTINUE;
+        }
+    
+    
+        // nothing to do if no position
+        if(pPos.inPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
+    
+    
+        // only virtual blocks support advanced placement behavior
+        // so emulate vanilla right-click behavior if we have non-virtual block
+        if(item.getSuperBlock() != null && !item.getSuperBlock().isVirtual())
+        {
+            ItemStack tweakedStack = stack.copy();
+            item.setTargetMode(tweakedStack, TargetMode.ON_CLICKED_FACE);
+    
+            return new PlacementResult(
+                    pPos.inPos, 
+                    PlacementEvent.PLACE,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+    
+        // Ctrl + right click: start new placement region
+        if(ModifierKeys.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
+        {
+            ItemStack tweakedStack = stack.copy();
+            item.fixedRegionStart(tweakedStack, pPos.inPos, false);
+    
+            return new PlacementResult(
+                    pPos.inPos, 
+                    PlacementEvent.START_PLACEMENT_REGION,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+    
+        if(item.isFixedRegionSelectionInProgress(stack))
+        {
+            // finish placement region
+            ItemStack tweakedStack = stack.copy();
+            item.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
+            IPlacementSpecBuilder builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            
+            return new PlacementResult(
+                    pPos.inPos, 
+                    builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+        else
+        {
+            // normal right click on block 
+            IPlacementSpecBuilder builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            return new PlacementResult(
+                    pPos.inPos, 
+                    builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                    builder);
+        }
     }
 }
