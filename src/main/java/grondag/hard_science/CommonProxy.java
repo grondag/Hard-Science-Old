@@ -8,7 +8,6 @@ import grondag.hard_science.init.ModDevices;
 import grondag.hard_science.init.ModEntities;
 import grondag.hard_science.init.ModRecipes;
 import grondag.hard_science.init.ModTileEntities;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
@@ -26,8 +25,6 @@ public class CommonProxy
 	{
 		Log.setLog(event.getModLog());
 		Configurator.recalcDerived();
-	      
-        ModMessages.registerNetworkMessages();
 
 		ModTileEntities.preInit(event);
 		ModEntities.preInit(event);

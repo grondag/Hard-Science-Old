@@ -2,11 +2,23 @@ package grondag.hard_science;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.Domain;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.DomainUser;
 import grondag.hard_science.init.ModItems;
+import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
+import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
+import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
+import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
+import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
+import grondag.hard_science.network.client_to_server.PacketSimpleAction;
+import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
+import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
+import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
+import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.domain.ProcessManager;
 import grondag.hard_science.simulator.fobs.TransientTaskContainer;
@@ -87,6 +99,21 @@ public class HardScience
         Domain.registerCapability(JobManager.class);
         Domain.registerCapability(TransientTaskContainer.class);
         Domain.registerCapability(ProcessManager.class);
+        
+        // Packets handled on Server side, sent from Client
+        PacketHandler.registerMessage(PacketConfigurePlacementItem.class, PacketConfigurePlacementItem.class, Side.SERVER);
+        PacketHandler.registerMessage(PacketUpdateModifierKeys.class, PacketUpdateModifierKeys.class, Side.SERVER);
+        PacketHandler.registerMessage(PacketDestroyVirtualBlock.class, PacketDestroyVirtualBlock.class, Side.SERVER);
+        PacketHandler.registerMessage(PacketOpenContainerStorageInteraction.class, PacketOpenContainerStorageInteraction.class, Side.SERVER);
+        PacketHandler.registerMessage(PacketMachineStatusAddListener.class, PacketMachineStatusAddListener.class, Side.SERVER);
+        PacketHandler.registerMessage(PacketMachineInteraction.class, PacketMachineInteraction.class, Side.SERVER);
+        PacketHandler.registerMessage(PacketSimpleAction.class, PacketSimpleAction.class, Side.SERVER);
+        
+        // Packets handled on Client side, sent from Server        
+        PacketHandler.registerMessage(PacketOpenContainerItemStorageRefresh.class, PacketOpenContainerItemStorageRefresh.class, Side.CLIENT);
+        PacketHandler.registerMessage(PacketMachineStatusUpdateListener.class, PacketMachineStatusUpdateListener.class, Side.CLIENT);
+        PacketHandler.registerMessage(PacketExcavationRenderUpdate.class, PacketExcavationRenderUpdate.class, Side.CLIENT);
+        PacketHandler.registerMessage(PacketExcavationRenderRefresh.class, PacketExcavationRenderRefresh.class, Side.CLIENT);
         
     }
     

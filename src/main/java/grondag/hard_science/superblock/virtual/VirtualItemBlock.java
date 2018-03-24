@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.virtual;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.PlacementItemFeature;
@@ -68,7 +69,7 @@ public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
         Item item = stack.getItem();
         if(item instanceof VirtualItemBlock)
         {
-            ISuperModelState modelState = PlacementItem.getStackModelState(stack);
+            ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
             if(modelState == null) return null;
 
             VirtualBlock targetBlock = ModSuperModelBlocks.findAppropriateVirtualBlock(modelState);

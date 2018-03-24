@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.placement.spec;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
-import grondag.hard_science.superblock.block.PlacementPosition;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -24,6 +24,6 @@ public abstract class SingleStackBuilder extends PlacementSpecBuilder
     @Override
     protected ISuperModelState previewModelState()
     {
-        return this.outputStack == null ? super.previewModelState() : PlacementItem.getStackModelState(this.outputStack);
+        return this.outputStack == null ? super.previewModelState() : SuperBlockStackHelper.getStackModelState(this.outputStack);
     }
 }

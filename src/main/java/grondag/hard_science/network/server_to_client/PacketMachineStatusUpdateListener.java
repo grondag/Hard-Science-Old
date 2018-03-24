@@ -1,11 +1,11 @@
 package grondag.hard_science.network.server_to_client;
 
+import grondag.exotic_matter.network.AbstractServerToPlayerPacket;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.matbuffer.ClientBufferInfo;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;

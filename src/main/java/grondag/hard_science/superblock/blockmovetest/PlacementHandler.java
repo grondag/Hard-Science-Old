@@ -1,9 +1,10 @@
-package grondag.hard_science.superblock.placement;
+package grondag.hard_science.superblock.blockmovetest;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
@@ -18,9 +19,7 @@ import grondag.exotic_matter.world.IBlockRegion;
 import grondag.hard_science.Log;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
-import grondag.hard_science.superblock.block.BlockOrientationHandler;
-import grondag.hard_science.superblock.block.PlacementPosition;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.placement.spec.IPlacementSpecBuilder;
 import grondag.hard_science.superblock.placement.spec.PlacementSpecHelper;
 import grondag.hard_science.superblock.placement.spec.SingleStackBuilder;
@@ -325,7 +324,7 @@ public abstract class PlacementHandler
     {
         if(!player.capabilities.allowEdit || build == null || !build.isOpen()) return;
 
-        SoundType soundtype = PlacementItem.getStackSubstance(stack).soundType;
+        SoundType soundtype = SuperBlockStackHelper.getStackSubstance(stack).soundType;
 
         PlacementItem item = PlacementItem.getPlacementItem(stack);
         if(item == null) return;
@@ -410,14 +409,14 @@ public abstract class PlacementHandler
 
         ItemStack stack = specBuilder.placedStack().copy();
         PlacementPosition pPos = specBuilder.placementPosition();
-        ISuperModelState modelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
         if(modelState != null && modelState.hasSpecies())
         {
             int species = speciesForPlacement(specBuilder.player(), pPos.onPos, pPos.onFace, stack, specBuilder.region());
             if(species >= 0) 
             {
                 modelState.setSpecies(species);
-                PlacementItem.setStackModelState(stack, modelState);
+                SuperBlockStackHelper.setStackModelState(stack, modelState);
                 if(modelState.metaUsage() == MetaUsage.SPECIES)
                 {
                     stack.setItemDamage(species);
@@ -446,7 +445,7 @@ public abstract class PlacementHandler
 
         boolean shouldBreak = mode != SpeciesMode.MATCH_MOST;
 
-        ISuperModelState  withModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState  withModelState = SuperBlockStackHelper.getStackModelState(stack);
         if(withModelState == null || !withModelState.hasSpecies()) return 0;
 
         if(player.world == null) return 0;

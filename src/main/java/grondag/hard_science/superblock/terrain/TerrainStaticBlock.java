@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
@@ -14,7 +15,6 @@ import grondag.exotic_matter.model.TerrainBlockRegistry;
 import grondag.exotic_matter.model.TerrainState;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.superblock.block.SuperStaticBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -93,12 +93,12 @@ public class TerrainStaticBlock extends SuperStaticBlock
         for(ItemStack stack : items)
         {
             int meta = stack.getMetadata();
-            ISuperModelState modelState = PlacementItem.getStackModelState(stack);
+            ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
             int level = this.isFiller ? TerrainState.BLOCK_LEVELS_INT - 1 : TerrainState.BLOCK_LEVELS_INT - meta;
             int [] quadrants = new int[] {level, level, level, level};
             TerrainState flowState = new TerrainState(level, quadrants, quadrants, 0);
             modelState.setTerrainState(flowState);
-            PlacementItem.setStackModelState(stack, modelState);
+            SuperBlockStackHelper.setStackModelState(stack, modelState);
         }
         return items;
     }

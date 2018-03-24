@@ -2,11 +2,11 @@ package grondag.hard_science.network.client_to_server;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.Log;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
-import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import grondag.hard_science.simulator.resource.ItemResourceWithQuantity;

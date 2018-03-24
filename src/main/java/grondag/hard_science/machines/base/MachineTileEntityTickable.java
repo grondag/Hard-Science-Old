@@ -1,12 +1,12 @@
 package grondag.hard_science.machines.base;
 
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.varia.KeyedTuple;
 import grondag.exotic_matter.varia.SimpleUnorderedArraySet;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.machines.support.MachineControlState;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ITickable;
@@ -64,7 +64,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
             // send immediate refresh for any new listener
             if(this.machine() == null) return;
             
-            ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
+            PacketHandler.CHANNEL.sendTo(this.createMachineStatusUpdate(), player);
             
         }
         else
@@ -79,7 +79,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
                 if(this.machine() == null) return;
                 
                 // send immediate refresh for any new / reinstated listener
-                ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
+                PacketHandler.CHANNEL.sendTo(this.createMachineStatusUpdate(), player);
             }
         }
     }
@@ -143,7 +143,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
                     {
                         if(Configurator.logMachineActivity) 
                             Log.info("MachineTileEntityTickable.update: %s Sending update packet due to change", this.machine().machineName());
-                        if(packet != null) ModMessages.INSTANCE.sendTo(packet, listener.key);
+                        if(packet != null) PacketHandler.CHANNEL.sendTo(packet, listener.key);
                         i++;
                     }
                 }

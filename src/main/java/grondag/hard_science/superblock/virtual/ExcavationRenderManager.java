@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.ClientProxy;
+import grondag.exotic_matter.ClientProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

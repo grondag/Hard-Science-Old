@@ -1,64 +1,87 @@
 package grondag.hard_science;
 
-import grondag.exotic_matter.varia.Useful;
+import java.io.IOException;
+import java.util.Map;
+
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.ConfigXM.Render.PreviewMode;
-import grondag.exotic_matter.model.varia.BlockHighlighter;
+import grondag.exotic_matter.block.SuperBlock;
+import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperDispatcher;
+import grondag.exotic_matter.block.SuperModelBlock;
+import grondag.exotic_matter.block.SuperModelTileEntity;
+import grondag.exotic_matter.model.varia.CraftingItem;
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.render.CompressedAnimatedSprite;
 import grondag.exotic_matter.render.QuadCache;
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.init.ModKeys;
+import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntityTickable;
+import grondag.hard_science.machines.impl.building.BlockFabricatorTESR;
+import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
+import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTESR;
+import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTileEntity;
+import grondag.hard_science.machines.impl.processing.DigesterTESR;
+import grondag.hard_science.machines.impl.processing.DigesterTileEntity;
+import grondag.hard_science.machines.impl.processing.MicronizerTESR;
+import grondag.hard_science.machines.impl.processing.MicronizerTileEntity;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
-import grondag.hard_science.network.ModMessages;
+import grondag.hard_science.matter.BulkItem;
+import grondag.hard_science.matter.MatterCube;
+import grondag.hard_science.matter.MatterCubeItemModel;
+import grondag.hard_science.matter.MatterCubeItemModel1;
 import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketSimpleAction;
 import grondag.hard_science.network.client_to_server.PacketUpdateModifierKeys;
 import grondag.hard_science.player.ModPlayerCaps;
-import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.block.SuperModelTileEntity;
-import grondag.hard_science.superblock.block.SuperTileEntity;
+import grondag.hard_science.superblock.block.SuperItemBlock;
+import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
 import grondag.hard_science.superblock.blockmovetest.PlacementItem;
-import grondag.hard_science.superblock.placement.PlacementHandler;
-import grondag.hard_science.superblock.placement.PlacementResult;
+import grondag.hard_science.superblock.blockmovetest.PlacementResult;
 import grondag.hard_science.superblock.virtual.ExcavationRenderManager;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
+import grondag.hard_science.superblock.virtual.VirtualTESR;
+import grondag.hard_science.superblock.virtual.VirtualTileEntityTESR;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.GuiOptions;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.block.model.ModelBakery;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent;
-import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
+import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler
 {
-    @SubscribeEvent()
-    public static void onRenderTick(TickEvent.RenderTickEvent event)
-    {
-        if(event.phase == Phase.START) ClientProxy.updateCamera();
-    }
-    
     @SubscribeEvent()
     public static void renderWorldLastEvent(RenderWorldLastEvent event)
     {
@@ -75,17 +98,6 @@ public class ClientEventHandler
         ExcavationRenderManager.render(event.getContext(), event.getPartialTicks());
     }
 
-    /**
-     * Check for blocks that need a custom block highlight and draw if checked.
-     * Adapted from the vanilla highlight code.
-     */
-    @SubscribeEvent
-    public static void onDrawBlockHighlightEvent(DrawBlockHighlightEvent event) 
-    {
-        BlockHighlighter.handleDrawBlockHighlightEvent(event);
-    }
-    
-    
     /** used to detect key down/up for modifier keys */
     private static int modifierKeyFlags = 0;
     
@@ -119,7 +131,7 @@ public class ClientEventHandler
             {
                 modifierKeyFlags = keyFlags;
                 ModPlayerCaps.setPlacementModifierFlags(Minecraft.getMinecraft().player, keyFlags);
-                ModMessages.INSTANCE.sendToServer(new PacketUpdateModifierKeys(keyFlags));
+                PacketHandler.CHANNEL.sendToServer(new PacketUpdateModifierKeys(keyFlags));
             }
             
             //FIXME: remove or cleanup
@@ -179,10 +191,10 @@ public class ClientEventHandler
                         SuperModelTileEntity smte = (SuperModelTileEntity)mc.player.world.getTileEntity(mc.objectMouseOver.getBlockPos());
                         if(smte != null)
                         {
-                            PlacementItem.setStackModelState(stack, smte.getModelState());
-                            PlacementItem.setStackLightValue(stack, smte.getLightValue());
-                            PlacementItem.setStackSubstance(stack, smte.getSubstance());
-                            ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                            SuperBlockStackHelper.setStackModelState(stack, smte.getModelState());
+                            SuperBlockStackHelper.setStackLightValue(stack, smte.getLightValue());
+                            SuperBlockStackHelper.setStackSubstance(stack, smte.getSubstance());
+                            PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                             
                             // prevent vanilla pick block 
                             KeyBinding.unPressAllKeys();
@@ -194,7 +206,7 @@ public class ClientEventHandler
             
             if(ModKeys.PLACEMENT_CYCLE_SELECTION_TARGET.isPressed() && item.cycleSelectionTargetRange(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 
                 String message = item.isFloatingSelectionEnabled(stack)
                         ? I18n.translateToLocalFormatted("placement.message.range_floating",  item.getFloatingSelectionRange(stack))
@@ -205,7 +217,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_CYCLE_REGION_ORIENTATION.isPressed() && item.cycleRegionOrientation(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.orientation_region",  item.getRegionOrientation(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 return;
@@ -213,7 +225,7 @@ public class ClientEventHandler
                 
             else if(ModKeys.PLACEMENT_CYCLE_BLOCK_ORIENTATION.isPressed() && item.cycleBlockOrientation(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.orientation_block",  item.blockOrientationLocalizedName(stack));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 return;
@@ -239,7 +251,7 @@ public class ClientEventHandler
             
             else if (ModKeys.PLACEMENT_CYCLE_FILTER_MODE.isPressed() && item.cycleFilterMode(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.filter_mode",  item.getFilterMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 return;
@@ -247,7 +259,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_CYCLE_SPECIES_HANDLING.isPressed() && item.cycleSpeciesMode(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.species_mode",  item.getSpeciesMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 return;
@@ -255,7 +267,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_CYCLE_TARGET_MODE.isPressed() && item.cycleTargetMode(stack, false))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 String message = I18n.translateToLocalFormatted("placement.message.target_mode",  item.getTargetMode(stack).localizedName());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
                 return;
@@ -279,7 +291,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_DECREASE_DEPTH.isPressed() && item.changeRegionSize(stack, 0, 0, -1))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -288,7 +300,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_DECREASE_HEIGHT.isPressed() && item.changeRegionSize(stack, 0, -1, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -297,7 +309,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_DECREASE_WIDTH.isPressed() && item.changeRegionSize(stack, -1, 0, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -306,7 +318,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_INCREASE_DEPTH.isPressed() && item.changeRegionSize(stack, 0, 0, 1))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -315,7 +327,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_INCREASE_HEIGHT.isPressed() && item.changeRegionSize(stack, 0, 1, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -324,7 +336,7 @@ public class ClientEventHandler
             
             else if(ModKeys.PLACEMENT_INCREASE_WIDTH.isPressed() && item.changeRegionSize(stack, 1, 0, 0))
             {
-                ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(stack));
+                PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(stack));
                 BlockPos pos = item.getRegionSize(stack, false);
                 String message  = I18n.translateToLocalFormatted("placement.message.region_box", pos.getX(), pos.getY(), pos.getZ());
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
@@ -334,7 +346,7 @@ public class ClientEventHandler
         
         if(ModKeys.PLACEMENT_LAUNCH_BUILD.isPressed())
         {
-            ModMessages.INSTANCE.sendToServer(new PacketSimpleAction(PacketSimpleAction.ActionType.LAUNCH_CURRENT_BUILD));
+            PacketHandler.CHANNEL.sendToServer(new PacketSimpleAction(PacketSimpleAction.ActionType.LAUNCH_CURRENT_BUILD));
             String message  = I18n.translateToLocal("placement.message.launch_build");
             Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             return;
@@ -342,12 +354,102 @@ public class ClientEventHandler
     }
     
     @SubscribeEvent
-    public static void onActionPerformed(ActionPerformedEvent.Pre event)
+    public static void modelRegistryEvent(ModelRegistryEvent event)
     {
-        if(event.getGui() != null && event.getGui() instanceof GuiOptions )
+          
+        IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
+        
+        for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
         {
-            SuperTileEntity.updateRenderDistance();
+            if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
+            {
+                
+                //TODO: move to library mod
+                Item item = entry.getValue();
+                if(item instanceof SuperItemBlock)
+                {
+                    
+                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
+                    for (ItemStack stack : block.getSubItems())
+                    {
+                        String variantName = SuperDispatcher.INSTANCE.getDelegate(block).getModelResourceString() + "." + stack.getMetadata();
+                        ModelBakery.registerItemVariants(item, new ResourceLocation(variantName));
+                        ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
+                    }
+                }
+                else if(item instanceof MatterCube)
+                {
+                    ModelBakery.registerItemVariants(item, item.getRegistryName());
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
+                }
+                else if(item instanceof BulkItem)
+                {
+                    ModelBakery.registerItemVariants(item, item.getRegistryName());
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
+                }
+                else if(item instanceof CraftingItem)
+                {
+                    ModelBakery.registerItemVariants(item, item.getRegistryName());
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
+                }
+                else
+                {
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
+                }
+            }
         }
+        
+        // Bind TESR to tile entity
+        ClientRegistry.bindTileEntitySpecialRenderer(VirtualTileEntityTESR.class, VirtualTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(BlockFabricatorTileEntity.class, BlockFabricatorTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntity.class, MachineTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(MachineTileEntityTickable.class, MachineTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(ChemicalBatteryTileEntity.class, ChemicalBatteryTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(MicronizerTileEntity.class, MicronizerTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(DigesterTileEntity.class, DigesterTESR.INSTANCE);
     }
     
+    @SubscribeEvent()
+    public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
+    {
+        
+        IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
+        
+        for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
+        {
+            if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
+            {
+                // TODO: move to library mod
+                Item item = entry.getValue();
+                if(item instanceof SuperItemBlock)
+                {
+                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
+                    for (ItemStack stack : block.getSubItems())
+                    {
+                        event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
+                                SuperDispatcher.INSTANCE.getDelegate(block));
+                    }
+                }
+                else if(item instanceof MatterCube)
+                {
+                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
+                            new MatterCubeItemModel((MatterCube) item));
+                }
+                else if(item instanceof BulkItem)
+                {
+                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
+                            new MatterCubeItemModel1((BulkItem) item));
+                }
+                else if(item instanceof CraftingItem)
+                {
+                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
+                            SuperDispatcher.INSTANCE.getItemDelegate());
+                }
+                else
+                {
+                    // Not needed - will look for json files for normal items;
+                }
+            }
+        }
+    }
 }

@@ -1,11 +1,11 @@
-package grondag.hard_science.superblock.block;
+package grondag.hard_science.superblock.blockmovetest;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldHelper;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,7 +30,7 @@ public class BlockOrientationHandler
     public static void configureStackForPlacement(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
         // does not attempt to configure non super-blocks
-        if(!(stack.getItem() instanceof SuperItemBlock)) return;
+        if(!(stack.getItem() instanceof PlacementItem)) return;
 
         PlacementItem item = (PlacementItem)stack.getItem();
         
@@ -54,7 +54,7 @@ public class BlockOrientationHandler
         
         PlacementItem item = (PlacementItem)stack.getItem();
         
-        ISuperModelState modelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
 
         if(modelState.hasAxis())
         {
@@ -70,13 +70,13 @@ public class BlockOrientationHandler
             modelState.setAxisRotation(item.getBlockPlacementRotation(stack));
         }
         
-        PlacementItem.setStackModelState(stack, modelState);
+        SuperBlockStackHelper.setStackModelState(stack, modelState);
     }
 
     private static void applyClosestOrientation(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
         // find closest instance, starting with block placed on
-        ISuperModelState outputModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState outputModelState = SuperBlockStackHelper.getStackModelState(stack);
         ISuperModelState closestModelState = null;
         World world = player.world;
         IBlockState onBlockState = world.getBlockState(pPos.onPos);
@@ -154,13 +154,13 @@ public class BlockOrientationHandler
             }
         }
         
-        PlacementItem.setStackModelState(stack, outputModelState);
+        SuperBlockStackHelper.setStackModelState(stack, outputModelState);
     }
 
     /** handle hit-sensitive placement for stairs, wedges */
     public static void applyDynamicOrientation(ItemStack stack, EntityPlayer player, PlacementPosition pPos)
     {
-        ISuperModelState outputModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState outputModelState = SuperBlockStackHelper.getStackModelState(stack);
 
         boolean isRotationDone = false;
 
@@ -204,7 +204,7 @@ public class BlockOrientationHandler
                     Rotation.fromHorizontalFacing(player.getHorizontalFacing().getOpposite()));
         }
         
-        PlacementItem.setStackModelState(stack, outputModelState);
+        SuperBlockStackHelper.setStackModelState(stack, outputModelState);
     }
 }
 

@@ -86,11 +86,11 @@ public class ModBlocks
         workingModel.setShape(ModShapes.CUBE);
         workingModel.setTexture(PaintLayer.BASE, grondag.exotic_matter.init.ModTextures.BLOCK_COBBLE);
         workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
-        event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", ModSubstances.BASALT, workingModel));
+        event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", ModSubstances.BASALT, workingModel).setCreativeTab(HardScience.tabMod));
 
         if(Configurator.VOLCANO.enableVolcano)
         {
-            event.getRegistry().register(new VolcanoBlock());
+            event.getRegistry().register(new VolcanoBlock().setCreativeTab(HardScience.tabMod));
             
             
             workingModel = new ModelState();
@@ -100,8 +100,8 @@ public class ModBlocks
             workingModel.setTexture(PaintLayer.CUT, ModTextures.BIGTEX_BASALT_CUT);
             workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.COLOR_BASALT);
             
-            Block dynamicBasaltHeight = new TerrainDynamicBlock("basalt_cool_dynamic_height", ModSubstances.BASALT, workingModel.clone(), false);
-            Block staticBasaltHeight = new TerrainStaticBlock("basalt_cool_static_height", ModSubstances.BASALT, workingModel.clone(), false);
+            Block dynamicBasaltHeight = new TerrainDynamicBlock("basalt_cool_dynamic_height", ModSubstances.BASALT, workingModel.clone(), false).setCreativeTab(HardScience.tabMod);
+            Block staticBasaltHeight = new TerrainStaticBlock("basalt_cool_static_height", ModSubstances.BASALT, workingModel.clone(), false).setCreativeTab(HardScience.tabMod);
     
             event.getRegistry().register(dynamicBasaltHeight);
             event.getRegistry().register(staticBasaltHeight);
@@ -109,8 +109,8 @@ public class ModBlocks
             workingModel = workingModel.clone();
             workingModel.setShape(ModShapes.TERRAIN_FILLER);
     
-            Block dynamicBasaltFiller = new TerrainDynamicBlock("basalt_cool_dynamic_filler", ModSubstances.BASALT, workingModel.clone(), true);
-            Block staticBasaltFiller = new TerrainStaticBlock("basalt_cool_static_filler", ModSubstances.BASALT, workingModel.clone(), true);
+            Block dynamicBasaltFiller = new TerrainDynamicBlock("basalt_cool_dynamic_filler", ModSubstances.BASALT, workingModel.clone(), true).setCreativeTab(HardScience.tabMod);
+            Block staticBasaltFiller = new TerrainStaticBlock("basalt_cool_static_filler", ModSubstances.BASALT, workingModel.clone(), true).setCreativeTab(HardScience.tabMod);
     
             event.getRegistry().register(dynamicBasaltFiller);
             event.getRegistry().register(staticBasaltFiller);
@@ -125,7 +125,7 @@ public class ModBlocks
             workingModel.setShape(ModShapes.CUBE);
             workingModel.setTexture(PaintLayer.BASE, ModTextures.BIGTEX_BASALT_CUT_ZOOM);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.COLOR_BASALT);
-            Block cubicBasalt  = new TerrainCubicBlock("basalt_cut", ModSubstances.BASALT, workingModel.clone());
+            Block cubicBasalt  = new TerrainCubicBlock("basalt_cut", ModSubstances.BASALT, workingModel.clone()).setCreativeTab(HardScience.tabMod);
             event.getRegistry().register(cubicBasalt);
             
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerCubic(dynamicBasaltHeight, cubicBasalt);
@@ -143,11 +143,11 @@ public class ModBlocks
             workingModel.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VERMILLION, Chroma.ULTRA_ACCENT, Luminance.MEDIUM_DARK));
             workingModel.setFullBrightness(PaintLayer.MIDDLE, false);
             
-            Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", ModSubstances.VOLCANIC_LAVA, workingModel, false);
+            Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", ModSubstances.VOLCANIC_LAVA, workingModel, false).setCreativeTab(HardScience.tabMod);
             
             workingModel = workingModel.clone();
             workingModel.setShape(ModShapes.TERRAIN_FILLER);
-            Block dynamicLavaFiller = new LavaBlock("lava_dynamic_filler", ModSubstances.VOLCANIC_LAVA, workingModel, true);
+            Block dynamicLavaFiller = new LavaBlock("lava_dynamic_filler", ModSubstances.VOLCANIC_LAVA, workingModel, true).setCreativeTab(HardScience.tabMod);
     
             event.getRegistry().register(dynamicLavaHeight);
             event.getRegistry().register(dynamicLavaFiller);
@@ -155,29 +155,29 @@ public class ModBlocks
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicLavaHeight, dynamicLavaFiller);
             
             // COOLING BASALT
-            Block dynamicCoolingBasaltHeight = makeCoolingBasalt("basalt_dynamic_cooling_height", ModTextures.BIGTEX_BASALT_COOLING, false);
-            Block dynamicCoolingBasaltFiller = makeCoolingBasalt("basalt_dynamic_cooling_filler", ModTextures.BIGTEX_BASALT_COOLING, true);        
+            Block dynamicCoolingBasaltHeight = makeCoolingBasalt("basalt_dynamic_cooling_height", ModTextures.BIGTEX_BASALT_COOLING, false).setCreativeTab(HardScience.tabMod);
+            Block dynamicCoolingBasaltFiller = makeCoolingBasalt("basalt_dynamic_cooling_filler", ModTextures.BIGTEX_BASALT_COOLING, true).setCreativeTab(HardScience.tabMod);        
             event.getRegistry().register(dynamicCoolingBasaltHeight);
             event.getRegistry().register(dynamicCoolingBasaltFiller);
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicCoolingBasaltHeight, dynamicCoolingBasaltFiller);
     
             // WARM BASALT
-            Block dynamicWarmBasaltHeight = makeCoolingBasalt("basalt_dynamic_warm_height", ModTextures.BIGTEX_BASALT_WARM, false);
-            Block dynamicWarmBasaltFiller = makeCoolingBasalt("basalt_dynamic_warm_filler", ModTextures.BIGTEX_BASALT_WARM, true);        
+            Block dynamicWarmBasaltHeight = makeCoolingBasalt("basalt_dynamic_warm_height", ModTextures.BIGTEX_BASALT_WARM, false).setCreativeTab(HardScience.tabMod);
+            Block dynamicWarmBasaltFiller = makeCoolingBasalt("basalt_dynamic_warm_filler", ModTextures.BIGTEX_BASALT_WARM, true).setCreativeTab(HardScience.tabMod);        
             event.getRegistry().register(dynamicWarmBasaltHeight);
             event.getRegistry().register(dynamicWarmBasaltFiller);
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicWarmBasaltHeight, dynamicWarmBasaltFiller);
             
             // HOT BASALT
-            Block dynamicHotBasaltHeight = makeCoolingBasalt("basalt_dynamic_hot_height", ModTextures.BIGTEX_BASALT_HOT, false);
-            Block dynamicHotBasaltFiller = makeCoolingBasalt("basalt_dynamic_hot_filler", ModTextures.BIGTEX_BASALT_HOT, true);        
+            Block dynamicHotBasaltHeight = makeCoolingBasalt("basalt_dynamic_hot_height", ModTextures.BIGTEX_BASALT_HOT, false).setCreativeTab(HardScience.tabMod);
+            Block dynamicHotBasaltFiller = makeCoolingBasalt("basalt_dynamic_hot_filler", ModTextures.BIGTEX_BASALT_HOT, true).setCreativeTab(HardScience.tabMod);        
             event.getRegistry().register(dynamicHotBasaltHeight);
             event.getRegistry().register(dynamicHotBasaltFiller);
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicHotBasaltHeight, dynamicHotBasaltFiller);
             
             // VERY HOT BASALT
-            Block dynamicVeryHotBasaltHeight = makeCoolingBasalt("basalt_dynamic_very_hot_height", ModTextures.BIGTEX_BASALT_VERY_HOT, false);
-            Block dynamicVeryHotBasaltFiller = makeCoolingBasalt("basalt_dynamic_very_hot_filler", ModTextures.BIGTEX_BASALT_VERY_HOT, true);        
+            Block dynamicVeryHotBasaltHeight = makeCoolingBasalt("basalt_dynamic_very_hot_height", ModTextures.BIGTEX_BASALT_VERY_HOT, false).setCreativeTab(HardScience.tabMod);
+            Block dynamicVeryHotBasaltFiller = makeCoolingBasalt("basalt_dynamic_very_hot_filler", ModTextures.BIGTEX_BASALT_VERY_HOT, true).setCreativeTab(HardScience.tabMod);        
             event.getRegistry().register(dynamicVeryHotBasaltHeight);
             event.getRegistry().register(dynamicVeryHotBasaltFiller);
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicVeryHotBasaltHeight, dynamicVeryHotBasaltFiller);
@@ -185,28 +185,29 @@ public class ModBlocks
         
         event.getRegistry().register(new DepletedFluidBlock()
                 .setRegistryName("depleted_fluid")
-                .setUnlocalizedName("depeleted_fluid"));
+                .setUnlocalizedName("depeleted_fluid")
+                .setCreativeTab(HardScience.tabMod));
         
         // MACHINE BLOCKS
-        event.getRegistry().register(new SmartChestBlock("smart_chest", false));
-        event.getRegistry().register(new SmartChestBlock("smart_bin", true));
-        event.getRegistry().register(new BlockFabricatorBlock("block_fabricator"));
-        event.getRegistry().register(new PhotoElectricBlock("solar_cell"));
-        event.getRegistry().register(new SolarCableBlock("solar_cable"));
-        event.getRegistry().register(new BottomBusBlock("bottom_bus"));
-        event.getRegistry().register(new MiddleBusBlock("middle_bus"));
-        event.getRegistry().register(new TopBusBlock("top_bus"));
-        event.getRegistry().register(new ModularTankBlock("tank_single_wet", 100, true, ModFluids.PREDICATE_NORMAL_FLUIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_multi_wet", 50, false, ModFluids.PREDICATE_NORMAL_FLUIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_single_dry", 100, true, ModFluids.PREDICATE_BULK_SOLIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_multi_dry", 50, false, ModFluids.PREDICATE_BULK_SOLIDS));
-        event.getRegistry().register(new ModularTankBlock("tank_single_gas", 100, true, ModFluids.PREDICATE_LIGHT_PRESSURE));
-        event.getRegistry().register(new ModularTankBlock("tank_multi_gas", 50, false, ModFluids.PREDICATE_LIGHT_PRESSURE));
-        event.getRegistry().register(new ModularTankBlock("tank_single_pressure", 50, true, ModFluids.PREDICATE_HIGH_PRESSURE));
-        event.getRegistry().register(new WaterPumpBlock("water_pump"));
-        event.getRegistry().register(new ChemicalBatteryBlock("chemical_battery"));
-        event.getRegistry().register(new MicronizerBlock("micronizer"));
-        event.getRegistry().register(new DigesterBlock("digester"));
+        event.getRegistry().register(new SmartChestBlock("smart_chest", false).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new SmartChestBlock("smart_bin", true).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new BlockFabricatorBlock("block_fabricator").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new PhotoElectricBlock("solar_cell").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new SolarCableBlock("solar_cable").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new BottomBusBlock("bottom_bus").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new MiddleBusBlock("middle_bus").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new TopBusBlock("top_bus").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ModularTankBlock("tank_single_wet", 100, true, ModFluids.PREDICATE_NORMAL_FLUIDS).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ModularTankBlock("tank_multi_wet", 50, false, ModFluids.PREDICATE_NORMAL_FLUIDS).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ModularTankBlock("tank_single_dry", 100, true, ModFluids.PREDICATE_BULK_SOLIDS).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ModularTankBlock("tank_multi_dry", 50, false, ModFluids.PREDICATE_BULK_SOLIDS).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ModularTankBlock("tank_single_gas", 100, true, ModFluids.PREDICATE_LIGHT_PRESSURE).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ModularTankBlock("tank_multi_gas", 50, false, ModFluids.PREDICATE_LIGHT_PRESSURE).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ModularTankBlock("tank_single_pressure", 50, true, ModFluids.PREDICATE_HIGH_PRESSURE).setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new WaterPumpBlock("water_pump").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new ChemicalBatteryBlock("chemical_battery").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new MicronizerBlock("micronizer").setCreativeTab(HardScience.tabMod));
+        event.getRegistry().register(new DigesterBlock("digester").setCreativeTab(HardScience.tabMod));
     }
     
     private static Block makeCoolingBasalt(String name, ITexturePalette tex, boolean  isFiller) 
@@ -220,7 +221,7 @@ public class ModBlocks
         model.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         model.setMiddleLayerEnabled(true);
         
-        return new CoolingBasaltBlock(name, ModSubstances.BASALT, model, isFiller).setAllowSilkHarvest(false);
+        return new CoolingBasaltBlock(name, ModSubstances.BASALT, model, isFiller).setAllowSilkHarvest(false).setCreativeTab(HardScience.tabMod);
     }
     
     public static void init(FMLInitializationEvent event) 

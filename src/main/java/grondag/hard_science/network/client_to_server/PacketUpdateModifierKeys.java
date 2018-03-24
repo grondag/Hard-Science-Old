@@ -1,7 +1,7 @@
 package grondag.hard_science.network.client_to_server;
 
 
-import grondag.hard_science.network.AbstractPlayerToServerPacket;
+import grondag.exotic_matter.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.player.ModPlayerCaps;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;

@@ -2,6 +2,7 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.block.SuperTileEntity;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
@@ -15,7 +16,6 @@ import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
-import grondag.hard_science.superblock.block.SuperTileEntity;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;

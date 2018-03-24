@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.network.AbstractServerToPlayerPacket;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
-import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;

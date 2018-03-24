@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.font.FontHolder;
+import grondag.exotic_matter.font.RasterFont;
 import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.render.EnhancedSprite;
 import grondag.exotic_matter.render.QuadBakery;
@@ -25,7 +27,6 @@ import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.moving.RasterFont;
 import grondag.hard_science.superblock.block.SuperItemBlock;
 import grondag.hard_science.machines.support.MachineStatusState;
 import net.minecraft.block.state.IBlockState;
@@ -214,7 +215,7 @@ public class MachineControlRenderer
             TextureAtlasSprite sprite, int color, Rotation rotation)
     {
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+        GlStateManager.bindTexture(TextureHelper.blockGlTextureId());
         TextureHelper.setTextureBlurMipmap(true, true);
         final float margin = (sprite.getMaxU() - sprite.getMinU()) * QuadBakery.UV_EPS;
 
@@ -786,7 +787,7 @@ public class MachineControlRenderer
             
             renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), ModTextures.DECAL_ELECTRICITY.getSampleSprite(), alphaShifted | ModModels.COLOR_POWER, Rotation.ROTATE_NONE); 
 
-            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+            renderMachineText(tessellator, buffer, FontHolder.FONT_RENDERER_SMALL,
                     new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.77, bounds.width(), bounds.height() * 0.25),
                     MachinePower.formatPower(Math.round(mpi.deviceDrawWatts()), false), HorizontalAlignment.CENTER, alphaShifted | ModModels.COLOR_POWER);
         }
@@ -824,7 +825,7 @@ public class MachineControlRenderer
         }
         renderSpriteInBounds(tessellator, buffer, bounds.innerBounds(), ModTextures.DECAL_FLAME.getSampleSprite(), alphaShifted | ModModels.COLOR_FUEL_CELL, Rotation.ROTATE_NONE); 
 
-        renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+        renderMachineText(tessellator, buffer, FontHolder.FONT_RENDERER_SMALL,
                 new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
                 MachinePower.formatPower(Math.round(output), false), HorizontalAlignment.CENTER, alphaShifted | ModModels.COLOR_FUEL_CELL);
         
@@ -862,7 +863,7 @@ public class MachineControlRenderer
             int arcLength = Math.min(180, (int)(xmpi.netStorageWatts() * 180 / xmpi.maxChargeWatts()));
             renderRadialSprite(tessellator, buffer, bounds, 270, arcLength, ModTextures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
             
-            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
+            renderMachineText(tessellator, buffer, FontHolder.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
                     MachinePower.formatPower(Math.round(xmpi.netStorageWatts()), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
         }
         else if(xmpi.netStorageWatts() < 0 && xmpi.maxDischargeWatts() > 0)
@@ -870,7 +871,7 @@ public class MachineControlRenderer
             int arcLength = (int)(-xmpi.netStorageWatts() * 180 / xmpi.maxDischargeWatts());
             renderRadialSprite(tessellator, buffer, bounds, 450 - arcLength, arcLength, ModTextures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
             
-            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
+            renderMachineText(tessellator, buffer, FontHolder.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
                     MachinePower.formatPower((long) -xmpi.netStorageWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
         }
 
@@ -888,7 +889,7 @@ public class MachineControlRenderer
             tessellator.draw();
         }
             
-        renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+        renderMachineText(tessellator, buffer, FontHolder.FONT_RENDERER_SMALL,
                 new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
                 MachinePower.formatEnergy((long) xmpi.storedEnergyJoules(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
         
@@ -1102,8 +1103,8 @@ public class MachineControlRenderer
         
         // set up the stuff that block rendering would need/expect
         IBakedModel bakedmodel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, null, null);
-        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-        ModModels.ITEX_BLOCKS.setBlurMipmap(false, false);
+        GlStateManager.bindTexture(TextureHelper.blockGlTextureId());
+        TextureHelper.blockGlTextureObject().setBlurMipmap(false, false);
         GlStateManager.enableAlpha();
         GlStateManager.alphaFunc(516, 0.1F);
         GlStateManager.enableBlend();
@@ -1157,8 +1158,8 @@ public class MachineControlRenderer
         GlStateManager.disableAlpha();
         GlStateManager.disableRescaleNormal();
         GlStateManager.disableLighting();
-        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-        ModModels.ITEX_BLOCKS.restoreLastBlurMipmap();
+        GlStateManager.bindTexture(TextureHelper.blockGlTextureId());
+        TextureHelper.blockGlTextureObject().restoreLastBlurMipmap();
         GlStateManager.enableRescaleNormal();
         
         GlStateManager.popMatrix();
@@ -1167,7 +1168,7 @@ public class MachineControlRenderer
     
     public static void setupMachineRendering()
     {
-        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+        GlStateManager.bindTexture(TextureHelper.blockGlTextureId());
         TextureHelper.setTextureBlurMipmap(true, true);
         GlStateManager.disableLighting();
         GlStateManager.enableBlend();

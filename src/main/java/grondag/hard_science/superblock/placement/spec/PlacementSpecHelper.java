@@ -1,10 +1,11 @@
 package grondag.hard_science.superblock.placement.spec;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.StateFormat;
-import grondag.hard_science.superblock.block.BlockOrientationHandler;
-import grondag.hard_science.superblock.block.PlacementPosition;
+import grondag.hard_science.superblock.blockmovetest.BlockOrientationHandler;
 import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -47,7 +48,7 @@ public class PlacementSpecHelper
             case COMPLETE_REGION:
             case FILL_REGION:
             case HOLLOW_REGION:
-                ISuperModelState modelState = PlacementItem.getStackModelState(placedStack);
+                ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(placedStack);
                 if(modelState != null && modelState.getShape().meshFactory().stateFormat == StateFormat.MULTIBLOCK)
                 {
                     return new CSGBuilder(placedStack, player, pPos);

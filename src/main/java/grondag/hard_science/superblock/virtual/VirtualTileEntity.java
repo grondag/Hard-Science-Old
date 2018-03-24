@@ -1,9 +1,9 @@
 package grondag.hard_science.superblock.virtual;
 
+import grondag.exotic_matter.block.SuperModelTileEntity;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.placement.Build;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;

@@ -1,9 +1,11 @@
 package grondag.hard_science.network.client_to_server;
 
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelState;
+import grondag.exotic_matter.network.AbstractPlayerToServerPacket;
 import grondag.exotic_matter.placement.BlockOrientationAxis;
 import grondag.exotic_matter.placement.BlockOrientationCorner;
 import grondag.exotic_matter.placement.BlockOrientationEdge;
@@ -12,7 +14,6 @@ import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.RegionOrientation;
 import grondag.exotic_matter.placement.SpeciesMode;
 import grondag.exotic_matter.placement.TargetMode;
-import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -52,11 +53,11 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
     {
         this.meta = stack.getItemDamage();
         
-        this.modelState = PlacementItem.getStackModelState(stack);
+        this.modelState = SuperBlockStackHelper.getStackModelState(stack);
         if(this.modelState == null) this.modelState = new ModelState();
         
-        this.blockSubstance = PlacementItem.getStackSubstance(stack);
-        this.lightValue = PlacementItem.getStackLightValue(stack);
+        this.blockSubstance = SuperBlockStackHelper.getStackSubstance(stack);
+        this.lightValue = SuperBlockStackHelper.getStackLightValue(stack);
         
         if(PlacementItem.isPlacementItem(stack))
         {
@@ -127,9 +128,9 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
         if(PlacementItem.isPlacementItem(heldStack))
         {
             heldStack.setItemDamage(message.meta);
-            PlacementItem.setStackModelState(heldStack, message.modelState);
-            PlacementItem.setStackSubstance(heldStack, message.blockSubstance);
-            PlacementItem.setStackLightValue(heldStack, message.lightValue);
+            SuperBlockStackHelper.setStackModelState(heldStack, message.modelState);
+            SuperBlockStackHelper.setStackSubstance(heldStack, message.blockSubstance);
+            SuperBlockStackHelper.setStackLightValue(heldStack, message.lightValue);
             PlacementItem item = (PlacementItem)heldStack.getItem();
             item.setTargetMode(heldStack, message.mode);
             item.setBlockOrientationAxis(heldStack, message.axis);

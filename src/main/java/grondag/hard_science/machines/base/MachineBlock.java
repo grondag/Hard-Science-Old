@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.block.SuperBlockPlus;
 import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.Chroma;
@@ -18,7 +19,6 @@ import grondag.exotic_matter.model.WorldLightOpacity;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.superblock.block.SuperBlockPlus;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;

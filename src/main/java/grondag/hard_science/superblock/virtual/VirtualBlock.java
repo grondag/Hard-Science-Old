@@ -7,15 +7,15 @@ import java.util.Random;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.WorldLightOpacity;
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
-import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import grondag.hard_science.superblock.placement.Build;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
@@ -73,9 +73,9 @@ public class VirtualBlock extends SuperModelBlock
         
         ItemStack result = smb.getSubItems().get(vBlock.getMetaFromState(blockState)).copy();
         
-        PlacementItem.setStackModelState(result, modelState);
-        PlacementItem.setStackLightValue(result, vte.getLightValue());
-        PlacementItem.setStackSubstance(result, vte.getSubstance());
+        SuperBlockStackHelper.setStackModelState(result, modelState);
+        SuperBlockStackHelper.setStackLightValue(result, vte.getLightValue());
+        SuperBlockStackHelper.setStackSubstance(result, vte.getSubstance());
         
         return result;
     }
@@ -481,7 +481,7 @@ public class VirtualBlock extends SuperModelBlock
             world.setBlockState(pos, net.minecraft.init.Blocks.AIR.getDefaultState(), 11);
             
             // have to send to server also, because server will see block is air and ignore the digging packet it gets
-            ModMessages.INSTANCE.sendToServer(new PacketDestroyVirtualBlock(pos));
+            PacketHandler.CHANNEL.sendToServer(new PacketDestroyVirtualBlock(pos));
         }
         return true;
     }

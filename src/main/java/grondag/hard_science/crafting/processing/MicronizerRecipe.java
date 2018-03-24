@@ -9,6 +9,7 @@ import org.magicwerk.brownies.collections.Key2List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.HardScience;
@@ -24,7 +25,6 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.PowerResource;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import mezz.jei.api.IGuiHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
@@ -276,7 +276,7 @@ public class MicronizerRecipe
         public Long apply(ItemStack stack)
         {
             double volume = 0;
-            ISuperModelState modelState = PlacementItem.getStackModelState(stack);
+            ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
             if(modelState == null) return 0L;
             for(AxisAlignedBB box : modelState.getShape().meshFactory().collisionHandler().getCollisionBoxes(modelState))
             {

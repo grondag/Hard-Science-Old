@@ -8,6 +8,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.block.SuperBlock;
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
@@ -19,9 +21,8 @@ import grondag.exotic_matter.world.WorldHelper;
 import grondag.hard_science.Log;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.player.ModPlayerCaps.ModifierKey;
-import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -62,7 +63,7 @@ public class CubicPlacementHandler extends PlacementHandler
         
         SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
-        ISuperModelState stackModelState = PlacementItem.getStackModelState(stack);
+        ISuperModelState stackModelState = SuperBlockStackHelper.getStackModelState(stack);
 
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
@@ -203,7 +204,7 @@ public class CubicPlacementHandler extends PlacementHandler
             stackModelState.setSpecies(species);
             result.setItemDamage(stackModelState.getMetaData());
         }
-        PlacementItem.setStackModelState(result, stackModelState);
+        SuperBlockStackHelper.setStackModelState(result, stackModelState);
  
         return ImmutableList.of(Pair.of(posPlaced, result));
     }

@@ -1,10 +1,11 @@
 package grondag.hard_science.init;
 
+import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.BlockRenderMode;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.WorldLightOpacity;
-import grondag.hard_science.superblock.block.SuperModelBlock;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -33,7 +34,7 @@ public class ModSuperModelBlocks
         {
             virtualBlocks[blockRenderMode.ordinal()]
                     = (VirtualBlock) new VirtualBlock("virtual_block" + virualBlockIndex++, blockRenderMode)
-                        .setUnlocalizedName("virtual_block"); //all virtual blocks have same display name
+                        .setUnlocalizedName("virtual_block").setCreativeTab(HardScience.tabMod); //all virtual blocks have same display name
             event.getRegistry().register(virtualBlocks[blockRenderMode.ordinal()]);
             
             for(WorldLightOpacity opacity : WorldLightOpacity.values())
@@ -41,25 +42,25 @@ public class ModSuperModelBlocks
                 // mundane non-cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][0]
                         = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, false, false)
-                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
+                            .setUnlocalizedName("super_model_block").setCreativeTab(HardScience.tabMod); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][0]);
                 
                 // mundane cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][1]
                         = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, false, true)
-                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
+                            .setUnlocalizedName("super_model_block").setCreativeTab(HardScience.tabMod); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][1]);
                 
                 // hypermatter non-cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][0]
                         = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, true, false)
-                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
+                            .setUnlocalizedName("super_model_block").setCreativeTab(HardScience.tabMod); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][0]);
                 
                 // hypermatter cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][1]
                         = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, true, true)
-                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
+                            .setUnlocalizedName("super_model_block").setCreativeTab(HardScience.tabMod); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][1]);
                 
             }

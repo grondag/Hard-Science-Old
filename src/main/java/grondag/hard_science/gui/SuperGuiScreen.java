@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 
 import org.lwjgl.input.Mouse;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ITexturePalette;
@@ -18,6 +19,7 @@ import grondag.exotic_matter.model.PaintLayer;
 import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.model.ColorMap.EnumColorMap;
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.gui.control.BrightnessSlider;
 import grondag.hard_science.gui.control.Button;
@@ -35,10 +37,8 @@ import grondag.hard_science.gui.control.VisiblitySelector;
 import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -131,15 +131,15 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             hasUpdates = shapeGui.saveSettings(modelState) || hasUpdates;
         }
 
-        if(brightnessSlider.getBrightness() != PlacementItem.getStackLightValue(itemPreview.previewItem))
+        if(brightnessSlider.getBrightness() != SuperBlockStackHelper.getStackLightValue(itemPreview.previewItem))
         {
-            PlacementItem.setStackLightValue(itemPreview.previewItem, brightnessSlider.getBrightness());
+            SuperBlockStackHelper.setStackLightValue(itemPreview.previewItem, brightnessSlider.getBrightness());
             hasUpdates = true;
         }
 
-        if(materialPicker.getSubstance() != PlacementItem.getStackSubstance(itemPreview.previewItem))
+        if(materialPicker.getSubstance() != SuperBlockStackHelper.getStackSubstance(itemPreview.previewItem))
         {
-            PlacementItem.setStackSubstance(itemPreview.previewItem, materialPicker.getSubstance());
+            SuperBlockStackHelper.setStackSubstance(itemPreview.previewItem, materialPicker.getSubstance());
             baseTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
             lampTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
             translucencyPicker.setVisible(materialPicker.getSubstance().isTranslucent);
@@ -203,7 +203,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         if(hasUpdates)
         {
             this.itemPreview.previewItem.setItemDamage(this.modelState.getMetaData());
-            PlacementItem.setStackModelState(itemPreview.previewItem, modelState);
+            SuperBlockStackHelper.setStackModelState(itemPreview.previewItem, modelState);
         }
     }
 
@@ -296,7 +296,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
     {
         if(hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {
-            ModMessages.INSTANCE.sendToServer(new PacketConfigurePlacementItem(itemPreview.previewItem));
+            PacketHandler.CHANNEL.sendToServer(new PacketConfigurePlacementItem(itemPreview.previewItem));
             hasUpdates = false;
         }
         mc.displayGuiScreen((GuiScreen)null);
@@ -340,7 +340,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
                 return;
             }
             //            this.meta = this.itemPreview.previewItem.getMetadata();
-            modelState = PlacementItem.getStackModelState(itemPreview.previewItem);
+            modelState = SuperBlockStackHelper.getStackModelState(itemPreview.previewItem);
         }
 
         // abort on strangeness
@@ -458,9 +458,9 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
     private void loadControlValuesFromModelState()
     {
-        materialPicker.setSubstance(PlacementItem.getStackSubstance(itemPreview.previewItem));
+        materialPicker.setSubstance(SuperBlockStackHelper.getStackSubstance(itemPreview.previewItem));
         shapePicker.setSelected(modelState.getShape());
-        brightnessSlider.setBrightness(PlacementItem.getStackLightValue(itemPreview.previewItem));
+        brightnessSlider.setBrightness(SuperBlockStackHelper.getStackLightValue(itemPreview.previewItem));
         outerToggle.setOn(modelState.isOuterLayerEnabled());
         middleToggle.setOn(modelState.isMiddleLayerEnabled());
         baseTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.BASE));

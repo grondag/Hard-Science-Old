@@ -8,17 +8,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.network.PacketHandler;
+import grondag.exotic_matter.simulator.WorldTaskManager;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.world.IntegerAABB;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.jobs.AbstractPositionedTask;
 import grondag.hard_science.simulator.jobs.AbstractTask;
 import grondag.hard_science.simulator.jobs.ITaskListener;
 import grondag.hard_science.simulator.jobs.Job;
-import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
 import grondag.hard_science.simulator.jobs.tasks.PlacementTask;
 import grondag.hard_science.superblock.placement.BuildManager;
@@ -375,7 +375,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
                     {
                         for(EntityPlayerMP player : listeners)
                         {
-                            ModMessages.INSTANCE.sendTo(packet, player);
+                            PacketHandler.CHANNEL.sendTo(packet, player);
                         }
                     }
                 }

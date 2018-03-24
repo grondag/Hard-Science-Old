@@ -3,10 +3,15 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.block.SuperBlock;
+import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperTileEntity;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.PlacementItemFeature;
+import grondag.hard_science.superblock.blockmovetest.BlockOrientationHandler;
 import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.BlockFaceShape;
@@ -173,7 +178,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
        }
        
    
-       ISuperModelState modelState = PlacementItem.getStackModelState(stackIn);
+       ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stackIn);
        if(modelState == null) return EnumActionResult.FAIL;
 
        AxisAlignedBB axisalignedbb = modelState.getShape().meshFactory().collisionHandler()

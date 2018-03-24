@@ -5,11 +5,12 @@ import javax.annotation.Nullable;
 
 import com.mojang.realmsclient.util.Pair;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
-import grondag.exotic_matter.model.ModelState;
 import grondag.exotic_matter.placement.BlockOrientationAxis;
 import grondag.exotic_matter.placement.BlockOrientationCorner;
 import grondag.exotic_matter.placement.BlockOrientationEdge;
@@ -28,9 +29,6 @@ import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.placement.PlacementHandler;
-import grondag.hard_science.superblock.placement.PlacementResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -57,12 +55,10 @@ public interface PlacementItem
     // STATIC MEMBERS
     /////////////////////////////////////////////////////
     
-    public final static String NBT_MODEL_STATE = NBTDictionary.claim("stackModelState");
     public final static String NBT_REGION_FLOATING_RANGE = NBTDictionary.claim("floatingRegionRange");
     public final static String NBT_REGION_SIZE = NBTDictionary.claim("regionSize");
     public final static String NBT_FIXED_REGION_ENABLED = NBTDictionary.claim("fixedRegionOn");
     public final static String NBT_FIXED_REGION_SELECT_POS = NBTDictionary.claim("fixedRegionPos");
-    public final static String NBT_SUPERMODEL_LIGHT_VALUE = NBTDictionary.claim("smLight");
     
     public static BinaryEnumSet<PlacementItemFeature> BENUMSET_FEATURES = new BinaryEnumSet<PlacementItemFeature>(PlacementItemFeature.class);
     
@@ -95,63 +91,6 @@ public interface PlacementItem
         return isPlacementItem(stack) ? (PlacementItem)stack.getItem() : null;
     }
     
-    public static ISuperModelState getStackModelState(ItemStack stack)
-    {
-        ISuperModelState stackState = stack.hasTagCompound()
-                ? ModelState.deserializeFromNBTIfPresent(stack.getTagCompound().getCompoundTag(NBT_MODEL_STATE))
-                : null;
-        
-        //WAILA or other mods might create a stack with no NBT
-        if(stackState != null) return stackState;
-        
-        if(stack.getItem() instanceof SuperItemBlock)
-        {
-            return ((ISuperBlock)((SuperItemBlock)stack.getItem()).getBlock()).getDefaultModelState();
-        }
-        
-        return null;
-    }
-    
-    public static void setStackModelState(ItemStack stack, ISuperModelState modelState)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        if(modelState == null)
-        {
-            if(tag != null) tag.removeTag(NBT_MODEL_STATE);
-            return;
-        }
-        
-        if(tag == null)
-        {
-            tag = new NBTTagCompound();
-            stack.setTagCompound(tag);
-        }
-        
-        tag.setTag(NBT_MODEL_STATE, modelState.serializeNBT());
-    }
-    
-    public static void setStackLightValue(ItemStack stack, int lightValue)
-    {
-        // important that the tag used here matches that used in tile entity
-        Useful.getOrCreateTagCompound(stack).setByte(NBT_SUPERMODEL_LIGHT_VALUE, (byte)lightValue);
-    }
-    
-    public static byte getStackLightValue(ItemStack stack)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        // important that the tag used here matches that used in tile entity
-        return tag == null ? 0 : tag.getByte(NBT_SUPERMODEL_LIGHT_VALUE);
-    }
-
-    public static void setStackSubstance(ItemStack stack, BlockSubstance substance)
-    {
-        if(substance != null) substance.serializeNBT(Useful.getOrCreateTagCompound(stack));
-    }
-    
-    public static BlockSubstance getStackSubstance(ItemStack stack)
-    {
-        return BlockSubstance.deserializeNBT(stack.getTagCompound());
-    }
     
     /////////////////////////////////////////////////////
     // ABSTRACT MEMBERS
@@ -220,7 +159,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return EnumFacing.Axis.Y;
 
-        ISuperModelState modelState = getStackModelState(stack);
+        ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
         if(modelState == null) return EnumFacing.Axis.Y;
         
         switch(modelState.orientationType())
@@ -250,7 +189,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return false;
 
-        switch(getStackModelState(stack).orientationType())
+        switch(SuperBlockStackHelper.getStackModelState(stack).orientationType())
         {
         case AXIS:
             return false;
@@ -275,7 +214,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return Rotation.ROTATE_NONE;
 
-        switch(getStackModelState(stack).orientationType())
+        switch(SuperBlockStackHelper.getStackModelState(stack).orientationType())
         {
             case EDGE:
                 return this.getBlockOrientationEdge(stack).edge.modelRotation;
@@ -298,7 +237,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return false;
 
-        switch(getStackModelState(stack).orientationType())
+        switch(SuperBlockStackHelper.getStackModelState(stack).orientationType())
         {
         case AXIS:
             return getBlockOrientationAxis(stack) == BlockOrientationAxis.DYNAMIC;
@@ -325,7 +264,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return false;
 
-        switch(getStackModelState(stack).orientationType())
+        switch(SuperBlockStackHelper.getStackModelState(stack).orientationType())
         {
         case AXIS:
             return getBlockOrientationAxis(stack).isFixed();
@@ -352,7 +291,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return false;
 
-        switch(getStackModelState(stack).orientationType())
+        switch(SuperBlockStackHelper.getStackModelState(stack).orientationType())
         {
         case AXIS:
             return getBlockOrientationAxis(stack) == BlockOrientationAxis.MATCH_CLOSEST;
@@ -464,7 +403,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return false;
         
-        switch(getStackModelState(stack).orientationType())
+        switch(SuperBlockStackHelper.getStackModelState(stack).orientationType())
         {
         case AXIS:
             cycleBlockOrientationAxis(stack, reverse);
@@ -496,7 +435,7 @@ public interface PlacementItem
     {
         if(!isBlockOrientationSupported(stack)) return "NOT SUPPORTED";
         
-        switch(getStackModelState(stack).orientationType())
+        switch(SuperBlockStackHelper.getStackModelState(stack).orientationType())
         {
         case AXIS:
             return getBlockOrientationAxis(stack).localizedName();
@@ -645,14 +584,14 @@ public interface PlacementItem
         
         if(item instanceof SuperItemBlock)
         {
-            ISuperModelState modelState = getStackModelState(stack);
+            ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);
             if(modelState == null) return null;
 
             ISuperBlock targetBlock = ((ISuperBlock)((SuperItemBlock)stack.getItem()).getBlock());
             
             if(!targetBlock.isVirtual() && targetBlock instanceof SuperModelBlock)
             {
-                BlockSubstance substance = getStackSubstance(stack);
+                BlockSubstance substance = SuperBlockStackHelper.getStackSubstance(stack);
                 if(substance == null) return null;
                 targetBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(substance, modelState);
             }

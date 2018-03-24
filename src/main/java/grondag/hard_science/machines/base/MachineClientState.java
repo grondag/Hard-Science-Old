@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.base;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
@@ -7,8 +9,6 @@ import grondag.hard_science.machines.matbuffer.ClientBufferInfo;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
-import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -131,9 +131,9 @@ public class MachineClientState
             
             SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(controlState.getSubstance(), controlState.getModelState());
             result = newBlock.getSubItems().get(0);
-            PlacementItem.setStackLightValue(result, controlState.getLightValue());
-            PlacementItem.setStackSubstance(result, controlState.getSubstance());
-            PlacementItem.setStackModelState(result, controlState.getModelState());
+            SuperBlockStackHelper.setStackLightValue(result, controlState.getLightValue());
+            SuperBlockStackHelper.setStackSubstance(result, controlState.getSubstance());
+            SuperBlockStackHelper.setStackModelState(result, controlState.getModelState());
             this.statusStack = result;
         }
         return result;

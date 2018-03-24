@@ -1,5 +1,7 @@
 package grondag.hard_science.init;
 
+import grondag.exotic_matter.block.SuperModelTileEntity;
+import grondag.exotic_matter.block.SuperTileEntity;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -8,8 +10,6 @@ import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
 import grondag.hard_science.machines.impl.logistics.ChemicalBatteryTileEntity;
 import grondag.hard_science.machines.impl.processing.DigesterTileEntity;
 import grondag.hard_science.machines.impl.processing.MicronizerTileEntity;
-import grondag.hard_science.superblock.block.SuperModelTileEntity;
-import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.virtual.VirtualTileEntity;
 import grondag.hard_science.volcano.VolcanoTileEntity;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;

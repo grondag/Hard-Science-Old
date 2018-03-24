@@ -2,6 +2,7 @@ package grondag.hard_science;
 
 import java.util.IdentityHashMap;
 
+import grondag.exotic_matter.init.ConfigPathNodeType;
 import grondag.exotic_matter.init.SubstanceConfig;
 import grondag.exotic_matter.model.BlockHarvestTool;
 import net.minecraft.block.Block;
@@ -61,7 +62,7 @@ public class Configurator
 
         public SubstanceConfig hyperglass = new SubstanceConfig(10, BlockHarvestTool.PICK, 3, 200, 1.3);
 
-        public SubstanceConfig flexwood = new SubstanceConfig(2, BlockHarvestTool.AXE, 1, 10, 1.0);
+        public SubstanceConfig flexwood = new SubstanceConfig(2, BlockHarvestTool.AXE, 1, 10, 1.0).withFlammability(1);
 
         public SubstanceConfig durawood = new SubstanceConfig(4, BlockHarvestTool.AXE, 2, 50, 1.15);
 
@@ -71,7 +72,7 @@ public class Configurator
 
         public SubstanceConfig hdpe = new SubstanceConfig(2, BlockHarvestTool.AXE, 1, 10, 1.0);
 
-        public SubstanceConfig volcanicLava = new SubstanceConfig(-1, BlockHarvestTool.SHOVEL, 3, 2000, 0.75);
+        public SubstanceConfig volcanicLava = new SubstanceConfig(-1, BlockHarvestTool.SHOVEL, 3, 2000, 0.75).setBurning().withPathNodeType(ConfigPathNodeType.LAVA);
     }    
 
 
@@ -275,31 +276,6 @@ public class Configurator
                 }
             }
         }
-    }
-
-    ////////////////////////////////////////////////////        
-    // HYPERSTONE
-    ////////////////////////////////////////////////////
-    @LangKey("config.hypermaterial")
-    @Comment("Settings for hyperdimensional building materials.")
-    public static HyperStone HYPERSTONE = new HyperStone();
-
-    public static class HyperStone
-    {
-        @Comment("If false, mobs cannot spawn on hyper-dimensional blocks in darkness; similar to slabs.")
-        public boolean allowMobSpawning = false;
-
-        @Comment("If false, normal fires directly above hyper-dimensional blocks are immediately extinguished.")
-        public boolean allowFire = false;
-
-        @Comment("If false, players cannot harvest hyper-dimensional blocks without silk touch - they can be broken but drop rubble.")
-        public boolean allowHarvest = false;
-
-        @Comment("If true, hyper-dimensional blocks can be harvested intact with silk touch. Only matters if allowHarvest is true.")
-        public boolean allowSilkTouch = true;
-
-        @Comment("If true, hyper-dimensional blocks have a chance to lose durability due to damage from entities or explosions.")
-        public boolean canBeDamaged;
     }
 
     ////////////////////////////////////////////////////        

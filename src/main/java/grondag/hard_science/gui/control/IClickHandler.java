@@ -2,9 +2,9 @@ package grondag.hard_science.gui.control;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.varia.ItemHelper;
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction.Action;
 import grondag.hard_science.simulator.resource.ItemResourceDelegate;
@@ -68,7 +68,7 @@ public interface IClickHandler<T>
                 }
             }
             
-            if(action != null) ModMessages.INSTANCE.sendToServer(new PacketOpenContainerStorageInteraction(action, target));
+            if(action != null) PacketHandler.CHANNEL.sendToServer(new PacketOpenContainerStorageInteraction(action, target));
         }
 
         @Override

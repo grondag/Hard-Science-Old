@@ -2,6 +2,7 @@ package grondag.hard_science.volcano.lava.simulator;
 
 import java.util.Collection;
 
+import grondag.exotic_matter.block.SuperBlock;
 import grondag.exotic_matter.concurrency.CountedJob;
 import grondag.exotic_matter.concurrency.CountedJobTask;
 import grondag.exotic_matter.concurrency.Job;
@@ -20,7 +21,6 @@ import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.volcano.lava.AgedBlockPos;
 import grondag.hard_science.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.volcano.lava.EntityLavaBlob;

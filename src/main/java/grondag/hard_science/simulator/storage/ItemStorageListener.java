@@ -14,9 +14,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.eventbus.Subscribe;
 
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.simulator.domain.Domain;
 import grondag.exotic_matter.simulator.domain.IDomain;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -189,7 +189,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             return;
         }
         this.domain.eventBus().register(this);
-        ModMessages.INSTANCE.sendTo(
+        PacketHandler.CHANNEL.sendTo(
                 new PacketOpenContainerItemStorageRefresh(
                         ImmutableList.copyOf(map.values()), this.totalCapacity, true), player);
     }
@@ -273,7 +273,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         case STORE:
             if(this.stores.contains(event.storage))
             {
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(
                         ImmutableList.of(this.changeQuantity(event.resource, event.delta)),
                         this.totalCapacity, 
                         false), player);
@@ -281,7 +281,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             break;
             
         case DOMAIN:
-            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+            PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(
                     ImmutableList.of(this.changeQuantity(event.resource, event.delta)),
                     this.totalCapacity, 
                     false), player);
@@ -313,7 +313,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                     HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map = new HashMap<IResource<StorageTypeStack>, ItemResourceDelegate>();
                     this.addStore((ItemContainer) event.storage, map);
                     this.stores.add((ItemContainer) event.storage);
-                    ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                    PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(
                             ImmutableList.copyOf(map.values()), this.totalCapacity, false), player);
             }
             break;
@@ -323,7 +323,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         {
             HashMap<IResource<StorageTypeStack>, ItemResourceDelegate> map = new HashMap<IResource<StorageTypeStack>, ItemResourceDelegate>();
             this.addStore((ItemContainer) event.storage, map);
-            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+            PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(
                     ImmutableList.copyOf(map.values()), this.totalCapacity, false), player);
             break;
         }
@@ -353,7 +353,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             {
                 this.slots.clear();
                 this.totalCapacity = 0;
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, true), player);
+                PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, true), player);
                 this.die();
             }
             else if(this.stores.contains(event.storage) 
@@ -362,7 +362,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
                     ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
                     this.removeStore((ItemContainer) event.storage, builder);
                     this.stores.remove((ItemContainer) event.storage);
-                    ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+                    PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(
                             builder.build(), this.totalCapacity, false), player);
                 
             }
@@ -373,7 +373,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
         {
             ImmutableList.Builder<ItemResourceDelegate> builder = ImmutableList.builder();
             this.removeStore((ItemContainer) event.storage, builder);
-            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(
+            PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(
                     builder.build(), this.totalCapacity, false), player);
             break;
         }
@@ -383,7 +383,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             {
                 this.slots.clear();
                 this.totalCapacity = 0;
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, true), player);
+                PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, true), player);
                 this.die();
             }
             break;
@@ -405,20 +405,20 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
             if(this.stores.contains(event.storage))
             {
                 this.totalCapacity += event.delta;
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
+                PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
             }
             break;
             
         case DOMAIN:
             this.totalCapacity += event.delta;
-            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
+            PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
             break;
             
         case STORE:
             if(event.storage == this.storage)
             {
                 this.totalCapacity = event.storage.getCapacity();
-                ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
+                PacketHandler.CHANNEL.sendTo(new PacketOpenContainerItemStorageRefresh(ImmutableList.of(), this.totalCapacity, false), player);
             }
             break;
             

@@ -4,12 +4,13 @@ import static grondag.exotic_matter.placement.PlacementPreviewRenderMode.OBSTRUC
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.placement.TargetMode;
-import grondag.hard_science.superblock.block.PlacementPosition;
 import grondag.hard_science.superblock.blockmovetest.PlacementItem;
+import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -111,7 +112,7 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
      */
     protected ISuperModelState previewModelState()
     {
-        return PlacementItem.getStackModelState(this.heldStack);
+        return SuperBlockStackHelper.getStackModelState(this.heldStack);
     }
     
     public ItemStack placedStack()

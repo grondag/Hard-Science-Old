@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import grondag.exotic_matter.block.SuperBlock;
+import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.world.WorldHelper;
-import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperItemBlock;
+import grondag.hard_science.superblock.blockmovetest.PlacementHandler;
 import grondag.hard_science.superblock.blockmovetest.PlacementItem;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
 import net.minecraft.block.state.IBlockState;
@@ -53,7 +55,7 @@ public class AdditivePlacementHandler extends PlacementHandler
             return CubicPlacementHandler.INSTANCE.getPlacementResults(playerIn, worldIn, posOn, hand, facing, hitX, hitY, hitZ, stack);
 
         final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).getBlock();
-        final ISuperModelState stackModelState = PlacementItem.getStackModelState(stack);
+        final ISuperModelState stackModelState = SuperBlockStackHelper.getStackModelState(stack);
 
         final IBlockState onBlockState = worldIn.getBlockState(posOn);
 
@@ -121,7 +123,7 @@ public class AdditivePlacementHandler extends PlacementHandler
             ItemStack newStack = stack.copy();
             newStack.setItemDamage(targetMeta);
             modelState.setMetaData(targetMeta);
-            PlacementItem.setStackModelState(newStack, modelState);
+            SuperBlockStackHelper.setStackModelState(newStack, modelState);
             result.add(Pair.of(posOn, newStack));
         }
 
@@ -152,7 +154,7 @@ public class AdditivePlacementHandler extends PlacementHandler
                 ItemStack newStack = stack.copy();
                 newStack.setItemDamage(targetMeta);
                 modelState.setMetaData(targetMeta);
-                PlacementItem.setStackModelState(newStack, modelState);
+                SuperBlockStackHelper.setStackModelState(newStack, modelState);
                 result.add(Pair.of(posOn.offset(addFace), newStack));
             }
         }

@@ -2,8 +2,8 @@ package grondag.hard_science.network.client_to_server;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;

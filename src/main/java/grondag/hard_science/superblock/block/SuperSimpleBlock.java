@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.block;
 
+import grondag.exotic_matter.block.SuperBlock;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.WorldLightOpacity;

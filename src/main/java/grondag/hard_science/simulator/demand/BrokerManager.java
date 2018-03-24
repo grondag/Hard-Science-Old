@@ -2,6 +2,7 @@ package grondag.hard_science.simulator.demand;
 
 import java.util.HashMap;
 
+import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.simulator.domain.Domain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.resource.IResource;
@@ -9,7 +10,6 @@ import grondag.hard_science.simulator.resource.ItemResource;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.block.SuperModelBlock;
 
 public class BrokerManager implements IDomainMember
 {

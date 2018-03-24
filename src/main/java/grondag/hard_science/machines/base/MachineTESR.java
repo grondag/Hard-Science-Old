@@ -2,6 +2,9 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.block.SuperBlockTESR;
+import grondag.exotic_matter.block.SuperTileEntity;
+import grondag.exotic_matter.font.FontHolder;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.Configurator;
@@ -9,8 +12,6 @@ import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
-import grondag.hard_science.superblock.block.SuperBlockTESR;
-import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -83,7 +84,7 @@ public class MachineTESR extends SuperBlockTESR
         BufferBuilder buffer = tessellator.getBuffer();
   
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolSprite(), (displayAlpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
-        MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.clientState().machineName, HorizontalAlignment.CENTER, white);
+        MachineControlRenderer.renderMachineText(tessellator, buffer, FontHolder.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.clientState().machineName, HorizontalAlignment.CENTER, white);
 
         if(mte.clientState().hasOnOff)
         {

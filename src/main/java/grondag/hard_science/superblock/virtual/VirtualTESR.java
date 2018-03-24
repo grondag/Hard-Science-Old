@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.virtual;
 
-import grondag.hard_science.superblock.block.SuperBlockTESR;
-import grondag.hard_science.superblock.block.SuperTileEntity;
+import grondag.exotic_matter.block.SuperBlockTESR;
+import grondag.exotic_matter.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

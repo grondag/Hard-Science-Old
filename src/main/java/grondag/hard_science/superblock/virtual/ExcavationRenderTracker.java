@@ -3,6 +3,7 @@ package grondag.hard_science.superblock.virtual;
 import java.util.HashMap;
 import java.util.Map;
 
+import grondag.exotic_matter.simulator.WorldTaskManager;
 import grondag.exotic_matter.simulator.domain.DomainChangeEvent;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.world.WorldMap;
@@ -11,7 +12,6 @@ import grondag.hard_science.Log;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.jobs.Job;
-import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.Mod;

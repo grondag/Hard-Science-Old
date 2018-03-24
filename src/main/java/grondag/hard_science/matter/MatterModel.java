@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.exotic_matter.font.FontHolder;
 import grondag.exotic_matter.render.QuadBakery;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.RawQuad;
 import grondag.exotic_matter.world.Rotation;
-import grondag.hard_science.init.ModModels;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 
 public abstract class MatterModel
@@ -213,7 +213,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<RawQuad> quadList)
         {
-            ModModels.FONT_RENDERER_SMALL.formulaBlockQuadsToList(this.symbolString, true, this.color, 1.025f, this.leftJustify, quadList);
+            FontHolder.FONT_RENDERER_SMALL.formulaBlockQuadsToList(this.symbolString, true, this.color, 1.025f, this.leftJustify, quadList);
         }
     }
     

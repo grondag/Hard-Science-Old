@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
-import grondag.hard_science.simulator.jobs.IWorldTask;
-import grondag.hard_science.superblock.block.PlacementPosition;
+import grondag.exotic_matter.simulator.IWorldTask;
+import grondag.hard_science.superblock.blockmovetest.PlacementPosition;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;

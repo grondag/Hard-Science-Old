@@ -2,12 +2,12 @@ package grondag.hard_science.machines.energy;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.exotic_matter.simulator.IWorldTask;
 import grondag.exotic_matter.simulator.Simulator;
+import grondag.exotic_matter.simulator.WorldTaskManager;
 import grondag.exotic_matter.world.Location;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.simulator.device.IDevice;
-import grondag.hard_science.simulator.jobs.IWorldTask;
-import grondag.hard_science.simulator.jobs.WorldTaskManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 

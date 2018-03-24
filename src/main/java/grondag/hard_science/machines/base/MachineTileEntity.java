@@ -3,18 +3,18 @@ package grondag.hard_science.machines.base;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.block.SuperTileEntity;
+import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.Domain;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
-import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
-import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;
@@ -276,7 +276,7 @@ public class MachineTileEntity extends SuperTileEntity
             if(Configurator.logMachineActivity) 
                 Log.info("MachineTileEntity.notifyServerPlayerWatching: %s sending keepalive packet", this.clientState().machineName);
 
-            ModMessages.INSTANCE.sendToServer(new PacketMachineStatusAddListener(this.pos));
+            PacketHandler.CHANNEL.sendToServer(new PacketMachineStatusAddListener(this.pos));
             this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;
         }
     }
@@ -301,7 +301,7 @@ public class MachineTileEntity extends SuperTileEntity
             Log.info("MachineTileEntity.addPlayerListener %s got keepalive packet", this.machine().machineName());
         
         // send immediate refresh
-        ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
+        PacketHandler.CHANNEL.sendTo(this.createMachineStatusUpdate(), player);
     }
     
     @Override
@@ -343,7 +343,7 @@ public class MachineTileEntity extends SuperTileEntity
         if(this.world.isRemote)
         {
             // send to server
-            ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_POWER, this.pos));
+            PacketHandler.CHANNEL.sendToServer(new PacketMachineInteraction(Action.TOGGLE_POWER, this.pos));
             return true;
         }
         else
@@ -368,7 +368,7 @@ public class MachineTileEntity extends SuperTileEntity
             // send to server
             if(this.clientState().hasRedstoneControl)
             {
-                ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_REDSTONE_CONTROL, this.pos));
+                PacketHandler.CHANNEL.sendToServer(new PacketMachineInteraction(Action.TOGGLE_REDSTONE_CONTROL, this.pos));
                 return true;
             }
             return false;
