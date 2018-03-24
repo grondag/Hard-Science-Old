@@ -45,6 +45,8 @@ import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+//TODO: seems to be missing placement logic, see methods in ExcavationMarker
+
 public class VirtualBlock extends SuperModelBlock
 {
     

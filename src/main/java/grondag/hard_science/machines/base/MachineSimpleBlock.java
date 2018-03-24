@@ -4,9 +4,9 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.block.SuperSimpleBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.hard_science.init.ModSubstances;
-import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;

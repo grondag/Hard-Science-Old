@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.PlacementEvent;
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.simulator.WorldTaskManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -62,9 +63,9 @@ public class PlacementResult
 
     public void apply(ItemStack stackIn, EntityPlayer player)
     {
-        if(!PlacementItem.isPlacementItem(stackIn)) return;
+        if(!IPlacementItem.isPlacementItem(stackIn)) return;
         
-        PlacementItem item = (PlacementItem)stackIn.getItem();
+        IPlacementItem item = (IPlacementItem)stackIn.getItem();
         
         switch(this.event)
         {

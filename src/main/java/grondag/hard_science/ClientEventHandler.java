@@ -12,6 +12,8 @@ import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.block.SuperModelTileEntity;
 import grondag.exotic_matter.model.varia.CraftingItem;
 import grondag.exotic_matter.network.PacketHandler;
+import grondag.exotic_matter.placement.IPlacementItem;
+import grondag.exotic_matter.placement.SuperItemBlock;
 import grondag.exotic_matter.render.CompressedAnimatedSprite;
 import grondag.exotic_matter.render.QuadCache;
 import grondag.exotic_matter.varia.Useful;
@@ -34,9 +36,7 @@ import grondag.hard_science.matter.MatterCubeItemModel;
 import grondag.hard_science.matter.MatterCubeItemModel1;
 import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketSimpleAction;
-import grondag.hard_science.superblock.block.SuperItemBlock;
 import grondag.hard_science.superblock.placement.spec.PlacementHandler;
-import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import grondag.hard_science.superblock.placement.spec.PlacementResult;
 import grondag.hard_science.superblock.virtual.ExcavationRenderManager;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;
@@ -83,11 +83,11 @@ public class ClientEventHandler
     public static void renderWorldLastEvent(RenderWorldLastEvent event)
     {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
-        ItemStack stack = PlacementItem.getHeldPlacementItem(player);
+        ItemStack stack = IPlacementItem.getHeldPlacementItem(player);
         
         if(stack != null)
         {
-            PlacementItem placer = (PlacementItem) stack.getItem();
+            IPlacementItem placer = (IPlacementItem) stack.getItem();
             PlacementResult result = PlacementHandler.predictPlacementResults(player, stack, placer);
             if(result.builder() != null) result.builder().renderPreview(event, player);
         }
@@ -156,11 +156,11 @@ public class ClientEventHandler
     public static void onKeyInput(InputEvent.KeyInputEvent event)
     {
         Minecraft mc = Minecraft.getMinecraft();
-        ItemStack stack = PlacementItem.getHeldPlacementItem(mc.player);
+        ItemStack stack = IPlacementItem.getHeldPlacementItem(mc.player);
         
         if(stack != null)
         {
-            PlacementItem item = (PlacementItem)stack.getItem();
+            IPlacementItem item = (IPlacementItem)stack.getItem();
             
             // If holding a virtual block and click pick block, 
             // change appearance of held block to match picked block

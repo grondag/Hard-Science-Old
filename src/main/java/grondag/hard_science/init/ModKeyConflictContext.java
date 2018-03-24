@@ -1,6 +1,6 @@
 package grondag.hard_science.init;
 
-import grondag.hard_science.superblock.placement.spec.PlacementItem;
+import grondag.exotic_matter.placement.IPlacementItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -13,7 +13,7 @@ public enum ModKeyConflictContext implements IKeyConflictContext
         public boolean isActive()
         {
             final ItemStack held = Minecraft.getMinecraft().player.getHeldItemMainhand();
-            return PlacementItem.isPlacementItem(held);
+            return IPlacementItem.isPlacementItem(held);
         }
 
         @Override

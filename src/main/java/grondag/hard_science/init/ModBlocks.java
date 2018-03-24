@@ -1,5 +1,6 @@
 package grondag.hard_science.init;
 
+import grondag.exotic_matter.block.SuperSimpleBlock;
 import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.Chroma;
 import grondag.exotic_matter.model.Hue;
@@ -25,7 +26,6 @@ import grondag.hard_science.machines.impl.processing.DigesterBlock;
 import grondag.hard_science.machines.impl.processing.MicronizerBlock;
 import grondag.hard_science.machines.impl.production.PhotoElectricBlock;
 import grondag.hard_science.machines.impl.production.SolarCableBlock;
-import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.terrain.DepletedFluidBlock;
 import grondag.hard_science.superblock.terrain.TerrainCubicBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;

@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperSimpleBlock;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
@@ -14,7 +15,6 @@ import grondag.exotic_matter.model.TerrainBlockHelper;
 import grondag.exotic_matter.model.TerrainBlockRegistry;
 import grondag.exotic_matter.model.TerrainState;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

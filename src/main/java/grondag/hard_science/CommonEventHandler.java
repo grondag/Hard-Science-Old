@@ -4,6 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
 
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.WorldTaskManager;
 import grondag.exotic_matter.simulator.domain.DomainManager;
@@ -14,7 +15,6 @@ import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.TaskType;
 import grondag.hard_science.simulator.jobs.tasks.ExcavationTask;
 import grondag.hard_science.superblock.placement.spec.PlacementHandler;
-import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import grondag.hard_science.superblock.placement.spec.PlacementResult;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
@@ -133,7 +133,7 @@ public class CommonEventHandler
         if(player == null) return;
         
         ItemStack stackIn = event.getItemStack();
-        if (stackIn == null || stackIn.isEmpty() || !(stackIn.getItem() instanceof PlacementItem)) return;
+        if (stackIn == null || stackIn.isEmpty() || !(stackIn.getItem() instanceof IPlacementItem)) return;
 
         PlacementResult result = PlacementHandler.doLeftClickBlock(player, event.getPos(), event.getFace(), event.getHitVec(), stackIn);
         

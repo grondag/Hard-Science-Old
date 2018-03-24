@@ -4,13 +4,13 @@ import java.util.Map;
 
 import grondag.exotic_matter.block.SuperBlock;
 import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.placement.SuperItemBlock;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.matter.MatterPackaging;
 import grondag.hard_science.superblock.block.ExcavationMarker;
-import grondag.hard_science.superblock.block.SuperItemBlock;
 import grondag.hard_science.superblock.terrain.TerrainWand;
 import grondag.hard_science.superblock.virtual.VirtualBlock;
 import grondag.hard_science.superblock.virtual.VirtualItemBlock;

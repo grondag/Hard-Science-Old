@@ -1,6 +1,7 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
@@ -8,10 +9,14 @@ import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.MetaUsage;
 import grondag.exotic_matter.model.varia.SuperBlockHelper;
+import grondag.exotic_matter.placement.BlockOrientationHandler;
+import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.OffsetPosition;
 import grondag.exotic_matter.placement.PlacementEvent;
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.SpeciesMode;
+import grondag.exotic_matter.placement.TargetMode;
 import grondag.exotic_matter.player.ModifierKeys;
 import grondag.exotic_matter.player.ModifierKeys.ModifierKey;
 import grondag.exotic_matter.varia.Useful;
@@ -88,7 +93,7 @@ public abstract class PlacementHandler
      */
     @SideOnly(Side.CLIENT)
     @Nonnull
-    public static PlacementResult predictPlacementResults(EntityPlayerSP player, @Nonnull ItemStack stack, @Nonnull PlacementItem item)
+    public static PlacementResult predictPlacementResults(EntityPlayerSP player, @Nonnull ItemStack stack, @Nonnull IPlacementItem item)
     {
 
         /* if player is in range to a solid block and floating selection is off, 
@@ -136,7 +141,7 @@ public abstract class PlacementHandler
 
         // assume user will click the right mouse button
         // Pass stack copy so that predicted action doesn't affect real stack
-        return PlacementItem.doRightClickBlock(player, onPos, onFace, hitVec, stack, item);
+        return PlacementHandler.doRightClickBlock(player, onPos, onFace, hitVec, stack, item);
     }
 
     
@@ -151,14 +156,96 @@ public abstract class PlacementHandler
 
 
     /**
+     * Determines outcome when player right clicks on the face of a block.
+     *  if no hit block is known or if floating selection is known to be enabled, pass onPos, onFace, and hitVec = null instead.
+     * DOES NOT UPDATE STATE.<p>
+     * 
+     * Called by Predict placement results, and by OnItemUse and onItemRightClick.
+     */
+    public static PlacementResult doRightClickBlock(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, @Nonnull ItemStack stack, @Nonnull IPlacementItem item)
+    {
+        
+        PlacementPosition pPos = new PlacementPosition(player, onPos, onFace, hitVec, item.getFloatingSelectionRange(stack), item.isExcavator(stack));
+    
+        // if not position, then either need to be using floating selection 
+        // or a fixed region (for preview only - see logic below) if not enabled
+        if(onPos == null && !item.isFloatingSelectionEnabled(stack)) 
+        {
+            // don't force player to be in placement range to see big region selections
+            // but note this doesn't work for selection in progress
+            if(item.isFixedRegionEnabled(stack) && !item.isFixedRegionSelectionInProgress(stack))
+            {
+                return new PlacementResult(
+                        pPos.inPos, 
+                        PlacementEvent.NO_OPERATION_CONTINUE,
+                        PlacementSpecHelper.placementBuilder(player, pPos, stack));
+            }
+            else return PlacementResult.EMPTY_RESULT_CONTINUE;
+        }
+    
+    
+        // nothing to do if no position
+        if(pPos.inPos == null) return PlacementResult.EMPTY_RESULT_CONTINUE;
+    
+    
+        // only virtual blocks support advanced placement behavior
+        // so emulate vanilla right-click behavior if we have non-virtual block
+        if(item.getSuperBlock() != null && !item.getSuperBlock().isVirtual())
+        {
+            ItemStack tweakedStack = stack.copy();
+            item.setTargetMode(tweakedStack, TargetMode.ON_CLICKED_FACE);
+    
+            return new PlacementResult(
+                    pPos.inPos, 
+                    PlacementEvent.PLACE,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+    
+        // Ctrl + right click: start new placement region
+        if(ModifierKeys.isModifierKeyPressed(player, ModifierKey.CTRL_KEY))
+        {
+            ItemStack tweakedStack = stack.copy();
+            item.fixedRegionStart(tweakedStack, pPos.inPos, false);
+    
+            return new PlacementResult(
+                    pPos.inPos, 
+                    PlacementEvent.START_PLACEMENT_REGION,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+    
+        if(item.isFixedRegionSelectionInProgress(stack))
+        {
+            // finish placement region
+            ItemStack tweakedStack = stack.copy();
+            item.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
+            IPlacementSpec builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            
+            return new PlacementResult(
+                    pPos.inPos, 
+                    builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                    PlacementSpecHelper.placementBuilder(player, pPos, tweakedStack));
+        }
+        else
+        {
+            // normal right click on block 
+            IPlacementSpec builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            return new PlacementResult(
+                    pPos.inPos, 
+                    builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,
+                    builder);
+        }
+    }
+
+
+    /**
      * Determines outcome when player left clicks on a block.
      * DOES NOT UPDATE STATE.
      * @param stack 
      */
     public static PlacementResult doLeftClickBlock(EntityPlayer player, BlockPos onPos, EnumFacing onFace, Vec3d hitVec, ItemStack stack)
     {
-        if(!PlacementItem.isPlacementItem(stack)) return PlacementResult.EMPTY_RESULT_CONTINUE;
-        PlacementItem item = (PlacementItem)stack.getItem();
+        if(!IPlacementItem.isPlacementItem(stack)) return PlacementResult.EMPTY_RESULT_CONTINUE;
+        IPlacementItem item = (IPlacementItem)stack.getItem();
 
         if(item.isFixedRegionSelectionInProgress(stack))
         {
@@ -243,7 +330,7 @@ public abstract class PlacementHandler
 
         SoundType soundtype = SuperBlockStackHelper.getStackSubstance(stack).soundType;
 
-        PlacementItem item = PlacementItem.getPlacementItem(stack);
+        IPlacementItem item = IPlacementItem.getPlacementItem(stack);
         if(item == null) return;
 
         IBlockState placedState = item.getPlacementBlockStateFromStack(stack);
@@ -354,8 +441,8 @@ public abstract class PlacementHandler
         // break with everything - need to know adjacent species
         // match with most - need to know adjacent species
 
-        if(!PlacementItem.isPlacementItem(stack)) return 0;
-        PlacementItem item = (PlacementItem)stack.getItem();
+        if(!IPlacementItem.isPlacementItem(stack)) return 0;
+        IPlacementItem item = (IPlacementItem)stack.getItem();
 
         SpeciesMode mode = item.getSpeciesMode(stack);
         if(ModifierKeys.isModifierKeyPressed(player, ModifierKey.ALT_KEY)) mode = mode.alternate();

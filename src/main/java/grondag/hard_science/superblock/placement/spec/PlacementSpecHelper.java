@@ -3,7 +3,9 @@ package grondag.hard_science.superblock.placement.spec;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.StateFormat;
+import grondag.exotic_matter.placement.BlockOrientationHandler;
 import grondag.exotic_matter.placement.IPlacementSpec;
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.PlacementPosition;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -27,7 +29,7 @@ public class PlacementSpecHelper
         
         BlockOrientationHandler.configureStackForPlacement(placedStack, player, pPos);
         
-        PlacementItem item = PlacementItem.getPlacementItem(stack);
+        IPlacementItem item = IPlacementItem.getPlacementItem(stack);
         
         if(item == null) return null;
         

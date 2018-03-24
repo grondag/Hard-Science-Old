@@ -3,6 +3,7 @@ package grondag.hard_science.superblock.placement.spec;
 import java.util.HashSet;
 
 import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.RegionOrientation;
 import grondag.exotic_matter.placement.TargetMode;
@@ -18,7 +19,7 @@ abstract class VolumetricPlacementSpec extends SingleStackPlacementSpec
     protected final boolean isHollow;
     protected final BlockPos offsetPos;
     /**
-     * Reference this instead of {@link PlacementItem#isFixedRegionEnabled(ItemStack)}
+     * Reference this instead of {@link IPlacementItem#isFixedRegionEnabled(ItemStack)}
      * because stack property is typically reset after builder is instantiated.
      */
     protected final boolean isFixedRegion;

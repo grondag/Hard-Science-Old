@@ -11,10 +11,10 @@ import grondag.exotic_matter.placement.BlockOrientationCorner;
 import grondag.exotic_matter.placement.BlockOrientationEdge;
 import grondag.exotic_matter.placement.BlockOrientationFace;
 import grondag.exotic_matter.placement.FilterMode;
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.RegionOrientation;
 import grondag.exotic_matter.placement.SpeciesMode;
 import grondag.exotic_matter.placement.TargetMode;
-import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -59,9 +59,9 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
         this.blockSubstance = SuperBlockStackHelper.getStackSubstance(stack);
         this.lightValue = SuperBlockStackHelper.getStackLightValue(stack);
         
-        if(PlacementItem.isPlacementItem(stack))
+        if(IPlacementItem.isPlacementItem(stack))
         {
-            PlacementItem item = (PlacementItem)stack.getItem();
+            IPlacementItem item = (IPlacementItem)stack.getItem();
             this.mode = item.getTargetMode(stack);
             this.axis = item.getBlockOrientationAxis(stack);
             this.face = item.getBlockOrientationFace(stack);
@@ -125,13 +125,13 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
     protected void handle(PacketConfigurePlacementItem message, EntityPlayerMP player)
     {
         ItemStack heldStack = player.getHeldItem(EnumHand.MAIN_HAND);
-        if(PlacementItem.isPlacementItem(heldStack))
+        if(IPlacementItem.isPlacementItem(heldStack))
         {
             heldStack.setItemDamage(message.meta);
             SuperBlockStackHelper.setStackModelState(heldStack, message.modelState);
             SuperBlockStackHelper.setStackSubstance(heldStack, message.blockSubstance);
             SuperBlockStackHelper.setStackLightValue(heldStack, message.lightValue);
-            PlacementItem item = (PlacementItem)heldStack.getItem();
+            IPlacementItem item = (IPlacementItem)heldStack.getItem();
             item.setTargetMode(heldStack, message.mode);
             item.setBlockOrientationAxis(heldStack, message.axis);
             item.setBlockOrientationFace(heldStack, message.face);

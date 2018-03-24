@@ -2,8 +2,8 @@ package grondag.hard_science.machines.support;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.placement.SuperItemBlock;
 import grondag.hard_science.machines.base.MachineBlock;
-import grondag.hard_science.superblock.block.SuperItemBlock;
 import net.minecraft.item.ItemStack;
 
 public class MachineItemBlock extends SuperItemBlock

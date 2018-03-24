@@ -8,6 +8,7 @@ import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.IPlacementSpec;
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.placement.TargetMode;
@@ -32,7 +33,7 @@ abstract class AbstractPlacementSpec implements IPlacementSpec
      */
     private final ItemStack heldStack;
     
-    protected final PlacementItem placementItem;
+    protected final IPlacementItem placementItem;
     protected final EntityPlayer player;
     protected final PlacementPosition pPos;
     protected Boolean isValid = null;
@@ -51,7 +52,7 @@ abstract class AbstractPlacementSpec implements IPlacementSpec
         this.heldStack = heldStack;
         this.player = player;
         this.pPos = pPos;
-        this.placementItem = (PlacementItem)heldStack.getItem();
+        this.placementItem = (IPlacementItem)heldStack.getItem();
         this.isSelectionInProgress = this.placementItem.isFixedRegionSelectionInProgress(heldStack);
         this.selectionMode = this.placementItem.getTargetMode(heldStack);
         this.isExcavation = this.placementItem.isExcavator(heldStack);

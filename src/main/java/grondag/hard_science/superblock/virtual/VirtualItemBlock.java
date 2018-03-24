@@ -3,21 +3,21 @@ package grondag.hard_science.superblock.virtual;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
+import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.PlacementItemFeature;
+import grondag.exotic_matter.placement.SuperItemBlock;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.ModGuiHandler;
-import grondag.hard_science.superblock.block.SuperItemBlock;
-import grondag.hard_science.superblock.placement.spec.PlacementItem;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
+public class VirtualItemBlock extends SuperItemBlock implements IPlacementItem
 {
     
-    public static final int FEATURE_FLAGS = PlacementItem.BENUMSET_FEATURES.getFlagsForIncludedValues(
+    public static final int FEATURE_FLAGS = IPlacementItem.BENUMSET_FEATURES.getFlagsForIncludedValues(
             PlacementItemFeature.FIXED_REGION,
             PlacementItemFeature.REGION_SIZE,
             PlacementItemFeature.REGION_ORIENTATION,
@@ -48,7 +48,7 @@ public class VirtualItemBlock extends SuperItemBlock implements PlacementItem
     @Override
     public void displayGui(EntityPlayer player)
     {
-        if(!(PlacementItem.getHeldPlacementItem(player).getItem() == this)) return;
+        if(!(IPlacementItem.getHeldPlacementItem(player).getItem() == this)) return;
         player.openGui(HardScience.INSTANCE,  ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
     }
     
