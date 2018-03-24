@@ -7,7 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
-public abstract class SingleStackBuilder extends PlacementSpecBuilder
+public abstract class SingleStackPlacementSpec extends AbstractPlacementSpec
 {
     /**
      * Stack that should be placed in the world.
@@ -16,7 +16,7 @@ public abstract class SingleStackBuilder extends PlacementSpecBuilder
      */
     protected ItemStack outputStack = Items.AIR.getDefaultInstance();
     
-    protected SingleStackBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    protected SingleStackPlacementSpec(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
     }

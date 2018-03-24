@@ -51,7 +51,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class CuboidBuilder extends VolumetricBuilder
+public class CuboidPlacementSpec extends VolumetricPlacementSpec
 {
 
     protected CubicBlockRegion region;
@@ -61,7 +61,7 @@ public class CuboidBuilder extends VolumetricBuilder
      */
     protected BlockPos previewPos;
 
-    public CuboidBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    public CuboidPlacementSpec(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
         this.previewPos = pPos.inPos;
@@ -430,7 +430,7 @@ public class CuboidBuilder extends VolumetricBuilder
                 /**
                  * Block positions to be checked. 
                  */
-                private Iterator<MutableBlockPos> positionIterator = CuboidBuilder.this.region.includedPositions().iterator();
+                private Iterator<MutableBlockPos> positionIterator = CuboidPlacementSpec.this.region.includedPositions().iterator();
 
                 private World world = player.world;
                 
@@ -462,14 +462,14 @@ public class CuboidBuilder extends VolumetricBuilder
 
                         // is the block at the position affected
                         // by this excavation?
-                        if(CuboidBuilder.this.effectiveFilterMode.shouldAffectBlock(
+                        if(CuboidPlacementSpec.this.effectiveFilterMode.shouldAffectBlock(
                                 blockState, 
                                 world, 
                                 pos, 
-                                CuboidBuilder.this.placedStack(),
-                                CuboidBuilder.this.isVirtual))
+                                CuboidPlacementSpec.this.placedStack(),
+                                CuboidPlacementSpec.this.isVirtual))
                         {
-                            PlacementHandler.placeVirtualBlock(world, CuboidBuilder.this.outputStack, player, pos, build);
+                            PlacementHandler.placeVirtualBlock(world, CuboidPlacementSpec.this.outputStack, player, pos, build);
                             opCount += 5;
                         }
 

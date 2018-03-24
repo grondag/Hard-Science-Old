@@ -321,7 +321,7 @@ public abstract class PlacementHandler
      * {@link BlockOrientationHandler#configureStackForPlacement(ItemStack, EntityPlayer, PlacementPosition)}
      * when spec was constructed.
      */
-    public static ItemStack cubicPlacementStack(SingleStackBuilder specBuilder)
+    public static ItemStack cubicPlacementStack(SingleStackPlacementSpec specBuilder)
     {
 
         ItemStack stack = specBuilder.placedStack().copy();

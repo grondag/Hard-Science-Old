@@ -13,7 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-abstract class VolumetricBuilder extends SingleStackBuilder
+abstract class VolumetricPlacementSpec extends SingleStackPlacementSpec
 {
     protected final boolean isHollow;
     protected final BlockPos offsetPos;
@@ -24,7 +24,7 @@ abstract class VolumetricBuilder extends SingleStackBuilder
     protected final boolean isFixedRegion;
     protected final boolean isAdjustmentEnabled;
 
-    protected VolumetricBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    protected VolumetricPlacementSpec(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
         this.isHollow = this.selectionMode == TargetMode.HOLLOW_REGION;

@@ -16,7 +16,7 @@ import grondag.exotic_matter.placement.BlockOrientationCorner;
 import grondag.exotic_matter.placement.BlockOrientationEdge;
 import grondag.exotic_matter.placement.BlockOrientationFace;
 import grondag.exotic_matter.placement.FilterMode;
-import grondag.exotic_matter.placement.IPlacementSpecBuilder;
+import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.PlacementEvent;
 import grondag.exotic_matter.placement.PlacementItemFeature;
 import grondag.exotic_matter.placement.PlacementPosition;
@@ -1094,7 +1094,7 @@ public interface PlacementItem
             // finish placement region
             ItemStack tweakedStack = stack.copy();
             item.fixedRegionFinish(tweakedStack, player, pPos.inPos, false);
-            IPlacementSpecBuilder builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            IPlacementSpec builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
             
             return new PlacementResult(
                     pPos.inPos, 
@@ -1104,7 +1104,7 @@ public interface PlacementItem
         else
         {
             // normal right click on block 
-            IPlacementSpecBuilder builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
+            IPlacementSpec builder = PlacementSpecHelper.placementBuilder(player, pPos, stack);
             return new PlacementResult(
                     pPos.inPos, 
                     builder.isExcavation() ? PlacementEvent.EXCAVATE : PlacementEvent.PLACE,

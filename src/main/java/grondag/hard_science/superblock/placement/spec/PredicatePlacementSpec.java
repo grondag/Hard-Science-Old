@@ -3,6 +3,8 @@ package grondag.hard_science.superblock.placement.spec;
 import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.simulator.IWorldTask;
+import grondag.exotic_matter.world.IBlockRegion;
+import grondag.exotic_matter.world.WorldHelper;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,9 +13,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class AdditiveBuilder extends SurfaceBuilder
+public class PredicatePlacementSpec extends SingleStackPlacementSpec
 {
-    public AdditiveBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+
+    public PredicatePlacementSpec(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
     }
@@ -21,8 +24,8 @@ public class AdditiveBuilder extends SurfaceBuilder
     @Override
     protected boolean doValidate()
     {
-        // TODO Auto-generated method stub
-        return false;
+        // can't replace air, water, weeds, etc.
+        return !WorldHelper.isBlockReplaceable(this.player.world, this.pPos.onPos, false);
     }
 
     @SideOnly(Side.CLIENT)
@@ -40,9 +43,16 @@ public class AdditiveBuilder extends SurfaceBuilder
         // TODO Auto-generated method stub
 
     }
-
+    
     @Override
     public IWorldTask worldTask(EntityPlayerMP player)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IBlockRegion region()
     {
         // TODO Auto-generated method stub
         return null;

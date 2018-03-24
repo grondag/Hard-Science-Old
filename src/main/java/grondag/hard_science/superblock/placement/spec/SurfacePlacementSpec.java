@@ -13,10 +13,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class PredicateBuilder extends SingleStackBuilder
+public class SurfacePlacementSpec extends SingleStackPlacementSpec
 {
-
-    public PredicateBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    public SurfacePlacementSpec(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
     }
@@ -24,8 +23,12 @@ public class PredicateBuilder extends SingleStackBuilder
     @Override
     protected boolean doValidate()
     {
-        // can't replace air, water, weeds, etc.
-        return !WorldHelper.isBlockReplaceable(this.player.world, this.pPos.onPos, false);
+        // excavation doesn't make sense with this mode
+        if(this.isExcavation) return false;
+
+        if(this.player.world.isOutsideBuildHeight(this.pPos.inPos)) return false;
+
+        return WorldHelper.isBlockReplaceable(this.player.world, this.pPos.inPos, false);
     }
 
     @SideOnly(Side.CLIENT)
@@ -43,7 +46,7 @@ public class PredicateBuilder extends SingleStackBuilder
         // TODO Auto-generated method stub
 
     }
-    
+
     @Override
     public IWorldTask worldTask(EntityPlayerMP player)
     {
@@ -57,5 +60,4 @@ public class PredicateBuilder extends SingleStackBuilder
         // TODO Auto-generated method stub
         return null;
     }
-
 }

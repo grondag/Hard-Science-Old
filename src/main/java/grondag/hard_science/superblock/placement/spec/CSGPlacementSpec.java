@@ -4,7 +4,6 @@ import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.simulator.IWorldTask;
 import grondag.exotic_matter.world.IBlockRegion;
-import grondag.exotic_matter.world.WorldHelper;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,9 +12,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class SurfaceBuilder extends SingleStackBuilder
+public class CSGPlacementSpec extends VolumetricPlacementSpec
 {
-    public SurfaceBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    public CSGPlacementSpec(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
     }
@@ -23,12 +22,8 @@ public class SurfaceBuilder extends SingleStackBuilder
     @Override
     protected boolean doValidate()
     {
-        // excavation doesn't make sense with this mode
-        if(this.isExcavation) return false;
-
-        if(this.player.world.isOutsideBuildHeight(this.pPos.inPos)) return false;
-
-        return WorldHelper.isBlockReplaceable(this.player.world, this.pPos.inPos, false);
+        // TODO: Logic will be similar to VolumetricBuilder
+        return false;
     }
 
     @SideOnly(Side.CLIENT)
@@ -46,7 +41,7 @@ public class SurfaceBuilder extends SingleStackBuilder
         // TODO Auto-generated method stub
 
     }
-
+    
     @Override
     public IWorldTask worldTask(EntityPlayerMP player)
     {

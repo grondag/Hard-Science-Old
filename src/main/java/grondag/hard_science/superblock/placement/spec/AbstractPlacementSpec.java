@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
-import grondag.exotic_matter.placement.IPlacementSpecBuilder;
+import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.PlacementPosition;
 import grondag.exotic_matter.placement.PlacementPreviewRenderMode;
 import grondag.exotic_matter.placement.TargetMode;
@@ -25,7 +25,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
+abstract class AbstractPlacementSpec implements IPlacementSpec
 {
     /**
      * Stack player is holding to do the placement.
@@ -46,7 +46,7 @@ abstract class PlacementSpecBuilder implements IPlacementSpecBuilder
      */
     protected final FilterMode effectiveFilterMode;
 
-    protected PlacementSpecBuilder(ItemStack heldStack, EntityPlayer player, PlacementPosition pPos)
+    protected AbstractPlacementSpec(ItemStack heldStack, EntityPlayer player, PlacementPosition pPos)
     {
         this.heldStack = heldStack;
         this.player = player;

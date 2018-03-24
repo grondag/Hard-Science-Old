@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.placement.spec;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.placement.IPlacementSpecBuilder;
+import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.PlacementEvent;
 import grondag.exotic_matter.simulator.WorldTaskManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,7 +18,7 @@ public class PlacementResult
 
     private final PlacementEvent event;
     private final BlockPos blockPos;
-    private final IPlacementSpecBuilder builder;
+    private final IPlacementSpec builder;
     
     /**
      * @param event Identifies state changes and subsequent event processing that should occur with this result.
@@ -28,14 +28,14 @@ public class PlacementResult
     public PlacementResult(
             @Nullable BlockPos blockPos,
             @Nonnull  PlacementEvent event, 
-            @Nullable IPlacementSpecBuilder builder)
+            @Nullable IPlacementSpec builder)
     {
         this.blockPos = blockPos;
         this.event = event;
         this.builder = builder;
     }
     
-    public IPlacementSpecBuilder builder()
+    public IPlacementSpec builder()
     {
         return this.builder;
     }

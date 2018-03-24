@@ -34,9 +34,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class SingleBuilder extends SingleStackBuilder
+public class SingleBlockPlacementSpec extends SingleStackPlacementSpec
 {
-    public SingleBuilder(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
+    public SingleBlockPlacementSpec(ItemStack placedStack, EntityPlayer player, PlacementPosition pPos)
     {
         super(placedStack, player, pPos);
     }
@@ -132,7 +132,7 @@ public class SingleBuilder extends SingleStackBuilder
 
                     World world = player.world;
 
-                    BlockPos pos = SingleBuilder.this.pPos.inPos;
+                    BlockPos pos = SingleBlockPlacementSpec.this.pPos.inPos;
                     if(pos == null) return 1;
 
                     // is the position inside the world?
@@ -142,12 +142,12 @@ public class SingleBuilder extends SingleStackBuilder
 
                     // is the block at the position affected
                     // by this excavation?
-                    if(SingleBuilder.this.effectiveFilterMode.shouldAffectBlock(
+                    if(SingleBlockPlacementSpec.this.effectiveFilterMode.shouldAffectBlock(
                             blockState, 
                             world, 
                             pos, 
-                            SingleBuilder.this.placedStack(),
-                            SingleBuilder.this.isVirtual))
+                            SingleBlockPlacementSpec.this.placedStack(),
+                            SingleBlockPlacementSpec.this.isVirtual))
                     {
                         Job job = new Job(RequestPriority.MEDIUM, player);
                         job.setDimensionID(world.provider.getDimension());
@@ -190,7 +190,7 @@ public class SingleBuilder extends SingleStackBuilder
                     
                     World world = player.world;
 
-                    BlockPos pos = SingleBuilder.this.pPos.inPos;
+                    BlockPos pos = SingleBlockPlacementSpec.this.pPos.inPos;
                     if(pos == null) return 1;
 
                     // is the position inside the world?
@@ -200,14 +200,14 @@ public class SingleBuilder extends SingleStackBuilder
 
                     // is the block at the position affected
                     // by this excavation?
-                    if(SingleBuilder.this.effectiveFilterMode.shouldAffectBlock(
+                    if(SingleBlockPlacementSpec.this.effectiveFilterMode.shouldAffectBlock(
                             blockState, 
                             world, 
                             pos, 
-                            SingleBuilder.this.placedStack(),
-                            SingleBuilder.this.isVirtual))
+                            SingleBlockPlacementSpec.this.placedStack(),
+                            SingleBlockPlacementSpec.this.isVirtual))
                     {
-                        PlacementHandler.placeVirtualBlock(world, SingleBuilder.this.outputStack, player, pos, build);
+                        PlacementHandler.placeVirtualBlock(world, SingleBlockPlacementSpec.this.outputStack, player, pos, build);
                         return 5;
                     }
                     return 3;
