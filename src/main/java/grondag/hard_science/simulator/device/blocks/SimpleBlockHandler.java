@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.varia.PackedBlockPos;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
@@ -69,7 +69,7 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     public void connect()
     {
         if(Configurator.logDeviceChanges)
-            Log.info("SimpleBlockHandler.connect: " + this.description());
+            HardScience.INSTANCE.info("SimpleBlockHandler.connect: " + this.description());
 
         DeviceManager.blockManager().addOrUpdateDelegate(this);
         this.onAdded();
@@ -78,7 +78,7 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     protected void onAdded()
     {
         if(Configurator.logDeviceChanges)
-            Log.info("SimpleBlockHandler.onAdded: " + this.description());
+            HardScience.INSTANCE.info("SimpleBlockHandler.onAdded: " + this.description());
 
         if(   this.itemPortManager.isEmpty()
            && this.powerPortManager.isEmpty()
@@ -142,7 +142,7 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     public void disconnect()
     {
         if(Configurator.logDeviceChanges)
-            Log.info("SimpleBlockHandler.disconnect: " + this.description());
+            HardScience.INSTANCE.info("SimpleBlockHandler.disconnect: " + this.description());
         
         // NB: will call back to onRemoval(), which contains logic 
         // for breaking connections
@@ -208,7 +208,7 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     public void onRemoval()
     {
         if(Configurator.logDeviceChanges)
-            Log.info("SimpleBlockHandler.onRemoval: " + this.description());
+            HardScience.INSTANCE.info("SimpleBlockHandler.onRemoval: " + this.description());
         
         this.doDisconnect(this.itemPortManager, LogisticsService.ITEM_SERVICE);
         this.doDisconnect(this.powerPortManager, LogisticsService.POWER_SERVICE);

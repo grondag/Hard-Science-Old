@@ -5,7 +5,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import grondag.exotic_matter.render.RawQuad;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 
@@ -38,7 +38,7 @@ public class RawQuadPerf
             results[i] = quad.intersectsWithRaySlow(point, direction); 
         }
         
-        Log.info("Slow way ns each: " + (System.nanoTime() - start) / RUNS);
+        HardScience.INSTANCE.info("Slow way ns each: " + (System.nanoTime() - start) / RUNS);
         
         r = new Random(9);
         start = System.nanoTime();
@@ -55,19 +55,19 @@ public class RawQuadPerf
             if(results[i] != quad.intersectsWithRay(point, direction))
             {
                 diffCount++;
-                Log.info("===========================================================");
-                Log.info("Quad " + quad.toString());
-                Log.info("point " + point.toString());
-                Log.info("intersection " + quad.intersectionOfRayWithPlane(point, direction).toString());
-                Log.info("direction " + direction.toString());
-                Log.info("slow " + quad.intersectsWithRay(point, direction));
-                Log.info("fast " + quad.intersectsWithRaySlow(point, direction));
+                HardScience.INSTANCE.info("===========================================================");
+                HardScience.INSTANCE.info("Quad " + quad.toString());
+                HardScience.INSTANCE.info("point " + point.toString());
+                HardScience.INSTANCE.info("intersection " + quad.intersectionOfRayWithPlane(point, direction).toString());
+                HardScience.INSTANCE.info("direction " + direction.toString());
+                HardScience.INSTANCE.info("slow " + quad.intersectsWithRay(point, direction));
+                HardScience.INSTANCE.info("fast " + quad.intersectsWithRaySlow(point, direction));
             }
 //            assert(results[i] == quad.intersectsWithRayFast(point, direction)); 
         }
         
-        Log.info("Diff % " + diffCount * 100 / RUNS);
-        Log.info("Fast way ns each: " + (System.nanoTime() - start) / RUNS);
+        HardScience.INSTANCE.info("Diff % " + diffCount * 100 / RUNS);
+        HardScience.INSTANCE.info("Fast way ns each: " + (System.nanoTime() - start) / RUNS);
     }
 
 }

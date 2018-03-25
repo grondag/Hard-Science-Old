@@ -12,7 +12,7 @@ import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.persistence.ISimulationTopNode;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.device.blocks.DeviceWorldManager;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlock;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -82,7 +82,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
         }
         catch (Throwable throwable1)
         {
-            Log.error("Failed to create device {}", s, throwable1);
+            HardScience.INSTANCE.error("Failed to create device {}", s, throwable1);
         }
 
         if (device != null)
@@ -93,13 +93,13 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
             }
             catch (Throwable throwable)
             {
-                Log.error("Failed to load data for device {}", s, throwable);
+                HardScience.INSTANCE.error("Failed to load data for device {}", s, throwable);
                 device = null;
             }
         }
         else
         {
-            Log.warn("Skipping device with id {}", (Object)s);
+            HardScience.INSTANCE.warn("Skipping device with id {}", (Object)s);
         }
 
         return device;
@@ -218,7 +218,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     public void addDeviceInconveniently(IDevice device)
     {
         if(Configurator.logDeviceChanges)
-            Log.info("DeviceManager.addDevice: " + device.getId());
+            HardScience.INSTANCE.info("DeviceManager.addDevice: " + device.getId());
         
         assert this.devices.put(device.getId(), device) == null
                 : "Duplicate device registration.";
@@ -227,7 +227,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
         this.isDirty = true;
         
         if(Configurator.logDeviceChanges)
-            Log.info("DeviceManager device count = " + this.devices.size());
+            HardScience.INSTANCE.info("DeviceManager device count = " + this.devices.size());
 
     }
     
@@ -240,7 +240,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
         }
         
         if(Configurator.logDeviceChanges)
-            Log.info("DeviceManager.removeDevice: " + device.getId());
+            HardScience.INSTANCE.info("DeviceManager.removeDevice: " + device.getId());
 
         IDevice oldDevice = this.devices.remove(device.getId());
         if(oldDevice == device)
@@ -261,7 +261,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
         this.offTickJobBacker.setDirty();
         
         if(Configurator.logDeviceChanges)
-            Log.info("DeviceManager device count = " + this.devices.size());
+            HardScience.INSTANCE.info("DeviceManager device count = " + this.devices.size());
     }
     
     @Override
@@ -324,7 +324,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
                     
                     if (resourcelocation == null)
                     {
-                        Log.error("Error saving device state because " + device.getClass() + " is missing a mapping");
+                        HardScience.INSTANCE.error("Error saving device state because " + device.getClass() + " is missing a mapping");
                     }
                     else
                     {

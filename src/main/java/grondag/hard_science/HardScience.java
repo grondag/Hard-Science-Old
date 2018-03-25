@@ -2,6 +2,9 @@ package grondag.hard_science;
 
 import javax.annotation.Nonnull;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import grondag.exotic_matter.IGrondagMod;
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.simulator.Simulator;
@@ -65,7 +68,22 @@ public class HardScience implements IGrondagMod
 			return ModItems.smart_chest.getDefaultInstance();
 		}
 	};
+	
+    private static Logger log;
 
+    @Override
+    public Logger getLog()
+    {
+        // allow access to log during unit testing or other debug scenarios
+        if(HardScience.log == null) HardScience.log = LogManager.getLogger();
+        return HardScience.log;
+    }
+
+    public static void setLog(Logger lOG)
+    {
+        HardScience.log = lOG;
+    }
+    
     @Override
     public String modID()
     {

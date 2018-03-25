@@ -13,7 +13,7 @@ import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.simulator.job.RequestPriority;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.jobs.Job;
 import grondag.hard_science.simulator.jobs.JobManager;
 import grondag.hard_science.simulator.jobs.tasks.BlockProcurementTask;
@@ -116,7 +116,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     {
         if(!this.isOpen())
         {
-            Log.warn("Build manager rejected attempt to modify an unopen build. This is a bug.");
+            HardScience.INSTANCE.warn("Build manager rejected attempt to modify an unopen build. This is a bug.");
             return;
         }
 
@@ -136,7 +136,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     {
         if(!this.isOpen())
         {
-            Log.warn("Build manager rejected attempt to modify an unopen build. This is a bug.");
+            HardScience.INSTANCE.warn("Build manager rejected attempt to modify an unopen build. This is a bug.");
             return;
         }
 
@@ -221,7 +221,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
                         ItemStack stack = VirtualBlock.getSuperModelStack(world, blockState, pos);
                         if(stack == null)
                         {
-                            Log.warn("Build manager unable to retrieve stack from virtual block. This is a bug");
+                            HardScience.INSTANCE.warn("Build manager unable to retrieve stack from virtual block. This is a bug");
                         }
                         else
                         {

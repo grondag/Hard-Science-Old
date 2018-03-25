@@ -10,7 +10,7 @@ import com.google.common.collect.AbstractIterator;
 
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -238,7 +238,7 @@ public class CarrierPortGroup<T extends StorageType<T>> implements Iterable<Port
             case BRIDGE:
                 
                 if(Configurator.logTransportNetwork) 
-                    Log.info("CarrierPortGroup.attach %s: using bridge mode logic",
+                    HardScience.INSTANCE.info("CarrierPortGroup.attach %s: using bridge mode logic",
                             this.device().machineName());
                 
                 // If internal carrier not already set up then 
@@ -251,7 +251,7 @@ public class CarrierPortGroup<T extends StorageType<T>> implements Iterable<Port
                     internalCircuit = new Carrier<T>(storageType, carrierLevel, this.getChannel());
                     
                     if(Configurator.logTransportNetwork) 
-                        Log.info("CarrierPortGroup.attach %s: created new internal circuit %d",
+                        HardScience.INSTANCE.info("CarrierPortGroup.attach %s: created new internal circuit %d",
                                 this.device().machineName(),
                                 internalCircuit.carrierAddress());
                 }
@@ -264,7 +264,7 @@ public class CarrierPortGroup<T extends StorageType<T>> implements Iterable<Port
             case CARRIER:
                 
                 if(Configurator.logTransportNetwork) 
-                    Log.info("CarrierPortGroup.attach %s: using carrier mode logic",
+                    HardScience.INSTANCE.info("CarrierPortGroup.attach %s: using carrier mode logic",
                             this.device().machineName());
                 
                 // These checks should have been done already but doesn't hurt to check again
@@ -369,7 +369,7 @@ public class CarrierPortGroup<T extends StorageType<T>> implements Iterable<Port
             if(internalCircuit == oldCircuit)
             {
                 if(Configurator.logTransportNetwork) 
-                    Log.info("CarrierPortGroup.swapCircuit %s: replacing internal circuit %d with new circuit %d",
+                    HardScience.INSTANCE.info("CarrierPortGroup.swapCircuit %s: replacing internal circuit %d with new circuit %d",
                             this.device().machineName(),
                             oldCircuit.carrierAddress(),
                             newCircuit.carrierAddress());
@@ -384,7 +384,7 @@ public class CarrierPortGroup<T extends StorageType<T>> implements Iterable<Port
                     if(port.externalCircuit == oldCircuit)
                     {
                         if(Configurator.logTransportNetwork) 
-                            Log.info("CarrierPortGroup.swapCircuit %s: replacing external circuit %d with new circuit %d",
+                            HardScience.INSTANCE.info("CarrierPortGroup.swapCircuit %s: replacing external circuit %d with new circuit %d",
                                     this.device().machineName(),
                                     oldCircuit.carrierAddress(),
                                     newCircuit.carrierAddress());

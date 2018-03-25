@@ -13,7 +13,7 @@ import grondag.exotic_matter.simulator.WorldTaskManager;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.world.IntegerAABB;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.jobs.AbstractPositionedTask;
 import grondag.hard_science.simulator.jobs.AbstractTask;
@@ -151,7 +151,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     {
         this.id = nextID++;
         
-        if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor", this.id);
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d new Entry constructor", this.id);
         
         this.domainID = job.getDomain().getId();
         
@@ -179,12 +179,12 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         
         if(ExcavationRenderEntry.this.positions.size() == 0)
         {
-            if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - invalid", this.id);
+            if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d new Entry constructor - invalid", this.id);
             this.isValid = false;
         }
         else
         {
-            if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry constructor - launching compute", this.id);
+            if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d new Entry constructor - launching compute", this.id);
             ExcavationRenderEntry.this.compute();
         }
     }
@@ -221,7 +221,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
 
     private void compute()
     {
-        if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute called. Already running = %s", this.id, Boolean.toString(this.isScheduled.get()));
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d Compute called. Already running = %s", this.id, Boolean.toString(this.isScheduled.get()));
         if(this.isScheduled.compareAndSet(false, true))
         {
             BuildManager.EXECUTOR.execute(this);
@@ -231,7 +231,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     @Override
     public void run()
     {
-        if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute running.", this.id);
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d Compute running.", this.id);
         
         this.isDirty.set(false);
         
@@ -239,7 +239,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         
         if(count == 0)
         {
-            if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute existing due to empty positions.", this.id);
+            if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d Compute existing due to empty positions.", this.id);
             this.updateListeners();
             ExcavationRenderTracker.INSTANCE.remove(this);
             return;
@@ -299,10 +299,10 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
                 this.renderPositions = newPositions;
             }
             needsListenerUpdate = true;
-            if(Configurator.logExcavationRenderTracking) Log.info("id %d Computed render position length = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
+            if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id %d Computed render position length = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
         }
         
-        if(Configurator.logExcavationRenderTracking) Log.info("id = %d Compute done, updateListeners=%s, isDirty=%s", this.id, Boolean.toString(needsListenerUpdate),
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d Compute done, updateListeners=%s, isDirty=%s", this.id, Boolean.toString(needsListenerUpdate),
                 Boolean.toString(this.isDirty.get()));
         
         if(needsListenerUpdate) this.updateListeners();
@@ -329,7 +329,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     
     public void addListener(EntityPlayerMP listener, boolean sendPacketIfNew)
     {
-        if(Configurator.logExcavationRenderTracking) Log.info("id=%d addListenger sendIfNew=%s, isValue=%s, isFirstComputeDone=%s",
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id=%d addListenger sendIfNew=%s, isValue=%s, isFirstComputeDone=%s",
                 this.id,
                 Boolean.toString(sendPacketIfNew),
                 Boolean.toString(isValid),
@@ -339,7 +339,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
         {
             if(this.listeners.addIfNotPresent(listener) && sendPacketIfNew && this.isValid && this.isFirstComputeDone)
             {
-                if(Configurator.logExcavationRenderTracking) Log.info("id=%d addListenger scheduling packet.", this.id);
+                if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id=%d addListenger scheduling packet.", this.id);
                 WorldTaskManager.sendPacketFromServerThread(new PacketExcavationRenderUpdate(ExcavationRenderEntry.this), listener, true);
             }
         }
@@ -391,7 +391,7 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     @Nullable
     public BlockPos[] renderPositions()
     {
-        if(Configurator.logExcavationRenderTracking) Log.info("id %d Render position retrieval, count = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id %d Render position retrieval, count = %d", this.id, this.renderPositions == null ? 0 : this.renderPositions.length);
         return this.renderPositions;
     }
 }

@@ -8,7 +8,7 @@ import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModTextures;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.simulator.device.DeviceManager;
@@ -69,7 +69,7 @@ public interface IMachineBlock
         if(worldIn.isRemote) return;
         
         if(Configurator.logDeviceChanges)
-            Log.info("MachineBlock.onBlockPlacedBy: @ %d.%d.%d in dim %d", 
+            HardScience.INSTANCE.info("MachineBlock.onBlockPlacedBy: @ %d.%d.%d in dim %d", 
                     pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
 
         assert this.machine(worldIn, pos) == null
@@ -168,7 +168,7 @@ public interface IMachineBlock
         if(!(worldIn == null || worldIn.isRemote))
         {
             if(Configurator.logDeviceChanges)
-                Log.info("MachineBlock.breakBlock: @ %d.%d.%d in dim %d", 
+                HardScience.INSTANCE.info("MachineBlock.breakBlock: @ %d.%d.%d in dim %d", 
                         pos.getX(), pos.getY(), pos.getZ(), worldIn.provider.getDimension());
             
             IDevice device = DeviceManager.getDevice(worldIn, pos);

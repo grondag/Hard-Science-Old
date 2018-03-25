@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -45,7 +45,7 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
        }
        catch (Exception e)
        {
-           Log.error("Error in item handler", e);
+           HardScience.INSTANCE.error("Error in item handler", e);
            return 0;
        }
    }
@@ -73,7 +73,7 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
        }
        catch (Exception e)
        {
-           Log.error("Error in item handler", e);
+           HardScience.INSTANCE.error("Error in item handler", e);
            return ItemStack.EMPTY;
        }
    }
@@ -125,7 +125,7 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
        }
        catch (Exception e)
        {
-           Log.error("Error in item handler", e);
+           HardScience.INSTANCE.error("Error in item handler", e);
            return stack;
        }
    }
@@ -165,7 +165,7 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
        }
        catch (Exception e)
        {
-           Log.error("Error in item handler", e);
+           HardScience.INSTANCE.error("Error in item handler", e);
            return ItemStack.EMPTY;
        }
    }
@@ -192,7 +192,7 @@ public class ItemContainer extends ResourceContainer<StorageTypeStack> implement
        }
        catch (Exception e)
        {
-           Log.error("Error in item handler", e);
+           HardScience.INSTANCE.error("Error in item handler", e);
            return 0;
        }
    }

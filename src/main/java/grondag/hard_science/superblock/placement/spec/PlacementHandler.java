@@ -22,7 +22,7 @@ import grondag.exotic_matter.player.ModifierKeys.ModifierKey;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.world.HorizontalFace;
 import grondag.exotic_matter.world.IBlockRegion;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.VirtualTileEntity;
 import net.minecraft.block.SoundType;
@@ -261,7 +261,7 @@ public abstract class PlacementHandler
             // Alt+left click: undo block placement
 
             //TODO
-            Log.info("UNDO PLACEMENT LOGIC HAPPENS NOW");
+            HardScience.INSTANCE.info("UNDO PLACEMENT LOGIC HAPPENS NOW");
             return new PlacementResult(
                     onPos, 
                     PlacementEvent.UNDO_PLACEMENT,

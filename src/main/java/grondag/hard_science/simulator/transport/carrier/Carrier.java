@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableSet;
 
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.ITypedStorage;
 import grondag.hard_science.simulator.resource.StorageType;
@@ -123,7 +123,7 @@ public class Carrier<T extends StorageType<T>> implements ITypedStorage<T>
         assert this.confirmServiceThread() : "Transport logic running outside transport thread";
         
         if(Configurator.logTransportNetwork) 
-            Log.info("Carrier.attach: Attaching port %s (%s) to circuit %d.",
+            HardScience.INSTANCE.info("Carrier.attach: Attaching port %s (%s) to circuit %d.",
                     portInstance.toString(),
                     isInternal ? "internal" : "external",
                     this.carrierAddress());
@@ -169,7 +169,7 @@ public class Carrier<T extends StorageType<T>> implements ITypedStorage<T>
         assert this.confirmServiceThread() : "Transport logic running outside transport thread";
         
         if(Configurator.logTransportNetwork) 
-            Log.info("Carrier.detach: Removing port %s from circuit %d.",
+            HardScience.INSTANCE.info("Carrier.detach: Removing port %s from circuit %d.",
                     portInstance.toString(),
                     this.carrierAddress());
         

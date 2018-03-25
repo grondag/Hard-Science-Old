@@ -5,7 +5,7 @@ import java.util.HashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -71,7 +71,7 @@ public class MachineStorageContainer extends MachineContainer
         }
         catch (Exception e)
         {
-            Log.error("Error in open container item handling", e);
+            HardScience.INSTANCE.error("Error in open container item handling", e);
         }
         
         if(consumed > 0)

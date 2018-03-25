@@ -13,7 +13,7 @@ import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.superblock.placement.Build;
 import grondag.hard_science.superblock.virtual.ExcavationRenderTracker;
 import net.minecraft.entity.player.EntityPlayer;
@@ -202,7 +202,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
                 if(this.readyWorkCount < 0)
                 {
                     this.readyWorkCount = 0;
-                    Log.warn("Job tried to decrement ready work count below zero. This is probably a bug.");
+                    HardScience.INSTANCE.warn("Job tried to decrement ready work count below zero. This is probably a bug.");
                 }
                 if(this.readyWorkCount == 0)
                 {
@@ -211,7 +211,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
             }
             else
             {
-                Log.warn("Job tried to decrement ready work count below zero. This is probably a bug.");
+                HardScience.INSTANCE.warn("Job tried to decrement ready work count below zero. This is probably a bug.");
             }
         }
     }

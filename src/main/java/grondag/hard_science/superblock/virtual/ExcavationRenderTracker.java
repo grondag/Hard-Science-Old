@@ -8,7 +8,7 @@ import grondag.exotic_matter.simulator.domain.DomainChangeEvent;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.world.WorldMap;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderRefresh;
 import grondag.hard_science.network.server_to_client.PacketExcavationRenderUpdate;
 import grondag.hard_science.simulator.jobs.Job;
@@ -38,7 +38,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
     public void add(Job job)
     {
         ExcavationRenderEntry entry = new ExcavationRenderEntry(job);
-        if(Configurator.logExcavationRenderTracking) Log.info("id = %d new Entry, valid=%s", entry.id, Boolean.toString(entry.isValid()));
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d new Entry, valid=%s", entry.id, Boolean.toString(entry.isValid()));
         if(entry.isValid())
         {
             synchronized(this)
@@ -51,7 +51,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
                 PlayerData pd = playerEntry.getValue();
                 if(pd.dimensionID == entry.dimensionID && pd.domainID == entry.domainID)
                 {
-                    if(Configurator.logExcavationRenderTracking) Log.info("adding listeners for %s", playerEntry.getKey());
+                    if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("adding listeners for %s", playerEntry.getKey());
                     entry.addListener(pd.player, true);
                 }
             }
@@ -60,7 +60,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
     
     public synchronized void remove(ExcavationRenderEntry entry)
     {
-        if(Configurator.logExcavationRenderTracking) Log.info("id = %d removing excavation render entry", entry.id);
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id = %d removing excavation render entry", entry.id);
         
         this.get(entry.dimensionID).remove(entry.id);
         
@@ -91,7 +91,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
      */
     public void updatePlayerTracking(EntityPlayerMP player)
     {
-        if(Configurator.logExcavationRenderTracking) Log.info("updatePlayerTracking for %s", player.getName());
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("updatePlayerTracking for %s", player.getName());
         
         PlayerData newData = new PlayerData(player);
         PlayerData oldData = playerTracking.get(player.getName());
@@ -99,7 +99,7 @@ public class ExcavationRenderTracker extends WorldMap<Int2ObjectOpenHashMap<Exca
         if(oldData != null && oldData.dimensionID == newData.dimensionID && oldData.domainID == newData.domainID)
         {
             // no changes
-            if(Configurator.logExcavationRenderTracking) Log.info("updatePlayerTracking exit no changes");
+            if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("updatePlayerTracking exit no changes");
             return;
         }
         

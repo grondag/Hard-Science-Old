@@ -1,7 +1,7 @@
 package grondag.hard_science.init;
 
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.processing.MicronizerRecipe;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.domain.ProcessManager;
@@ -28,14 +28,14 @@ public class ModRecipes
                 
                 if(args.length != 4)
                 {
-                    Log.warn("Skipping invalid micronizer recipe: " + csv);
+                    HardScience.INSTANCE.warn("Skipping invalid micronizer recipe: " + csv);
                     continue;
                 }
                 
                 Ingredient ing = ProcessManager.readIngredient(args[0].trim());
                 if(ing == null || ing == Ingredient.EMPTY)
                 {
-                    Log.warn("Skipping invalid micronizer recipe: " + csv);
+                    HardScience.INSTANCE.warn("Skipping invalid micronizer recipe: " + csv);
                     continue;
                 }
                 
@@ -43,7 +43,7 @@ public class ModRecipes
                 BulkResource br = BulkResource.fromFluid(fluid);
                 if(br == null)
                 {
-                    Log.warn("Skipping invalid micronizer recipe: " + csv);
+                    HardScience.INSTANCE.warn("Skipping invalid micronizer recipe: " + csv);
                     continue;
                 }
                 
@@ -58,7 +58,7 @@ public class ModRecipes
             }
             catch(Exception e)
             {
-                Log.error("Unable to read micronizer recipe: " + csv, e);
+                HardScience.INSTANCE.error("Unable to read micronizer recipe: " + csv, e);
             }
         }
         

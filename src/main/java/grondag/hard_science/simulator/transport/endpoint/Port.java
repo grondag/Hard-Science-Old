@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.resource.ITypedStorage;
@@ -181,7 +181,7 @@ public abstract class Port<T extends StorageType<T>>
                 : "Port attach with mismatched levels";
         
         if(Configurator.logTransportNetwork) 
-            Log.info("Port.attach %s: port attach for %s to circuit %d with mate %s",
+            HardScience.INSTANCE.info("Port.attach %s: port attach for %s to circuit %d with mate %s",
                     this.device().machineName(),
                     this.toString(),
                     externalCircuit.carrierAddress(),
@@ -189,7 +189,7 @@ public abstract class Port<T extends StorageType<T>>
 
         
         if(Configurator.logTransportNetwork) 
-            Log.info("Port.attach %s: port mode = %s", 
+            HardScience.INSTANCE.info("Port.attach %s: port mode = %s", 
                     this.device().machineName(),
                     this.mode);
         
@@ -222,7 +222,7 @@ public abstract class Port<T extends StorageType<T>>
                 : "Port dettach request when not attached.";
         
         if(Configurator.logTransportNetwork) 
-            Log.info("Port.detach %s: port detach for %s",
+            HardScience.INSTANCE.info("Port.detach %s: port detach for %s",
                     this.device().machineName(),
                     this.toString());
         
@@ -273,7 +273,7 @@ public abstract class Port<T extends StorageType<T>>
         if(this.externalCircuit == oldCircuit)
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("Port.swapCircuit %s: replacing external circuit %d with new circuit %d",
+                HardScience.INSTANCE.info("Port.swapCircuit %s: replacing external circuit %d with new circuit %d",
                         this.device().machineName(),
                         oldCircuit.carrierAddress(),
                         newCircuit.carrierAddress());
@@ -356,14 +356,14 @@ public abstract class Port<T extends StorageType<T>>
     public void setMode(PortMode mode)
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("Port.setMode %s: mode = %s", 
+            HardScience.INSTANCE.info("Port.setMode %s: mode = %s", 
                     this.device().machineName(),
                     mode.toString());
 
         if(this.mode == mode)
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("Port.setMode %s: no effect - target mode was already set", 
+                HardScience.INSTANCE.info("Port.setMode %s: no effect - target mode was already set", 
                         this.device().machineName());
             return;
         }

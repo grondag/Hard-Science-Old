@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.matter.VolumeUnits;
@@ -305,7 +305,7 @@ public abstract class StorageType<T extends StorageType<T>>
             }
             catch(Exception e)
             {
-                Log.error("Unable to parse Item CSV", e);
+                HardScience.INSTANCE.error("Unable to parse Item CSV", e);
             }
             return null;
         }

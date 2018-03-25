@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
@@ -89,7 +89,7 @@ public class ComponentRegistry
         }
         catch (Throwable throwable1)
         {
-            Log.error("Failed to create device component {}", component, throwable1);
+            HardScience.INSTANCE.error("Failed to create device component {}", component, throwable1);
         }
 
         return result;

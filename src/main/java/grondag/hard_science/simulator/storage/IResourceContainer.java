@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.support.ThroughputRegulator;
 import grondag.hard_science.simulator.device.IDeviceComponent;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
@@ -201,7 +201,7 @@ public interface IResourceContainer<T extends StorageType<T>>
         }
         catch (Exception e)
         {
-            Log.error("Error in storage interaction", e);
+            HardScience.INSTANCE.error("Error in storage interaction", e);
             return 0;
         }
     }

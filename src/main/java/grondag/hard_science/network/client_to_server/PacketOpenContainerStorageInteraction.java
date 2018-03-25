@@ -3,7 +3,7 @@ package grondag.hard_science.network.client_to_server;
 import javax.annotation.Nonnull;
 
 import grondag.exotic_matter.network.AbstractPlayerToServerPacket;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
@@ -171,7 +171,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
             }
             catch (Exception e)
             {
-                Log.error("Error in open container item handling", e);
+                HardScience.INSTANCE.error("Error in open container item handling", e);
             }
             if(added > 0) heldStack.shrink(added);
             player.updateHeldItem();
@@ -192,7 +192,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         }
         catch (Exception e)
         {
-            Log.error("Error in open container item handling", e);
+            HardScience.INSTANCE.error("Error in open container item handling", e);
         }
         
         if(toMove == 0) return;
@@ -238,7 +238,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
         }
         catch (Exception e)
         {
-            Log.error("Error in open container item handling", e);
+            HardScience.INSTANCE.error("Error in open container item handling", e);
         }
             
         if(toAdd == 0) return;

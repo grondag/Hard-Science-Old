@@ -13,7 +13,7 @@ import grondag.exotic_matter.model.RenderPassSet;
 import grondag.exotic_matter.model.Translucency;
 import grondag.exotic_matter.render.RenderPass;
 import grondag.exotic_matter.world.CornerJoinBlockStateSelector;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModTextures;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockRenderLayer;
@@ -25,13 +25,13 @@ public class ModelStateTest
     @Test
     public void test()
     {
-        Log.info("Max shapes within current format: " + ModelShape.MAX_SHAPES);
-        Log.info("bits0 length = "  + ModelStateData.PACKER_0.bitLength());
-        Log.info("bits1 length = "  + ModelStateData.PACKER_1.bitLength());
-        Log.info("bits2 length = "  + ModelStateData.PACKER_2.bitLength());
+        HardScience.INSTANCE.info("Max shapes within current format: " + ModelShape.MAX_SHAPES);
+        HardScience.INSTANCE.info("bits0 length = "  + ModelStateData.PACKER_0.bitLength());
+        HardScience.INSTANCE.info("bits1 length = "  + ModelStateData.PACKER_1.bitLength());
+        HardScience.INSTANCE.info("bits2 length = "  + ModelStateData.PACKER_2.bitLength());
         
-        Log.info("bits3 block length = "  + ModelStateData.PACKER_3_BLOCK.bitLength());
-        Log.info("bits3 flow length = "  + ModelStateData.PACKER_3_FLOW.bitLength());
+        HardScience.INSTANCE.info("bits3 block length = "  + ModelStateData.PACKER_3_BLOCK.bitLength());
+        HardScience.INSTANCE.info("bits3 flow length = "  + ModelStateData.PACKER_3_FLOW.bitLength());
         
         // sign bit on third long is used to store static indicator
         assert(ModelStateData.PACKER_2.bitLength() < 64);

@@ -5,7 +5,7 @@ import grondag.exotic_matter.varia.KeyedTuple;
 import grondag.exotic_matter.varia.SimpleUnorderedArraySet;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -50,7 +50,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
         if(world.isRemote) return;
         
         if(Configurator.logMachineActivity) 
-            Log.info("MachineTileEntityTickable.addPlayerListener: %s got keepalive packet", this.machine().machineName());
+            HardScience.INSTANCE.info("MachineTileEntityTickable.addPlayerListener: %s got keepalive packet", this.machine().machineName());
         PlayerListener listener = new PlayerListener(player);
         
         if(this.listeningPlayers == null)
@@ -59,7 +59,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
             this.listeningPlayers.put(listener);
             
             if(Configurator.logMachineActivity) 
-                Log.info("MachineTileEntityTickable.addPlayerListener: %s added new listener", this.machine().machineName());
+                HardScience.INSTANCE.info("MachineTileEntityTickable.addPlayerListener: %s added new listener", this.machine().machineName());
             
             // send immediate refresh for any new listener
             if(this.machine() == null) return;
@@ -74,7 +74,7 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
             if(previous == null || previous.goodUntilMillis < WorldInfo.currentTimeMillis())
             {
                 if(Configurator.logMachineActivity) 
-                    Log.info("MachineTileEntityTickable.addPlayerListener: %s added or reinstated listener", this.machine().machineName());
+                    HardScience.INSTANCE.info("MachineTileEntityTickable.addPlayerListener: %s added or reinstated listener", this.machine().machineName());
                 
                 if(this.machine() == null) return;
                 
@@ -137,12 +137,12 @@ public class MachineTileEntityTickable extends MachineTileEntity implements ITic
                     {
                         this.listeningPlayers.remove(i);
                         if(Configurator.logMachineActivity) 
-                            Log.info("MachineTileEntityTickable.update: %s Removed timed out listener", this.machine().machineName());
+                            HardScience.INSTANCE.info("MachineTileEntityTickable.update: %s Removed timed out listener", this.machine().machineName());
                     }
                     else
                     {
                         if(Configurator.logMachineActivity) 
-                            Log.info("MachineTileEntityTickable.update: %s Sending update packet due to change", this.machine().machineName());
+                            HardScience.INSTANCE.info("MachineTileEntityTickable.update: %s Sending update packet due to change", this.machine().machineName());
                         if(packet != null) PacketHandler.CHANNEL.sendTo(packet, listener.key);
                         i++;
                     }

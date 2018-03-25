@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.render.RenderUtil;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
@@ -50,7 +50,7 @@ public class ExcavationRenderer
         this.visibilityBounds = bounds.grow(192);
         this.positions = positions;
         
-        if(Configurator.logExcavationRenderTracking) Log.info("id %d Renderer setBounds position count = %d", id, positions == null ? 0 : positions.length);
+        if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id %d Renderer setBounds position count = %d", id, positions == null ? 0 : positions.length);
     }
     
     public AxisAlignedBB bounds()

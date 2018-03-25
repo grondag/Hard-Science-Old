@@ -2,7 +2,7 @@ package grondag.hard_science.matter;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
@@ -99,7 +99,7 @@ public class Molecule implements IComposition
                 Element e = Element.all().get(symbol);
                 if(e == null)
                 {
-                    Log.warn("Chemical formula parse error: %s unrecognized.", symbol);
+                    HardScience.INSTANCE.warn("Chemical formula parse error: %s unrecognized.", symbol);
                     return null;
                 }
                 else

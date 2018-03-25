@@ -14,8 +14,6 @@ import grondag.exotic_matter.model.varia.CraftingItem;
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.SuperItemBlock;
-import grondag.exotic_matter.render.CompressedAnimatedSprite;
-import grondag.exotic_matter.render.QuadCache;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.machines.base.MachineTESR;
@@ -94,8 +92,6 @@ public class ClientEventHandler
         
         ExcavationRenderManager.render(event.getContext(), event.getPartialTicks());
     }
-
-    private static int clientStatCounter = ConfigXM.RENDER.clientStatReportingInterval * 20;
     
     private static int cooldown = 0;
     
@@ -129,29 +125,9 @@ public class ClientEventHandler
             }
 
         }
-        else
-        {
-            if ((ConfigXM.RENDER.enableQuadCacheStatistics || ConfigXM.RENDER.enableAnimationStatistics)
-                    && --clientStatCounter == 0) 
-            {
-                clientStatCounter = ConfigXM.RENDER.clientStatReportingInterval * 20;
-                
-                if(ConfigXM.RENDER.enableQuadCacheStatistics)
-                {
-                    Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
-                }
-    
-                if(ConfigXM.RENDER.enableAnimatedTextures && ConfigXM.RENDER.enableAnimationStatistics)
-                {
-                    CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
-                    CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
-                }
-            }
-
-        }
-   
     }
     
+    @SuppressWarnings("deprecation")
     @SubscribeEvent
     public static void onKeyInput(InputEvent.KeyInputEvent event)
     {

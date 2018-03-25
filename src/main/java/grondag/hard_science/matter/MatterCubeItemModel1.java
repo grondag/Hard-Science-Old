@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.varia.Color;
 import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -158,7 +158,7 @@ public class MatterCubeItemModel1 implements IBakedModel
     @Override
     public TextureAtlasSprite getParticleTexture()
     {
-        Log.warn("Unsupported method call: SimpleItemModel.getParticleTexture()");
+        HardScience.INSTANCE.warn("Unsupported method call: SimpleItemModel.getParticleTexture()");
         return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel().getParticleTexture();
     }
 

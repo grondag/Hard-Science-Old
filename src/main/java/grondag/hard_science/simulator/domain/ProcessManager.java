@@ -9,7 +9,7 @@ import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainCapability;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.impl.processing.MicronizerInputSelector;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -286,7 +286,7 @@ public class ProcessManager implements IDomainCapability
         }
         catch(Exception e)
         {
-            Log.error("Unable to parse fluid resource processing configuration", e);
+            HardScience.INSTANCE.error("Unable to parse fluid resource processing configuration", e);
         }
         return null;
     }
@@ -340,7 +340,7 @@ public class ProcessManager implements IDomainCapability
         }
         catch(Exception e)
         {
-            Log.error("Unable to parse item resource processing configuration", e);
+            HardScience.INSTANCE.error("Unable to parse item resource processing configuration", e);
         }
         return null;
     }
@@ -476,7 +476,7 @@ public class ProcessManager implements IDomainCapability
                     }
                     catch(Exception e)
                     {
-                        Log.error("Unable to read fluid process settings", e);
+                        HardScience.INSTANCE.error("Unable to read fluid process settings", e);
                     }
                 }
             }
@@ -499,7 +499,7 @@ public class ProcessManager implements IDomainCapability
                     }
                     catch(Exception e)
                     {
-                        Log.error("Unable to read ingredient process settings", e);
+                        HardScience.INSTANCE.error("Unable to read ingredient process settings", e);
                     }                
                 }   
             }

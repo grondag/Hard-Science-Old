@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModBulkResources;
 import grondag.hard_science.matter.Compound;
 import grondag.hard_science.matter.Element;
@@ -153,7 +153,7 @@ public class DigesterAnalysis
         double totalResidueMols = 0;
         double netWater = 0;
         
-        if(debug) Log.info("BEGINNING DIGESTER ANALYSIS FOR " + input.displayName().toUpperCase());
+        if(debug) HardScience.INSTANCE.info("BEGINNING DIGESTER ANALYSIS FOR " + input.displayName().toUpperCase());
         
         Compound.Builder residueBuilder = Compound.builder();
         
@@ -163,7 +163,7 @@ public class DigesterAnalysis
             
             if(debug)
             {
-                Log.info("Input includes %f mols of %s", count, e.symbol);
+                HardScience.INSTANCE.info("Input includes %f mols of %s", count, e.symbol);
                 reconIn.put(e, count);
             }
 
@@ -175,7 +175,7 @@ public class DigesterAnalysis
                 residueBuilder.add(residue, residueMols);
                 netOxygen -= residue.countOf(Element.O) * residueMols;
                 
-                if(debug) Log.info("Residue includes %f mols of %s as %f mols of %s",
+                if(debug) HardScience.INSTANCE.info("Residue includes %f mols of %s as %f mols of %s",
                         count, e.symbol, residueMols, residue.formula);
             }
             else
@@ -183,7 +183,7 @@ public class DigesterAnalysis
                 if(!digested.contains(e))
                 {
                     if(debug || Configurator.PROCESSING.enableDigesterRecipeWarnings)
-                        Log.warn("Unsupported element " + e.symbol + "found in digester input. Content will be discarded.");
+                        HardScience.INSTANCE.warn("Unsupported element " + e.symbol + "found in digester input. Content will be discarded.");
                 }
             }
         }
@@ -200,7 +200,7 @@ public class DigesterAnalysis
             if(calciumFluoride > calcium)
             {
                 if(debug || Configurator.PROCESSING.enableDigesterRecipeWarnings)
-                    Log.warn("Digester recipe for " + input.displayName() + " has excess fluorine in composition.  Some fluorine will be lost. Add calcium to correct.");
+                    HardScience.INSTANCE.warn("Digester recipe for " + input.displayName() + " has excess fluorine in composition.  Some fluorine will be lost. Add calcium to correct.");
                 calciumFluoride = calcium;
             }
             
@@ -244,7 +244,7 @@ public class DigesterAnalysis
             if(sodiumChloride > sodium)
             {
                 if(debug || Configurator.PROCESSING.enableDigesterRecipeWarnings)
-                    Log.warn("Digester recipe for " + input.displayName() + " has excess chlorine in composition.  Some chlorine will be lost. Add sodium to correct.");
+                    HardScience.INSTANCE.warn("Digester recipe for " + input.displayName() + " has excess chlorine in composition.  Some chlorine will be lost. Add sodium to correct.");
                 sodiumChloride = sodium;
             }
             
@@ -418,7 +418,7 @@ public class DigesterAnalysis
         
         double massIn = input.composition().weight();
 
-        if(debug) Log.info("Base mass for one mol of input is " + massIn);
+        if(debug) HardScience.INSTANCE.info("Base mass for one mol of input is " + massIn);
         
         if(netWater > 0)
         {
@@ -431,7 +431,7 @@ public class DigesterAnalysis
             massIn += this.waterInputMols * H2O_FLUID.weight();
             if(debug)
             {
-                Log.info("Water consumption is %f mols with mass %f",
+                HardScience.INSTANCE.info("Water consumption is %f mols with mass %f",
                     this.waterInputMols, this.waterInputMols * H2O_FLUID.weight());
                 reconIn.addTo(Element.O, this.waterInputMols);
                 reconIn.addTo(Element.H, this.waterInputMols * 2);
@@ -440,7 +440,7 @@ public class DigesterAnalysis
         else
         {
             this.waterInputMols = 0; 
-            if(debug) Log.info("No water in or out");
+            if(debug) HardScience.INSTANCE.info("No water in or out");
         }
 
     
@@ -462,7 +462,7 @@ public class DigesterAnalysis
             massIn += this.nitrogenInputMols * N2_GAS.weight();
             if(debug)
             {
-                Log.info("Nitrogen (N2) consumption is %f mols with mass %f",
+                HardScience.INSTANCE.info("Nitrogen (N2) consumption is %f mols with mass %f",
                     this.nitrogenInputMols, this.nitrogenInputMols * N2_GAS.weight());
                 reconIn.addTo(Element.N, this.nitrogenInputMols * 2);
             }
@@ -470,13 +470,13 @@ public class DigesterAnalysis
         else
         {
             this.nitrogenInputMols = 0;
-            if(debug) Log.info("No nitrogen in or out");
+            if(debug) HardScience.INSTANCE.info("No nitrogen in or out");
         }
         
         if(Math.abs(netOxygen) < 0.000001)
         {
             this.oxygenInputMols = 0;
-            if(debug) Log.info("No oxygen in or out");
+            if(debug) HardScience.INSTANCE.info("No oxygen in or out");
         }
         else if(netOxygen > 0)
         {
@@ -487,19 +487,19 @@ public class DigesterAnalysis
         {
             this.oxygenInputMols = -netOxygen / 2;
             massIn += this.oxygenInputMols * O2_GAS.weight();
-            if(debug) Log.info("Oxygen (O2) consumption is %f mols with mass %f",
+            if(debug) HardScience.INSTANCE.info("Oxygen (O2) consumption is %f mols with mass %f",
                     this.oxygenInputMols, this.oxygenInputMols * O2_GAS.weight());
             reconIn.addTo(Element.O, this.oxygenInputMols * 2);
         }
         
-        if(debug) Log.info("Total mass in = " + massIn);
+        if(debug) HardScience.INSTANCE.info("Total mass in = " + massIn);
         
         final Object2DoubleOpenHashMap<Element> reconOut = debug ? new Object2DoubleOpenHashMap<>() : null;
         
         double massOut = this.residueCompound.weight() * this.residueMols;
         if(debug) 
         {
-            Log.info("Residue output is %f mols with mass %f",
+            HardScience.INSTANCE.info("Residue output is %f mols with mass %f",
                 this.residueMols, this.residueMols * this.residueCompound.weight());
             for(Element e : this.residueCompound.elements())
             {
@@ -519,7 +519,7 @@ public class DigesterAnalysis
             
             if(debug) 
             {
-                Log.info("Output includes %f mols of %s with mass %f",
+                HardScience.INSTANCE.info("Output includes %f mols of %s with mass %f",
                     entry.getValue(), entry.getKey().displayName(),  
                     entry.getKey().composition().weight() * entry.getValue());
                 
@@ -532,13 +532,13 @@ public class DigesterAnalysis
         
         if(debug)
         {
-            Log.info("Total mass out is " + massOut);
-            Log.info("Total element in/out reconciliation...");
+            HardScience.INSTANCE.info("Total mass out is " + massOut);
+            HardScience.INSTANCE.info("Total element in/out reconciliation...");
             for(Element e : reconIn.keySet())
             {
                 double in = reconIn.getDouble(e);
                 double out = reconOut.getDouble(e);
-                Log.info("%s in=%f out=%f %s", e.symbol, in, out, 
+                HardScience.INSTANCE.info("%s in=%f out=%f %s", e.symbol, in, out, 
                         (Math.abs(in - out) < 0.000001) ? "MATCH" : "ERROR");
                 reconOut.removeDouble(e);
             }
@@ -547,7 +547,7 @@ public class DigesterAnalysis
             {
                 for(Entry<Element, Double> e : reconOut.entrySet())
                 {
-                    Log.info("Unmatched output %s with %f mols", 
+                    HardScience.INSTANCE.info("Unmatched output %s with %f mols", 
                             e.getKey().symbol, e.getValue());
                 }
             }
@@ -555,7 +555,7 @@ public class DigesterAnalysis
 
         if((debug || Configurator.PROCESSING.enableDigesterRecipeWarnings) && Math.abs(massOut - massIn) > 0.0000001)
         {
-            Log.warn("Digester recipe for " + input.displayName() + " violates conservation of mass. Recipe still created.");
+            HardScience.INSTANCE.warn("Digester recipe for " + input.displayName() + " violates conservation of mass. Recipe still created.");
         }
     }
     

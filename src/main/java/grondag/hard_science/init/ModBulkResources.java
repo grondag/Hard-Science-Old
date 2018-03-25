@@ -11,7 +11,7 @@ import grondag.exotic_matter.model.BlockColorMapProvider;
 import grondag.exotic_matter.model.ColorMap.EnumColorMap;
 import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.processing.DigesterAnalysis;
 import grondag.hard_science.crafting.processing.DigesterRecipe;
 import grondag.hard_science.matter.Compound;
@@ -234,7 +234,7 @@ public class ModBulkResources
             {
                 if(usedNames.contains(args[0].trim()))
                 {
-                    Log.warn("Bad micronizer/digester configuration. Resource name not unique.");
+                    HardScience.INSTANCE.warn("Bad micronizer/digester configuration. Resource name not unique.");
                 }
                 else
                 {
@@ -246,7 +246,7 @@ public class ModBulkResources
                     }
                     catch(Exception e)
                     {
-                        Log.error("Unable to parse micronizer input density " + args[1] + ". Using 2.0 as default", e);
+                        HardScience.INSTANCE.error("Unable to parse micronizer input density " + args[1] + ". Using 2.0 as default", e);
                         density = 2.0;
                     }
                     
@@ -260,7 +260,7 @@ public class ModBulkResources
                     }
                     catch(Exception e)
                     {
-                        Log.error("Unable to parse micronizer input color " + colorArg + ". Using 0xFFAAAA as default", e);
+                        HardScience.INSTANCE.error("Unable to parse micronizer input color " + colorArg + ". Using 0xFFAAAA as default", e);
                         density = 0xFFAAAA;
                     }
                     
@@ -269,11 +269,11 @@ public class ModBulkResources
             }
             else if(builder == null)
             {
-                Log.warn("Bad micronizer/digester configuration. Should start with resource name");
+                HardScience.INSTANCE.warn("Bad micronizer/digester configuration. Should start with resource name");
             }
             else if(args.length != 2)
             {
-                Log.warn("Bad micronizer/digester configuration. Components should contain formula and fraction.");
+                HardScience.INSTANCE.warn("Bad micronizer/digester configuration. Components should contain formula and fraction.");
             }
             else
             {
@@ -284,11 +284,11 @@ public class ModBulkResources
                     double fraction = Double.parseDouble(args[1].trim());
                     if(fraction <=0)
                     {
-                        Log.warn("Fraction for digester input must be positive. Line '%s' skipped", line);
+                        HardScience.INSTANCE.warn("Fraction for digester input must be positive. Line '%s' skipped", line);
                     }
                     else if(m.elements().isEmpty())
                     {
-                        Log.warn("Formula for digester contains no elements. Line '%s' skipped", line);
+                        HardScience.INSTANCE.warn("Formula for digester contains no elements. Line '%s' skipped", line);
                     }
                     else
                     {
@@ -301,7 +301,7 @@ public class ModBulkResources
                 }
                 catch(Exception e)
                 {
-                    Log.error("Error parsing input '" + line + "' for digester input. Line skiped", e);
+                    HardScience.INSTANCE.error("Error parsing input '" + line + "' for digester input. Line skiped", e);
                 }
             }
             
@@ -309,7 +309,7 @@ public class ModBulkResources
             {
                 if(builder.isEmpty())
                 {
-                    Log.warn("Digester input %s has no components. Skipped", name);
+                    HardScience.INSTANCE.warn("Digester input %s has no components. Skipped", name);
                 }
                 else
                 {

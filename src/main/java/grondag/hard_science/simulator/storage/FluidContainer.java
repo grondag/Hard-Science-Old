@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.storage;
 
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.resource.AbstractResourceWithQuantity;
@@ -128,7 +128,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
         }
         catch (Exception e)
         {
-            Log.error("Error in fluid handler", e);
+            HardScience.INSTANCE.error("Error in fluid handler", e);
             return 0;
         }
         
@@ -159,7 +159,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
         }
         catch (Exception e)
         {
-            Log.error("Error in fluid handler", e);
+            HardScience.INSTANCE.error("Error in fluid handler", e);
             return null;
         }
     }

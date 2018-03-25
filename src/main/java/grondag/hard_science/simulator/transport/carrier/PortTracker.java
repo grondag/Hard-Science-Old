@@ -11,7 +11,7 @@ import com.google.common.collect.ImmutableSet;
 
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.endpoint.Port;
 
@@ -76,7 +76,7 @@ public class PortTracker<T extends StorageType<T>>
     public void add(Port<T> p)
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("PortTracker.add: circuit = %d, portState = %s",
+            HardScience.INSTANCE.info("PortTracker.add: circuit = %d, portState = %s",
                     this.owner.carrierAddress(),
                     p.toString());
         
@@ -90,7 +90,7 @@ public class PortTracker<T extends StorageType<T>>
             {
                 if(p.externalCircuit() == this.owner)
                 {
-                    Log.info("PortTracker.add: circuit = %d, downward side - updating bridges and version",
+                    HardScience.INSTANCE.info("PortTracker.add: circuit = %d, downward side - updating bridges and version",
                             this.owner.carrierAddress());
                     
                     this.bridges.addIfNotPresent(p);
@@ -99,7 +99,7 @@ public class PortTracker<T extends StorageType<T>>
                 }
                 else
                 {
-                    Log.info("PortTracker.add: circuit = %d, upward side - updating version only",
+                    HardScience.INSTANCE.info("PortTracker.add: circuit = %d, upward side - updating version only",
                             this.owner.carrierAddress());
                     
                     // opening assertion implies internalCircuit is our owner
@@ -114,7 +114,7 @@ public class PortTracker<T extends StorageType<T>>
     public void remove(Port<T> p)
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("PortTracker.remove: circuit = %d, portState = %s",
+            HardScience.INSTANCE.info("PortTracker.remove: circuit = %d, portState = %s",
                     this.owner.carrierAddress(),
                     p.toString());
         
@@ -129,7 +129,7 @@ public class PortTracker<T extends StorageType<T>>
             {
                 if(p.externalCircuit() == this.owner)
                 {
-                    Log.info("PortTracker.remove: circuit = %d, downward side - updating bridges and version",
+                    HardScience.INSTANCE.info("PortTracker.remove: circuit = %d, downward side - updating bridges and version",
                             this.owner.carrierAddress());
                     
                     this.bridges.removeIfPresent(p);
@@ -138,7 +138,7 @@ public class PortTracker<T extends StorageType<T>>
                 }
                 else 
                 {
-                    Log.info("PortTracker.remove: circuit = %d, upward side - updating version only",
+                    HardScience.INSTANCE.info("PortTracker.remove: circuit = %d, upward side - updating version only",
                             this.owner.carrierAddress());
                     
                     // opening assertion implies internalCircuit is our owner
@@ -169,7 +169,7 @@ public class PortTracker<T extends StorageType<T>>
     public void clear()
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("PortTracker.clear: circuit = %d",
+            HardScience.INSTANCE.info("PortTracker.clear: circuit = %d",
                     this.owner.carrierAddress());
         
         this.ports.clear();
@@ -227,7 +227,7 @@ public class PortTracker<T extends StorageType<T>>
     protected void mergeInto(PortTracker<T> into)
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("PortTracker.mergeInto: from = %d, to = %d",
+            HardScience.INSTANCE.info("PortTracker.mergeInto: from = %d, to = %d",
                     this.owner.carrierAddress(),
                     into.owner.carrierAddress());
         
@@ -255,7 +255,7 @@ public class PortTracker<T extends StorageType<T>>
     public void movePorts(PortTracker<T> into, Predicate<Port<T>> predicate)
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("PortTracker.movePorts: from = %d, to = %d",
+            HardScience.INSTANCE.info("PortTracker.movePorts: from = %d, to = %d",
                     this.owner.carrierAddress(),
                     into.owner.carrierAddress());
         

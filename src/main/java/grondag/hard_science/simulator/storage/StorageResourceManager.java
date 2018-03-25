@@ -15,7 +15,7 @@ import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.fobs.INewTaskListener;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.fobs.NewTask;
@@ -132,7 +132,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
         
         if(requestedAllocation < 0)
         {
-            Log.warn("StorageResourceManager received request to set resource allocation less than zero. This is a bug.");
+            HardScience.INSTANCE.warn("StorageResourceManager received request to set resource allocation less than zero. This is a bug.");
             requestedAllocation = 0;
         }
 
@@ -274,7 +274,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
         if(taken > this.quantityStored)
         {
             taken = this.quantityStored;
-            Log.warn("Resource manager encounted request to take more than current inventory level.  This is a bug.");
+            HardScience.INSTANCE.warn("Resource manager encounted request to take more than current inventory level.  This is a bug.");
         }
         
         // remove storage from list if no longer holding resource
@@ -299,7 +299,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
         {
             if(this.allocations == null)
             {
-                Log.warn("Storage Resource Manager tracking non-zero allocation but has no allocation requests. This is a bug.");
+                HardScience.INSTANCE.warn("Storage Resource Manager tracking non-zero allocation but has no allocation requests. This is a bug.");
             }
             else if(this.allocations instanceof Pair)
             {

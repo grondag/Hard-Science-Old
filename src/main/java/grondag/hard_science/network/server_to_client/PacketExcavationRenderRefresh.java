@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import grondag.exotic_matter.network.AbstractServerToPlayerPacket;
 import grondag.exotic_matter.world.IntegerAABB;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.superblock.virtual.ExcavationRenderEntry;
 import grondag.hard_science.superblock.virtual.ExcavationRenderManager;
 import grondag.hard_science.superblock.virtual.ExcavationRenderer;
@@ -63,7 +63,7 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
             pBuff.writeInt(r.positions == null ? 0 : r.positions.length);
             if(r.positions != null)
             {
-                if(Configurator.logExcavationRenderTracking) Log.info("id %d Refresh toBytes position count = %d", r.id, r.positions == null ? 0 : r.positions.length);
+                if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id %d Refresh toBytes position count = %d", r.id, r.positions == null ? 0 : r.positions.length);
 
                 for(BlockPos pos : r.positions)
                 {
@@ -100,7 +100,7 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
                     }
                     
                 }
-                if(Configurator.logExcavationRenderTracking) Log.info("id %d Refresh toBytes position count = %d", id, list == null ? 0 : list.length);
+                if(Configurator.logExcavationRenderTracking) HardScience.INSTANCE.info("id %d Refresh toBytes position count = %d", id, list == null ? 0 : list.length);
 
                 this.renders.add(new RenderData(id, new IntegerAABB(minPos, maxPos), isExchange, list));
             }

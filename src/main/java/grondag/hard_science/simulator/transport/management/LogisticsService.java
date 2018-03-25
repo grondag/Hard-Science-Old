@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.concurrency.PrivilegedExecutor;
 import grondag.hard_science.Configurator;
-import grondag.hard_science.Log;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.device.IDevice;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.resource.IResource;
@@ -97,7 +97,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         assert confirmServiceThread() : "LogisticsService.connect called outside service thread.";
         
         if(Configurator.logTransportNetwork) 
-            Log.info("LogisticsService.connect: CONNECT STARTED for %s to %s", first.toString(), second.toString());
+            HardScience.INSTANCE.info("LogisticsService.connect: CONNECT STARTED for %s to %s", first.toString(), second.toString());
 
         ConnectionResult result = connectionResult(first, second);
         
@@ -115,28 +115,28 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             
         case FAIL_CHANNEL_MISMATCH:
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.connect: attempt abandoned - channel mismatch.");
+                HardScience.INSTANCE.info("LogisticsService.connect: attempt abandoned - channel mismatch.");
             return false;
             
         case FAIL_INCOMPATIBLE:
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.connect: attempt abandoned - incompatible port types.");
+                HardScience.INSTANCE.info("LogisticsService.connect: attempt abandoned - incompatible port types.");
             return false;
 
         case FAIL_LEVEL_GAP:
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.connect: attempt abandoned - carrier level mismatch.");
+                HardScience.INSTANCE.info("LogisticsService.connect: attempt abandoned - carrier level mismatch.");
             return false;
 
         case FAIL_STORAGE_TYPE:
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.connect: attempt abandoned - incompatible storage types.");
+                HardScience.INSTANCE.info("LogisticsService.connect: attempt abandoned - incompatible storage types.");
             return false;
             
         default:
             assert false : "LogisticsService.connect: Unhandled ConnectionResult enum";
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.connect: attempt abandoned - unhandled result. This is a bug.");
+                HardScience.INSTANCE.info("LogisticsService.connect: attempt abandoned - unhandled result. This is a bug.");
             return false;
         }
     }
@@ -147,7 +147,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
     private void connectPorts(Port<T> first, Port<T> second, ConnectionResult result)
     {
         if(Configurator.logTransportNetwork) 
-            Log.info("LogisticsService.connectPorts: start");
+            HardScience.INSTANCE.info("LogisticsService.connectPorts: start");
 
         // now have to decide which circuit to use, or create a new circuit
         // if neither port already has one
@@ -163,7 +163,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             if(secondCircuit == null)
             {
                 if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.connectPorts: Neither port has circuit - creating new circuit");
+                    HardScience.INSTANCE.info("LogisticsService.connectPorts: Neither port has circuit - creating new circuit");
 
                 newCircuit = new Carrier<T>(this.storageType, 
                         first.externalLevel(result.left), 
@@ -172,7 +172,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             else
             {
                 if(Configurator.logTransportNetwork) 
-                    Log.info("LogisticsService.connectPorts: First port has null circuit - using circuit from second port");
+                    HardScience.INSTANCE.info("LogisticsService.connectPorts: First port has null circuit - using circuit from second port");
 
                 newCircuit = secondCircuit;
             }
@@ -182,7 +182,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         else if(secondCircuit == null || secondCircuit == firstCircuit)
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.connectCarrierPorts: Second port has null circuit - using circuit from start port");
+                HardScience.INSTANCE.info("LogisticsService.connectCarrierPorts: Second port has null circuit - using circuit from start port");
 
             attachBothPorts(first, second, firstCircuit, result);
         }
@@ -193,13 +193,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                 if(result.allowMerge)
                 {
                     if(Configurator.logTransportNetwork) 
-                        Log.info("LogisticsService.connectCarrierPorts: Ports have different circuits. Keeping start port circuit & merging second port circuit into start");
+                        HardScience.INSTANCE.info("LogisticsService.connectCarrierPorts: Ports have different circuits. Keeping start port circuit & merging second port circuit into start");
     
                     secondCircuit.mergeInto(firstCircuit);
                     attachBothPorts(first, second, firstCircuit, result);
                 }
                 else
-                    Log.warn("Mismatched circuits for port connect but merge not allowed. This is a bug, and strange (probably bad) things may happen now.");
+                    HardScience.INSTANCE.warn("Mismatched circuits for port connect but merge not allowed. This is a bug, and strange (probably bad) things may happen now.");
 
             }
             else
@@ -207,13 +207,13 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                 if(result.allowMerge)
                 {
                     if(Configurator.logTransportNetwork) 
-                        Log.info("LogisticsService.connectCarrierPorts: Ports have different circuits. Keeping second port circuit & merging start port circuit into second");
+                        HardScience.INSTANCE.info("LogisticsService.connectCarrierPorts: Ports have different circuits. Keeping second port circuit & merging start port circuit into second");
                     
                     firstCircuit.mergeInto(secondCircuit);
                     attachBothPorts(first, second, secondCircuit, result);
                 }
                 else
-                    Log.warn("Mismatched circuits for port connect but merge not allowed. This is a bug, and strange (probably bad) things may happen now.");
+                    HardScience.INSTANCE.warn("Mismatched circuits for port connect but merge not allowed. This is a bug, and strange (probably bad) things may happen now.");
 
             }
         }
@@ -240,12 +240,12 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         assert confirmServiceThread() : "LogisticsService.connect called outside service thread.";
 
         if(Configurator.logTransportNetwork) 
-            Log.info("LogisticsService.disconnect: DISCONNECT STARTED for %s", leaving.toString());
+            HardScience.INSTANCE.info("LogisticsService.disconnect: DISCONNECT STARTED for %s", leaving.toString());
 
         if(!leaving.isAttached())
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.disconnect: Disconnect abandoned - port not attached");
+                HardScience.INSTANCE.info("LogisticsService.disconnect: Disconnect abandoned - port not attached");
             return;
         }
 
@@ -254,14 +254,14 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         assert mate != null : "Missing mate on port disconnect.";
 
         if(Configurator.logTransportNetwork) 
-            Log.info("LogisticsService.disconnect: Port mate is %s", mate.toString());
+            HardScience.INSTANCE.info("LogisticsService.disconnect: Port mate is %s", mate.toString());
 
 
         // split isn't possible unless both ports are carrier ports
         if(leaving.getMode() == PortMode.CARRIER && mate.getMode() == PortMode.CARRIER)
         {
             if(Configurator.logTransportNetwork) 
-                Log.info("LogisticsService.disconnect: Checking for possible split");
+                HardScience.INSTANCE.info("LogisticsService.disconnect: Checking for possible split");
 
             // Carrier split will be necessary UNLESS the mate is navigable via
             // an alternate route on the same carrier circuit. 
@@ -278,7 +278,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                 if(reachableFromLeaving.size() >= existingCircuit.portCount() / 2)
                 {
                     if(Configurator.logTransportNetwork) 
-                        Log.info("LogisticsService.disconnect: Split needed, moving mate-side ports to new circuit %d", newCircuit.carrierAddress());
+                        HardScience.INSTANCE.info("LogisticsService.disconnect: Split needed, moving mate-side ports to new circuit %d", newCircuit.carrierAddress());
 
                     // Reachable ports are at least half of total. 
                     // Swap mate and unreachable ports to a new circuit
@@ -294,7 +294,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                 else
                 {
                     if(Configurator.logTransportNetwork) 
-                        Log.info("LogisticsService.disconnect: Split needed, moving leave-side ports to new circuit %d", newCircuit.carrierAddress());
+                        HardScience.INSTANCE.info("LogisticsService.disconnect: Split needed, moving leave-side ports to new circuit %d", newCircuit.carrierAddress());
 
                     // Reachable ports are less than half of total.
                     // Swap leaving port and reachable ports to a new circuit
@@ -310,7 +310,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
             }
             else if(Configurator.logTransportNetwork) 
             {
-                Log.info("LogisticsService.disconnect: Split not needed for %d ports. (If > 1 ports are still reachable)",
+                HardScience.INSTANCE.info("LogisticsService.disconnect: Split not needed for %d ports. (If > 1 ports are still reachable)",
                         reachableFromLeaving.size());
             }
         }
@@ -630,7 +630,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         }
         catch (Exception e)
         {
-            Log.error("Unable to find transport routes due to error", e);
+            HardScience.INSTANCE.error("Unable to find transport routes due to error", e);
             return ImmutableList.of();
         }
     }
@@ -837,7 +837,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         }
         catch (Exception e)
         {
-            Log.error("Unable to send resources due to error", e);
+            HardScience.INSTANCE.error("Unable to send resources due to error", e);
             return 0;
         }
     }
@@ -919,7 +919,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
         }
         catch (Exception e)
         {
-            Log.error("Unable to send resources due to error", e);
+            HardScience.INSTANCE.error("Unable to send resources due to error", e);
             return 0;
         }
     }
