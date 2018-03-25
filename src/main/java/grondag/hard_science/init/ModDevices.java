@@ -20,19 +20,19 @@ public class ModDevices
 {
     public static void preInit(FMLPreInitializationEvent event) 
     {
-        DeviceManager.register(HardScience.prefixResource("block_fabricator"), BlockFabricatorMachine.class);
-        DeviceManager.register(HardScience.prefixResource("smart_chest"), SmartChestMachine.Flexible.class);
-        DeviceManager.register(HardScience.prefixResource("smart_bin"), SmartChestMachine.Dedicated.class);
-        DeviceManager.register(HardScience.prefixResource("solar_cell"), PhotoElectricMachine.class);
-        DeviceManager.register(HardScience.prefixResource("solar_cable"), SolarCableMachine.class);
-        DeviceManager.register(HardScience.prefixResource("bottom_bus"), BottomBusMachine.class);
-        DeviceManager.register(HardScience.prefixResource("middle_bus"), MiddleBusMachine.class);
-        DeviceManager.register(HardScience.prefixResource("top_bus"), TopBusMachine.class);
-        DeviceManager.register(HardScience.prefixResource("water_pump"), WaterPumpMachine.class);
-        DeviceManager.register(HardScience.prefixResource("flexible_tank"), TankMachine.Flexible.class);
-        DeviceManager.register(HardScience.prefixResource("dedicated_tank"), TankMachine.Dedicated.class);
-        DeviceManager.register(HardScience.prefixResource("chemical_battery"), ChemicalBatteryMachine.class);
-        DeviceManager.register(HardScience.prefixResource("micronizer"), MicronizerMachine.class);
-        DeviceManager.register(HardScience.prefixResource("digester"), DigesterMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("block_fabricator"), BlockFabricatorMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("smart_chest"), SmartChestMachine.Flexible.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("smart_bin"), SmartChestMachine.Dedicated.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("solar_cell"), PhotoElectricMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("solar_cable"), SolarCableMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("bottom_bus"), BottomBusMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("middle_bus"), MiddleBusMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("top_bus"), TopBusMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("water_pump"), WaterPumpMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("flexible_tank"), TankMachine.Flexible.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("dedicated_tank"), TankMachine.Dedicated.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("chemical_battery"), ChemicalBatteryMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("micronizer"), MicronizerMachine.class);
+        DeviceManager.register(HardScience.INSTANCE.prefixResource("digester"), DigesterMachine.class);
     }
 }

@@ -16,7 +16,7 @@ public class ModRegistries
 
     public static ForgeRegistry<PortLayout> portLayoutRegistry;
 
-    public static final String EMPTY_KEY = HardScience.prefixResource("empty");
+    public static final String EMPTY_KEY = HardScience.INSTANCE.prefixResource("empty");
 
     @SubscribeEvent
     public static void newRegistries(RegistryEvent.NewRegistry event) 

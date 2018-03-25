@@ -21,7 +21,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class SolarEtheneRecipe extends GenericRecipe
 {
-    public static final String UID = HardScience.prefixName("solar_ethene");
+    public static final String UID = HardScience.INSTANCE.prefixName("solar_ethene");
    
     public final static Process PROCESS = new Process();
 

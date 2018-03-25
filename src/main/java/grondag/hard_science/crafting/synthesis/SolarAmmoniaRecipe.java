@@ -21,7 +21,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class SolarAmmoniaRecipe extends GenericRecipe
 {
-    public static final String UID = HardScience.prefixName("solar_ammonia");
+    public static final String UID = HardScience.INSTANCE.prefixName("solar_ammonia");
    
     public final static Process PROCESS = new Process();
 

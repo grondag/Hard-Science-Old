@@ -20,7 +20,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class SolarElectrolysisRecipe extends GenericRecipe
 {
-    public static final String UID = HardScience.prefixName("solar_electrolysis");
+    public static final String UID = HardScience.INSTANCE.prefixName("solar_electrolysis");
    
     public final static Process PROCESS = new Process();
 

@@ -1,8 +1,13 @@
 package grondag.hard_science.init;
 
 
-import static grondag.exotic_matter.model.TextureRotationType.*;
-import static grondag.exotic_matter.world.Rotation.*;
+import static grondag.exotic_matter.model.TextureRotationType.CONSISTENT;
+import static grondag.exotic_matter.model.TextureRotationType.FIXED;
+import static grondag.exotic_matter.model.TextureRotationType.RANDOM;
+import static grondag.exotic_matter.world.Rotation.ROTATE_180;
+import static grondag.exotic_matter.world.Rotation.ROTATE_270;
+import static grondag.exotic_matter.world.Rotation.ROTATE_90;
+import static grondag.exotic_matter.world.Rotation.ROTATE_NONE;
 
 import grondag.exotic_matter.model.ITexturePalette;
 import grondag.exotic_matter.model.TextureGroup;
@@ -11,7 +16,6 @@ import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.model.TexturePaletteSpec;
 import grondag.exotic_matter.model.TextureRenderIntent;
 import grondag.exotic_matter.model.TextureScale;
-import grondag.hard_science.Configurator;
 
 public class ModTextures
 {
@@ -68,7 +72,8 @@ public class ModTextures
     public static final ITexturePalette BORDER_GRITTY_SIGNAL = TexturePaletteRegistry.addBorderRandom("border_gritty_signal", false, false);
     public static final ITexturePalette BORDER_LOGIC = TexturePaletteRegistry.addBorderRandom("border_logic", true, false);
     public static final ITexturePalette BORDER_INVERSE_TILE_1 = TexturePaletteRegistry.addBorderRandom("border_inverse_logic_1", true, true);
-    
+    public static final ITexturePalette BORDER_INVERSE_TILE_2 = TexturePaletteRegistry.addBorderRandom("border_inverse_logic_2", true, true);
+
     //======================================================================
     //  BIGTEX
     //======================================================================
@@ -118,36 +123,6 @@ public class ModTextures
     public static final ITexturePalette BIGTEX_CRACKED_EARTH = TexturePaletteRegistry.addTexturePallette("cracked_earth", "cracked_earth", new TexturePaletteSpec(BIGTEX_WEATHERED_STONE));
     public static final ITexturePalette BIGTEX_CRACKED_EARTH_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_CRACKED_EARTH);
     public static final ITexturePalette BIGTEX_CRACKED_EARTH_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_CRACKED_EARTH_ZOOM);
-
-    //======================================================================
-    //  VOLCANO
-    //======================================================================
-    
-    public static final ITexturePalette BIGTEX_BASALT_CUT = TexturePaletteRegistry.addTexturePallette("basalt_cut", "basalt_cut", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.STATIC_TILES));
-    public static final ITexturePalette BIGTEX_BASALT_CUT_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_BASALT_CUT);
-    public static final ITexturePalette BIGTEX_BASALT_CUT_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_BASALT_CUT_ZOOM);
-    
-    public static final ITexturePalette BIGTEX_BASALT_COOL = TexturePaletteRegistry.addTexturePallette("basalt_cool", "basalt_cool", new TexturePaletteSpec(BIGTEX_BASALT_CUT));
-    public static final ITexturePalette BIGTEX_BASALT_COOL_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_BASALT_COOL);
-    public static final ITexturePalette BIGTEX_BASALT_COOL_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_BASALT_COOL_ZOOM);
-    
-    public static final ITexturePalette BIGTEX_LAVA = TexturePaletteRegistry.addTexturePallette("volcanic_lava", Configurator.VOLCANO.enableVolcano ? "lava" : "clouds",  
-            new TexturePaletteSpec(BIGTEX_BASALT_CUT).withLayout(TextureLayout.BIGTEX_ANIMATED).withGroups(TextureGroup.HIDDEN_TILES));
-    
-    public static final ITexturePalette BIGTEX_BASALT_COOLING = TexturePaletteRegistry.addTexturePallette("basalt_cooling", "basalt_cooling", 
-             new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_DETAILS));
-    public static final ITexturePalette BIGTEX_BASALT_WARM = TexturePaletteRegistry.addTexturePallette("basalt_warm", "basalt_warm",  new TexturePaletteSpec(BIGTEX_BASALT_COOLING));
-    public static final ITexturePalette BIGTEX_BASALT_HOT = TexturePaletteRegistry.addTexturePallette("basalt_hot", "basalt_hot", new TexturePaletteSpec(BIGTEX_BASALT_COOLING));
-    public static final ITexturePalette BIGTEX_BASALT_VERY_HOT = TexturePaletteRegistry.addTexturePallette("basalt_very_hot", "basalt_very_hot", new TexturePaletteSpec(BIGTEX_BASALT_COOLING));
-    
-    public static final ITexturePalette BIGTEX_BASALT_HINT = TexturePaletteRegistry.addTexturePallette("basalt_hint", "basalt_hint", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_DETAILS));
-    public static final ITexturePalette BIGTEX_BASALT_HINT_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_BASALT_HINT);
-    public static final ITexturePalette BIGTEX_BASALT_HINT_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_BASALT_HINT_ZOOM);
     
     //======================================================================
     //  BIGTEX - ANIMATED
@@ -256,10 +231,6 @@ public class ModTextures
     public static final ITexturePalette DECAL_FAT_BARS_RANDOM = TexturePaletteRegistry.addTexturePallette("fat_bars_random", "fat_bars", new TexturePaletteSpec(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final ITexturePalette DECAL_THICK_BARS_RANDOM = TexturePaletteRegistry.addTexturePallette("thick_bars_random", "thick_bars", new TexturePaletteSpec(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final ITexturePalette DECAL_THIN_BARS_RANDOM = TexturePaletteRegistry.addTexturePallette("thin_bars_random", "thin_bars", new TexturePaletteSpec(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
-    
-    // Integrate after here at next compatibility break
-    
-    public static final ITexturePalette BORDER_INVERSE_TILE_2 = TexturePaletteRegistry.addBorderRandom("border_inverse_logic_2", true, true);
     
     
     public static final ITexturePalette DECAL_SOFT_SKINNY_DIAGONAL_RIDGES = TexturePaletteRegistry.addTexturePallette("skinny_diagonal_ridges_seamless", "skinny_diagonal_ridges_seamless", new TexturePaletteSpec(DECAL_SMALL_DOT));

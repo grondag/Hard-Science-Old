@@ -19,6 +19,7 @@ import grondag.exotic_matter.model.WorldLightOpacity;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModSubstances;
+import grondag.hard_science.machines.support.MachineItemBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
@@ -34,6 +35,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -46,6 +49,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.registries.IForgeRegistry;
 
 public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlock
 {
@@ -92,6 +96,14 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
             modelState.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.GREY, Luminance.MEDIUM_DARK));
         }
         return modelState;
+    }
+    
+    @Override
+    public void registerItems(IForgeRegistry<Item> itemReg)
+    {
+        ItemBlock itemBlock = new MachineItemBlock(this);
+        itemBlock.setRegistryName(this.getRegistryName());
+        itemReg.register(itemBlock);        
     }
     
     @Override

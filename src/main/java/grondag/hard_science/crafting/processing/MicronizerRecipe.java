@@ -36,7 +36,7 @@ public class MicronizerRecipe
 {
     public static final long JOULES_PER_STONE_TONNE = MachinePower.JOULES_PER_KWH / 2;
     
-    public static final String JEI_UID = HardScience.prefixName("micronizer");
+    public static final String JEI_UID = HardScience.INSTANCE.prefixName("micronizer");
 
     private static final Key2List<MicronizerRecipe, Ingredient, BulkResource> conversions 
     = new Key2List.Builder<MicronizerRecipe, Ingredient, BulkResource>().

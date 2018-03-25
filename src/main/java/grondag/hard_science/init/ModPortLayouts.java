@@ -51,7 +51,7 @@ public class ModPortLayouts
                 PortFaces.EMPTY_FACE));
 
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("utb_low_carrier_all"),
+                HardScience.INSTANCE.prefixResource("utb_low_carrier_all"),
                 PortFaces.UTB_LOW_CARRIER,
                 PortFaces.UTB_LOW_CARRIER,
                 PortFaces.UTB_LOW_CARRIER_WITH_COMPACT_POWER,
@@ -60,7 +60,7 @@ public class ModPortLayouts
                 PortFaces.UTB_LOW_CARRIER_WITH_COMPACT_POWER));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("utb_mid_bridge_all"),
+                HardScience.INSTANCE.prefixResource("utb_mid_bridge_all"),
                 PortFaces.UTB_MID_BRIDGE,
                 PortFaces.UTB_MID_BRIDGE,
                 PortFaces.UTB_MID_BRIDGE,
@@ -69,7 +69,7 @@ public class ModPortLayouts
                 PortFaces.UTB_MID_BRIDGE));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("utb_mid_carrier_all"),
+                HardScience.INSTANCE.prefixResource("utb_mid_carrier_all"),
                 PortFaces.UTB_MID_CARRIER,
                 PortFaces.UTB_MID_CARRIER,
                 PortFaces.UTB_MID_CARRIER,
@@ -78,7 +78,7 @@ public class ModPortLayouts
                 PortFaces.UTB_MID_CARRIER));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("utb_top_bridge_all"),
+                HardScience.INSTANCE.prefixResource("utb_top_bridge_all"),
                 PortFaces.UTB_TOP_BRIDGE,
                 PortFaces.UTB_TOP_BRIDGE,
                 PortFaces.UTB_TOP_BRIDGE,
@@ -87,7 +87,7 @@ public class ModPortLayouts
                 PortFaces.UTB_TOP_BRIDGE));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("utb_top_carrier_all"),
+                HardScience.INSTANCE.prefixResource("utb_top_carrier_all"),
                 PortFaces.UTB_TOP_CARRIER,
                 PortFaces.UTB_TOP_CARRIER,
                 PortFaces.UTB_TOP_CARRIER,
@@ -96,7 +96,7 @@ public class ModPortLayouts
                 PortFaces.UTB_TOP_CARRIER));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("solar_cell"),
+                HardScience.INSTANCE.prefixResource("solar_cell"),
                 PortFaces.EMPTY_FACE,
                 PortFaces.STD_POWER_LOW_CARRIER,
                 PortFaces.COMPACT_POWER_LOW_CARRIER,
@@ -105,7 +105,7 @@ public class ModPortLayouts
                 PortFaces.COMPACT_POWER_LOW_CARRIER));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("power_low_carrier_flex_all"),
+                HardScience.INSTANCE.prefixResource("power_low_carrier_flex_all"),
                 PortFaces.FLEX_POWER_LOW_CARRIER,
                 PortFaces.FLEX_POWER_LOW_CARRIER,
                 PortFaces.FLEX_POWER_LOW_CARRIER,
@@ -114,7 +114,7 @@ public class ModPortLayouts
                 PortFaces.FLEX_POWER_LOW_CARRIER));
         
         event.getRegistry().register(new PortLayout(
-                HardScience.prefixResource("non_fluid_low_carrier_all"),
+                HardScience.INSTANCE.prefixResource("non_fluid_low_carrier_all"),
                 PortFaces.NON_FLUID_LOW_CARRIER,
                 PortFaces.NON_FLUID_LOW_CARRIER,
                 PortFaces.NON_FLUID_LOW_CARRIER,

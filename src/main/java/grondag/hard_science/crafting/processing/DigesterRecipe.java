@@ -33,7 +33,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 public class DigesterRecipe
 {
-    public static final String JEI_UID = HardScience.prefixName("digester");
+    public static final String JEI_UID = HardScience.INSTANCE.prefixName("digester");
 
     private static final HashMap<Fluid, DigesterRecipe> byInput = new HashMap<>();
     

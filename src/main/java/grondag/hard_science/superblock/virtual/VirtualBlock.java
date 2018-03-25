@@ -29,6 +29,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.tileentity.TileEntity;
@@ -44,11 +45,20 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.registries.IForgeRegistry;
 
 //TODO: seems to be missing placement logic, see methods in ExcavationMarker
 
 public class VirtualBlock extends SuperModelBlock
 {
+    
+    @Override
+    public void registerItems(IForgeRegistry<Item> itemReg)
+    {
+        ItemBlock itemBlock = new VirtualItemBlock(this);
+        itemBlock.setRegistryName(this.getRegistryName());
+        itemReg.register(itemBlock);        
+    }
     
     /**
      * Retrieves item stack that can be used to place a super block in place of

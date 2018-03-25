@@ -1,7 +1,5 @@
 package grondag.hard_science.crafting.fabrication;
 
-import static grondag.hard_science.HardScience.resource;
-
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -30,7 +28,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class EmergencyFabricatorRecipe extends GenericRecipe
 {
-    public static final String UID = HardScience.prefixName("emergency_fab");
+    public static final String UID = HardScience.INSTANCE.prefixName("emergency_fab");
 
     private static final Key1List<Process, ItemResource> fabs 
     = new Key1List.Builder<Process, ItemResource>().
@@ -87,7 +85,7 @@ public class EmergencyFabricatorRecipe extends GenericRecipe
             inBuilder.add(m.fluidResource().withQuantity((long)inputs[i+1]));
         }
         
-        Item item = ForgeRegistries.ITEMS.getValue(resource(itemName));
+        Item item = ForgeRegistries.ITEMS.getValue(HardScience.INSTANCE.resource(itemName));
         
         addFab(inBuilder.build(), 
                 ImmutableList.of(ItemResource.fromItem(item).withQuantity(quantity)));

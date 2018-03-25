@@ -2,6 +2,7 @@ package grondag.hard_science;
 
 import javax.annotation.Nonnull;
 
+import grondag.exotic_matter.IGrondagMod;
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.Domain;
@@ -27,11 +28,8 @@ import grondag.hard_science.simulator.storage.ItemStorageManager;
 import grondag.hard_science.simulator.storage.PowerStorageManager;
 import grondag.hard_science.superblock.placement.BuildCapability;
 import grondag.hard_science.superblock.placement.BuildManager;
-import grondag.hard_science.volcano.lava.simulator.LavaSimulator;
-import grondag.hard_science.volcano.lava.simulator.VolcanoManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -41,9 +39,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -53,7 +49,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
         acceptedMinecraftVersions = "[1.12]",
         dependencies = "after:theoneprobe")
 
-public class HardScience 
+public class HardScience implements IGrondagMod
 {
 	public static final String MODID = "hard_science";
 	public static final String MODNAME = "Hard Science";
@@ -66,10 +62,16 @@ public class HardScience
 		@SideOnly(Side.CLIENT)
 		public @Nonnull ItemStack getTabIconItem() 
 		{
-			return ModItems.basalt_cobble.getDefaultInstance();
+			return ModItems.smart_chest.getDefaultInstance();
 		}
 	};
 
+    @Override
+    public String modID()
+    {
+        return MODID;
+    }
+    
 	@Instance
 	public static HardScience INSTANCE = new HardScience();
 
@@ -83,11 +85,6 @@ public class HardScience
         //TODO move these where they should go
         Simulator.register(DeviceManager.class);
         Simulator.register(DomainManager.class);
-        if(Configurator.VOLCANO.enableVolcano)
-        {
-            Simulator.register(VolcanoManager.class);
-            Simulator.register(LavaSimulator.class);
-        }
         
         DomainUser.registerCapability(BuildCapability.class);
         
@@ -133,40 +130,10 @@ public class HardScience
 		proxy.postInit(event);
 	}
 	
-	
-   @EventHandler
-    public void serverAboutToStart(FMLServerAboutToStartEvent event) 
-   {
-       proxy.serverAboutToStart(event);
-    }
    
 	@EventHandler
     public void serverStarting(FMLServerStartingEvent event) 
 	{
        proxy.serverStarting(event);
     }
-
-   @EventHandler
-   public void serverStopping(FMLServerStoppingEvent event)
-   {
-       proxy.serverStopping(event);
-   }
-   
-   /**
-    * Puts mod ID and . in front of whatever is passed in
-    */
-   public static String prefixName(String name)
-   {
-       return String.format("%s.%s", MODID, name.toLowerCase());
-   }
-   
-   public static String prefixResource(String name)
-   {
-       return String.format("%s:%s", MODID, name.toLowerCase());
-   }
-   
-   public static ResourceLocation resource(String name)
-   {
-       return new ResourceLocation(prefixResource(name));
-   }
 }
