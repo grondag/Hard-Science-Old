@@ -1,0 +1,282 @@
+
+#MISC
+misc.power.joules.name="Joules"
+misc.power.empty.name="<EMPTY>"
+
+#GUI LABELS
+
+#CONFIG LABELS
+config.general=General Settings
+config.machines=Machine Settings
+config.processing=Automated Resource Processing Defaults
+config.substance=Material Properties
+config.render=Render Settings
+config.blocks=Block Settings
+config.hypermaterial=Hypermatter Properties
+
+#THE ONE PROBE
+
+
+#JEI
+jei_category.hard_science.bulk_conversion=Hard Science Bulk Resource
+jei_category.hard_science.solar_electrolysis=Solar Electrolysis
+
+#MACHINES
+machine.is_on=Machine is ON.
+machine.is_off=Machine is OFF.
+machine.name=Machine Identifier
+tile.block_fabricator.name=Block Fabricator
+tile.smart_chest.name=Smart Chest
+tile.smart_bin.name=Smart Bin
+tile.solar_aggregator.name=Solar Aggregator
+tile.solar_cell.name=Solar Cell
+tile.solar_cable.name=Solar Cable
+tile.bottom_bus.name=Local Transport Bus
+tile.middle_bus.name=Intermediate Transport Bus
+tile.top_bus.name=Supersonic Transport Bus
+tile.water_pump.name=Water Intake Pump
+tile.chemical_battery.name=Chemical Battery
+tile.tank_single_wet.name=Dedicated Fluid Tank
+tile.tank_multi_wet.name=Flexible Fluid Tank
+tile.tank_single_dry.name=Dedicated Bulk Tank 
+tile.tank_multi_dry.name=Flexible Bulk Tank
+tile.tank_single_gas.name=Dedicated Pressure Tank
+tile.tank_multi_gas.name=Flexible Pressure Tank
+tile.tank_single_pressure.name=High Pressure Tank
+tile.micronizer.name=Micronizer
+
+machine.redstone_enabled=Redstone control is ENABLED.
+machine.redstone_disabled=Redstone control is DISABLED.
+machine.redstone_live=Machine IS receiving redstone signal.
+machine.redstone_dead=Machine is NOT receiving redstone signal.
+machine.buffer_hdpe=Polyethylene
+machine.buffer_filler=Mineral Filler
+machine.buffer_resin_a=Construction Resin A
+machine.buffer_resin_b=Construction Resin B
+machine.buffer_nanolights=Nanolight
+machine.buffer_tio2=Titanium Dioxide
+machine.buffer_cyan=Cyan
+machine.buffer_magenta=Magenta
+machine.buffer_yellow=Yellow
+machine.fabrication_progress=Fabrication In Progress
+machine.fabrication_searching=Searching for Work
+machine.fabrication_shortage=Item(s) Not Fabricated Due to Material Shortage 
+machine.power_in=Power Production: %,.1f watts
+machine.power_out=Power Consumption: %,.1f watts
+machine.power_stored=Stored Energy %,d joules 
+
+
+#KEYS
+key.categories.hard_science=Hard Science
+
+
+#ITEMS
+item.block_wand.name=Block Adjuster
+item.terrain_wand.name=Terrain Wand
+item.excavation_marker.name=Excavation Marker
+item.duraplast_plate_1m.name=Duraplast Plate, 1m square
+item.duraplast_strut_1m.name=Duraplast Strut, 1m square
+item.duraplast_square_frame_1m.name=Duraplast Square Frame, 1m
+item.duraplast_joining_tool.name=Duraplast Joining Tool
+item.duraplast_cubic_frame_1m.name=Duraplast Cubic Frame, 1m
+item.duraplast_machine_casing_1m.name=Duraplast Machine Housing, 1m
+
+#generated items start here
+item.flex_tank_kl.name=Basic Tank
+item.dura_tank_kl.name=Rugged Tank
+item.flex_valve_ball.name=Valve Ball
+item.flex_valve_housing.name=Valve Housing
+item.flex_control_valve.name=Control Valve
+item.dura_valve_ball.name=HP Valve Ball
+item.dura_valve_housing.name=HP Valve Housing
+item.dura_control_valve.name=HP Control Valve
+
+#FLUIDS
+fluid.flowable_mineral_filler=Flowable Mineral Filler
+fluid.flowable_mineral_filler.desc=This is the test description for Flowable Mineral Filler. \nIt is very nice. \n\nHere are some line feeds. Yay!
+fluid.raw_mineral_dust=Raw Mineral Dust
+fluid.depleted_mineral_dust=Depleted Mineral Dust
+fluid.ammonia=Ammonia (NH3), Low-Pressure
+fluid.purified_water=H2O (Purified Water)
+
+#MATTER
+matter.tio2=Titanium Dioxide
+matter.hdpe=High Density Polyethylene
+matter.carbon_black=Carbon Black
+matter.carbon_graphite=Graphite
+matter.carbon_fiber=Carbon Fiber
+matter.raw_mineral_dust=Unprocessed Mineral Dust
+matter.depleted_mineral_dust=Depleted Mineral Dust
+matter.water=Pure Water
+matter.construction_resin_a=Construction Resin (Part A)
+matter.construction_resin_b=Construction Resin (Part B)
+matter.dye_cyan=Cyan Reactive Color
+matter.dye_magenta=Magenta Reactive Color
+matter.dye_yellow=Yellow Reactive Color
+matter.nano_lights=Nano Lights
+matter.urea=Urea: CO(NH2)2
+
+
+#CUBE SIZES
+cubesize.block=1000 liters (full block)
+cubesize.one=125 liters (1 block / 8)
+cubesize.two=15.6 liters (1 block / 64)
+cubesize.three=1.95 liters (1 block / 512)
+cubesize.four=244 mL (1 block / 4,096)
+cubesize.five=31 mL (1 block / 32,768)
+cubesize.six=3.8 mL (1 block / 262,144)
+
+#PACKAGE TYPES
+packagetype.naked=Unpackaged
+packagetype.ibc=Reinforced HDPE Bulk Container
+packagetype.vacpack=Vacuum Packed (HDPE Wrapper)
+
+#BLOCKS
+tile.hdpe_block.name=Polyethylene Block
+
+
+#SHAPES
+shape.box=Box
+shape.column_square=Square Column
+shape.cone=Cone
+shape.cube=Cube
+shape.cylinder=Cylinder
+shape.dodecahedron=Dodecahedron
+shape.dome=Dome
+shape.icosahedron=Icosahedron
+shape.pyramid=Pyramid
+shape.sphere=Sphere
+shape.staked_plates=Stacked Plates
+shape.terrain_filler=Flowing Terrain Filler
+shape.terrain_height=Flowing Terrain
+shape.tetrahedron=Tetrahedron
+shape.torus=Torus
+shape.tube=Tube
+
+#SUBSTANCES
+material.duraglass=DuraGlass
+material.durastone=DuraStone
+material.durawood=DuraWood
+material.flexiglass=FlexiGlass
+material.flexstone=FlexStone
+material.flexwood=FlexWood
+material.hyperglass=HyperGlass
+material.hyperstone=HyperStone
+material.hyperwood=HyperWood
+
+#TEXTURES
+texture.border_smooth_blended=Smooth Blended Edges
+texture.masonry_simple=Simple MutiBlock Masonry
+texture.border_gritty_inset_pinstripe=Gritty Inset Pinstripe
+texture.border_gritty_grooves=Gritty Grooves
+texture.border_gritty_whitewall=Gritty Whitewall
+texture.border_gritty_fat_line=Gritty Fat Line
+texture.border_gritty_signal=Gritty Signal
+texture.border_gritty_checkerboard=Gritty Checkerboard
+texture.border_gritty_pinstripe_grooves=Gritty Pinstripe Grooves
+texture.border_zigzag=ZigZag
+texture.border_inverse_zigzag=Inverse ZigZag
+texture.border_caution=Caution
+texture.border_pinstripe_dash=Pinstripe Dash
+texture.border_inset_dots_1=Inset Dots 1
+texture.border_inset_dots_2=Inset Dots 2
+texture.border_channel_checkerboard=Checkerboard Channel
+texture.border_checkerboard=Checkerboard
+texture.border_inset_pin_dots=Inset Pin Dots
+texture.border_single_pinstripe=Single Pinstripe
+texture.border_inset_pinstripe=Inset Pinstripe
+texture.border_single_line=Single Line
+texture.border_single_bold_line=Single Bold Line
+texture.border_single_fat_line=Single Fat Line
+texture.border_double_mixed_lines=Double Mixed Lines
+texture.border_double_pinstripes=Double Pinstripes
+texture.border_inset_double_pinstripes=Inset Double Pinstripes
+texture.border_triple_mixed_lines=Triple Mixed Lines
+texture.border_double_double=Double Double
+texture.border_whitewall=Whitewall
+texture.border_groovy_stripes=Groovy Stripes
+texture.border_groovy_pinstripes=Groovy Pinstripes
+texture.border_filmstrip=Filmstrip
+texture.border_channel_dots=Dots in Channel
+texture.border_channel_lines=Lines in Channel
+texture.border_channel_pin_dots=Pin Dots in Channel
+texture.border_signal=Signal
+texture.border_logic=Logic
+texture.border_inverse_logic_1=Inverse Logic 1
+texture.border_inverse_logic_2=Inverse Logic 2
+
+texture.small_dot=Small Circle
+texture.medium_dot=Medium Circle
+texture.big_dot=Big Circle
+texture.small_square=Small Square
+texture.medium_square=Medium Square
+texture.big_square=Big Square
+texture.skinny_diagonal_ridges=Skinny Diagonal Ridges (Hard)
+texture.thick_diagonal_cross_ridges=Thick Diagonal Ridge Lattice (Hard)
+texture.thick_diagonal_ridges=Thick Diagonal Ridges (Hard)
+texture.thin_diagonal_cross_ridges=Thin Diagonal Ridge Lattice (Hard)
+texture.thin_diagonal_ridges=Thin Diagaonal Ridges (Hard)
+texture.thin_diagonal_cross_bars=Thin Diagonal Lattice (Hard)
+texture.thin_diagonal_bars=Thin Diagonal Stripes (Hard)
+texture.skinny_diagnal_cross_bars=Skinny Diagonal Lattice (Hard)
+texture.skinny_diagonal_bars=Skinny Diagonal Stripes (Hard)
+texture.diagonal_cross_bars=Diagonal Lattice (Hard)
+texture.diagonal_bars=Diagonal Stripes (Hard)
+texture.fat_diagonal_cross_bars=Fat Diagonal Lattice (Hard)
+texture.fat_diagonal_bars=Fat Diagonal Stripes (Hard)
+texture.diagonal_cross_ridges=Diagonal Ridge Lattice (Hard)
+texture.diagonal_ridges=Diagonal Ridges (Hard)
+texture.skinny_bars=Skinny Stripes
+texture.fat_bars=Fat Stripes
+texture.thick_bars=Thick Stripes
+texture.thin_bars=Thin Stripes
+
+texture.diagonal_ridges_seamless=Diagonal Ridges (Soft)
+texture.diagonal_cross_ridges_seamless=Diagonal Ridge Lattice (Soft)
+texture.diagonal_bars_seamless=Diagonal Stripes (Soft)
+texture.diagonal_cross_bars_seamless=Diagonal Lattice (Soft)
+texture.fat_diagonal_bars_seamless=Fat Diagonal Stripes (Soft)
+texture.fat_diagonal_cross_bars_seamless=Fat Diagonal Lattice (Soft)
+texture.skinny_diagonal_bars_seamless=Skinny Diagonal Stripes (Soft)
+texture.skinny_diagonal_cross_bars_seamless=Skinny Diagonal Lattice (Soft)
+texture.skinny_diagonal_ridges_seamless=Skinny Diagonal Ridges (Soft)
+texture.thin_diagonal_bars_seamless=Thin Diagonal Stripes (Soft)
+texture.thin_diagonal_cross_bars_seamless=Thin Diagonal Lattice (Soft)
+texture.thin_diagonal_ridges_seamless=Thin Diagaonal Ridges (Soft)
+texture.thin_diagonal_cross_ridges_seamless=Thin Diagonal Ridge Lattice (Soft)
+texture.thick_diagonal_ridges_seamless=Thick Diagonal Ridges (Soft)
+texture.thick_diagonal_cross_ridges_seamless=Thick Diagonal Ridge Lattice (Soft)
+ 
+texture.weathered_smooth_stone=Weathered Stone
+texture.sandstone=Sandstone
+texture.asphalt=Asphalt
+texture.worn_asphalt=Weathered Asphalt
+texture.wood=Wood
+texture.granite=Granite
+texture.marble=Marble
+texture.slate=Slate
+texture.rough_rock=Rough Stone
+texture.cracked_earth=Cracked Earth
+
+texture.fluid_glow=Fluidic Glow
+texture.fluid_vortex=Vortex
+texture.clouds=Clouds
+texture.starfield=Starfield
+
+texture.big_triangle=Triangle
+texture.big_diamond=Diamond
+texture.big_pentagon=Pentagon
+texture.big_hexagon=Hexagon
+texture.star_16=Star with Sixteen Points
+texture.star_12=Star with Twelve Points
+texture.star_8=Star with Eight Points
+texture.star_5=Star with Five Points
+texture.star_4=Star with Four Points
+texture.two_dots=Two Dots
+texture.dust=Dust
+texture.mix=Mix
+texture.material_gradient=Material Gradient (System Texture)
+texture.drip=Drip
+texture.funnel=Funnel
+texture.arrow=Arrow
+
