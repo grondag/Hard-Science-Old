@@ -6,13 +6,9 @@ misc.power.empty.name="<EMPTY>"
 #GUI LABELS
 
 #CONFIG LABELS
-config.general=General Settings
 config.machines=Machine Settings
 config.processing=Automated Resource Processing Defaults
-config.substance=Material Properties
-config.render=Render Settings
-config.blocks=Block Settings
-config.hypermaterial=Hypermatter Properties
+
 
 #THE ONE PROBE
 
