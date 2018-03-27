@@ -77,13 +77,13 @@ public abstract class StorageType<T extends StorageType<T>>
         this.MATCH_ANY = new IResourcePredicate<T>()
         {
             @Override
-            public boolean test(IResource<T> t) { return true; }
+            public boolean test(@Nullable IResource<T> t) { return true; }
         };
         
         this.MATCH_NONE = new IResourcePredicate<T>()
         {
             @Override
-            public boolean test(IResource<T> t) { return false; }
+            public boolean test(@Nullable IResource<T> t) { return false; }
         };
     }
     
@@ -101,10 +101,8 @@ public abstract class StorageType<T extends StorageType<T>>
     @Nullable
     public abstract IResource<T> fromNBT(NBTTagCompound nbt);
     
-    @Nullable
     public abstract void toBytes(IResource<T> resource, PacketBuffer pBuff);
     
-    @Nullable
     public void toBytes(AbstractResourceWithQuantity<T> rwq, PacketBuffer pBuff)
     {
         this.toBytes(rwq.resource(), pBuff);

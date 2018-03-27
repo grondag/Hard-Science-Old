@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.resource;
 import java.util.Comparator;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.matter.MassUnits;
 import grondag.hard_science.matter.MatterPhase;
@@ -47,7 +48,7 @@ public class BulkResourceWithQuantity extends AbstractResourceWithQuantity<Stora
         SORT_BY_QTY_ASC = new Comparator<AbstractResourceWithQuantity<StorageTypeBulk>>()
     {
         @Override
-        public int compare(AbstractResourceWithQuantity<StorageTypeBulk> o1, AbstractResourceWithQuantity<StorageTypeBulk> o2)
+        public int compare(@Nullable AbstractResourceWithQuantity<StorageTypeBulk> o1, @Nullable AbstractResourceWithQuantity<StorageTypeBulk> o2)
         {  
             if(o1 == null)
             {
@@ -70,7 +71,7 @@ public class BulkResourceWithQuantity extends AbstractResourceWithQuantity<Stora
         SORT_BY_QTY_DESC = new Comparator<AbstractResourceWithQuantity<StorageTypeBulk>>()
     {
         @Override
-        public int compare(AbstractResourceWithQuantity<StorageTypeBulk> o1, AbstractResourceWithQuantity<StorageTypeBulk> o2)
+        public int compare(@Nullable AbstractResourceWithQuantity<StorageTypeBulk> o1, @Nullable AbstractResourceWithQuantity<StorageTypeBulk> o2)
         {
             return SORT_BY_QTY_ASC.compare(o2, o1);
         }

@@ -110,7 +110,7 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(@Nullable NBTTagCompound nbt)
     {
         this.capacity = nbt.getLong(NBT_STORAGE_CAPACITY);
         this.slots.clear();

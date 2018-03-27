@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import org.magicwerk.brownies.collections.Key2List;
 
 import com.google.common.collect.ImmutableList;
@@ -99,7 +101,7 @@ public class MicronizerRecipe
         {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
-            public boolean test(ItemStack t)
+            public boolean test(@Nullable ItemStack t)
             {
                 for(Predicate p : allInputs())
                 {
@@ -113,7 +115,7 @@ public class MicronizerRecipe
         {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
-            public boolean test(IResource<StorageTypeStack> t)
+            public boolean test(@Nullable IResource<StorageTypeStack> t)
             {
                 ItemStack stack = ((ItemResource)t).sampleItemStack();
                 
@@ -129,7 +131,7 @@ public class MicronizerRecipe
         OUTPUT_RESOURCE_PREDICATE = new IResourcePredicate<StorageTypeFluid>() 
         {
             @Override
-            public boolean test(IResource<StorageTypeFluid> t)
+            public boolean test(@Nullable IResource<StorageTypeFluid> t)
             {
                 for(BulkResource b : allOutputs())
                 {
@@ -255,7 +257,7 @@ public class MicronizerRecipe
         }
         
         @Override
-        public Long apply(ItemStack t)
+        public Long apply(@Nullable ItemStack t)
         {
             return this.nlPerItem;
         }
@@ -273,7 +275,7 @@ public class MicronizerRecipe
         }
         
         @Override
-        public Long apply(ItemStack stack)
+        public Long apply(@Nullable ItemStack stack)
         {
             double volume = 0;
             ISuperModelState modelState = SuperBlockStackHelper.getStackModelState(stack);

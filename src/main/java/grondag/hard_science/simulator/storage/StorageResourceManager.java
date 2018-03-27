@@ -321,7 +321,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
                 .sorted(new Comparator<Entry<NewProcurementTask<T>>>() 
                 {
                     @Override
-                    public int compare(Entry<NewProcurementTask<T>> o1, Entry<NewProcurementTask<T>> o2)
+                    public int compare(@Nullable Entry<NewProcurementTask<T>> o1, @Nullable Entry<NewProcurementTask<T>> o2)
                     {
                         // note reverse order
                         NewProcurementTask<T> k1 = o2.getKey();

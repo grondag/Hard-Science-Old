@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.fobs;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
@@ -83,7 +85,7 @@ public abstract class NewTask implements IReadWriteNBT, IDomainMember //, IIdent
     private final static String NBT_TASK_STATUS = NBTDictionary.claim("taskStatus");
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
 //        this.deserializeID(tag);
         this.status = Useful.safeEnumFromTag(tag, NBT_TASK_STATUS, RequestStatus.NEW);

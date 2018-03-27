@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.resource;
 
+import javax.annotation.Nullable;
+
 public class ResourcePredicateWithQuantity<V extends StorageType<V>> implements IResourcePredicateWithQuantity<V>
 {
     private final IResourcePredicate<V> predicate;
@@ -32,7 +34,7 @@ public class ResourcePredicateWithQuantity<V extends StorageType<V>> implements 
     }
 
     @Override
-    public boolean test(IResource<V> t)
+    public boolean test(@Nullable IResource<V> t)
     {
         return this.predicate.test(t);
     }

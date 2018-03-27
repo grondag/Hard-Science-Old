@@ -2,6 +2,8 @@ package grondag.hard_science.init;
 
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableSet;
 
 import grondag.hard_science.matter.MatterPhase;
@@ -52,7 +54,7 @@ public class ModFluids
         }
         
         @Override
-        public boolean test(IResource<StorageTypeFluid> t)
+        public boolean test(@Nullable IResource<StorageTypeFluid> t)
         {
             return this.allowed.contains(t);
         }

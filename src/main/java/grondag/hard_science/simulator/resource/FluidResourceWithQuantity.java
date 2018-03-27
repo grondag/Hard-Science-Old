@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.resource;
 import java.util.Comparator;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
@@ -47,7 +48,7 @@ public class FluidResourceWithQuantity extends AbstractResourceWithQuantity<Stor
         SORT_BY_QTY_ASC = new Comparator<AbstractResourceWithQuantity<StorageTypeFluid>>()
     {
         @Override
-        public int compare(AbstractResourceWithQuantity<StorageTypeFluid> o1, AbstractResourceWithQuantity<StorageTypeFluid> o2)
+        public int compare(@Nullable AbstractResourceWithQuantity<StorageTypeFluid> o1, @Nullable AbstractResourceWithQuantity<StorageTypeFluid> o2)
         {  
             if(o1 == null)
             {
@@ -70,7 +71,7 @@ public class FluidResourceWithQuantity extends AbstractResourceWithQuantity<Stor
         SORT_BY_QTY_DESC = new Comparator<AbstractResourceWithQuantity<StorageTypeFluid>>()
     {
         @Override
-        public int compare(AbstractResourceWithQuantity<StorageTypeFluid> o1, AbstractResourceWithQuantity<StorageTypeFluid> o2)
+        public int compare(@Nullable AbstractResourceWithQuantity<StorageTypeFluid> o1, @Nullable AbstractResourceWithQuantity<StorageTypeFluid> o2)
         {
             return SORT_BY_QTY_ASC.compare(o2, o1);
         }

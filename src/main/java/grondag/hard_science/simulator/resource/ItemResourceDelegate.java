@@ -3,6 +3,8 @@ package grondag.hard_science.simulator.resource;
 import java.io.IOException;
 import java.util.Comparator;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.serialization.IMessagePlus;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -51,7 +53,7 @@ public class ItemResourceDelegate implements IMessagePlus
      * does include quantityIn.
      */
     @Override
-    public boolean equals(Object other)
+    public boolean equals(@Nullable Object other)
     {
         return this == other
                 || (other != null && other.getClass() == this.getClass() 
@@ -123,7 +125,7 @@ public class ItemResourceDelegate implements IMessagePlus
     public static final Comparator<ItemResourceDelegate> SORT_BY_NAME_ASC = new Comparator<ItemResourceDelegate>()
     {
         @Override
-        public int compare(ItemResourceDelegate o1, ItemResourceDelegate o2)
+        public int compare(@Nullable ItemResourceDelegate o1, @Nullable ItemResourceDelegate o2)
         {
             if(o1 == null)
             {
@@ -147,7 +149,7 @@ public class ItemResourceDelegate implements IMessagePlus
     public static final Comparator<ItemResourceDelegate> SORT_BY_NAME_DESC = new Comparator<ItemResourceDelegate>()
     {
         @Override
-        public int compare(ItemResourceDelegate o1, ItemResourceDelegate o2)
+        public int compare(@Nullable ItemResourceDelegate o1, @Nullable ItemResourceDelegate o2)
         {
             return SORT_BY_NAME_ASC.compare(o2, o1);
         }
@@ -156,7 +158,7 @@ public class ItemResourceDelegate implements IMessagePlus
     public static final Comparator<ItemResourceDelegate> SORT_BY_QTY_ASC = new Comparator<ItemResourceDelegate>()
     {
         @Override
-        public int compare(ItemResourceDelegate o1, ItemResourceDelegate o2)
+        public int compare(@Nullable ItemResourceDelegate o1, @Nullable ItemResourceDelegate o2)
         {   
             if(o1 == null)
             {
@@ -178,7 +180,7 @@ public class ItemResourceDelegate implements IMessagePlus
     public static final Comparator<ItemResourceDelegate> SORT_BY_QTY_DESC = new Comparator<ItemResourceDelegate>()
     {
         @Override
-        public int compare(ItemResourceDelegate o1, ItemResourceDelegate o2)
+        public int compare(@Nullable ItemResourceDelegate o1, @Nullable ItemResourceDelegate o2)
         {
             return SORT_BY_QTY_ASC.compare(o2, o1);
         }

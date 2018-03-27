@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -266,7 +268,7 @@ public class Legs<T extends StorageType<T>>
             .sorted(new Comparator<Map.Entry<Carrier<T>, ImmutableList.Builder<Leg<T>>>>()
             {
                 @Override
-                public int compare(Entry<Carrier<T>, Builder<Leg<T>>> o1, Entry<Carrier<T>, Builder<Leg<T>>> o2)
+                public int compare(@Nullable Entry<Carrier<T>, Builder<Leg<T>>> o1, @Nullable Entry<Carrier<T>, Builder<Leg<T>>> o2)
                 {
                     Carrier<T> c1 = o1.getKey();
                     Carrier<T> c2 = o2.getKey();

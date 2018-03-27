@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.resource;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -45,7 +47,7 @@ public class ItemResourceKey //implements IMessagePlus, IReadWriteNBT
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(@Nullable Object obj)
     {
         if(obj == null || !(obj instanceof ItemResourceKey)) return false;
      

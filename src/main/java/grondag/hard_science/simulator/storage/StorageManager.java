@@ -449,7 +449,7 @@ public class StorageManager<T extends StorageType<T>>
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         // NOOP - storage state is saved with the devices
         // manager state reconstructed a run time

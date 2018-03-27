@@ -107,9 +107,9 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
     
     public DeviceEnergyManager(
             IDevice owner, 
-            AbstractGenerator generator, 
-            PowerContainer inputContainer,
-            PowerContainer outputContainer)
+            @Nullable AbstractGenerator generator, 
+            @Nullable PowerContainer inputContainer,
+            @Nullable PowerContainer outputContainer)
     {
         super();
         this.owner = owner;
@@ -238,7 +238,7 @@ public class DeviceEnergyManager implements IReadWriteNBT, IDeviceComponent, ISi
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         this.generator = tag.hasKey(NBT_MACHINE_GENERATOR) 
                 ? (AbstractGenerator)ComponentRegistry.fromNBT(

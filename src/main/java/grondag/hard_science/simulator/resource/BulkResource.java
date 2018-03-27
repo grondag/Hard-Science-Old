@@ -133,7 +133,7 @@ public class BulkResource implements IResource<StorageTypeBulk>
     }
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(@Nullable Object other)
     {
         if(other == this) return true;
         if(other == null) return false;

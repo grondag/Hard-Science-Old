@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
@@ -21,7 +23,7 @@ public class AbstractBroker<V extends StorageType<V>> implements IBroker<V>
     protected ConcurrentSkipListSet<NewProcurementTask<V>> requests = new ConcurrentSkipListSet<NewProcurementTask<V>>(new Comparator<NewProcurementTask<V>>() 
             {
                 @Override
-                public int compare(NewProcurementTask<V> o1, NewProcurementTask<V> o2)
+                public int compare(@Nullable NewProcurementTask<V> o1, @Nullable NewProcurementTask<V> o2)
                 {
                     return o1.priority().compareTo(o2.priority());
                 }

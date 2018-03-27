@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.resource;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -27,7 +29,7 @@ public class ItemPredicate implements IResourcePredicate<StorageTypeStack>
     }
     
     @Override
-    public boolean test(IResource<StorageTypeStack> t)
+    public boolean test(@Nullable IResource<StorageTypeStack> t)
     {
         return ((ItemResource)t).getItem() == this.item;
     }

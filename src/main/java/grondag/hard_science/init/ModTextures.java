@@ -16,6 +16,7 @@ import grondag.exotic_matter.model.TexturePaletteRegistry;
 import grondag.exotic_matter.model.TexturePaletteSpec;
 import grondag.exotic_matter.model.TextureRenderIntent;
 import grondag.exotic_matter.model.TextureScale;
+import grondag.hard_science.HardScience;
 
 public class ModTextures
 {
@@ -25,61 +26,61 @@ public class ModTextures
     //======================================================================
     
     public static final ITexturePalette BORDER_SMOOTH_BLEND = TexturePaletteRegistry.addTexturePallette("border_smooth_blended", "border_smooth_blended", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS));
 
     public static final ITexturePalette MASONRY_SIMPLE = TexturePaletteRegistry.addTexturePallette("masonry_simple", "masonry_simple", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.MASONRY_5)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.MASONRY_5)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS));
 
-    public static final ITexturePalette BORDER_SINGLE_PINSTRIPE = TexturePaletteRegistry.addBorderSingle("border_single_pinstripe");
-    public static final ITexturePalette BORDER_INSET_PINSTRIPE = TexturePaletteRegistry.addBorderSingle("border_inset_pinstripe");
-    public static final ITexturePalette BORDER_GRITTY_INSET_PINSTRIPE = TexturePaletteRegistry.addBorderRandom("border_gritty_inset_pinstripe", false, false);
-    public static final ITexturePalette BORDER_SINGLE_LINE = TexturePaletteRegistry.addBorderSingle("border_single_line");
-    public static final ITexturePalette BORDER_SINGLE_BOLD_LINE = TexturePaletteRegistry.addBorderSingle("border_single_bold_line");
-    public static final ITexturePalette BORDER_SINGLE_FAT_LINE = TexturePaletteRegistry.addBorderSingle("border_single_fat_line");
-    public static final ITexturePalette BORDER_GRITTY_FAT_LINE = TexturePaletteRegistry.addBorderRandom("border_gritty_fat_line", false, false);
-    public static final ITexturePalette BORDER_DOUBLE_MIXED_LINES = TexturePaletteRegistry.addBorderSingle("border_double_mixed_lines");
-    public static final ITexturePalette BORDER_DOUBLE_PINSTRIPES = TexturePaletteRegistry.addBorderSingle("border_double_pinstripes");
-    public static final ITexturePalette BORDER_INSET_DOUBLE_PINSTRIPES = TexturePaletteRegistry.addBorderSingle("border_inset_double_pinstripes");
-    public static final ITexturePalette BORDER_TRIPLE_MIXED_LINES = TexturePaletteRegistry.addBorderSingle("border_triple_mixed_lines");
-    public static final ITexturePalette BORDER_DOUBLE_DOUBLE = TexturePaletteRegistry.addBorderSingle("border_double_double");
-    public static final ITexturePalette BORDER_WHITEWALL = TexturePaletteRegistry.addBorderSingle("border_whitewall");
-    public static final ITexturePalette BORDER_GRITTY_WHITEWALL = TexturePaletteRegistry.addBorderRandom("border_gritty_whitewall", false, false);
+    public static final ITexturePalette BORDER_SINGLE_PINSTRIPE = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_single_pinstripe");
+    public static final ITexturePalette BORDER_INSET_PINSTRIPE = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_inset_pinstripe");
+    public static final ITexturePalette BORDER_GRITTY_INSET_PINSTRIPE = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_gritty_inset_pinstripe", false, false);
+    public static final ITexturePalette BORDER_SINGLE_LINE = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_single_line");
+    public static final ITexturePalette BORDER_SINGLE_BOLD_LINE = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_single_bold_line");
+    public static final ITexturePalette BORDER_SINGLE_FAT_LINE = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_single_fat_line");
+    public static final ITexturePalette BORDER_GRITTY_FAT_LINE = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_gritty_fat_line", false, false);
+    public static final ITexturePalette BORDER_DOUBLE_MIXED_LINES = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_double_mixed_lines");
+    public static final ITexturePalette BORDER_DOUBLE_PINSTRIPES = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_double_pinstripes");
+    public static final ITexturePalette BORDER_INSET_DOUBLE_PINSTRIPES = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_inset_double_pinstripes");
+    public static final ITexturePalette BORDER_TRIPLE_MIXED_LINES = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_triple_mixed_lines");
+    public static final ITexturePalette BORDER_DOUBLE_DOUBLE = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_double_double");
+    public static final ITexturePalette BORDER_WHITEWALL = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_whitewall");
+    public static final ITexturePalette BORDER_GRITTY_WHITEWALL = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_gritty_whitewall", false, false);
     
-    public static final ITexturePalette BORDER_PINSTRIPE_DASH = TexturePaletteRegistry.addBorderSingle("border_pinstripe_dash");
-    public static final ITexturePalette BORDER_INSET_DOTS_1 = TexturePaletteRegistry.addBorderSingle("border_inset_dots_1");
-    public static final ITexturePalette BORDER_INSET_DOTS_2 = TexturePaletteRegistry.addBorderSingle("border_inset_dots_2");
-    public static final ITexturePalette BORDER_INSET_PIN_DOTS = TexturePaletteRegistry.addBorderSingle("border_inset_pin_dots");
-    public static final ITexturePalette BORDER_CHANNEL_DOTS = TexturePaletteRegistry.addBorderSingle("border_channel_dots");
-    public static final ITexturePalette BORDER_CHANNEL_PIN_DOTS = TexturePaletteRegistry.addBorderSingle("border_channel_pin_dots");
+    public static final ITexturePalette BORDER_PINSTRIPE_DASH = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_pinstripe_dash");
+    public static final ITexturePalette BORDER_INSET_DOTS_1 = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_inset_dots_1");
+    public static final ITexturePalette BORDER_INSET_DOTS_2 = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_inset_dots_2");
+    public static final ITexturePalette BORDER_INSET_PIN_DOTS = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_inset_pin_dots");
+    public static final ITexturePalette BORDER_CHANNEL_DOTS = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_channel_dots");
+    public static final ITexturePalette BORDER_CHANNEL_PIN_DOTS = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_channel_pin_dots");
     
-    public static final ITexturePalette BORDER_CHANNEL_CHECKERBOARD = TexturePaletteRegistry.addBorderSingle("border_channel_checkerboard");
-    public static final ITexturePalette BORDER_CHECKERBOARD = TexturePaletteRegistry.addBorderSingle("border_checkerboard");
-    public static final ITexturePalette BORDER_GRITTY_CHECKERBOARD = TexturePaletteRegistry.addBorderRandom("border_gritty_checkerboard", false, false);
+    public static final ITexturePalette BORDER_CHANNEL_CHECKERBOARD = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_channel_checkerboard");
+    public static final ITexturePalette BORDER_CHECKERBOARD = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_checkerboard");
+    public static final ITexturePalette BORDER_GRITTY_CHECKERBOARD = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_gritty_checkerboard", false, false);
     
-    public static final ITexturePalette BORDER_GROOVY_STRIPES = TexturePaletteRegistry.addBorderSingle("border_groovy_stripes");
-    public static final ITexturePalette BORDER_GRITTY_GROOVES = TexturePaletteRegistry.addBorderRandom("border_gritty_grooves", false, false);
-    public static final ITexturePalette BORDER_GROOVY_PINSTRIPES = TexturePaletteRegistry.addBorderSingle("border_groovy_pinstripes");
-    public static final ITexturePalette BORDER_GRITTY_PINSTRIPE_GROOVES = TexturePaletteRegistry.addBorderRandom("border_gritty_pinstripe_grooves", false, false);
+    public static final ITexturePalette BORDER_GROOVY_STRIPES = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_groovy_stripes");
+    public static final ITexturePalette BORDER_GRITTY_GROOVES = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_gritty_grooves", false, false);
+    public static final ITexturePalette BORDER_GROOVY_PINSTRIPES = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_groovy_pinstripes");
+    public static final ITexturePalette BORDER_GRITTY_PINSTRIPE_GROOVES = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_gritty_pinstripe_grooves", false, false);
     
-    public static final ITexturePalette BORDER_ZIGZAG = TexturePaletteRegistry.addBorderSingle("border_zigzag");
-    public static final ITexturePalette BORDER_INVERSE_ZIGZAG = TexturePaletteRegistry.addBorderSingle("border_inverse_zigzag");
-    public static final ITexturePalette BORDER_CAUTION = TexturePaletteRegistry.addBorderSingle("border_caution");
-    public static final ITexturePalette BORDER_FILMSTRIP = TexturePaletteRegistry.addBorderSingle("border_filmstrip");
-    public static final ITexturePalette BORDER_CHANNEL_LINES = TexturePaletteRegistry.addBorderSingle("border_channel_lines");
-    public static final ITexturePalette BORDER_SIGNAL = TexturePaletteRegistry.addBorderSingle("border_signal");
-    public static final ITexturePalette BORDER_GRITTY_SIGNAL = TexturePaletteRegistry.addBorderRandom("border_gritty_signal", false, false);
-    public static final ITexturePalette BORDER_LOGIC = TexturePaletteRegistry.addBorderRandom("border_logic", true, false);
-    public static final ITexturePalette BORDER_INVERSE_TILE_1 = TexturePaletteRegistry.addBorderRandom("border_inverse_logic_1", true, true);
-    public static final ITexturePalette BORDER_INVERSE_TILE_2 = TexturePaletteRegistry.addBorderRandom("border_inverse_logic_2", true, true);
+    public static final ITexturePalette BORDER_ZIGZAG = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_zigzag");
+    public static final ITexturePalette BORDER_INVERSE_ZIGZAG = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_inverse_zigzag");
+    public static final ITexturePalette BORDER_CAUTION = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_caution");
+    public static final ITexturePalette BORDER_FILMSTRIP = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_filmstrip");
+    public static final ITexturePalette BORDER_CHANNEL_LINES = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_channel_lines");
+    public static final ITexturePalette BORDER_SIGNAL = TexturePaletteRegistry.addBorderSingle(HardScience.INSTANCE, "border_signal");
+    public static final ITexturePalette BORDER_GRITTY_SIGNAL = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_gritty_signal", false, false);
+    public static final ITexturePalette BORDER_LOGIC = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_logic", true, false);
+    public static final ITexturePalette BORDER_INVERSE_TILE_1 = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_inverse_logic_1", true, true);
+    public static final ITexturePalette BORDER_INVERSE_TILE_2 = TexturePaletteRegistry.addBorderRandom(HardScience.INSTANCE, "border_inverse_logic_2", true, true);
 
     //======================================================================
     //  BIGTEX
     //======================================================================
     
     public static final ITexturePalette BIGTEX_WEATHERED_STONE = TexturePaletteRegistry.addTexturePallette("weathered_smooth_stone", "weathered_smooth_stone", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.STATIC_TILES));
     public static final ITexturePalette BIGTEX_WEATHERED_STONE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_WEATHERED_STONE);
     public static final ITexturePalette BIGTEX_WEATHERED_STONE_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_WEATHERED_STONE_ZOOM);
@@ -129,13 +130,13 @@ public class ModTextures
     //======================================================================
 
     public static final ITexturePalette BIGTEX_FLUID_GLOW = TexturePaletteRegistry.addTexturePallette("fluid_glow", "fluid_glow", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.DYNAMIC_DETAILS));
     public static final ITexturePalette BIGTEX_FLUID_GLOW_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_FLUID_GLOW);
     public static final ITexturePalette BIGTEX_FLUID_GLOW_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_FLUID_GLOW_ZOOM);
 
     public static final ITexturePalette BIGTEX_FLUID_VORTEX = TexturePaletteRegistry.addTexturePallette("fluid_vortex", "fluid_vortex", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
             .withGroups(TextureGroup.DYNAMIC_DETAILS, TextureGroup.DYNAMIC_TILES)
             .withTicksPerFrame(2));
@@ -143,14 +144,14 @@ public class ModTextures
     public static final ITexturePalette BIGTEX_FLUID_VORTEX_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_FLUID_VORTEX_ZOOM);
 
     public static final ITexturePalette BIGTEX_CLOUDS = TexturePaletteRegistry.addTexturePallette("clouds", "clouds", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
             .withGroups(TextureGroup.DYNAMIC_DETAILS, TextureGroup.DYNAMIC_TILES));
     public static final ITexturePalette BIGTEX_CLOUDS_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_CLOUDS);
     public static final ITexturePalette BIGTEX_CLOUDS_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_CLOUDS_ZOOM);
     
     public static final ITexturePalette BIGTEX_STARFIELD = TexturePaletteRegistry.addTexturePallette("starfield", "starfield", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX_ANIMATED)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
             .withGroups(TextureGroup.DYNAMIC_DETAILS, TextureGroup.DYNAMIC_TILES));
     public static final ITexturePalette BIGTEX_STARFIELD_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_STARFIELD);
@@ -175,7 +176,7 @@ public class ModTextures
     //  DECALS
     //======================================================================
     public static final ITexturePalette DECAL_SMALL_DOT = TexturePaletteRegistry.addTexturePallette("small_dot", "small_dot", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_DETAILS));
     
     public static final ITexturePalette DECAL_MEDIUM_DOT = TexturePaletteRegistry.addTexturePallette("medium_dot", "medium_dot", new TexturePaletteSpec(DECAL_SMALL_DOT));
@@ -294,7 +295,7 @@ public class ModTextures
     public static final ITexturePalette DECAL_ARROW_270 = TexturePaletteRegistry.addTexturePallette("arrow_270", "arrow", new TexturePaletteSpec(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
     
     public static final ITexturePalette MATERIAL_GRADIENT = TexturePaletteRegistry.addTexturePallette("arrow", "material_gradient", 
-            new TexturePaletteSpec().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
 
     public static final ITexturePalette DECAL_BUILDER = TexturePaletteRegistry.addTexturePallette("symbol_builder", "symbol_builder", new TexturePaletteSpec(DECAL_SMALL_DOT));
@@ -317,7 +318,7 @@ public class ModTextures
     public static final ITexturePalette DECAL_FLAME = TexturePaletteRegistry.addTexturePallette("flame", "flame_64", new TexturePaletteSpec(DECAL_SMALL_DOT));
 
     public static final ITexturePalette TILE_DOTS = TexturePaletteRegistry.addTexturePallette("dots", "dots", 
-            new TexturePaletteSpec().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
             .withRotation(RANDOM.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT).withGroups(TextureGroup.STATIC_TILES, TextureGroup.STATIC_DETAILS));
 
     public static final ITexturePalette TILE_DOTS_SUBTLE = TexturePaletteRegistry.addTexturePallette("dots_subtle", "dots_subtle", new TexturePaletteSpec(TILE_DOTS));

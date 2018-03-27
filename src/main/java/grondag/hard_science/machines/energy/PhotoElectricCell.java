@@ -2,6 +2,8 @@ package grondag.hard_science.machines.energy;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.simulator.IWorldTask;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.WorldTaskManager;
@@ -103,7 +105,7 @@ public class PhotoElectricCell extends AbstractGenerator
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         //NOOP
     }

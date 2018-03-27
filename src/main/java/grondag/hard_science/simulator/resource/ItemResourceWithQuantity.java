@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.resource;
 import java.util.Comparator;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeStack;
 import net.minecraft.item.ItemStack;
@@ -42,7 +43,7 @@ public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<Stora
         SORT_BY_QTY_ASC = new Comparator<AbstractResourceWithQuantity<StorageTypeStack>>()
     {
         @Override
-        public int compare(AbstractResourceWithQuantity<StorageTypeStack> o1, AbstractResourceWithQuantity<StorageTypeStack> o2)
+        public int compare(@Nullable AbstractResourceWithQuantity<StorageTypeStack> o1, @Nullable AbstractResourceWithQuantity<StorageTypeStack> o2)
         {  
             if(o1 == null)
             {
@@ -65,7 +66,7 @@ public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<Stora
         SORT_BY_QTY_DESC = new Comparator<AbstractResourceWithQuantity<StorageTypeStack>>()
     {
         @Override
-        public int compare(AbstractResourceWithQuantity<StorageTypeStack> o1, AbstractResourceWithQuantity<StorageTypeStack> o2)
+        public int compare(@Nullable AbstractResourceWithQuantity<StorageTypeStack> o1, @Nullable AbstractResourceWithQuantity<StorageTypeStack> o2)
         {
             return SORT_BY_QTY_ASC.compare(o2, o1);
         }

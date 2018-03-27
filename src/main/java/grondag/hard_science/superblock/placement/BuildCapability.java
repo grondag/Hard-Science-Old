@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.placement;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.domain.DomainUser;
@@ -52,7 +54,7 @@ public class BuildCapability implements IUserCapability
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         if(tag.hasKey(NBT_TAG_DATA))
         {

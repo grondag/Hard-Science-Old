@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 
@@ -101,7 +103,7 @@ public class DigesterRecipe
         INPUT_STACK_PREDICATE = new Predicate<FluidStack>() 
         {
             @Override
-            public boolean test(FluidStack t)
+            public boolean test(@Nullable FluidStack t)
             {
                 return byInput.containsKey(t.getFluid());
             }
@@ -110,7 +112,7 @@ public class DigesterRecipe
         INPUT_RESOURCE_PREDICATE = new IResourcePredicate<StorageTypeFluid>() 
         {
             @Override
-            public boolean test(IResource<StorageTypeFluid> t)
+            public boolean test(@Nullable IResource<StorageTypeFluid> t)
             {
                 return byInput.containsKey(((FluidResource)t).getFluid());
             }
@@ -119,7 +121,7 @@ public class DigesterRecipe
         OUTPUT_RESOURCE_PREDICATE = new IResourcePredicate<StorageTypeFluid>() 
         {
             @Override
-            public boolean test(IResource<StorageTypeFluid> t)
+            public boolean test(@Nullable IResource<StorageTypeFluid> t)
             {
                 return byOutput.containsKey(((FluidResource)t).getFluid());
             }

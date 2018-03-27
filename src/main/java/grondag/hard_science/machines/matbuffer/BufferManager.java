@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.matbuffer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
@@ -111,7 +112,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         if(this.itemInput != null && tag.hasKey(NBT_BUFFER_ITEMS_IN))
             this.itemInput.deserializeNBT(tag.getCompoundTag(NBT_BUFFER_ITEMS_IN));
@@ -173,7 +174,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
     }
 
     @Override
-    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate)
+    public ItemStack insertItem(int slot, @Nonnull @Nullable ItemStack stack, boolean simulate)
     {
         if(slot < inSlots())
         {

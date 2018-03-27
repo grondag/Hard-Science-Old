@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.machines.energy.BatteryChemistry;
@@ -52,7 +54,7 @@ public class PowerContainer extends ResourceContainer<StorageTypePower> implemen
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         //NB: super saves capacity, contents
         super.deserializeNBT(tag);

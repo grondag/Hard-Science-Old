@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.energy;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.TimeUnits;
 import grondag.exotic_matter.varia.Useful;
@@ -118,7 +120,7 @@ public class PolyethyleneFuelCell extends AbstractGenerator
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         setup(
                 Useful.safeEnumFromOrdinal(tag.getInteger(NBT_MACHINE_FUEL_CELL_PLATE_SIZE), CubeSize.THREE),

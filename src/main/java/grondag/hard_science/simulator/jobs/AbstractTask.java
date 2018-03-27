@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.jobs;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
@@ -401,7 +402,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         this.deserializeID(tag);
         this.status = Useful.safeEnumFromTag(tag, NBT_REQUEST_STATUS, RequestStatus.NEW);

@@ -233,7 +233,7 @@ public abstract class AbstractDevice implements IDevice
 
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         this.deserializeID(tag);
         this.location = Location.fromNBT(tag);

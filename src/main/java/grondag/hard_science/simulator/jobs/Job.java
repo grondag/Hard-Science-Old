@@ -2,6 +2,8 @@ package grondag.hard_science.simulator.jobs;
 
 import java.util.Iterator;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.Simulator;
@@ -411,7 +413,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         this.tasks.clear();
         

@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.fobs;
 
+import javax.annotation.Nullable;
+
 public class TaskPriority implements Comparable<TaskPriority>
 {
     public static final TaskPriority NONE = new TaskPriority(Integer.MAX_VALUE);
@@ -20,7 +22,7 @@ public class TaskPriority implements Comparable<TaskPriority>
     }
 
     @Override
-    public int compareTo(TaskPriority o)
+    public int compareTo(@Nullable TaskPriority o)
     {
         return Long.compareUnsigned(this.value, o.value);
     }

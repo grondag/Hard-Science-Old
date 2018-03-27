@@ -7,24 +7,27 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import grondag.exotic_matter.init.IItemModelRegistrant;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.BulkItemInput;
 import grondag.hard_science.matter.MassUnits.Mass;
 import grondag.hard_science.simulator.resource.BulkResource;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ModelBakeEvent;
 
 /**
  * Package sizes for solid material blocks
  * and fluid containers. 
  */
 @Deprecated
-public class BulkItem extends Item
+public class BulkItem extends Item  implements IItemModelRegistrant
 {
     private static final String NBT_BULK_ITEM_NL = NBTDictionary.claim("bulkItemNL");
 
@@ -134,6 +137,13 @@ public class BulkItem extends Item
         ItemStack result = new ItemStack(this);
         this.setNanoLiters(result, nanoLiters);
         return result;
+    }
+
+    @Override
+    public void handleBake(ModelBakeEvent event)
+    {
+        event.getModelRegistry().putObject(new ModelResourceLocation(this.getRegistryName(), "inventory"),
+                new MatterCubeItemModel1((BulkItem) this));        
     }
     
     

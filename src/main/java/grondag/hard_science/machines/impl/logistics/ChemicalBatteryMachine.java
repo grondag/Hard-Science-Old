@@ -1,7 +1,5 @@
 package grondag.hard_science.machines.impl.logistics;
 
-import javax.annotation.Nullable;
-
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.energy.BatteryChemistry;
 import grondag.hard_science.machines.energy.DeviceEnergyManager;
@@ -18,7 +16,7 @@ public class ChemicalBatteryMachine extends AbstractSimpleMachine
     }
 
     @Override
-    protected @Nullable DeviceEnergyManager createEnergyManager()
+    protected DeviceEnergyManager createEnergyManager()
     {
         PowerContainer battery = new PowerContainer(this, ContainerUsage.STORAGE);
         battery.configure(VolumeUnits.LITER.nL * 750L, BatteryChemistry.SILICON);

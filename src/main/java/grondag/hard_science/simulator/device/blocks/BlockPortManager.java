@@ -2,6 +2,8 @@ package grondag.hard_science.simulator.device.blocks;
 
 import java.util.Comparator;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.resource.StorageType;
@@ -45,7 +47,7 @@ public class BlockPortManager<T extends StorageType<T>>
             allPorts = ImmutableList.sortedCopyOf(
                     new Comparator<Port<T>>(){
                     @Override
-                    public int compare(Port<T> o1, Port<T> o2)
+                    public int compare(@Nullable Port<T> o1, @Nullable Port<T> o2)
                     {
                         return Integer.compare(o1.getFace().ordinal(), o2.getFace().ordinal());
                     }}, 

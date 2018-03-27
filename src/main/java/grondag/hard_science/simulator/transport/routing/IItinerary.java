@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.serialization.IReadWriteNBT;
@@ -81,7 +83,7 @@ public class IItinerary<T extends StorageType<T>> implements IReadWriteNBT
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         // TODO Auto-generated method stub
         

@@ -94,7 +94,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     private final static IFunction<ItemResourceDelegate, Integer> RESOURCE_HANDLE_MAPPER
     = new IFunction<ItemResourceDelegate, Integer>() {
        @Override
-       public Integer apply(ItemResourceDelegate elem)
+       public Integer apply(@Nullable ItemResourceDelegate elem)
        {
            return elem.handle();
        }};

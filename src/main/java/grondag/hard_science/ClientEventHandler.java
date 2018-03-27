@@ -1,19 +1,12 @@
 package grondag.hard_science;
 
-import java.io.IOException;
-import java.util.Map;
-
 import grondag.exotic_matter.ConfigXM;
 import grondag.exotic_matter.ConfigXM.Render.PreviewMode;
-import grondag.exotic_matter.block.SuperBlock;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.block.SuperDispatcher;
 import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.block.SuperModelTileEntity;
-import grondag.exotic_matter.model.varia.CraftingItem;
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.placement.IPlacementItem;
-import grondag.exotic_matter.placement.SuperItemBlock;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.machines.base.MachineTESR;
@@ -28,10 +21,6 @@ import grondag.hard_science.machines.impl.processing.DigesterTileEntity;
 import grondag.hard_science.machines.impl.processing.MicronizerTESR;
 import grondag.hard_science.machines.impl.processing.MicronizerTileEntity;
 import grondag.hard_science.machines.support.OpenContainerStorageProxy;
-import grondag.hard_science.matter.BulkItem;
-import grondag.hard_science.matter.MatterCube;
-import grondag.hard_science.matter.MatterCubeItemModel;
-import grondag.hard_science.matter.MatterCubeItemModel1;
 import grondag.hard_science.network.client_to_server.PacketConfigurePlacementItem;
 import grondag.hard_science.network.client_to_server.PacketSimpleAction;
 import grondag.hard_science.superblock.placement.spec.PlacementHandler;
@@ -43,22 +32,15 @@ import grondag.hard_science.superblock.virtual.VirtualTileEntityTESR;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.renderer.block.model.ModelBakery;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.common.config.ConfigManager;
@@ -68,10 +50,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
 @SideOnly(Side.CLIENT)
@@ -316,49 +296,6 @@ public class ClientEventHandler
     @SubscribeEvent
     public static void modelRegistryEvent(ModelRegistryEvent event)
     {
-          
-        IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
-        
-        for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
-        {
-            if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
-            {
-                
-                //TODO: move to library mod
-                Item item = entry.getValue();
-                if(item instanceof SuperItemBlock)
-                {
-                    
-                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
-                    for (ItemStack stack : block.getSubItems())
-                    {
-                        String variantName = SuperDispatcher.INSTANCE.getDelegate(block).getModelResourceString() + "." + stack.getMetadata();
-                        ModelBakery.registerItemVariants(item, new ResourceLocation(variantName));
-                        ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
-                    }
-                }
-                else if(item instanceof MatterCube)
-                {
-                    ModelBakery.registerItemVariants(item, item.getRegistryName());
-                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
-                }
-                else if(item instanceof BulkItem)
-                {
-                    ModelBakery.registerItemVariants(item, item.getRegistryName());
-                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
-                }
-                else if(item instanceof CraftingItem)
-                {
-                    ModelBakery.registerItemVariants(item, item.getRegistryName());
-                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
-                }
-                else
-                {
-                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
-                }
-            }
-        }
-        
         // Bind TESR to tile entity
         ClientRegistry.bindTileEntitySpecialRenderer(VirtualTileEntityTESR.class, VirtualTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(BlockFabricatorTileEntity.class, BlockFabricatorTESR.INSTANCE);
@@ -367,49 +304,5 @@ public class ClientEventHandler
         ClientRegistry.bindTileEntitySpecialRenderer(ChemicalBatteryTileEntity.class, ChemicalBatteryTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(MicronizerTileEntity.class, MicronizerTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(DigesterTileEntity.class, DigesterTESR.INSTANCE);
-    }
-    
-    @SubscribeEvent()
-    public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
-    {
-        
-        IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
-        
-        for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
-        {
-            if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
-            {
-                // TODO: move to library mod
-                Item item = entry.getValue();
-                if(item instanceof SuperItemBlock)
-                {
-                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
-                    for (ItemStack stack : block.getSubItems())
-                    {
-                        event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
-                                SuperDispatcher.INSTANCE.getDelegate(block));
-                    }
-                }
-                else if(item instanceof MatterCube)
-                {
-                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
-                            new MatterCubeItemModel((MatterCube) item));
-                }
-                else if(item instanceof BulkItem)
-                {
-                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
-                            new MatterCubeItemModel1((BulkItem) item));
-                }
-                else if(item instanceof CraftingItem)
-                {
-                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
-                            SuperDispatcher.INSTANCE.getItemDelegate());
-                }
-                else
-                {
-                    // Not needed - will look for json files for normal items;
-                }
-            }
-        }
     }
 }

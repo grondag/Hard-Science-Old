@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.simulator.Simulator;
@@ -136,7 +138,7 @@ public class MicronizerInputSelector implements IDomainMember
             .sorted(new Comparator<BasicEntry<IResource<StorageTypeStack>>>()
             {
                 @Override
-                public int compare(BasicEntry<IResource<StorageTypeStack>> o1, BasicEntry<IResource<StorageTypeStack>> o2)
+                public int compare(@Nullable BasicEntry<IResource<StorageTypeStack>> o1, @Nullable BasicEntry<IResource<StorageTypeStack>> o2)
                 {
                     // note reverse order, higher ranking first
                     return Long.compare(o2.getLongValue(), o1.getLongValue());

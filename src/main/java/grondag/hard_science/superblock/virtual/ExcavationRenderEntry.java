@@ -47,12 +47,12 @@ public class ExcavationRenderEntry implements ITaskListener, Runnable
     
     public final int domainID;
     
-    private IntegerAABB aabb;
+    @Nullable private IntegerAABB aabb;
     
     private boolean isFirstComputeDone = false;
     
     /** Non-null if should render individual renderPositions instead of AABB */
-    private BlockPos[] renderPositions = null;
+    @Nullable private BlockPos[] renderPositions = null;
     
     private Int2ObjectMap<AtomicInteger> xCounts = new Int2ObjectOpenHashMap<AtomicInteger>();
     private Int2ObjectMap<AtomicInteger> yCounts = new Int2ObjectOpenHashMap<AtomicInteger>();

@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.resource;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.simulator.storage.IResourceContainer;
@@ -128,7 +129,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     }
 
     @Override
-    public boolean test(IResource<V> t)
+    public boolean test(@Nullable IResource<V> t)
     {
         return this.resource.test(t);
     }

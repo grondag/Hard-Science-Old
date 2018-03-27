@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.support;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
@@ -136,11 +137,12 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     }
     
     private long bits = DEFAULT_BITS;
-    private ISuperModelState modelState;
+    @Nullable private ISuperModelState modelState;
     private short jobDurationTicks = 0;
     private short jobRemainingTicks = 0;
-    private BlockPos targetPos = null;
-    private GenericRecipe currentRecipe = null;
+    
+    @Nullable private BlockPos targetPos = null;
+    @Nullable private GenericRecipe currentRecipe = null;
     
     //////////////////////////////////////////////////////////////////////
     // ACCESS METHODS
@@ -160,7 +162,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     private void updateModelStateStatus() { bits = PACKED_HAS_MODELSTATE.setValue(this.modelState != null, bits); }
     
     public ISuperModelState getModelState() { return this.modelState; }
-    public void setModelState( ISuperModelState value)
+    public void setModelState( @Nullable ISuperModelState value)
     {
         this.modelState = value; 
         this.updateModelStateStatus();
@@ -280,7 +282,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     private final static String NBT_MACHINE_JOB_REMAINING_TICKS = NBTDictionary.claim("devRemTicks");
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         if(tag.hasKey(NBT_MACHINE_CONTROL_STATE))
         {

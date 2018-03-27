@@ -44,7 +44,7 @@ public class JobManager implements IDomainCapability
         {
             private AtomicInteger count = new AtomicInteger(1);
             @Override
-            public Thread newThread(Runnable r)
+            public Thread newThread(@Nullable Runnable r)
             {
                 Thread thread = new Thread(r, "Hard Science Job Manager Thread -" + count.getAndIncrement());
                 thread.setDaemon(true);
@@ -162,7 +162,7 @@ public class JobManager implements IDomainCapability
     private static final Predicate<AbstractTask> MATCH_ANY_TASK = new Predicate<AbstractTask>()
     {
         @Override
-        public boolean test(AbstractTask t)
+        public boolean test(@Nullable AbstractTask t)
         {
             return true;
         }
@@ -308,7 +308,7 @@ public class JobManager implements IDomainCapability
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         NBTTagList nbtJobs = tag.getTagList(NBT_CHILDREN, 10);
         if( nbtJobs != null && !nbtJobs.hasNoTags())

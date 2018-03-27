@@ -292,7 +292,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         if(tag == null) return;
         

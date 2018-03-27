@@ -40,7 +40,7 @@ public class BuildManager implements IDomainCapability
             {
                 private AtomicInteger count = new AtomicInteger(1);
                 @Override
-                public Thread newThread(Runnable r)
+                public Thread newThread(@Nullable Runnable r)
                 {
                     Thread thread = new Thread(r, "Hard Science Build Manager Thread -" + count.getAndIncrement());
                     thread.setDaemon(true);
@@ -92,7 +92,7 @@ public class BuildManager implements IDomainCapability
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         NBTTagList nbtBuilds = tag.getTagList(NBT_BUILDS, 10);
         if( nbtBuilds != null && !nbtBuilds.hasNoTags())

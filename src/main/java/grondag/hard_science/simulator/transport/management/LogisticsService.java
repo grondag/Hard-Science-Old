@@ -285,7 +285,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                     existingCircuit.movePorts(newCircuit, new Predicate<Port<T>>()
                     {
                         @Override
-                        public boolean test(Port<T> t)
+                        public boolean test(@Nullable Port<T> t)
                         {
                             return !reachableFromLeaving.contains(t);
                         }
@@ -301,7 +301,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
                     existingCircuit.movePorts(newCircuit, new Predicate<Port<T>>()
                     {
                         @Override
-                        public boolean test(Port<T> t)
+                        public boolean test(@Nullable Port<T> t)
                         {
                             return reachableFromLeaving.contains(t);
                         }

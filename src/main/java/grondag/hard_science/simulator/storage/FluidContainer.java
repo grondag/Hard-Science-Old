@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.storage;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.HardScience;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.device.IDevice;
@@ -71,14 +73,14 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
         }
 
         @Override
-        public boolean canFillFluidType(FluidStack fluidStack)
+        public boolean canFillFluidType(@Nullable FluidStack fluidStack)
         {
             // must have capacity for at least 1mb
             return FluidContainer.this.availableCapacityFor(FluidResource.fromStack(fluidStack)) >= VolumeUnits.LITER.nL;
         }
 
         @Override
-        public boolean canDrainFluidType(FluidStack fluidStack)
+        public boolean canDrainFluidType(@Nullable FluidStack fluidStack)
         {
             // must contain at least 1mb
             return FluidContainer.this.takeUpTo(
@@ -103,7 +105,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
     }
 
     @Override
-    public int fill(FluidStack stack, boolean doFill)
+    public int fill(@Nullable FluidStack stack, boolean doFill)
     {
         if (stack == null || stack.amount <= 0)
         {
@@ -135,7 +137,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
     }
 
     @Override
-    public FluidStack drain(FluidStack stack, boolean doDrain)
+    public FluidStack drain(@Nullable FluidStack stack, boolean doDrain)
     {
         if(stack == null) return null;
         

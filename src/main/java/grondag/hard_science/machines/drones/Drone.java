@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.drones;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.domain.DomainManager;
@@ -70,7 +72,7 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         this.deserializeID(tag);
         this.deserializeLocation(tag);

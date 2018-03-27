@@ -3,6 +3,8 @@ package grondag.hard_science.simulator.domain;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.serialization.NBTDictionary;
@@ -458,7 +460,7 @@ public class ProcessManager implements IDomainCapability
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         if(tag.hasKey(NBT_FLUID_SETTINGS))
         {

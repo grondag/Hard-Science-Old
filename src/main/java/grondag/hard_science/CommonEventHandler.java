@@ -15,6 +15,7 @@ import grondag.hard_science.superblock.virtual.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Config.Type;
@@ -39,6 +40,12 @@ public class CommonEventHandler
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         VirtualBlock.registerVirtualBlocks(event);
+    }
+    
+    @SubscribeEvent
+    public static void registerItems(RegistryEvent.Register<Item> event) 
+    {
+        grondag.exotic_matter.CommonEventHandler.handleRegisterItems(HardScience.MODID, event);
     }
     
     @SubscribeEvent

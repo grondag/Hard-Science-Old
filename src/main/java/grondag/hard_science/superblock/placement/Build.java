@@ -272,7 +272,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         this.deserializeID(tag);
         Simulator.instance().assignedNumbersAuthority().register(this);

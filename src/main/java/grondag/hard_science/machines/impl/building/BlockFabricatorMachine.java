@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.impl.building;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.simulator.persistence.IIdentified;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.energy.BatteryChemistry;
@@ -52,6 +54,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     int taskID = IIdentified.UNASSIGNED_ID;
     
     // current task - lazy lookup, don't use directly
+    @Nullable
     BlockFabricationTask task = null;
     
     // Buffer setup - all persisted
@@ -81,7 +84,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     }
     
     @Override
-    protected BufferManager createBufferManager()
+    protected @Nullable BufferManager createBufferManager()
     {
         return new BufferManager(
                 this, 
@@ -109,6 +112,7 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
                 output);
     }
     
+    @Nullable
     public BlockFabricationTask task()
     {
         if(this.task == null && this.taskID != IIdentified.UNASSIGNED_ID)
@@ -131,9 +135,10 @@ public class BlockFabricatorMachine extends AbstractSimpleMachine
     
     private void abandonTaskInProgress()
     {
-        if(this.task() != null)
+        BlockFabricationTask myTask = this.task();
+        if(myTask != null)
         {
-            this.task.abandon();
+            myTask.abandon();
             this.task = null;
             this.taskID = IIdentified.UNASSIGNED_ID;
         }

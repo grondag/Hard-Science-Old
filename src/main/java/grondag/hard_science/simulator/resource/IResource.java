@@ -30,7 +30,7 @@ public interface IResource<V extends StorageType<V>> extends IResourcePredicate<
     public boolean isResourceEqual(@Nullable IResource<?> other);
     
     @Override
-    public default boolean test(IResource<V> t)
+    public default boolean test(@Nullable IResource<V> t)
     {
         return t.equals(this);
     }

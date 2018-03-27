@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.fobs;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainCapability;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,7 +29,7 @@ public class TransientTaskContainer implements ITaskContainer, IDomainCapability
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         //NOOP - no persisted state
     }

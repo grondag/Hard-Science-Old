@@ -1,5 +1,7 @@
 package grondag.hard_science.init;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.placement.IPlacementItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -18,7 +20,7 @@ public enum ModKeyConflictContext implements IKeyConflictContext
 
         @Override
         public boolean conflicts(
-                final IKeyConflictContext other )
+                final @Nullable IKeyConflictContext other )
         {
             return this == other;
         }
