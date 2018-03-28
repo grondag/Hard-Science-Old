@@ -86,11 +86,6 @@ public class CommonEventHandler
         }
         else
         {
-            WorldTaskManager.doServerTick();
-            
-            // thought it might be more determinism if simulator runs after block/entity ticks
-            Simulator.instance().onServerTick(event);
-            
             // TODO: remove
             // Temporary drone service
             for(IDomain domain : DomainManager.instance().getAllDomains())
