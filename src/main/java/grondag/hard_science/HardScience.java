@@ -59,7 +59,7 @@ public class HardScience implements IGrondagMod
 	public static final String VERSION = "0.0.1";
 	public static WorldType adversityWorld;
 	
-	public static CreativeTabs tabMod = new CreativeTabs("Hard Science") 
+	public static CreativeTabs tabMod = new CreativeTabs(MODID) 
 	{
 		@Override
 		@SideOnly(Side.CLIENT)

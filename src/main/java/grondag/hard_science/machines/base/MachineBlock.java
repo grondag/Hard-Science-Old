@@ -282,6 +282,12 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     }
 
     @Override
+    public BlockSubstance defaultSubstance()
+    {
+        return ModSubstances.MACHINE;
+    }
+    
+    @Override
     public boolean isGeometryFullCube(IBlockState state)
     {
         return true;

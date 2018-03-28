@@ -1,5 +1,6 @@
 
 #MISC
+itemGroup.hard_science=Hard Science
 misc.power.joules.name="Joules"
 misc.power.empty.name="<EMPTY>"
 
@@ -68,7 +69,6 @@ key.categories.hard_science=Hard Science
 
 #ITEMS
 item.block_wand.name=Block Adjuster
-item.terrain_wand.name=Terrain Wand
 item.excavation_marker.name=Excavation Marker
 item.duraplast_plate_1m.name=Duraplast Plate, 1m square
 item.duraplast_strut_1m.name=Duraplast Strut, 1m square
@@ -129,25 +129,6 @@ packagetype.vacpack=Vacuum Packed (HDPE Wrapper)
 
 #BLOCKS
 tile.hdpe_block.name=Polyethylene Block
-
-
-#SHAPES
-shape.box=Box
-shape.column_square=Square Column
-shape.cone=Cone
-shape.cube=Cube
-shape.cylinder=Cylinder
-shape.dodecahedron=Dodecahedron
-shape.dome=Dome
-shape.icosahedron=Icosahedron
-shape.pyramid=Pyramid
-shape.sphere=Sphere
-shape.staked_plates=Stacked Plates
-shape.terrain_filler=Flowing Terrain Filler
-shape.terrain_height=Flowing Terrain
-shape.tetrahedron=Tetrahedron
-shape.torus=Torus
-shape.tube=Tube
 
 #SUBSTANCES
 material.duraglass=DuraGlass
