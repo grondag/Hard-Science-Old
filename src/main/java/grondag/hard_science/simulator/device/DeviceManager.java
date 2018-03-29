@@ -3,7 +3,7 @@ package grondag.hard_science.simulator.device;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.concurrency.CountedJob;
-import grondag.exotic_matter.concurrency.CountedJobTask;
+import grondag.exotic_matter.concurrency.JobTask;
 import grondag.exotic_matter.concurrency.Job;
 import grondag.exotic_matter.concurrency.PerformanceCollector;
 import grondag.exotic_matter.concurrency.SimpleCountedJobBacker;
@@ -173,7 +173,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     public final Job onTickJob;  
     public final Job offTickJob;  
     
-    private final CountedJobTask<IDevice> offTickTask = new CountedJobTask<IDevice>() 
+    private final JobTask<IDevice> offTickTask = new JobTask<IDevice>() 
     {
         @Override
         public void doJobTask(IDevice operand)
@@ -182,7 +182,7 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
         }
     };
     
-    private final CountedJobTask<IDevice> onTickTask = new CountedJobTask<IDevice>() 
+    private final JobTask<IDevice> onTickTask = new JobTask<IDevice>() 
     {
         @Override
         public void doJobTask(IDevice operand)
