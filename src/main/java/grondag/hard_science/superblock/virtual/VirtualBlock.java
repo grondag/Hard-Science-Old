@@ -213,7 +213,7 @@ public class VirtualBlock extends SuperModelBlock
     @Override
     public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
-        return this.blockRenderMode == BlockRenderMode.TESR 
+        return this.blockRenderMode() == BlockRenderMode.TESR 
                 ? new VirtualTileEntityTESR()
                 : new VirtualTileEntity();
     }
@@ -360,7 +360,7 @@ public class VirtualBlock extends SuperModelBlock
         // We only want to show one item for virtual blocks
         // Otherwise will spam creative search / JEI
         // All do the same thing in the end.
-        if(this.blockRenderMode == BlockRenderMode.SOLID_SHADED)
+        if(this.blockRenderMode() == BlockRenderMode.SOLID_SHADED)
         {
             list.add(this.getSubItems().get(0));
         }
