@@ -164,7 +164,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
 
   
     @Override
-    public boolean isResourceEqual(IResource<?> other)
+    public boolean isResourceEqual(@Nullable IResource<?> other)
     {
         if(other == this) return true;
         if(other == null) return false;

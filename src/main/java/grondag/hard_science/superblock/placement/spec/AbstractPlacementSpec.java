@@ -2,6 +2,8 @@ package grondag.hard_science.superblock.placement.spec;
 
 import static grondag.exotic_matter.placement.PlacementPreviewRenderMode.OBSTRUCTED;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
@@ -36,7 +38,7 @@ abstract class AbstractPlacementSpec implements IPlacementSpec
     protected final IPlacementItem placementItem;
     protected final EntityPlayer player;
     protected final PlacementPosition pPos;
-    protected Boolean isValid = null;
+    protected @Nullable Boolean isValid = null;
     protected final TargetMode selectionMode;
     protected final boolean isExcavation;
     protected final boolean isVirtual;
@@ -111,6 +113,7 @@ abstract class AbstractPlacementSpec implements IPlacementSpec
      * render placement preview. Override with context-dependent
      * version if available.
      */
+    @Nullable
     protected ISuperModelState previewModelState()
     {
         return SuperBlockStackHelper.getStackModelState(this.heldStack);

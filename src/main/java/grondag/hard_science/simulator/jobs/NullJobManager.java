@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.jobs;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.nbt.NBTTagCompound;
 
 /** version of job manager that eats all method calls */
@@ -30,7 +32,7 @@ public class NullJobManager extends JobManager
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         // NOOP
     }

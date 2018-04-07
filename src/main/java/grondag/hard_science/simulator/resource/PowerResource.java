@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.resource;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.simulator.resource.StorageType.StorageTypePower;
 import net.minecraft.util.text.translation.I18n;
@@ -35,7 +36,7 @@ public class PowerResource extends AbstractResource<StorageType.StorageTypePower
     }
 
     @Override
-    public boolean isResourceEqual(IResource<?> other)
+    public boolean isResourceEqual(@Nullable IResource<?> other)
     {
         return other == this;
     }

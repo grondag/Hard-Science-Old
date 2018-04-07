@@ -3,6 +3,7 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.block.SuperBlockPlus;
 import grondag.exotic_matter.model.BlockColorMapProvider;
@@ -312,13 +313,13 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
 //    }
 
     @Override
-    public void addInformation(@Nonnull ItemStack stack, World world, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag advanced)
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag advanced)
     {
         //NOOP for now on machines - don't want all the stuff we get for normal superblocks
     }
 
     @Override
-    public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
+    public void addProbeInfo(@Nullable ProbeMode mode, @Nullable IProbeInfo probeInfo, @Nullable EntityPlayer player, @Nullable World world, @Nullable IBlockState blockState, @Nullable IProbeHitData data)
     { 
         this.addMachineProbeInfo(mode, probeInfo, player, world, blockState, data);
     }

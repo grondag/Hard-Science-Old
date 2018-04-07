@@ -2,6 +2,8 @@ package grondag.hard_science.simulator.demand;
 
 import java.util.HashMap;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.placement.SuperItemBlock;
 import grondag.exotic_matter.simulator.domain.Domain;
@@ -74,7 +76,7 @@ public class BrokerManager implements IDomainMember
     }
 
     @Override
-    public Domain getDomain()
+    public @Nullable Domain getDomain()
     {
         return this.domain;
     }

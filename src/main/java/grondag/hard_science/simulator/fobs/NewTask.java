@@ -109,7 +109,7 @@ public abstract class NewTask implements IReadWriteNBT, IDomainMember //, IIdent
     }
 
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.container.getDomain();
     }

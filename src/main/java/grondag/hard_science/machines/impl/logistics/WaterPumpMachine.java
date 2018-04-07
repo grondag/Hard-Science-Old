@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.impl.logistics;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.machines.matbuffer.BufferManager;
 import grondag.hard_science.matter.VolumeUnits;
@@ -25,7 +27,7 @@ public class WaterPumpMachine extends AbstractSimpleMachine
     }
 
     @Override
-    protected BufferManager createBufferManager()
+    protected @Nullable BufferManager createBufferManager()
     {
         return new BufferManager(
                 this, 

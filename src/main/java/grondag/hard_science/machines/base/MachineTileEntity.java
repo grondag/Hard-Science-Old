@@ -413,7 +413,7 @@ public class MachineTileEntity extends SuperTileEntity
     }
 
     @Override
-    public <T> T getCapability(@Nonnull Capability<T> capability, EnumFacing facing)
+    public @Nullable <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
     {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
                 && this.machine().hasItemStorage())
@@ -429,7 +429,7 @@ public class MachineTileEntity extends SuperTileEntity
     }
     
     @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, EnumFacing facing)
+    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
     {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && this.machine() != null)
         {

@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.jobs;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.NBTDictionary;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,7 +28,7 @@ public abstract class AbstractPositionedTask extends AbstractTask
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
         this.pos = BlockPos.fromLong(tag.getLong(NBT_TASK_POSITION));

@@ -575,7 +575,7 @@ public class Job implements Iterable<AbstractTask>, IIdentified, IReadWriteNBT, 
     }
 
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.jobManager.getDomain();
     }

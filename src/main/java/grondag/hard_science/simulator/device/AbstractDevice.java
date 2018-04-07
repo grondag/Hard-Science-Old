@@ -26,7 +26,7 @@ public abstract class AbstractDevice implements IDevice
     private static final String NBT_CHANNEL= NBTDictionary.claim("devChan");
     
     private int id;
-    private Location location;
+    private @Nullable Location location;
     
     /**
      * True if {@link #onConnect()} has run and {@link #onDisconnect()} has not.
@@ -38,23 +38,22 @@ public abstract class AbstractDevice implements IDevice
     private int domainID = IIdentified.UNASSIGNED_ID;
     
     /** do not access directly - lazy lookup after deserialization */
-    private IDomain domain = null;
+    private @Nullable IDomain domain = null;
     
     /**
      * Initialized during just before super connect, set null after super disconnect
      */
-    protected IDeviceBlockManager blockManager = null; 
+    protected @Nullable IDeviceBlockManager blockManager = null; 
     
-    protected final ITransportManager<StorageTypeStack> itemTransportManager;
-    protected final ITransportManager<StorageTypeFluid> fluidTransportManager;
-    protected final ITransportManager<StorageTypePower> powerTransportManager;
+    protected final @Nullable ITransportManager<StorageTypeStack> itemTransportManager;
+    protected final @Nullable ITransportManager<StorageTypeFluid> fluidTransportManager;
+    protected final @Nullable ITransportManager<StorageTypePower> powerTransportManager;
     
     
     /** Levels of materials stored in this machine.  Is persisted to NBT. 
      * Null (default) means disabled. 
      */
-    @Nullable
-    private BufferManager bufferManager = null;
+    private final BufferManager bufferManager;
     
     /**
      * Energy manager for this device.
@@ -73,7 +72,7 @@ public abstract class AbstractDevice implements IDevice
     /**
      * Override to enable item transport
      */
-    protected ITransportManager<StorageTypeStack> createItemTransportManager()
+    protected @Nullable ITransportManager<StorageTypeStack> createItemTransportManager()
     {
         return null;
     }
@@ -81,7 +80,7 @@ public abstract class AbstractDevice implements IDevice
     /**
      * Override to enable fluid transport
      */
-    protected ITransportManager<StorageTypeFluid> createFluidTransportManager()
+    protected @Nullable ITransportManager<StorageTypeFluid> createFluidTransportManager()
     {
         return null;
     }
@@ -89,7 +88,7 @@ public abstract class AbstractDevice implements IDevice
     /**
      * Override to enable power transport
      */
-    protected ITransportManager<StorageTypePower> createPowerTransportManager()
+    protected @Nullable ITransportManager<StorageTypePower> createPowerTransportManager()
     {
         return null;
     }
@@ -98,7 +97,6 @@ public abstract class AbstractDevice implements IDevice
      * If this machine has a material buffer, used to create a new instance.
      * May be used on client to create client-side delegate.
      */
-    @Nullable
     protected BufferManager createBufferManager()
     {
         return new BufferManager(
@@ -113,7 +111,6 @@ public abstract class AbstractDevice implements IDevice
     
 
     @Override
-    @Nullable
     public final BufferManager getBufferManager()
     {
         return this.bufferManager;
@@ -131,7 +128,7 @@ public abstract class AbstractDevice implements IDevice
     /**
      * Override to implement block manager functionality
      */
-    protected IDeviceBlockManager createBlockManager()
+    protected @Nullable IDeviceBlockManager createBlockManager()
     {
         return null;
     }
@@ -146,13 +143,13 @@ public abstract class AbstractDevice implements IDevice
     
     
     @Override
-    public final IDeviceBlockManager blockManager()
+    public final @Nullable IDeviceBlockManager blockManager()
     {
         return this.blockManager;
     }
     
     @Override
-    public ITransportManager<?> tranportManager(StorageType<?> storageType)
+    public @Nullable ITransportManager<?> tranportManager(StorageType<?> storageType)
     {
         switch(storageType.enumType)
         {
@@ -192,13 +189,13 @@ public abstract class AbstractDevice implements IDevice
     }
 
     @Override
-    public Location getLocation()
+    public @Nullable Location getLocation()
     {
         return this.location;
     }
 
     @Override
-    public void setLocation(Location loc)
+    public void setLocation(@Nullable Location loc)
     {
         this.location = loc;
     }
@@ -235,14 +232,17 @@ public abstract class AbstractDevice implements IDevice
     @Override
     public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
-        this.deserializeID(tag);
-        this.location = Location.fromNBT(tag);
-        
         // would cause problems with devices that have already posted events to a domain
         assert this.domain == null
                 : "Non-null domain during device deserialization.";
-        
-        this.domainID = tag.getInteger(NBT_DOMAIN_ID);
+
+        if(tag != null)
+        {
+            this.deserializeID(tag);
+            this.domainID = tag.getInteger(NBT_DOMAIN_ID);
+        }
+         
+        this.location = Location.fromNBT(tag);
         this.channel = tag.getInteger(NBT_CHANNEL);
         if(this.bufferManager != null) this.bufferManager.deserializeNBT(tag);
         this.energyManager.deserializeNBT(tag);
@@ -301,7 +301,7 @@ public abstract class AbstractDevice implements IDevice
      * 
      * See {@link #onProduce(IResource, long, boolean, NewProcurementTask)}
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     protected long onProduceImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     { 
         switch(resource.storageType().enumType)
@@ -351,7 +351,7 @@ public abstract class AbstractDevice implements IDevice
      * 
      * See {@link #onConsume(IResource, long, boolean, NewProcurementTask)}
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     protected long onConsumeImpl(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     {
         switch(resource.storageType().enumType)

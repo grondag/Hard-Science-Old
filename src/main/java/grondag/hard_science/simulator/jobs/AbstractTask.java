@@ -450,7 +450,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
     }
     
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.job.getDomain();
     }

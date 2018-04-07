@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.simulator.device.blocks.IDeviceBlockManager;
 import grondag.hard_science.simulator.device.blocks.SimpleBlockHandler;
@@ -62,7 +64,7 @@ public abstract class AbstractSimpleMachine extends AbstractMachine
     }
     
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
         this.portLayout = PortLayout.fromNBT(tag.getCompoundTag(NBT_PORT_LAYOUT));

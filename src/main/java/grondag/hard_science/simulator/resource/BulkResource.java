@@ -127,7 +127,7 @@ public class BulkResource implements IResource<StorageTypeBulk>
 //    }
   
     @Override
-    public boolean isResourceEqual(IResource<?> other)
+    public boolean isResourceEqual(@Nullable IResource<?> other)
     {
         return this.equals(other);
     }

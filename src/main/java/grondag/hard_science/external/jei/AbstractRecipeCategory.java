@@ -4,6 +4,7 @@ package grondag.hard_science.external.jei;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;
@@ -69,7 +70,7 @@ public class AbstractRecipeCategory<T extends GenericRecipe> implements IRecipeC
     }
 
     @Override
-    public IDrawable getIcon()
+    public @Nullable IDrawable getIcon()
     {
         return this.icon;
     }

@@ -454,7 +454,7 @@ public class ProcessManager implements IDomainCapability
     }
     
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.domain;
     }

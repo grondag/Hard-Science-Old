@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator.jobs;
 
 import grondag.exotic_matter.simulator.Simulator;
-import grondag.exotic_matter.simulator.domain.IDomain;
+import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.exotic_matter.simulator.job.RequestPriority;
 import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
@@ -9,7 +9,7 @@ import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 /**
  * Exists to allow interfaces that subclass tasks
  */
-public interface ITask
+public interface ITask extends IDomainMember
 {
 
     /**
@@ -61,8 +61,6 @@ public interface ITask
 
     void removeListener(ITaskListener listener);
 
-    IDomain getDomain();
-    
     public int getId();
     
     public void onAntecedentTerminated(ITask antecedent);

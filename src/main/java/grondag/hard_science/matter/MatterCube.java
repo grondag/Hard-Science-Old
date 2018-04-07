@@ -3,6 +3,7 @@ package grondag.hard_science.matter;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.init.IItemModelRegistrant;
 import grondag.hard_science.HardScience;
@@ -42,7 +43,7 @@ public class MatterCube extends Item implements IItemModelRegistrant
     }
     
     @Override
-    public void addInformation(@Nonnull ItemStack stack, World worldIn, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag flagIn)
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, @Nonnull ITooltipFlag flagIn)
     {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(this.cubeSize.toolTip());

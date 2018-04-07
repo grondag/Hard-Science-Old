@@ -123,7 +123,7 @@ public class VirtualBlock extends SuperModelBlock
     
     @Override
     public void addCollisionBoxToList(@Nonnull IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull AxisAlignedBB entityBox, @Nonnull List<AxisAlignedBB> collidingBoxes,
-            Entity entityIn, boolean p_185477_7_)
+            @Nullable Entity entityIn, boolean p_185477_7_)
     {
         if(HardScience.proxy.allowCollisionWithVirtualBlocks(worldIn) && entityIn == null)
         {
@@ -163,7 +163,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public boolean canConnectRedstone(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, EnumFacing side)
+    public boolean canConnectRedstone(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nullable EnumFacing side)
     {
         return false;
     }
@@ -211,7 +211,7 @@ public class VirtualBlock extends SuperModelBlock
     }
     
     @Override
-    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
+    public @Nullable TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return this.blockRenderMode() == BlockRenderMode.TESR 
                 ? new VirtualTileEntityTESR()
@@ -252,13 +252,13 @@ public class VirtualBlock extends SuperModelBlock
 //    }
     
     @Override
-    public PathNodeType getAiPathNodeType(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
+    public @Nullable PathNodeType getAiPathNodeType(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos)
     {
         return PathNodeType.OPEN;
     }
 
     @Override
-    public float[] getBeaconColorMultiplier(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull BlockPos beaconPos)
+    public @Nullable float[] getBeaconColorMultiplier(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull BlockPos beaconPos)
     {
         return null;
     }
@@ -276,7 +276,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
+    public @Nullable AxisAlignedBB getCollisionBoundingBox(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos)
     {
         return Block.NULL_AABB;
     }
@@ -294,7 +294,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public float getExplosionResistance(@Nonnull World world, @Nonnull BlockPos pos, Entity exploder, @Nonnull Explosion explosion)
+    public float getExplosionResistance(@Nonnull World world, @Nonnull BlockPos pos, @Nullable Entity exploder, @Nonnull Explosion explosion)
     {
         return 0;
     }
@@ -312,7 +312,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public String getHarvestTool(@Nonnull IBlockState state)
+    public @Nullable String getHarvestTool(@Nonnull IBlockState state)
     {
         return null;
     }
@@ -373,7 +373,7 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack stack)
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack)
     {
         // no drops!
     }

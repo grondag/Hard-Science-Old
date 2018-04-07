@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineStatusState;
@@ -15,11 +17,11 @@ public abstract class AbstractMachine extends AbstractDevice
     /**
      * If non-null will send notifications.
      */
-    public MachineTileEntity machineTE;
+    public @Nullable MachineTileEntity machineTE;
     
     public AbstractMachine()
     {
-        this.controlState.hasMaterialBuffer(this.getBufferManager() != null);
+        this.controlState.hasMaterialBuffer(this.getBufferManager().isReal());
         this.controlState.hasPowerSupply(!this.energyManager.isEmpty());
     }
     
@@ -161,7 +163,7 @@ public abstract class AbstractMachine extends AbstractDevice
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
         this.getControlState().deserializeNBT(tag);

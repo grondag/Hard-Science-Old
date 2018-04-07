@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.device;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.IDomainMember;
 import grondag.hard_science.simulator.resource.StorageType.StorageTypeFluid;
@@ -15,7 +17,7 @@ public interface IDeviceComponent extends IDomainMember
      * Shorthand for {@link #device()#getDomain()}
      */
     @Override
-    public default IDomain getDomain()
+    public default @Nullable IDomain getDomain()
     {
         return this.device().getDomain();
     }

@@ -62,9 +62,9 @@ public class DigesterRecipe
         }
     }
     
-    private static Set<Fluid> wrappedInputs;
+    private static @Nullable Set<Fluid> wrappedInputs;
     
-    public static Set<Fluid> allInputs()
+    public static @Nullable Set<Fluid> allInputs()
     {
         if(wrappedInputs == null)
         {
@@ -73,9 +73,9 @@ public class DigesterRecipe
         return wrappedInputs;
     }
     
-    private static Set<Fluid> wrappedOutputs;
+    private static @Nullable Set<Fluid> wrappedOutputs;
     
-    public static Set<Fluid> allOutputs()
+    public static @Nullable Set<Fluid> allOutputs()
     {
         if(wrappedOutputs == null)
         {

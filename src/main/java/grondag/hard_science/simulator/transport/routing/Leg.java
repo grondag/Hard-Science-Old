@@ -94,7 +94,7 @@ public abstract class Leg<T extends StorageType<T>>
         }
 
         @Override
-        public Carrier<T> inner()
+        public @Nullable Carrier<T> inner()
         {
             return null;
         }
@@ -151,7 +151,7 @@ public abstract class Leg<T extends StorageType<T>>
         }
 
         @Override
-        public Carrier<T> inner()
+        public @Nullable Carrier<T> inner()
         {
             return null;
         }
@@ -211,7 +211,7 @@ public abstract class Leg<T extends StorageType<T>>
 
         @Override
         @Nonnull 
-        public Carrier<T> inner()
+        public @Nullable Carrier<T> inner()
         {
             return this.inner;
         }

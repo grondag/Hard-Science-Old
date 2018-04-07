@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.impl.logistics;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.simulator.resource.ItemResource;
@@ -47,7 +49,7 @@ public abstract class SmartChestMachine extends AbstractSimpleMachine
     }
    
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
         this.itemStorage.deserializeNBT(tag);

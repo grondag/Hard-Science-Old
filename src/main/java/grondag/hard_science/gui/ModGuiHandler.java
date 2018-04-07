@@ -29,7 +29,7 @@ public class ModGuiHandler implements IGuiHandler
     }
     
     @Override
-    public Object getServerGuiElement(int id, @Nullable EntityPlayer player, @Nullable World world, int x, int y, int z) 
+    public @Nullable Object getServerGuiElement(int id, @Nullable EntityPlayer player, @Nullable World world, int x, int y, int z) 
     {
         if(id == ModGui.SMART_CHEST.ordinal())
         {
@@ -53,7 +53,7 @@ public class ModGuiHandler implements IGuiHandler
     }
 
     @Override
-    public Object getClientGuiElement(int id, @Nullable EntityPlayer player, @Nullable World world, int x, int y, int z) 
+    public @Nullable Object getClientGuiElement(int id, @Nullable EntityPlayer player, @Nullable World world, int x, int y, int z) 
     {
         if(id < ModGui.values().length)
         {

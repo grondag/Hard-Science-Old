@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
@@ -43,7 +44,7 @@ public class SmartChestBlock extends MachineContainerBlock
     }
 
     @Override
-    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta) 
+    public @Nullable TileEntity createNewTileEntity(@Nonnull World worldIn, int meta) 
     {
         return new MachineTileEntityTickable();
     }

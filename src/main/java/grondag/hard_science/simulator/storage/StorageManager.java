@@ -94,7 +94,7 @@ public class StorageManager<T extends StorageType<T>>
     }
 
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.domain;
     }

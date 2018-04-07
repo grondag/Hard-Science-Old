@@ -199,7 +199,7 @@ public abstract class StorageType<T extends StorageType<T>>
          * is what ItemResource serialization outputs.
          */
         @Override
-        public IResource<StorageTypeStack> fromNBT(NBTTagCompound nbt) 
+        public @Nullable IResource<StorageTypeStack> fromNBT(NBTTagCompound nbt) 
         {
             if(nbt == null) return this.emptyResource;
             
@@ -207,13 +207,13 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public NBTTagCompound toNBT(IResource<StorageTypeStack> resource)
+        public @Nullable NBTTagCompound toNBT(IResource<StorageTypeStack> resource)
         {
             return ((ItemResource)resource).sampleItemStack().serializeNBT();
         }
 
         @Override
-        public AbstractResourceWithQuantity<StorageTypeStack> fromNBTWithQty(NBTTagCompound nbt)
+        public @Nullable AbstractResourceWithQuantity<StorageTypeStack> fromNBTWithQty(NBTTagCompound nbt)
         {
             return new ItemResourceWithQuantity(nbt);
         }
@@ -250,7 +250,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeStack> fromBytes(PacketBuffer pBuff)
+        public @Nullable IResource<StorageTypeStack> fromBytes(PacketBuffer pBuff)
         {
             try
             {
@@ -283,7 +283,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeStack> fromCSV(String csv)
+        public @Nullable IResource<StorageTypeStack> fromCSV(String csv)
         {
             String[] args = csv.split(",");
             
@@ -327,21 +327,21 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeFluid> fromNBT(NBTTagCompound nbt)
+        public @Nullable IResource<StorageTypeFluid> fromNBT(NBTTagCompound nbt)
         {
             if(nbt == null) return this.emptyResource;
             return FluidResource.fromStack(FluidStack.loadFluidStackFromNBT(nbt));
         }
 
         @Override
-        public NBTTagCompound toNBT(IResource<StorageTypeFluid> resource)
+        public @Nullable NBTTagCompound toNBT(IResource<StorageTypeFluid> resource)
         {
             NBTTagCompound tag = new NBTTagCompound();
             return ((FluidResource)resource).sampleFluidStack().writeToNBT(tag);
         }
 
         @Override
-        public AbstractResourceWithQuantity<StorageTypeFluid> fromNBTWithQty(NBTTagCompound nbt)
+        public @Nullable AbstractResourceWithQuantity<StorageTypeFluid> fromNBTWithQty(NBTTagCompound nbt)
         {
             return new FluidResourceWithQuantity(nbt);
         }
@@ -378,7 +378,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeFluid> fromBytes(PacketBuffer pBuff)
+        public @Nullable IResource<StorageTypeFluid> fromBytes(PacketBuffer pBuff)
         {
             Fluid f = FluidRegistry.getFluid(pBuff.readString(256));
             return new FluidResource(f, null);
@@ -398,7 +398,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeFluid> fromCSV(String csv)
+        public @Nullable IResource<StorageTypeFluid> fromCSV(String csv)
         {
             Fluid fluid = FluidRegistry.getFluid(csv);
             return new FluidResource(fluid, null);
@@ -425,19 +425,19 @@ public abstract class StorageType<T extends StorageType<T>>
         }
         
         @Override
-        public IResource<StorageTypePower> fromNBT(NBTTagCompound nbt)
+        public @Nullable IResource<StorageTypePower> fromNBT(NBTTagCompound nbt)
         {
             return PowerResource.JOULES;
         }
 
         @Override
-        public NBTTagCompound toNBT(IResource<StorageTypePower> resource)
+        public @Nullable NBTTagCompound toNBT(IResource<StorageTypePower> resource)
         {
             return new NBTTagCompound();
         }
 
         @Override
-        public AbstractResourceWithQuantity<StorageTypePower> fromNBTWithQty(NBTTagCompound nbt)
+        public @Nullable AbstractResourceWithQuantity<StorageTypePower> fromNBTWithQty(NBTTagCompound nbt)
         {
             return new PowerResourceWithQuantity(nbt);
         }
@@ -474,7 +474,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypePower> fromBytes(PacketBuffer pBuff)
+        public @Nullable IResource<StorageTypePower> fromBytes(PacketBuffer pBuff)
         {
             return PowerResource.JOULES;
         }
@@ -492,7 +492,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypePower> fromCSV(String csv)
+        public @Nullable IResource<StorageTypePower> fromCSV(String csv)
         {
             return PowerResource.JOULES;
         }
@@ -518,7 +518,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
         
         @Override
-        public IResource<StorageTypeBulk> fromNBT(NBTTagCompound nbt)
+        public @Nullable IResource<StorageTypeBulk> fromNBT(NBTTagCompound nbt)
         {
             return nbt != null && nbt.hasKey(NBT_RESOURCE_IDENTITY)
 //                ? ModRegistries.bulkResourceRegistry.getValue(new ResourceLocation(nbt.getString(NBT_RESOURCE_IDENTITY)))
@@ -527,7 +527,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public NBTTagCompound toNBT(IResource<StorageTypeBulk> resource)
+        public @Nullable NBTTagCompound toNBT(IResource<StorageTypeBulk> resource)
         {
             NBTTagCompound result = new NBTTagCompound();
             result.setString(NBT_RESOURCE_IDENTITY, ((BulkResource)resource).systemName());
@@ -535,7 +535,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public AbstractResourceWithQuantity<StorageTypeBulk> fromNBTWithQty(NBTTagCompound nbt)
+        public @Nullable AbstractResourceWithQuantity<StorageTypeBulk> fromNBTWithQty(NBTTagCompound nbt)
         {
             return new BulkResourceWithQuantity(nbt);
         }
@@ -559,7 +559,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeBulk> fromBytes(PacketBuffer pBuff)
+        public @Nullable IResource<StorageTypeBulk> fromBytes(PacketBuffer pBuff)
         {
             return ModBulkResources.get(pBuff.readString(256));
         }
@@ -577,7 +577,7 @@ public abstract class StorageType<T extends StorageType<T>>
         }
 
         @Override
-        public IResource<StorageTypeBulk> fromCSV(String csv)
+        public @Nullable IResource<StorageTypeBulk> fromCSV(String csv)
         {
             return null;
         }

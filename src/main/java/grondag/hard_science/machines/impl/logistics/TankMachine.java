@@ -1,5 +1,7 @@
 package grondag.hard_science.machines.impl.logistics;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.machines.base.AbstractSimpleMachine;
 import grondag.hard_science.matter.VolumeUnits;
 import grondag.hard_science.simulator.resource.IResourcePredicate;
@@ -47,7 +49,7 @@ public abstract class TankMachine extends AbstractSimpleMachine
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
         this.fluidStorage.deserializeNBT(tag);

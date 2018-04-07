@@ -2,6 +2,8 @@ package grondag.hard_science.machines.impl.processing;
 
 import java.util.concurrent.Future;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.simulator.Simulator;
@@ -74,7 +76,7 @@ public class DigesterMachine extends AbstractSimpleMachine
     }
     
     @Override
-    protected BufferManager createBufferManager()
+    protected @Nullable BufferManager createBufferManager()
     {
         BufferManager result = new BufferManager(
                 this, 

@@ -266,7 +266,7 @@ public class Build implements IReadWriteNBT, IDomainMember, IIdentified
 
 
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.buildManager.getDomain();
     }

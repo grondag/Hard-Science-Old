@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.jobs;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.simulator.job.RequestPriority;
 import grondag.exotic_matter.simulator.job.RequestStatus;
 import net.minecraft.nbt.NBTTagCompound;
@@ -50,7 +52,7 @@ public class NullJob extends Job
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         // NOOP
     }

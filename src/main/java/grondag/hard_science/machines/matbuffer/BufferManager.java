@@ -27,10 +27,10 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
     private static final String NBT_BUFFER_FLUIDS_OUT = NBTDictionary.claim("buffFluidsOut");
     
     private final IDevice owner;
-    private final ItemContainer itemInput;
-    private final ItemContainer itemOutput;
-    private final FluidContainer fluidInput;
-    private final FluidContainer fluidOutput;
+    private final @Nullable ItemContainer itemInput;
+    private final @Nullable ItemContainer itemOutput;
+    private final @Nullable FluidContainer fluidInput;
+    private final @Nullable FluidContainer fluidOutput;
     
     public BufferManager(
             IDevice owner,
@@ -91,21 +91,25 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
         }
     }
 
+    @Nullable 
     public ItemContainer itemInput() 
     {
         return this.itemInput;
     }
     
+    @Nullable 
     public ItemContainer itemOutput()
     {
         return this.itemOutput;
     }
     
+    @Nullable 
     public FluidContainer fluidInput()
     {
         return this.fluidInput;
     }
     
+    @Nullable 
     public FluidContainer fluidOutput()
     {
         return this.fluidOutput;
@@ -174,9 +178,10 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
     }
 
     @Override
-    public ItemStack insertItem(int slot, @Nonnull @Nullable ItemStack stack, boolean simulate)
+    @Nullable
+    public ItemStack insertItem(int slot, @SuppressWarnings("null") @Nonnull ItemStack stack, boolean simulate)
     {
-        if(slot < inSlots())
+        if(this.itemInput != null && slot < inSlots())
         {
             return this.itemInput.insertItem(slot, stack, simulate);
         }
@@ -236,6 +241,7 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
         if(this.fluidOutput != null) this.fluidOutput.onDisconnect();
     }
 
+    @Nullable
     public FluidContainer bufferHDPE()
     {
         //TODO stub
@@ -246,5 +252,13 @@ public class BufferManager implements IReadWriteNBT, IItemHandler, IDeviceCompon
     public IDevice device()
     {
         return this.owner;
+    }
+
+    /**
+     * True if actually has buffers
+     */
+    public boolean isReal()
+    {
+        return this.itemInput != null || this.itemOutput != null || this.fluidInput != null || this.fluidInput != null;
     }
 }

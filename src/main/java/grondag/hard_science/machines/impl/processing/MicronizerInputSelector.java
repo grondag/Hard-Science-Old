@@ -232,7 +232,7 @@ public class MicronizerInputSelector implements IDomainMember
 
 
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.owner.getDomain();
     }

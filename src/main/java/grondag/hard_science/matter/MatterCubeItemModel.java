@@ -3,6 +3,7 @@ package grondag.hard_science.matter;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
@@ -147,7 +148,7 @@ public class MatterCubeItemModel implements IBakedModel
     }
 
     @Override
-    public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
+    public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
         return side == null ? quads : QuadHelper.EMPTY_QUAD_LIST;
     }
 

@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.simulator.device.IDevice;
@@ -101,6 +103,6 @@ public interface IPortLayout
     /**
      * Name of this underlying port layout (with no localization) in forge registry.  
      */
-    public ResourceLocation getRegistryName();
+    public @Nullable ResourceLocation getRegistryName();
 
 }

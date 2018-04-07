@@ -37,7 +37,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
         }
 
         @Override
-        public FluidStack getContents()
+        public @Nullable FluidStack getContents()
         {
             if(FluidContainer.this.usedCapacity() == 0) return null;
             
@@ -137,7 +137,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
     }
 
     @Override
-    public FluidStack drain(@Nullable FluidStack stack, boolean doDrain)
+    public @Nullable FluidStack drain(@Nullable FluidStack stack, boolean doDrain)
     {
         if(stack == null) return null;
         
@@ -167,7 +167,7 @@ public class FluidContainer extends ResourceContainer<StorageTypeFluid> implemen
     }
 
     @Override
-    public FluidStack drain(int maxDrain, boolean doDrain)
+    public @Nullable FluidStack drain(int maxDrain, boolean doDrain)
     {
         // if no stack offered, then use first stack in the storage
         if(this.slots.isEmpty()) return null;

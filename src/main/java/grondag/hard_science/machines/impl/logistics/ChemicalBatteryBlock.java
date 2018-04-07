@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.impl.logistics;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
@@ -29,7 +30,7 @@ public class ChemicalBatteryBlock extends MachineBlock
     }
     
     @Override
-    public TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
+    public @Nullable TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
         return new ChemicalBatteryTileEntity();
     }

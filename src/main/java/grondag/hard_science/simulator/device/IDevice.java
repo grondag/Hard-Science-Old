@@ -132,6 +132,7 @@ public interface IDevice extends
     /**
      * Implement if device has fluid storage.  Will be null if not.
      */
+    @Nullable 
     public default FluidContainer fluidStorage() {return null;}
     
     /**
@@ -142,6 +143,7 @@ public interface IDevice extends
     /**
      * Implement if device has item storage. Will be null if not.
      */
+    @Nullable 
     public default ItemContainer itemStorage() {return null;}
 
     /**
@@ -154,7 +156,6 @@ public interface IDevice extends
     /** 
      * If this tile has a material buffer, gives access.  Null if not.
      */
-    @Nullable
     BufferManager getBufferManager();
     
     /**

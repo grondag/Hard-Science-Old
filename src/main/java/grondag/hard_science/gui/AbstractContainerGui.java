@@ -2,6 +2,8 @@ package grondag.hard_science.gui;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.gui.control.GuiControl;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
@@ -24,9 +26,9 @@ public abstract class AbstractContainerGui<T extends MachineTileEntity> extends 
     public static final ContainerLayout LAYOUT;
     
     
-    protected Panel mainPanel;
+    protected @Nullable Panel mainPanel;
     protected final T te;
-    protected GuiControl<?> hoverControl;
+    protected @Nullable GuiControl<?> hoverControl;
     
     static
     {

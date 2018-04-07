@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.Transform;
 import grondag.exotic_matter.model.Transform.FaceMap;
@@ -121,6 +123,7 @@ public class PortLayout extends IForgeRegistryEntry.Impl<PortLayout> implements 
         }
 
         @Override
+        @Nullable
         public ResourceLocation getRegistryName()
         {
             return PortLayout.this.getRegistryName();

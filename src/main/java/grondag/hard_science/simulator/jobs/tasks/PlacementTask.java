@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.jobs.tasks;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.simulator.jobs.AbstractTask;
@@ -47,7 +48,7 @@ public class PlacementTask extends AbstractTask
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag)
+    public void deserializeNBT(@Nullable NBTTagCompound tag)
     {
         super.deserializeNBT(tag);
         this.procurementTaskID = tag.getInteger(NBT_PROCUREMENT_TASK_ID);

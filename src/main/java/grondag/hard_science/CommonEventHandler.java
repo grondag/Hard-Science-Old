@@ -1,8 +1,6 @@
 package grondag.hard_science;
 
 import grondag.exotic_matter.placement.IPlacementItem;
-import grondag.exotic_matter.simulator.Simulator;
-import grondag.exotic_matter.simulator.WorldTaskManager;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.hard_science.simulator.jobs.JobManager;

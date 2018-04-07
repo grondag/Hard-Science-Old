@@ -49,7 +49,7 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         if(this.domain == null && this.domainID != IIdentified.UNASSIGNED_ID)
         {
@@ -59,13 +59,13 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public Location getLocation()
+    public @Nullable Location getLocation()
     {
         return this.location;
     }
 
     @Override
-    public void setLocation(Location loc)
+    public void setLocation(@Nullable Location loc)
     {
         this.location = loc;
         this.setDirty();
@@ -95,14 +95,14 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public long onProduce(IResource<?> resource, long quantity, boolean simulate, NewProcurementTask<?> request)
+    public long onProduce(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public long onConsume(IResource<?> resource, long quantity, boolean simulate, NewProcurementTask<?> request)
+    public long onConsume(IResource<?> resource, long quantity, boolean simulate, @Nullable NewProcurementTask<?> request)
     {
         // TODO Auto-generated method stub
         return 0;
@@ -115,7 +115,7 @@ public class Drone implements IDevice, IReadWriteNBT
     }
 
     @Override
-    public BufferManager getBufferManager()
+    public @Nullable BufferManager getBufferManager()
     {
         // TODO Auto-generated method stub
         return null;

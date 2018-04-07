@@ -17,7 +17,7 @@ public class TransientTaskContainer implements ITaskContainer, IDomainCapability
     private IDomain domain;
 
     @Override
-    public IDomain getDomain()
+    public @Nullable IDomain getDomain()
     {
         return this.domain;
     }
