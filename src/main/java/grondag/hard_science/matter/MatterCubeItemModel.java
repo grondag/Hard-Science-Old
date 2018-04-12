@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableMap;
 
 import grondag.exotic_matter.render.QuadBakery;
 import grondag.exotic_matter.render.QuadHelper;
-import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Poly;
 import grondag.hard_science.HardScience;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -108,7 +108,7 @@ public class MatterCubeItemModel implements IBakedModel
         }
         
         // add size symbol
-        for(RawQuad raw : matterCube.cubeSize.rawQuads())
+        for(Poly raw : matterCube.cubeSize.rawQuads())
         {
             builder.add(QuadBakery.createBakedQuad(raw, true));
         }

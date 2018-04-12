@@ -12,7 +12,7 @@ import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
 import grondag.exotic_matter.render.CSGShape;
 import grondag.exotic_matter.render.QuadHelper;
-import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
@@ -54,17 +54,17 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<RawQuad> getShapeQuads(ISuperModelState modelState)
+    public List<Poly> getShapeQuads(ISuperModelState modelState)
     {
 
-        RawQuad template = new RawQuad();
+        Poly template = new Poly();
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setFullBrightness(false);
         template.setLockUV(true);
         template.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
 
-        ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
+        ImmutableList.Builder<Poly> builder = new ImmutableList.Builder<Poly>();
         
         SimpleJoin join = modelState.getSimpleJoin();
         
@@ -98,7 +98,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         return builder.build();
     }
    
-    private CSGShape makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull RawQuad template)
+    private CSGShape makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull Poly template)
     {
         if(join.isJoined(face))
         {
@@ -114,7 +114,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
     }
     
-    private List<RawQuad> makeBox(@Nonnull EnumFacing face, @Nonnull RawQuad template, boolean isBothEnds)
+    private List<Poly> makeBox(@Nonnull EnumFacing face, @Nonnull Poly template, boolean isBothEnds)
     {
         AxisAlignedBB aabb;
         

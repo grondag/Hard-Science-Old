@@ -11,7 +11,7 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
-import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
 import net.minecraft.block.state.IBlockState;
@@ -26,10 +26,10 @@ import net.minecraft.world.World;
 public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
 {
     /** never changes so may as well save it */
-    private final List<RawQuad> cubeQuads0;
-    private final List<RawQuad> cubeQuads90;
-    private final List<RawQuad> cubeQuads180;
-    private final List<RawQuad> cubeQuads270;
+    private final List<Poly> cubeQuads0;
+    private final List<Poly> cubeQuads90;
+    private final List<Poly> cubeQuads180;
+    private final List<Poly> cubeQuads270;
     
     private final boolean hasFront;
     
@@ -62,7 +62,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<RawQuad> getShapeQuads(ISuperModelState modelState)
+    public List<Poly> getShapeQuads(ISuperModelState modelState)
     {
         if(this.hasFront)
         {
@@ -83,7 +83,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         else return this.cubeQuads0;
     }
    
-    private List<RawQuad> getCubeQuads(Rotation rotation)
+    private List<Poly> getCubeQuads(Rotation rotation)
     {
         CubeInputs result = new CubeInputs();
         result.color = 0xFFFFFFFF;
@@ -95,7 +95,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         result.v1 = 16;
         result.isOverlay = false;
         
-        RawQuad template = new RawQuad();
+        Poly template = new Poly();
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setFullBrightness(false);
@@ -104,7 +104,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         template.setMaxU(16);
         template.setMaxV(16);
         
-        ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
+        ImmutableList.Builder<Poly> builder = new ImmutableList.Builder<Poly>();
        
         for(EnumFacing face : EnumFacing.VALUES)
         {

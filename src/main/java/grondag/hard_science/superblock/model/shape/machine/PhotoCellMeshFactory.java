@@ -8,7 +8,7 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
-import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
 import net.minecraft.block.state.IBlockState;
@@ -39,17 +39,17 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<RawQuad> getShapeQuads(ISuperModelState modelState)
+    public List<Poly> getShapeQuads(ISuperModelState modelState)
     {
-        RawQuad template = new RawQuad();
+        Poly template = new Poly();
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setFullBrightness(false);
         template.setLockUV(true);
 
-        ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
+        ImmutableList.Builder<Poly> builder = new ImmutableList.Builder<Poly>();
         
-        RawQuad quad = template.clone();
+        Poly quad = template.clone();
         quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 1 - height, EnumFacing.NORTH);

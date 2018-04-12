@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.exotic_matter.font.FontHolder;
 import grondag.exotic_matter.render.QuadBakery;
 import grondag.exotic_matter.render.QuadHelper;
-import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.world.Rotation;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 
@@ -15,15 +15,15 @@ public abstract class MatterModel
 {
     public void addBakedQuads(ImmutableList.Builder<BakedQuad> builder)
     {
-        ArrayList<RawQuad> quads = new ArrayList<RawQuad>();
+        ArrayList<Poly> quads = new ArrayList<Poly>();
         this.addRawQuads(quads);
-        for(RawQuad raw : quads)
+        for(Poly raw : quads)
         {
             builder.add(QuadBakery.createBakedQuad(raw, true));
         }
     }
     
-    protected abstract void addRawQuads(ArrayList<RawQuad> quadList);
+    protected abstract void addRawQuads(ArrayList<Poly> quadList);
     
     private abstract static class TexColor extends MatterModel
     {
@@ -49,7 +49,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
         }
@@ -65,7 +65,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
         }
@@ -79,7 +79,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1.0/16.0, Rotation.ROTATE_NONE, quadList);            
         }
@@ -93,7 +93,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1.0/16.0, Rotation.ROTATE_NONE, quadList);            
         }
@@ -107,7 +107,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
@@ -121,7 +121,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.48f, 0.98f, 0.46f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
@@ -137,7 +137,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.50f, 0.96f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
@@ -155,7 +155,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, this.rotation, quadList);
         }
@@ -169,7 +169,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbolString, 0.02f, 0.58f, 0.29f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
@@ -192,7 +192,7 @@ public abstract class MatterModel
         }
         
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             QuadHelper.addTextureToAllFaces(this.symbol0, 0.0f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
             QuadHelper.addTextureToAllFaces(this.symbol1, 0.40f, 0.96f, 0.20f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
@@ -211,7 +211,7 @@ public abstract class MatterModel
         }
 
         @Override
-        public void addRawQuads(ArrayList<RawQuad> quadList)
+        public void addRawQuads(ArrayList<Poly> quadList)
         {
             FontHolder.FONT_RENDERER_SMALL.formulaBlockQuadsToList(this.symbolString, true, this.color, 1.025f, this.leftJustify, quadList);
         }

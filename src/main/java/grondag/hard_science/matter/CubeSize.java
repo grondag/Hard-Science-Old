@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.render.QuadHelper;
-import grondag.exotic_matter.render.RawQuad;
+import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.varia.Color;
 import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.Rotation;
@@ -86,14 +86,14 @@ public enum CubeSize
     }
     
     @SideOnly(Side.CLIENT)
-    private List<RawQuad> quads;
+    private List<Poly> quads;
 
     @SideOnly(Side.CLIENT)
-    public List<RawQuad> rawQuads()
+    public List<Poly> rawQuads()
     {
         if(this.quads == null)
         {
-            ArrayList<RawQuad> quadList = new ArrayList<RawQuad>();
+            ArrayList<Poly> quadList = new ArrayList<Poly>();
             
             QuadHelper.addTextureToAllFaces(this.symbolTexture, 0.02f, 0.26f, 0.24f, 1.025f, this.symbolColor, true, Rotation.ROTATE_NONE, quadList);
             
