@@ -42,31 +42,31 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     public List<RawQuad> getShapeQuads(ISuperModelState modelState)
     {
         RawQuad template = new RawQuad();
-        template.color = 0xFFFFFFFF;
-        template.rotation = Rotation.ROTATE_NONE;
-        template.isFullBrightness = false;
-        template.lockUV = true;
+        template.setColor(0xFFFFFFFF);
+        template.setRotation(Rotation.ROTATE_NONE);
+        template.setFullBrightness(false);
+        template.setLockUV(true);
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
         
         RawQuad quad = template.clone();
-        quad.surfaceInstance = MachineMeshFactory.INSTANCE_MAIN;
-        quad.setFace(EnumFacing.UP);
+        quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
+        quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 1 - height, EnumFacing.NORTH);
         builder.add(quad);
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
             quad = template.clone();
-            quad.surfaceInstance = MachineMeshFactory.INSTANCE_LAMP;
-            quad.setFace(face);
+            quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
+            quad.setNominalFace(face);
             quad.setupFaceQuad( 0.0, 0.0, 1.0, height, 0.0, EnumFacing.UP);
             builder.add(quad);
         }
         
         quad = template.clone();
-        quad.surfaceInstance = MachineMeshFactory.INSTANCE_LAMP;
-        quad.setFace(EnumFacing.DOWN);
+        quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
+        quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
         builder.add(quad);
         

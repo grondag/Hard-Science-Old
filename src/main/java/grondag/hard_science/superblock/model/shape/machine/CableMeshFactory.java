@@ -58,11 +58,11 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     {
 
         RawQuad template = new RawQuad();
-        template.color = 0xFFFFFFFF;
-        template.rotation = Rotation.ROTATE_NONE;
-        template.isFullBrightness = false;
-        template.lockUV = true;
-        template.surfaceInstance = MachineMeshFactory.INSTANCE_MAIN;
+        template.setColor(0xFFFFFFFF);
+        template.setRotation(Rotation.ROTATE_NONE);
+        template.setFullBrightness(false);
+        template.setLockUV(true);
+        template.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
         

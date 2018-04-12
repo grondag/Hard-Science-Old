@@ -96,13 +96,13 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         result.isOverlay = false;
         
         RawQuad template = new RawQuad();
-        template.color = 0xFFFFFFFF;
-        template.rotation = Rotation.ROTATE_NONE;
-        template.isFullBrightness = false;
-        template.minU = 0;
-        template.minV = 0;
-        template.maxU = 16;
-        template.maxV = 16;
+        template.setColor(0xFFFFFFFF);
+        template.setRotation(Rotation.ROTATE_NONE);
+        template.setFullBrightness(false);
+        template.setMinU(0);
+        template.setMinV(0);
+        template.setMaxU(16);
+        template.setMaxV(16);
         
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
        
