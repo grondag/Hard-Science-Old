@@ -10,7 +10,7 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
-import grondag.exotic_matter.render.CSGShape;
+import grondag.exotic_matter.render.CSGMesh;
 import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
@@ -68,9 +68,9 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         
         SimpleJoin join = modelState.getSimpleJoin();
         
-        CSGShape shape = makeAxis(join, EnumFacing.NORTH, template);
+        CSGMesh shape = makeAxis(join, EnumFacing.NORTH, template);
         
-        CSGShape box = makeAxis(join, EnumFacing.EAST, template);
+        CSGMesh box = makeAxis(join, EnumFacing.EAST, template);
         
         if(box != null)
         {
@@ -98,15 +98,15 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         return builder.build();
     }
    
-    private CSGShape makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull Poly template)
+    private CSGMesh makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull Poly template)
     {
         if(join.isJoined(face))
         {
-            return new CSGShape(makeBox(face, template, join.isJoined(face.getOpposite())));
+            return new CSGMesh(makeBox(face, template, join.isJoined(face.getOpposite())));
         }
         else if(join.isJoined(face.getOpposite()))
         {
-            return new CSGShape(makeBox(face.getOpposite(), template, false));
+            return new CSGMesh(makeBox(face.getOpposite(), template, false));
         }
         else
         {
