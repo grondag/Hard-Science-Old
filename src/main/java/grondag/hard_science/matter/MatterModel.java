@@ -81,7 +81,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<Poly> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1.0/16.0, Rotation.ROTATE_NONE, quadList);            
+            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
         }
     }
 
@@ -95,7 +95,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<Poly> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1.0/16.0, Rotation.ROTATE_NONE, quadList);            
+            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
         }
     }
     

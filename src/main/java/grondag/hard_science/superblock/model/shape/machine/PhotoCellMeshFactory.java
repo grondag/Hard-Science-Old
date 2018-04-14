@@ -52,7 +52,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
         Poly quad = template.clone();
         quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
-        quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 1 - height, EnumFacing.NORTH);
+        quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
         builder.add(quad);
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
@@ -60,14 +60,14 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
             quad = template.clone();
             quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
             quad.setNominalFace(face);
-            quad.setupFaceQuad( 0.0, 0.0, 1.0, height, 0.0, EnumFacing.UP);
+            quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
             builder.add(quad);
         }
         
         quad = template.clone();
         quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
-        quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
+        quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);
         builder.add(quad);
         
         return builder.build();
