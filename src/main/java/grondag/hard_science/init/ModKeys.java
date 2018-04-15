@@ -8,6 +8,7 @@ import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
+@SuppressWarnings("null")
 public class ModKeys
 {
     public static KeyBinding PLACEMENT_HISTORY_FORWARD;

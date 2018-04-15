@@ -8,6 +8,7 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
+import grondag.exotic_matter.render.IPolygon;
 import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
@@ -39,7 +40,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<Poly> getShapeQuads(ISuperModelState modelState)
+    public List<IPolygon> getShapeQuads(ISuperModelState modelState)
     {
         Poly template = new Poly();
         template.setColor(0xFFFFFFFF);
@@ -47,7 +48,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
         template.setFullBrightness(false);
         template.setLockUV(true);
 
-        ImmutableList.Builder<Poly> builder = new ImmutableList.Builder<Poly>();
+        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
         
         Poly quad = template.clone();
         quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);

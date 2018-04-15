@@ -12,6 +12,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber
 @ObjectHolder(HardScience.MODID)
+@SuppressWarnings("null")
 public class ModItems
 {
     public static final Item smart_chest = null;

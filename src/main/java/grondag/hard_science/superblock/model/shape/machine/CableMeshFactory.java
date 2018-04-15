@@ -11,8 +11,9 @@ import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
 import grondag.exotic_matter.render.CSGMesh;
-import grondag.exotic_matter.render.QuadHelper;
+import grondag.exotic_matter.render.IPolygon;
 import grondag.exotic_matter.render.Poly;
+import grondag.exotic_matter.render.QuadHelper;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.SimpleJoin;
@@ -54,7 +55,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<Poly> getShapeQuads(ISuperModelState modelState)
+    public List<IPolygon> getShapeQuads(ISuperModelState modelState)
     {
 
         Poly template = new Poly();
@@ -64,7 +65,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         template.setLockUV(true);
         template.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
 
-        ImmutableList.Builder<Poly> builder = new ImmutableList.Builder<Poly>();
+        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
         
         SimpleJoin join = modelState.getSimpleJoin();
         

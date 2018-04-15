@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
 @Mod.EventBusSubscriber
 @ObjectHolder(HardScience.MODID)
+@SuppressWarnings("null")
 public class ModPortLayouts
 {
     

@@ -11,6 +11,7 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
+import grondag.exotic_matter.render.IPolygon;
 import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
 import grondag.exotic_matter.world.Rotation;
@@ -26,10 +27,10 @@ import net.minecraft.world.World;
 public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
 {
     /** never changes so may as well save it */
-    private final List<Poly> cubeQuads0;
-    private final List<Poly> cubeQuads90;
-    private final List<Poly> cubeQuads180;
-    private final List<Poly> cubeQuads270;
+    private final List<IPolygon> cubeQuads0;
+    private final List<IPolygon> cubeQuads90;
+    private final List<IPolygon> cubeQuads180;
+    private final List<IPolygon> cubeQuads270;
     
     private final boolean hasFront;
     
@@ -62,7 +63,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<Poly> getShapeQuads(ISuperModelState modelState)
+    public List<IPolygon> getShapeQuads(ISuperModelState modelState)
     {
         if(this.hasFront)
         {
@@ -83,7 +84,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         else return this.cubeQuads0;
     }
    
-    private List<Poly> getCubeQuads(Rotation rotation)
+    private List<IPolygon> getCubeQuads(Rotation rotation)
     {
         CubeInputs result = new CubeInputs();
         result.color = 0xFFFFFFFF;
@@ -104,7 +105,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         template.setMaxU(16);
         template.setMaxV(16);
         
-        ImmutableList.Builder<Poly> builder = new ImmutableList.Builder<Poly>();
+        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
        
         for(EnumFacing face : EnumFacing.VALUES)
         {

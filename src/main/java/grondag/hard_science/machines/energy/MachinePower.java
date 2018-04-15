@@ -2,8 +2,6 @@ package grondag.hard_science.machines.energy;
 
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 import grondag.exotic_matter.varia.TimeUnits;
 import grondag.exotic_matter.world.Location;
 import grondag.hard_science.matter.VolumeUnits;
@@ -213,216 +211,218 @@ public class MachinePower
         return watts * TimeUnits.SIMULATED_SECONDS_PER_TICK;
     }
     
+    @SuppressWarnings("null") 
     private static final Function<?, ?> FORMAT_JOULES[] = 
     {
             // 0 digits- should never get
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t + "J"; }},
+            public String apply(String t) { return t + "J"; }},
             
             // 1 digit
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t + "J"; }},
+            public String apply(String t) { return t + "J"; }},
             
             // 2  digits
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t + "J"; }},
+            public String apply(String t) { return t + "J"; }},
             
             // 3  digits
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t + "J"; }},
+            public String apply(String t) { return t + "J"; }},
             
             // 4  digits - kJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "kJ"); }},
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "kJ"); }},
             
             // 5  digits - kJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "kJ"); }},
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "kJ"); }},
             
             // 6  digits - kJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t.substring(0, 3) + "kJ"; }},
+            public String apply(String t) { return t.substring(0, 3) + "kJ"; }},
             
             // 7  digits - MJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "MJ"); }},
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "MJ"); }},
             
             // 8  digits - MJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "MJ"); }},
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "MJ"); }},
             
             // 9  digits - MJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t.substring(0, 3) + "MJ"; }},
+            public String apply(String t) { return t.substring(0, 3) + "MJ"; }},
             
             // 10  digits - GJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "GJ"); }},
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "GJ"); }},
             
             // 11  digits - GJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "GJ"); }},
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "GJ"); }},
             
             // 12  digits - GJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t.substring(0, 3) + "GJ"; }},
+            public String apply(String t) { return t.substring(0, 3) + "GJ"; }},
             
             // 13  digits - TJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "TJ"); }},
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "TJ"); }},
             
             // 14  digits - TJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "TJ"); }},
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "TJ"); }},
             
             // 15  digits - TJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t.substring(0, 3) + "TJ"; }},
+            public String apply(String t) { return t.substring(0, 3) + "TJ"; }},
 
             // 16  digits - PJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "PJ"); }},
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "PJ"); }},
             
             // 17  digits - PJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "PJ"); }},
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "PJ"); }},
             
             // 18  digits - PJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t.substring(0, 3) + "PJ"; }},
+            public String apply(String t) { return t.substring(0, 3) + "PJ"; }},
 
             // 19  digits - EJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "EJ"); }},
+            public String apply(String t) { return insertDecimal1_2Suffix(t, "EJ"); }},
             
             // 20  digits - EJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "EJ"); }},
+            public String apply(String t) { return insertDecimal2_1Suffix(t, "EJ"); }},
             
             // 21  digits - EJ
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return t.substring(0, 3) + "EJ"; }},
+            public String apply(String t) { return t.substring(0, 3) + "EJ"; }},
             
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return "WOW"; }},
+            public String apply(String t) { return "WOW"; }},
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return "WOW"; }},
+            public String apply(String t) { return "WOW"; }},
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return "WOW"; }},
+            public String apply(String t) { return "WOW"; }},
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return "WOW"; }},
+            public String apply(String t) { return "WOW"; }},
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return "WOW"; }},
+            public String apply(String t) { return "WOW"; }},
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return "WOW"; }},
+            public String apply(String t) { return "WOW"; }},
             new Function<String, String>() { @Override
-            public String apply(@Nullable String t) { return "WOW"; }}
+            public String apply(String t) { return "WOW"; }}
     };
     
+    @SuppressWarnings("null") 
     private static final Function<?, ?> FORMAT_WATTS[] = 
         {
                 // 0 digits- should never get
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t + "W"; }},
+                public String apply(String t) { return t + "W"; }},
                 
                 // 1 digit
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t + "W"; }},
+                public String apply(String t) { return t + "W"; }},
                 
                 // 2  digits
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t + "W"; }},
+                public String apply(String t) { return t + "W"; }},
                 
                 // 3  digits
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t + "W"; }},
+                public String apply(String t) { return t + "W"; }},
                 
                 // 4  digits - kJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "kW"); }},
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "kW"); }},
                 
                 // 5  digits - kJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "kW"); }},
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "kW"); }},
                 
                 // 6  digits - kJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t.substring(0, 3) + "kW"; }},
+                public String apply(String t) { return t.substring(0, 3) + "kW"; }},
                 
                 // 7  digits - MJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "MW"); }},
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "MW"); }},
                 
                 // 8  digits - MJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "MW"); }},
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "MW"); }},
                 
                 // 9  digits - MJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t.substring(0, 3) + "MW"; }},
+                public String apply(String t) { return t.substring(0, 3) + "MW"; }},
                 
                 // 10  digits - GJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "GW"); }},
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "GW"); }},
                 
                 // 11  digits - GJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "GW"); }},
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "GW"); }},
                 
                 // 12  digits - GJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t.substring(0, 3) + "GW"; }},
+                public String apply(String t) { return t.substring(0, 3) + "GW"; }},
                 
                 // 13  digits - TJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "TW"); }},
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "TW"); }},
                 
                 // 14  digits - TJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "TW"); }},
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "TW"); }},
                 
                 // 15  digits - TJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t.substring(0, 3) + "TW"; }},
+                public String apply(String t) { return t.substring(0, 3) + "TW"; }},
 
                 // 16  digits - PJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "PW"); }},
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "PW"); }},
                 
                 // 17  digits - PJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "PW"); }},
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "PW"); }},
                 
                 // 18  digits - PJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t.substring(0, 3) + "PW"; }},
+                public String apply(String t) { return t.substring(0, 3) + "PW"; }},
 
                 // 19  digits - EJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal1_2Suffix(t, "EW"); }},
+                public String apply(String t) { return insertDecimal1_2Suffix(t, "EW"); }},
                 
                 // 20  digits - EJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return insertDecimal2_1Suffix(t, "EW"); }},
+                public String apply(String t) { return insertDecimal2_1Suffix(t, "EW"); }},
                 
                 // 21  digits - EJ
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return t.substring(0, 3) + "EW"; }},
+                public String apply(String t) { return t.substring(0, 3) + "EW"; }},
                 
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return "WOW"; }},
+                public String apply(String t) { return "WOW"; }},
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return "WOW"; }},
+                public String apply(String t) { return "WOW"; }},
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return "WOW"; }},
+                public String apply(String t) { return "WOW"; }},
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return "WOW"; }},
+                public String apply(String t) { return "WOW"; }},
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return "WOW"; }},
+                public String apply(String t) { return "WOW"; }},
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return "WOW"; }},
+                public String apply(String t) { return "WOW"; }},
                 new Function<String, String>() { @Override
-                public String apply(@Nullable String t) { return "WOW"; }}
+                public String apply(String t) { return "WOW"; }}
         };
     
     public static String insertDecimal1_2Suffix(String inString, String withSuffix)
@@ -435,7 +435,7 @@ public class MachinePower
         return inString.substring(0, 2) + "." + inString.substring(2, 3) + withSuffix;
     }
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     public static String formatEnergy(long joules, boolean includePositiveSign)
     {
         if(joules == 0) return "0J";
@@ -454,7 +454,7 @@ public class MachinePower
         }
     }
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     public static String formatPower(long watts, boolean includePositiveSign)
     {
         if(watts == 0) return "0W";
