@@ -11,6 +11,7 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
+import grondag.exotic_matter.render.IMutablePolygon;
 import grondag.exotic_matter.render.IPolygon;
 import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
@@ -96,7 +97,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         result.v1 = 16;
         result.isOverlay = false;
         
-        Poly template = new Poly();
+        IMutablePolygon template = Poly.mutable(4);
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setFullBrightness(false);

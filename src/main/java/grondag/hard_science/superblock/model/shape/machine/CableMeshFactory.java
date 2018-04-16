@@ -11,6 +11,7 @@ import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
 import grondag.exotic_matter.render.CSGMesh;
+import grondag.exotic_matter.render.IMutablePolygon;
 import grondag.exotic_matter.render.IPolygon;
 import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.QuadHelper;
@@ -57,15 +58,14 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     @Override
     public List<IPolygon> getShapeQuads(ISuperModelState modelState)
     {
-
-        Poly template = new Poly();
+        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
+        
+        IMutablePolygon template = Poly.mutable(4);
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setFullBrightness(false);
         template.setLockUV(true);
         template.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
-
-        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
         
         SimpleJoin join = modelState.getSimpleJoin();
         
@@ -99,7 +99,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         return builder.build();
     }
    
-    private CSGMesh makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull Poly template)
+    private CSGMesh makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull IPolygon template)
     {
         if(join.isJoined(face))
         {
@@ -115,7 +115,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
     }
     
-    private List<Poly> makeBox(@Nonnull EnumFacing face, @Nonnull Poly template, boolean isBothEnds)
+    private List<IPolygon> makeBox(@Nonnull EnumFacing face, @Nonnull IPolygon template, boolean isBothEnds)
     {
         AxisAlignedBB aabb;
         

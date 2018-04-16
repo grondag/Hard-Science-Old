@@ -8,6 +8,7 @@ import grondag.exotic_matter.model.ICollisionHandler;
 import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.model.ModelStateData;
+import grondag.exotic_matter.render.IMutablePolygon;
 import grondag.exotic_matter.render.IPolygon;
 import grondag.exotic_matter.render.Poly;
 import grondag.exotic_matter.render.SideShape;
@@ -42,7 +43,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     @Override
     public List<IPolygon> getShapeQuads(ISuperModelState modelState)
     {
-        Poly template = new Poly();
+        IMutablePolygon template = Poly.mutable(4);
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setFullBrightness(false);
@@ -50,7 +51,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
 
         ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
         
-        Poly quad = template.clone();
+        IMutablePolygon quad = Poly.mutableCopyOf(template);
         quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
@@ -58,14 +59,14 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
-            quad = template.clone();
+            quad = Poly.mutableCopyOf(template);
             quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
             quad.setNominalFace(face);
             quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
             builder.add(quad);
         }
         
-        quad = template.clone();
+        quad = Poly.mutableCopyOf(template);
         quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);
