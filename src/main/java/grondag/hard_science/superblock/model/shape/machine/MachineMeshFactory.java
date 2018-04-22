@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
+import java.util.Collection;
 import java.util.List;
 
 import grondag.exotic_matter.model.ICollisionHandler;
@@ -74,7 +75,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     }
     
     @Override
-    public List<IPolygon> getShapeQuads(ISuperModelState modelState)
+    public Collection<IPolygon> getShapeQuads(ISuperModelState modelState)
     {
         return HANDLERS[getMachineShape(modelState).ordinal()].getShapeQuads(modelState);
     }

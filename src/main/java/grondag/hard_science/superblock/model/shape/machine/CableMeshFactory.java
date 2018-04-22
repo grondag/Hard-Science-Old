@@ -1,8 +1,10 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
@@ -69,20 +71,20 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         
         SimpleJoin join = modelState.getSimpleJoin();
         
-        CSGMesh shape = makeAxis(join, EnumFacing.NORTH, template);
+        Collection<IPolygon> shape = makeAxis(join, EnumFacing.NORTH, template);
         
-        CSGMesh box = makeAxis(join, EnumFacing.EAST, template);
+        Collection<IPolygon> box = makeAxis(join, EnumFacing.EAST, template);
         
         if(box != null)
         {
-            shape = shape == null ? box : shape.union(box);
+            shape = shape == null ? box : CSGMesh.union(shape, box);
         }
         
         box = makeAxis(join, EnumFacing.UP, template);
         
         if(box != null)
         {
-            shape = shape == null ? box : shape.union(box);
+            shape = shape == null ? box : CSGMesh.union(shape, box);
         }
         
         if(shape == null)
@@ -99,15 +101,15 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         return builder.build();
     }
    
-    private CSGMesh makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull IPolygon template)
+    private @Nullable Collection<IPolygon> makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull IPolygon template)
     {
         if(join.isJoined(face))
         {
-            return new CSGMesh(makeBox(face, template, join.isJoined(face.getOpposite())));
+            return makeBox(face, template, join.isJoined(face.getOpposite()));
         }
         else if(join.isJoined(face.getOpposite()))
         {
-            return new CSGMesh(makeBox(face.getOpposite(), template, false));
+            return makeBox(face.getOpposite(), template, false);
         }
         else
         {
