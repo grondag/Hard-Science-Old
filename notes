@@ -1,3 +1,624 @@
+Things to do
+ Make drop consider larger neighborhood of blocks
+ Make new model multi-threaded
+ Is stepping 5X sufficient?
+ Any additional ways to shortcut connection processing?
+ Make connection deletion faster / do it less / do it when needed
+ Packed block pos still make sense?
+ Packed chunk pos still make sense?
+ Look for places where referencing world state when should instead check cell state
+ Measure / throttle volcano node tick time consumption
+ Eject Lava Blobs
+ Improve push blocks - including: fill in caverns below surface before mounding
+ Implement find weakness
+ Implement explode
+ Confirm retention for non-flow surface isn't degraded by smoothing (and if is, exclude from smoothing)
+ Lava Sounds
+ Volcano Sounds
+ Detection Item
+ Code review / clean up of all volcano code - lots of leftovers
+ Clean up Polygon stuff from before
+ Performance tuning of lava
+ Biome
+ Haze
+ Smoke
+ Ash
+ Remove TE when all code is migrated
+
+
+
+split quad 250-350 with outliers 220 - 450
+
+[08:11:59] [Chunk Batcher 2/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 135762 ns, total duration = 1357, total runs = 10000
+[08:12:01] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitQuad duration = 231 ns, total duration = 231, total runs = 1000000
+[08:12:01] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 945 ns, total duration = 114, total runs = 120973
+[08:12:03] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 185 ns, total duration = 185, total runs = 1000000
+[08:12:03] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 535 ns, total duration = 66, total runs = 123983
+[08:12:06] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 194 ns, total duration = 194, total runs = 1000000
+[08:12:06] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 558 ns, total duration = 71, total runs = 127083
+[08:12:07] [Chunk Batcher 6/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 127458 ns, total duration = 1274, total runs = 10000
+[08:12:09] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 270 ns, total duration = 270, total runs = 1000000
+[08:12:09] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1116 ns, total duration = 140, total runs = 126199
+[08:12:10] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 342 ns, total duration = 342, total runs = 1000000
+[08:12:10] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 914 ns, total duration = 112, total runs = 123007
+[08:12:11] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 270 ns, total duration = 270, total runs = 1000000
+[08:12:11] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 804 ns, total duration = 95, total runs = 118333
+[08:12:11] [Chunk Batcher 7/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 227756 ns, total duration = 2277, total runs = 10000
+[08:12:12] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 287 ns, total duration = 287, total runs = 1000000
+[08:12:12] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 868 ns, total duration = 104, total runs = 119953
+[08:12:13] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitQuad duration = 281 ns, total duration = 281, total runs = 1000000
+[08:12:13] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 910 ns, total duration = 108, total runs = 118916
+
+[08:16:48] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitQuad duration = 406 ns, total duration = 406, total runs = 1000000
+[08:16:48] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1621 ns, total duration = 191, total runs = 118040
+[08:16:49] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitQuad duration = 390 ns, total duration = 390, total runs = 1000000
+[08:16:49] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1083 ns, total duration = 106, total runs = 97916
+[08:16:49] [Chunk Batcher 2/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 237012 ns, total duration = 2370, total runs = 10000
+[08:16:51] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 374 ns, total duration = 374, total runs = 1000000
+[08:16:51] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1514 ns, total duration = 175, total runs = 115689
+[08:16:52] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 335 ns, total duration = 335, total runs = 1000000
+[08:16:52] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1113 ns, total duration = 125, total runs = 112755
+[08:16:53] [Chunk Batcher 2/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 242847 ns, total duration = 2428, total runs = 10000
+[08:16:54] [main/INFO] [exotic_matter]: Avg splitQuad duration = 547 ns, total duration = 547, total runs = 1000000
+[08:16:54] [main/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 2193 ns, total duration = 233, total runs = 106439
+[08:16:55] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 301 ns, total duration = 301, total runs = 1000000
+[08:16:55] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 932 ns, total duration = 105, total runs = 113502
+[08:16:57] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 388 ns, total duration = 388, total runs = 1000000
+[08:16:57] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 952 ns, total duration = 108, total runs = 114250
+[08:16:57] [Chunk Batcher 5/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 227557 ns, total duration = 2275, total runs = 10000
+[08:16:59] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitQuad duration = 352 ns, total duration = 352, total runs = 1000000
+[08:16:59] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1597 ns, total duration = 179, total runs = 112283
+[08:17:02] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 433 ns, total duration = 433, total runs = 1000000
+[08:17:02] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 839 ns, total duration = 93, total runs = 110901
+[08:17:07] [main/INFO] [exotic_matter]: Avg splitQuad duration = 190 ns, total duration = 190, total runs = 1000000
+[08:17:07] [main/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 560 ns, total duration = 68, total runs = 122894
+[08:17:07] [main/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 190052 ns, total duration = 1900, total runs = 10000
+
+// with concrete vertex type
+[18:05:57] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitQuad duration = 286 ns, total duration = 286, total runs = 1000000
+[18:05:57] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1137 ns, total duration = 111, total runs = 97972
+[18:06:03] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitQuad duration = 327 ns, total duration = 327, total runs = 1000000
+[18:06:03] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1451 ns, total duration = 148, total runs = 101961
+[18:06:03] [Chunk Batcher 3/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 186354 ns, total duration = 1863, total runs = 10000
+
+
+// make CSG poly flip non-mutating
+[09:34:47] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitQuad duration = 470 ns, total duration = 470, total runs = 1000000
+[09:34:47] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1125 ns, total duration = 143, total runs = 127747
+[09:34:48] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 416 ns, total duration = 416, total runs = 1000000
+[09:34:48] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1280 ns, total duration = 164, total runs = 128278
+[09:34:49] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitQuad duration = 331 ns, total duration = 331, total runs = 1000000
+[09:34:49] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1040 ns, total duration = 127, total runs = 122709
+[09:34:49] [Chunk Batcher 0/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 278266 ns, total duration = 2782, total runs = 10000
+[09:34:50] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 367 ns, total duration = 367, total runs = 1000000
+[09:34:50] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1246 ns, total duration = 151, total runs = 121417
+[09:34:51] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 393 ns, total duration = 393, total runs = 1000000
+[09:34:51] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1366 ns, total duration = 173, total runs = 126881
+[09:34:52] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 358 ns, total duration = 358, total runs = 1000000
+[09:34:52] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1033 ns, total duration = 127, total runs = 123195
+[09:34:52] [Chunk Batcher 7/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 277177 ns, total duration = 2771, total runs = 10000
+[09:34:53] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 391 ns, total duration = 391, total runs = 1000000
+[09:34:53] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1159 ns, total duration = 146, total runs = 126139
+[09:34:54] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 418 ns, total duration = 418, total runs = 1000000
+[09:34:54] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1010 ns, total duration = 124, total runs = 123256
+
+
+// add acceptor interface
+[10:00:10] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitQuad duration = 354 ns, total duration = 354, total runs = 1000000
+[10:00:10] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1240 ns, total duration = 151, total runs = 122408
+[10:00:10] [Chunk Batcher 0/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 277579 ns, total duration = 2775, total runs = 10000
+[10:00:11] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 314 ns, total duration = 314, total runs = 1000000
+[10:00:11] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 954 ns, total duration = 117, total runs = 123391
+[10:00:12] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 329 ns, total duration = 329, total runs = 1000000
+[10:00:12] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 905 ns, total duration = 112, total runs = 124441
+[10:00:12] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitQuad duration = 336 ns, total duration = 336, total runs = 1000000
+[10:00:12] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 919 ns, total duration = 111, total runs = 121282
+[10:00:12] [Chunk Batcher 3/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 264754 ns, total duration = 2647, total runs = 10000
+[10:00:13] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitQuad duration = 366 ns, total duration = 366, total runs = 1000000
+[10:00:13] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1035 ns, total duration = 130, total runs = 125734
+[10:00:14] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 365 ns, total duration = 365, total runs = 1000000
+[10:00:14] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1202 ns, total duration = 152, total runs = 126386
+[10:00:15] [Chunk Batcher 0/INFO] [exotic_matter]: Avg splitQuad duration = 404 ns, total duration = 404, total runs = 1000000
+[10:00:15] [Chunk Batcher 0/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1147 ns, total duration = 145, total runs = 126945
+[10:00:15] [Chunk Batcher 4/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 315590 ns, total duration = 3155, total runs = 10000
+[10:00:16] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitQuad duration = 389 ns, total duration = 389, total runs = 1000000
+[10:00:16] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1132 ns, total duration = 144, total runs = 127169
+[10:00:16] [Chunk Batcher 4/INFO] [exotic_matter]: Avg splitQuad duration = 389 ns, total duration = 389, total runs = 1000000
+[10:00:16] [Chunk Batcher 4/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1124 ns, total duration = 143, total runs = 127265
+
+
+// map flip semantic vs copy vertices/polygon to new instance
+[11:16:03] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitQuad duration = 344 ns, total duration = 344, total runs = 1000000
+[11:16:03] [Chunk Batcher 1/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 947 ns, total duration = 124, total runs = 131495
+[11:16:05] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 388 ns, total duration = 388, total runs = 1000000
+[11:16:05] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1223 ns, total duration = 156, total runs = 127609
+[11:16:06] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitQuad duration = 303 ns, total duration = 303, total runs = 1000000
+[11:16:06] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 848 ns, total duration = 109, total runs = 128887
+[11:16:07] [Chunk Batcher 4/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 259189 ns, total duration = 2591, total runs = 10000
+[11:16:07] [Chunk Batcher 7/INFO] [exotic_matter]: Avg recombinePolys duration = 2068 ns, total duration = 206, total runs = 100000
+[11:16:07] [Chunk Batcher 7/INFO] [exotic_matter]: CSG Poly recombination efficiency = 27 percent
+[11:16:08] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 278 ns, total duration = 278, total runs = 1000000
+[11:16:08] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 854 ns, total duration = 109, total runs = 127705
+
+
+
+// direct array access as parameter
+[08:22:55] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 956 ns, total duration = 115, total runs = 120523
+[08:22:56] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 339 ns, total duration = 339, total runs = 1000000
+[08:22:56] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1148 ns, total duration = 139, total runs = 121281
+[08:22:57] [Chunk Batcher 7/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 245048 ns, total duration = 2450, total runs = 10000
+[08:22:57] [Chunk Batcher 1/INFO] [exotic_matter]: Avg recombinePolys duration = 1827 ns, total duration = 182, total runs = 100000
+[08:22:57] [Chunk Batcher 1/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+[08:22:57] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 338 ns, total duration = 338, total runs = 1000000
+[08:22:57] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 864 ns, total duration = 105, total runs = 121654
+[08:22:58] [Chunk Batcher 4/INFO] [exotic_matter]: Avg splitQuad duration = 313 ns, total duration = 313, total runs = 1000000
+[08:22:58] [Chunk Batcher 4/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1060 ns, total duration = 124, total runs = 117826
+[08:23:00] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 392 ns, total duration = 392, total runs = 1000000
+[08:23:00] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1494 ns, total duration = 184, total runs = 123238
+[08:23:00] [Chunk Batcher 3/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 254654 ns, total duration = 2546, total runs = 10000
+[08:23:00] [Chunk Batcher 4/INFO] [exotic_matter]: Avg recombinePolys duration = 1950 ns, total duration = 195, total runs = 100000
+[08:23:00] [Chunk Batcher 4/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+[08:23:01] [Chunk Batcher 4/INFO] [exotic_matter]: Avg splitQuad duration = 286 ns, total duration = 286, total runs = 1000000
+[08:23:01] [Chunk Batcher 4/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 882 ns, total duration = 105, total runs = 119313
+[08:23:02] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitQuad duration = 286 ns, total duration = 286, total runs = 1000000
+[08:23:02] [Chunk Batcher 2/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 875 ns, total duration = 105, total runs = 120158
+
+
+//  use counters instead of array
+[14:33:40] [Chunk Batcher 1/INFO] [exotic_matter]: Avg recombinePolys duration = 2323 ns, total duration = 232, total runs = 100000
+[14:33:40] [Chunk Batcher 1/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+[14:33:40] [Chunk Batcher 1/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 255268 ns, total duration = 2552, total runs = 10000
+[14:33:40] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 271 ns, total duration = 271, total runs = 1000000
+[14:33:40] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 967 ns, total duration = 116, total runs = 120581
+[14:33:41] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 291 ns, total duration = 291, total runs = 1000000
+[14:33:41] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1016 ns, total duration = 122, total runs = 120226
+[14:33:42] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitQuad duration = 293 ns, total duration = 293, total runs = 1000000
+[14:33:42] [Chunk Batcher 3/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 992 ns, total duration = 122, total runs = 123181
+[14:33:43] [Chunk Batcher 5/INFO] [exotic_matter]: Avg recombinePolys duration = 2143 ns, total duration = 214, total runs = 100000
+[14:33:43] [Chunk Batcher 5/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+[14:33:43] [Chunk Batcher 5/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 268502 ns, total duration = 2685, total runs = 10000
+[14:33:43] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitQuad duration = 293 ns, total duration = 293, total runs = 1000000
+[14:33:43] [Chunk Batcher 6/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1027 ns, total duration = 125, total runs = 121641
+[14:33:44] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitQuad duration = 319 ns, total duration = 319, total runs = 1000000
+[14:33:44] [Chunk Batcher 7/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 1059 ns, total duration = 128, total runs = 120865
+[14:33:45] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitQuad duration = 335 ns, total duration = 335, total runs = 1000000
+[14:33:45] [Chunk Batcher 5/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 949 ns, total duration = 114, total runs = 120657
+[14:33:46] [Chunk Batcher 3/INFO] [exotic_matter]: Avg recombinePolys duration = 2092 ns, total duration = 209, total runs = 100000
+[14:33:46] [Chunk Batcher 3/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+
+
+[08:47:59] [Chunk Batcher 3/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 178953 ns, total duration = 1789, total runs = 10000
+[08:48:01] [main/INFO] [exotic_matter]: Avg recombinePolys duration = 1282 ns, total duration = 128, total runs = 100000
+[08:48:01] [main/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+[08:48:04] [Chunk Batcher 2/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 177609 ns, total duration = 1776, total runs = 10000
+[08:48:04] [main/INFO] [exotic_matter]: Avg splitQuad duration = 187 ns, total duration = 1872, total runs = 10000000
+[08:48:04] [main/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 429 ns, total duration = 529, total runs = 1233100
+[08:48:06] [Chunk Batcher 2/INFO] [exotic_matter]: Avg recombinePolys duration = 1292 ns, total duration = 129, total runs = 100000
+[08:48:06] [Chunk Batcher 2/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+
+// CSGPolygon
+[07:34:52] [Server thread/INFO] [big_volcano]: WorldBuffer state sets this sample = 102328
+[07:34:53] [Chunk Batcher 4/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 180355 ns, total duration = 1803, total runs = 10000
+[07:34:55] [Chunk Batcher 0/INFO] [exotic_matter]: Avg recombinePolys duration = 1400 ns, total duration = 140, total runs = 100000
+[07:34:55] [Chunk Batcher 0/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+[07:35:02] [Chunk Batcher 6/INFO] [exotic_matter]: Avg terrainGetShapeQuads duration = 132563 ns, total duration = 1325, total runs = 10000
+[07:35:02] [Chunk Batcher 1/INFO] [exotic_matter]: Avg recombinePolys duration = 1806 ns, total duration = 180, total runs = 100000
+[07:35:02] [Chunk Batcher 1/INFO] [exotic_matter]: CSG Poly recombination efficiency = 26 percent
+[07:35:07] [main/INFO] [exotic_matter]: Avg splitQuad duration = 185 ns, total duration = 1853, total runs = 10000000
+[07:35:07] [main/INFO] [exotic_matter]: Avg splitSpanningQuad duration = 416 ns, total duration = 509, total runs = 1222072
+
+// with perf test harness
+[12:27:33] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 89745 ns, total duration = 8974, total runs = 100000
+[12:27:35] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 992 ns, total duration = 992, total runs = 1000000
+[12:27:35] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 33 percent
+[12:27:35] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 109 ns, total duration = 1095, total runs = 10000000
+[12:27:35] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 236 ns, total duration = 311, total runs = 1315076
+[12:27:38] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 107 ns, total duration = 1077, total runs = 10000000
+[12:27:38] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 232 ns, total duration = 306, total runs = 1318768
+[12:27:41] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 108 ns, total duration = 1086, total runs = 10000000
+[12:27:41] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 233 ns, total duration = 307, total runs = 1317934
+[12:27:42] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 89145 ns, total duration = 8914, total runs = 100000
+
+// use array lenght instead of instance var for vertex count
+[12:33:48] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 90372 ns, total duration = 9037, total runs = 100000
+[12:33:49] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 1006 ns, total duration = 1006, total runs = 1000000
+[12:33:49] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 33 percent
+[12:33:50] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 112 ns, total duration = 1122, total runs = 10000000
+[12:33:50] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 233 ns, total duration = 306, total runs = 1315076
+[12:33:53] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 110 ns, total duration = 1103, total runs = 10000000
+[12:33:53] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 229 ns, total duration = 302, total runs = 1318768
+[12:33:56] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 111 ns, total duration = 1116, total runs = 10000000
+[12:33:56] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 230 ns, total duration = 304, total runs = 1317934
+[12:33:57] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 89855 ns, total duration = 8985, total runs = 100000
+
+[12:46:36] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 91356 ns, total duration = 9135, total runs = 100000
+[12:46:37] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 990 ns, total duration = 990, total runs = 1000000
+[12:46:37] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 33 percent
+[12:46:38] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 116 ns, total duration = 1169, total runs = 10000000
+[12:46:38] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 231 ns, total duration = 304, total runs = 1315076
+[12:46:41] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 117 ns, total duration = 1172, total runs = 10000000
+[12:46:41] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 232 ns, total duration = 305, total runs = 1318768
+[12:46:44] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 116 ns, total duration = 1165, total runs = 10000000
+[12:46:44] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 230 ns, total duration = 303, total runs = 1317934
+[12:46:45] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 90434 ns, total duration = 9043, total runs = 100000
+
+
+base ancestor tracking on original poly instance
+[13:02:09] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 89931 ns, total duration = 8993, total runs = 100000
+[13:02:10] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 840 ns, total duration = 840, total runs = 1000000
+[13:02:10] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 33 percent
+[13:02:12] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 116 ns, total duration = 1162, total runs = 10000000
+[13:02:12] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 228 ns, total duration = 300, total runs = 1315076
+[13:02:15] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 118 ns, total duration = 1186, total runs = 10000000
+[13:02:15] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 234 ns, total duration = 308, total runs = 1318768
+[13:02:18] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 117 ns, total duration = 1171, total runs = 10000000
+[13:02:18] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 230 ns, total duration = 304, total runs = 1317934
+[13:02:19] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 92149 ns, total duration = 9214, total runs = 100000
+
+[13:03:07] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 90389 ns, total duration = 9038, total runs = 100000
+[13:03:07] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 863 ns, total duration = 863, total runs = 1000000
+[13:03:07] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 33 percent
+[13:03:09] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 114 ns, total duration = 1145, total runs = 10000000
+[13:03:09] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 226 ns, total duration = 297, total runs = 1315076
+[13:03:12] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 115 ns, total duration = 1159, total runs = 10000000
+[13:03:12] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 230 ns, total duration = 304, total runs = 1318768
+[13:03:15] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 115 ns, total duration = 1150, total runs = 10000000
+[13:03:15] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 228 ns, total duration = 300, total runs = 1317934
+[13:03:16] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 89835 ns, total duration = 8983, total runs = 100000
+
+no lines, dummy recombine
+[20:36:34] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 95995 ns, total duration = 9599, total runs = 100000
+[20:36:34] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 1443 ns, total duration = 1443, total runs = 1000000
+[20:36:34] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 0 percent
+[20:36:36] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 113 ns, total duration = 1133, total runs = 10000000
+[20:36:36] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 200 ns, total duration = 263, total runs = 1315076
+[20:36:39] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 113 ns, total duration = 1139, total runs = 10000000
+[20:36:39] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 200 ns, total duration = 264, total runs = 1318768
+[20:36:42] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 113 ns, total duration = 1132, total runs = 10000000
+[20:36:42] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 201 ns, total duration = 265, total runs = 1317934
+[20:36:44] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 95496 ns, total duration = 9549, total runs = 100000
+
+compute masked color 1x in interpolation
+[20:44:44] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 95352 ns, total duration = 9535, total runs = 100000
+[20:44:45] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 1457 ns, total duration = 1457, total runs = 1000000
+[20:44:45] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 0 percent
+[20:44:47] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 112 ns, total duration = 1128, total runs = 10000000
+[20:44:47] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 198 ns, total duration = 260, total runs = 1315076
+[20:44:50] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 111 ns, total duration = 1114, total runs = 10000000
+[20:44:50] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 196 ns, total duration = 259, total runs = 1318768
+[20:44:53] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 113 ns, total duration = 1133, total runs = 10000000
+[20:44:53] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 199 ns, total duration = 263, total runs = 1317934
+[20:44:54] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 95178 ns, total duration = 9517, total runs = 100000
+
+with new split acceptor
+[08:40:12] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 49581 ns, total duration = 4958, total runs = 100000
+[08:40:17] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 49658 ns, total duration = 4965, total runs = 100000
+[08:40:23] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg terrainGetShapeQuads duration = 52321 ns, total duration = 5232, total runs = 100000
+
+
+// without eliminating cubes
+getShapeQuads mean time = 49272ns
+getShapeQuads min time  = 16775ns
+getShapeQuads max time  = 2052566ns
+Error count = 0
+ 
+getShapeQuads mean time = 49606ns
+getShapeQuads min time  = 17522ns
+getShapeQuads max time  = 1701923ns
+Error count = 0
+ 
+getShapeQuads mean time = 49596ns
+getShapeQuads min time  = 16709ns
+getShapeQuads max time  = 1672512ns
+Error count = 0
+ 
+getShapeQuads mean time = 49677ns
+getShapeQuads min time  = 17296ns
+getShapeQuads max time  = 1916586ns
+Error count = 0
+
+// eliminating cubes
+getShapeQuads mean time = 45782ns
+getShapeQuads min time  = 1018ns
+getShapeQuads max time  = 1555113ns
+Error count = 0
+ 
+getShapeQuads mean time = 45754ns
+getShapeQuads min time  = 986ns
+getShapeQuads max time  = 1554552ns
+Error count = 0
+ 
+getShapeQuads mean time = 45564ns
+getShapeQuads min time  = 961ns
+getShapeQuads max time  = 1757308ns
+Error count = 0
+
+//enable simplified geometry
+getShapeQuads mean time = 28124ns
+getShapeQuads min time  = 951ns
+getShapeQuads max time  = 1842691ns
+Error count = 167
+ 
+getShapeQuads mean time = 28462ns
+getShapeQuads min time  = 960ns
+getShapeQuads max time  = 1551602ns
+Error count = 167
+ 
+getShapeQuads mean time = 28441ns
+getShapeQuads min time  = 949ns
+getShapeQuads max time  = 1718229ns
+Error count = 167
+
+// fix CSG errors
+getShapeQuads mean time = 28317ns
+getShapeQuads min time  = 940ns
+getShapeQuads max time  = 1554628ns
+Error count = 0
+ 
+getShapeQuads mean time = 28482ns
+getShapeQuads min time  = 929ns
+getShapeQuads max time  = 1620854ns
+Error count = 0
+ 
+getShapeQuads mean time = 28588ns
+getShapeQuads min time  = 945ns
+getShapeQuads max time  = 1340693ns
+Error count = 0
+
+// recombined before changes
+getShapeQuads mean time = 25615ns
+getShapeQuads min time  = 919ns
+getShapeQuads max time  = 1773511ns
+[14:07:42] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9366 ns, total duration = 946, total runs = 101026
+Error count = 0
+ 
+getShapeQuads mean time = 25369ns
+getShapeQuads min time  = 914ns
+getShapeQuads max time  = 1899659ns
+[14:07:45] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9288 ns, total duration = 938, total runs = 101026
+Error count = 0
+ 
+getShapeQuads mean time = 25555ns
+getShapeQuads min time  = 912ns
+getShapeQuads max time  = 1426350ns
+[14:07:48] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9350 ns, total duration = 944, total runs = 101026
+Error count = 0
+
+
+//recombined - track and skip ancestors - not much help, backed out change
+getShapeQuads mean time = 26012ns
+getShapeQuads min time  = 830ns
+getShapeQuads max time  = 1295775ns
+[14:06:10] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9251 ns, total duration = 934, total runs = 101026
+Error count = 0
+ 
+getShapeQuads mean time = 25724ns
+getShapeQuads min time  = 828ns
+getShapeQuads max time  = 1372863ns
+[14:06:13] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9147 ns, total duration = 924, total runs = 101026
+Error count = 0
+ 
+getShapeQuads mean time = 25977ns
+getShapeQuads min time  = 830ns
+getShapeQuads max time  = 1417909ns
+[14:06:16] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9235 ns, total duration = 932, total runs = 101026
+Error count = 0
+
+// use simpler data structures in recombine
+getShapeQuads mean time = 21981ns
+getShapeQuads min time  = 902ns
+getShapeQuads max time  = 1902886ns
+[14:42:29] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 5597 ns, total duration = 565, total runs = 101026
+Error count = 0
+ 
+getShapeQuads mean time = 22391ns
+getShapeQuads min time  = 903ns
+getShapeQuads max time  = 1306367ns
+[14:42:31] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 5709 ns, total duration = 576, total runs = 101026
+Error count = 0
+ 
+getShapeQuads mean time = 23467ns
+getShapeQuads min time  = 909ns
+getShapeQuads max time  = 1381383ns
+[14:42:34] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 5995 ns, total duration = 605, total runs = 101026
+Error count = 0
+
+// fix bug in terrain simplification
+getShapeQuads mean time = 32661ns
+getShapeQuads min time  = 832ns
+getShapeQuads max time  = 2227536ns
+[15:19:53] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9876 ns, total duration = 999, total runs = 101159
+Error count = 0
+ 
+getShapeQuads mean time = 32766ns
+getShapeQuads min time  = 837ns
+getShapeQuads max time  = 1273780ns
+[15:19:57] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9926 ns, total duration = 1004, total runs = 101159
+Error count = 0
+ 
+getShapeQuads mean time = 33601ns
+getShapeQuads min time  = 838ns
+getShapeQuads max time  = 1634787ns
+[15:20:01] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 10148 ns, total duration = 1026, total runs = 101159
+Error count = 0
+
+// single pre-split plane
+getShapeQuads mean time = 33125ns
+getShapeQuads min time  = 976ns
+getShapeQuads max time  = 1650254ns
+[16:43:00] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 8895 ns, total duration = 899, total runs = 101159
+Error count = 0
+ 
+getShapeQuads mean time = 33080ns
+getShapeQuads min time  = 974ns
+getShapeQuads max time  = 1522280ns
+[16:43:04] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 8879 ns, total duration = 898, total runs = 101159
+Error count = 0
+ 
+getShapeQuads mean time = 33621ns
+getShapeQuads min time  = 978ns
+getShapeQuads max time  = 1513374ns
+[16:43:08] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9022 ns, total duration = 912, total runs = 101159
+Error count = 0
+ 
+// double split
+getShapeQuads mean time = 32851ns
+getShapeQuads min time  = 993ns
+getShapeQuads max time  = 1586433ns
+[16:44:39] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 8134 ns, total duration = 822, total runs = 101159
+Error count = 0
+ 
+getShapeQuads mean time = 32953ns
+getShapeQuads min time  = 1017ns
+getShapeQuads max time  = 1848920ns
+[16:44:43] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 8139 ns, total duration = 823, total runs = 101159
+Error count = 0
+ 
+getShapeQuads mean time = 32333ns
+getShapeQuads min time  = 997ns
+getShapeQuads max time  = 1888894ns
+[16:44:47] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 8008 ns, total duration = 810, total runs = 101159
+Error count = 0
+
+// with X pre-split of terrain only
+[18:12:26] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 95 ns, total duration = 2689, total runs = 28178752
+[18:12:26] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 182 ns, total duration = 547, total runs = 3002233
+
+// with no pre-split
+[18:14:11] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 120 ns, total duration = 3806, total runs = 31588200
+[18:14:11] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 233 ns, total duration = 847, total runs = 3634407
+
+// with X pre-split of both
+[18:16:10] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 102 ns, total duration = 3117, total runs = 30273255
+[18:16:10] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 201 ns, total duration = 605, total runs = 3002233
+
+// x and + split of terrain
+[18:35:52] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 103 ns, total duration = 3343, total runs = 32381760
+[18:35:52] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 204 ns, total duration = 615, total runs = 3002233
+
+
+// x and + split of non-simple terrain
+[18:39:26] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 96 ns, total duration = 3061, total runs = 31663944
+[18:39:26] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 191 ns, total duration = 560, total runs = 2924570
+
+// x and + split of non-simple terrain, output two sides when non-simple, didn't help as expected
+[18:55:25] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 97 ns, total duration = 3160, total runs = 32362127
+[18:55:25] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 196 ns, total duration = 581, total runs = 2961629
+
+// x and + split of non-simple terrain, x only if most sides are simple
+[19:23:09] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 111 ns, total duration = 3509, total runs = 31353798
+[19:23:09] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 228 ns, total duration = 667, total runs = 2924570
+
+
+// pre-build terrain CSG roots with bottom face added and pre-split depending on complexity level
+[21:07:24] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 88 ns, total duration = 2892, total runs = 32784820
+[21:07:24] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 185 ns, total duration = 489, total runs = 2640364
+
+// also pre-build cube CSG root with different complexity levels
+[21:20:45] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 88 ns, total duration = 2954, total runs = 33366260
+[21:20:45] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 207 ns, total duration = 429, total runs = 2072212
+
+
+// pre-built terrain and cube, only use simple or X split, no X+ pre-split
+[21:23:48] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 91 ns, total duration = 2572, total runs = 28169112
+[21:23:48] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 203 ns, total duration = 421, total runs = 2072212
+
+// don't pre-split cube - slightly fewer top line but more actual splits
+[21:25:53] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 114 ns, total duration = 3104, total runs = 27151419
+[21:25:53] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 227 ns, total duration = 601, total runs = 2640364
+
+// always use X split, slightly worse than using no X split when simple
+[21:27:19] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 100 ns, total duration = 2892, total runs = 28751261
+[21:27:19] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 217 ns, total duration = 455, total runs = 2091672
+
+
+// after pre-built CSG splits, other stuff
+getShapeQuads mean time = 24946ns
+getShapeQuads min time  = 882ns
+getShapeQuads max time  = 1495636ns
+Runs exceeding 60,000ns: 671
+
+// actually recombining polys again
+getShapeQuads mean time = 31676ns
+getShapeQuads min time  = 877ns
+getShapeQuads max time  = 1867005ns
+Runs exceeding 60,000ns: 2597
+[09:04:13] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 410 ns, total duration = 558, total runs = 1361834
+[09:04:13] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination efficiency = 17 percent
+
+// same, with outer loop timing enabled
+getShapeQuads mean time = 27414ns
+getShapeQuads min time  = 856ns
+getShapeQuads max time  = 1326387ns
+Runs exceeding 60,000ns: 1176
+[09:31:17] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 9504 ns, total duration = 961, total runs = 101159
+[09:31:17] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 374 ns, total duration = 509, total runs = 1361834
+[09:31:17] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination reduction = 17 percent (of polygons processed, not total reduction)
+Error count = 0
+
+
+// don't create lists for original poly buckets with a single poly, similarly don't call recombine quads for a single quad
+getShapeQuads mean time = 25946ns
+getShapeQuads min time  = 892ns
+getShapeQuads max time  = 1423742ns
+Runs exceeding 60,000ns: 912
+[09:47:38] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 7988 ns, total duration = 808, total runs = 101159
+[09:47:38] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 2001 ns, total duration = 478, total runs = 239292
+[09:47:38] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination reduction = 40 percent (of polygons processed, not total reduction)
+Error count = 0
+
+// optimize for special case of two polygons
+getShapeQuads mean time = 25342ns
+getShapeQuads min time  = 916ns
+getShapeQuads max time  = 1559874ns
+Runs exceeding 60,000ns: 997
+[10:16:59] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinedRenderableQuads duration = 6655 ns, total duration = 673, total runs = 101159
+[10:16:59] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg recombinePolys duration = 1427 ns, total duration = 341, total runs = 239292
+[10:16:59] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly recombination reduction = 40 percent (of polygons processed, not total reduction)
+[10:16:59] [main/INFO] [grondag.exotic_matter.ExoticMatter]: CSG Poly pair-wise count = 16 percent (of polygons processed)
+Error count = 0
+
+// run with counters off
+getShapeQuads mean time = 25097ns
+getShapeQuads min time  = 888ns
+getShapeQuads max time  = 1395968ns
+Runs exceeding 60,000ns: 812
+Error count = 0
+
+
+// re-enabled split timing
+getShapeQuads mean time = 46666ns
+getShapeQuads min time  = 875ns
+getShapeQuads max time  = 1895344ns
+Runs exceeding 60,000ns: 32032
+[10:35:37] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 81 ns, total duration = 2295, total runs = 28169112
+[10:35:37] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 163 ns, total duration = 339, total runs = 2072212
+
+
+// going back to vertex type vs combined increment in first split pass - didn't help
+getShapeQuads mean time = 47679ns
+getShapeQuads min time  = 925ns
+getShapeQuads max time  = 1414566ns
+Runs exceeding 60,000ns: 35532
+[10:54:21] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 83 ns, total duration = 2357, total runs = 28169112
+[10:54:21] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 186 ns, total duration = 387, total runs = 2072212
+Error count = 0
+
+// back to combined increment test - appears to confirm is slightly better
+getShapeQuads mean time = 46865ns
+getShapeQuads min time  = 885ns
+getShapeQuads max time  = 1645325ns
+Runs exceeding 60,000ns: 32658
+[11:06:51] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitQuad duration = 81 ns, total duration = 2301, total runs = 28169112
+[11:06:51] [main/INFO] [grondag.exotic_matter.ExoticMatter]: Avg splitSpanningQuad duration = 162 ns, total duration = 336, total runs = 2072212
+Error count = 0
+
+// ideas
+use face normal in original poly
+don't create new vec3f instance tVec - use local vars instead
+optimize compute face normal in concrete poly classes
+
+
  Serialize port layout in devices
  Let direct ports mate with direct ports to form device/device private links
  

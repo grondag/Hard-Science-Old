@@ -18,7 +18,7 @@ public class BlockFabricationTask extends AbstractTask
     /** 
      * Don't use directly - lazily deserialized.
      */
-    private BlockProcurementTask procurementTask;
+    private @Nullable BlockProcurementTask procurementTask;
     
     /**
      * Use for new instances. Automatically
@@ -58,6 +58,7 @@ public class BlockFabricationTask extends AbstractTask
         tag.setInteger(NBT_PROCUREMENT_TASK_ID, this.procurementTaskID);
     }
     
+    @SuppressWarnings("null")
     public BlockProcurementTask procurementTask()
     {
         if(this.procurementTask == null)
