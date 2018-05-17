@@ -1,6 +1,8 @@
 package grondag.hard_science.network.client_to_server;
 
 
+import javax.annotation.Nullable;
+
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.BlockSubstance;
 import grondag.exotic_matter.model.ISuperModelState;
@@ -28,21 +30,21 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
 {
     
     private int meta;
-    private ISuperModelState modelState;
-    private BlockSubstance blockSubstance;
+    private @Nullable ISuperModelState modelState;
+    private @Nullable BlockSubstance blockSubstance;
     private int lightValue;
-    private TargetMode mode;
-    private BlockOrientationAxis axis;
-    private BlockOrientationFace face;
-    private BlockOrientationEdge edge;
-    private BlockOrientationCorner corner;
-    private RegionOrientation regionOrientation;
+    private @Nullable TargetMode mode;
+    private @Nullable BlockOrientationAxis axis;
+    private @Nullable BlockOrientationFace face;
+    private @Nullable BlockOrientationEdge edge;
+    private @Nullable BlockOrientationCorner corner;
+    private @Nullable RegionOrientation regionOrientation;
     private int floatingSelectionRange;
-    private FilterMode filterMode;
-    private SpeciesMode speciesMode;
+    private @Nullable FilterMode filterMode;
+    private @Nullable SpeciesMode speciesMode;
     private boolean isDeleteModeEnabled;
     private boolean isFixedRegionEnabled;
-    private BlockPos regionSize;
+    private @Nullable BlockPos regionSize;
     
     
     public PacketConfigurePlacementItem() 
@@ -100,6 +102,7 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
 
     }
 
+    @SuppressWarnings("null")
     @Override
     public void toBytes(PacketBuffer pBuff) 
     {
@@ -121,6 +124,7 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
         pBuff.writeBlockPos(this.regionSize);
     }
    
+    @SuppressWarnings("null")
     @Override
     protected void handle(PacketConfigurePlacementItem message, EntityPlayerMP player)
     {
@@ -141,7 +145,6 @@ public class PacketConfigurePlacementItem extends AbstractPlayerToServerPacket<P
             item.setRegionOrientation(heldStack, message.regionOrientation);
             item.setFilterMode(heldStack, message.filterMode);
             item.setSpeciesMode(heldStack, message.speciesMode);
-//            item.setDeleteModeEnabled(heldStack, message.isDeleteModeEnabled);
             item.setFixedRegionEnabled(heldStack, message.isFixedRegionEnabled);
             item.setRegionSize(heldStack, message.regionSize);
         }

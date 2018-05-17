@@ -435,7 +435,7 @@ public class MachinePower
         return inString.substring(0, 2) + "." + inString.substring(2, 3) + withSuffix;
     }
     
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({ "unchecked"})
     public static String formatEnergy(long joules, boolean includePositiveSign)
     {
         if(joules == 0) return "0J";
@@ -454,7 +454,7 @@ public class MachinePower
         }
     }
     
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({ "unchecked" })
     public static String formatPower(long watts, boolean includePositiveSign)
     {
         if(watts == 0) return "0W";
