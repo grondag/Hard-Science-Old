@@ -77,9 +77,9 @@ public class MicronizerInputSelector implements IDomainMember
      */
     private void updateBacklogIfStale()
     {
-        if(Simulator.instance().getTick() < nextUpdateTick) return;
+        if(Simulator.currentTick() < nextUpdateTick) return;
         
-        nextUpdateTick = Simulator.instance().getTick() + 20;
+        nextUpdateTick = Simulator.currentTick() + 20;
         
         long maxDemand = 0;
         long totalDemand = 0;

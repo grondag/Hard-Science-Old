@@ -51,7 +51,7 @@ public class PhotoElectricCell extends AbstractGenerator
      */
     private void requestRefreshFromWorld()
     {
-        this.nextRefreshTick = Simulator.instance().getTick() + 40 + ThreadLocalRandom.current().nextInt(20);
+        this.nextRefreshTick = Simulator.currentTick() + 40 + ThreadLocalRandom.current().nextInt(20);
         WorldTaskManager.enqueue( new IWorldTask()
         {
             boolean isDone = false;
@@ -90,7 +90,7 @@ public class PhotoElectricCell extends AbstractGenerator
     {
         if(!this.device().hasLocation()) return 0;
         
-        if(Simulator.instance().getTick() >= this.nextRefreshTick) 
+        if(Simulator.currentTick() >= this.nextRefreshTick) 
         {
             requestRefreshFromWorld();
         }

@@ -113,7 +113,7 @@ public abstract class ThroughputRegulator<T extends StorageType<T>>
 
         protected synchronized void updateTracking()
         {
-            int now = Simulator.instance().getTick();
+            int now = Simulator.currentTick();
             if(now == lastTickSeen) return;
             
             if (now == lastTickSeen + 1)

@@ -161,7 +161,7 @@ public class DigesterMachine extends AbstractSimpleMachine
         
         if(this.getDomain() == null) return;
         
-        if((Simulator.instance().getTick() & 0x1F) == 0x1F)
+        if((Simulator.currentTick() & 0x1F) == 0x1F)
         {
             ProcessManager pm = this.getDomain().getCapability(ProcessManager.class);
             this.setCurrentBacklog(pm.micronizerInputSelector.estimatedBacklogDepth());

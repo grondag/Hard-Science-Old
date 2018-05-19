@@ -212,7 +212,7 @@ public class Carrier<T extends StorageType<T>> implements ITypedStorage<T>
      */
     protected void refreshUtilization()
     {
-        long currentTick = Simulator.instance().getTick();
+        long currentTick = Simulator.currentTick();
         
         if(currentTick > this.lastTickSeen)
         {

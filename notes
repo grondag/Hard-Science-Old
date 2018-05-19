@@ -1,8 +1,10 @@
 Things to do
  Make drop consider larger neighborhood of blocks
- Make new model multi-threaded
  Is stepping 5X sufficient?
- Any additional ways to shortcut connection processing?
+ Optimize flow calculations
+ Confirm pressured flow still good
+ Move flowable connection attributes to a PotentialFlow child class in LavaConnection to save memory
+ Consider single-threading all fluid updates?
  Make connection deletion faster / do it less / do it when needed
  Packed block pos still make sense?
  Packed chunk pos still make sense?
