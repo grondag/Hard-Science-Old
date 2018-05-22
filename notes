@@ -1,10 +1,8 @@
 Things to do
- Make drop consider larger neighborhood of blocks
- Make simulator off tick and subticks a counted completion task
- Look for places where referencing world state when should instead check cell state
  Use mutableblockpos where appropriate (retention, adjustment, cell validation/load, others?)
  Packed block pos still make sense?
  Packed chunk pos still make sense?
+ Make simulator off tick and subticks a counted completion task
  Measure / throttle volcano node tick time consumption
  Eject Lava Blobs
  Improve push blocks - including: fill in caverns below surface before mounding
@@ -20,10 +18,14 @@ Things to do
  Smoke
  Haze
  Biome
+ Make TOP debug info for lava blocks configurable
+ 
+ Post-release features
  Add repair command to capture strays within a radius and for all loaded chunks - call after deserialize
- Ash
-
+ Ash (requires multi-part)
+ Support multiple worlds for lava/volcanos
  Consider different version / child class in terrain state to reduce memory usage when vertex calcs not needed
+ Cave-ins?
 
 
 split quad 250-350 with outliers 220 - 450
