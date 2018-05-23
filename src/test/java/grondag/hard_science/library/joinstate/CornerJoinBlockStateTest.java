@@ -16,11 +16,11 @@ public class CornerJoinBlockStateTest
     {
         // added simple join as an attribute of corner joins so don't need to have both when both are needed
         // this test ensures consistency
-        NeighborBlocks<Void> dummy = new NeighborBlocks<Void>(null, null);
+        NeighborBlocks dummy = new NeighborBlocks(null, null);
         
         for(int i = 0; i < 1 << 26; i++)
         {
-            NeighborBlocks<?>.NeighborTestResults tests = dummy.getFakeNeighborTestResults(i);
+            NeighborBlocks.NeighborTestResults tests = dummy.getFakeNeighborTestResults(i);
             SimpleJoin simple = new SimpleJoin(tests);
             CornerJoinBlockState corner = CornerJoinBlockStateSelector.getJoinState(CornerJoinBlockStateSelector.findIndex(tests));
             assert(corner.simpleJoin.getIndex() == simple.getIndex());

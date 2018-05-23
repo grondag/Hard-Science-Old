@@ -1,7 +1,6 @@
 package grondag.hard_science.machines.base;
 
 import grondag.exotic_matter.model.ISuperBlock;
-import grondag.exotic_matter.model.ISuperModelState;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.FarCorner;
 import grondag.exotic_matter.world.IBlockTest;
@@ -11,7 +10,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class SuperBlockCableMatch implements IBlockTest<ISuperModelState>
+public class SuperBlockCableMatch implements IBlockTest
 {
     private final IPortLayout portLayout;
     private final int channel;
