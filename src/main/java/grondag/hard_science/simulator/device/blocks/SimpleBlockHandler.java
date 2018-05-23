@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.exotic_matter.varia.PackedBlockPos;
+import grondag.exotic_matter.world.PackedBlockPos;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.device.DeviceManager;
