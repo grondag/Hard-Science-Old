@@ -2,11 +2,8 @@ package grondag.hard_science.simulator.device;
 
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.concurrency.CountedJob;
-import grondag.exotic_matter.concurrency.JobTask;
-import grondag.exotic_matter.concurrency.Job;
 import grondag.exotic_matter.concurrency.PerformanceCollector;
-import grondag.exotic_matter.concurrency.SimpleCountedJobBacker;
+import grondag.exotic_matter.concurrency.PerformanceCounter;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.ISimulationTickable;
 import grondag.exotic_matter.simulator.Simulator;
@@ -37,18 +34,18 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
      * A bit ugly but covenient.  Set to null when any 
      * instance is created, retrieved lazily from Simulator.
      */
-    private static DeviceManager instance;
+    private static @Nullable DeviceManager instance;
     
     public static DeviceManager instance()
     {
-        if(instance == null)
+        DeviceManager dm = instance;
+        if(dm == null)
         {
-            instance = Simulator.instance().getNode(DeviceManager.class);
+            dm = Simulator.instance().getNode(DeviceManager.class);
+            instance = dm;
         }
-        return instance;
+        return dm;
     }
-
-    private static final int BATCH_SIZE = 100;
     
     private static final RegistryNamespaced < ResourceLocation, Class <? extends IDevice >> REGISTRY = new RegistryNamespaced < ResourceLocation, Class <? extends IDevice >> ();
     
@@ -146,64 +143,21 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     
     private final DeviceWorldManager deviceBlocks = new DeviceWorldManager();
     
-    
-    private SimpleCountedJobBacker onTickJobBacker = new SimpleCountedJobBacker()
-    {
-        @Override
-        protected Object[] generateOperands()
-        {
-            return devices.values().stream().filter(d -> d.doesUpdateOnTick()).toArray();
-        }
-    };
-    
-    private SimpleCountedJobBacker offTickJobBacker = new SimpleCountedJobBacker()
-    {
-        @Override
-        protected Object[] generateOperands()
-        {
-            return devices.values().stream().filter(d -> d.doesUpdateOffTick()).toArray();
-        }
-    };
-    
     private boolean isDirty = false;
+    
+    private @Nullable IDevice[] offTickDevices = null;
+    private @Nullable IDevice[] onTickDevices = null;
     
     public final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Machine Simulator On tick");
     public final PerformanceCollector perfCollectorOffTick = new PerformanceCollector("Machine Simulator Off tick");
     
-    public final Job onTickJob;  
-    public final Job offTickJob;  
-    
-    private final JobTask<IDevice> offTickTask = new JobTask<IDevice>() 
-    {
-        @Override
-        public void doJobTask(IDevice operand)
-        {
-            operand.doOffTick();
-        }
-    };
-    
-    private final JobTask<IDevice> onTickTask = new JobTask<IDevice>() 
-    {
-        @Override
-        public void doJobTask(IDevice operand)
-        {
-            operand.doOnTick();
-        }
-    };
+    private final PerformanceCounter perfCounterOffTick = PerformanceCounter.create(Configurator.MACHINES.enablePerformanceLogging, "Machine off-stick update processing", perfCollectorOffTick);
+    private final PerformanceCounter perfCounterOnTick = PerformanceCounter.create(Configurator.MACHINES.enablePerformanceLogging, "Machine on-stick update processing", perfCollectorOnTick);
     
     public DeviceManager()
     {
         // force refresh of singleton access method
         instance = null;
-        
-        // on-tick jobs
-        this.onTickJob = new CountedJob<IDevice>(this.onTickJobBacker, this.onTickTask, BATCH_SIZE, 
-                Configurator.MACHINES.enablePerformanceLogging, "Machine on-tick update processing", this.perfCollectorOnTick);    
-
-        // off-tick jobs
-        this.offTickJob = new CountedJob<IDevice>(this.offTickJobBacker, this.offTickTask, BATCH_SIZE, 
-                Configurator.MACHINES.enablePerformanceLogging, "Machine off-stick update processing", this.perfCollectorOffTick);   
-
     }
     
     @Override
@@ -222,8 +176,8 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
         
         assert this.devices.put(device.getId(), device) == null
                 : "Duplicate device registration.";
-        this.onTickJobBacker.setDirty();
-        this.offTickJobBacker.setDirty();
+        this.onTickDevices = null;
+        this.offTickDevices = null;
         this.isDirty = true;
         
         if(Configurator.logDeviceChanges)
@@ -233,12 +187,6 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     
     public void removeDeviceInconveniently(IDevice device)
     {
-        if(device == null)
-        {
-            assert false : "Received request to remove null device.";
-            return;
-        }
-        
         if(Configurator.logDeviceChanges)
             HardScience.INSTANCE.info("DeviceManager.removeDevice: " + device.getId());
 
@@ -257,8 +205,8 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
             assert false : "Removal request for missing device.";
         }        
         this.isDirty = true;
-        this.onTickJobBacker.setDirty();
-        this.offTickJobBacker.setDirty();
+        this.onTickDevices = null;
+        this.offTickDevices = null;
         
         if(Configurator.logDeviceChanges)
             HardScience.INSTANCE.info("DeviceManager device count = " + this.devices.size());
@@ -305,8 +253,8 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
                 if(device != null) this.devices.put(device.getId(), device);
             }   
         }
-        this.onTickJobBacker.setDirty();
-        this.offTickJobBacker.setDirty();
+        this.onTickDevices = null;
+        this.offTickDevices = null;
     }
 
     @Override
@@ -347,13 +295,43 @@ public class DeviceManager implements ISimulationTopNode, ISimulationTickable
     @Override
     public void doOnTick()
     {
-        this.onTickJob.run();
+        IDevice[] devs = this.onTickDevices;
+        if(devs == null)
+        {
+            devs = devices.size() == 0
+                ? new IDevice[0]
+                : devices.values().stream().filter(d -> d.doesUpdateOnTick()).toArray(IDevice[]::new);
+            this.onTickDevices = devs;
+        }
+        
+        if(devs.length > 0)
+        {
+            this.perfCounterOnTick.startRun();
+            this.perfCounterOnTick.addCount(devs.length);
+            for(IDevice d : devs) d.doOnTick();
+            this.perfCounterOnTick.endRun();
+        }
     }
 
     @Override
     public void doOffTick()
     {
-        this.offTickJob.runOn(Simulator.SIMULATION_POOL);        
+        IDevice[] devs = this.offTickDevices;
+        if(devs == null)
+        {
+            devs = devices.size() == 0
+                ? new IDevice[0]
+                : devices.values().stream().filter(d -> d.doesUpdateOffTick()).toArray(IDevice[]::new);
+            this.offTickDevices = devs;
+        }
+        
+        if(devs.length > 0)
+        {
+            this.perfCounterOffTick.startRun();
+            this.perfCounterOffTick.addCount(devs.length);
+            Simulator.SCATTER_GATHER_POOL.completeTask(devs, d -> d.doOffTick());
+            this.perfCounterOffTick.endRun();
+        }
     }
 
 }

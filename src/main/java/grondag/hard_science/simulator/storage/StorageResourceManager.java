@@ -494,7 +494,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
         
         this.isListenerNotificationDirty = true;
         
-        Simulator.SIMULATION_POOL.execute(new Runnable()
+        Simulator.CONTROL_THREAD.execute(new Runnable()
         {
             @Override
             public void run()
