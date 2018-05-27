@@ -1,7 +1,5 @@
 Things to do
  	
- Make simulator off tick and subticks a counted completion task
- Thread pool docs
  Measure / throttle volcano node tick time consumption
  Eject Lava Blobs
  Improve push blocks - including: fill in caverns below surface before mounding

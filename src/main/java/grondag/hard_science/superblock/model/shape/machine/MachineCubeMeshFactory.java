@@ -1,6 +1,5 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
-import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -33,8 +32,6 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     private final List<IPolygon> cubeQuads180;
     private final List<IPolygon> cubeQuads270;
     
-    private final boolean hasFront;
-    
     /**
      * @param hasFront If true, model will have an orientation and front display face
      */
@@ -43,19 +40,18 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         super(hasFront ? ModelStateData.STATE_FLAG_HAS_AXIS_ROTATION : ModelStateData.STATE_FLAG_NONE, 
                 MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
         
-        this.hasFront = hasFront;
-        this.cubeQuads0 = getCubeQuads(Rotation.ROTATE_NONE);
+        this.cubeQuads0 = getCubeQuads(Rotation.ROTATE_NONE, hasFront);
         if(hasFront)
         {
-            this.cubeQuads90 = getCubeQuads(Rotation.ROTATE_90);
-            this.cubeQuads180 = getCubeQuads(Rotation.ROTATE_180);
-            this.cubeQuads270 = getCubeQuads(Rotation.ROTATE_270);
+            this.cubeQuads90 = getCubeQuads(Rotation.ROTATE_90, hasFront);
+            this.cubeQuads180 = getCubeQuads(Rotation.ROTATE_180, hasFront);
+            this.cubeQuads270 = getCubeQuads(Rotation.ROTATE_270, hasFront);
         }
         else
         {
-            this.cubeQuads90 = null;
-            this.cubeQuads180 = null;
-            this.cubeQuads270 = null;
+            this.cubeQuads90 = this.cubeQuads0;
+            this.cubeQuads180 = this.cubeQuads0;
+            this.cubeQuads270 = this.cubeQuads0;
         }
     }
     
@@ -66,26 +62,21 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     @Override
     public List<IPolygon> getShapeQuads(ISuperModelState modelState)
     {
-        if(this.hasFront)
+        switch(modelState.getAxisRotation())
         {
-            switch(modelState.getAxisRotation())
-            {
-            case ROTATE_NONE:
-                return this.cubeQuads0;
-            case ROTATE_90:
-                return this.cubeQuads90;
-            case ROTATE_180:
-                return this.cubeQuads180;
-            case ROTATE_270:
-                return this.cubeQuads270;
-            default:
-                return Collections.emptyList();
-            }
+        case ROTATE_NONE:
+        default:
+            return this.cubeQuads0;
+        case ROTATE_90:
+            return this.cubeQuads90;
+        case ROTATE_180:
+            return this.cubeQuads180;
+        case ROTATE_270:
+            return this.cubeQuads270;
         }
-        else return this.cubeQuads0;
     }
    
-    private List<IPolygon> getCubeQuads(Rotation rotation)
+    private List<IPolygon> getCubeQuads(Rotation rotation, boolean hasFront)
     {
         CubeInputs result = new CubeInputs();
         result.color = 0xFFFFFFFF;
@@ -111,7 +102,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         for(EnumFacing face : EnumFacing.VALUES)
         {
             
-            result.surfaceInstance = this.hasFront && face == rotation.horizontalFace  
+            result.surfaceInstance = hasFront && face == rotation.horizontalFace  
                     ? MachineMeshFactory.INSTANCE_LAMP 
                     : MachineMeshFactory.INSTANCE_MAIN;
             
