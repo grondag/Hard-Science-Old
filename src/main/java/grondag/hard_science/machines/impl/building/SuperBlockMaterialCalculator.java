@@ -26,9 +26,8 @@ public class SuperBlockMaterialCalculator
     
     public SuperBlockMaterialCalculator(ISuperModelState modelState, BlockSubstance requestedSubstance, int lightValue)
     {
-        //TODO: need a way to check for full brightness renders without block light
-        
-        this.nanoLights_nL = lightValue > 0 ? MatterUnits.nL_NANO_LIGHTS_PER_BLOCK : 0;
+
+        this.nanoLights_nL = lightValue > 0 || modelState.getRenderPassSet().hasFlatRenderPass ? MatterUnits.nL_NANO_LIGHTS_PER_BLOCK : 0;
         
         final long volume = (long) (Useful.volumeAABB(modelState.collisionBoxes(BlockPos.ORIGIN)) * MatterUnits.nL_ONE_BLOCK);
         
