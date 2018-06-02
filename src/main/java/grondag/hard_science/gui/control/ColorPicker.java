@@ -1,11 +1,11 @@
 package grondag.hard_science.gui.control;
 
-import grondag.exotic_matter.model.BlockColorMapProvider;
-import grondag.exotic_matter.model.Chroma;
-import grondag.exotic_matter.model.ColorMap;
-import grondag.exotic_matter.model.Hue;
-import grondag.exotic_matter.model.Luminance;
-import grondag.exotic_matter.model.ColorMap.EnumColorMap;
+import grondag.exotic_matter.model.color.BlockColorMapProvider;
+import grondag.exotic_matter.model.color.Chroma;
+import grondag.exotic_matter.model.color.ColorMap;
+import grondag.exotic_matter.model.color.Hue;
+import grondag.exotic_matter.model.color.Luminance;
+import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
 import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;

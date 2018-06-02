@@ -10,11 +10,11 @@ import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.font.FontHolder;
 import grondag.exotic_matter.font.RasterFont;
-import grondag.exotic_matter.model.ITexturePalette;
+import grondag.exotic_matter.model.render.QuadBakery;
+import grondag.exotic_matter.model.texture.EnhancedSprite;
+import grondag.exotic_matter.model.texture.ITexturePalette;
+import grondag.exotic_matter.model.texture.TextureHelper;
 import grondag.exotic_matter.placement.SuperItemBlock;
-import grondag.exotic_matter.render.EnhancedSprite;
-import grondag.exotic_matter.render.QuadBakery;
-import grondag.exotic_matter.render.TextureHelper;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldInfo;

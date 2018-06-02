@@ -1,6 +1,6 @@
 package grondag.hard_science.gui.control;
 
-import grondag.exotic_matter.model.BlockSubstance;
+import grondag.exotic_matter.block.BlockSubstance;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.hard_science.gui.GuiUtil;

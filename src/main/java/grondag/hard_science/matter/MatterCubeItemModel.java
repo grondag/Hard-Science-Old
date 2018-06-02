@@ -12,9 +12,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import grondag.exotic_matter.render.QuadBakery;
-import grondag.exotic_matter.render.QuadHelper;
-import grondag.exotic_matter.render.IPolygon;
+import grondag.exotic_matter.model.primitives.IPolygon;
+import grondag.exotic_matter.model.primitives.QuadHelper;
+import grondag.exotic_matter.model.render.QuadBakery;
 import grondag.hard_science.HardScience;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

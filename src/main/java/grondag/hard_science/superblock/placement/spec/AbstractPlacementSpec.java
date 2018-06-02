@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.IPlacementItem;

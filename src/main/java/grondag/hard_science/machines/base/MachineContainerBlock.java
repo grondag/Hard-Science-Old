@@ -2,7 +2,7 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nonnull;
 
-import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.hard_science.HardScience;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

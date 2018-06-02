@@ -2,9 +2,9 @@ package grondag.hard_science.simulator.transport.endpoint;
 
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.Transform;
-import grondag.exotic_matter.model.Transform.FaceMap;
+import grondag.exotic_matter.model.primitives.Transform;
+import grondag.exotic_matter.model.primitives.Transform.FaceMap;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.init.ModRegistries;

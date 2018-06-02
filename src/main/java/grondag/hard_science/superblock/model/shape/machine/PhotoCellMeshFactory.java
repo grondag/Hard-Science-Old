@@ -4,14 +4,14 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.exotic_matter.model.ICollisionHandler;
-import grondag.exotic_matter.model.ISuperBlock;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.ModelStateData;
-import grondag.exotic_matter.render.IMutablePolygon;
-import grondag.exotic_matter.render.IPolygon;
-import grondag.exotic_matter.render.Poly;
-import grondag.exotic_matter.render.SideShape;
+import grondag.exotic_matter.block.ISuperBlock;
+import grondag.exotic_matter.model.primitives.IMutablePolygon;
+import grondag.exotic_matter.model.primitives.IPolygon;
+import grondag.exotic_matter.model.primitives.Poly;
+import grondag.exotic_matter.model.state.ISuperModelState;
+import grondag.exotic_matter.model.state.ModelStateData;
+import grondag.exotic_matter.model.varia.ICollisionHandler;
+import grondag.exotic_matter.model.varia.SideShape;
 import grondag.exotic_matter.world.Rotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;

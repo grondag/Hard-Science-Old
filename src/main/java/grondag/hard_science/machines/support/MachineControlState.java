@@ -3,9 +3,9 @@ package grondag.hard_science.machines.support;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.model.BlockSubstance;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.ModelState;
+import grondag.exotic_matter.block.BlockSubstance;
+import grondag.exotic_matter.model.state.ISuperModelState;
+import grondag.exotic_matter.model.state.ModelState;
 import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;

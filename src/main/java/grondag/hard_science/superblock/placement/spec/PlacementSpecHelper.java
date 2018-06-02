@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.placement.spec;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.StateFormat;
+import grondag.exotic_matter.model.state.ISuperModelState;
+import grondag.exotic_matter.model.state.StateFormat;
 import grondag.exotic_matter.placement.BlockOrientationHandler;
 import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.IPlacementItem;

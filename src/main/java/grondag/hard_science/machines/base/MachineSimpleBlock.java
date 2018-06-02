@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.block.SuperSimpleBlock;
-import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.hard_science.init.ModSubstances;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;

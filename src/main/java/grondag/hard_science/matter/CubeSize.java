@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.exotic_matter.render.QuadHelper;
-import grondag.exotic_matter.render.IPolygon;
+import grondag.exotic_matter.model.primitives.IPolygon;
+import grondag.exotic_matter.model.primitives.QuadHelper;
 import grondag.exotic_matter.varia.Color;
 import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.Rotation;

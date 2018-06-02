@@ -2,8 +2,8 @@ package grondag.hard_science.gui.control;
 
 import java.util.List;
 
-import grondag.exotic_matter.model.ITexturePalette;
-import grondag.exotic_matter.model.TextureRotationType;
+import grondag.exotic_matter.model.texture.ITexturePalette;
+import grondag.exotic_matter.model.texture.TextureRotationType;
 import grondag.exotic_matter.world.Rotation;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.gui.GuiUtil;

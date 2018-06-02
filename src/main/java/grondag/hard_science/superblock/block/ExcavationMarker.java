@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nonnull;
 
-import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.PlacementItemFeature;

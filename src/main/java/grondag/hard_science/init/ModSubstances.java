@@ -1,12 +1,12 @@
 package grondag.hard_science.init;
 
+import grondag.exotic_matter.block.BlockHarvestTool;
+import grondag.exotic_matter.block.BlockSubstance;
 import grondag.exotic_matter.init.SubstanceConfig;
-import grondag.exotic_matter.model.BlockColorMapProvider;
-import grondag.exotic_matter.model.BlockHarvestTool;
-import grondag.exotic_matter.model.BlockSubstance;
-import grondag.exotic_matter.model.Chroma;
-import grondag.exotic_matter.model.Hue;
-import grondag.exotic_matter.model.Luminance;
+import grondag.exotic_matter.model.color.BlockColorMapProvider;
+import grondag.exotic_matter.model.color.Chroma;
+import grondag.exotic_matter.model.color.Hue;
+import grondag.exotic_matter.model.color.Luminance;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.machines.base.MachineBlock;
 import net.minecraft.block.SoundType;

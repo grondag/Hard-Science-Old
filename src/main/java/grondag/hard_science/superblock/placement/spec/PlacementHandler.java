@@ -4,11 +4,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.ConfigXM;
+import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.model.ISuperBlock;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.MetaUsage;
-import grondag.exotic_matter.model.varia.SuperBlockHelper;
+import grondag.exotic_matter.model.state.ISuperModelState;
+import grondag.exotic_matter.model.state.MetaUsage;
+import grondag.exotic_matter.model.state.SuperBlockHelper;
 import grondag.exotic_matter.placement.BlockOrientationHandler;
 import grondag.exotic_matter.placement.IPlacementSpec;
 import grondag.exotic_matter.placement.OffsetPosition;

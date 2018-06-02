@@ -9,9 +9,9 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
-import grondag.exotic_matter.model.BlockRenderMode;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.WorldLightOpacity;
+import grondag.exotic_matter.model.render.BlockRenderMode;
+import grondag.exotic_matter.model.state.ISuperModelState;
+import grondag.exotic_matter.model.varia.WorldLightOpacity;
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;

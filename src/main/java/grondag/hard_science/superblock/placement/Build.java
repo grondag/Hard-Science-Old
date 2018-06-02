@@ -2,7 +2,7 @@ package grondag.hard_science.superblock.placement;
 
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.simulator.IWorldTask;

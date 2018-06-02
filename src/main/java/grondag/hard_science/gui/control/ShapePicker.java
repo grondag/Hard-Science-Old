@@ -2,9 +2,9 @@ package grondag.hard_science.gui.control;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.ModelShape;
-import grondag.exotic_matter.model.ModelState;
+import grondag.exotic_matter.model.mesh.ModelShape;
+import grondag.exotic_matter.model.state.ISuperModelState;
+import grondag.exotic_matter.model.state.ModelState;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModSubstances;

@@ -1,6 +1,6 @@
 package grondag.hard_science.gui;
 
-import grondag.exotic_matter.model.TextureScale;
+import grondag.exotic_matter.model.texture.TextureScale;
 import grondag.exotic_matter.varia.HorizontalAlignment;
 import grondag.exotic_matter.varia.VerticalAlignment;
 import grondag.exotic_matter.world.Rotation;

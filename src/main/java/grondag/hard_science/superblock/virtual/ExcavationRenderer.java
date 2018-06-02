@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.virtual;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.exotic_matter.render.RenderUtil;
+import grondag.exotic_matter.model.render.RenderUtil;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import net.minecraft.client.renderer.BufferBuilder;

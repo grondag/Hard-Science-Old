@@ -1,6 +1,6 @@
 package grondag.hard_science.network.client_to_server;
 
-import grondag.exotic_matter.model.ISuperBlock;
+import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.network.AbstractPlayerToServerPacket;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;

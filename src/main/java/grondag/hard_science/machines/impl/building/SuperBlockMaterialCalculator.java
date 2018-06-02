@@ -1,9 +1,9 @@
 package grondag.hard_science.machines.impl.building;
 
-import grondag.exotic_matter.model.BlockSubstance;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.PaintLayer;
-import grondag.exotic_matter.model.ColorMap.EnumColorMap;
+import grondag.exotic_matter.block.BlockSubstance;
+import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
+import grondag.exotic_matter.model.painting.PaintLayer;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.varia.ColorHelper;
 import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.varia.ColorHelper.CMY;

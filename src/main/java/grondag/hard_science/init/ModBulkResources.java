@@ -7,8 +7,8 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 
-import grondag.exotic_matter.model.BlockColorMapProvider;
-import grondag.exotic_matter.model.ColorMap.EnumColorMap;
+import grondag.exotic_matter.model.color.BlockColorMapProvider;
+import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
 import grondag.exotic_matter.varia.Color;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;

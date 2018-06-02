@@ -1,13 +1,13 @@
 package grondag.hard_science.machines.impl.production;
 
-import grondag.exotic_matter.model.BlockColorMapProvider;
-import grondag.exotic_matter.model.Chroma;
-import grondag.exotic_matter.model.Hue;
-import grondag.exotic_matter.model.ISuperBlock;
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.Luminance;
-import grondag.exotic_matter.model.ModelState;
-import grondag.exotic_matter.model.PaintLayer;
+import grondag.exotic_matter.block.ISuperBlock;
+import grondag.exotic_matter.model.color.BlockColorMapProvider;
+import grondag.exotic_matter.model.color.Chroma;
+import grondag.exotic_matter.model.color.Hue;
+import grondag.exotic_matter.model.color.Luminance;
+import grondag.exotic_matter.model.painting.PaintLayer;
+import grondag.exotic_matter.model.state.ISuperModelState;
+import grondag.exotic_matter.model.state.ModelState;
 import grondag.exotic_matter.world.IBlockTest;
 import grondag.hard_science.init.ModPortLayouts;
 import grondag.hard_science.machines.base.AbstractMachine;

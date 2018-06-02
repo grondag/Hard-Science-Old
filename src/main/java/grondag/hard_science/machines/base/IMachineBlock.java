@@ -2,8 +2,8 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nullable;
 
+import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.block.SuperTileEntity;
-import grondag.exotic_matter.model.ISuperBlock;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.Privilege;

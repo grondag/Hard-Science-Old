@@ -12,7 +12,7 @@ import org.magicwerk.brownies.collections.Key2List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.crafting.base.GenericRecipe;

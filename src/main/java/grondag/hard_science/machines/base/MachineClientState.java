@@ -2,7 +2,7 @@ package grondag.hard_science.machines.base;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
-import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.matbuffer.ClientBufferInfo;
 import grondag.hard_science.machines.support.MachineControlState;

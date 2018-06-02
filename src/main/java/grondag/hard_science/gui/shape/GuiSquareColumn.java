@@ -1,7 +1,7 @@
 package grondag.hard_science.gui.shape;
 
-import grondag.exotic_matter.model.ISuperModelState;
-import grondag.exotic_matter.model.SquareColumnMeshFactory;
+import grondag.exotic_matter.model.mesh.SquareColumnMeshFactory;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.hard_science.gui.control.Slider;
 import grondag.hard_science.gui.control.Toggle;
 import net.minecraft.client.Minecraft;

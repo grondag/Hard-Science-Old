@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.matter.BulkItem;
 import grondag.hard_science.matter.VolumeUnits;

@@ -1,7 +1,7 @@
 package grondag.hard_science;
 
+import grondag.exotic_matter.block.BlockHarvestTool;
 import grondag.exotic_matter.init.SubstanceConfig;
-import grondag.exotic_matter.model.BlockHarvestTool;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.LangKey;

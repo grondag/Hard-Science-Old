@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.virtual;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.model.ISuperModelState;
+import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.placement.FilterMode;
 import grondag.exotic_matter.placement.IPlacementItem;
 import grondag.exotic_matter.placement.PlacementItemFeature;
