@@ -10,10 +10,10 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.CSG.CSGMesh;
+import grondag.exotic_matter.model.mesh.MeshHelper;
 import grondag.exotic_matter.model.primitives.IMutablePolygon;
 import grondag.exotic_matter.model.primitives.IPolygon;
 import grondag.exotic_matter.model.primitives.Poly;
-import grondag.exotic_matter.model.primitives.QuadHelper;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.ICollisionHandler;
@@ -90,7 +90,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         if(shape == null)
         {
 
-            builder.addAll(QuadHelper.makeBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template));
+            builder.addAll(MeshHelper.makeBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template));
         }
         else
         {
@@ -149,7 +149,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
             break;
         
         }
-        return QuadHelper.makeBox(aabb, template);
+        return MeshHelper.makeBox(aabb, template);
     }
    
     @Override
