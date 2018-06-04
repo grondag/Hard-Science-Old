@@ -32,6 +32,8 @@ public class MaterialPicker extends GuiControl<MaterialPicker>
     
     private int materialIndex = NO_SELECTION;
     private int toughnessIndex = NO_SELECTION;
+    
+    private BlockSubstance substance = BlockSubstance.DEFAULT;
 
     static
     {
@@ -57,6 +59,7 @@ public class MaterialPicker extends GuiControl<MaterialPicker>
     {
         this.materialIndex = NO_SELECTION;
         this.toughnessIndex = NO_SELECTION;
+        this.substance = substance;
         
         for(int i = 0; i < 3; i++)
         {
@@ -74,7 +77,7 @@ public class MaterialPicker extends GuiControl<MaterialPicker>
     
     public BlockSubstance getSubstance()
     {
-        if(this.materialIndex == NO_SELECTION || this.toughnessIndex == NO_SELECTION) return null;
+        if(this.materialIndex == NO_SELECTION || this.toughnessIndex == NO_SELECTION) return this.substance;
         return substances[this.materialIndex][this.toughnessIndex];
     }
     

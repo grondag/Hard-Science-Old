@@ -14,7 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class BuildCapability implements IUserCapability
 {
     private static final String NBT_TAG_SELF = NBTDictionary.claim("buildCap");
-    private static final String NBT_TAG_DATA = NBTDictionary.claim("buildData");
+    private static final String NBT_TAG_DATA = NBTDictionary.claim("buildCapData");
 
     private Int2IntOpenHashMap activeBuilds = new Int2IntOpenHashMap();
 

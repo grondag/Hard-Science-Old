@@ -12,7 +12,6 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>>
 implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
 {
     protected static final String NBT_RESOURCE_QUANTITY = NBTDictionary.claim("resQty");
-    protected static final String NBT_RESOURCE_IDENTITY = NBTDictionary.claim("resID");
     
     private IResource<V> resource;
     protected long quantity;
@@ -32,7 +31,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     public AbstractResourceWithQuantity(NBTTagCompound tag)
     {
         this.quantity = tag.getLong(NBT_RESOURCE_QUANTITY);
-        this.resource = this.storageType().fromNBT(tag.getCompoundTag(NBT_RESOURCE_IDENTITY));
+        this.resource = this.storageType().fromNBT(tag.getCompoundTag(StorageType.NBT_RESOURCE_IDENTITY));
     }
     
     public final ItemResourceDelegate toDelegate(int handle)
@@ -43,7 +42,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     public NBTTagCompound toNBT()
     {
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setTag(NBT_RESOURCE_IDENTITY, this.storageType().toNBT(this.resource));
+        tag.setTag(StorageType.NBT_RESOURCE_IDENTITY, this.storageType().toNBT(this.resource));
         tag.setLong(NBT_RESOURCE_QUANTITY, this.quantity);
         return tag;
     }

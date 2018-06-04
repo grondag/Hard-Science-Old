@@ -21,7 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ShapePicker extends TabBar<ModelShape<?>>
 {
 
-    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.guiAvailableShapes().size()];
+    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.MAX_SHAPES];
     
     static
     {

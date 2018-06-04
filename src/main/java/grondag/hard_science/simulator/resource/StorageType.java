@@ -39,8 +39,8 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
  */
 public abstract class StorageType<T extends StorageType<T>>
 {
-    private static final String NBT_RESOURCE_IDENTITY = NBTDictionary.claim("resID");
-    private static final String NBT_RESOURCE_TYPE = NBTDictionary.claim("resType");
+    public static final String NBT_RESOURCE_IDENTITY = NBTDictionary.claim("resID");
+    public static final String NBT_RESOURCE_TYPE = NBTDictionary.claim("resType");
 
     public static StorageType<?> fromEnum(EnumStorageType e)
     {
