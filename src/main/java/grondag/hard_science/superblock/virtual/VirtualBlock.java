@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
-import grondag.exotic_matter.model.render.BlockRenderMode;
+import grondag.exotic_matter.model.render.RenderLayout;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.varia.WorldLightOpacity;
 import grondag.exotic_matter.network.PacketHandler;
@@ -95,30 +95,29 @@ public class VirtualBlock extends SuperModelBlock
     /**
      * Virtual blocks only vary by render mode
      */
-    public static final VirtualBlock[] virtualBlocks = new VirtualBlock[BlockRenderMode.values().length];
+    public static final VirtualBlock[] virtualBlocks = new VirtualBlock[RenderLayout.ALL_LAYOUTS.size()];
     
     public static VirtualBlock findAppropriateVirtualBlock(ISuperModelState modelState)
     {
-        BlockRenderMode blockRenderMode = modelState.getRenderPassSet().blockRenderMode;
-        return virtualBlocks[blockRenderMode.ordinal()];
+        return virtualBlocks[modelState.getRenderLayout().blockLayerFlags];
     }
 
     public static void registerVirtualBlocks(Register<Block> event)
     {
         int virualBlockIndex = 0;
         
-        for(BlockRenderMode blockRenderMode : BlockRenderMode.values())
+        for(RenderLayout renderLayout : RenderLayout.ALL_LAYOUTS)
         {
-            VirtualBlock.virtualBlocks[blockRenderMode.ordinal()]
-                    = (VirtualBlock) new VirtualBlock("virtual_block" + virualBlockIndex++, blockRenderMode)
+            VirtualBlock.virtualBlocks[renderLayout.blockLayerFlags]
+                    = (VirtualBlock) new VirtualBlock("virtual_block" + virualBlockIndex++, renderLayout)
                         .setUnlocalizedName("virtual_block").setCreativeTab(HardScience.tabMod); //all virtual blocks have same display name
-            event.getRegistry().register(VirtualBlock.virtualBlocks[blockRenderMode.ordinal()]);
+            event.getRegistry().register(VirtualBlock.virtualBlocks[renderLayout.blockLayerFlags]);
         }        
     }
     
-    public VirtualBlock(String blockName, BlockRenderMode renderMode)
+    public VirtualBlock(String blockName, RenderLayout renderLayout)
     {
-        super(blockName, Material.AIR, renderMode, WorldLightOpacity.TRANSPARENT, false, false);
+        super(blockName, Material.AIR, renderLayout, WorldLightOpacity.TRANSPARENT, false, false);
     }
     
     @Override
@@ -213,7 +212,7 @@ public class VirtualBlock extends SuperModelBlock
     @Override
     public @Nullable TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
-        return this.blockRenderMode() == BlockRenderMode.TESR 
+        return this.renderLayout().blockLayerFlags == 0
                 ? new VirtualTileEntityTESR()
                 : new VirtualTileEntity();
     }
@@ -360,7 +359,7 @@ public class VirtualBlock extends SuperModelBlock
         // We only want to show one item for virtual blocks
         // Otherwise will spam creative search / JEI
         // All do the same thing in the end.
-        if(this.blockRenderMode() == BlockRenderMode.SOLID_SHADED)
+        if(this.renderLayout() == RenderLayout.SOLID_ONLY)
         {
             list.add(this.getSubItems().get(0));
         }

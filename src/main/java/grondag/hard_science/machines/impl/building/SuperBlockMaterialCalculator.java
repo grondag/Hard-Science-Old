@@ -26,8 +26,8 @@ public class SuperBlockMaterialCalculator
     
     public SuperBlockMaterialCalculator(ISuperModelState modelState, BlockSubstance requestedSubstance, int lightValue)
     {
-
-        this.nanoLights_nL = lightValue > 0 || modelState.getRenderPassSet().hasFlatRenderPass ? MatterUnits.nL_NANO_LIGHTS_PER_BLOCK : 0;
+        // TODO: require minimal nanolights if has glow rendering but no lights
+        this.nanoLights_nL = lightValue > 0 ? MatterUnits.nL_NANO_LIGHTS_PER_BLOCK : 0;
         
         final long volume = (long) (Useful.volumeAABB(modelState.collisionBoxes(BlockPos.ORIGIN)) * MatterUnits.nL_ONE_BLOCK);
         

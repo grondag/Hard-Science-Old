@@ -28,7 +28,7 @@ public class VirtualTileEntityTESR extends VirtualTileEntity
         
         if(this.modelState != null) 
         {
-            RenderLayout renderLayout = modelState.getRenderPassSet().renderLayout;
+            RenderLayout renderLayout = modelState.getRenderLayout();
             this.renderSolid = renderLayout.containsBlockRenderLayer(BlockRenderLayer.SOLID);
             this.renderTranslucent = renderLayout.containsBlockRenderLayer(BlockRenderLayer.TRANSLUCENT);
         }
