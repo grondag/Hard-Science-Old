@@ -109,10 +109,6 @@ public class ModTextures
     public static final ITexturePalette BIGTEX_GRANITE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_GRANITE);
     public static final ITexturePalette BIGTEX_GRANITE_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_GRANITE_ZOOM);
 
-    public static final ITexturePalette BIGTEX_MARBLE = TexturePaletteRegistry.addTexturePallette("marble", "marble", new TexturePaletteSpec(BIGTEX_WEATHERED_STONE));
-    public static final ITexturePalette BIGTEX_MARBLE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_MARBLE);
-    public static final ITexturePalette BIGTEX_MARBLE_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_MARBLE_ZOOM);
-
     public static final ITexturePalette BIGTEX_SLATE = TexturePaletteRegistry.addTexturePallette("slate", "slate", new TexturePaletteSpec(BIGTEX_WEATHERED_STONE));
     public static final ITexturePalette BIGTEX_SLATE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_SLATE);
     public static final ITexturePalette BIGTEX_SLATE_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_SLATE_ZOOM);
