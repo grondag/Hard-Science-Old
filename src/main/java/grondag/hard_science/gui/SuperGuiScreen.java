@@ -15,7 +15,6 @@ import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.color.BlockColorMapProvider;
 import grondag.exotic_matter.model.color.ColorMap;
 import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
-import grondag.exotic_matter.model.color.Translucency;
 import grondag.exotic_matter.model.painting.IQuadColorizer;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.state.ISuperModelState;
@@ -148,18 +147,19 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             hasUpdates = true;
         }
 
-        Translucency newTrans = materialPicker.getSubstance().isTranslucent
-                ? translucencyPicker.getTranslucency()
-                        : Translucency.CLEAR;
-        if(newTrans == null)
-        {
-            newTrans = Translucency.CLEAR;
-        }
-        if(newTrans != modelState.getTranslucency() )
-        {
-            modelState.setTranslucency(newTrans);
-            hasUpdates = true;
-        }
+        //FIXME: needs redone now that each paint layer has own alpha
+//        Translucency newTrans = materialPicker.getSubstance().isTranslucent
+//                ? translucencyPicker.getTranslucency()
+//                        : Translucency.CLEAR;
+//        if(newTrans == null)
+//        {
+//            newTrans = Translucency.CLEAR;
+//        }
+//        if(newTrans != modelState.getTranslucency() )
+//        {
+//            modelState.setTranslucency(newTrans);
+//            hasUpdates = true;
+//        }
         
         if(outerToggle.isOn() != modelState.isOuterLayerEnabled())
         {
@@ -478,7 +478,8 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         lampTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
 
         translucencyPicker.setVisible(materialPicker.getSubstance().isTranslucent);
-        translucencyPicker.setTranslucency(modelState.getTranslucency());
+        //FIXME: needs redone now that each layer has alpha
+//        translucencyPicker.setTranslucency(modelState.getTranslucency());
 
         shapeGui.loadSettings(modelState);
         

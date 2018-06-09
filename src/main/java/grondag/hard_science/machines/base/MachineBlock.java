@@ -11,7 +11,6 @@ import grondag.exotic_matter.model.color.BlockColorMapProvider;
 import grondag.exotic_matter.model.color.Chroma;
 import grondag.exotic_matter.model.color.Hue;
 import grondag.exotic_matter.model.color.Luminance;
-import grondag.exotic_matter.model.color.Translucency;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelState;
@@ -88,7 +87,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
             modelState.setTexture(PaintLayer.MIDDLE, decalTex);
             modelState.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
             modelState.setTranslucent(PaintLayer.MIDDLE, true);
-            modelState.setTranslucency(Translucency.CLEAR);
+            modelState.setAlpha(PaintLayer.MIDDLE, 0x19);
         }
         
         if(borderTex != null)

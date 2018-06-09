@@ -11,6 +11,10 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+/**
+ * TODO: Rewrite to handle alpha in each paint layer now.
+ * Then remove translucency enum.
+ */
 @SideOnly(Side.CLIENT)
 public class TranslucencyPicker extends GuiControl<TranslucencyPicker>
 {
