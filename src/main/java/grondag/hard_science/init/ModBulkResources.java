@@ -73,7 +73,7 @@ public class ModBulkResources
     public final static BulkResource MINERAL_FILLER = register("mineral_filler", MatterColors.DEPLETED_MINERAL_DUST, Compounds.MINERAL_FILLER, 20, 1, MatterPhase.SOLID, 2.0);
 
     public final static BulkResource MICRONIZED_STONE = register("micronized_stone", MatterColors.RAW_MINERAL_DUST, Compounds.STONE, 20, 1, MatterPhase.SOLID, 2.0);    
-    public final static BulkResource MICRONIZED_BASALT = register("micronized_basalt", BlockColorMapProvider.COLOR_BASALT.getColor(EnumColorMap.BASE), Compounds.BASALT, 20, 1, MatterPhase.SOLID, 2.0);    
+    public final static BulkResource MICRONIZED_BASALT = register("micronized_basalt", BlockColorMapProvider.COLOR_BASALT, Compounds.BASALT, 20, 1, MatterPhase.SOLID, 2.0);    
 
     public final static BulkResource H2_GAS = register("h2_gas", 0xFFEA3323, Molecules.H2_GAS, 20, 1);
     public final static BulkResource N2_GAS = register("n2_gas", 0xFF526FDC, Molecules.N2_GAS, 20, 1);

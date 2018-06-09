@@ -13,8 +13,10 @@ import org.lwjgl.input.Mouse;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.color.BlockColorMapProvider;
-import grondag.exotic_matter.model.color.Translucency;
+import grondag.exotic_matter.model.color.ColorMap;
 import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
+import grondag.exotic_matter.model.color.Translucency;
+import grondag.exotic_matter.model.painting.IQuadColorizer;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.texture.ITexturePalette;
@@ -207,9 +209,13 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         }
     }
 
+    /** Hack to deal with removing color maps from model state */
+    @Deprecated
+    private int[] lastColorMapID = {-1, -1, -1, -1, -1};
+    
     private void updateItemPreviewSub(PaintLayer layer)
     {
-        if(modelState.getColorMap(layer).ordinal != colorPicker[layer.dynamicIndex].getColorMapID())
+        if(lastColorMapID[layer.dynamicIndex] != colorPicker[layer.dynamicIndex].getColorMapID())
         {
             updateColors(layer);
             hasUpdates = true;
@@ -245,7 +251,9 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
     private void updateColors(PaintLayer layer)
     {
-        modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
+        lastColorMapID[layer.dynamicIndex] = colorPicker[layer.dynamicIndex].getColorMapID();
+        ColorMap map = BlockColorMapProvider.INSTANCE.getColorMap(lastColorMapID[layer.dynamicIndex]);
+        modelState.setColorMap(layer, map);
         textureTabBar[layer.dynamicIndex].borderColor = BlockColorMapProvider.INSTANCE
                 .getColorMap(colorPicker[layer.dynamicIndex].getColorMapID())
                 .getColor(modelState.isFullBrightness(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
@@ -254,8 +262,8 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         {
             // refresh base color on overlay layers if it has changed
             int baseColor = modelState.isFullBrightness(PaintLayer.BASE)
-                    ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
-                    : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
+                    ? map.getColor(EnumColorMap.LAMP)
+                    : map.getColor(EnumColorMap.BASE);
 
             textureTabBar[PaintLayer.MIDDLE.dynamicIndex].baseColor = baseColor;
             textureTabBar[PaintLayer.OUTER.dynamicIndex].baseColor = baseColor;
@@ -484,14 +492,16 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             t.setSelected(tex == TexturePaletteRegistry.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
             t.borderColor = modelState.isFullBrightness(layer)
-                    ? modelState.getColorMap(layer).getColor(EnumColorMap.LAMP)
-                    : modelState.getColorMap(layer).getColor(EnumColorMap.BASE);
+                    ? IQuadColorizer.lampColor(modelState.getColorARGB(layer))
+                    : modelState.getColorARGB(layer);
             t.baseColor = modelState.isFullBrightness(PaintLayer.BASE)
-                    ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
-                    : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
+                    ? IQuadColorizer.lampColor(modelState.getColorARGB(PaintLayer.BASE))
+                    : modelState.getColorARGB(PaintLayer.BASE);
 
             ColorPicker c = colorPicker[layer.dynamicIndex];
-            c.setColorMapID(modelState.getColorMap(layer).ordinal);
+            
+            //FIXME: not going to work - commented to allow compile after removing color map from model state
+            //c.setColorMapID(modelState.getColorMap(layer).ordinal);
             
             c.showLampColors = modelState.isFullBrightness(layer);
             fullBrightToggle[layer.dynamicIndex].setOn(modelState.isFullBrightness(layer));

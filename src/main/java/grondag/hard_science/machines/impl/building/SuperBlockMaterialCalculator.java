@@ -1,12 +1,11 @@
 package grondag.hard_science.machines.impl.building;
 
 import grondag.exotic_matter.block.BlockSubstance;
-import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.varia.ColorHelper;
-import grondag.exotic_matter.varia.Useful;
 import grondag.exotic_matter.varia.ColorHelper.CMY;
+import grondag.exotic_matter.varia.Useful;
 import grondag.hard_science.init.ModSubstances;
 import grondag.hard_science.matter.MatterUnits;
 import grondag.hard_science.matter.VolumeUnits;
@@ -61,7 +60,7 @@ public class SuperBlockMaterialCalculator
         }
        
         
-        CMY cmy = ColorHelper.cmy(modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE));
+        CMY cmy = ColorHelper.cmy(modelState.getColorARGB(PaintLayer.BASE));
         
         int basis = 5;
         float cyan = cmy.cyan * basis;
@@ -71,7 +70,7 @@ public class SuperBlockMaterialCalculator
         if(modelState.isMiddleLayerEnabled())
         {
             basis++;
-            cmy = ColorHelper.cmy(modelState.getColorMap(PaintLayer.MIDDLE).getColor(EnumColorMap.BASE));
+            cmy = ColorHelper.cmy(modelState.getColorARGB(PaintLayer.MIDDLE));
             if(cmy.cyan != 0) cyan += cmy.cyan;
             if(cmy.magenta != 0) magenta += cmy.magenta;
             if(cmy.yellow != 0) yellow += cmy.yellow;
@@ -80,7 +79,7 @@ public class SuperBlockMaterialCalculator
         if(modelState.isOuterLayerEnabled())
         {
             basis++;
-            cmy = ColorHelper.cmy(modelState.getColorMap(PaintLayer.OUTER).getColor(EnumColorMap.BASE));
+            cmy = ColorHelper.cmy(modelState.getColorARGB(PaintLayer.OUTER));
             if(cmy.cyan != 0) cyan += cmy.cyan;
             if(cmy.magenta != 0) magenta += cmy.magenta;
             if(cmy.yellow != 0) yellow += cmy.yellow;
@@ -89,7 +88,7 @@ public class SuperBlockMaterialCalculator
         if(modelState.hasLampSurface())
         {
             basis++;
-            cmy = ColorHelper.cmy(modelState.getColorMap(PaintLayer.LAMP).getColor(EnumColorMap.BASE));
+            cmy = ColorHelper.cmy(modelState.getColorARGB(PaintLayer.LAMP));
             if(cmy.cyan != 0) cyan += cmy.cyan;
             if(cmy.magenta != 0) magenta += cmy.magenta;
             if(cmy.yellow != 0) yellow += cmy.yellow;
