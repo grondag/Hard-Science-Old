@@ -10,9 +10,6 @@ import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
 import grondag.exotic_matter.varia.BitPacker;
-import grondag.exotic_matter.varia.BitPacker.BitElement.BooleanElement;
-import grondag.exotic_matter.varia.BitPacker.BitElement.EnumElement;
-import grondag.exotic_matter.varia.BitPacker.BitElement.IntElement;
 import grondag.exotic_matter.world.PackedBlockPos;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import net.minecraft.nbt.NBTTagCompound;
@@ -111,28 +108,28 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         RESERVED27;
     }
     
-    private static BitPacker PACKER = new BitPacker();
+    private static BitPacker<MachineControlState> PACKER = new BitPacker<MachineControlState>(s -> s.bits, (s,b) -> s.bits = b);
     
-    private static EnumElement<ControlMode> PACKED_CONTROL_MODE = PACKER.createEnumElement(ControlMode.class);
-    private static EnumElement<RenderLevel> PACKED_RENDER_LEVEL = PACKER.createEnumElement(RenderLevel.class);
-    private static BooleanElement PACKED_HAS_MODELSTATE = PACKER.createBooleanElement();
-    private static IntElement PACKED_META = PACKER.createIntElement(16);
-    private static IntElement PACKED_LIGHT_VALUE = PACKER.createIntElement(16);
-    private static IntElement PACKED_SUBSTANCE = PACKER.createIntElement(BlockSubstance.MAX_SUBSTANCES);
-    private static EnumElement<MachineState> PACKED_MACHINE_STATAE = PACKER.createEnumElement(MachineState.class);
-    private static BooleanElement PACKED_HAS_JOB_TICKS = PACKER.createBooleanElement();
-    private static BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
-    private static BooleanElement PACKED_HAS_MATERIAL_BUFFER = PACKER.createBooleanElement();
-    private static BooleanElement PACKED_HAS_POWER_SUPPLY= PACKER.createBooleanElement();
-    private static BooleanElement PACKED_HAS_RECIPE= PACKER.createBooleanElement();
+    private static BitPacker<MachineControlState>.EnumElement<ControlMode> PACKED_CONTROL_MODE = PACKER.createEnumElement(ControlMode.class);
+    private static BitPacker<MachineControlState>.EnumElement<RenderLevel> PACKED_RENDER_LEVEL = PACKER.createEnumElement(RenderLevel.class);
+    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_MODELSTATE = PACKER.createBooleanElement();
+    private static BitPacker<MachineControlState>.IntElement PACKED_META = PACKER.createIntElement(16);
+    private static BitPacker<MachineControlState>.IntElement PACKED_LIGHT_VALUE = PACKER.createIntElement(16);
+    private static BitPacker<MachineControlState>.IntElement PACKED_SUBSTANCE = PACKER.createIntElement(BlockSubstance.MAX_SUBSTANCES);
+    private static BitPacker<MachineControlState>.EnumElement<MachineState> PACKED_MACHINE_STATAE = PACKER.createEnumElement(MachineState.class);
+    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_JOB_TICKS = PACKER.createBooleanElement();
+    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
+    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_MATERIAL_BUFFER = PACKER.createBooleanElement();
+    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_POWER_SUPPLY= PACKER.createBooleanElement();
+    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_RECIPE= PACKER.createBooleanElement();
 
     private static final long DEFAULT_BITS;
     
     static
     {
         long bits = 0;
-        bits = PACKED_CONTROL_MODE.setValue(ControlMode.ON, bits);
-        bits = PACKED_RENDER_LEVEL.setValue(RenderLevel.EXTENDED_WHEN_VISIBLE, bits);
+        bits |= PACKED_CONTROL_MODE.getBits(ControlMode.ON);
+        bits |= PACKED_RENDER_LEVEL.getBits(RenderLevel.EXTENDED_WHEN_VISIBLE);
         DEFAULT_BITS = bits;
     }
     
@@ -148,18 +145,18 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     // ACCESS METHODS
     //////////////////////////////////////////////////////////////////////
     
-    public ControlMode getControlMode() { return PACKED_CONTROL_MODE.getValue(bits); }
-    public void setControlMode(@Nonnull ControlMode value) { bits = PACKED_CONTROL_MODE.setValue(value, bits); }
+    public ControlMode getControlMode() { return PACKED_CONTROL_MODE.getValue(this); }
+    public void setControlMode(@Nonnull ControlMode value) { PACKED_CONTROL_MODE.setValue(value, this); }
     
-    public RenderLevel getRenderLevel() { return PACKED_RENDER_LEVEL.getValue(bits); }
-    public void setRenderLevel(@Nonnull RenderLevel value) { bits = PACKED_RENDER_LEVEL.setValue(value, bits); }
+    public RenderLevel getRenderLevel() { return PACKED_RENDER_LEVEL.getValue(this); }
+    public void setRenderLevel(@Nonnull RenderLevel value) { PACKED_RENDER_LEVEL.setValue(value, this); }
     
     /**
      * If true, then modelState should be populated.
      * Used by block fabricators
      */
-    public boolean hasModelState() { return PACKED_HAS_MODELSTATE.getValue(bits); }
-    private void updateModelStateStatus() { bits = PACKED_HAS_MODELSTATE.setValue(this.modelState != null, bits); }
+    public boolean hasModelState() { return PACKED_HAS_MODELSTATE.getValue(this); }
+    private void updateModelStateStatus() { PACKED_HAS_MODELSTATE.setValue(this.modelState != null, this); }
     
     public ISuperModelState getModelState() { return this.modelState; }
     public void setModelState( @Nullable ISuperModelState value)
@@ -171,8 +168,8 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     /**
      * If true, then recipe should be populated.
      */
-    public boolean hasRecipe() { return PACKED_HAS_RECIPE.getValue(bits); }
-    private void updateRecipeStatus() { bits = PACKED_HAS_RECIPE.setValue(this.currentRecipe != null, bits); }
+    public boolean hasRecipe() { return PACKED_HAS_RECIPE.getValue(this); }
+    private void updateRecipeStatus() { PACKED_HAS_RECIPE.setValue(this.currentRecipe != null, this); }
     
     public GenericRecipe getRecipe() { return this.currentRecipe; }
     public void setRecipe( GenericRecipe value)
@@ -181,8 +178,8 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         this.updateRecipeStatus();
     }
     
-    public boolean hasTargetPos() { return PACKED_HAS_TARGET_POS.getValue(bits); }
-    private void updateTargetPosStatus() { bits = PACKED_HAS_TARGET_POS.setValue(this.targetPos != null, bits); }
+    public boolean hasTargetPos() { return PACKED_HAS_TARGET_POS.getValue(this); }
+    private void updateTargetPosStatus() { PACKED_HAS_TARGET_POS.setValue(this.targetPos != null, this); }
     
     public BlockPos getTargetPos() { return this.targetPos; }
     public void setTargetPos( BlockPos value)
@@ -196,25 +193,25 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
      * While values are always non-null, they are not always valid.  
      * Check that a modelState or other related attribute also exists
      */
-    public @Nonnull BlockSubstance getSubstance() { return BlockSubstance.get(PACKED_SUBSTANCE.getValue(bits)); }
-    public void setSubstance(@Nonnull BlockSubstance value) { bits = PACKED_SUBSTANCE.setValue(value.ordinal, bits); }
+    public @Nonnull BlockSubstance getSubstance() { return BlockSubstance.get(PACKED_SUBSTANCE.getValue(this)); }
+    public void setSubstance(@Nonnull BlockSubstance value) { PACKED_SUBSTANCE.setValue(value.ordinal, this); }
     
     /** intended for block fabricators, but usage determined by machine. */
-    public int getLightValue() { return PACKED_LIGHT_VALUE.getValue(bits); }
-    public void setLightValue(int value) { bits = PACKED_LIGHT_VALUE.setValue(value, bits); }
+    public int getLightValue() { return PACKED_LIGHT_VALUE.getValue(this); }
+    public void setLightValue(int value) { PACKED_LIGHT_VALUE.setValue(value, this); }
     
     /** intended for block fabricators, but usage determined by machine. */
-    public int getMeta() { return PACKED_META.getValue(bits); }
-    public void setMeta(int value) { bits = PACKED_META.setValue(value, bits); }
+    public int getMeta() { return PACKED_META.getValue(this); }
+    public void setMeta(int value) { PACKED_META.setValue(value, this); }
     
-    public MachineState getMachineState() { return PACKED_MACHINE_STATAE.getValue(bits); }
-    public void setMachineState(@Nonnull MachineState value) { bits = PACKED_MACHINE_STATAE.setValue(value, bits); }
+    public MachineState getMachineState() { return PACKED_MACHINE_STATAE.getValue(this); }
+    public void setMachineState(@Nonnull MachineState value) { PACKED_MACHINE_STATAE.setValue(value, this); }
     
-    public boolean hasJobTicks() { return PACKED_HAS_JOB_TICKS.getValue(this.bits); }
+    public boolean hasJobTicks() { return PACKED_HAS_JOB_TICKS.getValue(this); }
     
     private void updateJobTicksStatus()
     {
-        this.bits = PACKED_HAS_JOB_TICKS.setValue(this.jobDurationTicks >0 || this.jobRemainingTicks >0, this.bits);
+        PACKED_HAS_JOB_TICKS.setValue(this.jobDurationTicks > 0 || this.jobRemainingTicks > 0, this);
     }
     
     public short getJobDurationTicks() { return this.jobDurationTicks; }
@@ -265,11 +262,11 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         this.updateJobTicksStatus();
     }
     
-    public boolean hasMaterialBuffer() { return PACKED_HAS_MATERIAL_BUFFER.getValue(bits); }
-    public void hasMaterialBuffer(boolean hasBuffer) { bits = PACKED_HAS_MATERIAL_BUFFER.setValue(hasBuffer, bits); }
+    public boolean hasMaterialBuffer() { return PACKED_HAS_MATERIAL_BUFFER.getValue(this); }
+    public void hasMaterialBuffer(boolean hasBuffer) { PACKED_HAS_MATERIAL_BUFFER.setValue(hasBuffer, this); }
     
-    public boolean hasPowerSupply() { return PACKED_HAS_POWER_SUPPLY.getValue(bits); }
-    public void hasPowerSupply(boolean hasProvider) { bits = PACKED_HAS_POWER_SUPPLY.setValue(hasProvider, bits); }
+    public boolean hasPowerSupply() { return PACKED_HAS_POWER_SUPPLY.getValue(this); }
+    public void hasPowerSupply(boolean hasProvider) { PACKED_HAS_POWER_SUPPLY.setValue(hasProvider, this); }
     
     //////////////////////////////////////////////////////////////////////
     // Serialization Stuff                                              //

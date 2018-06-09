@@ -2,7 +2,6 @@ package grondag.hard_science.machines.support;
 
 import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.varia.BitPacker;
-import grondag.exotic_matter.varia.BitPacker.BitElement.BooleanElement;
 import net.minecraft.network.PacketBuffer;
 
 
@@ -14,10 +13,10 @@ import net.minecraft.network.PacketBuffer;
  */
 public class MachineStatusState implements IMessagePlus
 {
- private static BitPacker PACKER = new BitPacker();
+ private static BitPacker<MachineStatusState> PACKER = new BitPacker<MachineStatusState>(s -> s.bits, (s, b) -> s.bits = b);
     
-    private static BooleanElement PACKED_REDSTONE_POWER = PACKER.createBooleanElement();
-    private static BooleanElement PACKED_HAS_BACKLOG = PACKER.createBooleanElement();
+    private static BitPacker<MachineStatusState>.BooleanElement PACKED_REDSTONE_POWER = PACKER.createBooleanElement();
+    private static BitPacker<MachineStatusState>.BooleanElement PACKED_HAS_BACKLOG = PACKER.createBooleanElement();
 
     private static final int DEFAULT_BITS;
     
@@ -37,11 +36,11 @@ public class MachineStatusState implements IMessagePlus
     // ACCESS METHODS
     //////////////////////////////////////////////////////////////////////
     
-    public boolean hasRedstonePower() { return PACKED_REDSTONE_POWER.getValue(bits); }
-    public void setHasRestonePower(boolean value) { bits = PACKED_REDSTONE_POWER.setValue(value, bits); }
+    public boolean hasRedstonePower() { return PACKED_REDSTONE_POWER.getValue(this); }
+    public void setHasRestonePower(boolean value) { PACKED_REDSTONE_POWER.setValue(value, this); }
     
-    public boolean hasBacklog() { return PACKED_HAS_BACKLOG.getValue(bits); }
-    public void setHasBacklog(boolean value) { bits = PACKED_HAS_BACKLOG.setValue(value, bits); }
+    public boolean hasBacklog() { return PACKED_HAS_BACKLOG.getValue(this); }
+    public void setHasBacklog(boolean value) { PACKED_HAS_BACKLOG.setValue(value, this); }
 
     public int getMaxBacklog() { return this.maxBacklog; }
     public void setMaxBacklog(int value) { this.maxBacklog = value; }
