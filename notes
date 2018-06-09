@@ -3,6 +3,7 @@ Things to do
  	consider using block color handler to reduce # of baked quads in memory (get color from block during chunk build)
  	clean up / reorg model state docs
  	remove dynamic index from paint layer
+ 	make all model state methods final
  	
  Improve lava textures
  Lava Sounds

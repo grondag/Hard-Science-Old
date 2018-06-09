@@ -240,11 +240,11 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             }
         }
 
-        if(((modelState.isFullBrightness(layer)) != fullBrightToggle[layer.dynamicIndex].isOn()))
+        if(((modelState.hasBrightness(layer)) != fullBrightToggle[layer.dynamicIndex].isOn()))
         {
-            modelState.setFullBrightness(layer, fullBrightToggle[layer.dynamicIndex].isOn());
+            modelState.setBrightness(layer, fullBrightToggle[layer.dynamicIndex].isOn() ? 15 : 0);
             updateColors(layer);
-            this.colorPicker[layer.dynamicIndex].showLampColors = modelState.isFullBrightness(layer);
+            this.colorPicker[layer.dynamicIndex].showLampColors = modelState.hasBrightness(layer);
             hasUpdates = true;
         }
     }
@@ -256,12 +256,12 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         modelState.setColorMap(layer, map);
         textureTabBar[layer.dynamicIndex].borderColor = BlockColorMapProvider.INSTANCE
                 .getColorMap(colorPicker[layer.dynamicIndex].getColorMapID())
-                .getColor(modelState.isFullBrightness(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
+                .getColor(modelState.hasBrightness(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
         
         if(layer == PaintLayer.BASE)
         {
             // refresh base color on overlay layers if it has changed
-            int baseColor = modelState.isFullBrightness(PaintLayer.BASE)
+            int baseColor = modelState.hasBrightness(PaintLayer.BASE)
                     ? map.getColor(EnumColorMap.LAMP)
                     : map.getColor(EnumColorMap.BASE);
 
@@ -492,10 +492,10 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             ITexturePalette tex = modelState.getTexture(layer);
             t.setSelected(tex == TexturePaletteRegistry.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
-            t.borderColor = modelState.isFullBrightness(layer)
+            t.borderColor = modelState.hasBrightness(layer)
                     ? IQuadColorizer.lampColor(modelState.getColorARGB(layer))
                     : modelState.getColorARGB(layer);
-            t.baseColor = modelState.isFullBrightness(PaintLayer.BASE)
+            t.baseColor = modelState.hasBrightness(PaintLayer.BASE)
                     ? IQuadColorizer.lampColor(modelState.getColorARGB(PaintLayer.BASE))
                     : modelState.getColorARGB(PaintLayer.BASE);
 
@@ -504,8 +504,8 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             //FIXME: not going to work - commented to allow compile after removing color map from model state
             //c.setColorMapID(modelState.getColorMap(layer).ordinal);
             
-            c.showLampColors = modelState.isFullBrightness(layer);
-            fullBrightToggle[layer.dynamicIndex].setOn(modelState.isFullBrightness(layer));
+            c.showLampColors = modelState.hasBrightness(layer);
+            fullBrightToggle[layer.dynamicIndex].setOn(modelState.hasBrightness(layer));
         }
     }
 
