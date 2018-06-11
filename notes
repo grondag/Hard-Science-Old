@@ -4,6 +4,8 @@ Things to do
  	clean up / reorg model state docs
  	remove dynamic index from paint layer
  	make all model state methods final
+ 	re-optimize terrain model caching - still worth? Maybe pre-populate most common and leave it at that?
+ 	cleam up terrain state, use bit packer instead of current mess
  	
  Improve lava textures
  Lava Sounds

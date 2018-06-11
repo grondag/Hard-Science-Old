@@ -65,7 +65,6 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         IMutablePolygon template = Poly.mutable(4);
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
-        template.setFullBrightness(false);
         template.setLockUV(true);
         template.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
         

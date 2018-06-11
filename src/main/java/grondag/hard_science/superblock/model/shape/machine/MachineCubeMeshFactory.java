@@ -91,7 +91,6 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         IMutablePolygon template = Poly.mutable(4);
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
-        template.setFullBrightness(false);
         template.setMinU(0);
         template.setMinV(0);
         template.setMaxU(16);
