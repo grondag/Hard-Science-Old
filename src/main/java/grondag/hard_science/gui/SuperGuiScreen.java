@@ -168,7 +168,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
             if(!outerToggle.isOn())
             {
-                textureTabBar[PaintLayer.OUTER.dynamicIndex].setSelected(null);
+                textureTabBar[PaintLayer.OUTER.ordinal()].setSelected(null);
             }
         }
         
@@ -179,13 +179,13 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             
             if(!middleToggle.isOn())
             {
-                textureTabBar[PaintLayer.MIDDLE.dynamicIndex].setSelected(null);
+                textureTabBar[PaintLayer.MIDDLE.ordinal()].setSelected(null);
             }
         }
 
         // needs to happen before toggle checks because it turns on
         // middle/outer toggles when a texture is selected
-        for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
+        for(PaintLayer layer : PaintLayer.VALUES)
         {
             updateItemPreviewSub(layer);
         }
@@ -215,13 +215,13 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
     
     private void updateItemPreviewSub(PaintLayer layer)
     {
-        if(lastColorMapID[layer.dynamicIndex] != colorPicker[layer.dynamicIndex].getColorMapID())
+        if(lastColorMapID[layer.ordinal()] != colorPicker[layer.ordinal()].getColorMapID())
         {
             updateColors(layer);
             hasUpdates = true;
         }
 
-        ITexturePalette tex = textureTabBar[layer.dynamicIndex].getSelected();
+        ITexturePalette tex = textureTabBar[layer.ordinal()].getSelected();
         if(tex != null && modelState.getTexture(layer) != tex)
         {
             modelState.setTexture(layer, tex);
@@ -240,22 +240,22 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             }
         }
 
-        if(((modelState.hasBrightness(layer)) != fullBrightToggle[layer.dynamicIndex].isOn()))
+        if(((modelState.hasBrightness(layer)) != fullBrightToggle[layer.ordinal()].isOn()))
         {
-            modelState.setBrightness(layer, fullBrightToggle[layer.dynamicIndex].isOn() ? 15 : 0);
+            modelState.setBrightness(layer, fullBrightToggle[layer.ordinal()].isOn() ? 15 : 0);
             updateColors(layer);
-            this.colorPicker[layer.dynamicIndex].showLampColors = modelState.hasBrightness(layer);
+            this.colorPicker[layer.ordinal()].showLampColors = modelState.hasBrightness(layer);
             hasUpdates = true;
         }
     }
 
     private void updateColors(PaintLayer layer)
     {
-        lastColorMapID[layer.dynamicIndex] = colorPicker[layer.dynamicIndex].getColorMapID();
-        ColorMap map = BlockColorMapProvider.INSTANCE.getColorMap(lastColorMapID[layer.dynamicIndex]);
+        lastColorMapID[layer.ordinal()] = colorPicker[layer.ordinal()].getColorMapID();
+        ColorMap map = BlockColorMapProvider.INSTANCE.getColorMap(lastColorMapID[layer.ordinal()]);
         modelState.setColorMap(layer, map);
-        textureTabBar[layer.dynamicIndex].borderColor = BlockColorMapProvider.INSTANCE
-                .getColorMap(colorPicker[layer.dynamicIndex].getColorMapID())
+        textureTabBar[layer.ordinal()].borderColor = BlockColorMapProvider.INSTANCE
+                .getColorMap(colorPicker[layer.ordinal()].getColorMapID())
                 .getColor(modelState.hasBrightness(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
         
         if(layer == PaintLayer.BASE)
@@ -265,9 +265,9 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
                     ? map.getColor(EnumColorMap.LAMP)
                     : map.getColor(EnumColorMap.BASE);
 
-            textureTabBar[PaintLayer.MIDDLE.dynamicIndex].baseColor = baseColor;
-            textureTabBar[PaintLayer.OUTER.dynamicIndex].baseColor = baseColor;
-            textureTabBar[PaintLayer.LAMP.dynamicIndex].baseColor = baseColor;
+            textureTabBar[PaintLayer.MIDDLE.ordinal()].baseColor = baseColor;
+            textureTabBar[PaintLayer.OUTER.ordinal()].baseColor = baseColor;
+            textureTabBar[PaintLayer.LAMP.ordinal()].baseColor = baseColor;
         }
     }
     
@@ -362,21 +362,21 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             materialPicker = new MaterialPicker();
             shapePicker = new ShapePicker();
             translucencyPicker = new TranslucencyPicker();
-            textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
-            colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
+            textureTabBar = new TexturePicker[PaintLayer.SIZE];
+            colorPicker = new ColorPicker[PaintLayer.SIZE];
 
             outerToggle = new Toggle().setLabel("Enabled");
             middleToggle = new Toggle().setLabel("Enabled");
             baseTranslucentToggle = new Toggle().setLabel("Translucent");
             lampTranslucentToggle = new Toggle().setLabel("Translucent");
-            fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
+            fullBrightToggle = new Toggle[PaintLayer.SIZE];
             brightnessSlider = new BrightnessSlider(mc);
 
-            for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
+            for(int i = 0; i < PaintLayer.SIZE; i++)
             {
                 TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<ITexturePalette>(), xStart + CONTROL_EXTERNAL_MARGIN, yStart + 100).setVerticalWeight(5);
                 // only render textures with alpha for layers that will render that way in world
-                t.renderAlpha = PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.MIDDLE || PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.OUTER;
+                t.renderAlpha = PaintLayer.VALUES[i] == PaintLayer.MIDDLE || PaintLayer.VALUES[i] == PaintLayer.OUTER;
                 textureTabBar[i] = t;
 
                 colorPicker[i] = (ColorPicker) new ColorPicker().setHorizontalWeight(5);
@@ -483,9 +483,9 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 
         shapeGui.loadSettings(modelState);
         
-        for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
+        for(PaintLayer layer : PaintLayer.VALUES)
         {
-            TexturePicker t = textureTabBar[layer.dynamicIndex];
+            TexturePicker t = textureTabBar[layer.ordinal()];
 
             t.clear();
             t.addAll(TexturePaletteRegistry.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
@@ -499,13 +499,13 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
                     ? IQuadColorizer.lampColor(modelState.getColorARGB(PaintLayer.BASE))
                     : modelState.getColorARGB(PaintLayer.BASE);
 
-            ColorPicker c = colorPicker[layer.dynamicIndex];
+            ColorPicker c = colorPicker[layer.ordinal()];
             
             //FIXME: not going to work - commented to allow compile after removing color map from model state
             //c.setColorMapID(modelState.getColorMap(layer).ordinal);
             
             c.showLampColors = modelState.hasBrightness(layer);
-            fullBrightToggle[layer.dynamicIndex].setOn(modelState.hasBrightness(layer));
+            fullBrightToggle[layer.ordinal()].setOn(modelState.hasBrightness(layer));
         }
     }
 

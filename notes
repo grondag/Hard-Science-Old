@@ -1,5 +1,9 @@
 Things to do
  	
+ 	find way to tag quads with position or other attributes in surface
+ 	make shader a property of paint layer
+ 	make surfaces flag which paint layer(s) (and thus shader) applies to them
+ 	
  	consider using block color handler to reduce # of baked quads in memory (get color from block during chunk build)
  	clean up / reorg model state docs
  	remove dynamic index from paint layer
