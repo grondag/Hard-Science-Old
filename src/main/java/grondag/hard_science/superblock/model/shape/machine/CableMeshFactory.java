@@ -65,7 +65,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setLockUV(true);
-        template.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
+        template.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
         
         SimpleJoin join = modelState.getSimpleJoin();
         

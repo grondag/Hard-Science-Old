@@ -101,8 +101,8 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         {
             
             result.surfaceInstance = hasFront && face == rotation.horizontalFace  
-                    ? MachineMeshFactory.INSTANCE_LAMP 
-                    : MachineMeshFactory.INSTANCE_MAIN;
+                    ? MachineMeshFactory.SURFACE_LAMP 
+                    : MachineMeshFactory.SURFACE_MAIN;
             
             builder.add(result.makeRawFace(face));
         }

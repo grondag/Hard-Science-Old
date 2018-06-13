@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
 import org.lwjgl.input.Mouse;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.exotic_matter.model.color.BlockColorMapProvider;
 import grondag.exotic_matter.model.color.ColorMap;
 import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;

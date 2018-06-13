@@ -5,10 +5,9 @@ import java.util.List;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.mesh.ShapeMeshGenerator;
+import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.painting.Surface;
 import grondag.exotic_matter.model.painting.SurfaceTopology;
-import grondag.exotic_matter.model.painting.SurfaceType;
-import grondag.exotic_matter.model.painting.Surface.SurfaceInstance;
 import grondag.exotic_matter.model.primitives.IPolygon;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
@@ -40,11 +39,14 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     
     private static final ShapeMeshGenerator[] HANDLERS;
     
-    private static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-    private static final Surface SURFACE_LAMP = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
+    protected static final Surface SURFACE_MAIN = Surface.builder(SurfaceTopology.CUBIC)
+            .withDisabledLayers(PaintLayer.CUT, PaintLayer.LAMP)
+            .build();
     
-    public static final SurfaceInstance INSTANCE_MAIN = SURFACE_MAIN.unitInstance;
-    public static final SurfaceInstance INSTANCE_LAMP = SURFACE_LAMP.unitInstance.withAllowBorders(false);
+    protected static final Surface SURFACE_LAMP = Surface.builder(SurfaceTopology.CUBIC)
+            .withAllowBorders(false)
+            .withEnabledLayers(PaintLayer.LAMP)
+            .build();
     
     static
     {

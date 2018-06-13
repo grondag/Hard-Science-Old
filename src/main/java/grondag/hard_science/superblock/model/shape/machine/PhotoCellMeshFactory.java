@@ -50,7 +50,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
         ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
         
         IMutablePolygon quad = Poly.mutableCopyOf(template);
-        quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_MAIN);
+        quad.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
         builder.add(quad);
@@ -58,14 +58,14 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
             quad = Poly.mutableCopyOf(template);
-            quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
+            quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
             quad.setNominalFace(face);
             quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
             builder.add(quad);
         }
         
         quad = Poly.mutableCopyOf(template);
-        quad.setSurfaceInstance(MachineMeshFactory.INSTANCE_LAMP);
+        quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);
         builder.add(quad);
