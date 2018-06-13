@@ -42,8 +42,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     
     public CableMeshFactory(double cableRadius, boolean onGround)
     {
-        super(ModelStateData.STATE_FLAG_NEEDS_SIMPLE_JOIN | ModelStateData.STATE_FLAG_NEEDS_SPECIES, 
-                MachineMeshFactory.SURFACE_MAIN); 
+        super(ModelStateData.STATE_FLAG_NEEDS_SIMPLE_JOIN | ModelStateData.STATE_FLAG_NEEDS_SPECIES); 
         
         this.CABLE_RADIUS = cableRadius;
         this.CABLE_Y_CENTER = onGround ? cableRadius : 0.5;
@@ -179,5 +178,11 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     public ICollisionHandler collisionHandler()
     {
         return this;
+    }
+
+    @Override
+    public boolean hasLampSurface(ISuperModelState modelState)
+    {
+        return false;
     }
 }

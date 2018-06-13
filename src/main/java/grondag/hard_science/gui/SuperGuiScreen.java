@@ -12,6 +12,7 @@ import javax.annotation.Nonnull;
 import org.lwjgl.input.Mouse;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.init.ModTextures;
 import grondag.exotic_matter.model.color.BlockColorMapProvider;
 import grondag.exotic_matter.model.color.ColorMap;
 import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
@@ -161,26 +162,18 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 //            hasUpdates = true;
 //        }
         
-        if(outerToggle.isOn() != modelState.isOuterLayerEnabled())
+        if(!outerToggle.isOn() && modelState.isLayerEnabled(PaintLayer.OUTER))
         {
-            modelState.setOuterLayerEnabled(outerToggle.isOn());
+            modelState.disableLayer(PaintLayer.OUTER);
             hasUpdates = true;
-
-            if(!outerToggle.isOn())
-            {
-                textureTabBar[PaintLayer.OUTER.ordinal()].setSelected(null);
-            }
+            textureTabBar[PaintLayer.OUTER.ordinal()].setSelected(null);
         }
         
-        if(middleToggle.isOn() != modelState.isMiddleLayerEnabled())
+        if(!middleToggle.isOn() && modelState.isLayerEnabled(PaintLayer.MIDDLE))
         {
-            modelState.setMiddleLayerEnabled(middleToggle.isOn());
+            modelState.disableLayer(PaintLayer.MIDDLE);
             hasUpdates = true;
-            
-            if(!middleToggle.isOn())
-            {
-                textureTabBar[PaintLayer.MIDDLE.ordinal()].setSelected(null);
-            }
+            textureTabBar[PaintLayer.MIDDLE.ordinal()].setSelected(null);
         }
 
         // needs to happen before toggle checks because it turns on
@@ -231,12 +224,10 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             if(layer == PaintLayer.OUTER && !outerToggle.isOn())
             {
                 outerToggle.setOn(true);
-                modelState.setOuterLayerEnabled(true);
             }
             else if(layer == PaintLayer.MIDDLE && !middleToggle.isOn())
             {
                 middleToggle.setOn(true);
-                modelState.setMiddleLayerEnabled(true);
             }
         }
 
@@ -469,8 +460,8 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         materialPicker.setSubstance(SuperBlockStackHelper.getStackSubstance(itemPreview.previewItem));
         shapePicker.setSelected(modelState.getShape());
         brightnessSlider.setBrightness(SuperBlockStackHelper.getStackLightValue(itemPreview.previewItem));
-        outerToggle.setOn(modelState.isOuterLayerEnabled());
-        middleToggle.setOn(modelState.isMiddleLayerEnabled());
+        outerToggle.setOn(modelState.isLayerEnabled(PaintLayer.OUTER));
+        middleToggle.setOn(modelState.isLayerEnabled(PaintLayer.MIDDLE));
         baseTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.BASE));
         lampTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.LAMP));
 

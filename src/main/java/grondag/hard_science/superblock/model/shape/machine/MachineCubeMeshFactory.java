@@ -37,8 +37,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
      */
     public MachineCubeMeshFactory(boolean hasFront)
     {
-        super(hasFront ? ModelStateData.STATE_FLAG_HAS_AXIS_ROTATION : ModelStateData.STATE_FLAG_NONE, 
-                MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
+        super(hasFront ? ModelStateData.STATE_FLAG_HAS_AXIS_ROTATION : ModelStateData.STATE_FLAG_NONE); 
         
         this.cubeQuads0 = getCubeQuads(Rotation.ROTATE_NONE, hasFront);
         if(hasFront)
@@ -143,5 +142,11 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     public SideShape sideShape(ISuperModelState modelState, EnumFacing side)
     {
         return SideShape.SOLID;
+    }
+
+    @Override
+    public boolean hasLampSurface(ISuperModelState modelState)
+    {
+        return true;
     }
 }

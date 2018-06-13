@@ -67,7 +67,7 @@ public class SuperBlockMaterialCalculator
         float magenta = cmy.magenta * basis;
         float yellow = cmy.yellow * basis;
         
-        if(modelState.isMiddleLayerEnabled())
+        if(modelState.isLayerEnabled(PaintLayer.MIDDLE))
         {
             basis++;
             cmy = ColorHelper.cmy(modelState.getColorARGB(PaintLayer.MIDDLE));
@@ -76,7 +76,7 @@ public class SuperBlockMaterialCalculator
             if(cmy.yellow != 0) yellow += cmy.yellow;
         }
         
-        if(modelState.isOuterLayerEnabled())
+        if(modelState.isLayerEnabled(PaintLayer.OUTER))
         {
             basis++;
             cmy = ColorHelper.cmy(modelState.getColorARGB(PaintLayer.OUTER));

@@ -30,8 +30,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     
     public PhotoCellMeshFactory(float height)
     {
-        super(ModelStateData.STATE_FLAG_NONE, 
-                MachineMeshFactory.SURFACE_MAIN, MachineMeshFactory.SURFACE_LAMP); 
+        super(ModelStateData.STATE_FLAG_NONE); 
         this.height = height;
         this.AABB = new AxisAlignedBB(0, 0, 0, 1, height, 1);
     }
@@ -120,5 +119,11 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     public AxisAlignedBB getRenderBoundingBox(ISuperModelState modelState)
     {
         return getCollisionBoundingBox(modelState);
+    }
+
+    @Override
+    public boolean hasLampSurface(ISuperModelState modelState)
+    {
+        return true;
     }
 }

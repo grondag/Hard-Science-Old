@@ -40,8 +40,8 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     
     private static final ShapeMeshGenerator[] HANDLERS;
     
-    public static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-    public static final Surface SURFACE_LAMP = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
+    private static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static final Surface SURFACE_LAMP = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
     
     public static final SurfaceInstance INSTANCE_MAIN = SURFACE_MAIN.unitInstance;
     public static final SurfaceInstance INSTANCE_LAMP = SURFACE_LAMP.unitInstance.withAllowBorders(false);
@@ -60,8 +60,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     
     public MachineMeshFactory()
     {
-        super(StateFormat.BLOCK, ModelStateData.STATE_FLAG_NONE, 
-                SURFACE_MAIN, SURFACE_LAMP); 
+        super(StateFormat.BLOCK, ModelStateData.STATE_FLAG_NONE); 
     }
 
     public static MachineShape getMachineShape(ISuperModelState modelState)
@@ -136,9 +135,9 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     }
     
     @Override
-    public List<Surface> getSurfaces(ISuperModelState modelState)
+    public boolean hasLampSurface(ISuperModelState modelState)
     {
-        return HANDLERS[getMachineShape(modelState).ordinal()].getSurfaces(modelState);
+        return true;
     }
 
 }
