@@ -15,13 +15,13 @@ import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.model.color.BlockColorMapProvider;
 import grondag.exotic_matter.model.color.ColorMap;
 import grondag.exotic_matter.model.color.ColorMap.EnumColorMap;
-import grondag.exotic_matter.model.painting.IQuadColorizer;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.texture.ITexturePalette;
 import grondag.exotic_matter.model.texture.TexturePaletteRegistry;
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.placement.SuperItemBlock;
+import grondag.exotic_matter.varia.ColorHelper;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.gui.control.BrightnessSlider;
 import grondag.hard_science.gui.control.Button;
@@ -483,10 +483,10 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             t.setSelected(tex == TexturePaletteRegistry.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
             t.borderColor = modelState.hasBrightness(layer)
-                    ? IQuadColorizer.lampColor(modelState.getColorARGB(layer))
+                    ? ColorHelper.lampColor(modelState.getColorARGB(layer))
                     : modelState.getColorARGB(layer);
             t.baseColor = modelState.hasBrightness(PaintLayer.BASE)
-                    ? IQuadColorizer.lampColor(modelState.getColorARGB(PaintLayer.BASE))
+                    ? ColorHelper.lampColor(modelState.getColorARGB(PaintLayer.BASE))
                     : modelState.getColorARGB(PaintLayer.BASE);
 
             ColorPicker c = colorPicker[layer.ordinal()];
