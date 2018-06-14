@@ -1,6 +1,7 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.common.collect.ImmutableList;
 
@@ -59,19 +60,26 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<IPolygon> getShapeQuads(ISuperModelState modelState)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
         switch(modelState.getAxisRotation())
         {
         case ROTATE_NONE:
         default:
-            return this.cubeQuads0;
+            this.cubeQuads0.forEach(target);
+            break;
+            
         case ROTATE_90:
-            return this.cubeQuads90;
+            this.cubeQuads90.forEach(target);
+            break;
+
         case ROTATE_180:
-            return this.cubeQuads180;
+            this.cubeQuads180.forEach(target);
+            break;
+
         case ROTATE_270:
-            return this.cubeQuads270;
+            this.cubeQuads270.forEach(target);
+            break;
         }
     }
    

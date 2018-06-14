@@ -1,6 +1,7 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.common.collect.ImmutableList;
 
@@ -40,20 +41,18 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<IPolygon> getShapeQuads(ISuperModelState modelState)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
         IMutablePolygon template = Poly.mutable(4);
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setLockUV(true);
 
-        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
-        
         IMutablePolygon quad = Poly.mutableCopyOf(template);
         quad.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
-        builder.add(quad);
+        target.accept(quad);
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
@@ -61,16 +60,14 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
             quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
             quad.setNominalFace(face);
             quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
-            builder.add(quad);
+            target.accept(quad);
         }
         
         quad = Poly.mutableCopyOf(template);
         quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);
-        builder.add(quad);
-        
-        return builder.build();
+        target.accept(quad);
     }
    
     @Override

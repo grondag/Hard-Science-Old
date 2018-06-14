@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.mesh.ShapeMeshGenerator;
@@ -76,9 +76,9 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     }
     
     @Override
-    public Collection<IPolygon> getShapeQuads(ISuperModelState modelState)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
-        return HANDLERS[getMachineShape(modelState).ordinal()].getShapeQuads(modelState);
+        HANDLERS[getMachineShape(modelState).ordinal()].produceShapeQuads(modelState, target);
     }
     
  

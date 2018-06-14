@@ -1,6 +1,5 @@
 Things to do
  	
- 	make painters stateless and immutable
  	find way to tag quads with position or other attributes in surface
  	make shader a property of paint layer
  	

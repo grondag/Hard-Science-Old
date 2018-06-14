@@ -1,12 +1,10 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.CSG.CSGMesh;
@@ -57,10 +55,8 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public List<IPolygon> getShapeQuads(ISuperModelState modelState)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
-        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
-        
         IMutablePolygon template = Poly.mutable(4);
         template.setColor(0xFFFFFFFF);
         template.setRotation(Rotation.ROTATE_NONE);
@@ -88,15 +84,13 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         if(shape == null)
         {
 
-            builder.addAll(MeshHelper.makeBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template));
+            MeshHelper.makeBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template, target);
         }
         else
         {
             //shape.recolor();
-            builder.addAll(shape);
+            shape.forEach(target);
         }
-        
-        return builder.build();
     }
    
     private @Nullable Collection<IPolygon> makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull IPolygon template)
@@ -115,7 +109,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
     }
     
-    private List<IPolygon> makeBox(@Nonnull EnumFacing face, @Nonnull IPolygon template, boolean isBothEnds)
+    private Collection<IPolygon> makeBox(@Nonnull EnumFacing face, @Nonnull IPolygon template, boolean isBothEnds)
     {
         AxisAlignedBB aabb;
         
