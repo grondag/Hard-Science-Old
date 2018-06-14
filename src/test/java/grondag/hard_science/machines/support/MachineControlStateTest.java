@@ -2,7 +2,7 @@ package grondag.hard_science.machines.support;
 
 import org.junit.Test;
 
-import grondag.exotic_matter.model.mesh.ModShapes;
+import grondag.exotic_matter.init.ModShapes;
 import grondag.exotic_matter.model.state.ModelState;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;

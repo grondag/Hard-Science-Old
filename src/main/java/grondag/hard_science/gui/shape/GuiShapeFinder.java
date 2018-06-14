@@ -1,6 +1,6 @@
 package grondag.hard_science.gui.shape;
 
-import grondag.exotic_matter.model.mesh.ModShapes;
+import grondag.exotic_matter.init.ModShapes;
 import grondag.exotic_matter.model.mesh.ModelShape;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;

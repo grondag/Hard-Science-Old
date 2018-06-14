@@ -3,6 +3,7 @@ package grondag.hard_science.gui.control;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.mesh.ModelShape;
+import grondag.exotic_matter.model.mesh.ModelShapes;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelState;
 import grondag.hard_science.gui.GuiUtil;
@@ -21,11 +22,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ShapePicker extends TabBar<ModelShape<?>>
 {
 
-    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.MAX_SHAPES];
+    private static final ItemStack[] ITEMS = new ItemStack[ModelShapes.MAX_SHAPES];
     
     static
     {
-        for(ModelShape<?> shape : ModelShape.guiAvailableShapes())
+        for(ModelShape<?> shape : ModelShapes.guiAvailableShapes())
         {
             ISuperModelState modelState = new ModelState();
             modelState.setShape(shape);
@@ -37,7 +38,7 @@ public class ShapePicker extends TabBar<ModelShape<?>>
     
     public ShapePicker()
     {
-        super(ModelShape.guiAvailableShapes());
+        super(ModelShapes.guiAvailableShapes());
         this.setItemsPerRow(8);
     }
 
