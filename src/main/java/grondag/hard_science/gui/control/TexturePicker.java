@@ -41,7 +41,7 @@ public class TexturePicker extends TabBar<ITexturePalette>
                 ? Rotation.values()[(int) ((WorldInfo.currentTimeMillis() >> 11) & 3)]
                 : item.rotation().rotation;
                 
-        TextureAtlasSprite tex = mc.getTextureMapBlocks().getAtlasSprite(item.getSampleTextureName());
+        TextureAtlasSprite tex = item.getSampleSprite();
         GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, size, size, this.borderColor, item.textureScale(), rotation, renderAlpha);
     }
 

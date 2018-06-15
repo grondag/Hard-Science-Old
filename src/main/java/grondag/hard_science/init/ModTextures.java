@@ -80,7 +80,7 @@ public class ModTextures
     //======================================================================
     
     public static final ITexturePalette BIGTEX_WEATHERED_STONE = TexturePaletteRegistry.addTexturePallette("weathered_smooth_stone", "weathered_smooth_stone", 
-            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.SIMPLE)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_ONLY).withGroups(TextureGroup.STATIC_TILES));
     public static final ITexturePalette BIGTEX_WEATHERED_STONE_ZOOM = TexturePaletteRegistry.addZoomedPallete(BIGTEX_WEATHERED_STONE);
     public static final ITexturePalette BIGTEX_WEATHERED_STONE_ZOOM_X2 = TexturePaletteRegistry.addZoomedPallete(BIGTEX_WEATHERED_STONE_ZOOM);
@@ -172,7 +172,7 @@ public class ModTextures
     //  DECALS
     //======================================================================
     public static final ITexturePalette DECAL_SMALL_DOT = TexturePaletteRegistry.addTexturePallette("small_dot", "small_dot", 
-            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SIMPLE)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_DETAILS));
     
     public static final ITexturePalette DECAL_MEDIUM_DOT = TexturePaletteRegistry.addTexturePallette("medium_dot", "medium_dot", new TexturePaletteSpec(DECAL_SMALL_DOT));
@@ -291,7 +291,7 @@ public class ModTextures
     public static final ITexturePalette DECAL_ARROW_270 = TexturePaletteRegistry.addTexturePallette("arrow_270", "arrow", new TexturePaletteSpec(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
     
     public static final ITexturePalette MATERIAL_GRADIENT = TexturePaletteRegistry.addTexturePallette("arrow", "material_gradient", 
-            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SIMPLE)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
 
     public static final ITexturePalette DECAL_BUILDER = TexturePaletteRegistry.addTexturePallette("symbol_builder", "symbol_builder", new TexturePaletteSpec(DECAL_SMALL_DOT));
