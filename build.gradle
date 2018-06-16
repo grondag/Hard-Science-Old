@@ -122,7 +122,7 @@ dependencies {
 	// not currently using these APIs
 	// here to support compatibility testing in dev environment
 	// or because thinking about using the APIs
-    deobfCompile "MCMultiPart2:MCMultiPart:${mcmp_version}"
+    // deobfCompile "MCMultiPart2:MCMultiPart:${mcmp_version}"
 }
 
 processResources
