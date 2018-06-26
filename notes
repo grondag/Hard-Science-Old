@@ -1,13 +1,31 @@
 Things to do
  	
- 	consider using block color handler to reduce # of baked quads in memory (get color from block during chunk build)
- 	clean up / reorg model state docs
- 	remove dynamic index from paint layer
- 	make all model state methods final
- 	re-optimize terrain model caching - still worth? Maybe pre-populate most common and leave it at that?
- 	cleam up terrain state, use bit packer instead of current mess
+ 	hot blocks -> te blocks
+ 	simplify/clean up state caching
+ 	tesr
+ 	tesr batching - make others fast render after first one has rendered and buffer nothing
  	
+ 	take render state recompute off thread
+ 	shader
+ 	hook renderchunks list clear method in ChunkRenderContainer by replacing with a custom list implementation
+ 	   - should create a render hook at end of render block layer
+ 	   
+   	provide "safe" render config, uses two-layer block model. Will need to eliminate cool mask. If keeping TESR then
+    need to provide two different block inplementations - one that is TEProvider (advanced) and one that isn't.
+ 	make world state cache more efficient
+ 		consolidate render / state storage
+ 		don't invalidate entire nibble if any block changes
+ 	
+ 	clean up / reorg model state docs
+ 	make all model state methods final
+ 	clean up terrain state, use bit packer instead of current mess
+ 	make lava use indoor lightmap
+ 	clear out macports crap
+ 	
+ 
  Improve lava textures
+ Cache terrain state in model state?
+ Make basalt very hot if lava placed on top of it without melting, unless fully obscured
  Lava Sounds
  Volcano Sounds
  Measure / throttle volcano node tick time consumption
@@ -22,6 +40,13 @@ Things to do
  Clean up Polygon stuff from before
  Code review / clean up of all volcano code - lots of leftovers
  Final perf optimization pass
+ Review / clean up configuration paramters and docs
+ 
+ for quadrant textures, use a full-block texture when there is no border
+ and don't split quads into quadrants if it isn't necessary. Will reduce poly count.
+ Not urgent because lava will always have per-quadrant polys.
+
+ consider using block color handler to reduce # of baked quads in memory (get color from block during chunk build)
  
  Post-release features
  Add repair command to capture strays within a radius and for all loaded chunks - call after deserialize
