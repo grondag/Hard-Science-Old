@@ -1,12 +1,9 @@
 Things to do
  	
- 	hot blocks -> te blocks
  	simplify/clean up state caching
- 	tesr
  	tesr batching - make others fast render after first one has rendered and buffer nothing
  	
  	take render state recompute off thread
- 	shader
  	hook renderchunks list clear method in ChunkRenderContainer by replacing with a custom list implementation
  	   - should create a render hook at end of render block layer
  	   
