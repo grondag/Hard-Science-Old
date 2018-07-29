@@ -25,10 +25,6 @@ public class ModTextures
     //  BORDERS
     //======================================================================
     
-    public static final ITexturePalette BORDER_SMOOTH_BLEND = TexturePaletteRegistry.addTexturePallette("border_smooth_blended", "border_smooth_blended", 
-            new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS));
-
     public static final ITexturePalette MASONRY_SIMPLE = TexturePaletteRegistry.addTexturePallette("masonry_simple", "masonry_simple", 
             new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.MASONRY_5)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.STATIC_BORDERS));
@@ -313,13 +309,12 @@ public class ModTextures
     public static final ITexturePalette DECAL_CMY = TexturePaletteRegistry.addTexturePallette("cmy", "cmy", new TexturePaletteSpec(DECAL_SMALL_DOT));
     public static final ITexturePalette DECAL_FLAME = TexturePaletteRegistry.addTexturePallette("flame", "flame_64", new TexturePaletteSpec(DECAL_SMALL_DOT));
 
-    public static final ITexturePalette TILE_DOTS = TexturePaletteRegistry.addTexturePallette("dots", "dots", 
+    public static final ITexturePalette TILE_DOTS_SUBTLE = TexturePaletteRegistry.addTexturePallette("dots_subtle", "dots_subtle", 
             new TexturePaletteSpec(HardScience.INSTANCE).withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
             .withRotation(RANDOM.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT).withGroups(TextureGroup.STATIC_TILES, TextureGroup.STATIC_DETAILS));
 
-    public static final ITexturePalette TILE_DOTS_SUBTLE = TexturePaletteRegistry.addTexturePallette("dots_subtle", "dots_subtle", new TexturePaletteSpec(TILE_DOTS));
-    public static final ITexturePalette TILE_DOTS_INVERSE = TexturePaletteRegistry.addTexturePallette("dots_inverse", "dots_inverse", new TexturePaletteSpec(TILE_DOTS));
-    public static final ITexturePalette TILE_DOTS_INVERSE_SUBTLE = TexturePaletteRegistry.addTexturePallette("dots_inverse_subtle", "dots_inverse_subtle", new TexturePaletteSpec(TILE_DOTS));
+    public static final ITexturePalette TILE_DOTS_INVERSE = TexturePaletteRegistry.addTexturePallette("dots_inverse", "dots_inverse", new TexturePaletteSpec(TILE_DOTS_SUBTLE));
+    public static final ITexturePalette TILE_DOTS_INVERSE_SUBTLE = TexturePaletteRegistry.addTexturePallette("dots_inverse_subtle", "dots_inverse_subtle", new TexturePaletteSpec(TILE_DOTS_SUBTLE));
 
 
 }

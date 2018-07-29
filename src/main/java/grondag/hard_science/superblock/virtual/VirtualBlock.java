@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import grondag.exotic_matter.block.SuperBlockStackHelper;
 import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.render.RenderLayout;
+import grondag.exotic_matter.model.render.RenderLayoutProducer;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.varia.WorldLightOpacity;
 import grondag.exotic_matter.network.PacketHandler;
@@ -99,23 +100,23 @@ public class VirtualBlock extends SuperModelBlock
     
     public static VirtualBlock findAppropriateVirtualBlock(ISuperModelState modelState)
     {
-        return virtualBlocks[modelState.getRenderLayout().blockLayerFlags];
+        return virtualBlocks[modelState.getRenderLayout().ordinal];
     }
 
     public static void registerVirtualBlocks(Register<Block> event)
     {
         int virualBlockIndex = 0;
         
-        for(RenderLayout renderLayout : RenderLayout.ALL_LAYOUTS)
+        for(RenderLayoutProducer renderLayout : RenderLayoutProducer.VALUES)
         {
-            VirtualBlock.virtualBlocks[renderLayout.blockLayerFlags]
+            VirtualBlock.virtualBlocks[renderLayout.ordinal]
                     = (VirtualBlock) new VirtualBlock("virtual_block" + virualBlockIndex++, renderLayout)
                         .setUnlocalizedName("virtual_block").setCreativeTab(HardScience.tabMod); //all virtual blocks have same display name
-            event.getRegistry().register(VirtualBlock.virtualBlocks[renderLayout.blockLayerFlags]);
+            event.getRegistry().register(VirtualBlock.virtualBlocks[renderLayout.ordinal]);
         }        
     }
     
-    public VirtualBlock(String blockName, RenderLayout renderLayout)
+    public VirtualBlock(String blockName, RenderLayoutProducer renderLayout)
     {
         super(blockName, Material.AIR, renderLayout, WorldLightOpacity.TRANSPARENT, false, false);
     }
@@ -212,7 +213,7 @@ public class VirtualBlock extends SuperModelBlock
     @Override
     public @Nullable TileEntity createNewTileEntity(@Nonnull World worldIn, int meta)
     {
-        return this.renderLayout().blockLayerFlags == 0
+        return this.renderLayout().ordinal == 0
                 ? new VirtualTileEntityTESR()
                 : new VirtualTileEntity();
     }

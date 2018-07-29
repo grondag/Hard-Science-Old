@@ -66,7 +66,7 @@ public abstract class MachineBlock extends SuperBlockPlus implements IMachineBlo
     
     public MachineBlock(String name, int guiID, ISuperModelState modelState)
     {
-        super(name, MACHINE_MATERIAL, modelState, modelState.getRenderLayout());
+        super(name, MACHINE_MATERIAL, modelState, modelState.getRenderLayoutProducer());
         this.guiID = guiID;
         this.setHarvestLevel(null, 0);
         this.setHardness(1);
