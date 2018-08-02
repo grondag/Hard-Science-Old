@@ -230,11 +230,11 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             }
         }
 
-        if(((modelState.hasBrightness(layer)) != fullBrightToggle[layer.ordinal()].isOn()))
+        if(((modelState.isEmissive(layer)) != fullBrightToggle[layer.ordinal()].isOn()))
         {
-            modelState.setBrightness(layer, fullBrightToggle[layer.ordinal()].isOn() ? 15 : 0);
+            modelState.setEmissive(layer, fullBrightToggle[layer.ordinal()].isOn());
             updateColors(layer);
-            this.colorPicker[layer.ordinal()].showLampColors = modelState.hasBrightness(layer);
+            this.colorPicker[layer.ordinal()].showLampColors = modelState.isEmissive(layer);
             hasUpdates = true;
         }
     }
@@ -246,12 +246,12 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         modelState.setColorMap(layer, map);
         textureTabBar[layer.ordinal()].borderColor = BlockColorMapProvider.INSTANCE
                 .getColorMap(colorPicker[layer.ordinal()].getColorMapID())
-                .getColor(modelState.hasBrightness(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
+                .getColor(modelState.isEmissive(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
         
         if(layer == PaintLayer.BASE)
         {
             // refresh base color on overlay layers if it has changed
-            int baseColor = modelState.hasBrightness(PaintLayer.BASE)
+            int baseColor = modelState.isEmissive(PaintLayer.BASE)
                     ? map.getColor(EnumColorMap.LAMP)
                     : map.getColor(EnumColorMap.BASE);
 
@@ -482,10 +482,10 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             ITexturePalette tex = modelState.getTexture(layer);
             t.setSelected(tex == TexturePaletteRegistry.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
-            t.borderColor = modelState.hasBrightness(layer)
+            t.borderColor = modelState.isEmissive(layer)
                     ? ColorHelper.lampColor(modelState.getColorARGB(layer))
                     : modelState.getColorARGB(layer);
-            t.baseColor = modelState.hasBrightness(PaintLayer.BASE)
+            t.baseColor = modelState.isEmissive(PaintLayer.BASE)
                     ? ColorHelper.lampColor(modelState.getColorARGB(PaintLayer.BASE))
                     : modelState.getColorARGB(PaintLayer.BASE);
 
@@ -494,8 +494,8 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
             //FIXME: not going to work - commented to allow compile after removing color map from model state
             //c.setColorMapID(modelState.getColorMap(layer).ordinal);
             
-            c.showLampColors = modelState.hasBrightness(layer);
-            fullBrightToggle[layer.ordinal()].setOn(modelState.hasBrightness(layer));
+            c.showLampColors = modelState.isEmissive(layer);
+            fullBrightToggle[layer.ordinal()].setOn(modelState.isEmissive(layer));
         }
     }
 

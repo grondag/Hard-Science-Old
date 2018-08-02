@@ -11,7 +11,7 @@ import grondag.exotic_matter.model.CSG.CSGMesh;
 import grondag.exotic_matter.model.mesh.MeshHelper;
 import grondag.exotic_matter.model.primitives.IMutablePolygon;
 import grondag.exotic_matter.model.primitives.IPolygon;
-import grondag.exotic_matter.model.primitives.Poly;
+import grondag.exotic_matter.model.primitives.PolyImpl;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.ICollisionHandler;
@@ -57,8 +57,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     @Override
     public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
-        IMutablePolygon template = Poly.mutable(4);
-        template.setColor(0xFFFFFFFF);
+        IMutablePolygon template = new PolyImpl(4);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setLockUV(true);
         template.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);

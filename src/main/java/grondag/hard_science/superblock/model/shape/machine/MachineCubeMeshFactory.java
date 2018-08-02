@@ -9,7 +9,7 @@ import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.primitives.CubeInputs;
 import grondag.exotic_matter.model.primitives.IMutablePolygon;
 import grondag.exotic_matter.model.primitives.IPolygon;
-import grondag.exotic_matter.model.primitives.Poly;
+import grondag.exotic_matter.model.primitives.PolyImpl;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.CubeCollisionHandler;
@@ -95,8 +95,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         result.v1 = 16;
         result.isOverlay = false;
         
-        IMutablePolygon template = Poly.mutable(4);
-        template.setColor(0xFFFFFFFF);
+        IMutablePolygon template = new PolyImpl(4);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setMinU(0);
         template.setMinV(0);

@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.primitives.IMutablePolygon;
 import grondag.exotic_matter.model.primitives.IPolygon;
-import grondag.exotic_matter.model.primitives.Poly;
+import grondag.exotic_matter.model.primitives.PolyImpl;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.ICollisionHandler;
@@ -43,12 +43,11 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     @Override
     public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
-        IMutablePolygon template = Poly.mutable(4);
-        template.setColor(0xFFFFFFFF);
+        IMutablePolygon template = new PolyImpl(4);
         template.setRotation(Rotation.ROTATE_NONE);
         template.setLockUV(true);
 
-        IMutablePolygon quad = Poly.mutableCopyOf(template);
+        IMutablePolygon quad = template.mutableCopy(4);
         quad.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
@@ -56,14 +55,14 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
-            quad = Poly.mutableCopyOf(template);
+            quad = template.mutableCopy(4);
             quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
             quad.setNominalFace(face);
             quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
             target.accept(quad);
         }
         
-        quad = Poly.mutableCopyOf(template);
+        quad = template.mutableCopy(4);
         quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);

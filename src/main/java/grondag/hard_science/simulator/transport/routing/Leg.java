@@ -100,7 +100,6 @@ public abstract class Leg<T extends StorageType<T>>
         }
 
         @Override
-        @Nonnull 
         public int size()
         {
             return 1;
