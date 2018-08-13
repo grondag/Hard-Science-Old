@@ -1,7 +1,19 @@
 Things to do
+
+-XX:+PrintCompilation  -XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining
+
+pack cutout layers into same vbo
+	render with same draw call somehow?
+
+If desired pipeline isn't available, fall back to default pipeline/model
+Give pipelines registry names so can persist correctly in model state/NBT
+
+
+
+Side culling could be more aggressive in top of bore - watch bore in spectator mode to see it
+ \\\\\\\\
  	
  	simplify/clean up state caching
- 	tesr batching - make others fast render after first one has rendered and buffer nothing
  	
  	take render state recompute off thread
  	hook renderchunks list clear method in ChunkRenderContainer by replacing with a custom list implementation
