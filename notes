@@ -1,5 +1,76 @@
 Things to do
 
+increase default flow/clearing rates
+move volcano node off-tick if needed
+optimize volcano node if needed (profile)
+find fix npes that show up during start up
+clean up commands
+clean up / implement activation logic
+profile/tune lava blobs
+test dedicated server
+tweak lava appearance - do this last
+	side textures
+	scale option
+ChunkMap concurrency needs work - especially for iteration concurrency used during NBT read/write & debug render
+
+docs - github
+technical write up - github
+overview - CF
+	include link to HD texture pack
+video capture
+screenshots
+release
+	EM
+	Pyroclasm
+	Pyroclasm HD
+post on
+	Curseforge
+	Youtube
+		- update CF
+	Imgur
+		- update CF
+	Minecraft forum
+	Reddit
+		- include link to technical write up
+	Forge forums (if appropriate)
+	
+
+baseline drawarray with 28-byte formate
+measure with 32-byte format  - did, was 8% slower
+move control flags to normal quartet
+pass diffuse ao in light map and bake shading into light in vsh
+
+// okay so 32-bytes appears 8% slower - where is that coming from? If drawarrays, not much can do about it
+//    in profiler it looks like 32 is *very* slightly slower than 28
+
+DONE: investigate indexed draw - not going to work, most vertex collectors have well over > 80 to 90% unique
+investigate packing the lightmap with normals
+avoid options that alter color or uv data
+	rules out packing the control flags with texture coordinates
+	OR provide way to designate "raw" color or UV - will not be modified but disables features
+could also try seting up an atlas index texture and referencing it with 16-bit uv coordinates
+	would save 16 bits in base layer and 32 bits per additional layer
+
+public static final PipelineVertextFormatElement BASE_RGBA_4UB = new PipelineVertextFormatElement(1, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.GENERIC, 4, "in_color_0");
+    public static final PipelineVertextFormatElement BASE_TEX_2F = new PipelineVertextFormatElement(2, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.GENERIC, 2, "in_uv_0");
+    
+    /**
+     * Usage varies by lighting model.  <p>
+     * 
+     * In vanilla lighting model, Bytes 1-2 are sky and block lightmap coordinates<br>
+     * 3rd byte is pre-computed diffuse shading, including AO.<br>
+     * Last byte is control bits.  bit 0-2 = emissive render, bit 3 = cutout flag, bit 4 = mip flag, bits 5-7 reserved<p>
+     * 
+     * In enhanced lighting model, format will include rgb block light , torch flicker, possibly AO.
+     */
+    public static final PipelineVertextFormatElement LIGHTMAPS_4UB = new PipelineVertextFormatElement(3, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.GENERIC, 4, "in_lightmaps", false);
+    
+    /**
+     * 4th byte is reserved for control information
+     */
+    public static final PipelineVertextFormatElement NORMAL_CONTROL_4UB = new PipelineVertextFormatElement(4, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.GENERIC, 4, "in_normal_conttrol", false);
+
+
 -XX:+PrintCompilation  -XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining
 
 pack cutout layers into same vbo

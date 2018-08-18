@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.base;
 
 import grondag.exotic_matter.block.ISuperBlock;
+import grondag.exotic_matter.block.ISuperBlockAccess;
 import grondag.exotic_matter.world.BlockCorner;
 import grondag.exotic_matter.world.FarCorner;
 import grondag.exotic_matter.world.IBlockTest;
@@ -8,7 +9,6 @@ import grondag.hard_science.simulator.transport.endpoint.IPortLayout;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 
 public class SuperBlockCableMatch implements IBlockTest
 {
@@ -23,7 +23,7 @@ public class SuperBlockCableMatch implements IBlockTest
     }
     
     @Override
-    public boolean testBlock(EnumFacing face, IBlockAccess world, IBlockState ibs, BlockPos pos)
+    public boolean testBlock(EnumFacing face, ISuperBlockAccess world, IBlockState ibs, BlockPos pos)
     {
         if(ibs.getBlock() instanceof IMachineBlock)
         {
@@ -37,13 +37,13 @@ public class SuperBlockCableMatch implements IBlockTest
     }
 
     @Override
-    public boolean testBlock(BlockCorner corner, IBlockAccess world, IBlockState ibs, BlockPos pos)
+    public boolean testBlock(BlockCorner corner, ISuperBlockAccess world, IBlockState ibs, BlockPos pos)
     {
         return false;
     }
 
     @Override
-    public boolean testBlock(FarCorner corner, IBlockAccess world, IBlockState ibs, BlockPos pos)
+    public boolean testBlock(FarCorner corner, ISuperBlockAccess world, IBlockState ibs, BlockPos pos)
     {
         return false;
     }

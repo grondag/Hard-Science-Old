@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.block.SuperBlockStackHelper;
+import grondag.exotic_matter.block.SuperBlockWorldAccess;
 import grondag.exotic_matter.block.SuperModelBlock;
 import grondag.exotic_matter.model.render.RenderLayout;
 import grondag.exotic_matter.model.render.RenderLayoutProducer;
@@ -73,7 +74,7 @@ public class VirtualBlock extends SuperModelBlock
         
         VirtualBlock vBlock = (VirtualBlock)block;
         
-        ISuperModelState modelState = vBlock.getModelState(world, pos, true);
+        ISuperModelState modelState = SuperBlockWorldAccess.access(world).getModelState(vBlock, pos, true);
         if(modelState == null) return null;
         
         TileEntity te = world.getTileEntity(pos);

@@ -3,6 +3,7 @@ package grondag.hard_science.machines.base;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.block.ISuperBlock;
+import grondag.exotic_matter.block.SuperBlockWorldAccess;
 import grondag.exotic_matter.block.SuperTileEntity;
 import grondag.exotic_matter.simulator.domain.DomainManager;
 import grondag.exotic_matter.simulator.domain.IDomain;
@@ -130,7 +131,7 @@ public interface IMachineBlock
      */
     public default IPortLayout portLayout(IBlockAccess worldIn, BlockPos pos, IBlockState state)
     {
-        return this.nominalPortLayout().localize(((ISuperBlock)state.getBlock()).getModelState(worldIn, pos, true));
+        return this.nominalPortLayout().localize(SuperBlockWorldAccess.access(worldIn).getModelState((ISuperBlock)state.getBlock(), pos, true));
     }
     
     /**
