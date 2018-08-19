@@ -1,6 +1,6 @@
 package grondag.hard_science.matter;
 
-import grondag.hard_science.init.ModTextures;
+import grondag.exotic_matter.init.ModTextures;
 import net.minecraft.util.ResourceLocation;
 
 public enum MatterPhase

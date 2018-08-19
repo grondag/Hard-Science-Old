@@ -8,7 +8,7 @@ import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelState;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.hard_science.init.ModTextures;
+import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;

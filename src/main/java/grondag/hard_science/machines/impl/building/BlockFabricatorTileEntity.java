@@ -3,7 +3,7 @@ package grondag.hard_science.machines.impl.building;
 import grondag.exotic_matter.world.Rotation;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
-import grondag.hard_science.init.ModTextures;
+import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
 import grondag.hard_science.matter.MatterColors;
 import net.minecraftforge.fml.relauncher.Side;

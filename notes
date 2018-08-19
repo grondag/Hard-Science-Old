@@ -1,5 +1,16 @@
 Things to do
 
+Fix missing fillers
+Use old filler collection to remove filler orphans - why are none showing up?
+Profile block updates 1 last time, look for low-hanging fruit
+Blob performance
+Find/Fix strange render bug when other SB are around? Maybe volcano shader not getting shut off? Quads being sent to wrong pipeline?
+Lava resolution config option
+Test HD textures again
+
+
+Lazy expanded block state  ISuperBlockState
+	Use this in TerrainWorldAdapter
 increase default flow/clearing rates
 move volcano node off-tick if needed
 optimize volcano node if needed (profile)

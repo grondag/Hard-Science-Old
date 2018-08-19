@@ -22,7 +22,7 @@ import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRadialRende
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.init.ModTextures;
+import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.energy.ClientEnergyInfo;
 import grondag.hard_science.machines.energy.MachinePower;
