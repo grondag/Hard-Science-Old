@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import grondag.exotic_matter.block.ISuperBlock;
+import grondag.exotic_matter.model.collision.ICollisionHandler;
 import grondag.exotic_matter.model.mesh.ShapeMeshGenerator;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.painting.Surface;
@@ -12,7 +13,6 @@ import grondag.exotic_matter.model.primitives.IPolygon;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.state.StateFormat;
-import grondag.exotic_matter.model.varia.ICollisionHandler;
 import grondag.exotic_matter.model.varia.SideShape;
 import grondag.exotic_matter.varia.Useful;
 import net.minecraft.block.state.IBlockState;
