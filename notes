@@ -1,23 +1,10 @@
 Things to do
 
-Fix missing fillers
-Use old filler collection to remove filler orphans - why are none showing up?
-Profile block updates 1 last time, look for low-hanging fruit
-Blob performance
-Find/Fix strange render bug when other SB are around? Maybe volcano shader not getting shut off? Quads being sent to wrong pipeline?
+
 Lava resolution config option
 Test HD textures again
 
-
-Lazy expanded block state  ISuperBlockState
-	Use this in TerrainWorldAdapter
-increase default flow/clearing rates
-move volcano node off-tick if needed
-optimize volcano node if needed (profile)
-find fix npes that show up during start up
-clean up commands
 clean up / implement activation logic
-profile/tune lava blobs
 test dedicated server
 tweak lava appearance - do this last
 	side textures
@@ -46,6 +33,13 @@ post on
 	Forge forums (if appropriate)
 	
 
+Exotic Matter cleanups
+Move test blocks to test mod
+Move textures to texture mod
+Lazy expanded block state  ISuperBlockState
+	Use this in TerrainWorldAdapter
+Try caching immutable polygons instead of baking them into LitBakedQuad (like UnpackedBakedQuad)?
+	
 baseline drawarray with 28-byte formate
 measure with 32-byte format  - did, was 8% slower
 move control flags to normal quartet
