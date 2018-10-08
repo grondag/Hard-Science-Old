@@ -44,7 +44,6 @@ public interface IDeviceBlockManager
      *
      * @param storageType  Matches ports of this type.
      */
-    @Nonnull
     public <T extends StorageType<T>> List<Port<T>> getAttachedPorts(T storageType);
 
 }

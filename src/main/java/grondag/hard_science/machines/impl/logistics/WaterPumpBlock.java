@@ -3,9 +3,9 @@ package grondag.hard_science.machines.impl.logistics;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineTileEntityTickable;
@@ -19,7 +19,7 @@ public class WaterPumpBlock extends MachineBlock
 {
     public WaterPumpBlock(String name)
     {
-        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_CHANNEL_DOTS));
+        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, ArtBoxTextures.BORDER_CHANNEL_DOTS));
     }
 
     @Override
@@ -37,7 +37,7 @@ public class WaterPumpBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return ModTextures.DECAL_DRIP.getSampleSprite();
+        return ArtBoxTextures.DECAL_DRIP.getSampleSprite();
     }
 
     @Override

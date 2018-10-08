@@ -1,5 +1,6 @@
 package grondag.hard_science.init;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.machines.impl.building.BlockFabricatorTileEntity;
 import net.minecraft.client.Minecraft;
@@ -33,8 +34,8 @@ public class ModModels
     {
         
         TEX_MACHINE_ON_OFF = new BinaryReference<TextureAtlasSprite>(
-                grondag.exotic_matter.init.ModTextures.MACHINE_POWER_ON.getSampleSprite(),
-                grondag.exotic_matter.init.ModTextures.MACHINE_POWER_OFF.getSampleSprite());
+                ArtBoxTextures.MACHINE_POWER_ON.getSampleSprite(),
+                ArtBoxTextures.MACHINE_POWER_OFF.getSampleSprite());
         
 //        TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
 //        TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");

@@ -106,8 +106,8 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
 
     private <T extends StorageType<T>> void doConnect(
             @Nullable BlockPortManager<T> myPortManager,
-            @Nonnull LogisticsService<T> service,
-            @Nonnull ImmutableList<Pair<IDeviceBlock, EnumFacing>> neighbors)
+            LogisticsService<T> service,
+            ImmutableList<Pair<IDeviceBlock, EnumFacing>> neighbors)
     {
         if(myPortManager.isEmpty()) return;
         
@@ -217,7 +217,7 @@ public class SimpleBlockHandler implements IDeviceBlock, IDeviceBlockManager, ID
     
     private <T extends StorageType<T>> void doDisconnect(
             @Nullable BlockPortManager<T> portManager,
-            @Nonnull LogisticsService<T> service)
+            LogisticsService<T> service)
     {
         if(portManager.isEmpty()) return;
         

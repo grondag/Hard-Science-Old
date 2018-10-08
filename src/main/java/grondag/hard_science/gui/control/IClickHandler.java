@@ -20,8 +20,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public interface IClickHandler<T>
 {
-    public void handleMouseClick(Minecraft mc, int mouseButton, @Nonnull T target);
-    public void handleMouseDrag(Minecraft mc, int mouseButton, @Nonnull T target);
+    public void handleMouseClick(Minecraft mc, int mouseButton, T target);
+    public void handleMouseDrag(Minecraft mc, int mouseButton, T target);
     
     public static class StorageClickHandlerStack implements IClickHandler<ItemResourceDelegate>
     {

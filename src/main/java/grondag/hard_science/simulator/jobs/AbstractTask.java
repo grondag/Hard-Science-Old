@@ -75,7 +75,7 @@ public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomai
      * Does NOT call job to notify of status change.
      * Return true if the task is in a ready state.
      */
-    public synchronized boolean initialize(@Nonnull Job job)
+    public synchronized boolean initialize(Job job)
     {
         assert this.job == NullJob.INSTANCE
                 : "AbstractTask.initialize called on same task more than once";

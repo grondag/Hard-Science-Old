@@ -67,7 +67,7 @@ public class VirtualBlock extends SuperModelBlock
      * virtual block currently at position.  Null if no virtual block located there.
      */
     @Nullable
-    public static ItemStack getSuperModelStack(@Nonnull World world, @Nonnull IBlockState blockState, @Nonnull BlockPos pos)
+    public static ItemStack getSuperModelStack(World world, IBlockState blockState, BlockPos pos)
     {
         Block block = blockState.getBlock();
         if(!(block instanceof VirtualBlock)) return null;

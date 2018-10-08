@@ -64,10 +64,10 @@ public abstract class Port<T extends StorageType<T>>
     protected Carrier<T> externalCircuit;
     
     public Port(
-            @Nonnull T storageType,
-            @Nonnull PortFunction function,
-            @Nonnull PortConnector connector,
-            @Nonnull CarrierLevel level, 
+            T storageType,
+            PortFunction function,
+            PortConnector connector,
+            CarrierLevel level, 
             @Nullable BlockPos pos, 
             @Nullable EnumFacing face)
     {
@@ -159,8 +159,8 @@ public abstract class Port<T extends StorageType<T>>
      * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
     public void attach(
-            @Nonnull Carrier<T> externalCircuit,
-            @Nonnull Port<T> mate)
+            Carrier<T> externalCircuit,
+            Port<T> mate)
     {
         assert this.confirmServiceThread() : "Transport logic running outside transport thread";
         
@@ -267,7 +267,7 @@ public abstract class Port<T extends StorageType<T>>
      * 
      * SHOULD ONLY BE CALLED FROM CONNECTION MANAGER THREAD.
      */
-    public void swapCircuit(@Nonnull Carrier<T> oldCircuit, @Nonnull Carrier<T> newCircuit)
+    public void swapCircuit(Carrier<T> oldCircuit, Carrier<T> newCircuit)
     {
         assert this.confirmServiceThread() : "Transport logic running outside transport thread";
         if(this.externalCircuit == oldCircuit)
@@ -297,7 +297,6 @@ public abstract class Port<T extends StorageType<T>>
      * 
      * With {@link #mate()}, enables search within a circuit topology.
      */
-    @Nonnull
     public Iterable<Port<T>> carrierMates()
     {
         return Collections.emptyList();
@@ -395,7 +394,6 @@ public abstract class Port<T extends StorageType<T>>
      * Will be same as {@link #internalLevel()} for Carrier ports. For bridge
      * ports in bride mode will be one level lower than internal.
      */
-    @Nonnull
     public final CarrierLevel externalLevel()
     {
         return this.externalLevel(this.mode);
@@ -404,7 +402,6 @@ public abstract class Port<T extends StorageType<T>>
     /**
      * Forecasts what external level will be with the given mode.
      */
-    @Nonnull
     public CarrierLevel externalLevel(PortMode mode)
     {
         return this.function() == PortFunction.BRIDGE && mode == PortMode.BRIDGE

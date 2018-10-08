@@ -55,9 +55,9 @@ public class CarrierPortGroup<T extends StorageType<T>> implements Iterable<Port
     private int carrierPortCount = 0;
 
     public CarrierPortGroup(
-            @Nonnull IDevice device, 
-            @Nonnull T storageType, 
-            @Nonnull CarrierLevel carrierLevel)
+            IDevice device, 
+            T storageType, 
+            CarrierLevel carrierLevel)
     {
         this.device = device;
         this.storageType = storageType;

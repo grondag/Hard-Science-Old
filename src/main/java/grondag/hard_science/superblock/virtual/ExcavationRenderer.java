@@ -37,14 +37,14 @@ public class ExcavationRenderer
      */
     private BlockPos[] positions;
     
-    public ExcavationRenderer(int id, @Nonnull AxisAlignedBB aabb, boolean isExchange, @Nullable BlockPos[] positions)
+    public ExcavationRenderer(int id, AxisAlignedBB aabb, boolean isExchange, @Nullable BlockPos[] positions)
     {
         this.id = id;
         this.isExchange = isExchange;
         this.setBounds(aabb, positions);
     }
     
-    public void setBounds(@Nonnull AxisAlignedBB bounds, @Nullable BlockPos[] positions)
+    public void setBounds(AxisAlignedBB bounds, @Nullable BlockPos[] positions)
     {
         this.aabb = bounds;
         this.visibilityBounds = bounds.grow(192);

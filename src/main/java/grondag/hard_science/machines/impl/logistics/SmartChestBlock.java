@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineContainerBlock;
@@ -39,7 +39,7 @@ public class SmartChestBlock extends MachineContainerBlock
     
     public SmartChestBlock(String name, boolean dedicated)
     {
-        super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(ModTextures.DECAL_SKINNY_DIAGNAL_CROSS_BARS, ModTextures.BORDER_SINGLE_BOLD_LINE));
+        super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(ArtBoxTextures.DECAL_SKINNY_DIAGNAL_CROSS_BARS, ArtBoxTextures.BORDER_SINGLE_BOLD_LINE));
         this.dedicated = dedicated;
     }
 
@@ -53,7 +53,7 @@ public class SmartChestBlock extends MachineContainerBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return ModTextures.DECAL_CHEST.getSampleSprite();
+        return ArtBoxTextures.DECAL_CHEST.getSampleSprite();
     }
 
     @Override

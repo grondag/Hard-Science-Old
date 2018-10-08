@@ -92,8 +92,7 @@ public abstract class PlacementHandler
      * that completes the operation.
      */
     @SideOnly(Side.CLIENT)
-    @Nonnull
-    public static PlacementResult predictPlacementResults(EntityPlayerSP player, @Nonnull ItemStack stack, @Nonnull IPlacementItem item)
+    public static PlacementResult predictPlacementResults(EntityPlayerSP player, ItemStack stack, IPlacementItem item)
     {
 
         /* if player is in range to a solid block and floating selection is off, 
@@ -162,7 +161,7 @@ public abstract class PlacementHandler
      * 
      * Called by Predict placement results, and by OnItemUse and onItemRightClick.
      */
-    public static PlacementResult doRightClickBlock(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, @Nonnull ItemStack stack, @Nonnull IPlacementItem item)
+    public static PlacementResult doRightClickBlock(EntityPlayer player, @Nullable BlockPos onPos, @Nullable EnumFacing onFace, @Nullable Vec3d hitVec, ItemStack stack, IPlacementItem item)
     {
         
         PlacementPosition pPos = new PlacementPosition(player, onPos, onFace, hitVec, item.getFloatingSelectionRange(stack), item.isExcavator(stack));

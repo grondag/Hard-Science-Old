@@ -16,7 +16,7 @@ public abstract class AbstractPositionedTask extends AbstractTask
 
     private BlockPos pos;
   
-    protected AbstractPositionedTask(@Nonnull BlockPos pos)
+    protected AbstractPositionedTask(BlockPos pos)
     {
         super(true);
         this.pos = pos;

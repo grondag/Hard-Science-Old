@@ -12,7 +12,7 @@ public class PowerResource extends AbstractResource<StorageType.StorageTypePower
     
     private final String unlocalizedName;
     
-    public PowerResource(@Nonnull String unlocalizedName)
+    public PowerResource(String unlocalizedName)
     {
         this.unlocalizedName = unlocalizedName;
     }

@@ -36,7 +36,7 @@ public class PacketExcavationRenderRefresh extends AbstractServerToPlayerPacket<
             this(entry.id, entry.aabb(), entry.isExchange, entry.renderPositions());
         }
         
-        private RenderData(int id, @Nonnull IntegerAABB aabb, boolean isExchange, @Nullable BlockPos[] positions)
+        private RenderData(int id, IntegerAABB aabb, boolean isExchange, @Nullable BlockPos[] positions)
         {
             this.id = id;
             this.aabb = aabb;

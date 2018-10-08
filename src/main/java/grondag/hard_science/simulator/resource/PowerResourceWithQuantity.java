@@ -7,7 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class PowerResourceWithQuantity extends AbstractResourceWithQuantity<StorageType.StorageTypePower>
 {
-    public PowerResourceWithQuantity(@Nonnull PowerResource resource, long quantity)
+    public PowerResourceWithQuantity(PowerResource resource, long quantity)
     {
         super(resource, quantity);
     }

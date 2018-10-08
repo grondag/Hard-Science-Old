@@ -3,9 +3,9 @@ package grondag.hard_science.machines.impl.building;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
@@ -19,7 +19,7 @@ public class BlockFabricatorBlock extends MachineBlock
 {
     public BlockFabricatorBlock(String name)
     {
-        super(name, ModGui.BLOCK_FABRICATOR.ordinal(), MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_FILMSTRIP));
+        super(name, ModGui.BLOCK_FABRICATOR.ordinal(), MachineBlock.creatBasicMachineModelState(null, ArtBoxTextures.BORDER_FILMSTRIP));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class BlockFabricatorBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return ModTextures.DECAL_BUILDER.getSampleSprite();
+        return ArtBoxTextures.DECAL_BUILDER.getSampleSprite();
     }
 
     @Override

@@ -28,7 +28,7 @@ public class PlacementResult
      */
     public PlacementResult(
             @Nullable BlockPos blockPos,
-            @Nonnull  PlacementEvent event, 
+            PlacementEvent event, 
             @Nullable IPlacementSpec builder)
     {
         this.blockPos = blockPos;

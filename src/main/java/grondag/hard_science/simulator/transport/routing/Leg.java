@@ -18,14 +18,12 @@ public abstract class Leg<T extends StorageType<T>>
      * Lowest-level circuit in the leg. 
      * Will be same as {@link #end()} for direct routes.
      */
-    @Nonnull
     public abstract Carrier<T> start();
     
     /**
      * Highest-level circuit in the leg. 
      * Will be same as {@link #start()} for direct routes.
      */
-    @Nonnull
     public abstract Carrier<T> end();
     
     /**
@@ -55,27 +53,24 @@ public abstract class Leg<T extends StorageType<T>>
         this.start = first;
     }
     
-    @Nonnull 
-    public static <V extends StorageType<V>> Leg<V> create(@Nonnull Carrier<V> single)
+    public static <V extends StorageType<V>> Leg<V> create(Carrier<V> single)
     {
         return new SingleLeg<V>(single);
     }
     
-    @Nonnull 
-    public static <V extends StorageType<V>> Leg<V> create(@Nonnull Carrier<V> start, @Nonnull Carrier<V> end)
+    public static <V extends StorageType<V>> Leg<V> create(Carrier<V> start, Carrier<V> end)
     {
         return new DoubleLeg<V>(start, end);
     }
     
-    @Nonnull 
-    public static <V extends StorageType<V>> Leg<V> create(@Nonnull Carrier<V> start, @Nonnull Carrier<V> inner, @Nonnull Carrier<V> end)
+    public static <V extends StorageType<V>> Leg<V> create(Carrier<V> start, Carrier<V> inner, Carrier<V> end)
     {
         return new TripleLeg<V>(start, inner, end);
     }
     
     private static class SingleLeg<T extends StorageType<T>> extends Leg<T>
     {
-        private SingleLeg(@Nonnull Carrier<T> single)
+        private SingleLeg(Carrier<T> single)
         {
             super(single);
         }
@@ -122,7 +117,7 @@ public abstract class Leg<T extends StorageType<T>>
     {
         protected final Carrier<T> end;
         
-        private DoubleLeg(@Nonnull Carrier<T> start, @Nonnull Carrier<T> end)
+        private DoubleLeg(Carrier<T> start, Carrier<T> end)
         {
             super(start);
             this.end = end;
@@ -179,7 +174,7 @@ public abstract class Leg<T extends StorageType<T>>
     {
         protected final Carrier<T> inner;
         
-        private TripleLeg(@Nonnull Carrier<T> start, @Nonnull Carrier<T> inner, @Nonnull Carrier<T> end)
+        private TripleLeg(Carrier<T> start, Carrier<T> inner, Carrier<T> end)
         {
             super(start, end);
             this.inner = inner;

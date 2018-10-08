@@ -298,7 +298,7 @@ public class ResourceContainer<T extends StorageType<T>> implements IResourceCon
     }
     
     private long addImpl(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long howMany, 
             boolean simulate, 
             boolean allowPartial, 

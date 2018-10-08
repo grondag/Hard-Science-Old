@@ -116,7 +116,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      * ensure that the initial snapshot is consistent with all 
      * later updates.<p>
      */
-    public ItemStorageListener(Domain domain, @Nonnull EntityPlayerMP player)
+    public ItemStorageListener(Domain domain, EntityPlayerMP player)
     {
         this.player = player;
         this.container = player.openContainer;
@@ -137,7 +137,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
     * all physically connected storage machines.
     */
             
-    public ItemStorageListener(@Nonnull ItemContainer storage, @Nonnull EntityPlayerMP player)
+    public ItemStorageListener(ItemContainer storage, EntityPlayerMP player)
     {
         this.player = player;
         this.container = player.openContainer;
@@ -458,7 +458,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      * For non-domain listeners, limits to connectivity from 
      * the primary storage device.  Always empty for domain listener.
      */
-    public ImmutableList<IResourceContainer<StorageTypeStack>> findSpaceFor(@Nonnull IResource<StorageTypeStack> resource)
+    public ImmutableList<IResourceContainer<StorageTypeStack>> findSpaceFor(IResource<StorageTypeStack> resource)
     {
         return this.storage == null
                 ? ImmutableList.of()
@@ -469,7 +469,7 @@ public class ItemStorageListener implements IStorageAccess<StorageTypeStack>
      * For non-domain listeners, limits to connectivity from 
      * the primary storage device.  Always fails (returns 0) for domain listener.
      */
-    public long add(@Nonnull IResource<StorageTypeStack> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<StorageTypeStack> request)
+    public long add(IResource<StorageTypeStack> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<StorageTypeStack> request)
     {
         return this.storage == null
                 ? 0

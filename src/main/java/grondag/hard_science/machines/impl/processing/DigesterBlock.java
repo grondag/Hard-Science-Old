@@ -3,9 +3,9 @@ package grondag.hard_science.machines.impl.processing;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
@@ -19,7 +19,7 @@ public class DigesterBlock extends MachineBlock
 {
     public DigesterBlock(String name)
     {
-        super(name, ModGui.DIGESTER.ordinal(), MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_CAUTION));
+        super(name, ModGui.DIGESTER.ordinal(), MachineBlock.creatBasicMachineModelState(null, ArtBoxTextures.BORDER_CAUTION));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class DigesterBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return ModTextures.DECAL_BIG_DIAMOND.getSampleSprite();
+        return ArtBoxTextures.DECAL_BIG_DIAMOND.getSampleSprite();
     }
 
     @Override

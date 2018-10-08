@@ -1,5 +1,6 @@
 package grondag.hard_science.machines.impl.logistics;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.exotic_matter.model.color.BlockColorMapProvider;
 import grondag.exotic_matter.model.color.Chroma;
 import grondag.exotic_matter.model.color.Hue;
@@ -8,7 +9,6 @@ import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelState;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineSimpleBlock;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
@@ -31,7 +31,7 @@ public class TopBusBlock extends MachineSimpleBlock
         result.setTexture(PaintLayer.BASE, grondag.exotic_matter.init.ModTextures.BLOCK_NOISE_SUBTLE);
         result.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
         
-        result.setTexture(PaintLayer.OUTER, ModTextures.BORDER_SIGNAL);
+        result.setTexture(PaintLayer.OUTER, ArtBoxTextures.BORDER_SIGNAL);
         result.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VIOLET, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         
 //        result.setTexture(PaintLayer.LAMP, Textures.TILE_DOTS_INVERSE);

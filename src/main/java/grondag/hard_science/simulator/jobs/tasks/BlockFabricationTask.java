@@ -24,7 +24,7 @@ public class BlockFabricationTask extends AbstractTask
      * Use for new instances. Automatically
      * make procurement task dependent on this task.
      */
-    public BlockFabricationTask(@Nonnull BlockProcurementTask procurementTask)
+    public BlockFabricationTask(BlockProcurementTask procurementTask)
     {
         super(true);
         this.procurementTaskID = procurementTask.getId();

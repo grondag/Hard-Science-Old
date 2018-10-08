@@ -20,7 +20,7 @@ public class BlockProcurementTask extends AbstractPositionedStackTask
      * material substitution occurs.
      * 
      */
-    public BlockProcurementTask(@Nonnull BlockPos pos, @Nonnull ItemStack stack)
+    public BlockProcurementTask(BlockPos pos, ItemStack stack)
     {
         super(pos, stack);
     }

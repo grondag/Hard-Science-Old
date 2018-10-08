@@ -118,7 +118,7 @@ public interface ICraftingProcess<R extends IHardScienceRecipe>
     }
     
     public R configureFromOutputs(
-            @Nonnull List<AbstractResourceWithQuantity<?>> minOutputs);
+            List<AbstractResourceWithQuantity<?>> minOutputs);
     
     public default R configureFromOutputs(AbstractResourceWithQuantity<?> minOutput)
     {
@@ -126,5 +126,5 @@ public interface ICraftingProcess<R extends IHardScienceRecipe>
     }
     
     public R configureFromInputs(
-            @Nonnull List<AbstractResourceWithQuantity<?>> maxInputs);
+            List<AbstractResourceWithQuantity<?>> maxInputs);
 }

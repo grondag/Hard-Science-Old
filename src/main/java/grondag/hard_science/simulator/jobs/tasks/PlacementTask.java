@@ -27,7 +27,7 @@ public class PlacementTask extends AbstractTask
     /**
      * Use for new instances. Creates dependency on input task.
      */
-    public PlacementTask(@Nonnull BlockProcurementTask procurementTask)
+    public PlacementTask(BlockProcurementTask procurementTask)
     {
         super(true);
         this.procurementTaskID = procurementTask.getId();

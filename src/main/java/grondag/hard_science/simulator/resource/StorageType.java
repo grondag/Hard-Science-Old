@@ -120,10 +120,8 @@ public abstract class StorageType<T extends StorageType<T>>
     @Nullable
     public abstract AbstractResourceWithQuantity<T> fromNBTWithQty(NBTTagCompound nbt);
     
-    @Nonnull
     public abstract IStorageEventFactory<T> eventFactory();
     
-    @Nonnull
     public abstract LogisticsService<T> service();
     
     /**

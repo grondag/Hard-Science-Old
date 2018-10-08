@@ -25,7 +25,7 @@ public class PacketMachineInteraction extends AbstractPlayerToServerPacket<Packe
     {
     }
     
-    public PacketMachineInteraction(@Nonnull Action action, @Nonnull BlockPos pos) 
+    public PacketMachineInteraction(Action action, BlockPos pos) 
     {
         this.action = action;
         this.blockPos = pos;

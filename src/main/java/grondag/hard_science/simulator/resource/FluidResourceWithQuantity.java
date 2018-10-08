@@ -13,7 +13,7 @@ import net.minecraftforge.fluids.FluidStack;
 public class FluidResourceWithQuantity extends AbstractResourceWithQuantity<StorageType.StorageTypeFluid>
 {
 
-    public FluidResourceWithQuantity(@Nonnull FluidResource resource, long nanoLiters)
+    public FluidResourceWithQuantity(FluidResource resource, long nanoLiters)
     {
         super(resource, nanoLiters);
     }

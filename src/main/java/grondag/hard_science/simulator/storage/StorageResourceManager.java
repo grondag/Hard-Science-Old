@@ -89,7 +89,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
      * Total quantityIn allocated can be different from return value if request already had an allocation.
      * Provides no notification to the request.
      */
-    public synchronized long changeAllocation(@Nonnull NewProcurementTask<T> request, long quantityRequested)
+    public synchronized long changeAllocation(NewProcurementTask<T> request, long quantityRequested)
     {
         long allocated = this.getAllocation(request);
         long newAllocation = Useful.clamp(allocated + quantityRequested, 0, allocated + this.quantityAvailable());
@@ -99,7 +99,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
     /**
      * Returns current allocation for the given request.
      */
-    public synchronized long getAllocation(@Nonnull NewProcurementTask<T> request)
+    public synchronized long getAllocation(NewProcurementTask<T> request)
     {
         if(this.allocations == null) return 0;
         
@@ -123,7 +123,7 @@ public class StorageResourceManager<T extends StorageType<T>> implements INewTas
      * and will not set allocation so that total allocated is more the total available.
      * Provides no notification to the request.
      */
-    public synchronized long setAllocation(@Nonnull NewProcurementTask<T> request, long requestedAllocation)
+    public synchronized long setAllocation(NewProcurementTask<T> request, long requestedAllocation)
     {
         /**
          * 1 = start listening, -1 = stop

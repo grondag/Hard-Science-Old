@@ -24,21 +24,21 @@ public interface IResourceContainer<T extends StorageType<T>>
      * Returned bulkResource stacks are disconnected from this collection.
      * Changing them will have no effect on storage contents.
      */
-    List<AbstractResourceWithQuantity<T>> find(@Nonnull Predicate<IResource<T>> predicate);
+    List<AbstractResourceWithQuantity<T>> find(Predicate<IResource<T>> predicate);
     
     public default List<AbstractResourceWithQuantity<T>> findAll()
     {
         return this.find(this.storageType().MATCH_ANY);
     }
     
-    long getQuantityStored(@Nonnull IResource<T> resource);
+    long getQuantityStored(IResource<T> resource);
 
-    default boolean isResourceAllowed(@Nonnull IResource<T> resource)
+    default boolean isResourceAllowed(IResource<T> resource)
     {
         return this.getContentPredicate() == null || this.getContentPredicate().test(resource);
     }
     
-    default long availableCapacityFor(@Nonnull IResource<T> resource)
+    default long availableCapacityFor(IResource<T> resource)
     {
         return this.isResourceAllowed(resource) ? this.availableCapacity() : 0;
     }
@@ -94,7 +94,7 @@ public interface IResourceContainer<T extends StorageType<T>>
      * allocation, the amount added will be allocated (domain-wide) to the given request.
      */
     public long add(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long howMany, 
             boolean simulate, 
             boolean allowPartial, 
@@ -105,7 +105,7 @@ public interface IResourceContainer<T extends StorageType<T>>
      * that assumes allowPartial == true.
      */
     public default long add(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long howMany, 
             boolean simulate, 
             @Nullable NewProcurementTask<T> request)
@@ -118,7 +118,7 @@ public interface IResourceContainer<T extends StorageType<T>>
      * that assumes allowPartial == true and request == null.
      */
     public default long add(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long howMany, 
             boolean simulate)
     {
@@ -126,7 +126,7 @@ public interface IResourceContainer<T extends StorageType<T>>
     }
     
     /** Alternate syntax for {@link #add(IResource, long, boolean, NewProcurementTask)} */
-    default long add(@Nonnull AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate, @Nullable NewProcurementTask<T> request)
+    default long add(AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate, @Nullable NewProcurementTask<T> request)
     {
         return this.add(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate, request);
     }
@@ -140,7 +140,7 @@ public interface IResourceContainer<T extends StorageType<T>>
      * the amount taken will reduce any allocation (domain-wide) to the given request.
      */
     public long takeUpTo(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long limit, 
             boolean simulate, 
             boolean allowPartial, 
@@ -151,7 +151,7 @@ public interface IResourceContainer<T extends StorageType<T>>
      * which assumed allowPartial == true.
      */
     public default long takeUpTo(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long limit, 
             boolean simulate, 
             @Nullable NewProcurementTask<T> request)
@@ -164,7 +164,7 @@ public interface IResourceContainer<T extends StorageType<T>>
      * which assumes allowPartial == true and request == null.
      */
     public default long takeUpTo(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long limit, 
             boolean simulate)
     {
@@ -188,7 +188,7 @@ public interface IResourceContainer<T extends StorageType<T>>
      * on service thread for that storage type.
      */
     public default long addInteractively(
-            @Nonnull IResource<T> resource, 
+            IResource<T> resource, 
             long howMany, 
             boolean simulate)
     {
@@ -207,7 +207,7 @@ public interface IResourceContainer<T extends StorageType<T>>
     }
     
     /** Alternate syntax for {@link #addInteractively(IResource, long, boolean)} */
-    default long addInteractively(@Nonnull AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate)
+    default long addInteractively(AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate)
     {
         return this.addInteractively(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate);
     }

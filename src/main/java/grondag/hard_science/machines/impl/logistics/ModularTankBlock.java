@@ -5,9 +5,9 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -43,7 +43,7 @@ public class ModularTankBlock extends MachineBlock
     
     public ModularTankBlock(String name, int kL, boolean dedicated, IResourcePredicate<StorageTypeFluid> predicate)
     {
-        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_CHANNEL_DOTS));
+        super(name, ModGui.MODULAR_TANK.ordinal(), MachineBlock.creatBasicMachineModelState(null, ArtBoxTextures.BORDER_CHANNEL_DOTS));
         this.kLcapacity = kL;
         this.dedicated = dedicated;
         this.predicate = predicate;
@@ -69,7 +69,7 @@ public class ModularTankBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return ModTextures.DECAL_DRIP.getSampleSprite();
+        return ArtBoxTextures.DECAL_DRIP.getSampleSprite();
     }
     
     @Override

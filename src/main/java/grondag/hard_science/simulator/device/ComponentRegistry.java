@@ -47,7 +47,7 @@ public class ComponentRegistry
     }
     
     
-    public static NBTTagCompound toNBT(@Nonnull IDeviceComponent component)
+    public static NBTTagCompound toNBT(IDeviceComponent component)
     {
         NBTTagCompound result = new NBTTagCompound();
         

@@ -2,6 +2,7 @@ package grondag.hard_science.machines.base;
 
 import javax.annotation.Nullable;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.block.SuperBlockWorldAccess;
 import grondag.exotic_matter.block.SuperTileEntity;
@@ -10,7 +11,6 @@ import grondag.exotic_matter.simulator.domain.IDomain;
 import grondag.exotic_matter.simulator.domain.Privilege;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.energy.MachinePower;
 import grondag.hard_science.simulator.device.DeviceManager;
 import grondag.hard_science.simulator.device.IDevice;
@@ -237,6 +237,6 @@ public interface IMachineBlock
     @SideOnly(Side.CLIENT)
     public default TextureAtlasSprite getSymbolSprite()
     {
-        return ModTextures.DECAL_LARGE_SQUARE.getSampleSprite();
+        return ArtBoxTextures.DECAL_LARGE_SQUARE.getSampleSprite();
     }
 }

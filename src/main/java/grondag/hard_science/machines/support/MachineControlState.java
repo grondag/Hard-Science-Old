@@ -146,10 +146,10 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     //////////////////////////////////////////////////////////////////////
     
     public ControlMode getControlMode() { return PACKED_CONTROL_MODE.getValue(this); }
-    public void setControlMode(@Nonnull ControlMode value) { PACKED_CONTROL_MODE.setValue(value, this); }
+    public void setControlMode(ControlMode value) { PACKED_CONTROL_MODE.setValue(value, this); }
     
     public RenderLevel getRenderLevel() { return PACKED_RENDER_LEVEL.getValue(this); }
-    public void setRenderLevel(@Nonnull RenderLevel value) { PACKED_RENDER_LEVEL.setValue(value, this); }
+    public void setRenderLevel(RenderLevel value) { PACKED_RENDER_LEVEL.setValue(value, this); }
     
     /**
      * If true, then modelState should be populated.
@@ -193,8 +193,8 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
      * While values are always non-null, they are not always valid.  
      * Check that a modelState or other related attribute also exists
      */
-    public @Nonnull BlockSubstance getSubstance() { return BlockSubstance.get(PACKED_SUBSTANCE.getValue(this)); }
-    public void setSubstance(@Nonnull BlockSubstance value) { PACKED_SUBSTANCE.setValue(value.ordinal, this); }
+    public BlockSubstance getSubstance() { return BlockSubstance.get(PACKED_SUBSTANCE.getValue(this)); }
+    public void setSubstance(BlockSubstance value) { PACKED_SUBSTANCE.setValue(value.ordinal, this); }
     
     /** intended for block fabricators, but usage determined by machine. */
     public int getLightValue() { return PACKED_LIGHT_VALUE.getValue(this); }
@@ -205,7 +205,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     public void setMeta(int value) { PACKED_META.setValue(value, this); }
     
     public MachineState getMachineState() { return PACKED_MACHINE_STATAE.getValue(this); }
-    public void setMachineState(@Nonnull MachineState value) { PACKED_MACHINE_STATAE.setValue(value, this); }
+    public void setMachineState(MachineState value) { PACKED_MACHINE_STATAE.setValue(value, this); }
     
     public boolean hasJobTicks() { return PACKED_HAS_JOB_TICKS.getValue(this); }
     

@@ -14,7 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class BulkResourceWithQuantity extends AbstractResourceWithQuantity<StorageTypeBulk>
 {
 
-    public BulkResourceWithQuantity(@Nonnull BulkResource resource, long nanoLiters)
+    public BulkResourceWithQuantity(BulkResource resource, long nanoLiters)
     {
         super(resource, nanoLiters);
     }

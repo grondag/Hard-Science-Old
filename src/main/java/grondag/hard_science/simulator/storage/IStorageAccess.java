@@ -34,7 +34,7 @@ public interface IStorageAccess<T extends StorageType<T>>
      * Stores with the largest count of the bulkResource (but still with empty space)
      * come first, followed by stores with available space in descending order.
      */
-    public default ImmutableList<IResourceContainer<T>> findSpaceFor(@Nonnull IResource<T> resource, @Nonnull IDevice reachableFrom)
+    public default ImmutableList<IResourceContainer<T>> findSpaceFor(IResource<T> resource, IDevice reachableFrom)
     {
         LogisticsService<T> service = resource.storageType().service();
                 
@@ -73,7 +73,7 @@ public interface IStorageAccess<T extends StorageType<T>>
      * Aggregate version of {@link IStorage#add(IResource, long, boolean, NewProcurementTask)}
      * Must run on service thread for storage type.
      */
-    public default long add(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<T> request, IDevice reachableFrom)
+    public default long add(IResource<T> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<T> request, IDevice reachableFrom)
     {
         assert resource.confirmServiceThread() : "Storage action outside service thread.";
         
@@ -101,7 +101,7 @@ public interface IStorageAccess<T extends StorageType<T>>
     /**
      * Aggregate version of {@link IStorage#takeUpTo(IResource, long, boolean, IProcurementRequest)}
      */
-    public default long takeUpTo(@Nonnull IResource<T> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<T> request)
+    public default long takeUpTo(IResource<T> resource, final long howMany, boolean simulate, @Nullable NewProcurementTask<T> request)
     {
         assert resource.confirmServiceThread() : "Storage action outside service thread.";
         

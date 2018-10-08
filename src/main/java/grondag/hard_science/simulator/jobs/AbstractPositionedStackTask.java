@@ -20,7 +20,7 @@ public abstract class AbstractPositionedStackTask extends AbstractPositionedTask
     /**
      * Use for new instances.
      */
-    public AbstractPositionedStackTask(@Nonnull BlockPos pos, @Nonnull ItemStack stack)
+    public AbstractPositionedStackTask(BlockPos pos, ItemStack stack)
     {
         super(pos);
         this.stack = stack;

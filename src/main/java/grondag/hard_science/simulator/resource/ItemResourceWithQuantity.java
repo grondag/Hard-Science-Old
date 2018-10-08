@@ -12,7 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class ItemResourceWithQuantity extends AbstractResourceWithQuantity<StorageType.StorageTypeStack>
 {
 
-    public ItemResourceWithQuantity(@Nonnull ItemResource resource, long quantity)
+    public ItemResourceWithQuantity(ItemResource resource, long quantity)
     {
         super(resource, quantity);
     }

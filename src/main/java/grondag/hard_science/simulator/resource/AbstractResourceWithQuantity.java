@@ -16,7 +16,7 @@ implements ITypedStorage<V>, IResourcePredicateWithQuantity<V>
     private IResource<V> resource;
     protected long quantity;
   
-    public AbstractResourceWithQuantity(@Nonnull IResource<V> resource, long quantity)
+    public AbstractResourceWithQuantity(IResource<V> resource, long quantity)
     {
         this.resource = resource;
         this.quantity = quantity;

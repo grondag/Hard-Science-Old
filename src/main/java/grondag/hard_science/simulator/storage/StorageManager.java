@@ -259,7 +259,7 @@ public class StorageManager<T extends StorageType<T>>
      * and reachable from the given device, in order of preference
      * for extract. (Generally stores that can be emptied are preferred.)<p>
      */
-    public ImmutableList<IResourceContainer<T>> findSourcesFor(@Nonnull IResource<T> resource, @Nonnull IDevice reachableFrom)
+    public ImmutableList<IResourceContainer<T>> findSourcesFor(IResource<T> resource, IDevice reachableFrom)
     {
         assert this.confirmServiceThread() : "Storage manager access outside service thread.";
 
@@ -392,8 +392,8 @@ public class StorageManager<T extends StorageType<T>>
      * Provides no notification to the request.
      */
     public long setAllocation(
-            @Nonnull IResource<T> resource, 
-            @Nonnull NewProcurementTask<T> request, 
+            IResource<T> resource, 
+            NewProcurementTask<T> request, 
             long requestedAllocation)
     {
         assert this.confirmServiceThread() : "Storage manager access outside service thread.";
@@ -413,9 +413,9 @@ public class StorageManager<T extends StorageType<T>>
      * Provides no notification to the request.
      */
     public long changeAllocation(
-            @Nonnull IResource<T> resource,
+            IResource<T> resource,
             long quantityRequested, 
-            @Nonnull NewProcurementTask<T> request)
+            NewProcurementTask<T> request)
     {       
         assert this.confirmServiceThread() : "Storage manager access outside service thread.";
 

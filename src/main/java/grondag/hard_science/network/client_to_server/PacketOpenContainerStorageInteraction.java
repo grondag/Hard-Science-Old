@@ -53,7 +53,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     private Action action;
     private int resourceHandle;
     
-    public PacketOpenContainerStorageInteraction(@Nonnull Action action, @Nonnull ItemResourceDelegate target)
+    public PacketOpenContainerStorageInteraction(Action action, ItemResourceDelegate target)
     {
         this.action = action;
         this.resourceHandle = target.handle();

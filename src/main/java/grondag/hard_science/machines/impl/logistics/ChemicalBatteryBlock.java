@@ -3,9 +3,9 @@ package grondag.hard_science.machines.impl.logistics;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.artbox.ArtBoxTextures;
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.init.ModPortLayouts;
-import grondag.exotic_matter.init.ModTextures;
 import grondag.hard_science.machines.base.AbstractMachine;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.simulator.transport.endpoint.PortLayout;
@@ -20,7 +20,7 @@ public class ChemicalBatteryBlock extends MachineBlock
     public ChemicalBatteryBlock(String name)
     {
         super(name, ModGui.GLASS_BATTERY.ordinal(), 
-                MachineBlock.creatBasicMachineModelState(null, ModTextures.BORDER_INVERSE_ZIGZAG));
+                MachineBlock.creatBasicMachineModelState(null, ArtBoxTextures.BORDER_INVERSE_ZIGZAG));
     }
 
     @Override
@@ -39,7 +39,7 @@ public class ChemicalBatteryBlock extends MachineBlock
     @Override
     public TextureAtlasSprite getSymbolSprite()
     {
-        return ModTextures.DECAL_ELECTRICITY.getSampleSprite();
+        return ArtBoxTextures.DECAL_ELECTRICITY.getSampleSprite();
     }
 
     @Override

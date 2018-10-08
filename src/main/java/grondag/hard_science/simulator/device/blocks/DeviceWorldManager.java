@@ -47,7 +47,7 @@ public class DeviceWorldManager
     }
     
     @Nullable
-    public IDeviceBlock getBlockDelegate(@Nonnull World world, @Nonnull BlockPos pos)
+    public IDeviceBlock getBlockDelegate(World world, BlockPos pos)
     {
         return this.getBlockDelegate(world.provider.getDimension(), PackedBlockPos.pack(pos));
     }
@@ -68,7 +68,7 @@ public class DeviceWorldManager
      * tear down of existing connections, notifying neighbors, etc.
      * 
      */
-    public void addOrUpdateDelegate(@Nonnull IDeviceBlock block)
+    public void addOrUpdateDelegate(IDeviceBlock block)
     {
         if(Configurator.logDeviceChanges)
             HardScience.INSTANCE.info("DeviceWorldManager.addOrUpdateDelegate: " + block.description());
@@ -90,7 +90,7 @@ public class DeviceWorldManager
      * This is the signal for the old block to handle
      * tear down of existing connections, notifying neighbors, etc.
      */
-    public void removeDelegate(@Nonnull IDeviceBlock block)
+    public void removeDelegate(IDeviceBlock block)
     {
         if(Configurator.logDeviceChanges)
             HardScience.INSTANCE.info("DeviceWorldManager.removeDelegate: " + block.description());

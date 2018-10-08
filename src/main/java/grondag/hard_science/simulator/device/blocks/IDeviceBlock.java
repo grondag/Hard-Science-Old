@@ -37,7 +37,7 @@ public interface IDeviceBlock
      * those could be configured to match the existing channel.
      */
     @Nullable
-    public <T extends StorageType<T>> Iterable<Port<T>> getConnectablePorts(@Nonnull Port<T> port, EnumFacing actualFace);
+    public <T extends StorageType<T>> Iterable<Port<T>> getConnectablePorts(Port<T> port, EnumFacing actualFace);
     
     /**
      * Called by device block manager immediately after this block is removed from the world.

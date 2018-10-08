@@ -92,7 +92,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
     }
    
-    private @Nullable Collection<IPolygon> makeAxis(SimpleJoin join, @Nonnull EnumFacing face, @Nonnull IPolygon template)
+    private @Nullable Collection<IPolygon> makeAxis(SimpleJoin join, EnumFacing face, IPolygon template)
     {
         if(join.isJoined(face))
         {
@@ -108,7 +108,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
     }
     
-    private Collection<IPolygon> makeBox(@Nonnull EnumFacing face, @Nonnull IPolygon template, boolean isBothEnds)
+    private Collection<IPolygon> makeBox(EnumFacing face, IPolygon template, boolean isBothEnds)
     {
         AxisAlignedBB aabb;
         

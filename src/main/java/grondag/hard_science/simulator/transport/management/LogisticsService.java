@@ -92,7 +92,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * 
      * Returns true if ports were connected.
      */
-    public boolean connect(@Nonnull Port<T> first, @Nonnull Port<T> second)
+    public boolean connect(Port<T> first, Port<T> second)
     {
         assert confirmServiceThread() : "LogisticsService.connect called outside service thread.";
         
@@ -235,7 +235,7 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * 
      * Must be called from service thread.
      */
-    public void disconnect(@Nonnull Port<T> leaving)
+    public void disconnect(Port<T> leaving)
     {
         assert confirmServiceThread() : "LogisticsService.connect called outside service thread.";
 
@@ -397,7 +397,6 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * Convenient version of {@link #connectionResult(Port, int, Port, int)}
      * to use if both ports already have channels fully configured.
      */
-    @Nonnull
     public ConnectionResult connectionResult(
             Port<T> port1,
             Port<T> port2)
@@ -414,7 +413,6 @@ public class LogisticsService<T extends StorageType<T>> implements ITypedStorage
      * to be mated with the given given channels.
      * Implements all the rules described in PortFunction.<p>
      */
-    @Nonnull
     public ConnectionResult connectionResult(
             Port<T> port1,
             int channel1,
