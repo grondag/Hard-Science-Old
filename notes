@@ -1,48 +1,23 @@
 Things to do
 
-Lava Sounds
- Volcano Sounds
- 
- 
-ChunkMap concurrency needs work - especially for iteration concurrency used during NBT read/write & debug render
-Side culling could be more aggressive in top of bore - watch bore in spectator mode to see it
- Make basalt very hot if lava placed on top of it without melting, unless fully obscured
- Smoke
- Haze / Biome
+Log issues or track in code
+ Side culling could be more aggressive in top of bore - watch bore in spectator mode to see it
+ Smoke / Haze / Biome
  Explosions
- Clean up Polygon stuff from before
- Code review / clean up of all volcano code - lots of leftovers
- Add repair command to capture strays within a radius and for all loaded chunks - call after deserialize
  Ash (requires multi-part)
  Support multiple worlds for lava/volcanos
- Consider different version / child class in terrain state to reduce memory usage when vertex calcs not needed
-
 
 docs - github
 technical write up - github
 overview - CF
 	include link to HD texture pack
-video capture
-screenshots
 release
-	EM
-	Pyroclasm
 	Pyroclasm HD
-post on
-	Curseforge
-	Youtube
-		- update CF
-	Imgur
-		- update CF
-	Minecraft forum
-	Reddit
-		- include link to technical write up
-	Forge forums (if appropriate)
 	
 
 Exotic Matter cleanups
-Move test blocks to test mod
-Move textures to texture mod
+ Consider different version / child class in terrain state to reduce memory usage when vertex calcs not needed
+ Clean up Polygon stuff from before
 Lazy expanded block state  ISuperBlockState
 	Use this in TerrainWorldAdapter
 Try caching immutable polygons instead of baking them into LitBakedQuad (like UnpackedBakedQuad)?
