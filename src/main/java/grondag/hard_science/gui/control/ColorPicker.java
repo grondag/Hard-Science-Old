@@ -26,7 +26,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
     private double centerY;
     private double radiusInner;
     private double radiusOuter;
-    private double arc = 360.0 / Hue.values().length;
+    private double arc = 360.0 / Hue.COUNT;
 
     private double gridLeft;
     private double gridTop;
@@ -54,7 +54,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        for(int h = 0; h < Hue.values().length; h++)
+        for(int h = 0; h < Hue.COUNT; h++)
         {
             double radius = (h == this.selectedHue.ordinal()) ? radiusOuter : radiusInner;
             double arcStart = Math.toRadians(arc * h);
@@ -72,7 +72,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
             double x3 =  centerX;// + Math.sin(arcEnd) * radiusInner;
             double y3 =  centerY;// + Math.cos(arcEnd) * radiusInner;
 
-            GuiUtil.drawQuad(x0, y0, x1, y1, x2, y2, x3, y3, Hue.values()[h].hueSample());
+            GuiUtil.drawQuad(x0, y0, x1, y1, x2, y2, x3, y3, Hue.VALUES[h].hueSample());
         }
 
         double left;
@@ -86,10 +86,10 @@ public class ColorPicker extends GuiControl<ColorPicker>
         {
             bottom = top + this.gridIncrementY;
             left = this.gridLeft;
-            for(Chroma c : Chroma.values())
+            for(int c = 0 ; c < Chroma.COUNT; c++)
             {
                 right = left + this.gridIncrementX;
-                ColorMap colormap = BlockColorMapProvider.INSTANCE.getColorMap(selectedHue, c, l);
+                ColorMap colormap = BlockColorMapProvider.INSTANCE.getColorMap(selectedHue, Chroma.VALUES[c], l);
                 if(colormap != null)
                 {
                     GuiUtil.drawRect(left, top, right, bottom, colormap.getColor(map));
@@ -123,7 +123,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
 
             while(newMap == null)
             {
-                currentChroma = Chroma.values()[currentChroma.ordinal() - 1];
+                currentChroma = Chroma.VALUES[currentChroma.ordinal() - 1];
                 newMap = BlockColorMapProvider.INSTANCE.getColorMap(
                         newHue, currentChroma, currentLuminance);
             }
@@ -143,9 +143,9 @@ public class ColorPicker extends GuiControl<ColorPicker>
             if(angle < 1) angle += 360;
             int index = (int) Math.floor(angle / this.arc);
 
-            if(index >= Hue.values().length) index = 0;
+            if(index >= Hue.COUNT) index = 0;
 
-            this.changeHueIfDifferent(Hue.values()[index]);
+            this.changeHueIfDifferent(Hue.VALUES[index]);
          
         }
         else if(mouseX >= this.gridLeft)
@@ -154,11 +154,11 @@ public class ColorPicker extends GuiControl<ColorPicker>
             int c = (int) Math.floor((mouseX - this.gridLeft) / this.gridIncrementX);
 
             if(l >= 0 && l <  Luminance.values().length 
-                    && c >= 0 && c < Chroma.values().length )
+                    && c >= 0 && c < Chroma.COUNT )
             {
                 ColorMap testMap = BlockColorMapProvider.INSTANCE.getColorMap(
                         this.selectedHue, 
-                        Chroma.values()[c], 
+                        Chroma.VALUES[c], 
                         Luminance.values()[l]);
 
                 if(testMap != null)
@@ -184,10 +184,10 @@ public class ColorPicker extends GuiControl<ColorPicker>
         {
             int ord = this.selectedHue.ordinal() + inc;
             if(ord < 0) 
-                ord = Hue.values().length - 1;
-            else if(ord >= Hue.values().length) 
+                ord = Hue.COUNT - 1;
+            else if(ord >= Hue.COUNT) 
                 ord = 0;
-            this.changeHueIfDifferent(Hue.values()[ord]);
+            this.changeHueIfDifferent(Hue.VALUES[ord]);
         }
     }
 
@@ -199,7 +199,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
         this.centerY = this.top + this.radiusOuter;
         this.radiusInner = innerRadius(height);
 
-        this.gridIncrementX = (this.width - this.height) / (Chroma.values().length + 1);
+        this.gridIncrementX = (this.width - this.height) / (Chroma.COUNT + 1);
         this.gridIncrementY = this.radiusInner * 2 / Luminance.values().length;
         this.gridLeft = this.left + this.height + this.gridIncrementX;
         this.gridTop = this.centerY - radiusInner;
@@ -222,7 +222,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
           * h * (1 + 0.85  / lvl * (cvl + 1)) = w
           * h = w / (1 + 0.85  / lvl * (cvl + 1))
           */
-        return width / (1.0 + 0.85 / Luminance.values().length * (Chroma.values().length + 1));
+        return width / (1.0 + 0.85 / Luminance.values().length * (Chroma.COUNT + 1));
     }
     
     @Override 
