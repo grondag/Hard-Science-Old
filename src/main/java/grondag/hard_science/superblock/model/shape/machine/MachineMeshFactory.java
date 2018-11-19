@@ -9,7 +9,7 @@ import grondag.exotic_matter.model.mesh.ShapeMeshGenerator;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.painting.Surface;
 import grondag.exotic_matter.model.painting.SurfaceTopology;
-import grondag.exotic_matter.model.primitives.IPolygon;
+import grondag.exotic_matter.model.primitives.polygon.IPolygon;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.state.StateFormat;

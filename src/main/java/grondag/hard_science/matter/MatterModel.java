@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.font.FontHolder;
-import grondag.exotic_matter.model.primitives.IPolygon;
 import grondag.exotic_matter.model.primitives.QuadHelper;
+import grondag.exotic_matter.model.primitives.polygon.IPolygon;
 import grondag.exotic_matter.model.render.QuadBakery;
 import grondag.exotic_matter.world.Rotation;
 import net.minecraft.client.renderer.block.model.BakedQuad;
