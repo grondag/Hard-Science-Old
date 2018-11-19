@@ -38,7 +38,7 @@ public class TexturePicker extends TabBar<ITexturePalette>
         if(this.renderAlpha) GuiUtil.drawRect(left, top, left + size, top + size, this.baseColor);
 
         Rotation rotation = item.rotation().rotationType() == TextureRotationType.RANDOM 
-                ? Rotation.values()[(int) ((WorldInfo.currentTimeMillis() >> 11) & 3)]
+                ? Rotation.VALUES[(int) ((WorldInfo.currentTimeMillis() >> 11) & 3)]
                 : item.rotation().rotation;
                 
         TextureAtlasSprite tex = item.getSampleSprite();

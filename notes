@@ -1,23 +1,17 @@
 Things to do
 
-Log issues or track in code
- Side culling could be more aggressive in top of bore - watch bore in spectator mode to see it
- Smoke / Haze / Biome
- Explosions
- Ash (requires multi-part)
- Support multiple worlds for lava/volcanos
-
-docs - github
-technical write up - github
-overview - CF
-	include link to HD texture pack
-release
-	Pyroclasm HD
-	
-
 Exotic Matter cleanups
+Space hogs:
+	QuadContainer - could condense, compact give up some accuracy for painted quads in the dispatched
+					could also cache some components, remove any that don't apply to painted
+					
+	VertexCollector/VertexCollectorList
+	
+	Sound files - currently largest is close to 13MB
+		Mojang uses 48K mono, 32bit float
+		
  Consider different version / child class in terrain state to reduce memory usage when vertex calcs not needed
- Clean up Polygon stuff from before
+ Clean up Polygon stuff from .before
 Lazy expanded block state  ISuperBlockState
 	Use this in TerrainWorldAdapter
 Try caching immutable polygons instead of baking them into LitBakedQuad (like UnpackedBakedQuad)?
