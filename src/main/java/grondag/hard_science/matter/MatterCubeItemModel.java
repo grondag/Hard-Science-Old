@@ -13,7 +13,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import grondag.exotic_matter.model.primitives.QuadHelper;
-import grondag.exotic_matter.model.primitives.polygon.IPolygon;
 import grondag.exotic_matter.model.render.QuadBakery;
 import grondag.hard_science.HardScience;
 import net.minecraft.block.state.IBlockState;
