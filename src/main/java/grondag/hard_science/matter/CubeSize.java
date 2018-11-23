@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.model.primitives.QuadHelper;
+import grondag.exotic_matter.model.primitives.better.IPolygon;
 import grondag.exotic_matter.varia.Color;
 import grondag.exotic_matter.varia.Color.EnumHCLFailureMode;
 import grondag.exotic_matter.world.Rotation;
@@ -94,7 +95,7 @@ public enum CubeSize
         {
             ArrayList<IPolygon> quadList = new ArrayList<IPolygon>();
             
-            QuadHelper.addTextureToAllFaces(this.symbolTexture, 0.02f, 0.26f, 0.24f, 1.025f, this.symbolColor, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbolTexture, 0.02f, 0.26f, 0.24f, 1.025f, this.symbolColor, true, Rotation.ROTATE_NONE, quadList);
             
             this.quads = ImmutableList.copyOf(quadList);
         }

@@ -3,13 +3,15 @@ package grondag.hard_science.superblock.model.shape.machine;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.CSG.CSGMesh;
 import grondag.exotic_matter.model.collision.ICollisionHandler;
 import grondag.exotic_matter.model.mesh.MeshHelper;
+import grondag.exotic_matter.model.primitives.better.IMutablePolygon;
+import grondag.exotic_matter.model.primitives.better.IPolygon;
+import grondag.exotic_matter.model.primitives.better.PolyFactory;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.SideShape;
@@ -46,7 +48,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         this.xzMin = 0.5 - CABLE_RADIUS;
         this.xzMax = 0.5 + CABLE_RADIUS;
     }
-    
+
     /**
      * Top surface is main surface (so can support borders if wanted).
      * Sides and bottom are lamp surface. 
@@ -54,16 +56,16 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     @Override
     public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
-        IMutablePolygon template = new PolyImpl(4);
-        template.setRotation(Rotation.ROTATE_NONE);
-        template.setLockUV(true);
+        IMutablePolygon template = PolyFactory.newPaintable(4);
+        template.setRotation(0,Rotation.ROTATE_NONE);
+        template.setLockUV(0, true);
         template.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
         
         SimpleJoin join = modelState.getSimpleJoin();
         
-        Collection<IPolygon> shape = makeAxis(join, EnumFacing.NORTH, template);
+        Collection<IMutablePolygon> shape = makeAxis(join, EnumFacing.NORTH, template);
         
-        Collection<IPolygon> box = makeAxis(join, EnumFacing.EAST, template);
+        Collection<IMutablePolygon> box = makeAxis(join, EnumFacing.EAST, template);
         
         if(box != null)
         {
@@ -89,7 +91,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
     }
    
-    private @Nullable Collection<IPolygon> makeAxis(SimpleJoin join, EnumFacing face, IPolygon template)
+    private @Nullable Collection<IMutablePolygon> makeAxis(SimpleJoin join, EnumFacing face, IMutablePolygon template)
     {
         if(join.isJoined(face))
         {
@@ -105,7 +107,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
     }
     
-    private Collection<IPolygon> makeBox(EnumFacing face, IPolygon template, boolean isBothEnds)
+    private Collection<IMutablePolygon> makeBox(EnumFacing face, IMutablePolygon template, boolean isBothEnds)
     {
         AxisAlignedBB aabb;
         
@@ -137,7 +139,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
             break;
         
         }
-        return MeshHelper.makeBox(aabb, template);
+        return MeshHelper.makePaintableBox(aabb, template);
     }
    
     @Override

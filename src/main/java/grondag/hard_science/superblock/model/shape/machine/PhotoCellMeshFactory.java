@@ -7,6 +7,9 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.collision.ICollisionHandler;
+import grondag.exotic_matter.model.primitives.better.IMutablePolygon;
+import grondag.exotic_matter.model.primitives.better.IPolygon;
+import grondag.exotic_matter.model.primitives.better.PolyFactory;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.SideShape;
@@ -40,30 +43,29 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     @Override
     public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
-        IMutablePolygon template = new PolyImpl(4);
-        template.setRotation(Rotation.ROTATE_NONE);
-        template.setLockUV(true);
+        IMutablePolygon quad = PolyFactory.newPaintable(4);
+        quad.setRotation(0, Rotation.ROTATE_NONE);
+        quad.setLockUV(0, true);
 
-        IMutablePolygon quad = template.mutableCopy(4);
         quad.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
-        target.accept(quad);
+        target.accept(quad.toPainted());
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
-            quad = template.mutableCopy(4);
             quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
             quad.setNominalFace(face);
             quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
-            target.accept(quad);
+            target.accept(quad.toPainted());
         }
         
-        quad = template.mutableCopy(4);
         quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);
-        target.accept(quad);
+        target.accept(quad.toPainted());
+        
+        quad.release();
     }
    
     @Override

@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import grondag.exotic_matter.model.primitives.QuadHelper;
+import grondag.exotic_matter.model.primitives.better.IPolygon;
 import grondag.exotic_matter.model.render.QuadBakery;
 import grondag.hard_science.HardScience;
 import net.minecraft.block.state.IBlockState;
@@ -109,7 +110,7 @@ public class MatterCubeItemModel implements IBakedModel
         // add size symbol
         for(IPolygon raw : matterCube.cubeSize.rawQuads())
         {
-            builder.add(QuadBakery.createBakedQuad(raw, true));
+            builder.add(QuadBakery.createBakedQuad(0, raw, true));
         }
 
         this.quads = builder.build();

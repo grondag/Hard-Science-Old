@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.font.FontHolder;
 import grondag.exotic_matter.model.primitives.QuadHelper;
+import grondag.exotic_matter.model.primitives.better.IPolygon;
 import grondag.exotic_matter.model.render.QuadBakery;
 import grondag.exotic_matter.world.Rotation;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -50,7 +51,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
         }
         
     }
@@ -66,7 +67,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
         }
     }
     
@@ -80,7 +81,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
         }
     }
 
@@ -94,7 +95,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
         }
     }
     
@@ -108,7 +109,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     
@@ -122,7 +123,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.48f, 0.98f, 0.46f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.48f, 0.98f, 0.46f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     
@@ -138,7 +139,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.50f, 0.96f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.50f, 0.96f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     
@@ -156,7 +157,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, this.rotation, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, this.rotation, quadList);
         }
     }
     
@@ -170,7 +171,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbolString, 0.02f, 0.58f, 0.29f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.02f, 0.58f, 0.29f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
    
@@ -193,9 +194,9 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(this.symbol0, 0.0f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
-            QuadHelper.addTextureToAllFaces(this.symbol1, 0.40f, 0.96f, 0.20f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
-            QuadHelper.addTextureToAllFaces(this.symbol2, 0.58f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbol0, 0.0f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbol1, 0.40f, 0.96f, 0.20f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            QuadHelper.addTextureToAllFaces(false, this.symbol2, 0.58f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     
@@ -233,20 +234,4 @@ public abstract class MatterModel
             super(symbolString, color, true);
         }
     }
- 
-//
-//    switch(matterCube.matter.symbolType)
-//    {
-//    case FORMULA:
-//        ModModels.FONT_RENDERER_SMALL.formulaBlockQuadsToList(matterCube.matter.symbolString, true, matterCube.matter.symbolColor, 1.025f, quadList);
-//        break;
-//    case SYMBOL:
-//        QuadHelper.addTextureToAllFaces(matterCube.matter.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, matterCube.matter.symbolColor, true, quadList);
-//        break;
-//    case NAME:
-//    default:
-//        ModModels.FONT_RENDERER_SMALL.formulaBlockQuadsToList(matterCube.matter.symbolString, false, matterCube.matter.symbolColor, 1.025f, quadList);
-//        break;
-    
-//    }
 }

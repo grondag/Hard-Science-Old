@@ -1,5 +1,8 @@
 Things to do
 
+If acuity is enabled, store a simple list of paintedquads
+
+
 Exotic Matter cleanups
 Space hogs:
 	QuadContainer - could condense, compact give up some accuracy for painted quads in the dispatched

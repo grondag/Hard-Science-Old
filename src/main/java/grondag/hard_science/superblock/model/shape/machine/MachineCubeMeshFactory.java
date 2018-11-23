@@ -9,6 +9,9 @@ import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.collision.CubeCollisionHandler;
 import grondag.exotic_matter.model.collision.ICollisionHandler;
 import grondag.exotic_matter.model.primitives.CubeInputs;
+import grondag.exotic_matter.model.primitives.better.IMutablePolygon;
+import grondag.exotic_matter.model.primitives.better.IPolygon;
+import grondag.exotic_matter.model.primitives.better.PolyFactory;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.SideShape;
@@ -92,24 +95,26 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         result.v1 = 16;
         result.isOverlay = false;
         
-        IMutablePolygon template = new PolyImpl(4);
-        template.setRotation(Rotation.ROTATE_NONE);
-        template.setMinU(0);
-        template.setMinV(0);
-        template.setMaxU(16);
-        template.setMaxV(16);
+        IMutablePolygon template = PolyFactory.newPaintable(4);
+        template.setRotation(0, Rotation.ROTATE_NONE);
+        template.setMinU(0, 0);
+        template.setMinV(0, 0);
+        template.setMaxU(0, 16);
+        template.setMaxV(0, 16);
         
         ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
        
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            
             result.surfaceInstance = hasFront && face == rotation.horizontalFace  
                     ? MachineMeshFactory.SURFACE_LAMP 
                     : MachineMeshFactory.SURFACE_MAIN;
             
-            builder.add(result.makeRawFace(face));
+            builder.add(result.makePaintedFace(face));
         }
+        
+        template.release();
+        
         return builder.build();
     }
     
