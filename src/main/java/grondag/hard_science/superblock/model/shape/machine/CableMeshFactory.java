@@ -59,7 +59,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         IMutablePolygon template = PolyFactory.newPaintable(4);
         template.setRotation(0,Rotation.ROTATE_NONE);
         template.setLockUV(0, true);
-        template.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
+        template.setSurface(MachineMeshFactory.SURFACE_MAIN);
         
         SimpleJoin join = modelState.getSimpleJoin();
         

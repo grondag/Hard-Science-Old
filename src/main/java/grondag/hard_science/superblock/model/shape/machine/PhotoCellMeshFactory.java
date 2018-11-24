@@ -47,20 +47,20 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
         quad.setRotation(0, Rotation.ROTATE_NONE);
         quad.setLockUV(0, true);
 
-        quad.setSurfaceInstance(MachineMeshFactory.SURFACE_MAIN);
+        quad.setSurface(MachineMeshFactory.SURFACE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
         target.accept(quad.toPainted());
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
-            quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
+            quad.setSurface(MachineMeshFactory.SURFACE_LAMP);
             quad.setNominalFace(face);
             quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
             target.accept(quad.toPainted());
         }
         
-        quad.setSurfaceInstance(MachineMeshFactory.SURFACE_LAMP);
+        quad.setSurface(MachineMeshFactory.SURFACE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);
         target.accept(quad.toPainted());
