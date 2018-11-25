@@ -9,7 +9,7 @@ import grondag.exotic_matter.model.mesh.ShapeMeshGenerator;
 import grondag.exotic_matter.model.painting.PaintLayer;
 import grondag.exotic_matter.model.painting.Surface;
 import grondag.exotic_matter.model.painting.SurfaceTopology;
-import grondag.exotic_matter.model.primitives.better.IPolygon;
+import grondag.exotic_matter.model.primitives.better.IMutablePolygon;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.state.StateFormat;
@@ -76,7 +76,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator implements ICollision
     }
     
     @Override
-    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
     {
         HANDLERS[getMachineShape(modelState).ordinal()].produceShapeQuads(modelState, target);
     }

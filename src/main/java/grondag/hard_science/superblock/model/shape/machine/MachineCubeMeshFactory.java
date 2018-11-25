@@ -60,25 +60,25 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
     {
         switch(modelState.getAxisRotation())
         {
         case ROTATE_NONE:
         default:
-            this.cubeQuads0.forEach(target);
+            this.cubeQuads0.forEach(q -> target.accept(q.claimCopy()));
             break;
             
         case ROTATE_90:
-            this.cubeQuads90.forEach(target);
+            this.cubeQuads90.forEach(q -> target.accept(q.claimCopy()));
             break;
 
         case ROTATE_180:
-            this.cubeQuads180.forEach(target);
+            this.cubeQuads180.forEach(q -> target.accept(q.claimCopy()));
             break;
 
         case ROTATE_270:
-            this.cubeQuads270.forEach(target);
+            this.cubeQuads270.forEach(q -> target.accept(q.claimCopy()));
             break;
         }
     }

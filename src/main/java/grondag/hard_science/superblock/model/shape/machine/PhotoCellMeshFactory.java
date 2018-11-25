@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.collision.ICollisionHandler;
 import grondag.exotic_matter.model.primitives.better.IMutablePolygon;
-import grondag.exotic_matter.model.primitives.better.IPolygon;
 import grondag.exotic_matter.model.primitives.better.PolyFactory;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
@@ -41,7 +40,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
     {
         IMutablePolygon quad = PolyFactory.newPaintable(4);
         quad.setRotation(0, Rotation.ROTATE_NONE);
@@ -50,22 +49,22 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
         quad.setSurface(MachineMeshFactory.SURFACE_MAIN);
         quad.setNominalFace(EnumFacing.UP);
         quad.setupFaceQuad(0, 0, 1, 1, 1 - height, EnumFacing.NORTH);
-        target.accept(quad.toPainted());
+        target.accept(quad);
       
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
+            quad = quad.claimCopy();
             quad.setSurface(MachineMeshFactory.SURFACE_LAMP);
             quad.setNominalFace(face);
             quad.setupFaceQuad( 0, 0, 1, height, 0, EnumFacing.UP);
-            target.accept(quad.toPainted());
+            target.accept(quad);
         }
         
+        quad = quad.claimCopy();
         quad.setSurface(MachineMeshFactory.SURFACE_LAMP);
         quad.setNominalFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0, 0, 1, 1, 0, EnumFacing.NORTH);
-        target.accept(quad.toPainted());
-        
-        quad.release();
+        target.accept(quad);
     }
    
     @Override

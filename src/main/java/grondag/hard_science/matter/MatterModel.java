@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.font.FontHolder;
-import grondag.exotic_matter.model.primitives.QuadHelper;
+import grondag.exotic_matter.model.mesh.MeshHelper;
 import grondag.exotic_matter.model.primitives.better.IPolygon;
 import grondag.exotic_matter.model.render.QuadBakery;
 import grondag.exotic_matter.world.Rotation;
@@ -51,7 +51,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
         }
         
     }
@@ -67,7 +67,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, Rotation.ROTATE_NONE, quadList);            
         }
     }
     
@@ -81,7 +81,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
         }
     }
 
@@ -95,7 +95,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.0f, 1.0f, 1.0f, 1.00f, this.color, true, 1f/16f, Rotation.ROTATE_NONE, quadList);            
         }
     }
     
@@ -109,7 +109,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     
@@ -123,7 +123,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.48f, 0.98f, 0.46f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.48f, 0.98f, 0.46f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     
@@ -139,7 +139,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.50f, 0.96f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.50f, 0.96f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     
@@ -157,7 +157,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, this.rotation, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.25f, 0.96f, 0.5f, 1.025f, this.color, true, this.rotation, quadList);
         }
     }
     
@@ -171,7 +171,7 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbolString, 0.02f, 0.58f, 0.29f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbolString, 0.02f, 0.58f, 0.29f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
    
@@ -194,9 +194,9 @@ public abstract class MatterModel
         @Override
         public void addRawQuads(ArrayList<IPolygon> quadList)
         {
-            QuadHelper.addTextureToAllFaces(false, this.symbol0, 0.0f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
-            QuadHelper.addTextureToAllFaces(false, this.symbol1, 0.40f, 0.96f, 0.20f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
-            QuadHelper.addTextureToAllFaces(false, this.symbol2, 0.58f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbol0, 0.0f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbol1, 0.40f, 0.96f, 0.20f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
+            MeshHelper.addTextureToAllFaces(false, this.symbol2, 0.58f, 0.98f, 0.42f, 1.025f, this.color, true, Rotation.ROTATE_NONE, quadList);
         }
     }
     

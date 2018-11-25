@@ -10,7 +10,6 @@ import grondag.exotic_matter.model.CSG.CSGMesh;
 import grondag.exotic_matter.model.collision.ICollisionHandler;
 import grondag.exotic_matter.model.mesh.MeshHelper;
 import grondag.exotic_matter.model.primitives.better.IMutablePolygon;
-import grondag.exotic_matter.model.primitives.better.IPolygon;
 import grondag.exotic_matter.model.primitives.better.PolyFactory;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
@@ -54,7 +53,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
     {
         IMutablePolygon template = PolyFactory.newPaintable(4);
         template.setRotation(0,Rotation.ROTATE_NONE);
@@ -82,7 +81,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         if(shape == null)
         {
 
-            MeshHelper.makeBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template, target);
+            MeshHelper.makePaintableBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template, target);
         }
         else
         {
