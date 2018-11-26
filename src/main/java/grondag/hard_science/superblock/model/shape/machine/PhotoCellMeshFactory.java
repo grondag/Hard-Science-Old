@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.collision.ICollisionHandler;
-import grondag.exotic_matter.model.primitives.better.IMutablePolygon;
-import grondag.exotic_matter.model.primitives.better.PolyFactory;
+import grondag.exotic_matter.model.primitives.PolyFactory;
+import grondag.exotic_matter.model.primitives.polygon.IMutablePolygon;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.SideShape;
