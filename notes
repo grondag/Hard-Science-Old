@@ -1,7 +1,11 @@
 Things to do
 
 If acuity is enabled, store a simple list of paintedquads
-
+Linked lists
+Reuse immutable instances
+Array-backed polys
+Move glow (for N <= 4) and layercount to bitfield
+Consider tokenizing texture string and surfaces and moving to bit field
 
 Exotic Matter cleanups
 Space hogs:

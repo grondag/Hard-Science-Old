@@ -95,7 +95,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         result.v1 = 16;
         result.isOverlay = false;
         
-        IMutablePolygon template = PolyFactory.newPaintable(4);
+        IMutablePolygon template = PolyFactory.COMMON_POOL.newPaintable(4);
         template.setRotation(0, Rotation.ROTATE_NONE);
         template.setMinU(0, 0);
         template.setMinV(0, 0);

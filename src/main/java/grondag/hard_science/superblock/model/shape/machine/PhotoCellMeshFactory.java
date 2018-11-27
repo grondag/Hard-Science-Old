@@ -42,7 +42,7 @@ public class PhotoCellMeshFactory extends AbstractMachineMeshGenerator implement
     @Override
     public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
     {
-        IMutablePolygon quad = PolyFactory.newPaintable(4);
+        IMutablePolygon quad = PolyFactory.COMMON_POOL.newPaintable(4);
         quad.setRotation(0, Rotation.ROTATE_NONE);
         quad.setLockUV(0, true);
 

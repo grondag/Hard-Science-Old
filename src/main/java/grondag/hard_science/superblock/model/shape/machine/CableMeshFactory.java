@@ -55,7 +55,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
     @Override
     public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
     {
-        IMutablePolygon template = PolyFactory.newPaintable(4);
+        IMutablePolygon template = PolyFactory.COMMON_POOL.newPaintable(4);
         template.setRotation(0,Rotation.ROTATE_NONE);
         template.setLockUV(0, true);
         template.setSurface(MachineMeshFactory.SURFACE_MAIN);
