@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.transport.endpoint;
 
-import grondag.exotic_matter.varia.BitPacker;
+import grondag.exotic_matter.varia.BitPacker64;
 import grondag.hard_science.simulator.resource.EnumStorageType;
 import grondag.hard_science.simulator.resource.StorageType;
 import grondag.hard_science.simulator.transport.carrier.CarrierLevel;
@@ -21,12 +21,12 @@ import grondag.hard_science.simulator.transport.carrier.Channel;
  */
 public class PortDescription<T extends StorageType<T>> implements IPortDescription<T>
 {
-    private static final BitPacker<PortDescription<?>> PACKER = new BitPacker<PortDescription<?>>(p -> p.id, (p, i) -> { throw new UnsupportedOperationException();});
-    private static final BitPacker<PortDescription<?>>.EnumElement<EnumStorageType> STORAGE_TYPE = PACKER.createEnumElement(EnumStorageType.class);
-    private static final BitPacker<PortDescription<?>>.EnumElement<PortConnector> CONNECTOR = PACKER.createEnumElement(PortConnector.class);
-    private static final BitPacker<PortDescription<?>>.EnumElement<PortFunction> FUNCTION = PACKER.createEnumElement(PortFunction.class);
-    private static final BitPacker<PortDescription<?>>.EnumElement<CarrierLevel> LEVEL = PACKER.createEnumElement(CarrierLevel.class);
-    private static final BitPacker<PortDescription<?>>.IntElement CHANNEL = PACKER.createIntElement(Channel.MIN_CHANNEL_VALUE, Channel.MAX_CHANNEL_VALUE);
+    private static final BitPacker64<PortDescription<?>> PACKER = new BitPacker64<PortDescription<?>>(p -> p.id, (p, i) -> { throw new UnsupportedOperationException();});
+    private static final BitPacker64<PortDescription<?>>.EnumElement<EnumStorageType> STORAGE_TYPE = PACKER.createEnumElement(EnumStorageType.class);
+    private static final BitPacker64<PortDescription<?>>.EnumElement<PortConnector> CONNECTOR = PACKER.createEnumElement(PortConnector.class);
+    private static final BitPacker64<PortDescription<?>>.EnumElement<PortFunction> FUNCTION = PACKER.createEnumElement(PortFunction.class);
+    private static final BitPacker64<PortDescription<?>>.EnumElement<CarrierLevel> LEVEL = PACKER.createEnumElement(CarrierLevel.class);
+    private static final BitPacker64<PortDescription<?>>.IntElement CHANNEL = PACKER.createIntElement(Channel.MIN_CHANNEL_VALUE, Channel.MAX_CHANNEL_VALUE);
 
     private static final PortDescription<?> ports[] = new PortDescription[1 << PACKER.bitLength()];
 

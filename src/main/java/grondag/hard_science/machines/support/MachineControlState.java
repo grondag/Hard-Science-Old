@@ -9,7 +9,7 @@ import grondag.exotic_matter.model.state.ModelState;
 import grondag.exotic_matter.serialization.IMessagePlus;
 import grondag.exotic_matter.serialization.IReadWriteNBT;
 import grondag.exotic_matter.serialization.NBTDictionary;
-import grondag.exotic_matter.varia.BitPacker;
+import grondag.exotic_matter.varia.BitPacker64;
 import grondag.exotic_matter.world.PackedBlockPos;
 import grondag.hard_science.crafting.base.GenericRecipe;
 import net.minecraft.nbt.NBTTagCompound;
@@ -108,20 +108,20 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         RESERVED27;
     }
     
-    private static BitPacker<MachineControlState> PACKER = new BitPacker<MachineControlState>(s -> s.bits, (s,b) -> s.bits = b);
+    private static BitPacker64<MachineControlState> PACKER = new BitPacker64<MachineControlState>(s -> s.bits, (s,b) -> s.bits = b);
     
-    private static BitPacker<MachineControlState>.EnumElement<ControlMode> PACKED_CONTROL_MODE = PACKER.createEnumElement(ControlMode.class);
-    private static BitPacker<MachineControlState>.EnumElement<RenderLevel> PACKED_RENDER_LEVEL = PACKER.createEnumElement(RenderLevel.class);
-    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_MODELSTATE = PACKER.createBooleanElement();
-    private static BitPacker<MachineControlState>.IntElement PACKED_META = PACKER.createIntElement(16);
-    private static BitPacker<MachineControlState>.IntElement PACKED_LIGHT_VALUE = PACKER.createIntElement(16);
-    private static BitPacker<MachineControlState>.IntElement PACKED_SUBSTANCE = PACKER.createIntElement(BlockSubstance.MAX_SUBSTANCES);
-    private static BitPacker<MachineControlState>.EnumElement<MachineState> PACKED_MACHINE_STATAE = PACKER.createEnumElement(MachineState.class);
-    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_JOB_TICKS = PACKER.createBooleanElement();
-    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
-    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_MATERIAL_BUFFER = PACKER.createBooleanElement();
-    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_POWER_SUPPLY= PACKER.createBooleanElement();
-    private static BitPacker<MachineControlState>.BooleanElement PACKED_HAS_RECIPE= PACKER.createBooleanElement();
+    private static BitPacker64<MachineControlState>.EnumElement<ControlMode> PACKED_CONTROL_MODE = PACKER.createEnumElement(ControlMode.class);
+    private static BitPacker64<MachineControlState>.EnumElement<RenderLevel> PACKED_RENDER_LEVEL = PACKER.createEnumElement(RenderLevel.class);
+    private static BitPacker64<MachineControlState>.BooleanElement PACKED_HAS_MODELSTATE = PACKER.createBooleanElement();
+    private static BitPacker64<MachineControlState>.IntElement PACKED_META = PACKER.createIntElement(16);
+    private static BitPacker64<MachineControlState>.IntElement PACKED_LIGHT_VALUE = PACKER.createIntElement(16);
+    private static BitPacker64<MachineControlState>.IntElement PACKED_SUBSTANCE = PACKER.createIntElement(BlockSubstance.MAX_SUBSTANCES);
+    private static BitPacker64<MachineControlState>.EnumElement<MachineState> PACKED_MACHINE_STATAE = PACKER.createEnumElement(MachineState.class);
+    private static BitPacker64<MachineControlState>.BooleanElement PACKED_HAS_JOB_TICKS = PACKER.createBooleanElement();
+    private static BitPacker64<MachineControlState>.BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
+    private static BitPacker64<MachineControlState>.BooleanElement PACKED_HAS_MATERIAL_BUFFER = PACKER.createBooleanElement();
+    private static BitPacker64<MachineControlState>.BooleanElement PACKED_HAS_POWER_SUPPLY= PACKER.createBooleanElement();
+    private static BitPacker64<MachineControlState>.BooleanElement PACKED_HAS_RECIPE= PACKER.createBooleanElement();
 
     private static final long DEFAULT_BITS;
     

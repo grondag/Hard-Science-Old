@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.support;
 
 import grondag.exotic_matter.serialization.IMessagePlus;
-import grondag.exotic_matter.varia.BitPacker;
+import grondag.exotic_matter.varia.BitPacker64;
 import net.minecraft.network.PacketBuffer;
 
 
@@ -13,10 +13,10 @@ import net.minecraft.network.PacketBuffer;
  */
 public class MachineStatusState implements IMessagePlus
 {
- private static BitPacker<MachineStatusState> PACKER = new BitPacker<MachineStatusState>(s -> s.bits, (s, b) -> s.bits = b);
+ private static BitPacker64<MachineStatusState> PACKER = new BitPacker64<MachineStatusState>(s -> s.bits, (s, b) -> s.bits = b);
     
-    private static BitPacker<MachineStatusState>.BooleanElement PACKED_REDSTONE_POWER = PACKER.createBooleanElement();
-    private static BitPacker<MachineStatusState>.BooleanElement PACKED_HAS_BACKLOG = PACKER.createBooleanElement();
+    private static BitPacker64<MachineStatusState>.BooleanElement PACKED_REDSTONE_POWER = PACKER.createBooleanElement();
+    private static BitPacker64<MachineStatusState>.BooleanElement PACKED_HAS_BACKLOG = PACKER.createBooleanElement();
 
     private static final int DEFAULT_BITS;
     
