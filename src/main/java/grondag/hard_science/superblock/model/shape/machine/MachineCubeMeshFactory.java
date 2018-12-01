@@ -1,17 +1,16 @@
 package grondag.hard_science.superblock.model.shape.machine;
 
-import java.util.List;
 import java.util.function.Consumer;
-
-import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.block.ISuperBlock;
 import grondag.exotic_matter.model.collision.CubeCollisionHandler;
 import grondag.exotic_matter.model.collision.ICollisionHandler;
 import grondag.exotic_matter.model.primitives.CubeInputs;
-import grondag.exotic_matter.model.primitives.PolyFactory;
 import grondag.exotic_matter.model.primitives.polygon.IMutablePolygon;
 import grondag.exotic_matter.model.primitives.polygon.IPolygon;
+import grondag.exotic_matter.model.primitives.stream.IPolyStream;
+import grondag.exotic_matter.model.primitives.stream.IWritablePolyStream;
+import grondag.exotic_matter.model.primitives.stream.PolyStreams;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.SideShape;
@@ -28,10 +27,7 @@ import net.minecraft.world.World;
 public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
 {
     /** never changes so may as well save it */
-    private final List<IPolygon> cubeQuads0;
-    private final List<IPolygon> cubeQuads90;
-    private final List<IPolygon> cubeQuads180;
-    private final List<IPolygon> cubeQuads270;
+    private final IPolyStream[] cubeQuads = new IPolyStream[4];
     
     /**
      * @param hasFront If true, model will have an orientation and front display face
@@ -40,18 +36,18 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     {
         super(hasFront ? ModelStateData.STATE_FLAG_HAS_AXIS_ROTATION : ModelStateData.STATE_FLAG_NONE); 
         
-        this.cubeQuads0 = getCubeQuads(Rotation.ROTATE_NONE, hasFront);
+        cubeQuads[Rotation.ROTATE_NONE.ordinal()] = getCubeQuads(Rotation.ROTATE_NONE, hasFront);
         if(hasFront)
         {
-            this.cubeQuads90 = getCubeQuads(Rotation.ROTATE_90, hasFront);
-            this.cubeQuads180 = getCubeQuads(Rotation.ROTATE_180, hasFront);
-            this.cubeQuads270 = getCubeQuads(Rotation.ROTATE_270, hasFront);
+            cubeQuads[Rotation.ROTATE_90.ordinal()] = getCubeQuads(Rotation.ROTATE_90, true);
+            cubeQuads[Rotation.ROTATE_180.ordinal()] = getCubeQuads(Rotation.ROTATE_180, true);
+            cubeQuads[Rotation.ROTATE_270.ordinal()] = getCubeQuads(Rotation.ROTATE_270, true);
         }
         else
         {
-            this.cubeQuads90 = this.cubeQuads0;
-            this.cubeQuads180 = this.cubeQuads0;
-            this.cubeQuads270 = this.cubeQuads0;
+            cubeQuads[Rotation.ROTATE_90.ordinal()] = cubeQuads[Rotation.ROTATE_NONE.ordinal()];
+            cubeQuads[Rotation.ROTATE_180.ordinal()] = cubeQuads[Rotation.ROTATE_NONE.ordinal()];
+            cubeQuads[Rotation.ROTATE_270.ordinal()] = cubeQuads[Rotation.ROTATE_NONE.ordinal()];
         }
     }
     
@@ -62,60 +58,47 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
     @Override
     public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
     {
-        switch(modelState.getAxisRotation())
-        {
-        case ROTATE_NONE:
-        default:
-            this.cubeQuads0.forEach(q -> target.accept(q.claimCopy()));
-            break;
-            
-        case ROTATE_90:
-            this.cubeQuads90.forEach(q -> target.accept(q.claimCopy()));
-            break;
-
-        case ROTATE_180:
-            this.cubeQuads180.forEach(q -> target.accept(q.claimCopy()));
-            break;
-
-        case ROTATE_270:
-            this.cubeQuads270.forEach(q -> target.accept(q.claimCopy()));
-            break;
-        }
+        IPolyStream cachedQuads = cubeQuads[modelState.getAxisRotation().ordinal()];
+        
+        cachedQuads.origin();
+        IPolygon reader = cachedQuads.reader();
+        
+        do
+            target.accept(reader.claimCopy());
+        while(cachedQuads.next());
     }
    
-    private List<IPolygon> getCubeQuads(Rotation rotation, boolean hasFront)
+    private IPolyStream getCubeQuads(Rotation rotation, boolean hasFront)
     {
-        CubeInputs result = new CubeInputs();
-        result.color = 0xFFFFFFFF;
-        result.textureRotation = Rotation.ROTATE_NONE;
-        result.isFullBrightness = false;
-        result.u0 = 0;
-        result.v0 = 0;
-        result.u1 = 16;
-        result.v1 = 16;
-        result.isOverlay = false;
+        CubeInputs cube = new CubeInputs();
+        cube.color = 0xFFFFFFFF;
+        cube.textureRotation = Rotation.ROTATE_NONE;
+        cube.isFullBrightness = false;
+        cube.u0 = 0;
+        cube.v0 = 0;
+        cube.u1 = 16;
+        cube.v1 = 16;
+        cube.isOverlay = false;
         
-        IMutablePolygon template = PolyFactory.COMMON_POOL.newPaintable(4);
-        template.setRotation(0, Rotation.ROTATE_NONE);
-        template.setMinU(0, 0);
-        template.setMinV(0, 0);
-        template.setMaxU(0, 16);
-        template.setMaxV(0, 16);
+        IWritablePolyStream stream = PolyStreams.claimWriter();
+        IMutablePolygon writer = stream.writer();
+        writer.setRotation(0, Rotation.ROTATE_NONE);
+        writer.setMinU(0, 0);
+        writer.setMinV(0, 0);
+        writer.setMaxU(0, 16);
+        writer.setMaxV(0, 16);
+        stream.saveDefaults();
         
-        ImmutableList.Builder<IPolygon> builder = ImmutableList.builder();
-       
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            result.surfaceInstance = hasFront && face == rotation.horizontalFace  
+            cube.surfaceInstance = hasFront && face == rotation.horizontalFace  
                     ? MachineMeshFactory.SURFACE_LAMP 
                     : MachineMeshFactory.SURFACE_MAIN;
             
-            builder.add(result.makePaintedFace(face));
+            cube.appendFace(stream, face);
         }
         
-        template.release();
-        
-        return builder.build();
+        return stream.convertToReader();
     }
     
 
