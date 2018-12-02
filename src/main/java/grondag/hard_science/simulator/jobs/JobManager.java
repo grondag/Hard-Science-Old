@@ -19,7 +19,7 @@ import grondag.exotic_matter.simulator.job.RequestPriority;
 import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
+import grondag.exotic_matter.varia.structures.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.jobs.tasks.PerpetualTask;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;

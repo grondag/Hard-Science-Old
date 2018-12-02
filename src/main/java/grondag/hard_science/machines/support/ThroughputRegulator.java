@@ -3,7 +3,7 @@ package grondag.hard_science.machines.support;
 import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.simulator.Simulator;
-import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
+import grondag.exotic_matter.varia.structures.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.resource.IResource;
 import grondag.hard_science.simulator.resource.StorageType;
 

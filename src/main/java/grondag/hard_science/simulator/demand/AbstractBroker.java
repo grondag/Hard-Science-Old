@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.Nullable;
 
 import grondag.exotic_matter.simulator.job.RequestStatus;
-import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
+import grondag.exotic_matter.varia.structures.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;
 import grondag.hard_science.simulator.fobs.NewTask;
 import grondag.hard_science.simulator.fobs.TaskPriority;

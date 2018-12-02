@@ -13,8 +13,8 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.exotic_matter.simulator.Simulator;
 import grondag.exotic_matter.simulator.job.RequestStatus;
-import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.varia.structures.SimpleUnorderedArrayList;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.simulator.fobs.INewTaskListener;
 import grondag.hard_science.simulator.fobs.NewProcurementTask;

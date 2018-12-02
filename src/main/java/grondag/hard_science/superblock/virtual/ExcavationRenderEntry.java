@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 import grondag.exotic_matter.network.PacketHandler;
 import grondag.exotic_matter.simulator.WorldTaskManager;
-import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
+import grondag.exotic_matter.varia.structures.SimpleUnorderedArrayList;
 import grondag.exotic_matter.world.IntegerAABB;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;

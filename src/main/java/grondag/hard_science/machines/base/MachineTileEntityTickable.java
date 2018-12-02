@@ -1,8 +1,8 @@
 package grondag.hard_science.machines.base;
 
 import grondag.exotic_matter.network.PacketHandler;
-import grondag.exotic_matter.varia.SimpleUnorderedArraySet;
 import grondag.exotic_matter.varia.structures.KeyedTuple;
+import grondag.exotic_matter.varia.structures.SimpleUnorderedArraySet;
 import grondag.exotic_matter.world.WorldInfo;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;

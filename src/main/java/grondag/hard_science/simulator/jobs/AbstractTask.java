@@ -13,8 +13,8 @@ import grondag.exotic_matter.simulator.job.RequestPriority;
 import grondag.exotic_matter.simulator.job.RequestStatus;
 import grondag.exotic_matter.simulator.persistence.AssignedNumber;
 import grondag.exotic_matter.simulator.persistence.IIdentified;
-import grondag.exotic_matter.varia.SimpleUnorderedArrayList;
 import grondag.exotic_matter.varia.Useful;
+import grondag.exotic_matter.varia.structures.SimpleUnorderedArrayList;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class AbstractTask implements IReadWriteNBT, IIdentified, IDomainMember, ITask
