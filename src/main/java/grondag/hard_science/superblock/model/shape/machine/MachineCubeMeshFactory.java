@@ -10,7 +10,7 @@ import grondag.exotic_matter.model.primitives.polygon.IMutablePolygon;
 import grondag.exotic_matter.model.primitives.polygon.IPolygon;
 import grondag.exotic_matter.model.primitives.stream.IPolyStream;
 import grondag.exotic_matter.model.primitives.stream.IWritablePolyStream;
-import grondag.exotic_matter.model.primitives.stream.PolyStreams;
+import grondag.exotic_matter.model.primitives.wip.PolyStreams2;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.SideShape;
@@ -80,7 +80,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
         cube.v1 = 16;
         cube.isOverlay = false;
         
-        IWritablePolyStream stream = PolyStreams.claimWriter();
+        IWritablePolyStream stream = PolyStreams2.claimWritable();
         IMutablePolygon writer = stream.writer();
         writer.setRotation(0, Rotation.ROTATE_NONE);
         writer.setMinU(0, 0);
@@ -98,7 +98,7 @@ public class MachineCubeMeshFactory extends AbstractMachineMeshGenerator
             cube.appendFace(stream, face);
         }
         
-        return stream.convertToReader();
+        return stream.releaseAndConvertToReader();
     }
     
 

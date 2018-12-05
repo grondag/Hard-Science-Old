@@ -1,27 +1,18 @@
 Things to do
 
-If acuity is enabled, store a simple list of paintedquads
-Linked lists
-Reuse immutable instances
-Array-backed polys
-Move glow (for N <= 4) and layercount to bitfield
-Consider tokenizing texture string and surfaces and moving to bit field
+implement CSG bounds
+Look at transient mutables
+Concurrent reader
+quadcontainers
+quantizations
+cleanup old implementations
+cleanup unused methods
 
 Exotic Matter cleanups
-Space hogs:
-	QuadContainer - could condense, compact give up some accuracy for painted quads in the dispatched
-					could also cache some components, remove any that don't apply to painted
-					
-	VertexCollector/VertexCollectorList
-	
-	Sound files - currently largest is close to 13MB
-		Mojang uses 48K mono, 32bit float
 		
  Consider different version / child class in terrain state to reduce memory usage when vertex calcs not needed
- Clean up Polygon stuff from .before
 Lazy expanded block state  ISuperBlockState
 	Use this in TerrainWorldAdapter
-Try caching immutable polygons instead of baking them into LitBakedQuad (like UnpackedBakedQuad)?
 clean up / reorg model state docs
  	make all model state methods final
  	clean up terrain state, use bit packer instead of current mess
@@ -29,12 +20,6 @@ clean up / reorg model state docs
 simplify/clean up state caching
  consider using block color handler to reduce # of baked quads in memory (get color from block during chunk build)
  
-
-// ideas
-use face normal in original poly
-don't create new vec3f instance tVec - use local vars instead
-optimize compute face normal in concrete poly classes
-
 
  Serialize port layout in devices
  Let direct ports mate with direct ports to form device/device private links
