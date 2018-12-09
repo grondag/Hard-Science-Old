@@ -11,6 +11,7 @@ import grondag.exotic_matter.model.collision.ICollisionHandler;
 import grondag.exotic_matter.model.mesh.MeshHelper;
 import grondag.exotic_matter.model.primitives.PolyFactory;
 import grondag.exotic_matter.model.primitives.polygon.IMutablePolygon;
+import grondag.exotic_matter.model.primitives.polygon.IPolygon;
 import grondag.exotic_matter.model.state.ISuperModelState;
 import grondag.exotic_matter.model.state.ModelStateData;
 import grondag.exotic_matter.model.varia.SideShape;
@@ -53,7 +54,7 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
      * Sides and bottom are lamp surface. 
      */
     @Override
-    public void produceShapeQuads(ISuperModelState modelState, Consumer<IMutablePolygon> target)
+    public void produceShapeQuads(ISuperModelState modelState, Consumer<IPolygon> target)
     {
         IMutablePolygon template = PolyFactory.COMMON_POOL.newPaintable(4);
         template.setRotation(0,Rotation.ROTATE_NONE);
@@ -79,15 +80,9 @@ public class CableMeshFactory extends AbstractMachineMeshGenerator implements IC
         }
         
         if(shape == null)
-        {
-
-            MeshHelper.makePaintableBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template, target);
-        }
+            MeshHelper.makePaintableBox(new AxisAlignedBB(xzMin, yLow, xzMin, xzMax, yHigh, xzMax), template, p -> target.accept(p.toPainted()));
         else
-        {
-            //shape.recolor();
             shape.forEach(target);
-        }
     }
    
     private @Nullable Collection<IMutablePolygon> makeAxis(SimpleJoin join, EnumFacing face, IMutablePolygon template)
